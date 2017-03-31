@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Gopher - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Gopher skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Gopher</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Gopher is a protocol for information transfer over the internet that was very popular before HTTP took over as the dominant protocol, but there is still a community of gopher users that prefer the simplicity of the protocol over the more complex and large protocols more often encountered. A few examples of gopher sites can be found <a rel="nofollow" class="external text" href="gopher://gopher.floodgap.com/1/new">here</a>. Note that not all browsers support gopher, or have incomplete support. Firefox has limited support, but it can be enhanced with <a rel="nofollow" class="external text" href="https://addons.mozilla.org/en-US/firefox/addon/7685">this</a> add-on.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#GoFish_Server"><span class="tocnumber">1</span> <span class="toctext">GoFish Server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Configuration"><span class="tocnumber">1.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#.cache"><span class="tocnumber">1.3</span> <span class="toctext">.cache</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Gopher_Browser"><span class="tocnumber">2</span> <span class="toctext">Gopher Browser</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Additional_Resources"><span class="tocnumber">3</span> <span class="toctext">Additional Resources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="GoFish_Server">GoFish Server</span></h2>
+<p><a rel="nofollow" class="external text" href="http://gofish.sourceforge.net/">GoFish</a> is a basic gopher server that allows you to run your own gopherspace. The setup is somewhat like other servers, but generally requires less resources to function.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gofish/">gofish</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>There are some basic settings for the server you can change in the /etc/gofish.conf file, but the defaults will work. If you do not alter any settings, the root of the gopher server will be /var/gopher and it will run on port 70. (Note that Firefox can only use the gopher protocol on port 70, so changing it will mean your users must use some other client.)
+</p>
+<p>To run the server, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>gofish.service</code>.
+</p>
+<p>You can now connect to your server and see what you have by navigating to <a rel="nofollow" class="external free" href="gopher://127.0.0.1">gopher://127.0.0.1</a>
+</p>
+<h3><span class="mw-headline" id=".cache">.cache</span></h3>
+<p>Unlike FTP which automatically shows all files, gopher relies on a file called .cache in each directory to determine how the page will be shown to the end user. Although GoFish comes with a manpage for the .cache files - man dotcache - it can be a little confusing. GoFish also comes with a program to autogenerate .cache files for all the directories and files in your server root.
+</p>
+<pre>mkcache -r
+</pre>
+<p>This will create all the needed .cache files recursively, but you may want to edit some names. A sample .cache file will look something like this:
+</p>
+<pre>iHello         none            example.com     70
+0ReadMe	0/ReadMe.txt	example.com	70
+1Ebooks	1/ebooks	example.com	70
+</pre>
+<p>The gopher protocol uses number prefixes to describe filetype. 0 is a plain text file, 1 is a directory and 9 is a binary file. The i indicates an image, and if it is linked to 'none', it will show up as plain text. This is good for introducing your site. See the manpage for dotcache for more info on the prefixes. After the prefix number is the name that will appear in the client, and it does not need to be the same as the file it links to. In the second section, we see the "path" to the file. There is not a directory named '0' or '1' in the file system, it is only added in the URI to let the gopher server and end user know what sort of file it is. The third section is whatever domain name the site is, and the fourth is the port it is on, default is 70. The space between each of the 4 sections must be a tab, not a space or it will not be parsed correctly.
+</p>
+<p>Now let's look at the .cache file in the ebooks directory.
+</p>
+<pre>9Book 1	9/ebooks/Book1.chm	example.com	70
+9Book 2	9/ebooks/Book2.pdf	example.com	70
+</pre>
+<p>Notice that the URI is 9/ebooks/Book1.chm, NOT 1/ebooks/9Book1.chm . There is always only one prefix number for the last item in the URI. Also notice that a chm file nor a pdf file is really a binary, but it is still given the prefix of 9. In the GoFish server, any file that is not a text file or a directory is given the binary prefix. Remember that if there are files within your server's root, people can download or view them even if they are not in your .cache file, so be careful.
+</p>
+<h2><span class="mw-headline" id="Gopher_Browser">Gopher Browser</span></h2>
+<p>To browse gopherspace as it was originally intended to be browsed, you can install the University of Minnesota gopher browser with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gopher/">gopher</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/gopher">aur-mirror</a>]</sup> package.
+</p>
+<h2><span class="mw-headline" id="Additional_Resources">Additional Resources</span></h2>
+<p><a rel="nofollow" class="external text" href="http://gofish.sourceforge.net/">GoFish Homepage</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

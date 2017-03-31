@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>GPS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GPS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">GPS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>There is a variety of GPS (Global Positioning System) hardware receivers supported in Arch Linux:
+</p>
+<ul>
+<li> Bluetooth GPS adapters</li>
+<li> USB GPS adapters (internal or external)</li>
+<li> WWAN-integrated adapters (some HP EliteBook modules for example)</li>
+<li> smartphones are able to relay GPS data over USB or Bluetooth with additional software</li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Drivers"><span class="tocnumber">1</span> <span class="toctext">Drivers</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Interfaces"><span class="tocnumber">2</span> <span class="toctext">Interfaces</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#GPSD"><span class="tocnumber">2.1</span> <span class="toctext">GPSD</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#ModemManager"><span class="tocnumber">2.2</span> <span class="toctext">ModemManager</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#View_locationing_capabilities"><span class="tocnumber">2.2.1</span> <span class="toctext">View locationing capabilities</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Enable_GPS"><span class="tocnumber">2.2.2</span> <span class="toctext">Enable GPS</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Display_location"><span class="tocnumber">2.2.3</span> <span class="toctext">Display location</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Disable_GPS"><span class="tocnumber">2.2.4</span> <span class="toctext">Disable GPS</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Drivers">Drivers</span></h2>
+<p>Usually a GPS device is presented as a serial device and the kernel uses a standard driver, but in some cases the drivers such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mtkbabel/">mtkbabel</a></span><sup><small>AUR</small></sup> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mbm-gpsd-pl4nkton-git/">mbm-gpsd-pl4nkton-git</a></span><sup><small>AUR</small></sup> need to be installed.
+</p>
+<h2><span class="mw-headline" id="Interfaces">Interfaces</span></h2>
+<p>GPS does not have a very unified interfacing and configuration in Linux. The raw GPS data is printed on the serial device and programs interpret the location by themselves, occupying the device in the process. Sharing the GPS adapter to multiple applications is possible with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gpsd">gpsd</a></span>.
+</p>
+<h3><span class="mw-headline" id="GPSD">GPSD</span></h3>
+<p><a rel="nofollow" class="external text" href="http://www.catb.org/gpsd/">GPSD</a> is a deamon to query the serial GPS device and make its output available on a TCP server. It is the most standard GPS interface in Linux and GPS-aware applications usually support it.
+</p>
+<h3><span class="mw-headline" id="ModemManager">ModemManager</span></h3>
+<p>ModemManager is some kind of a Linux WWAN modem support package which interfaces with <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a>. It also supports querying GPS coordinates from GPS-enabled WWAN cards and it even displays the location in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=modem-manager-gui">modem-manager-gui</a></span>. The most important commands are:
+</p>
+<h4><span class="mw-headline" id="View_locationing_capabilities">View locationing capabilities</span></h4>
+<pre>mmcli -m 0 --location-status
+</pre>
+<h4><span class="mw-headline" id="Enable_GPS">Enable GPS</span></h4>
+<pre>mmcli -m 0 --location-enable-gps-raw --location-enable-gps-nmea
+</pre>
+<h4><span class="mw-headline" id="Display_location">Display location</span></h4>
+<pre>watch mmcli -m 0 --location-get
+</pre>
+<h4><span class="mw-headline" id="Disable_GPS">Disable GPS</span></h4>
+<pre>mmcli -m 0 --location-disable-gps-raw --location-disable-gps-nmea
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://sigquit.wordpress.com/2012/03/29/enabling-gps-location-in-modemmanager/">Enabling GPS location in ModemManager</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Laptops.html" title="Category:Laptops">Laptops</a></li>
+<li><a href="../en/Category:Other_hardware.html" title="Category:Other hardware">Other hardware</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

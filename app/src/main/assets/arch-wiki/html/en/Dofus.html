@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dofus - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dofus skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dofus</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.dofus.com">Dofus</a> is an MMORPG by <a rel="nofollow" class="external text" href="http://www.ankama.com">Ankama</a>.
+</p>
+<h2><span class="mw-headline" id="AUR">AUR</span></h2>
+<p>Installation can be automated with the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dofus/">dofus</a></span><sup><small>AUR</small></sup>, which depends on <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ankama-transition/">ankama-transition</a></span><sup><small>AUR</small></sup>, the updater.
+</p>
+<p>Currently the game files are installed under the "games" group with group writability. You can add your user to the group (<tt>usermod -a -G games <i>username</i></tt>) to take advantage of this. Otherwise, you may need to enter your password in order to update the game files. 
+</p>
+<h2><span class="mw-headline" id="Manual_Installation">Manual Installation</span></h2>
+<p>Ankama provides official Linux packages for Dofus, but some modifications are necessary for them to work on Arch Linux.
+</p>
+<p>There is no Adobe Air runtime on Arch Linux, so it is necessary to use this <a href="../en/Adobe_AIR.html" title="Adobe AIR">workaround</a> involving <tt>adobe-air-sdk</tt>. <tt>transition</tt> needs to be configured to use the sdk launcher instead of binaries provided by Dofus. Additionally, <tt>transition</tt> will by default attempt to install Adobe Air, and this needs to be disabled in its configuration.
+</p>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dofus/">dofus</a></span><sup><small>AUR</small></sup> AUR package accomplishes these with the following code in <tt>transition.conf</tt>:
+</p>
+<pre> bypass_air_installation = true
+ dofus.reg.path = "${root}/share/reg/bin/air-generic-launcher.sh"
+ 
+ launcher.command = """
+ "${root}/bin/air-generic-launcher.sh" --lang=${i18n.lang} --update-server-port=${service_port} --updater_version=v2
+</pre>
+<p>It installs <tt>air-generic-launcher.sh</tt> in the same locations as the game client and sound engine executables, to run them with the SDK launcher:
+</p>
+<pre> #!/bin/bash
+ 
+ # This is a generic launcher script for AIR applications on Arch Linux
+ 
+ SCRIPT_PATH=`readlink -f $0`
+ SCRIPT_DIR=`dirname $SCRIPT_PATH`
+ BASE_DIR=`readlink -f $SCRIPT_DIR/..`
+ 
+ if [ "`uname -m`" == "x86_64" ]; then
+ 	export GTK_PATH=/usr/lib32/gtk-2.0
+ 	export G_FILENAME_ENCODING=UTF-8
+ fi
+ 
+ /opt/adobe-air-sdk/bin/adl -nodebug $BASE_DIR/share/META-INF/AIR/application.xml $BASE_DIR/share -- $*
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>When debugging problems, it is helpful to set the environment variable <code>AK_LOG_CONSOLE=1</code> when running Dofus. It will then print detailed logs in the console.
+</p>
+<p>A known problem is that some systems require <tt>unset SESSION_MANAGER</tt> in the environment, to avoid crashes on start up.
+</p>
+<p>Occasionally the updater cannot function because of a leftover process from previous runs. Killing <tt>transition</tt> processes can solve this problem.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Gaming.html" title="Category:Gaming">Gaming</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

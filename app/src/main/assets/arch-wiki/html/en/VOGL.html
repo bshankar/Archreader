@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>VOGL - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-VOGL skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">VOGL</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Step-by-step_debugging_guide.html" title="Step-by-step debugging guide">Step-by-step debugging guide</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Debug_-_Getting_Traces.html" title="Debug - Getting Traces">Debug - Getting Traces</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://github.com/ValveSoftware/vogl">VOGL</a> is a tool created by Valve Software and RAD Game Tools for OpenGL debugging. It is able to capture, replay and inspect OpenGL call tracefiles.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Capturing_a_tracefile"><span class="tocnumber">2</span> <span class="toctext">Capturing a tracefile</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Trimming_the_tracefile"><span class="tocnumber">3</span> <span class="toctext">Trimming the tracefile</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Replaying_the_tracefile"><span class="tocnumber">4</span> <span class="toctext">Replaying the tracefile</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Inspecting_the_tracefile"><span class="tocnumber">5</span> <span class="toctext">Inspecting the tracefile</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Limitations"><span class="tocnumber">6</span> <span class="toctext">Limitations</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The development version <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vogl-git/">vogl-git</a></span><sup><small>AUR</small></sup> is available on the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.  
+</p>
+<p>To capture and debug 32-Bit applications you need libvogltrace32.so, voglreplay32 and vogleditor32 from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lib32-vogl-git/">lib32-vogl-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Capturing_a_tracefile">Capturing a tracefile</span></h2>
+<p>To obtain a tracefile run the following command.    
+</p>
+<pre>$ VOGL_CMD_LINE="--vogl_debug --vogl_dump_stats --vogl_tracefile /tmp/vogltrace.bin" LD_PRELOAD=/usr/lib/libvogltrace64.so &lt;command&gt;</pre>    
+<p>Where &lt;command&gt; is the command to launch your OpenGL application. Your tracefile will be created in your /tmp directory.  
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> These files get big very fast! 1-2 minutes result in about 1GB of captured calls.  </div>
+<p>VOGL ships with various OpenGL samples that can be used for testing in its sources. These are not part of the package but they can be built manually. You can also grab the latest OpenGL samples from the <a rel="nofollow" class="external text" href="http://ogl-samples.g-truc.net/">OpenGL Samples Pack</a> or from <a rel="nofollow" class="external text" href="http://www.openglsuperbible.com/">OpenGL SuperBible</a>.
+</p>
+<h2><span class="mw-headline" id="Trimming_the_tracefile">Trimming the tracefile</span></h2>
+<p>If you want to create a smaller tracefile from your captured trace containing X amount of frames starting at frame Y use:
+</p>
+<pre>$ voglreplay64 original_trace.bin --trim_file trimmed_trace.bin --trim_len X --trim_frame Y</pre>
+<h2><span class="mw-headline" id="Replaying_the_tracefile">Replaying the tracefile</span></h2>
+<p>To replay your trace launch the voglreplayer from within your vogl directory.
+</p>
+<pre>$ voglreplay64 /tmp/vogltrace.bin</pre>
+<p>To get verbose debugging output for your trace:
+</p>
+<pre>$ voglreplay64 --debug --verbose vogltrace.bin</pre>
+<p>To get GL call and extension statistics:
+</p>
+<pre>$ voglreplay64 --info vogltrace.bin</pre>
+<h2><span class="mw-headline" id="Inspecting_the_tracefile">Inspecting the tracefile</span></h2>
+<p>Launch the vogleditor binary and open the tracefile.bin with the "File - Open Trace" menu.
+</p>
+<pre>$ vogleditor64</pre>
+<h2><span class="mw-headline" id="Limitations">Limitations</span></h2>
+<p>Read about the limitations on this <a rel="nofollow" class="external text" href="http://richg42.blogspot.it/2014/03/current-vogl-limitations.html">blog post.</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Development.html" title="Category:Development">Development</a></li>
+<li><a href="../en/Category:Graphics.html" title="Category:Graphics">Graphics</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

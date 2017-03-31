@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Arch boot process - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Arch_boot_process skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Arch boot process</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Init.html" title="Init">init</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd.html" title="Systemd">systemd</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fstab.html" title="Fstab">fstab</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Autostarting.html" title="Autostarting">Autostarting</a></li>
+</ul>
+</div>
+<p>In order to boot Arch Linux, a Linux-capable <a href="../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a> such as <a href="../en/GRUB.html" title="GRUB">GRUB</a> or <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a> must be installed to the <a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a> or the <a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a>. The boot loader is responsible for loading the kernel and <a href="../en/Mkinitcpio.html" title="Initial ramdisk" class="mw-redirect">initial ramdisk</a> before initiating the boot process. The procedure is quite different for <a href="https://en.wikipedia.org/wiki/BIOS" class="extiw" title="wikipedia:BIOS">BIOS</a> and <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> systems, the detailed description is given on this or linked pages.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Firmware_types"><span class="tocnumber">1</span> <span class="toctext">Firmware types</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#BIOS"><span class="tocnumber">1.1</span> <span class="toctext">BIOS</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#UEFI"><span class="tocnumber">1.2</span> <span class="toctext">UEFI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#System_initialization"><span class="tocnumber">2</span> <span class="toctext">System initialization</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Under_BIOS"><span class="tocnumber">2.1</span> <span class="toctext">Under BIOS</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Under_UEFI"><span class="tocnumber">2.2</span> <span class="toctext">Under UEFI</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Multibooting_in_UEFI"><span class="tocnumber">2.3</span> <span class="toctext">Multibooting in UEFI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Boot_loader"><span class="tocnumber">3</span> <span class="toctext">Boot loader</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Kernel"><span class="tocnumber">4</span> <span class="toctext">Kernel</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#initramfs"><span class="tocnumber">5</span> <span class="toctext">initramfs</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Init_process"><span class="tocnumber">6</span> <span class="toctext">Init process</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Getty"><span class="tocnumber">7</span> <span class="toctext">Getty</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Display_Manager"><span class="tocnumber">8</span> <span class="toctext">Display Manager</span></a></li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Login"><span class="tocnumber">9</span> <span class="toctext">Login</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Message_of_the_day"><span class="tocnumber">9.1</span> <span class="toctext">Message of the day</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16"><a href="#Shell"><span class="tocnumber">10</span> <span class="toctext">Shell</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#xinit"><span class="tocnumber">11</span> <span class="toctext">xinit</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#See_also"><span class="tocnumber">12</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Firmware_types">Firmware types</span></h2>
+<h3><span class="mw-headline" id="BIOS">BIOS</span></h3>
+<p>A BIOS or Basic Input-Output System is the very first program (firmware) that is executed once the system is switched on. In most cases it is stored in a flash memory in the motherboard itself and independent of the system storage. 
+</p>
+<p>The BIOS loads the beginning 512 bytes (<a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a>) of the first valid disk in the BIOS disk order. Of these 512 bytes, the first 440 contains the first stage of a boot loader like <a href="../en/GRUB.html" title="GRUB">GRUB</a>, <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a> or <a href="../en/LILO.html" title="LILO">LILO</a>. Since very little can be achieved by a program of this size, the second stage (residing on the next disk sectors) is loaded from here and looks up a file stored on the partition itself (the actual bootloader). This then loads an operating system by either chain-loading or directly loading the operating system kernel.
+</p>
+<h3><span class="mw-headline" id="UEFI">UEFI</span></h3>
+<p>UEFI has support for reading both the partition table as well as understanding filesystems. Hence it is not limited by 440 byte code limitation (MBR boot code) as in BIOS systems. It does not use the MBR boot code at all.
+</p>
+<p>The commonly used UEFI firmwares support both MBR and GPT <a href="../en/Partitioning.html#Partition_table" title="Partitioning">partition table</a>. EFI in Apple-Intel Macs are known to also support Apple Partition Map besides MBR and GPT. Most UEFI firmwares have support for accessing FAT12 (floppy disks), FAT16 and FAT32 filesystems in HDDs and ISO9660 (and UDF) in CD/DVDs. EFI in Intel Macs can also access HFS/HFS+ filesystems, in addition to the mentioned ones.
+</p>
+<p>UEFI does not launch any boot code in the MBR whether it exists or not. Instead it uses a special partition in the partition table called <b>EFI System Partition</b> in which files required to be launched by the firmware are stored. Each vendor can store its files under <code>&lt;EFI SYSTEM PARTITION&gt;/EFI/&lt;VENDOR NAME&gt;/</code> folder and can use the firmware or its shell (UEFI shell) to launch the boot program. An EFI System Partition is usually formatted as FAT32 or (less commonly) FAT16.
+</p>
+<h2><span class="mw-headline" id="System_initialization">System initialization</span></h2>
+<h3><span class="mw-headline" id="Under_BIOS">Under BIOS</span></h3>
+<ol>
+<li> System switched on - <a href="https://en.wikipedia.org/wiki/Power-on_self-test" class="extiw" title="wikipedia:Power-on self-test">Power-on self-test</a> or POST process</li>
+<li> After POST, BIOS initializes the necessary system hardware for booting (disk, keyboard controllers etc.)</li>
+<li> BIOS launches the first 440 bytes (<a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a>) of the first disk in the BIOS disk order</li>
+<li> The MBR boot code then takes control from BIOS and launches its next stage code (if any) (mostly <a href="../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a> code)</li>
+<li> The launched actual boot loader</li>
+</ol>
+<h3><span class="mw-headline" id="Under_UEFI">Under UEFI</span></h3>
+<ol>
+<li> System switched on. The Power On Self Test (POST) is executed.</li>
+<li> UEFI firmware is loaded. Firmware initializes the hardware required for booting.</li>
+<li> Firmware reads the boot entries in the firmware's boot manager to determine which UEFI application to be launched and from where (i.e. from which disk and partition).</li>
+<li> Firmware launches the UEFI application.
+<ul>
+<li> This could be the Arch kernel itself (since <a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a> is enabled by default).</li>
+<li> It could be some other application such as a shell or a graphical boot manager.</li>
+<li> Or the boot entry could simply be a disk. In this case the firmware looks for an <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a> on that disk and tries to run the fallback UEFI application <code>\EFI\BOOT\BOOTX64.EFI</code> (<code>BOOTIA32.EFI</code> on 32-bit systems). This is how UEFI bootable thumb drives work.</li>
+</ul>
+</li>
+</ol>
+<p>If <a href="../en/Secure_Boot.html" title="Secure Boot">Secure Boot</a> is enabled, the boot process will verify authenticity of the EFI binary by signature.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>On some (poorly-designed) UEFI systems the only way to boot is using a disk boot entry with the fallback UEFI application path.</div>
+<h3><span class="mw-headline" id="Multibooting_in_UEFI">Multibooting in UEFI</span></h3>
+<p>Since each OS or vendor can maintain its own files within the EFI System Partition without affecting the other, multi-booting using UEFI is just a matter of launching a different UEFI application corresponding to the particular OS's bootloader. This removes the need for relying on chainloading mechanisms of one <a href="../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a> to load another OS.
+</p>
+<p>See also <a href="../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">Dual boot with Windows</a>.
+</p>
+<h2><span class="mw-headline" id="Boot_loader">Boot loader</span></h2>
+<p>The boot loader is the first piece of software started by the <a href="https://en.wikipedia.org/wiki/BIOS" class="extiw" title="wikipedia:BIOS">BIOS</a> or <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a>. It is responsible for loading the kernel with the wanted <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>, and <a href="../en/Mkinitcpio.html" title="Mkinitcpio">initial RAM disk</a> based on config files. 
+</p>
+<h2><span class="mw-headline" id="Kernel">Kernel</span></h2>
+<p>The kernel is the core of an operating system. It functions on a low level (<i>kernelspace</i>) interacting between the hardware of the machine and the programs which use the hardware to run. To make efficient use of the CPU, the kernel uses a scheduler to arbitrate which tasks take priority at any given moment, creating the illusion of many tasks being executed simultaneously.
+</p>
+<h2><span class="mw-headline" id="initramfs">initramfs</span></h2>
+<p>After the kernel is loaded, it unpacks the <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a> (initial RAM filesystem), which becomes the initial root filesystem. The kernel then executes <code>/init</code> as the first process. The <i>early userspace</i> starts.
+</p>
+<p>The purpose of the initramfs is to bootstrap the system to the point where it can access the root filesystem (see <a href="../en/Frequently_asked_questions.html#Does_Arch_follow_the_FHS.3F" title="FHS" class="mw-redirect">FHS</a> for details). This means that any modules that are required for devices like IDE, SCSI, SATA, USB/FW (if booting from an external drive) must be loadable from the initramfs if not built into the kernel; once the proper modules are loaded (either explicitly via a program or script, or implicitly via <a href="../en/Udev.html" title="Udev">udev</a>), the boot process continues. For this reason, the initramfs only needs to contain the modules necessary to access the root filesystem; it does not need to contain every module one would ever want to use. The majority of modules will be loaded later on by udev, during the init process.
+</p>
+<h2><span class="mw-headline" id="Init_process">Init process</span></h2>
+<p>At the final stage of early userspace, the real root is mounted, and then replaces the initial root filesystem. <code>/sbin/init</code> is executed, replacing the <code>/init</code> process. Arch uses <a href="../en/Systemd.html" title="Systemd">systemd</a> as the default <a href="../en/Init.html" title="Init">init</a>.
+</p>
+<h2><span class="mw-headline" id="Getty">Getty</span></h2>
+<p><a href="../en/Init.html" title="Init">init</a> calls <a href="../en/Getty.html" title="Getty">getty</a> once for each <a href="https://en.wikipedia.org/wiki/Virtual_console" class="extiw" title="wikipedia:Virtual console">virtual terminal</a> (typically six of them), which initializes each tty and asks for a username and password. Once the username and password are provided, getty checks them against <code>/etc/passwd</code>, then calls <a href="#Login">login</a>, which begins a session for the user, and executes the user's shell according to <code>/etc/passwd</code>. Alternatively, getty may start a display manager if one is present on the system.
+</p>
+<h2><span class="mw-headline" id="Display_Manager">Display Manager</span></h2>
+<p>A <a href="../en/Display_manager.html" title="Display manager">display manager</a> can be configured to replace the getty login prompt on a tty.
+</p>
+<h2><span class="mw-headline" id="Login">Login</span></h2>
+<p>The <i>login</i> program begins a session for the user by setting environment variables and starting the user's shell, based on <code>/etc/passwd</code>.
+</p>
+<h3><span class="mw-headline" id="Message_of_the_day">Message of the day</span></h3>
+<p>The <i>login</i> program displays the contents of <a href="https://en.wikipedia.org/wiki/motd_(Unix)" class="extiw" title="wikipedia:motd (Unix)">/etc/motd</a> (<i>m</i>essage <i>o</i>f <i>t</i>he <i>d</i>ay) after a successful login, just before it executes the login shell.
+</p>
+<p>It is a good place to display your Terms of Service to remind users of your local policies or anything you wish to tell them.
+</p>
+<h2><span class="mw-headline" id="Shell">Shell</span></h2>
+<p>Once the user's <a href="../en/Command-line_shell.html" title="Shell" class="mw-redirect">shell</a> is started, it will typically run a runtime configuration file, such as <a href="../en/Bash.html#Configuration_files" title="Bashrc" class="mw-redirect">bashrc</a>, before presenting a prompt to the user. If the account is configured to <a href="../en/Xinit.html#Autostart_X_at_login" title="Start X at login" class="mw-redirect">Start X at login</a>, the runtime configuration file will call <a href="../en/Xinit.html" title="Startx" class="mw-redirect">startx</a> or <a href="../en/Xinit.html" title="Xinit">xinit</a>.
+</p>
+<h2><span class="mw-headline" id="xinit">xinit</span></h2>
+<p><a href="../en/Xinit.html" title="Xinit">xinit</a> runs the user's <a href="../en/Xinit.html" title="Xinitrc" class="mw-redirect">xinitrc</a> runtime configuration file, which normally starts a <a href="../en/Window_manager.html" title="Window manager">window manager</a>. When the user is finished and exits the window manager, xinit, startx, the shell, and login will terminate in that order, returning to getty.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://web.archive.org/web/20150430223035/http://archlinux.me/brain0/2010/02/13/early-userspace-in-arch-linux/">Early Userspace in Arch Linux</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-linuxboot/">Inside the Linux boot process</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linuxjournal.com/article/4622">Boot with GRUB</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Linux_startup_process" class="extiw" title="wikipedia:Linux startup process">Wikipedia:Linux startup process</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/initrd" class="extiw" title="wikipedia:initrd">Wikipedia:initrd</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.cyberciti.biz/faq/grub-boot-into-single-user-mode/">Boot Linux Grub Into Single User Mode</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://neosmart.net/wiki/mbr-boot-process/">NeoSmart: The BIOS/MBR Boot Process</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+<li><a href="../en/Category:About_Arch.html" title="Category:About Arch">About Arch</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

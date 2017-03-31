@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Vino - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Vino skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Vino</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>Vino</b> is a VNC (Virtual Network Computing) server allowing remote connection to your actual desktop. It is a default component of the <a href="../en/GNOME.html" title="GNOME">GNOME</a> <a href="../en/Desktop_environment.html" title="Desktop environment">Desktop environment</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#GNOME"><span class="tocnumber">1.1</span> <span class="toctext">GNOME</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Alternative_Desktop_Environments"><span class="tocnumber">1.2</span> <span class="toctext">Alternative Desktop Environments</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Running_on_a_headless_server"><span class="tocnumber">3</span> <span class="toctext">Running on a headless server</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="GNOME">GNOME</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vino">vino</a></span>, which is available in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>You need to restart GNOME so that <code>vino-server</code> is started automatically when enabling the remote desktop feature. The remote desktop feature can usually be enabled in Settings &gt; Sharing, however this only seems to be functional when <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a> is installed and functional.
+</p>
+<h3><span class="mw-headline" id="Alternative_Desktop_Environments">Alternative Desktop Environments</span></h3>
+<p>As of version 3.9.2, Vino no longer includes a standalone preferences dialog (see <a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=700070">bug 700070</a>), thus making configuration difficult without the GNOME Control Center.
+</p>
+<p>The easiest solution is to install the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vino38/">vino38</a></span><sup><small>AUR</small></sup>, which provides the latest version with the preferences dialog, accessible via the <code>vino-preferences</code> command.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>You can configure vino via gnome-control-center.
+</p>
+<p>Now you can connect remotely to your desktop via a VNC viewer like TightVNC or Remmina. Remember to forward port 5900 if you are behind a NAT device and to allow the connection through iptables.
+</p>
+<p>If you are having problems regarding security and encryption you could try:
+</p>
+<pre>$ gsettings set org.gnome.Vino require-encryption false
+</pre>
+<p>If you use a standalone <a href="../en/Window_manager.html" title="Window manager">window manager</a> like <a href="../en/Openbox.html" title="Openbox">Openbox</a> and it does not work, you can start <code>vino-server</code> manually or add the command to the window manager's autostart script
+</p>
+<pre># /usr/lib/vino/vino-server &amp;
+</pre>
+<h2><span class="mw-headline" id="Running_on_a_headless_server">Running on a headless server</span></h2>
+<p>Vino can be used to manage a headless server with a graphical desktop via VNC. For this, a graphics driver like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-dummy">xf86-video-dummy</a></span> must be installed and <a href="../en/Xorg.html#Configuration" title="Xorg">configured</a>. <a rel="nofollow" class="external text" href="http://xpra.org/xorg.conf">xpra’s sample xorg.conf</a> for the Xdummy driver can be used as a base. Then, the server can be configured to <a href="../en/Xinit.html#Autostart_X_at_login" title="Start X at boot" class="mw-redirect">start X at boot</a> for the user account that should be usable remotely. Vino must be made to <a href="../en/Desktop_entries.html#Autostart" title="Desktop entries">autostart with the desktop environment</a> by creating a desktop entry in the user’s home directory such as this one:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/autostart/vino-server.desktop</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Desktop Entry]
+Type=Application
+Name=Vino VNC server
+Exec=/usr/lib/vino/vino-server
+NoDisplay=true</pre>
+<p>Next, make Vino accept VNC connections without asking for confirmation by running the following command as the graphical desktop user:
+</p>
+<pre>$ dbus-launch gsettings set org.gnome.Vino prompt-enabled false
+</pre>
+<p>You may wish to revoke suspend and hibernate permissions using <a href="../en/Polkit.html" title="Polkit">Polkit</a>.
+</p>
+<p>For the <a href="../en/GNOME.html" title="GNOME">GNOME</a> desktop environment, the following are some further options you may want for GNOME:
+</p>
+<pre>$ dbus-launch gsettings set org.gnome.desktop.lockdown disable-user-switching true
+$ dbus-launch gsettings set org.gnome.desktop.lockdown disable-log-out true
+$ dbus-launch gsettings set org.gnome.desktop.interface enable-animations false
+</pre>
+<p>Remember to configure your <a href="../en/Firewalls.html" title="Firewall" class="mw-redirect">firewall</a> to not block the <code>rfb</code> port used for VNC. For secure authentication – which should be used when giving access to privileged users on the open internet –, you should tunnel the VNC protocol through e.g. <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=stunnel">stunnel</a></span> instead of unblocking the <code>rfb</code> port. When using stunnel, you should require a <a href="../en/Security.html#Passwords" title="Security">password</a>:
+</p>
+<pre>$ dbus-launch gsettings set org.gnome.Vino authentication-methods "['vnc']"
+$ dbus-launch gsettings set org.gnome.Vino vnc-password $(echo -n "mypassword"|base64)
+</pre>
+<p>You can now log in to your server with a VNC client such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vinagre">vinagre</a></span>.
+</p>
+<p>The above setup can also be used with multiple remote users logging in automatically, e.g. by using multiple copies of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xlogin-git/">xlogin-git</a></span><sup><small>AUR</small></sup>’s service files in <code>/etc/systemd/system/</code>, each modified to log in a different user on a different X11 display and virtual terminal. With Vino, each user’s VNC server can be configured to listen on a different port as well:
+</p>
+<pre>$ dbus-launch gsettings set org.gnome.Vino alternative-port 5910
+$ dbus-launch gsettings set org.gnome.Vino use-alternative-port true
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Remote_desktop.html" title="Category:Remote desktop">Remote desktop</a></li>
+<li><a href="../en/Category:GNOME.html" title="Category:GNOME">GNOME</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

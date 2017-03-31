@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PaX - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PaX skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PaX</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Grsecurity.html" title="Grsecurity">grsecurity</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Security.html" title="Security">Security</a></li>
+</ul>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/PaX" class="extiw" title="wikipedia:PaX">PaX</a> is developed as a subset of the <a href="../en/Grsecurity.html" title="Grsecurity">grsecurity</a> patches, and is included in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package in the official repositories. It is also available in the standalone <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-pax/">linux-pax</a></span><sup><small>AUR</small></sup> package in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>PaX contains most of the <a href="../en/Grsecurity.html" title="Grsecurity">grsecurity</a> mitigations against memory corruption exploits. It hardens the kernel and userspace processes in many ways, including improved <a href="https://en.wikipedia.org/wiki/Address_space_layout_randomization" class="extiw" title="wikipedia:Address space layout randomization">address space layout randomization</a>, strengthening the separation between kernel and userspace code / data and wiping out various classes of information leaks. The kernel hardening features have no user-facing impact, but the MPROTECT / RANDMMAP mitigations require making exceptions for some applications.
+</p>
+<p>Using PaX alone is not recommended as the synergies with other grsecurity features are important. For example, defeating even the improved PaX ASLR is trivial without the <a rel="nofollow" class="external text" href="https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Harden_ASLR_against_information_leaks_and_entropy_reduction">GRKERNSEC_PROC_MEMMAP feature</a> if the attacker has filesystem access.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Performance"><span class="tocnumber">2</span> <span class="toctext">Performance</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Tunable_parameters"><span class="tocnumber">2.1</span> <span class="toctext">Tunable parameters</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Custom_kernel"><span class="tocnumber">2.2</span> <span class="toctext">Custom kernel</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#PaX_exceptions"><span class="tocnumber">3</span> <span class="toctext">PaX exceptions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6">
+<a href="#Using_the_paxd_daemon"><span class="tocnumber">3.1</span> <span class="toctext">Using the paxd daemon</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#User_exceptions"><span class="tocnumber">3.1.1</span> <span class="toctext">User exceptions</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Manually"><span class="tocnumber">3.2</span> <span class="toctext">Manually</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Soft_mode"><span class="tocnumber">3.3</span> <span class="toctext">Soft mode</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Testing_the_userspace_features"><span class="tocnumber">4</span> <span class="toctext">Testing the userspace features</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The Pax subset is installed with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package; however, it is set to soft mode by default, meaning it is opt-in rather than opt-out.
+</p>
+<p>The recommended way to switch to opt-in is to <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> package.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>After installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> the system must be rebooted to apply the changes. Alternatively apply the <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> configuration to the running system using <code>sysctl -p usr/lib/sysctl.d/10-enable-pax.conf</code>
+</div>
+<p>It is also possible to temporarily disable soft mode:
+</p>
+<pre># kernel.pax.softmode=0
+</pre>
+<p>Note that this will only work until the next reboot.
+</p>
+<h2><span class="mw-headline" id="Performance">Performance</span></h2>
+<h3><span class="mw-headline" id="Tunable_parameters">Tunable parameters</span></h3>
+<p>The <code>pax_sanitize_slab=0</code> option can be set on the kernel line to disable slab object sanitization. This will increase the risk of information leaks from the kernel, while reducing the performance hit from <code>CONFIG_PAX_MEMORY_SANITIZE</code> (~3% for a kernel compile by default).
+</p>
+<p>The <code>pax_nouderef</code> option can be set on the kernel line to disable UDEREF. It is cheap on i686 since it takes advantage of memory segmentation but can cause serious performance issues with some virtualization environments. On x86_64, there are 3 implementations of UDEREF:
+</p>
+<ul>
+<li> slow / weak legacy implementation (~10% slower kernel compile)</li>
+<li> strong implementation on Sandy Bridge and later (default when supported, use <code>nopcid</code> to use the legacy implementation)</li>
+<li> fast / weak implementation on Sandy Bridge and later (pass <code>pax_weakuderef</code> to use it)</li>
+</ul>
+<h3><span class="mw-headline" id="Custom_kernel">Custom kernel</span></h3>
+<p>Building a custom kernel allows full control over the compromise between performance and security. The pre-built <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package prioritizes security over performance. On i686, disabling <code>CONFIG_PAX_MEMORY_SANITIZE</code> and <code>CONFIG_PAX_MEMORY_STACKLEAK</code> will make the performance hit negligible. On x86_64, disabling those options along with <code>CONFIG_PAX_MEMORY_UDEREF</code> will do the same, although <code>pax_nouderef</code> also exists at runtime as documented above.
+</p>
+<h2><span class="mw-headline" id="PaX_exceptions">PaX exceptions</span></h2>
+<p>Some of the PaX exploit mitigations prevent certain applications from running and require the executables to be marked with exceptions. The MPROTECT feature is by far the most common source of issues, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> defaults to <a href="../en/Grsecurity.html#Auditing" title="Grsecurity">logging violations</a> to the kernel log. It is more difficult to identify these issues with PaX installed on a vanilla kernel.
+</p>
+<p>Extended attributes can be used to exclude executables from one or more of the features. This can be done in multiple ways.
+</p>
+<h3><span class="mw-headline" id="Using_the_paxd_daemon">Using the paxd daemon</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> package provided in the official repositories includes a daemon that automatically applies PaX exceptions from <code>/etc/paxd.conf</code> whenever an executable is updated or the configuration file is modified. This is the officially supported way of applying these exceptions for binaries provided by packages. To start / enable the daemon:
+</p>
+<pre># systemctl start paxd
+# systemctl enable paxd
+</pre>
+<h4><span class="mw-headline" id="User_exceptions">User exceptions</span></h4>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> also provides a user service so that individual users can apply exceptions, primarily to files in their home directory. It can be started / enabled with <code>systemctl --user</code> and will apply exceptions from <code>$XDG_CONFIG_HOME/paxd.conf</code> (falling back to <code>~/.config/paxd.conf</code>).
+</p>
+<h3><span class="mw-headline" id="Manually">Manually</span></h3>
+<p>The setfattr command can be used to manually set exclusions for a problematic binary. For example, to disable the MPROTECT and RANDMMAP features:
+</p>
+<pre>$ setfattr -n user.pax.flags -v "emr" /usr/bin/problematic_binary
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package <i>only</i> supports the extended attributes, and does not include support for the ELF exception markers. The extended attributes do not require special tooling and leave the binaries unaltered, making them a far better option.</div>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pax-utils">pax-utils</a></span> package includes some useful tools. For example, the <code>pspax</code> utility can display PaX permissions from the kernel's perspective along with capabilities. The <code>scanelf</code> tool can be used to query attributes of binaries.
+</p>
+<p>One might also use getfattr to retrieve extended attributes set above (or set by paxd described above) if they choose not to run pax-utils or if they want to check the attributes of a process not running:
+</p>
+<pre>$ getfattr -n user.pax.flags /usr/bin/problematic_binary
+</pre>
+<h3><span class="mw-headline" id="Soft_mode">Soft mode</span></h3>
+<p>Setting <code>kernel.pax.softmode=1</code> with <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> will result in the mitigations being opt-in rather than opt-out. This could be used to apply the mitigations only to certain high-risk binaries such as web services on a server without causing any issues. However, opting out of the mitigations results in a significantly more secure system and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> takes care of nearly all the work automatically.
+</p>
+<h2><span class="mw-headline" id="Testing_the_userspace_features">Testing the userspace features</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxtest">paxtest</a></span> tool can be used to test the userspace exploit mitigation features. Note that the UDEREF self-protection feature shrinks the address space on x86_64, reducing the entropy available for randomization. It's an extremely important feature and outweighs the minimal gain from the additional entropy. 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">Vanilla kernel (x86_64)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Executable anonymous mapping             : Killed
+Executable bss                           : Killed
+Executable data                          : Killed
+Executable heap                          : Killed
+Executable stack                         : Killed
+Executable shared library bss            : Killed
+Executable shared library data           : Killed
+Executable anonymous mapping (mprotect)  : Vulnerable
+Executable bss (mprotect)                : Vulnerable
+Executable data (mprotect)               : Vulnerable
+Executable heap (mprotect)               : Vulnerable
+Executable stack (mprotect)              : Vulnerable
+Executable shared library bss (mprotect) : Vulnerable
+Executable shared library data (mprotect): Vulnerable
+Writable text segments                   : Vulnerable
+Anonymous mapping randomisation test     : 28 quality bits (guessed)
+Heap randomisation test (ET_EXEC)        : 13 quality bits (guessed)
+Heap randomisation test (PIE)            : 28 quality bits (guessed)
+Main executable randomisation (ET_EXEC)  : 28 quality bits (guessed)
+Main executable randomisation (PIE)      : 28 quality bits (guessed)
+Shared library randomisation test        : 28 quality bits (guessed)
+VDSO randomisation test                  : 20 quality bits (guessed)
+Stack randomisation test (SEGMEXEC)      : 30 quality bits (guessed)
+Stack randomisation test (PAGEEXEC)      : 30 quality bits (guessed)
+Arg/env randomisation test (SEGMEXEC)    : 22 quality bits (guessed)
+Arg/env randomisation test (PAGEEXEC)    : 22 quality bits (guessed)
+Randomization under memory exhaustion @~0: 28 bits (guessed)
+Randomization under memory exhaustion @0 : 28 bits (guessed)
+Return to function (strcpy)              : paxtest: return address contains a NULL byte.
+Return to function (memcpy)              : Killed
+Return to function (strcpy, PIE)         : paxtest: return address contains a NULL byte.
+Return to function (memcpy, PIE)         : Killed
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PaX kernel (x86_64 without UDEREF)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Executable anonymous mapping             : Killed
+Executable bss                           : Killed
+Executable data                          : Killed
+Executable heap                          : Killed
+Executable stack                         : Killed
+Executable shared library bss            : Killed
+Executable shared library data           : Killed
+Executable anonymous mapping (mprotect)  : Killed
+Executable bss (mprotect)                : Killed
+Executable data (mprotect)               : Killed
+Executable heap (mprotect)               : Killed
+Executable stack (mprotect)              : Killed
+Executable shared library bss (mprotect) : Killed
+Executable shared library data (mprotect): Killed
+Writable text segments                   : Killed
+Anonymous mapping randomisation test     : 33 quality bits (guessed)
+Heap randomisation test (ET_EXEC)        : 22 quality bits (guessed)
+Heap randomisation test (PIE)            : 40 quality bits (guessed)
+Main executable randomisation (ET_EXEC)  : 33 quality bits (guessed)
+Main executable randomisation (PIE)      : 33 quality bits (guessed)
+Shared library randomisation test        : 33 quality bits (guessed)
+VDSO randomisation test                  : 33 quality bits (guessed)
+Stack randomisation test (SEGMEXEC)      : 40 quality bits (guessed)
+Stack randomisation test (PAGEEXEC)      : 40 quality bits (guessed)
+Arg/env randomisation test (SEGMEXEC)    : 44 quality bits (guessed)
+Arg/env randomisation test (PAGEEXEC)    : 44 quality bits (guessed)
+Randomization under memory exhaustion @~0: 33 bits (guessed)
+Randomization under memory exhaustion @0 : 33 bits (guessed)
+Return to function (strcpy)              : paxtest: return address contains a NULL byte.
+Return to function (memcpy)              : Killed
+Return to function (strcpy, PIE)         : paxtest: return address contains a NULL byte.
+Return to function (memcpy, PIE)         : Killed
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PaX kernel (x86_64 with UDEREF)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Executable anonymous mapping             : Killed
+Executable bss                           : Killed
+Executable data                          : Killed
+Executable heap                          : Killed
+Executable stack                         : Killed
+Executable shared library bss            : Killed
+Executable shared library data           : Killed
+Executable anonymous mapping (mprotect)  : Killed
+Executable bss (mprotect)                : Killed
+Executable data (mprotect)               : Killed
+Executable heap (mprotect)               : Killed
+Executable stack (mprotect)              : Killed
+Executable shared library bss (mprotect) : Killed
+Executable shared library data (mprotect): Killed
+Writable text segments                   : Killed
+Anonymous mapping randomisation test     : 29 quality bits (guessed)
+Heap randomisation test (ET_EXEC)        : 22 quality bits (guessed)
+Heap randomisation test (PIE)            : 35 quality bits (guessed)
+Main executable randomisation (ET_EXEC)  : 29 quality bits (guessed)
+Main executable randomisation (PIE)      : 29 quality bits (guessed)
+Shared library randomisation test        : 29 quality bits (guessed)
+VDSO randomisation test                  : 29 quality bits (guessed)
+Stack randomisation test (SEGMEXEC)      : 35 quality bits (guessed)
+Stack randomisation test (PAGEEXEC)      : 35 quality bits (guessed)
+Arg/env randomisation test (SEGMEXEC)    : 39 quality bits (guessed)
+Arg/env randomisation test (PAGEEXEC)    : 39 quality bits (guessed)
+Randomization under memory exhaustion @~0: 29 bits (guessed)
+Randomization under memory exhaustion @0 : 29 bits (guessed)
+Return to function (strcpy)              : paxtest: return address contains a NULL byte.
+Return to function (memcpy)              : Killed
+Return to function (strcpy, PIE)         : paxtest: return address contains a NULL byte.
+Return to function (memcpy, PIE)         : Killed
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://pax.grsecurity.net/docs/">PaX documentation</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

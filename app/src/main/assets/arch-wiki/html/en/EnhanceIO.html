@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>EnhanceIO - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-EnhanceIO skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">EnhanceIO</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://github.com/stec-inc/EnhanceIO">EnhanceIO</a> makes it possible to use an SSD as a caching device for any other type of block device storage (HDD, Network, you name it) with almost zero configuration. Based on <a href="../en/Flashcache.html" title="Flashcache">Flashcache</a> it is much simpler to set up. Unlike <a href="../en/Bcache.html" title="Bcache">Bcache</a> there is no need to convert file systems.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> As always be careful and read the documentation carefully before attempting to use EnhanceIO, do not confuse your HDD and SDD and make sure the SSD does not have any important data on it.</li>
+<li> There is a <a rel="nofollow" class="external text" href="https://github.com/stec-inc/EnhanceIO/issues/30">known issue</a> with EnhanceIO causing filesystem corruption if fsck is run on file system before cache is brought up.</li>
+<li> As of October 2015 EnhanceIO is <a rel="nofollow" class="external text" href="https://github.com/stec-inc/EnhanceIO/issues/106">completely broken</a> on newer kernels.</li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Setting_up_the_module_and_drives"><span class="tocnumber">1.1</span> <span class="toctext">Setting up the module and drives</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Getting_information_on_caches"><span class="tocnumber">1.2</span> <span class="toctext">Getting information on caches</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Enable_EnhanceIO_on_initcpio"><span class="tocnumber">1.3</span> <span class="toctext">Enable EnhanceIO on initcpio</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/enhanceio-dkms-git/">enhanceio-dkms-git</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Throughout the page, <code>/dev/sda</code> will be used to indicate the slow drive and <code>/dev/sdb</code> will be used to indicate the fast drive. Be sure to change these examples to match your setup.</div>
+<h3><span class="mw-headline" id="Setting_up_the_module_and_drives">Setting up the module and drives</span></h3>
+<p>The EnhanceIO command line interface (eio_cli) is used to manage your setup.
+Set up caching on your fast ssd for your slow hdd like so:
+</p>
+<pre># eio_cli create -d /dev/sda -s /dev/sdb -c my_first_enhanceio
+</pre>
+<p>This will use the default options which are safe, if you want to enhance speed even further you might want to add <code>-m wb</code> to enable WriteBack mode instead of WriteThrough. This might put data itegrity at risk though.
+</p>
+<p>The cache drive is persistent now, which means even after a reboot it will still be used. If you want to deactive it first set the cache into read-only mode to not lose any yet unwritten blocks
+</p>
+<pre># eio_cli edit -c my_first_enhanceio -m ro
+</pre>
+<p>Then wait until
+</p>
+<pre>$ grep nr_dirty /proc/enhanceio/enchanceio_test/stats
+</pre>
+<p>returns 0. Now all the blocks have been written to your slow hdd and it's safe to delete the caching device:
+</p>
+<pre># eio_cli delete -c my_first_enhanceio
+</pre>
+<h3><span class="mw-headline" id="Getting_information_on_caches">Getting information on caches</span></h3>
+<p>To get basic information on caches in use try
+</p>
+<pre># eio_cli info
+</pre>
+<p>To get detailed information use
+</p>
+<pre>$ cat /proc/enhanceio/my_first_enhanceio/stats
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>After initiating EnhanceIO I felt that my system had become more sluggish, this seems to be due to building up the cache first. Use your system like you normally would and open up those applications you would want to start quickly, maybe give it another reboot and observe how things fly.</div>
+<h3><span class="mw-headline" id="Enable_EnhanceIO_on_initcpio">Enable EnhanceIO on initcpio</span></h3>
+<p>After you verify that EnhanceIO works with your system, you might want to accelerate the boot process of your system. In order to do this, EnhanceIO should start as early as possible and before the rootfs gets mounted. This can be achieved by enabling EnhanceIO in initcpio.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>EnhanceIO does not support the WriteBack <code>-m wb</code> strategy when accelerating rootfs, only ReadOnly <code>-m ro</code> or WriteThrough (the default). If you enable WriteBack on the root volume bad things WILL happen.</div>
+<p>First, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pyinstaller/">pyinstaller</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>; we need it to compile EnhanceIO's Python <code>eio_cli</code> script into an executable for inclusion in the initcpio image.
+</p>
+<p>Create the file <code>/etc/initcpio/hooks/enhanceio</code>. This is the EnhanceIO hook that performs cache initialization on boot:
+</p>
+<pre>
+#!/usr/bin/bash
+
+run_hook ()
+{
+    local mod
+    for mod in enhanceio enhanceio_lru enhanceio_fifo; do
+        modprobe "$mod"
+    done
+
+    msg -n ":: Activating EnhanceIO..."
+    udevadm trigger
+}
+</pre>
+<p>Create the file <code>/etc/initcpio/install/enhanceio</code>. This file compiles <code>eio_cli</code> as an executable and includes everything needed to load EnhanceIO from initcpio:
+</p>
+<pre>
+#!/bin/bash
+
+build ()
+{
+    local mod
+    for mod in enhanceio enhanceio_lru enhanceio_rand enhanceio_fifo; do
+        add_module "$mod"
+    done
+
+    add_binary "/usr/lib/libutil.so.1"
+    add_file "/etc/udev/rules.d/94-enhanceio-my_first_enhanceio.rules"
+
+    sudo -u ${SUDO_USER} pyinstaller --distpath=/tmp/eio_cli/dist --workpath=/tmp/eio_cli --specpath=/tmp/eio_cli --clean --onefile --noconfirm --strip --console /usr/bin/eio_cli
+    add_binary "/tmp/eio_cli/dist/eio_cli" "/usr/bin/eio_cli"
+
+    add_runscript
+}
+ 
+help ()
+{
+    echo "This hook loads the necessary modules for EnhanceIO when caching your root device."
+}
+</pre>
+<p>Edit <code>/etc/mkinitcpio.conf</code> and add the <code>enhanceio</code> hook inside the HOOKS variable after <b>udev</b>, <b>block</b> and <b>modconf</b> entries:
+</p>
+<pre>
+HOOKS="base udev block modconf enhanceio ..."
+</pre>
+<p>Fix permissions on eio_cli:
+</p>
+<pre>
+chmod uga+xr /usr/bin/eio_cli
+</pre>
+<p>Finally, re-create the initcpio:
+</p>
+<pre>
+mkinitcpio -p linux
+</pre>
+<p>Reboot and watch your system fly.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

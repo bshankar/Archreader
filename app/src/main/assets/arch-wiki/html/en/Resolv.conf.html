@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>resolv.conf - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Resolv_conf skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">resolv.conf</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Improving_performance.html#Network" title="Improving performance">Improving performance#Network</a></li>
+</ul>
+</div>
+<p>The configuration file for DNS resolvers is <code>/etc/resolv.conf</code>. From its <a rel="nofollow" class="external text" href="http://www.kernel.org/doc/man-pages/online/pages/man5/resolv.conf.5.html">man page</a>:
+</p>
+<dl><dd>The resolver is a set of routines in the C library that provide access to the Internet Domain Name System (DNS). The resolver configuration file contains information that is read by the resolver routines the first time they are invoked by a process. The file is designed to be human readable and contains a list of keywords with values that provide various types of resolver information.</dd></dl>
+<dl><dd>If this file does not exist, only the name server on the local machine will be queried; the domain name is determined from the hostname and the domain search path is constructed from the domain name.</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#DNS_in_Linux"><span class="tocnumber">1</span> <span class="toctext">DNS in Linux</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Testing"><span class="tocnumber">1.1</span> <span class="toctext">Testing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Alternative_DNS_servers"><span class="tocnumber">2</span> <span class="toctext">Alternative DNS servers</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#OpenNIC"><span class="tocnumber">2.1</span> <span class="toctext">OpenNIC</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#OpenDNS"><span class="tocnumber">2.2</span> <span class="toctext">OpenDNS</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Google"><span class="tocnumber">2.3</span> <span class="toctext">Google</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Comodo"><span class="tocnumber">2.4</span> <span class="toctext">Comodo</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Yandex"><span class="tocnumber">2.5</span> <span class="toctext">Yandex</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#UncensoredDNS"><span class="tocnumber">2.6</span> <span class="toctext">UncensoredDNS</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Preserve_DNS_settings"><span class="tocnumber">3</span> <span class="toctext">Preserve DNS settings</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#With_NetworkManager"><span class="tocnumber">3.1</span> <span class="toctext">With NetworkManager</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Using_openresolv"><span class="tocnumber">3.2</span> <span class="toctext">Using openresolv</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Modify_the_dhcpcd_config"><span class="tocnumber">3.3</span> <span class="toctext">Modify the dhcpcd config</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Write-protect_.2Fetc.2Fresolv.conf"><span class="tocnumber">3.4</span> <span class="toctext">Write-protect /etc/resolv.conf</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Use_timeout_option_to_reduce_hostname_lookup_time"><span class="tocnumber">3.5</span> <span class="toctext">Use timeout option to reduce hostname lookup time</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#Local_domain_names"><span class="tocnumber">4.1</span> <span class="toctext">Local domain names</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="DNS_in_Linux">DNS in Linux</span></h2>
+<p>Your ISP (usually) provides working <a href="https://en.wikipedia.org/wiki/Domain_Name_System" class="extiw" title="wikipedia:Domain Name System">DNS</a> servers, and a router may also add an extra DNS server in case you have your own cache server. Switching between DNS servers does not represent a problem for Windows users, because if a DNS server is slow or does not work it will immediately switch to a better one.  However, Linux usually takes longer to timeout, which could be the reason why you are getting a delay.
+</p>
+<h3><span class="mw-headline" id="Testing">Testing</span></h3>
+<p>Use <i>drill</i> (provided by package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ldns">ldns</a></span>) before any changes, repeat after making the adjustments and compare the query time(s). The following command uses the nameservers set in <code>/etc/resolv.conf</code>:
+</p>
+<pre>$ drill www5.yahoo.com
+</pre>
+<p>You can also specify a specific nameserver's ip address, bypassing the settings in your <code>/etc/resolv.conf</code>:
+</p>
+<pre>$ drill @<i>ip.of.name.server</i> www5.yahoo.com
+</pre>
+<p>For example to test Google's name servers:
+</p>
+<pre>$ drill @8.8.8.8 www5.yahoo.com
+</pre>
+<p>To test a local name server (such as <a href="../en/Unbound.html" title="Unbound">unbound</a>) do:
+</p>
+<pre>$ drill @127.0.0.1 www5.yahoo.com
+</pre>
+<h2><span class="mw-headline" id="Alternative_DNS_servers">Alternative DNS servers</span></h2>
+<p>To use alternative DNS servers, edit <code>/etc/resolv.conf</code> and add them to the top of the file so they are used first, optionally removing or commenting out already listed servers. Currently, you may include a maximum of three <code>nameserver</code> lines. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Changes made to <code>/etc/resolv.conf</code> take effect immediately.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you require more flexibility, e.g. more than three nameservers, you can use a locally caching nameserver/resolver like <a href="../en/Dnsmasq.html" title="Dnsmasq">dnsmasq</a> or <a href="../en/Unbound.html" title="Unbound">unbound</a>. Using a local DNS caching resolver, most likely you will not set the <code>nameserver</code> to the actual DNS server but to <code>127.0.0.1</code>. See the article for the program you are using for DNS caching.</div>
+<h3><span class="mw-headline" id="OpenNIC">OpenNIC</span></h3>
+<p><a rel="nofollow" class="external text" href="http://www.opennicproject.org/">OpenNIC</a> provides free uncensored nameservers with additional features.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>OpenNIC offers many <a rel="nofollow" class="external text" href="http://wiki.opennicproject.org/Tier2">different nameservers</a> located in multiple countries. Pick some of the <a rel="nofollow" class="external text" href="http://www.opennicproject.org/nearest-servers/">nearest nameservers</a> for optimal performance.</div>
+<pre># OpenNIC IPv4 nameservers (US)
+nameserver 107.170.95.180
+nameserver 75.127.14.107
+</pre>
+<h3><span class="mw-headline" id="OpenDNS">OpenDNS</span></h3>
+<p><a rel="nofollow" class="external text" href="https://opendns.com">OpenDNS</a> provides free alternative nameservers:
+</p>
+<pre># OpenDNS IPv4 nameservers
+nameserver 208.67.222.222
+nameserver 208.67.220.220
+</pre>
+<pre># OpenDNS IPv6 nameservers
+nameserver 2620:0:ccc::2
+nameserver 2620:0:ccd::2
+</pre>
+<h3><span class="mw-headline" id="Google">Google</span></h3>
+<p><a rel="nofollow" class="external text" href="https://developers.google.com/speed/public-dns/">Google's nameservers</a> can be used as an alternative:
+</p>
+<pre># Google IPv4 nameservers
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+</pre>
+<pre># Google IPv6 nameservers
+nameserver 2001:4860:4860::8888
+nameserver 2001:4860:4860::8844
+</pre>
+<h3><span class="mw-headline" id="Comodo">Comodo</span></h3>
+<p><a rel="nofollow" class="external text" href="http://securedns.dnsbycomodo.com/">Comodo</a> provides another IPv4 set, with optional (non-free) web-filtering. Implied in this feature is that the service hijacks the queries. 
+</p>
+<pre># Comodo nameservers 
+nameserver 8.26.56.26 
+nameserver 8.20.247.20
+</pre>
+<h3><span class="mw-headline" id="Yandex">Yandex</span></h3>
+<p><a rel="nofollow" class="external text" href="https://dns.yandex.com/advanced/">Yandex.DNS</a> have three options:
+</p>
+<pre># Basic Yandex.DNS - Quick and reliable DNS
+nameserver 77.88.8.8              # Preferred IPv4 DNS
+nameserver 77.88.8.1              # Alternate IPv4 DNS
+
+nameserver 2a02:6b8::feed:0ff     # Preferred IPv6 DNS
+nameserver 2a02:6b8:0:1::feed:0ff # Alternate IPv6 DNS
+</pre>
+<pre># Safe Yandex.DNS - Protection from virus and fraudulent content
+nameserver 77.88.8.88             # Preferred IPv4 DNS
+nameserver 77.88.8.2              # Alternate IPv4 DNS
+
+nameserver 2a02:6b8::feed:bad     # Preferred IPv6 DNS
+nameserver 2a02:6b8:0:1::feed:bad # Alternate IPv6 DNS
+</pre>
+<pre># Family Yandex.DNS - Without adult content
+nameserver 77.88.8.7              # Preferred IPv4 DNS
+nameserver 77.88.8.3              # Alternate IPv4 DNS
+
+nameserver 2a02:6b8::feed:a11     # Preferred IPv6 DNS
+nameserver 2a02:6b8:0:1::feed:a11 # Alternate IPv6 DNS
+</pre>
+<p>Yandex.DNS' speed is the same in all three modes. In "Basic" mode, there is no traffic filtering. In "Safe" mode, protection from infected and fraudulent sites is provided. "Family" mode enables protection from dangerous sites and blocks sites with adult content.
+</p>
+<h3><span class="mw-headline" id="UncensoredDNS">UncensoredDNS</span></h3>
+<p><a rel="nofollow" class="external text" href="http://censurfridns.dk">UncensoredDNS</a> is a free uncensored DNS resolver who also answers queries on port 5353 if you are behind a firewall blocking outgoing port 53.
+</p>
+<pre># censurfridns.dk IPv4 nameservers
+nameserver 91.239.100.100    ## anycast.censurfridns.dk
+nameserver 89.233.43.71      ## ns1.censurfridns.dk
+</pre>
+<pre># censurfridns.dk IPv6 nameservers
+nameserver 2001:67c:28a4::             ## anycast.censurfridns.dk
+nameserver 2002:d596:2a92:1:71:53::    ## ns1.censurfridns.dk
+</pre>
+<h2><span class="mw-headline" id="Preserve_DNS_settings">Preserve DNS settings</span></h2>
+<p><a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a>, <a href="../en/Netctl.html" title="Netctl">netctl</a>, <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a>, and various other processes can overwrite <code>/etc/resolv.conf</code>. This is usually desirable behavior, but sometimes DNS settings need to be set manually (e.g. when using a static IP address). There are several ways to accomplish this. 
+</p>
+<ul>
+<li>If you are using <i>dhcpcd</i>, see <a href="#Modify_the_dhcpcd_config">#Modify the dhcpcd config</a> below.</li>
+<li>If you are using <a href="../en/Netctl.html" title="Netctl">netctl</a> and static IP address assignment, do not use the <code>DNS*</code> options in your profile, otherwise <i>resolvconf</i> is called and <code>/etc/resolv.conf</code> overwritten.</li>
+</ul>
+<h3><span class="mw-headline" id="With_NetworkManager">With NetworkManager</span></h3>
+<p>To stop NetworkManager from modifying <code>/etc/resolv.conf</code>, edit <code>/etc/NetworkManager/NetworkManager.conf</code> and add the following in the <code>[main]</code> section:
+</p>
+<pre>dns=none
+</pre>
+<p><code>/etc/resolv.conf</code> might be a broken symlink that you will need to remove after doing that. Then, just create a new <code>/etc/resolv.conf</code> file.
+</p>
+<h3><span class="mw-headline" id="Using_openresolv">Using openresolv</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openresolv">openresolv</a></span> provides a utility <i>resolvconf</i>, which is a framework for managing multiple DNS configurations. See <code>man 8 resolvconf</code> and <code>man 5 resolvconf.conf</code> for more information.
+</p>
+<p>The configuration is done in <code>/etc/resolvconf.conf</code> and running <code>resolvconf -u</code> will generate <code>/etc/resolv.conf</code>.
+</p>
+<h3><span class="mw-headline" id="Modify_the_dhcpcd_config">Modify the dhcpcd config</span></h3>
+<p><i>dhcpcd'</i>s configuration file may be edited to prevent the <i>dhcpcd</i> daemon from overwriting <code>/etc/resolv.conf</code>. To do this, add the following to the last section of <code>/etc/dhcpcd.conf</code>: 
+</p>
+<pre>nohook resolv.conf
+</pre>
+<p>Alternatively, you can create a file called <code>/etc/resolv.conf.head</code> containing your DNS servers. <i>dhcpcd</i> will prepend this file to the beginning of <code>/etc/resolv.conf</code>.
+</p>
+<p>Or you can configure dhcpcd to use the same DNS servers every time. To do this, add the following line at the end of your <code>/etc/dhcpcd.conf</code>:
+</p>
+<pre>static domain_name_servers=8.8.4.4 8.8.8.8
+</pre>
+<h3><span class="mw-headline" id="Write-protect_.2Fetc.2Fresolv.conf">Write-protect /etc/resolv.conf</span></h3>
+<p>Another way to protect your <code>/etc/resolv.conf</code> from being modified by anything is setting the immutable (write-protection) attribute:
+</p>
+<pre># chattr +i /etc/resolv.conf
+</pre>
+<h3><span class="mw-headline" id="Use_timeout_option_to_reduce_hostname_lookup_time">Use timeout option to reduce hostname lookup time</span></h3>
+<p>If you are confronted with a very long hostname lookup (may it be in <a href="../en/Pacman.html" title="Pacman">pacman</a> or while browsing), it often helps to define a small timeout after which an alternative nameserver is used. To do so, put the following in <code>/etc/resolv.conf</code>.
+</p>
+<pre>options timeout:1
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Local_domain_names">Local domain names</span></h3>
+<p>If you want to be able to use the hostname of local machine names without the fully qualified domain names, then add a line to <code>resolv.conf</code> with the local domain such as:
+</p>
+<pre>domain example.com
+</pre>
+<p>That way you can refer to local hosts such as <code>mainmachine1.example.com</code> as simply <code>mainmachine1</code> when using the <i>ssh</i> command, but the <i>drill</i> command still requires the fully qualified domain names in order to perform lookups.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Domain_Name_System.html" title="Category:Domain Name System">Domain Name System</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

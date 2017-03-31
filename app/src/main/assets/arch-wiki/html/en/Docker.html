@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Docker - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Docker skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Docker</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Linux_Containers.html" title="Linux Containers">Linux Containers</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Linux_Containers.html#Systemd_considerations_.28required.29" title="Lxc-systemd" class="mw-redirect">Lxc-systemd</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Vagrant.html" title="Vagrant">Vagrant</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://www.docker.io">Docker</a> is a utility to pack, ship and run any application as a lightweight container.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Opening_remote_API"><span class="tocnumber">2.1</span> <span class="toctext">Opening remote API</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Daemon_socket_configuration"><span class="tocnumber">2.2</span> <span class="toctext">Daemon socket configuration</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Proxies"><span class="tocnumber">2.3</span> <span class="toctext">Proxies</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Proxy_configuration"><span class="tocnumber">2.3.1</span> <span class="toctext">Proxy configuration</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Container_configuration"><span class="tocnumber">2.3.2</span> <span class="toctext">Container configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Configuring_DNS"><span class="tocnumber">2.4</span> <span class="toctext">Configuring DNS</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Images_location"><span class="tocnumber">2.5</span> <span class="toctext">Images location</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Docker_0.9.0_--_1.2.x_and_LXC"><span class="tocnumber">3</span> <span class="toctext">Docker 0.9.0 -- 1.2.x and LXC</span></a></li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Images"><span class="tocnumber">4</span> <span class="toctext">Images</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12">
+<a href="#Arch_Linux"><span class="tocnumber">4.1</span> <span class="toctext">Arch Linux</span></a>
+<ul>
+<li class="toclevel-3 tocsection-13"><a href="#x86_64"><span class="tocnumber">4.1.1</span> <span class="toctext">x86_64</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#i686"><span class="tocnumber">4.1.2</span> <span class="toctext">i686</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Build_Image"><span class="tocnumber">4.1.3</span> <span class="toctext">Build Image</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-16"><a href="#Debian"><span class="tocnumber">4.2</span> <span class="toctext">Debian</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17"><a href="#Arch_Linux_image_with_snapshot_repository"><span class="tocnumber">5</span> <span class="toctext">Arch Linux image with snapshot repository</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#Clean_Remove_Docker_.2B_Images"><span class="tocnumber">6</span> <span class="toctext">Clean Remove Docker + Images</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Useful_tips"><span class="tocnumber">7</span> <span class="toctext">Useful tips</span></a></li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Troubleshooting"><span class="tocnumber">8</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Docker_info_errors_out"><span class="tocnumber">8.1</span> <span class="toctext">Docker info errors out</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Deleting_Docker_Images_in_a_BTRFS_Filesystem"><span class="tocnumber">8.2</span> <span class="toctext">Deleting Docker Images in a BTRFS Filesystem</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#docker0_Bridge_gets_no_IP_.2F_no_internet_access_in_containers"><span class="tocnumber">8.3</span> <span class="toctext">docker0 Bridge gets no IP / no internet access in containers</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#docker_complains_about_no_loopback_devices"><span class="tocnumber">8.4</span> <span class="toctext">docker complains about no loopback devices</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Default_number_of_allowed_processes.2Fthreads_too_low"><span class="tocnumber">8.5</span> <span class="toctext">Default number of allowed processes/threads too low</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-26"><a href="#See_also"><span class="tocnumber">9</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Docker doesn't support i686. <a rel="nofollow" class="external autonumber" href="https://github.com/docker/docker/issues/136">[1]</a>
+</div>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=docker">docker</a></span> package or, for the development version, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/docker-git/">docker-git</a></span><sup><small>AUR</small></sup> package. You may need to reboot. Next <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and enable <code>docker.service</code> and verify operation:
+</p>
+<pre># docker info
+</pre>
+<p>If you want to be able to run docker as a regular user, add yourself to the docker group:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> Anyone added to the 'docker' group is root equivalent. More information <a rel="nofollow" class="external text" href="https://github.com/docker/docker/issues/9976">here</a> and <a rel="nofollow" class="external text" href="http://docs.docker.com/engine/articles/security/">here</a>.</div>
+<pre># gpasswd -a <i>user</i> docker
+</pre>
+<p>Then re-login or to make your current user session aware of this new group, you can use:
+</p>
+<pre>$ newgrp docker
+</pre>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Opening_remote_API">Opening remote API</span></h3>
+<p>To open the Remote API to port <code>4243</code> manually, run:
+</p>
+<pre> # docker daemon -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
+</pre>
+<p><code>-H tcp://0.0.0.0:4243</code> part is for opening the Remote API.
+</p>
+<p><code>-H unix:///var/run/docker.sock</code> part for host machine access via terminal.
+</p>
+<h3><span class="mw-headline" id="Daemon_socket_configuration">Daemon socket configuration</span></h3>
+<p>The <i>docker</i> daemon listens to a <a href="https://en.wikipedia.org/wiki/Unix_domain_socket" class="extiw" title="wikipedia:Unix domain socket">Unix socket</a> by default. To listen on a specified port instead, edit <code>/etc/systemd/system/docker.socket</code>, where <code>ListenStream</code> is the used port:
+</p>
+<pre>[Socket]
+ListenStream=0.0.0.0:2375
+</pre>
+<h3><span class="mw-headline" id="Proxies">Proxies</span></h3>
+<p>Proxy configuration is broken down into two. First is the host configuration of the Docker daemon, second is the configuration required for your container to see your proxy.
+</p>
+<h4><span class="mw-headline" id="Proxy_configuration">Proxy configuration</span></h4>
+<p>First, create a systemd drop-in directory for the docker service: <code>mkdir /etc/systemd/system/docker.service.d</code>
+</p>
+<p>Now create a file called <code>/etc/systemd/system/docker.service.d/http-proxy.conf</code> that adds the <code>HTTP_PROXY</code> environment variable:
+</p>
+<pre>[Service]
+Environment="HTTP_PROXY=192.168.1.1"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This assumes <code>192.168.1.1</code> is your proxy server, do not use <code>127.0.0.1</code>.</div>
+<p>Flush changes:
+<code>sudo systemctl daemon-reload</code>
+</p>
+<p>Verify that the configuration has been loaded:
+</p>
+<pre>sudo systemctl show docker --property Environment
+Environment=HTTP_PROXY=192.168.1.1
+</pre>
+<p>Restart Docker:
+<code>sudo systemctl restart docker</code>
+</p>
+<h4><span class="mw-headline" id="Container_configuration">Container configuration</span></h4>
+<p>The settings in the <code>docker.service</code> file will not translate into containers. To achieve this you must set <code>ENV</code> variables in your <code>Dockerfile</code> thus:
+</p>
+<pre> FROM base/archlinux
+ ENV http_proxy="http://192.168.1.1:3128"
+ ENV https_proxy="https://192.168.1.1:3128"
+</pre>
+<p><a rel="nofollow" class="external text" href="https://docs.docker.com/reference/builder/#env">Docker</a> provide detailed information on configuration via <code>ENV</code> within a Dockerfile.
+</p>
+<h3><span class="mw-headline" id="Configuring_DNS">Configuring DNS</span></h3>
+<p>By default, docker will make resolv.conf in the container match resolv.conf on the host machine, filtering out local addresses (e.g. <code>127.0.0.1</code>).  If this yields an empty file, then googles DNS servers are defaulted.  If you are using a service like dnsmasq to provide name resolution, you will need to add an entry to your resolv.conf for docker's network interface so that it isn't filtered out.
+</p>
+<h3><span class="mw-headline" id="Images_location">Images location</span></h3>
+<p>By default, docker images are located at <code>/var/lib/docker</code>. They can be moved to other partitions. 
+First, <a href="../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">stop</a> the <code>docker.service</code>. 
+</p>
+<p>If you have run the docker images, you need to make sure the images are unmounted totally. Once that is completed, you may move the images from <code>/var/lib/docker</code> to the target destination.
+</p>
+<p>Then add a <a href="../en/Systemd.html#Editing_provided_units" title="Drop-in snippet" class="mw-redirect">Drop-in snippet</a> for the <code>docker.service</code>, adding the <code>-g</code> parameter to the <code>ExecStart</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/docker.service.d/imagelocation.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart= 
+ExecStart=/usr/bin/dockerd -g <i>/path/to/new/location/docker</i> -H fd://</pre>
+<p>Finally, <a href="../en/Systemd.html#Using_units" title="Reload" class="mw-redirect">reload</a> configuration and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>docker.service</code> again.
+</p>
+<h2><span class="mw-headline" id="Docker_0.9.0_--_1.2.x_and_LXC">Docker 0.9.0 -- 1.2.x and LXC</span></h2>
+<p>Since version 0.9.0 Docker provides a new way to start containers without relying on a LXC library called <i>libcontainer</i>.
+</p>
+<p>The lxc exec driver and the -lxc-conf option may also be removed in the near future, <a rel="nofollow" class="external autonumber" href="https://github.com/docker/docker/pull/5797">[2]</a>
+</p>
+<p>Hence, you will not be able to use <code>lxc-attach</code> with containers managed by Docker 0.9.0+ by default. It is required to make Docker daemon run with <code>-e lxc</code> as an argument.
+</p>
+<p>You can create a file named <code>lxc.conf</code> under <code>/etc/systemd/system/docker.service.d/</code> with the following contents:
+</p>
+<pre>[Service]
+ExecStart=
+ExecStart=/usr/bin/docker -d -e lxc
+</pre>
+<h2><span class="mw-headline" id="Images">Images</span></h2>
+<h3><span class="mw-headline" id="Arch_Linux">Arch Linux</span></h3>
+<h4><span class="mw-headline" id="x86_64">x86_64</span></h4>
+<p>The following command pulls the <a rel="nofollow" class="external text" href="https://hub.docker.com/r/base/archlinux/">base/archlinux</a> x86_64 image.
+</p>
+<pre># docker pull base/archlinux
+</pre>
+<h4><span class="mw-headline" id="i686">i686</span></h4>
+<p>The default Arch Linux image in Docker Registry is for x86_64 only. i686 image must be built manually.
+</p>
+<h4><span class="mw-headline" id="Build_Image">Build Image</span></h4>
+<p>Instead, check <a rel="nofollow" class="external text" href="https://registry.hub.docker.com/u/base/archlinux/">docker base/archlinux registry</a> and click the <code>mkimage-arch.sh</code> link to download <code>mkimage-arch.sh</code> and <code>mkimage-arch-pacman.conf</code> to the same directory as raw files. Next, make the script executable and run it: 
+</p>
+<pre>$ chmod +x mkimage-arch.sh
+$ cp /etc/pacman.conf ./mkimage-arch-pacman.conf # or get a pacman.conf from somewhere else
+$ ./mkimage-arch.sh
+# docker run -t -i --rm archlinux /bin/bash  # try it
+</pre>
+<p>For slow network connections or CPU, the build timeout can be extended: 
+</p>
+<pre>$ sed -i 's/timeout 60/timeout 120/' mkimage-arch.sh
+</pre>
+<h3><span class="mw-headline" id="Debian">Debian</span></h3>
+<p>Build Debian image with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=debootstrap">debootstrap</a></span>:
+</p>
+<pre># mkdir jessie-chroot
+# debootstrap jessie ./jessie-chroot <a rel="nofollow" class="external free" href="http://http.debian.net/debian/">http://http.debian.net/debian/</a>
+# cd jessie-chroot
+# tar cpf - . | docker import - debian
+# docker run -t -i --rm debian /bin/bash
+</pre>
+<h2><span class="mw-headline" id="Arch_Linux_image_with_snapshot_repository">Arch Linux image with snapshot repository</span></h2>
+<p>Arch Linux on Docker can become problematic when multiple images are created and updated each having different package versions. To keep Docker containers with consistent package versions, a <a rel="nofollow" class="external text" href="https://registry.hub.docker.com/u/pritunl/archlinux/">Docker image with a snapshot repository</a> is available. This allows installing new packages from the official repository as it was on the day that the snapshot was created.
+</p>
+<pre>$ docker pull pritunl/archlinux:latest
+$ docker run --rm -t -i pritunl/archlinux:latest /bin/bash
+</pre>
+<p>Alternatively, you could use <a href="../en/Arch_Linux_Archive.html" title="Arch Linux Archive">Arch Linux Archive</a> by freezing  <code>/etc/pacman.d/mirrorlist</code> 
+</p>
+<pre> Server=<a rel="nofollow" class="external free" href="https://archive.archlinux.org/repos/2020/01/02/%24repo/os/%24arch">https://archive.archlinux.org/repos/2020/01/02/$repo/os/$arch</a>
+</pre>
+<h2><span class="mw-headline" id="Clean_Remove_Docker_.2B_Images">Clean Remove Docker + Images</span></h2>
+<p>In case you want to remove Docker entirely you can do this by following  the steps below:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Don't just copy paste those commands without making sure you know what you are doing!</div>
+<p>Check for running containers:
+</p>
+<pre># docker ps
+</pre>
+<p>Killing still running containers:
+</p>
+<pre># docker kill &lt;CONTAINER ID&gt;
+</pre>
+<p>List all containers running on the host for deletion:
+</p>
+<pre># docker ps -a
+</pre>
+<p>Delete all containers listed by ID:
+</p>
+<pre># docker rm &lt;CONTAINER ID&gt;
+</pre>
+<p>List all Docker images:
+</p>
+<pre># docker images
+</pre>
+<p>Delete all images by ID:
+</p>
+<pre># docker rmi &lt;IMAGE ID&gt;
+</pre>
+<p>Disable Docker:
+</p>
+<pre># systemctl disable docker
+# systemctl stop docker
+</pre>
+<p>Remove Docker/Compose from the system:
+</p>
+<pre># pacman -Rs docker docker-compose
+</pre>
+<p>Remove users from docker group:
+</p>
+<pre># gpasswd -d &lt;user&gt; docker
+</pre>
+<p>Delete docker group from system:
+</p>
+<pre># groupdel docker
+</pre>
+<p>Delete all Docker data (purge directory):
+</p>
+<pre># rm -R /var/lib/docker
+</pre>
+<h2><span class="mw-headline" id="Useful_tips">Useful tips</span></h2>
+<p>To grab the IP address of a running container:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ docker inspect --format '{{ .NetworkSettings.IPAddress }}' &lt;container-name OR id&gt; </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+172.17.0.37</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Docker_info_errors_out">Docker info errors out</span></h3>
+<p>If running <code>docker info</code> gives an error that looks like this:
+</p>
+<pre> FATA[0000] Get <a rel="nofollow" class="external free" href="http:///var/run/docker.sock/v1.17/info">http:///var/run/docker.sock/v1.17/info</a>: read unix /var/run/docker.sock: connection reset by peer. Are you trying to connect to a TLS-enabled daemon without TLS? 
+</pre>
+<p>then you might not have the <code>bridge</code> module loaded. You can check for it by running <code>lsmod </code>. If it is not loaded, you can try to load it with <code>modprobe</code> or simply reboot (a reboot might be required if you have upgraded your kernel recently without rebooting and the bridge module was built for the more recent kernel.)
+</p>
+<p>See <a rel="nofollow" class="external text" href="https://github.com/docker/docker/issues/6853">this issue on GitHub for more information</a>.
+</p>
+<h3><span class="mw-headline" id="Deleting_Docker_Images_in_a_BTRFS_Filesystem">Deleting Docker Images in a BTRFS Filesystem</span></h3>
+<p>Deleting docker images in a <a href="../en/Btrfs.html" title="Btrfs">btrfs</a> filesystem leaves the images in <code>/var/lib/docker/btrfs/subvolumes/</code> with a size of 0. When you try to delete this you get a permission error.
+</p>
+<pre> # docker rm bab4ff309870
+ # rm -Rf /var/lib/docker/btrfs/subvolumes/*
+ rm: cannot remove '/var/lib/docker/btrfs/subvolumes/85122f1472a76b7519ed0095637d8501f1d456787be1a87f2e9e02792c4200ab': Operation not permitted
+</pre>
+<p>This is caused by btrfs which created subvolumes for the docker images. So the correct command to delete them is:
+</p>
+<pre> # btrfs subvolume delete /var/lib/docker/btrfs/subvolumes/85122f1472a76b7519ed0095637d8501f1d456787be1a87f2e9e02792c4200ab
+</pre>
+<h3><span class="mw-headline" id="docker0_Bridge_gets_no_IP_.2F_no_internet_access_in_containers">docker0 Bridge gets no IP / no internet access in containers</span></h3>
+<p>Docker enables IP forwarding by itself, but by default systemd overrides the respective sysctl setting. The following disables this override (for all interfaces):
+</p>
+<pre># cat &gt; /etc/systemd/network/ipforward.network &lt;&lt;EOF
+[Network]
+IPForward=ipv4
+EOF
+
+# cat &gt; /etc/sysctl.d/99-docker.conf &lt;&lt;EOF
+net.ipv4.ip_forward = 1
+EOF
+
+# sysctl -w net.ipv4.ip_forward=1
+</pre>
+<p>Finally <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> the <code>systemd-networkd</code> and <code>docker</code> services.
+</p>
+<h3><span class="mw-headline" id="docker_complains_about_no_loopback_devices">docker complains about no loopback devices</span></h3>
+<p>If starting the docker service fails and <code>journalctl</code> says that no loopback device can be found, try following the steps outlined in <a href="../en/TrueCrypt.html#Failed_to_set_up_a_loop_device" title="TrueCrypt">TrueCrypt's troubleshooting section</a>.  In particular, if you've upgraded the kernel since last rebooting, you just need to reboot.
+</p>
+<h3><span class="mw-headline" id="Default_number_of_allowed_processes.2Fthreads_too_low">Default number of allowed processes/threads too low</span></h3>
+<p>If you run into error messages like
+</p>
+<pre># e.g. Java
+java.lang.OutOfMemoryError: unable to create new native thread
+# e.g. C, bash, ...
+fork failed: Resource temporarily unavailable
+ 
+</pre>
+<p>then you might need to adjust the number of processes allowed by systemd. Default (see system.conf) is 500, which is pretty small for running several docker containers. You need to create a drop-in service file for this:
+</p>
+<pre># mkdir /etc/systemd/system/docker.service.d
+# cat &gt; /etc/systemd/system/docker.service.d/tasks.conf &lt;&lt;EOF
+[Service]
+TasksMax=infinity
+EOF
+# systemctl daemon-reload
+# systemctl restart docker.service
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://docs.docker.com/installation/archlinux/">Arch Linux on docs.docker.com</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://opensource.com/business/14/7/docker-security-selinux">Are Docker containers really secure?</a> — opensource.com</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

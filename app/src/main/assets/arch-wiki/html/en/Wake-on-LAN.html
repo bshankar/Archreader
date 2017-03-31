@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Wake-on-LAN - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Wake-on-LAN skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Wake-on-LAN</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Wake-on-LAN (WOL) is a feature to switch on a computer via a network connection (be it the internet or intranet).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Hardware_settings"><span class="tocnumber">1</span> <span class="toctext">Hardware settings</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Software_configuration"><span class="tocnumber">2</span> <span class="toctext">Software configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Make_it_persistent"><span class="tocnumber">2.1</span> <span class="toctext">Make it persistent</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#netctl"><span class="tocnumber">2.1.1</span> <span class="toctext">netctl</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#systemd-networkd"><span class="tocnumber">2.1.2</span> <span class="toctext">systemd-networkd</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#systemd_service"><span class="tocnumber">2.1.3</span> <span class="toctext">systemd service</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#udev"><span class="tocnumber">2.1.4</span> <span class="toctext">udev</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#cron"><span class="tocnumber">2.1.5</span> <span class="toctext">cron</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#NetworkManager"><span class="tocnumber">2.1.6</span> <span class="toctext">NetworkManager</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Trigger_a_wake_up"><span class="tocnumber">3</span> <span class="toctext">Trigger a wake up</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#On_the_same_LAN"><span class="tocnumber">3.1</span> <span class="toctext">On the same LAN</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#With_port_forwarding"><span class="tocnumber">3.2</span> <span class="toctext">With port forwarding</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Across_the_internet"><span class="tocnumber">3.3</span> <span class="toctext">Across the internet</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Miscellaneous"><span class="tocnumber">4</span> <span class="toctext">Miscellaneous</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Battery_draining_problem"><span class="tocnumber">4.1</span> <span class="toctext">Battery draining problem</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Example_WOL_script"><span class="tocnumber">4.2</span> <span class="toctext">Example WOL script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#Realtek"><span class="tocnumber">5.1</span> <span class="toctext">Realtek</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Suspend.2FResume"><span class="tocnumber">5.2</span> <span class="toctext">Suspend/Resume</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Hardware_settings">Hardware settings</span></h2>
+<p>The target computer's motherboard and <a href="https://en.wikipedia.org/wiki/NIC" class="extiw" title="wikipedia:NIC">NIC</a> have to support Wake-on-LAN. Wireless cards do not support Wake-on-LAN, so the target computer has to be physically connected (i.e. by cable) to router or the source computer.
+</p>
+<p>The Wake-on-LAN feature also has to be enabled in the PC's BIOS. Different motherboard manufactures use slightly different language for this feature. Look for terminology such as "PCI Power up", "Allow PCI wake up event" or "Boot from PCI/PCI-E".
+</p>
+<p>It is known that some motherboards are affected by a nasty bug that causes reboots rather than shutdowns under certain situations (see <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=173648">this</a> thread for example). To prevent this bug from surfacing, it is recommended to do the following on the target machine:
+</p>
+<ol>
+<li> Disable all references to "xHCI" as it pertains to USB settings.</li>
+<li> Disable EuP 2013 if it is explicitly an option.</li>
+<li> Optionally enable WOL for keyboard actions.</li>
+</ol>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There are mixed opinions as to the value of #3 above and it may be motherboard dependent.</div>
+<h2><span class="mw-headline" id="Software_configuration">Software configuration</span></h2>
+<p>Depending on the hardware, the network drivers may have WOL switched off by default. To query this status or to change the settings, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ethtool">ethtool</a></span>.
+</p>
+<p>Query the network device via this command:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ethtool net0 | grep Wake-on</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+        Supports Wake-on: pumbag
+    Wake-on: d
+</pre>
+<p>The values define what activity to wake on: <code>d</code> (disabled), <code>p</code> (PHY activity), <code>u</code> (unicast activity), <code>m</code> (multicast activity), <code>b</code> (broadcast activity), <code>a</code> (ARP activity), and <code>g</code> (magic packet activity). The value of <code>g</code> is required for WOL to work.
+</p>
+<p>To enable the WOL feature in the driver:
+</p>
+<pre># ethtool -s net0 wol g
+</pre>
+<p>This command might not last beyond the next reboot, so it must be repeated via some mechanism. Common solutions are listed in the following subsections.
+</p>
+<h3><span class="mw-headline" id="Make_it_persistent">Make it persistent</span></h3>
+<h4><span class="mw-headline" id="netctl">netctl</span></h4>
+<p>If using netctl, one can make this setting persistent by adding the following the netctl profile:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/<i>profile</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ExecUpPost='/usr/bin/ethtool -s net0 wol g'</pre>
+<h4><span class="mw-headline" id="systemd-networkd">systemd-networkd</span></h4>
+<p>If <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a> is used to setup machine's network then it is easy to enable Wake-On-Lan using <code>systemd.link</code> configuration. Add <code>WakeOnLan</code> option to the network link file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/network/50-wired.link</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Link]
+WakeOnLan=magic
+...</pre>
+<p>See <a href="../en/Systemd-networkd.html#link_files" title="Systemd-networkd">systemd-networkd#link files</a> and <code>man systemd.link</code> for more information.
+</p>
+<h4><span class="mw-headline" id="systemd_service">systemd service</span></h4>
+<p>This is an equivalent of previous <code>systemd.link</code> option, but uses a standalone systemd service.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/wol@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Wake-on-LAN for %i
+Requires=network.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/ethtool -s %i wol g
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Alternatively install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wol-systemd/">wol-systemd</a></span><sup><small>AUR</small></sup> package.
+</p>
+<p>Then activate this new service by <a href="../en/Systemd.html#Using_units" title="Starting" class="mw-redirect">starting</a> <code>wol@<i>interface</i>.service</code>.
+</p>
+<h4><span class="mw-headline" id="udev">udev</span></h4>
+<p><a href="../en/Udev.html" title="Udev">udev</a> is capable of running any command as soon as a device is visible. The following rule will turn on WOL on all <a href="../en/Network_configuration.html#Network_interfaces" title="Network interface" class="mw-redirect">network interfaces</a> whose name matches <code>enp*</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-wol.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ACTION=="add", SUBSYSTEM=="net", NAME=="enp*", RUN+="/usr/bin/ethtool -s $name wol g"
+</pre>
+<p>The <code>$name</code> placeholder will be replaced by the value of the <code>NAME</code> variable for the matched device.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The name of the configuration file is important. Due to the introduction of <a href="../en/Network_configuration.html#Device_names" title="Network configuration">persistent device names</a> in systemd v197, it is important that the rules matching a specific network interface are named lexicographically after <code>80-net-name-slot.rules</code>, so that they are applied after the devices gain the persistent names.</div>
+<h4><span class="mw-headline" id="cron">cron</span></h4>
+<p>A command can be run each time the computer is (re)booted using "@reboot" in a crontab. First, make sure <a href="../en/Cron.html#Installation" title="Cron">cron</a> is enabled, and then <a href="../en/Cron.html#Basic_commands" title="Cron">edit a crontab</a> for the root user that contains the following line:
+</p>
+<pre>@reboot /usr/bin/ethtool -s [net-device] wol g
+</pre>
+<h4><span class="mw-headline" id="NetworkManager">NetworkManager</span></h4>
+<p>In version 1.0.6 NetworkManager <a rel="nofollow" class="external text" href="https://www.phoronix.com/scan.php?page=news_item&amp;px=NetworkManager-WoL-Control">adds Wake-on-LAN controls</a>. One way to enable Wake-on-LAN by magic packet is through nmcli.
+</p>
+<p>First, search for the name of the wired connection:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nmcli con show</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">NAME    UUID                                  TYPE            DEVICE
+wired1  612e300a-c047-4adb-91e2-12ea7bfe214e  802-3-ethernet  enp0s25</pre>
+<p>By following, one can view current status of Wake-on-LAN settings:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nmcli c show "wired1" | grep 802-3-ethernet.wake-on-lan</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">802-3-ethernet.wake-on-lan:             default
+802-3-ethernet.wake-on-lan-password:    --</pre>
+<p>Enable Wake-on-LAN by magic packet on that connection:
+</p>
+<pre># nmcli c modify "wired1" 802-3-ethernet.wake-on-lan magic
+</pre>
+<p>Then reboot, possibly two times.
+</p>
+<p>From version 1.2.0 Wake-on-LAN settings can be changed graphically using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nm-connection-editor">nm-connection-editor</a></span>.
+</p>
+<h2><span class="mw-headline" id="Trigger_a_wake_up">Trigger a wake up</span></h2>
+<p>To trigger WOL on a target machine, its MAC address and external or internal IP should be known.
+</p>
+<p>To obtain the internal IP address and MAC address of the target computer, execute the following command:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ip addr</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet 127.0.0.1/8 scope host lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope host
+      valid_lft forever preferred_lft forever
+2: enp1s0: &lt;BROADCAST,MULTICAST,PROMISC,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel master br0 state UP group default qlen 1000
+    link/ether <b>48:05:ca:09:0e:6a</b> brd ff:ff:ff:ff:ff:ff
+    inet <b>192.168.1.20/24</b> brd 192.168.1.255 scope global br0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::6a05:caff:fe09:e6a/64 scope link
+       valid_lft forever preferred_lft forever
+</pre>
+<p>Here the internal IP address is <code>192.168.1.20</code> and the MAC address is <code>48:05:ca:09:0e:6a</code>.
+</p>
+<p>One program able to send magic packets for WOL is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wol">wol</a></span>.
+</p>
+<h3><span class="mw-headline" id="On_the_same_LAN">On the same LAN</span></h3>
+<p>If you are connected directly to another computer through a network cable, or the traffic within a LAN is not firewalled, then using Wake-on-LAN should be very easy since there is no need to worry about port redirects.
+</p>
+<p>In the simplest case the default broadcast address <code>255.255.255.255</code> is used:
+</p>
+<pre>$ wol <i>target_MAC_address</i>
+</pre>
+<p>To broadcast the magic packet only to a specific subnet or host, use the <code>-i</code> switch:
+</p>
+<pre>$ wol -i <i>target_IP</i> <i>target_MAC_address</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you intend to continue using Wake-on-LAN, it is recommended to assign a static IP address to the target computer.</div>
+<h3><span class="mw-headline" id="With_port_forwarding">With port forwarding</span></h3>
+<p>When the source and target computers are separated by a router, Wake-on-LAN can be used via <a href="https://en.wikipedia.org/wiki/Port_forwarding" class="extiw" title="wikipedia:Port forwarding">port forwarding</a>. The router must be instructed to forward any signal heading for a specific port to the internal IP of the target PC. See for example <a href="../en/Firewalls.html" title="Firewalls">Firewalls</a> for configuration details.
+</p>
+<p>To trigger the wakeup:
+</p>
+<pre>$ wol -p <i>forwarded_port</i> -i <i>router_IP</i> <i>target_MAC_address</i>
+</pre>
+<p>In case of multiple computers behind the router, it is recommended to assign a different port forward to each target IP.
+</p>
+<h3><span class="mw-headline" id="Across_the_internet">Across the internet</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Emphasize the difference from <a href="#With_port_forwarding">#With port forwarding</a> (if any). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Wake-on-LAN">Talk:Wake-on-LAN#</a>)</div>
+</div>
+<p>The syntax needed in this case:
+</p>
+<pre>$ wol -p <i>target_port</i> -i <i>target_IP_or_hostname</i> <i>target_MAC_address</i>
+</pre>
+<ul><li>Assuming that you know the external IP of the target machine, and that the <a href="#With_port_forwarding">router ports</a> on both sides have been forwarding correctly, then this should be exactly as the syntax states.</li></ul>
+<p>Usually it is necessary to forward your wol port (typically UDP 9) to the broadcast address on your network, not to a particular IP. Most routers do not allow you to forward to broadcast, however if you can get shell access to your router (through telnet, ssh, serial cable, etc) you can implement this workaround:
+</p>
+<pre>$ ip neighbor add 192.168.1.254 lladdr FF:FF:FF:FF:FF:FF dev net0
+</pre>
+<p>(The above command assumes your network is 192.168.1.0/24 and use net0 as network interface). Now, forward UDP port 9 to 192.168.1.254. This has worked for me on a Linksys WRT54G running Tomato, and on the Verizon FIOS ActionTec router.
+</p>
+<p>For notes on how to do it on DD-WRT routers, see <a rel="nofollow" class="external text" href="http://www.dd-wrt.com/wiki/index.php/WOL#Remote_Wake_On_LAN_via_Port_Forwarding">this tutorial</a>.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Request for OpenWRT instructions. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Wake-on-LAN">Talk:Wake-on-LAN#</a>)</div>
+</div>
+<h2><span class="mw-headline" id="Miscellaneous">Miscellaneous</span></h2>
+<h3><span class="mw-headline" id="Battery_draining_problem">Battery draining problem</span></h3>
+<p>Some laptops have a battery draining problem after shutdown <a rel="nofollow" class="external autonumber" href="http://ubuntuforums.org/archive/index.php/t-1729782.html">[1]</a>. This might be caused by enabled WOL. To solve this problem, disable it by using ethtool as mentioned above.
+</p>
+<pre># ethtool -s net0 wol d
+</pre>
+<h3><span class="mw-headline" id="Example_WOL_script">Example WOL script</span></h3>
+<p>Here is a script to automate WOL to several different machines:
+</p>
+<pre>
+#!/bin/bash
+
+# definition of MAC addresses
+monster=01:12:46:82:ab:4f
+chronic=00:3a:53:21:bc:30
+powerless=1a:32:41:02:29:92
+ghost=01:1a:d2:56:6b:e6
+
+while [ "$input1" != quit ]; do
+echo "Which PC to wake?"
+echo "p) powerless"
+echo "m) monster"
+echo "c) chronic"
+echo "g) ghost"
+echo "b) wake monster, wait 40sec, then wake chronic"
+echo "q) quit and take no action"
+read input1
+  if [ $input1 == p ]; then
+  /usr/bin/wol $powerless
+  exit 1
+fi
+
+if [ $input1 == m ]; then
+  /usr/bin/wol $monster
+  exit 1
+fi
+
+if [ $input1 == c ]; then
+  /usr/bin/wol $chronic
+  exit 1
+fi
+
+# this line requires an IP address in /etc/hosts for ghost
+# and should use wol over the internet provided that port 9
+# is forwarded to ghost on ghost's router
+
+if [ $input1 == g ]; then
+  /usr/bin/wol -v -h -p 9 ghost $ghost
+  exit 1
+fi
+
+if [ $input1 == b ]; then
+  /usr/bin/wol $monster
+  echo "monster sent, now waiting for 40sec then waking chronic"
+  sleep 40
+  /usr/bin/wol $chronic
+  exit 1
+fi
+
+if [ $input1 == Q ] || [ $input1 == q ]; then
+echo "later!"
+exit 1
+fi
+
+done
+echo  "this is the (quit) end!! c-ya!"
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Realtek">Realtek</span></h3>
+<p>Users with Realtek 8168 8169 8101 8111(C) based NICs (cards / and on-board) may notice a problem where the NIC seems to be disabled on boot and has no Link light. See <a href="../en/Network_configuration.html#Realtek_no_link_.2F_WOL_problem" title="Network configuration">Network configuration#Realtek no link / WOL problem</a>.
+</p>
+<p>If the link light on the network switch is enabled when the computer is turned off but wake on LAN is still not working, booting the system using the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=r8168">r8168</a></span> kernel module at least once and then switching back to the r8169 kernel module included with the kernel seems to fix it at least in the following configurations:
+</p>
+<ul><li> MSI B85M-E45 motherboard, BIOS version V10.9, onboard Realtek 8111G chipset</li></ul>
+<h3><span class="mw-headline" id="Suspend.2FResume">Suspend/Resume</span></h3>
+<p>If the computer does not wake after suspend/hibernate when using <a href="../en/TLP.html" title="TLP">TLP</a>, set the <code>WOL_DISABLE</code> value to <code>N</code> in <code>/etc/default/tlp</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.depicus.com/wake-on-lan/woli.aspx">Wake-On-Lan</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

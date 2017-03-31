@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DNSCrypt - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DNSCrypt skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DNSCrypt</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://dnscrypt.org/">DNSCrypt</a> encrypts and authenticates DNS traffic between user and DNS resolver. While IP traffic itself is unchanged, it prevents local spoofing of DNS queries, ensuring DNS responses are sent by the server of choice. <a rel="nofollow" class="external autonumber" href="https://www.reddit.com/r/sysadmin/comments/2hn435/dnssec_vs_dnscrypt/ckuhcbu">[1]</a>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#DNSCrypt_as_a_forwarder_for_local_DNS_cache"><span class="tocnumber">3.1</span> <span class="toctext">DNSCrypt as a forwarder for local DNS cache</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Example:_configuration_for_systemd-resolved"><span class="tocnumber">3.1.1</span> <span class="toctext">Example: configuration for systemd-resolved</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Example:_configuration_for_Unbound"><span class="tocnumber">3.1.2</span> <span class="toctext">Example: configuration for Unbound</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Example:_configuration_for_dnsmasq"><span class="tocnumber">3.1.3</span> <span class="toctext">Example: configuration for dnsmasq</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Example:_configuration_for_pdnsd"><span class="tocnumber">3.1.4</span> <span class="toctext">Example: configuration for pdnsd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9">
+<a href="#Enable_EDNS0"><span class="tocnumber">3.2</span> <span class="toctext">Enable EDNS0</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Test_EDNS0"><span class="tocnumber">3.2.1</span> <span class="toctext">Test EDNS0</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11">
+<a href="#Redundant_DNSCrypt_providers"><span class="tocnumber">3.3</span> <span class="toctext">Redundant DNSCrypt providers</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Add_new_forward_address"><span class="tocnumber">3.3.1</span> <span class="toctext">Add new forward address</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Create_instanced_systemd_service"><span class="tocnumber">3.3.2</span> <span class="toctext">Create instanced systemd service</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Add_first_dnscrypt-socket"><span class="tocnumber">3.3.3</span> <span class="toctext">Add first dnscrypt-socket</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Add_additional_dyscrypt-sockets"><span class="tocnumber">3.3.4</span> <span class="toctext">Add additional dyscrypt-sockets</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Apply_new_systemd_configuration"><span class="tocnumber">3.3.5</span> <span class="toctext">Apply new systemd configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Known_issues"><span class="tocnumber">4</span> <span class="toctext">Known issues</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#dnscrypt_runs_with_root_privileges"><span class="tocnumber">4.1</span> <span class="toctext">dnscrypt runs with root privileges</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnscrypt-proxy">dnscrypt-proxy</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Select a resolver from <code>/usr/share/dnscrypt-proxy/dnscrypt-resolvers.csv</code> and <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">edit</a> <code>dnscrypt-proxy.service</code>, using the first column as the name of the resolver with the <code>-R</code> flag. For example, to select <i>dnscrypt.eu-nl</i> as the resolver, the drop-in file would look like this:
+</p>
+<pre>[Service]
+ExecStart=
+ExecStart=/usr/bin/dnscrypt-proxy -R dnscrypt.eu-nl
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>A potentially more up-to-date list is available directly on the <a rel="nofollow" class="external text" href="https://github.com/jedisct1/dnscrypt-proxy/blob/master/dnscrypt-resolvers.csv">upstream page</a>.</div>
+<p>After selecting a dnscrypt resolver, modify the <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a> file and replace the current set of resolver addresses with address for <i>localhost</i>:
+</p>
+<pre>nameserver 127.0.0.1
+</pre>
+<p>Other programs may overwrite this setting; see <a href="../en/Resolv.conf.html#Preserve_DNS_settings" title="Resolv.conf">resolv.conf#Preserve DNS settings</a> for details.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="DNSCrypt_as_a_forwarder_for_local_DNS_cache">DNSCrypt as a forwarder for local DNS cache</span></h3>
+<p>It is recommended to run DNSCrypt as a forwarder for a local DNS cache, otherwise every single query will make a round-trip to the upstream resolver. Any local DNS caching program should work, examples below show configuration for <a href="../en/Unbound.html" title="Unbound">Unbound</a>, <a href="../en/Dnsmasq.html" title="Dnsmasq">dnsmasq</a>, and <a href="../en/Pdnsd.html" title="Pdnsd">pdnsd</a>.
+</p>
+<p>First configure <i>dnscrypt-proxy</i> to listen on a port different from the default <code>53</code>, since the DNS cache needs to listen on <code>53</code> and query <i>dnscrypt-proxy</i> on a different port. Port number <code>40</code> is used as an example in this section:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl edit dnscrypt-proxy.socket</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Socket]
+ListenStream=
+ListenDatagram=
+ListenStream=127.0.0.1:40
+ListenDatagram=127.0.0.1:40</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>ListenStream</code> and <code>ListenDatagram</code> options need to be cleared with empty assignment before overriding, otherwise the new address would be <i>added</i> to the list of sockets. See <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">systemd#Editing provided units</a> for details.</div>
+<p>Then restart <code>dnscrypt-proxy.socket</code> and <i>stop</i> <code>dnscrypt-proxy.service</code> if already running to let it be started by the <i>.socket</i> unit.
+</p>
+<h4><span class="mw-headline" id="Example:_configuration_for_systemd-resolved">Example: configuration for systemd-resolved</span></h4>
+<p>First configure dnscrypt-proxy to listen on another loopback address due to the reason that systemd-resolved doesn't allow to specify a port for a dns-server:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl edit dnscrypt-proxy.socket</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Socket]
+ListenStream=
+ListenDatagram=
+ListenStream=127.0.0.54:53
+ListenDatagram=127.0.0.54:53</pre>
+<p>Now configure <code>/etc/systemd/resolved.conf</code> as follows:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/resolved.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Resolve]
+DNS=127.0.0.54
+FallbackDNS=127.0.0.54
+#Domains=
+#LLMNR=yes
+DNSSEC=allow-downgrade
+Cache=yes</pre>
+<p>Now you can configure <code>dnscrypt-proxy.service</code> for your needs. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl edit dnscrypt-proxy.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/bin/dnscrypt-proxy \
+          --resolver-name=&lt;your-resolver&gt;\
+          --user=&lt;your user&gt;</pre>
+<p>Last but not least just start and enable both services.
+</p>
+<h4><span class="mw-headline" id="Example:_configuration_for_Unbound">Example: configuration for Unbound</span></h4>
+<p>Configure <a href="../en/Unbound.html" title="Unbound">Unbound</a> to your liking (in particular, see <a href="../en/Unbound.html#Local_DNS_server" title="Unbound">Unbound#Local DNS server</a>) and add the following lines to the end of the <code>server</code> section in <code>/etc/unbound/unbound.conf</code>:
+</p>
+<pre>do-not-query-localhost: no
+forward-zone:
+  name: "."
+  forward-addr: 127.0.0.1@40
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you are setting up a server, add <code>interface: 0.0.0.0@53</code> and <code>access-control: <i>your-network</i>/<i>subnet-mask</i> allow</code> inside the <code>server:</code> section so that the other computers can connect to the server. A client must be configured with <code>nameserver <i>address-of-your-server</i></code> in <code>/etc/resolv.conf</code>.</div>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> <code>unbound.service</code> to apply the changes.
+</p>
+<h4><span class="mw-headline" id="Example:_configuration_for_dnsmasq">Example: configuration for dnsmasq</span></h4>
+<p>Configure dnsmasq as a <a href="../en/Dnsmasq.html#DNS_cache_setup" title="Dnsmasq">local DNS cache</a>. The basic configuration to work with DNSCrypt:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">no-resolv
+server=127.0.0.1#40
+listen-address=127.0.0.1</pre>
+<p>If you configured DNSCrypt to use a resolver with enabled DNSSEC validation, make sure to enable it also in dnsmasq:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">proxy-dnssec</pre>
+<p>Restart <code>dnsmasq.service</code> to apply the changes.
+</p>
+<h4><span class="mw-headline" id="Example:_configuration_for_pdnsd">Example: configuration for pdnsd</span></h4>
+<p>Install <a href="../en/Pdnsd.html" title="Pdnsd">pdnsd</a>. A basic configuration to work with DNSCrypt is:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pdnsd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">global {
+    perm_cache = 1024;
+    cache_dir = "/var/cache/pdnsd";
+    run_as = "pdnsd";
+    server_ip = 127.0.0.1;
+    status_ctl = on;
+    query_method = udp_tcp;
+    min_ttl = 15m;       # Retain cached entries at least 15 minutes.
+    max_ttl = 1w;        # One week.
+    timeout = 10;        # Global timeout option (10 seconds).
+    neg_domain_pol = on;
+    udpbufsize = 1024;   # Upper limit on the size of UDP messages.
+}
+
+server {
+    label = "dnscrypt-proxy";
+    ip = 127.0.0.1;
+    port = 40;
+    timeout = 4;
+    proxy_only = on;
+}
+
+source {
+    owner = localhost;
+    file = "/etc/hosts";
+}</pre>
+<p>Restart <code>pdnsd.service</code> to apply the changes.
+</p>
+<h3><span class="mw-headline" id="Enable_EDNS0">Enable EDNS0</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/Extension_mechanisms_for_DNS" class="extiw" title="wikipedia:Extension mechanisms for DNS">Extension Mechanisms for DNS</a> that, among other things, allows a client to specify how large a reply over UDP can be.
+</p>
+<p>Add the following line to your <code>/etc/resolv.conf</code>:
+</p>
+<pre>options edns0
+</pre>
+<p>You may also wish to add the following argument to <i>dnscrypt-proxy</i>:
+</p>
+<pre>--edns-payload-size=&lt;bytes&gt;
+</pre>
+<p>The default size being <b>1252</b> bytes, with values up to <b>4096</b> bytes being purportedly safe.  A value below or equal to <b>512</b> bytes will disable this mechanism, unless a client sends a packet with an OPT section providing a payload size.
+</p>
+<h4><span class="mw-headline" id="Test_EDNS0">Test EDNS0</span></h4>
+<p>Make use of the <a rel="nofollow" class="external text" href="https://www.dns-oarc.net/oarc/services/replysizetest">DNS Reply Size Test Server</a>, use the <i>dig</i> command line tool from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bind-tools">bind-tools</a></span> package to issue a TXT query for the name <i>rs.dns-oarc.net</i>:
+</p>
+<pre>$ dig +short rs.dns-oarc.net txt
+</pre>
+<p>With <b>EDNS0</b> supported, the output should look similar to this:
+</p>
+<pre>rst.x3827.rs.dns-oarc.net.
+rst.x4049.x3827.rs.dns-oarc.net.
+rst.x4055.x4049.x3827.rs.dns-oarc.net.
+"2a00:d880:3:1::a6c1:2e89 DNS reply size limit is at least 4055 bytes"
+"2a00:d880:3:1::a6c1:2e89 sent EDNS buffer size 4096"
+</pre>
+<h3><span class="mw-headline" id="Redundant_DNSCrypt_providers">Redundant DNSCrypt providers</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Needs some tweaks to comply with <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a>, e.g avoid writing in first person and link to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a>, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and similar instead of explicit systemctl commands. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:DNSCrypt">Talk:DNSCrypt#</a>)</div>
+</div>
+<h4><span class="mw-headline" id="Add_new_forward_address">Add new forward address</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Obtaining redundancy requires a simple edit to the above Unbound example and the addition of a second instance of the dnscrypt-proxy and service. Please be sure that the above Unbound example is working prior to proceeding, as this tip extends the previous example.</div>
+<p>Extend the previous <a href="../en/Unbound.html" title="Unbound">Unbound</a> configuration in <code>/etc/unbound/unbound.conf</code> to include an additional forward address that uses a different port. Port 41 is used in the below example:
+</p>
+<pre>do-not-query-localhost: no
+forward-zone:
+  name: "."
+  forward-addr: 127.0.0.1@40
+  forward-addr: 127.0.0.1@41
+</pre>
+<h4><span class="mw-headline" id="Create_instanced_systemd_service">Create instanced systemd service</span></h4>
+<p>We will use an instanced systemd service to accomplish this. This will use one <code>dnscrypt-proxy@.service</code> systemd service to handle as many distinct DNSCrypt resolves as we want.
+</p>
+<p>First, we need <code>/etc/systemd/system/dnscrypt-proxy@.service</code> containing:
+</p>
+<pre>
+ [Unit]
+ Description=DNSCrypt client proxy
+ Documentation=man:dnscrypt-proxy(8)
+ Requires=dnscrypt-proxy@%i.socket
+
+ [Service]
+ Type=notify
+ NonBlocking=true
+ ExecStart=/usr/sbin/dnscrypt-proxy \
+     --resolver-name=%i
+ Restart=always
+</pre>
+<p>This specifies an instanced systemd service that starts a dnscrypt-proxy using the service name specified after the @ symbol of a corresponding .socket file.
+</p>
+<h4><span class="mw-headline" id="Add_first_dnscrypt-socket">Add first dnscrypt-socket</span></h4>
+<p>You can now create two (or more!) socket files, specifying different DNSCrypt providers.
+</p>
+<p>For the first dnscrypt-proxy socket, listening on 127.0.0.1@40 and connecting to the example dnscrypt.eu-nl provider, copy <code>/lib/systemd/system/dnscrypt-proxy.socket</code> to <code>/etc/systemd/system/dnscrypt-proxy@dnscrypt.eu-nl.socket</code>.
+</p>
+<h4><span class="mw-headline" id="Add_additional_dyscrypt-sockets">Add additional dyscrypt-sockets</span></h4>
+<p>For the second (or more) dnscrypt-proxy socket, copy <code>/lib/systemd/system/dnscrypt-proxy.socket</code> to eg. <code>/etc/systemd/system/dnscrypt-proxy@cloudns-syd.socket</code>
+</p>
+<p>Here you can replace the socket instance name to eg. <b>cloudns-syd</b> as one of those listed in <code>providers name</code> column in <code>/usr/share/dnscrypt-proxy/dnscrypt-resolvers.csv</code> and edit it to eg. port 41 and so forth.
+</p>
+<pre>
+ [Unit]
+ Description=dnscrypt-proxy-secondary listening socket
+
+ [Socket]
+ ListenStream=127.0.0.1:41
+ ListenDatagram=127.0.0.1:41
+
+ [Install]
+ WantedBy=sockets.target
+</pre>
+<h4><span class="mw-headline" id="Apply_new_systemd_configuration">Apply new systemd configuration</span></h4>
+<p>Now we need to reload the systemd configuration.
+</p>
+<pre># systemctl daemon-reload
+</pre>
+<p>Since we are replacing the default service with a different name, we need to explicitly <a href="../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">stop</a> and <a href="../en/Systemd.html#Using_units" title="Disable" class="mw-redirect">disable</a> <code>dnscrypt-proxy</code> and <code>dnscrypt-proxy.socket</code>.
+</p>
+<p>Now <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">start/enable</a> the new sockets, <code>dnscrypt-proxy@dnscrypt.eu-nl.socket</code> and <code>dnscrypt-proxy@cloudns-syd.socket</code>.
+</p>
+<p>Finally <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>unbound.service</code>
+</p>
+<h2><span class="mw-headline" id="Known_issues">Known issues</span></h2>
+<h3><span class="mw-headline" id="dnscrypt_runs_with_root_privileges">dnscrypt runs with root privileges</span></h3>
+<p>See <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/49881">FS#49881</a>. To work around this, create an unprivileged user manually.
+</p>
+<p><a href="../en/Users_and_groups.html#User_management" title="Users and groups">Create the user</a> as follows:
+</p>
+<pre># useradd -r -d /var/dnscrypt -m -s /sbin/nologin dnscrypt
+</pre>
+<p><a href="../en/Systemd.html#Editing_provided_units" title="Systemd">Edit</a> <code>dnscrypt-proxy.service</code>, pointing <code>--user</code> to the new user:
+</p>
+<pre>[Service]
+ExecStart=
+ExecStart=/usr/bin/dnscrypt-proxy -R dnscrypt.eu-nl --user=dnscrypt
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Domain_Name_System.html" title="Category:Domain Name System">Domain Name System</a></li>
+<li><a href="../en/Category:Encryption.html" title="Category:Encryption">Encryption</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

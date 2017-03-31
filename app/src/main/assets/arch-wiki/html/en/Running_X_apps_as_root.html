@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Running X apps as root - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Running_X_apps_as_root skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Running X apps as root</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>By default, and for security reasons, root will be unable to connect to a non-root user's X server. There are multiple ways of allowing root to do so, if it is necessary.
+</p>
+<h2><span class="mw-headline" id="The_most_secure_methods">The most secure methods</span></h2>
+<p>The most secure methods are simple. They include:
+</p>
+<ul><li> kdesu (included with KDE)</li></ul>
+<pre>$ kdesu <i>name-of-app</i>
+</pre>
+<ul><li> gksu (included with GNOME)</li></ul>
+<pre>$ gksu <i>name-of-app</i>
+</pre>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bashrun">bashrun</a></span> (in community)</li></ul>
+<pre>$ bashrun --su <i>name-of-app</i>
+</pre>
+<ul><li> <a href="../en/Sudo.html" title="Sudo">sudo</a> (must be installed and properly configured with <code>visudo</code>)</li></ul>
+<pre>$ sudo <i>name-of-app</i>
+</pre>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sux/">sux</a></span><sup><small>AUR</small></sup> (wrapper around su which will transfer your X credentials)</li></ul>
+<pre>$ sux root <i>name-of-app</i>
+</pre>
+<p>These are the preferred methods, because they automatically exit when the application exits, negating any security risks quite completely.
+</p>
+<h2><span class="mw-headline" id="Alternate_methods">Alternate methods</span></h2>
+<p>These methods will allow root to connect to a non-root user's X server, but present varying levels of security risks, especially if you run ssh. If you are behind a firewall, you may consider them to be safe enough for your requirements.
+</p>
+<ul><li> <b>Temporarily allow root access</b>
+</li></ul>
+<dl><dd><ul><li>xhost </li></ul></dd></dl>
+<pre>$ xhost +
+</pre>
+<p>will temporarily allow root, or <i>anyone</i> to connect your X server. Likewise,
+</p>
+<pre>$ xhost -
+</pre>
+<p>will disallow this function afterward. 
+</p>
+<p>Some users also use:
+</p>
+<pre>$ xhost + localhost
+</pre>
+<p>(Your X server must be configured to listen to TCP connections for <code>xhost + localhost</code>  to work).
+</p>
+<ul><li> <b>Permanently allow root access</b>
+</li></ul>
+<dl><dd>
+<b>Method 1</b>: Add the line</dd></dl>
+<p><code>session         optional        pam_xauth.so</code>
+</p>
+<p>to <code> /etc/pam.d/su </code> and <code>/etc/pam.d/su-l</code>. Then switch to your root user
+using 'su' or 'su -'.
+</p>
+<dl><dd>
+<b>Method 2</b>: Globally in <code>/etc/profile</code>
+</dd></dl>
+<p>Add the following to <code>/etc/profile</code>
+</p>
+<pre>export XAUTHORITY=/home/non-root-usersname/.Xauthority
+</pre>
+<p>This will permanently allow root to connect to a non-root user's X server.
+</p>
+<p>Or, merely specify a particular app:
+</p>
+<pre>export XAUTHORITY=/home/usersname/.Xauthority kwrite
+</pre>
+<p>(to allow root to access kwrite, for instance.)
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

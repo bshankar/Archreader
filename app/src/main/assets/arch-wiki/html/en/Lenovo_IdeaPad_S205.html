@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Lenovo IdeaPad S205 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Lenovo_IdeaPad_S205 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Lenovo IdeaPad S205</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Overview"><span class="tocnumber">1</span> <span class="toctext">Overview</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Hardware"><span class="tocnumber">2</span> <span class="toctext">Hardware</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#BIOS"><span class="tocnumber">3</span> <span class="toctext">BIOS</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Installation"><span class="tocnumber">4</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#UEFI"><span class="tocnumber">4.1</span> <span class="toctext">UEFI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#WiFi"><span class="tocnumber">5</span> <span class="toctext">WiFi</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Touchpad"><span class="tocnumber">6</span> <span class="toctext">Touchpad</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Sound"><span class="tocnumber">7</span> <span class="toctext">Sound</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Graphics"><span class="tocnumber">8</span> <span class="toctext">Graphics</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Overview">Overview</span></h2>
+<p>The Lenovo IdeaPad S205 has some issues with the BIOS (Boot loader), WiFi.
+</p>
+<h2><span class="mw-headline" id="Hardware">Hardware</span></h2>
+<p>The unit used for testing contained the following hardware:
+</p>
+<ul><li> Processor: AMD E-450 APU (integrated Mobility Radeon HD6320)</li></ul>
+<ul><li> WiFi: Ralink RT3090</li></ul>
+<h2><span class="mw-headline" id="BIOS">BIOS</span></h2>
+<p>The IdeaPad uses a BIOS based on the SecureCore Tiano Platform. It supports UEFI and Legacy booting, but you can't manually switch between them. From what I found out it depends wether the disk is partitioned as GPT or MBR. However it doesn't have secure boot.
+</p>
+<p>The BIOS firmware has got a lot of bugs. If anything related to it doesn't work, try loading setup defaults.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Follow the <a href="../en/Installation_guide.html" title="Installation guide">Installation guide</a> until bootloader installation.
+</p>
+<p>You can not use the GUID Partition Table and still boot using legacy BIOS. If your desired partition layout doesn't work for MBR you must use UEFI.
+</p>
+<h3><span class="mw-headline" id="UEFI">UEFI</span></h3>
+<p>While installing the bootloader, you might get the error
+</p>
+<pre>Failed to create EFI Boot variable entry: No space left on device
+</pre>
+<p>leaving you with an un-bootable system.
+Don't worry too hard about this error!
+</p>
+<p>The BIOS wants the <code>.efi</code>-file to be specificly <code>/boot/efi/EFI/boot/bootx64.efi</code>
+The BIOS does not seem to be able to boot any other file, thus giving you the above error message. 
+The trick is now to just copy <code>/boot/efi/EFI/arch/grubx64.efi</code> to <code>/boot/efi/EFI/boot/bootx64.efi</code>
+</p>
+<pre>$ cp /boot/efi/EFI/arch/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+</pre>
+<p>and reboot into your system.
+</p>
+<h2><span class="mw-headline" id="WiFi">WiFi</span></h2>
+<p>Drivers work out of the box.
+</p>
+<p>If you're using UEFI, your device might show up as hard blocked. This is due to a bug in the BIOS firmware.
+You can fix it by doing the following things:
+</p>
+<ol>
+<li> Go into BIOS settings and reload factory defaults</li>
+<li> If WiFi still doesn't work change the boot order so that it boots from PXE (PCI LAN) before booting from Hard Drive.</li>
+</ol>
+<h2><span class="mw-headline" id="Touchpad">Touchpad</span></h2>
+<p>Works by installing the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-synaptics">xf86-input-synaptics</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Sound">Sound</span></h2>
+<p>Detected by ALSA automatically.
+</p>
+<h2><span class="mw-headline" id="Graphics">Graphics</span></h2>
+<p>The open source <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-ati">xf86-video-ati</a></span> driver works fine and is recommended.
+</p>
+<p>You can also install the proprietary <a href="../en/AMD_Catalyst.html" title="Catalyst" class="mw-redirect">Catalyst</a> driver, but it causes glitches when waking up from hibernation. Also you may run into errors when using the HDMI output on some Monitors.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Lenovo.html" title="Category:Lenovo">Lenovo</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

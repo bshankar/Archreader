@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Virtual user mail system - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Virtual_user_mail_system skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Virtual user mail system</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Courier_MTA.html" title="Courier MTA">Courier MTA</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenDKIM.html" title="OpenDKIM">OpenDKIM</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Postfix.html" title="Postfix">Postfix</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SOGo.html" title="SOGo">SOGo</a></li>
+</ul>
+</div>
+<p>This article describes how to set up a complete virtual user mail system on an Arch Linux system in the simplest manner possible. However, since a mail system consists of many complex components, quite a bit of configuration will still be necessary. 
+</p>
+<p>Roughly, the components used in this article are Postfix as the mail server, Dovecot as the IMAP server, Roundcube as the webmail interface and PostfixAdmin as the administration interface to manage it all.
+</p>
+<p>In the end, the provided solution will allow you to use the best currently available security mechanisms, you will be able to send mails using SMTP and SMTPS and receive mails using POP3, POP3S, IMAP and IMAPS. Additionally, configuration will be easy thanks to PostfixAdmin and users will be able to login using Roundcube. What a deal!
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#User"><span class="tocnumber">2.1</span> <span class="toctext">User</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Database"><span class="tocnumber">2.2</span> <span class="toctext">Database</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#PostfixAdmin"><span class="tocnumber">2.2.1</span> <span class="toctext">PostfixAdmin</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#SSL_certificate"><span class="tocnumber">2.3</span> <span class="toctext">SSL certificate</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Postfix"><span class="tocnumber">2.4</span> <span class="toctext">Postfix</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#SMTPS"><span class="tocnumber">2.4.1</span> <span class="toctext">SMTPS</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Prerequisites"><span class="tocnumber">2.4.2</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Setting_up_Postfix"><span class="tocnumber">2.4.3</span> <span class="toctext">Setting up Postfix</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Create_the_file_structure"><span class="tocnumber">2.4.4</span> <span class="toctext">Create the file structure</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Dovecot"><span class="tocnumber">2.5</span> <span class="toctext">Dovecot</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#PostfixAdmin_2"><span class="tocnumber">2.6</span> <span class="toctext">PostfixAdmin</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Roundcube"><span class="tocnumber">2.7</span> <span class="toctext">Roundcube</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Apache_configuration"><span class="tocnumber">2.7.1</span> <span class="toctext">Apache configuration</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Roundcube:_Change_Password_Plugin"><span class="tocnumber">2.7.2</span> <span class="toctext">Roundcube: Change Password Plugin</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17"><a href="#Fire_it_up"><span class="tocnumber">3</span> <span class="toctext">Fire it up</span></a></li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Optional_Items"><span class="tocnumber">4</span> <span class="toctext">Optional Items</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Quota"><span class="tocnumber">4.1</span> <span class="toctext">Quota</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Sidenotes"><span class="tocnumber">5</span> <span class="toctext">Sidenotes</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Alternative_vmail_folder_structure"><span class="tocnumber">5.1</span> <span class="toctext">Alternative vmail folder structure</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#IMAP.2FPOP3_client_failing_to_receive_mails"><span class="tocnumber">6.1</span> <span class="toctext">IMAP/POP3 client failing to receive mails</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Roundcube_not_able_to_delete_emails_or_view_any_.27standard.27_folders"><span class="tocnumber">6.2</span> <span class="toctext">Roundcube not able to delete emails or view any 'standard' folders</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Before you start, you must have both a working MySQL server as described in <a href="../en/MySQL.html" title="MySQL">MySQL</a> and a working Postfix server as described in <a href="../en/Postfix.html" title="Postfix">Postfix</a>.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dovecot">dovecot</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=roundcubemail">roundcubemail</a></span> packages.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="User">User</span></h3>
+<p>For security reasons, a new user should be created to store the mails:
+</p>
+<pre># groupadd -g 5000 vmail
+# useradd -u 5000 -g vmail -s /usr/bin/nologin -d /home/vmail -m vmail
+</pre>
+<p>A gid and uid of 5000 is used in both cases so that we do not run into conflicts with regular users. All your mail will then be stored in <code>/home/vmail</code>. You could change the home directory to something like <code>/var/mail/vmail</code> but be careful to change this in any configuration below as well.
+</p>
+<h3><span class="mw-headline" id="Database">Database</span></h3>
+<p>You will need to create an empty database and corresponding user. In this article, the user <i>postfix_user</i> will have read/write access to the database <i>postfix_db</i> using <i>hunter2</i> as password. You are expected to create the database and user yourself, and give the user permission to use the database, as shown in the following code.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+CREATE DATABASE postfix_db;
+GRANT ALL ON postfix_db.* TO 'postfix_user'@'localhost' IDENTIFIED BY 'hunter2';
+FLUSH PRIVILEGES;
+</pre>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Further manual database installation is missing. So far, the only way to follow this article is by installing PostfixAdmin with Apache, MySQL and PHP. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Virtual_user_mail_system">Talk:Virtual user mail system#</a>)</div>
+</div>
+<p>Now you can go to the PostfixAdmin's setup page, let PostfixAdmin create the needed tables and create the users in there.
+</p>
+<h4><span class="mw-headline" id="PostfixAdmin">PostfixAdmin</span></h4>
+<p>See <a href="../en/Postfix.html#PostfixAdmin" title="Postfix">Postfix#PostfixAdmin</a>.
+</p>
+<h3><span class="mw-headline" id="SSL_certificate">SSL certificate</span></h3>
+<p>You will need a SSL certificate for all encrypted mail communications (SMTPS/IMAPS/POP3S). If you do not have one, create one:
+</p>
+<pre># cd /etc/ssl/private/
+# openssl req -new -x509 -nodes -newkey rsa:4096 -keyout vmail.key -out vmail.crt -days 1460 #days are optional
+# chmod 400 vmail.key
+# chmod 444 vmail.crt
+</pre>
+<h3><span class="mw-headline" id="Postfix">Postfix</span></h3>
+<h4><span class="mw-headline" id="SMTPS">SMTPS</span></h4>
+<p>Enable secure SMTP as described in <a href="../en/Postfix.html#Secure_SMTP" title="Postfix">Postfix#Secure SMTP</a>. 
+</p>
+<h4><span class="mw-headline" id="Prerequisites">Prerequisites</span></h4>
+<p>Before you copy&amp;paste the configuration below, check if <code>relay_domains</code> has already been already set. If you leave more than one active, you will receive warnings during runtime.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><code>relay_domains</code> can be dangerous. You usually do not want Postfix to forward mail of strangers. <code>$mydestination</code> is a sane default value. Double check it's value before running postfix! See <a rel="nofollow" class="external free" href="http://www.postfix.org/BASIC_CONFIGURATION_README.html#relay_to">http://www.postfix.org/BASIC_CONFIGURATION_README.html#relay_to</a>
+</div> 
+<p>Also check if your SSL certificate paths are set right in all upcoming config examples.
+</p>
+<h4><span class="mw-headline" id="Setting_up_Postfix">Setting up Postfix</span></h4>
+<p>To <code>/etc/postfix/main.cf</code> append:
+</p>
+<pre>relay_domains = $mydestination
+virtual_alias_maps = proxy:mysql:/etc/postfix/virtual_alias_maps.cf
+virtual_mailbox_domains = proxy:mysql:/etc/postfix/virtual_mailbox_domains.cf
+virtual_mailbox_maps = proxy:mysql:/etc/postfix/virtual_mailbox_maps.cf
+virtual_mailbox_base = /home/vmail
+virtual_mailbox_limit = 512000000
+virtual_minimum_uid = 5000
+virtual_transport = virtual
+virtual_uid_maps = static:5000
+virtual_gid_maps = static:5000
+local_transport = virtual
+local_recipient_maps = $virtual_mailbox_maps
+transport_maps = hash:/etc/postfix/transport
+
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = /var/run/dovecot/auth-client
+smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_tls_security_options = $smtpd_sasl_security_options
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = yes
+smtpd_tls_received_header = yes
+smtpd_tls_cert_file = /etc/ssl/private/vmail.crt
+smtpd_tls_key_file = /etc/ssl/private/vmail.key
+smtpd_sasl_local_domain = $mydomain
+broken_sasl_auth_clients = yes
+smtpd_tls_loglevel = 1
+</pre>
+<ul><li> In the configuration above <code>virtual_mailbox_domains</code> is a list of the domains that you want to receive mail for. This CANNOT contain the domain that is set in <code>mydestination</code>. That is why we left <code>mydestination</code> to be localhost only.</li></ul>
+<ul><li> <code>virtual_mailbox_maps</code> will contain the information of virtual users and their mailbox locations. We are using a hash file to store the more permanent maps, and these will then override the forwards in the MySQL database.</li></ul>
+<ul><li> <code>virtual_mailbox_base</code> is the base directory where the virtual mailboxes will be stored.</li></ul>
+<p>The <code>virtual_uid_maps</code> and <code>virtual_gid_maps</code> are the real system user IDs that the virtual mails will be owned by. This is for storage purposes. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since we will be using a web interface (Roundcube), and do not want people accessing this by any other means, we will be creating this account later without providing any login access.</div>
+<h4><span class="mw-headline" id="Create_the_file_structure">Create the file structure</span></h4>
+<p>Those new additional settings reference a lot of files that do not even exist yet. We will create them with the following steps.
+</p>
+<p>If you were setting up your database with PostfixAdmin and created the database schema through PostfixAdmin, you can create the following files. Do not forget to change the password:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_alias_maps.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = alias
+select_field = goto
+where_field = address
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_mailbox_domains.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = domain
+select_field = domain
+where_field = domain
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_mailbox_maps.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = mailbox
+select_field = maildir
+where_field = username
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> For setups without using PostfixAdmin, create the following files.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_alias_maps.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = domains
+select_field = virtual
+where_field = domain
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_mailbox_domains.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = forwardings
+select_field = destination
+where_field = source
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/virtual_mailbox_maps.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user = postfix_user
+password = hunter2
+hosts = localhost
+dbname = postfix_db
+table = users
+select_field = concat(domain,'/',email,'/')
+where_field = email
+</pre>
+<p>Run <i>postmap</i> on <i>transport</i> to generate its db:
+</p>
+<pre># postmap /etc/postfix/transport
+</pre>
+<h3><span class="mw-headline" id="Dovecot">Dovecot</span></h3>
+<p>Instead of using the provided Dovecot example config file, we'll create our own <code>/etc/dovecot/dovecot.conf</code>. Please note that the user and group here might be vmail <b>instead of postfix</b>!
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dovecot/dovecot.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+protocols = imap pop3
+auth_mechanisms = plain
+passdb {
+    driver = sql
+    args = /etc/dovecot/dovecot-sql.conf
+}
+userdb {
+    driver = sql
+    args = /etc/dovecot/dovecot-sql.conf
+}
+ 
+service auth {
+    unix_listener auth-client {
+        group = postfix
+        mode = 0660
+        user = postfix
+    }
+    user = root
+}
+
+mail_home = /home/vmail/%d/%n
+mail_location = maildir:~
+
+ssl_cert = &lt;/etc/ssl/private/vmail.crt
+ssl_key = &lt;/etc/ssl/private/vmail.key
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you instead want to modify <code>dovecot.conf.sample</code>, beware that the default configuration file imports the content of <code>conf.d/*.conf</code>. Those files call other files that aren't present in our configuration.</div>
+<p>Now we create <code>/etc/dovecot/dovecot-sql.conf</code>, which we just referenced in the config above. Use the following contents and check if everything is set accordingly to your system's configuration.
+</p>
+<p>If you used PostfixAdmin, then you add the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dovecot/dovecot-sql.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+driver = mysql
+connect = host=localhost dbname=postfix_db user=postfix_user password=hunter2
+# It is highly recommended to not use deprecated MD5-CRYPT. Read more at http://wiki2.dovecot.org/Authentication/PasswordSchemes
+default_pass_scheme = SHA512-CRYPT
+# Get the mailbox
+user_query = SELECT '/home/vmail/%d/%n' as home, 'maildir:/home/vmail/%d/%n' as mail, 5000 AS uid, 5000 AS gid, concat('dirsize:storage=',  quota) AS quota FROM mailbox WHERE username = '%u' AND active = '1'
+# Get the password
+password_query = SELECT username as user, password, '/home/vmail/%d/%n' as userdb_home, 'maildir:/home/vmail/%d/%n' as userdb_mail, 5000 as  userdb_uid, 5000 as userdb_gid FROM mailbox WHERE username = '%u' AND active = '1'
+# If using client certificates for authentication, comment the above and uncomment the following
+#password_query = SELECT null AS password, ‘%u’ AS user
+</pre>
+<p>Without having used PostfixAdmin you can use:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dovecot/dovecot-sql.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+driver = mysql
+connect = host=localhost dbname=postfix_db user=postfix_user password=hunter2
+# It is highly recommended to not use deprecated MD5-CRYPT. Read more at http://wiki2.dovecot.org/Authentication/PasswordSchemes
+default_pass_scheme = SHA512-CRYPT
+# Get the mailbox
+user_query = SELECT '/home/vmail/%d/%n' as home, 'maildir:/home/vmail/%d/%n' as mail, 5000 AS uid, 5000 AS gid, concat('dirsize:storage=',  quota) AS quota FROM users WHERE email = '%u'
+# Get the password
+password_query = SELECT email as user, password, '/home/vmail/%d/%n' as userdb_home, 'maildir:/home/vmail/%d/%n' as userdb_mail, 5000 as  userdb_uid, 5000 as userdb_gid FROM users WHERE email = '%u'
+# If using client certificates for authentication, comment the above and uncomment the following
+#password_query = SELECT null AS password, ‘%u’ AS user
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> Visit <a rel="nofollow" class="external free" href="http://wiki2.dovecot.org/Variables">http://wiki2.dovecot.org/Variables</a> to learn more about Dovecot variables.</div>
+<h3><span class="mw-headline" id="PostfixAdmin_2">PostfixAdmin</span></h3>
+<p>See <a href="../en/Postfix.html#PostfixAdmin" title="Postfix">Postfix#PostfixAdmin</a>.
+</p>
+<h3><span class="mw-headline" id="Roundcube">Roundcube</span></h3>
+<p>Make sure that both the <code>pdo_mysql.so</code> extension and <code>iconv.so</code> extension are uncommented in your <code>php.ini</code> file. Also check the <code>.htaccess</code> for access restrictions. Assuming that localhost is your current host, navigate a browser to <code><a rel="nofollow" class="external free" href="http://localhost/roundcube/installer/">http://localhost/roundcube/installer/</a></code> and follow the instructions. 
+</p>
+<p>Roundcube needs a separate database to work. You should not use the same database for Roundcube and PostfixAdmin. Create a second database <code>roundcube_db</code> and a new user named <code>roundcube_user</code>.
+</p>
+<p>While running the installer ...
+</p>
+<ul>
+<li> Make sure to address of the IMAP host is <code>ssl://localhost/</code> or <code>tls://localhost/</code> and not just <code>localhost</code>. </li>
+<li> Use port <code>993</code>. Likewise with SMTP. </li>
+<li> Make sure to provide <code>ssl://localhost/</code> with port <code>465</code> if you used the wrapper mode</li>
+<li> and use <code>tls://localhost/</code> port <code>587</code> if you used the proper TLS mode. </li>
+<li> See <a href="#Postfix">here</a> for an explanation on that.</li>
+</ul>
+<p>The post install process is similar to any other webapp like <a href="../en/PhpMyAdmin.html" title="PhpMyAdmin">PhpMyAdmin</a> or PostFixAdmin. The configuration file is in <code>/etc/webapps/roundcubemail/config/config.inc.php</code> which works as an override over <code>default.inc.php</code>.
+</p>
+<h4><span class="mw-headline" id="Apache_configuration">Apache configuration</span></h4>
+<p>If you are using Apache, copy the example configuration file to your webserver configuration directory.
+</p>
+<pre># cp /etc/webapps/roundcubemail/apache.conf /etc/httpd/conf/extra/httpd-roundcubemail.conf
+</pre>
+<p>Add the following line in
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/httpd/conf/httpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Include conf/extra/httpd-roundcubemail.conf
+</pre>
+<h4><span class="mw-headline" id="Roundcube:_Change_Password_Plugin">Roundcube: Change Password Plugin</span></h4>
+<p>To let users change their passwords from within Roundcube, do the following:
+</p>
+<p>Enable the password plugin by adding this line to
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/webapps/roundcubemail/config/config.inc.php</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+$rcmail_config['plugins'] = array('password');
+</pre>
+<p>Configure the password plugin and make sure you alter the settings accordingly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/webapps/roundcubemail/plugins/password/config.inc.php</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+$config['password_driver'] = 'sql';
+$config['password_db_dsn'] = 'mysql://&lt;postfix_database_user&gt;:&lt;password&gt;@localhost/&lt;postfix_database_name&gt;';
+$config['password_query'] = 'UPDATE mailbox SET password=%c WHERE username=%u';
+</pre>
+<h2><span class="mw-headline" id="Fire_it_up">Fire it up</span></h2>
+<p>All necessary daemons should be started in order to test the configuration. <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> both <code>postfix</code> and <code>dovecot</code>.
+</p>
+<p>Now for testing purposes, create a domain and mail account in PostfixAdmin. Try to login to this account using Roundcube. Now send yourself a mail.
+</p>
+<h2><span class="mw-headline" id="Optional_Items">Optional Items</span></h2>
+<p>Although these items are not required, they definitely add more completeness to your setup
+</p>
+<h3><span class="mw-headline" id="Quota">Quota</span></h3>
+<p>To enable mailbox quota support by dovecot, do the following: 
+</p>
+<ul><li>First add the following lines to /etc/dovecot/dovecot.conf</li></ul>
+<pre>dict {
+	quotadict = mysql:/etc/dovecot/dovecot-dict-sql.conf.ext
+}
+service dict {
+	unix_listener dict {
+		group = vmail
+		mode = 0660
+		user = vmail
+	}
+	user = root
+}
+service quota-warning {
+	executable = script /usr/local/bin/quota-warning.sh
+	user = vmail
+	unix_listener quota-warning {
+		group = vmail
+		mode = 0660
+		user = vmail
+	}
+}	
+mail_plugins=quota
+protocol pop3 {
+	 mail_plugins = quota
+	 pop3_client_workarounds = outlook-no-nuls oe-ns-eoh
+	 pop3_uidl_format = %08Xu%08Xv
+}
+protocol lda {
+	mail_plugins = quota
+	postmaster_address = postmaster@yourdomain.com
+}
+protocol imap {
+	mail_plugins = $mail_plugins imap_quota
+	mail_plugin_dir = /usr/lib/dovecot/modules
+}
+plugin {
+       quota = dict:User quota::proxy::quotadict
+       quota_rule2 = Trash:storage=+10%%
+       quota_warning = storage=100%% quota-warning +100 %u
+       quota_warning2 = storage=95%% quota-warning +95 %u
+       quota_warning3 = storage=80%% quota-warning +80 %u
+       quota_warning4 = -storage=100%% quota-warning -100 %u # user is no longer over quota
+}
+</pre>
+<ul><li>Create a new file /etc/dovecot/dovecot-dict-sql.conf.ext with the following code:</li></ul>
+<pre>connect = host=localhost dbname=yourdb user=youruser password=yourpassword
+map {
+	pattern = priv/quota/storage
+	table = quota2
+	username_field = username
+	value_field = bytes
+}
+map {
+	pattern = priv/quota/messages
+	table = quota2
+	username_field = username
+	value_field = messages
+}
+</pre>
+<ul><li>Create a warning script /usr/local/bin/quota-warning.sh and make sure it is executable. This warning script works with postfix lmtp configuration as well.</li></ul>
+<pre> #!/bin/sh
+ BOUNDARY="$1"
+ USER="$2"
+ MSG=""
+ if [[ "$BOUNDARY" = "+100" ]]; then
+    MSG="Your mailbox is now overfull (&gt;100%). In order for your account to continue functioning properly, you need to remove some emails NOW."
+ elif [[ "$BOUNDARY" = "+95" ]]; then
+    MSG="Your mailbox is now over 95% full. Please remove some emails ASAP."
+ elif [[ "$BOUNDARY" = "+80" ]]; then
+    MSG="Your mailbox is now over 80% full. Please consider removing some emails to save space."
+ elif [[ "$BOUNDARY" = "-100" ]]; then
+    MSG="Your mailbox is now back to normal (&lt;100%)."
+ fi
+ 
+ cat &lt;&lt; EOF | /usr/lib/dovecot/dovecot-lda -d $USER -o "plugin/quota=maildir:User quota:noenforcing"
+ From: postmaster@yourdomain.com
+ Subject: Email Account Quota Warning
+ 
+ Dear User,
+ 
+ $MSG
+ 
+ Best regards,
+ Your Mail System
+ EOF
+</pre>
+<ul><li>Edit the user_query line and add iterat_query in dovecot-sql.conf as following:</li></ul>
+<pre> user_query = SELECT '/home/vmail/%d/%n' as home, 'maildir:/home/vmail/%d/%n' as mail, 5000 AS uid, 5000 AS gid, concat('*:bytes=', quota) AS quota_rule FROM mailbox WHERE username = '%u' AND active = '1'
+ iterate_query = SELECT username AS user FROM mailbox
+</pre>
+<ul><li>Set up LDA as described above under SpamAssassin. If you're not using SpamAssassin, the pipe should look like this in /etc/postfix/master.cf :</li></ul>
+<pre> dovecot    unix  -       n       n       -       -       pipe
+ flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver -f ${sender} -d ${recipient}
+</pre>
+<p>As above activate it in Postfix main.cf
+</p>
+<pre> virtual_transport = dovecot
+</pre>
+<ul><li>You can set up quota per each mailbox in postfixadmin. Make sure the relevant lines in config.inc.php look like this:</li></ul>
+<pre>$CONF['quota'] = 'YES';
+$CONF['quota_multiplier'] = '1024000';
+</pre>
+<p>Restart postfix and dovecot services. If things go well, you should be able to list all users' quota and usage by the this command:
+</p>
+<pre>doveadm quota get -A
+</pre>
+<p>You should be able to see the quota in roundcube too.
+</p>
+<h2><span class="mw-headline" id="Sidenotes">Sidenotes</span></h2>
+<h3><span class="mw-headline" id="Alternative_vmail_folder_structure">Alternative vmail folder structure</span></h3>
+<p>Instead of having a directory structure like <code>/home/vmail/example.com/user@example.com</code> you can have cleaner subdirectories (without the additional domain name) by replacing <code>select_field</code> and <code>where_field</code> with:
+</p>
+<pre>query = SELECT CONCAT(SUBSTRING_INDEX(email,'@',-1),'/',SUBSTRING_INDEX(email,'@',1),'/') FROM users WHERE email='%s'</pre>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="IMAP.2FPOP3_client_failing_to_receive_mails">IMAP/POP3 client failing to receive mails</span></h3>
+<p>If you get similar errors, take a look into <code>/var/log/mail.log</code> or use <code>journalctl -xn --unit postfix.service</code> to find out more.
+</p>
+<p>It may turn out that the Maildir <code>/home/vmail/mail@domain.tld</code> is just being created if there is at least one email waiting. Otherwise there wouldn't be any need for the directory creation before.
+</p>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Roundcube_not_able_to_delete_emails_or_view_any_.27standard.27_folders">Roundcube not able to delete emails or view any 'standard' folders</span></h3>
+<p>Ensure that the Roundcube config.inc.php file contains the following:
+</p>
+<pre>$rcmail_config['default_imap_folders'] = array('INBOX', 'Drafts', 'Sent', 'Junk', 'Trash');
+$rcmail_config['create_default_folders'] = true;
+$rcmail_config['protect_default_folders'] = true;</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Install bundled 32-bit system in 64-bit system - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Install_bundled_32-bit_system_in_64-bit_system skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Install bundled 32-bit system in 64-bit system</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This article presents one way of running 32-bit applications, which may be of use to those who do not wish to install the lib32-* libraries from the multilib repository and instead prefer to isolate 32bit applications. The approach involves creating a "chroot jail" to handle 32-bit apps.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Xyne has created a package that installs a minimalist 32-bit chroot as described below. See <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=97629">[1]</a> and <a rel="nofollow" class="external autonumber" href="http://xyne.archlinux.ca/projects/arch32-light">[2]</a> for details.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Settings"><span class="tocnumber">1.1</span> <span class="toctext">Settings</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Daemon_and_systemd_service"><span class="tocnumber">1.2</span> <span class="toctext">Daemon and systemd service</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#First-time_Setup"><span class="tocnumber">2.1</span> <span class="toctext">First-time Setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Schroot"><span class="tocnumber">3</span> <span class="toctext">Schroot</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Using_Schroot_to_run_a_32-bit_application"><span class="tocnumber">3.1</span> <span class="toctext">Using Schroot to run a 32-bit application</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Compilation_and_installing"><span class="tocnumber">4.1</span> <span class="toctext">Compilation and installing</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Video_problems"><span class="tocnumber">4.2</span> <span class="toctext">Video problems</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Sound_in_Flash"><span class="tocnumber">4.3</span> <span class="toctext">Sound in Flash</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Tips_and_tricks"><span class="tocnumber">5</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Java_in_a_chroot"><span class="tocnumber">5.1</span> <span class="toctext">Java in a chroot</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Allow_32-bit_applications_access_to_64-bit_PulseAudio"><span class="tocnumber">5.2</span> <span class="toctext">Allow 32-bit applications access to 64-bit PulseAudio</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Sound_in_Firefox"><span class="tocnumber">5.3</span> <span class="toctext">Sound in Firefox</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#3D_acceleration"><span class="tocnumber">5.4</span> <span class="toctext">3D acceleration</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#WINE"><span class="tocnumber">5.5</span> <span class="toctext">WINE</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Printing"><span class="tocnumber">5.6</span> <span class="toctext">Printing</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Why not just use <i>pacstrap</i> as <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php?title=Systemd-nspawn&amp;diff=next&amp;oldid=438608">here</a>? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Install_bundled_32-bit_system_in_64-bit_system">Talk:Install bundled 32-bit system in 64-bit system#</a>)</div>
+</div>
+<p>1. Create the directory:
+</p>
+<pre># mkdir /opt/arch32
+</pre>
+<p>2. Generate temporary <a href="../en/Pacman.html" title="Pacman">pacman</a> configuration files for chroot:
+</p>
+<pre># sed -e 's/\$arch/i686/g' /etc/pacman.d/mirrorlist &gt; /opt/arch32/mirrorlist
+# sed -e 's@/etc/pacman.d/mirrorlist@/opt/arch32/mirrorlist@g' -e '/Architecture/ s,auto,i686,'  /etc/pacman.conf &gt; /opt/arch32/pacman.conf
+</pre>
+<ul>
+<li>These files would conflict with the normal pacman files, which will be installed in the later steps.</li>
+<li>For this reason they must be put <i>into</i> a temporary location (<code>/opt/arch32</code> is used here).</li>
+<li>Remember to delete/comment the multilib repo, if you have enabled it, in the <code>/opt/arch32/pacman.conf</code> file</li>
+</ul>
+<p>3. Create the directory:
+</p>
+<pre># mkdir -p /opt/arch32/var/{cache/pacman/pkg,lib/pacman}
+</pre>
+<p>4. Sync pacman:
+</p>
+<pre># pacman --root /opt/arch32 --cachedir /opt/arch32/var/cache/pacman/pkg --config /opt/arch32/pacman.conf -Sy
+</pre>
+<p>5. Install the base and optionally base-devel groups:
+</p>
+<pre># pacman --root /opt/arch32 --cachedir /opt/arch32/var/cache/pacman/pkg --config /opt/arch32/pacman.conf -S base base-devel
+</pre>
+<p>Optionally add your favorite text editor and distcc if you plan to compile within the chroot with other machines:
+</p>
+<pre># pacman --root /opt/arch32 --cachedir /opt/arch32/var/cache/pacman/pkg --config /opt/arch32/pacman.conf -S base base-devel sudo vim distcc
+</pre>
+<p>Optionally move the pacman mirror list into place:
+</p>
+<pre># mv /opt/arch32/mirrorlist /opt/arch32/etc/pacman.d
+</pre>
+<h3><span class="mw-headline" id="Settings">Settings</span></h3>
+<p>Key configuration files should be copied over:
+</p>
+<pre># for i in passwd* shadow* group* sudoers resolv.conf localtime locale.gen vimrc mtab inputrc profile.d/locale.sh; do cp -p /etc/"$i" /opt/arch32/etc/; done
+</pre>
+<p>Remember to define the correct the number of MAKEFLAGS and other vars in <code>/opt/arch32/etc/makepkg.conf</code> before attempting to build.
+</p>
+<h3><span class="mw-headline" id="Daemon_and_systemd_service">Daemon and systemd service</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/arch32.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=32-bit chroot
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/arch32 start
+ExecStop=/usr/local/bin/arch32 stop
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/arch32</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+
+## User variables.
+MOUNTPOINT=/opt/arch32
+
+## Set MANAGEPARTITION to any value if /opt/arch32 resides on a separate
+## partition and not mounted by /etc/fstab or some other means.
+## If /opt/arch32 is part of your rootfs, leave this empty.
+MANAGEPARTITION=
+
+## Leave USEDISTCC empty unless you wish to use distccd from within the chroot.
+USEDISTCC=
+DISTCC_SUBNET='10.9.8.0/24'
+
+## PIDFILE shouldn't need to ba changed from this default.
+PIDFILE=/run/arch32
+
+start_distccd() {
+	[[ ! -L "$MOUNTPOINT"/usr/bin/distccd-chroot ]] &amp;&amp;
+		ln -s /usr/bin/distccd "$MOUNTPOINT"/usr/bin/distccd-chroot 
+	DISTCC_ARGS="--user nobody --allow $DISTCC_SUBNET --port 3692 --log-level warning --log-file /tmp/distccd-i686.log"
+
+	[[ -z "$(pgrep distccd-chroot)" ]] &amp;&amp;
+		linux32 chroot "$MOUNTPOINT" /bin/bash -c "/usr/bin/distccd-chroot --daemon $DISTCC_ARGS"
+}
+
+stop_distccd() {
+	[[ -n "$(pgrep distccd-chroot)" ]] &amp;&amp;
+		linux32 chroot "$MOUNTPOINT" /bin/bash -c "pkill -SIGTERM distccd-chroot"
+}
+
+case $1 in
+	start)
+		[[ -f "$PIDFILE" ]] &amp;&amp; exit 1
+
+		if [[ -n "$MANAGEPARTITION" ]]; then
+			mountpoint -q $MOUNTPOINT || mount LABEL="arch32" $MOUNTPOINT
+		fi
+
+		dirs=(/tmp /dev /dev/pts /home)
+		for d in "${dirs[@]}"; do
+			mount -o bind $d "$MOUNTPOINT"$d
+		done
+
+		mount -t proc none "$MOUNTPOINT/proc"
+		mount -t sysfs none "$MOUNTPOINT/sys"
+		touch "$PIDFILE"
+		[[ -n "$USEDISTCC" ]] &amp;&amp; start_distccd
+		;;
+
+	stop)
+		[[ ! -f "$PIDFILE" ]] &amp;&amp; exit 1
+		[[ -n "$USEDISTCC" ]] &amp;&amp; stop_distccd
+
+		if [[ -n "$MANAGEPARTITION" ]]; then
+			umount -R -A -l "$MOUNTPOINT"
+		else
+			dirs=(/home /dev/pts /dev /tmp)
+			[[ -n "$USEDISTCC" ]] &amp;&amp; stop_distccd
+			umount "$MOUNTPOINT"/{sys,proc}
+			for d in "${dirs[@]}"; do
+				umount -l "$MOUNTPOINT$d"
+			done
+		fi
+		
+		rm -f "$PIDFILE"
+		;;
+	*)
+		echo "usage: $0 (start|stop)"
+		exit 1
+esac
+</pre>
+<p>Be sure to make the init script executable:
+</p>
+<pre># chmod +x /usr/local/bin/arch32
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> and optionally <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>arch32.service</code>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Chroot into the new system:
+</p>
+<pre># /usr/local/bin/arch32 start
+$ xhost +SI:localuser:username_to_give_access_to
+# chroot /opt/arch32
+</pre>
+<p>It is recommended to use a custom bash prompt inside the 32-bit chroot installation in order to differentiate from the regular system. You can, for example, add a <i>ARCH32</i> string to the <i>PS1</i> variable defined in <code>~/.bashrc</code>.  In fact, the default Debian .bashrc prompt string contains appropriate logic to report whether the working directory is within a chroot.
+</p>
+<h3><span class="mw-headline" id="First-time_Setup">First-time Setup</span></h3>
+<p>Fix possible locale problems:
+</p>
+<pre># /usr/bin/locale-gen
+</pre>
+<p>Initialize pacman:
+</p>
+<pre># sed -i 's/CheckSpace/#CheckSpace/' /etc/pacman.conf
+# pacman-key --init &amp;&amp; pacman-key --populate archlinux
+</pre>
+<h2><span class="mw-headline" id="Schroot">Schroot</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=schroot">schroot</a></span> to the native <b>64-bit</b> installation:
+</p>
+<p>Edit <code>/etc/schroot/schroot.conf</code>, and create an <i>[Arch32]</i> section.
+</p>
+<pre>[Arch32]
+type=directory
+profile=arch32
+description=Arch32
+directory=/opt/arch32
+users=user1,user2,user3
+groups=users
+root-groups=root
+personality=linux32
+aliases=32,default
+</pre>
+<p>Optionally edit <code>/etc/schroot/arch32/mount</code> to match the mounts created within <code>/usr/local/bin/arch32</code>.
+</p>
+<h3><span class="mw-headline" id="Using_Schroot_to_run_a_32-bit_application">Using Schroot to run a 32-bit application</span></h3>
+<p>The general syntax for calling an application <i>inside</i> the chroot is:
+</p>
+<pre># schroot -p -- htop
+</pre>
+<p>In this example, htop is called from within the 32-bit environment.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Compilation_and_installing">Compilation and installing</span></h3>
+<p>Ensure the desired options are set in the local <code>/etc/makepkg.conf</code>.
+</p>
+<p>Some packages may require a <code>--host</code> flag be added to the ./configure script in the PKBUILD:
+</p>
+<pre>$ ./configure --host="i686-pc-linux" ...
+</pre>
+<p>This is the case when the build makes use of values (for example, the output of the <code>uname</code> command) inherited from your base system.
+</p>
+<h3><span class="mw-headline" id="Video_problems">Video problems</span></h3>
+<p>If you get:
+</p>
+<pre>X Error of failed request: BadLength (poly request too large or internal Xlib length error)
+</pre>
+<p>while trying to run an application that requires video acceleration, make sure you have installed appropriate <a href="../en/Xorg.html#Driver_installation" title="Video drivers" class="mw-redirect">video drivers</a> in your chroot.
+</p>
+<h3><span class="mw-headline" id="Sound_in_Flash">Sound in Flash</span></h3>
+<p>To get sound from the flash player in Firefox, open a terminal and chroot inside the 32-bit system:
+</p>
+<pre># chroot /opt/arch32
+</pre>
+<p>From there, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=alsa-oss">alsa-oss</a></span> as usual with <a href="../en/Pacman.html" title="Pacman">pacman</a>.
+</p>
+<p>Then type:
+</p>
+<pre>$ export FIREFOX_DSP="aoss"
+</pre>
+<p>Every chroot into the 32-bit system will require this export command to be entered so it may be best to incorporate it into a script.
+</p>
+<p>Finally, launch Firefox.
+</p>
+<p>For <a href="../en/Wine.html" title="Wine">Wine</a> this works the same way. The package alsa-oss will also install the alsa libs required by <a href="../en/Wine.html" title="Wine">Wine</a> to output sound.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Java_in_a_chroot">Java in a chroot</span></h3>
+<p>See <a href="../en/Java.html" title="Java">Java</a>. After installation, adjust the path:
+</p>
+<pre>$ export PATH="/opt/java/bin/:$PATH"
+</pre>
+<h3><span class="mw-headline" id="Allow_32-bit_applications_access_to_64-bit_PulseAudio">Allow 32-bit applications access to 64-bit PulseAudio</span></h3>
+<p>Additional paths have to be bind-mounted to the chroot environment:
+</p>
+<pre># mount --bind /var/run /opt/arch32/var/run
+# mount --bind /var/lib/dbus /opt/arch32/var/lib/dbus
+</pre>
+<p>Unmount them when leaving the environment:
+</p>
+<pre># umount /opt/arch32/var/run
+# umount /opt/arch32/var/lib/dbus
+</pre>
+<p>Optionally add the commands to the <code>/usr/local/bin/arch32</code> script after the other bind-mount/umount commands. See <a href="../en/PulseAudio/Examples.html#PulseAudio_from_within_a_chroot_.28e.g._32-bit_chroot_in_64-bit_install.29" title="PulseAudio/Examples">PulseAudio from within a chroot</a> for details
+</p>
+<h3><span class="mw-headline" id="Sound_in_Firefox">Sound in Firefox</span></h3>
+<p>Create <code>/usr/bin/firefox32</code> as root:
+</p>
+<pre>#!/bin/sh
+schroot -p firefox $1;export FIREFOX_DSP="aoss"
+</pre>
+<p>Make it executable:
+</p>
+<pre># chmod +x /usr/bin/firefox32
+</pre>
+<p>Now you can make an alias for Firefox, if desired:
+</p>
+<pre>alias firefox="firefox32"
+</pre>
+<p>Add this to <code>~/.bashrc</code> and source it to enable it. Or you can just change all your desktop environment's launchers to firefox32 if you still want 64-bit Firefox to be available.
+</p>
+<h3><span class="mw-headline" id="3D_acceleration">3D acceleration</span></h3>
+<p>You need to install the corresponding package under your "native" arch for 3D support. 
+</p>
+<p>For information on how to set up your graphic adapter refer to:
+</p>
+<ul>
+<li> <a href="../en/ATI.html" title="ATI">ATI</a>
+</li>
+<li> <a href="../en/Intel_graphics.html" title="Intel" class="mw-redirect">Intel</a>
+</li>
+<li> <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a>
+</li>
+</ul>
+<h3><span class="mw-headline" id="WINE">WINE</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The <i>wine-hacks</i> package does not exist anymore. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Install_bundled_32-bit_system_in_64-bit_system">Talk:Install bundled 32-bit system in 64-bit system#</a>)</div>
+</div>
+<p>In order to compile wine, you need a 32-bit system installed. Compiling wine is needed for applying patches in order to get <a rel="nofollow" class="external text" href="http://art.ified.ca/?page_id=40">PulseAudio</a> working. See also <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages.php?ID=19675">wine-hacks</a> from AUR.
+</p>
+<p>Add the following alias to <code>~/.bashrc</code>:
+</p>
+<pre>alias wine='schroot -pqd "$(pwd)" -- wine'
+</pre>
+<p>The <code>-q</code> switch makes schroot operate in quiet mode, so it works like "regular" wine does. Also note that If you still use dchroot instead of schroot, you should use switch <code>-d</code> instead of <code>-s</code>.
+</p>
+<h3><span class="mw-headline" id="Printing">Printing</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The note below contains a link to this very page, making it very unclear. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Install_bundled_32-bit_system_in_64-bit_system">Talk:Install bundled 32-bit system in 64-bit system#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have a 64-bit base installation with a <a href="../en/Install_bundled_32-bit_system_in_64-bit_system.html" title="Install bundled 32-bit system in Arch64" class="mw-redirect">32-bit chroot environment</a>, explicit installation of CUPS is not necessary in the 32-bit environment.</div> 
+<p>To access installed CUPS printers from the chroot environment, one needs to bind the <code>/var/run/cups</code> directory to the same (relative) location in the chroot environment.
+</p>
+<p>Simply make sure the <code>/var/run/cups</code> directory exists in the chroot environment and bind-mount the host <code>/var/run/cups</code> to the chroot environment: 
+</p>
+<pre># mkdir <i>chroot32-dir/var/run/cups</i>
+# mount --bind /var/run/cups <i>chroot32-dir/var/run/cups</i>
+</pre>
+<p>and printers should be available from 32-bit chroot applications immediately.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

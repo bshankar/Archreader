@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Gudrun (web) - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Gudrun_web skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Gudrun (web)</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#General_configuration_guideline"><span class="tocnumber">1</span> <span class="toctext">General configuration guideline</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Users"><span class="tocnumber">2</span> <span class="toctext">Users</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Services"><span class="tocnumber">3</span> <span class="toctext">Services</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Vhost_setup"><span class="tocnumber">4</span> <span class="toctext">Vhost setup</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Maintainer"><span class="tocnumber">5</span> <span class="toctext">Maintainer</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#www.archlinux.org"><span class="tocnumber">5.1</span> <span class="toctext">www.archlinux.org</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#mailman.archlinux.org"><span class="tocnumber">5.2</span> <span class="toctext">mailman.archlinux.org</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#bugs.archlinux.org"><span class="tocnumber">5.3</span> <span class="toctext">bugs.archlinux.org</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#projects.archlinux.org"><span class="tocnumber">5.4</span> <span class="toctext">projects.archlinux.org</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#planet.archlinux.org"><span class="tocnumber">5.5</span> <span class="toctext">planet.archlinux.org</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#repos.archlinux.org"><span class="tocnumber">5.6</span> <span class="toctext">repos.archlinux.org</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#Emergency_evacuation_plan"><span class="tocnumber">6</span> <span class="toctext">Emergency evacuation plan</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="General_configuration_guideline">General configuration guideline</span></h2>
+<ul>
+<li> Document non-trivial changes within the config files</li>
+<li> Keep the others informed about changes you made (e.g. send a summary to arch-dev, prefix with [gudrun])</li>
+<li> Use a local git repo for complex configuration files. The following are currently being tracked in git:
+<ul>
+<li>/etc/httpd/conf</li>
+<li>/etc/php</li>
+</ul>
+</li>
+<li> Don't forget to commit your changes ;-)</li>
+</ul>
+<h2><span class="mw-headline" id="Users">Users</span></h2>
+<table class="wikitable" border="1">
+
+<tr>
+<th> UID
+</th>
+<th> User
+</th>
+<th> Primary Purpose
+</th>
+<th> Cronjobs
+</th>
+<th> Owned/Primary Directories
+</th>
+</tr>
+<tr>
+<td> 33
+</td>
+<td> http
+</td>
+<td> Apache process owner
+</td>
+<td> no
+</td>
+<td> /srv/http
+</td>
+</tr>
+<tr>
+<td> 130
+</td>
+<td> svnserve
+</td>
+<td> process owner for svnserve, spawned by xinetd
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> 131
+</td>
+<td> git-daemon
+</td>
+<td> process owner for git-daemon, spawned by xinetd
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> 5000
+</td>
+<td> bbs
+</td>
+<td> PHP/FastCGI process owner for the BBS
+</td>
+<td> no
+</td>
+<td> /srv/http/bbs
+</td>
+</tr>
+<tr>
+<td> 5001
+</td>
+<td> wiki
+</td>
+<td> PHP/FastCGI process owner for the Wiki
+</td>
+<td> no
+</td>
+<td> /srv/http/wiki
+</td>
+</tr>
+<tr>
+<td> 5002
+</td>
+<td> archweb
+</td>
+<td> Python/FastCGI process owner for the main site
+</td>
+<td> no
+</td>
+<td> /srv/http/archweb_pub
+</td>
+</tr>
+<tr>
+<td> 5003
+</td>
+<td> archwebdev
+</td>
+<td> Python/FastCGI process owner for the dev site
+</td>
+<td> no
+</td>
+<td> /srv/http/archweb_dev
+</td>
+</tr>
+<tr>
+<td> 5004
+</td>
+<td> viewvc
+</td>
+<td> CGI user for ViewVC (repos.archlinux.org)
+</td>
+<td> no
+</td>
+<td> /srv/http/viewvc
+</td>
+</tr>
+<tr>
+<td> 5005
+</td>
+<td> projects
+</td>
+<td> CGI user for gitweb
+</td>
+<td> no
+</td>
+<td> /srv/http/projects
+</td>
+</tr>
+<tr>
+<td> 5006
+</td>
+<td> planet
+</td>
+<td> endpoint user for rsyncing planet contents from gerolde
+</td>
+<td> no
+</td>
+<td> /home/planet, /srv/http/planet
+</td>
+</tr>
+<tr>
+<td> 5007
+</td>
+<td> bugs
+</td>
+<td> PHP/FastCGI process owner for Flyspray
+</td>
+<td> no
+</td>
+<td> /srv/http/flyspray
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Services">Services</span></h2>
+<ul>
+<li> Apache</li>
+<li> MySQL</li>
+<li> memcached</li>
+<li> mailman</li>
+<li> svnserve</li>
+<li> git-daemon</li>
+<li> (please add more)</li>
+</ul>
+<h2><span class="mw-headline" id="Vhost_setup">Vhost setup</span></h2>
+<ul>
+<li> For each vhost the DocumentRoot points to /srv/http/vhosts/&lt;vhost.archlinux.org&gt;/</li>
+<li> Every vhost dir should be tracked by a git repo</li>
+<li> If this is a public repo (prefered) make sure there are no config files with passwords; use .gitignore)</li>
+<li> Put the public git repo on <a href="../en/DeveloperWiki:Gerolde_(dev).html" title="DeveloperWiki:Gerolde (dev)">Gerolde</a> under /srv/projects/git/&lt;vhost.archlinux.org&gt;.git</li>
+<li> You'll push to and pull from that bare repo</li>
+<li> The repo can be accessed via /srv/git/&lt;vhost.archlinux.org&gt;.git from gudrun</li>
+</ul>
+<h2><span class="mw-headline" id="Maintainer">Maintainer</span></h2>
+<ul><li> System (sudo): Aaron, Jan, Dan, Pierre, Thomas</li></ul>
+<h3><span class="mw-headline" id="www.archlinux.org">www.archlinux.org</span></h3>
+<ul><li> Maintainer: Dan</li></ul>
+<h3><span class="mw-headline" id="mailman.archlinux.org">mailman.archlinux.org</span></h3>
+<ul><li> Maintainer: ?</li></ul>
+<h3><span class="mw-headline" id="bugs.archlinux.org">bugs.archlinux.org</span></h3>
+<ul>
+<li> Maintainer: Roman</li>
+<li> Upstream: <a rel="nofollow" class="external free" href="http://flyspray.org/">http://flyspray.org/</a>
+</li>
+<li> Dependencies: php, mysql</li>
+<li> Public git repo: <a rel="nofollow" class="external free" href="https://projects.archlinux.org/vhosts/bugs.archlinux.org.git/">https://projects.archlinux.org/vhosts/bugs.archlinux.org.git/</a>
+</li>
+</ul>
+<h3><span class="mw-headline" id="projects.archlinux.org">projects.archlinux.org</span></h3>
+<ul><li> Maintainer: Ronald</li></ul>
+<h3><span class="mw-headline" id="planet.archlinux.org">planet.archlinux.org</span></h3>
+<ul><li> Maintainer: Andrea</li></ul>
+<h3><span class="mw-headline" id="repos.archlinux.org">repos.archlinux.org</span></h3>
+<ul>
+<li> Maintainer: Ronald ?</li>
+<li> Public git repo: <a rel="nofollow" class="external free" href="https://projects.archlinux.org/vhosts/repos.archlinux.org.git/">https://projects.archlinux.org/vhosts/repos.archlinux.org.git/</a>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Emergency_evacuation_plan">Emergency evacuation plan</span></h2>
+<ol>
+<li> Don't <a rel="nofollow" class="external text" href="http://z0r.de/?id=842">Panic</a>!</li>
+<li> Look for some cute cat at <a rel="nofollow" class="external text" href="http://icanhascheezburger.com/">lolcats</a> and place it on a maintenance page</li>
+<li> Blame Allan</li>
+</ol>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki:Server_Configuration.html" title="Category:DeveloperWiki:Server Configuration">DeveloperWiki:Server Configuration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

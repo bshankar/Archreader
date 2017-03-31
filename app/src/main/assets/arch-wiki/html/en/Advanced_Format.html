@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Format - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Advanced_Format skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Advanced Format</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Partially overlaps with <a href="../en/Partitioning.html#Partition_alignment" title="Partitioning">Partitioning#Partition alignment</a>, these pages are not very well interlinked. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Advanced_Format">Talk:Advanced Format#</a>)</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#More_Detailed_Explanation"><span class="tocnumber">1.1</span> <span class="toctext">More Detailed Explanation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#External_Links"><span class="tocnumber">1.2</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Current_HDD_Models_that_Employ_a_4k_Sectors"><span class="tocnumber">2</span> <span class="toctext">Current HDD Models that Employ a 4k Sectors</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#How_to_determine_if_HDD_employ_a_4k_sector"><span class="tocnumber">3</span> <span class="toctext">How to determine if HDD employ a 4k sector</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Aligning_Partitions"><span class="tocnumber">4</span> <span class="toctext">Aligning Partitions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Check_your_partitions_alignment"><span class="tocnumber">4.1</span> <span class="toctext">Check your partitions alignment</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#GPT_.28Recommended.29"><span class="tocnumber">4.2</span> <span class="toctext">GPT (Recommended)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Special_Consideration_for_WD_Green_HDDs"><span class="tocnumber">5</span> <span class="toctext">Special Consideration for WD Green HDDs</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10">
+<a href="#Disable_via_hdparm"><span class="tocnumber">5.1</span> <span class="toctext">Disable via hdparm</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Is_this_safe.3F"><span class="tocnumber">5.1.1</span> <span class="toctext">Is this safe?</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Disable_via_changing_firmware_value_.28persistent.29"><span class="tocnumber">5.2</span> <span class="toctext">Disable via changing firmware value (persistent)</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>The <a href="https://en.wikipedia.org/wiki/Advanced_Format" class="extiw" title="wikipedia:Advanced Format">Advanced Format</a> feature reduces overhead by using 4 kilobyte sectors instead of the traditional 512 byte sectors. The old format gave a format efficiency of 87%. Advanced Format results in a format efficiency of 96% which increases space by up to 11%.  The 4k sector is slated to become the next standard for HDDs by 2014.
+</p>
+<h3><span class="mw-headline" id="More_Detailed_Explanation">More Detailed Explanation</span></h3>
+<p>The main idea behind using 4096-byte sectors is to increase the bit density on each track by reducing the number of gaps which hold Sync/DAM and ECC (Error Correction Code) information between data sectors.  For eight 512-byte sectors, the track also holds eight sector gaps.
+</p>
+<p>By having one single sector of size 4096-byte (8 x 512-byte), the track holds only 1 sector gap for each data sector thus reducing an overhead for a need to support multiple Sync/DAM and ECC blocks and at the same time increasing bit density.
+</p>
+<p>Linux partitioning tools by default start each partition on sector 63 which leads to a bad performance in HDDs that use this 4K sector size due to misalignment to 4K sector from the beginning of the track.
+</p>
+<h3><span class="mw-headline" id="External_Links">External Links</span></h3>
+<ul>
+<li><a rel="nofollow" class="external text" href="http://www.anandtech.com/Show/Index/2888?cPage=2&amp;all=False&amp;sort=0&amp;page=1">Western Digital’s Advanced Format: The 4K Sector Transition Begins</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.wdc.com/wdproducts/library/WhitePapers/ENG/2579-771430.pdf">White paper entitled "Advanced Format Technology."</a></li>
+<li>Failure to align one's HDD results in poor read/write performance.  See <a rel="nofollow" class="external text" href="http://www.linuxconfig.org/linux-wd-ears-advanced-format">this article</a> for specific examples.</li>
+</ul>
+<h2><span class="mw-headline" id="Current_HDD_Models_that_Employ_a_4k_Sectors">Current HDD Models that Employ a 4k Sectors</span></h2>
+<p>As of June 2011, there are a limited number of HDDs that support "Advanced Format" or 4k sectors as shown below.
+</p>
+<p>All drives in this list have a physical sector size of 4096 bytes, but not all drives correctly report this to the OS.  The actual value reported (via new fields in the ATA-8 spec) is shown in the table as the physical reported sector size.  As this is the value partitioning tools use for alignment, it is important that it should be 4096 to avoid misalignment issues.
+</p>
+<p>The logical sector size is the sector size used for data transfer.  This value multiplied by the number of LBA sectors on the disk gives the disk capacity.  Thus a disk with 4096 byte logical sectors will have a lower maximum LBA for the same capacity compared to a drive with 512 byte sectors.  Drives with 512 byte logical sectors offer better compatibility with legacy operating systems (roughly those released before 2009) however drives with 4096 byte logical sectors may offer marginally better performance (e.g. more read/write requests may fit into the NCQ buffer.)
+</p>
+<table class="wikitable">
+<tr>
+<th rowspan="2"> Manufacturer </th>
+<th rowspan="2"> Model </th>
+<th rowspan="2"> Capacity </th>
+<th colspan="2"> Reported sector size (bytes)
+</th>
+</tr>
+<tr>
+<th> Logical </th>
+<th> Physical
+</th>
+</tr>
+<tr>
+<td colspan="5"> <b>3.5"</b>
+</td>
+</tr>
+<tr>
+<td> Samsung         </td>
+<td> HD204UI     </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 512
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST3500413AS </td>
+<td> 500.0 GB </td>
+<td> 512  </td>
+<td> 512
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST500DM002  </td>
+<td> 500.0 GB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST1000DL002 </td>
+<td> 1.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST1000DM003 </td>
+<td> 1.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST2000DL003 </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 512
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST2000DM001 </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST3000DM001 </td>
+<td> 3.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST4000DM000 </td>
+<td> 4.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST4000VN000 </td>
+<td> 4.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD3000F9YZ  </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD30EZRX    </td>
+<td> 3.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD20EZRX    </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD30EZRSDTL </td>
+<td> 3.0 TB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD25EZRSDTL </td>
+<td> 2.5 TB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD20EARX    </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD20EFRX    </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD30EFRX    </td>
+<td> 3.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD40EFRX    </td>
+<td> 4.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD60EFRX    </td>
+<td> 6.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD10EARS    </td>
+<td> 1.0 TB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD15EARS    </td>
+<td> 1.5 TB </td>
+<td> 512  </td>
+<td> <a rel="nofollow" class="external text" href="http://excess.org/article/2010/11/wd-hdd-lying-about-4k-sectors/">4096</a>
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD20EARS    </td>
+<td> 2.0 TB </td>
+<td> 512  </td>
+<td> <a rel="nofollow" class="external text" href="http://community.wd.com/t5/Desktop-Mobile-Drives/Physical-Sector-Size-different-between-WD20EARS-00MVWB0-and/td-p/218226">4096</a> or <a rel="nofollow" class="external text" href="http://community.wdc.com/t5/Desktop/4k-sector-drive-reporting-512-byte-sectors-to-OS-why/td-p/205060">512</a>
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD10EURS    </td>
+<td> 1.0 TB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD8000AARS  </td>
+<td> 800.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD6400AARS  </td>
+<td> 640.0 GB
+</td>
+</tr>
+<tr>
+<td colspan="5"> <b>2.5"</b>
+</td>
+</tr>
+<tr>
+<td> Samsung        </td>
+<td>  ST1000LM024</td>
+<td> 1.0 TB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Samsung        </td>
+<td>  ST2000LM003</td>
+<td> 2.0 TB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST320LT007 </td>
+<td> 320 GB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Seagate         </td>
+<td> ST9750420AS </td>
+<td> 750 GB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+
+<tr>
+<td> Seagate         </td>
+<td> ST1000LM014 </td>
+<td> 1.0 TB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD10JPVT    </td>
+<td> 1.0 TB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD10TPVT    </td>
+<td> 1.0 TB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD7500BPVT </td>
+<td> 750.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD7500KPVT </td>
+<td> 750.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD6400BPVT  </td>
+<td> 640.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD5000BPVT  </td>
+<td> 500.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD3200BPVT  </td>
+<td> 320.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD2500BPVT  </td>
+<td> 250.0 GB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD1600BPVT  </td>
+<td> 160.0 GB
+</td>
+</tr>
+<tr>
+<td> Western Digital </td>
+<td> WD7500BPKX  </td>
+<td> 750.0 GB </td>
+<td> 512  </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> TOSHIBA </td>
+<td>   </td>
+<td> 500 GB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> TOSHIBA </td>
+<td> MQ01ABD100 </td>
+<td> 1.0 TB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+<tr>
+<td> TOSHIBA </td>
+<td> MQ01ABC150 </td>
+<td> 1.5 TB </td>
+<td> 512 </td>
+<td> 4096
+</td>
+</tr>
+</table>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Readers are encouraged to add to this table.</div>
+<h2><span class="mw-headline" id="How_to_determine_if_HDD_employ_a_4k_sector">How to determine if HDD employ a 4k sector</span></h2>
+<p>The physical and logical sector size of hard disk /dev/sd<i>X</i> can be determined by reading the following sysfs entries:
+</p>
+<pre>$ cat /sys/class/block/sd<i>X</i>/queue/physical_block_size
+$ cat /sys/class/block/sd<i>X</i>/queue/logical_block_size
+</pre>
+<p>Tools which will report the physical sector of a drive (provided the drive will report it correctly) includes
+</p>
+<ul>
+<li> smartmontools (since 5.41 ; <tt>smartmontools -a</tt>, in information section)</li>
+<li> hdparm (since 9.12 ; <tt>hdparm -I</tt>, in configuration section)</li>
+</ul>
+<p>Note that both works even for USB-attached discs (if the USB bridge supports SAT aka SCSI/ATA Translation, ANSI INCITS 431-2007).
+</p>
+<h2><span class="mw-headline" id="Aligning_Partitions">Aligning Partitions</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This should no longer require manual intervention. Any tools using recent libblkid versions are capable of handling Advanced Format automatically.</div>
+<p>Versions with this support include:
+</p>
+<ul>
+<li> fdisk, since util-linux &gt;= 2.15. You should start with ‘-c -u’ to disable DOS compatibility and use sectors instead of cylinders.</li>
+<li> parted, since parted &gt;= 2.1.</li>
+<li> mdadm, since util-linux &gt;= 2.15</li>
+<li> lvm2, since util-linux &gt;= 2.15</li>
+<li> mkfs.{ext,xfs,gfs2,ocfs2} all support libblkid directly.</li>
+</ul>
+<p>Refer to <a rel="nofollow" class="external text" href="https://www.tolaris.com/2011/07/21/libblkid-or-why-you-dont-need-to-worry-about-4k-disk-format/">this page</a> for further information.
+</p>
+<h3><span class="mw-headline" id="Check_your_partitions_alignment">Check your partitions alignment</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This only works with <a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a>, not <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a>.</div>
+<pre># fdisk -lu /dev/sda
+...
+# Device     Boot      Start   End         Blocks      Id System
+# /dev/sda1            2048    46876671    23437312    7  HPFS/NTFS
+</pre>
+<p>2048 (default since fdisk 2.17.2) means that your HDD is aligned correctly.
+Any other value divisible by 8 is good as well.
+</p>
+<h3><span class="mw-headline" id="GPT_.28Recommended.29">GPT (Recommended)</span></h3>
+<p>When using <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> partition tables, one need only use gdisk to create partitions which are aligned by default.  For an example, see <a href="../en/Solid_State_Drives.html#Detailed_Usage_Example" title="SSD" class="mw-redirect">SSD#Detailed Usage Example</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<h2><span class="mw-headline" id="Special_Consideration_for_WD_Green_HDDs">Special Consideration for WD Green HDDs</span></h2>
+<p>FYI - this section has nothing to do with Advanced Format technology, but this is an appropriate location to share it with users.  The WD20EARS (and other sizes include 1.0 and 1.5 TB driver in the series) will attempt to park the read heads once every 8 seconds FOR THE LIFE OF THE HDD which is just horrible! To see if you are affected use the smartctl command (part of smartmontools). If the last column changes rapidly, this section applies to your drive. 
+</p>
+<pre># smartctl /dev/sdb -a | grep Load_Cycle
+193 Load_Cycle_Count        0x0032   001   001   000    Old_age   Always       -       597115
+</pre>
+<h3><span class="mw-headline" id="Disable_via_hdparm">Disable via hdparm</span></h3>
+<p>Use hdparm in <code>/etc/systemd/system/lcc_fix.service</code> to disable this 'feature' and likely add life to your hdd:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/lcc_fix.service </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=WDIDLE3
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/hdparm -J 300 --please-destroy-my-drive /dev/sdX
+TimeoutSec=0
+StandardInput=tty
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Start the service
+</p>
+<pre># systemctl start lcc_fix.service
+</pre>
+<p>Enable the service to autorun at boot.
+</p>
+<pre># systemctl enable lcc_fix.service
+</pre>
+<h4><span class="mw-headline" id="Is_this_safe.3F">Is this safe?</span></h4>
+<p>Why do we need to pass the "--please-destroy-my-drive" flag?  Here is an email from hdparm author, Mark Lord:
+</p>
+<pre>&gt; I have a Western DIgital \"Green\" drive (wd20ears).  I noticed you added a -J switch and that 
+&gt; it is said to adjust the idle3 timeout.  What frightens me is the output you gave it:
+&gt; 
+&gt; How safe or not is this to use?
+
+I use it on my own drives.  It works for me.
+
+If you can run the WDIDLE3.EXE MS-Dos program,
+then use it instead -- it was written by WD,
+and only they know how things really work there.
+
+If you cannot use the WDIDLE3.EXE, then you
+could consider "hdparm -J".  It works for me,
+but it may or may not void some kind of warranty.
+
+Cheers
+-- 
+Mark Lord
+Real-Time Remedies Inc.
+mlord@pobox.com
+</pre>
+<h3><span class="mw-headline" id="Disable_via_changing_firmware_value_.28persistent.29">Disable via changing firmware value (persistent)</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The tool used in this process is experimental, use at your own risk!</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method is persistent, you only need to do this once for every drive.</div>
+<p>This method will use a utility called idle3ctl to alter the firmware value for the idle3 timer on WD hard drives (similar to wdidle3.exe from WD). The advantage compared to the official utility is you do not need to create a DOS bootdisk first to change the idle3 timer value. Additionally idle3ctl might also work over USB-to-S-ATA bridges (in some cases).
+The utility is provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=idle3-tools">idle3-tools</a></span> package.
+</p>
+<pre># idle3ctl -g /dev/your_wd_hdd
+</pre>
+<p>to get the raw idle3 timer value.
+You can disable the IntelliPark feature completely, with:
+</p>
+<pre># idle3ctl -d /dev/your_wd_hdd
+</pre>
+<p>or set it to a different value (<i>0</i>-<i>255</i>) with (e.g. 10 seconds):
+</p>
+<pre># idle3ctl -s 100 /dev/your_wd_hd
+</pre>
+<p>The range <i>0</i>-<i>128</i> is in 0.1s and <i>129-255</i> in 30s. For the changes to take effect, the drive needs to go through one powercycle, meaning powering it off and on again (on internal drives, a reboot is not sufficient).
+</p>
+<p>If your WD hard drive is not recognized, you can use the <i>--force</i> option. For more options see:
+</p>
+<pre>$ idle3ctl -h
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Storage.html" title="Category:Storage">Storage</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

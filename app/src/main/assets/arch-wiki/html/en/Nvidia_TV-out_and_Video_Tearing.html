@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Nvidia TV-out and Video Tearing - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Nvidia_TV-out_and_Video_Tearing skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Nvidia TV-out and Video Tearing</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Possible_Issues"><span class="tocnumber">2</span> <span class="toctext">Possible Issues</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Step_1:_Clone_desktop_to_TV_.28CRT.29."><span class="tocnumber">3</span> <span class="toctext">Step 1: Clone desktop to TV (CRT).</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Step_2:_Using_the_correct_settings_for_NVIDIA_X_Server_Settings"><span class="tocnumber">4</span> <span class="toctext">Step 2: Using the correct settings for NVIDIA X Server Settings</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Step_3:_Using_the_correct_settings_for_MPlayer"><span class="tocnumber">5</span> <span class="toctext">Step 3: Using the correct settings for MPlayer</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Step_4:_Gnome_Video_Playback_with_Totem_.28Videos.29"><span class="tocnumber">6</span> <span class="toctext">Step 4: Gnome Video Playback with Totem (Videos)</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#REFERENCES"><span class="tocnumber">7</span> <span class="toctext">REFERENCES</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>This article tries to address the problem of video tearing on the TV via Nvidia video card. The scenario typically involves the VGA (D-sub or DVI) connection to the monitor (LCD or CRT) with the S-Video handling the TV output.
+</p>
+<p>This approach has been confirmed to work with Geforce 5900XT, Geforce 7300GT, and Geforce 7600GS. (All three have onboard TV-encoders on the GPU.)
+</p>
+<h2><span class="mw-headline" id="Possible_Issues">Possible Issues</span></h2>
+<p>Be aware that you may run into possible issues with Beryl 0.20, if the wrong <b>Option</b> in <b>xorg.conf</b> is used. (You will encounter unusual graphical issues).
+</p>
+<p>There is a known issue with HD mode of Nvidia cards and PAL standard. As in it doesn't work! :(
+</p>
+<h2><span class="mw-headline" id="Step_1:_Clone_desktop_to_TV_.28CRT.29.">Step 1: Clone desktop to TV (CRT).</span></h2>
+<p>In this example we have connected the TV-OUT of the video card to the S-Video IN of our TV (CRT solution). The driver version we're using is <b>1.0-9755</b> with Xorg <b>7.2</b>. Typically, you can let the Nvidia driver handle detecting TV-Out (S-Video). However, there are times where the driver will not detect things correctly, and you may have to manually override it via <b>xorg.conf</b>, (by specifically setting the values). <b>CRT-0</b> is the computer monitor, and <b>TV-0</b> is obviously the TV.
+</p>
+<p>NOTE: <b>PAL-B</b> is seen below as this is the standard for Australian TVs. (See <b>[1]</b> in the <b>REFERENCES</b> section for other regions around the world).
+</p>
+<p>Use <b>nano</b> or <b>vim</b> to open <b>/etc/X11/xorg.conf</b> file, scroll down until you find the <b>"Device"</b> section.
+</p>
+<p>It will be something like:
+</p>
+<pre>Section "Device"
+    Identifier   "Card0"
+    Driver       "nvidia"
+    VendorName   "ALL"
+    BoardName    "ALL"
+EndSection
+</pre>
+<p>Add the following:
+</p>
+<pre>    Option "TwinView"
+    Option "TwinViewOrientation" "Clone"
+    Option "MetaModes"           "CRT-0: 1024x768,  TV-0: 1024x768"
+    Option "HorizSync"           "CRT-0: 30-81;  TV-0: 30-50"
+    Option "VertRefresh"         "CRT-0: 56-76;  TV-0: 60"
+    Option "ConnectedMonitor"    "CRT-0, TV-0"
+    Option "TVStandard"          "PAL-B"
+    Option "TVOutFormat"         "SVIDEO" 
+</pre>
+<p>So it becomes:
+</p>
+<pre>Section "Device"
+    Identifier   "Card0"
+    Driver       "nvidia"
+    VendorName   "ALL"
+    BoardName    "ALL"
+    Option       "TwinView"
+    Option       "TwinViewOrientation" "Clone"
+    Option       "MetaModes"           "CRT-0: 1024x768,  TV-0: 1024x768"
+    Option       "HorizSync"           "CRT-0: 30-81;  TV-0: 30-50"
+    Option       "VertRefresh"         "CRT-0: 56-76;  TV-0: 60"
+    Option       "ConnectedMonitor"    "CRT-0, TV-0"
+    Option       "TVStandard"          "PAL-B"
+    Option       "TVOutFormat"         "SVIDEO" 
+EndSection
+</pre>
+<p>Save changes, log out of the system, and restart X-Server by pressing <b>Ctrl-Alt-Backspace</b>. This should bring you back to the login screen. You will notice a clone of the screen will appear on your TV.
+</p>
+<p>For more options and details, please see <b>[2]</b> and <b>[3]</b> in the <b>REFERENCES</b> section.
+</p>
+<h2><span class="mw-headline" id="Step_2:_Using_the_correct_settings_for_NVIDIA_X_Server_Settings">Step 2: Using the correct settings for NVIDIA X Server Settings</span></h2>
+<p>Go to <b>NVIDIA X Server Settings</b>. 
+</p>
+<p>(In <b>KDE</b>, this is done by <b>K-menu</b> (icon) =&gt; <b>System</b> =&gt; <b>NVIDIA X Server Settings</b>).
+</p>
+<p>In the section <b>X Screen 0</b>, there is an entry called <b>X Server XVideo Settings</b>, click on that.
+</p>
+<p>Now you will see three entries:
+</p>
+<ol>
+<li> <b>Video Texture Adaptor</b> <br> Enable =&gt; <b>Sync to VBlank</b> (Make sure this is checked with a tick)</li>
+<li> <b>Video Blitter Adaptor</b> <br> Enable =&gt; <b>Sync to VBlank</b> (Make sure this is checked with a tick)</li>
+<li> <b>Sync to this display device</b> <br> Select =&gt; <b>TV-0 (TV-0)</b>
+</li>
+</ol>
+<p>Then click on <b>Quit</b> to save changes.
+</p>
+<h2><span class="mw-headline" id="Step_3:_Using_the_correct_settings_for_MPlayer">Step 3: Using the correct settings for MPlayer</span></h2>
+<p>Now in MPlayer, right-click and select <b>Preferences</b>. Select the <b>Video</b> tab. Select <b>xv</b> in the <b>Available Drivers:</b> section.
+</p>
+<p>Also enable (checkmark appears in box): <b>Enable double buffering</b>, <b>Enable direct rendering</b>, and <b>Enable frame dropping</b>.
+</p>
+<p>Select <b>OK</b>, close MPlayer and then restart MPlayer to enable changes. Do a test with movie or video clip that contains lots of fast action scenes (eg: Anime). There should be little or no tearing when playing video through MPlayer on your TV.
+</p>
+<p>If you still have issues with tearing, consider adjusting the values for <b>"VertRefresh"</b> first. As a last resort, you can also adjust the <b>modeline</b> in <b>xorg.conf</b>. See <b>[4]</b> and <b>[5]</b> in <b>REFERENCES</b> section for details.
+</p>
+<h2><span class="mw-headline" id="Step_4:_Gnome_Video_Playback_with_Totem_.28Videos.29">Step 4: Gnome Video Playback with Totem (Videos)</span></h2>
+<p>You can enable vsync on your driver's options if you like.
+</p>
+<p>Edit /etc/enviroment and add the lines:
+</p>
+<pre>CLUTTER_PAINT=disable-clipped-redraws:disable-culling
+CLUTTER_VBLANK=True
+</pre>
+<p>Then reboot your system.
+</p>
+<h2><span class="mw-headline" id="REFERENCES">REFERENCES</span></h2>
+<p><b>[1]</b> <a rel="nofollow" class="external free" href="http://en.wikibooks.org/wiki/NVidia/TV-OUT">http://en.wikibooks.org/wiki/NVidia/TV-OUT</a>
+</p>
+<p><b>[2]</b> <a rel="nofollow" class="external free" href="http://us.download.nvidia.com/XFree86/Linux-x86/1.0-9755/README/appendix-g.html">http://us.download.nvidia.com/XFree86/Linux-x86/1.0-9755/README/appendix-g.html</a>
+</p>
+<p><b>[3]</b> <a rel="nofollow" class="external free" href="http://us.download.nvidia.com/XFree86/Linux-x86/1.0-9755/README/appendix-h.html">http://us.download.nvidia.com/XFree86/Linux-x86/1.0-9755/README/appendix-h.html</a>
+</p>
+<p><b>[4]</b> <a rel="nofollow" class="external free" href="http://www.mythtv.org/wiki/Working_with_Modelines">http://www.mythtv.org/wiki/Working_with_Modelines</a>
+</p>
+<p><b>[5]</b> <a rel="nofollow" class="external free" href="http://www.mythtv.org/wiki/Modeline_Database">http://www.mythtv.org/wiki/Modeline_Database</a>
+</p>
+<p><b>[6]</b> <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1017705#p1017705">https://bbs.archlinux.org/viewtopic.php?pid=1017705#p1017705</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

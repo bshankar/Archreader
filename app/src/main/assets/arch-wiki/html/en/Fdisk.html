@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>fdisk - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Fdisk skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">fdisk</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GNU_Parted.html" title="GNU Parted">GNU Parted</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html" title="Partitioning">Partitioning</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://git.kernel.org/cgit/utils/util-linux/util-linux.git/">util-linux fdisk</a> is a dialogue-driven command-line utility that creates and manipulates partition tables and partitions on a hard disk. Hard disks are divided into partitions and this division is described in the partition table.
+</p>
+<p><a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/">GPT fdisk</a>, as implemented in the <i>gdisk</i> program and its associated utilities, works "on Globally Unique Identifier (GUID) Partition Table (<a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a>) disks, rather than on the more common (through at least early 2013) Master Boot Record (<a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a>) partition tables."
+</p>
+<p>This article covers <span class="plainlinks archwiki-template-man" title="$ man 8 fdisk"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/fdisk.8.html">fdisk(8)</a></span> and its related <span class="plainlinks archwiki-template-man" title="$ man 8 sfdisk"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/sfdisk.8.html">sfdisk(8)</a></span> utility, as well as the analogous <span class="plainlinks archwiki-template-man" title="$ man 8 gdisk"><a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/gdisk.html">gdisk(8)</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 8 sgdisk"><a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/sgdisk.html">sgdisk(8)</a></span> utilities.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For basic partitioning functionality with a graphical interface, <span class="plainlinks archwiki-template-man" title="$ man 8 cfdisk"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/cfdisk.8.html">cfdisk(8)</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 8 cgdisk"><a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/cgdisk.html">cgdisk(8)</a></span> can be used.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#List_partitions"><span class="tocnumber">2</span> <span class="toctext">List partitions</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Backup_and_restore_partition_table"><span class="tocnumber">3</span> <span class="toctext">Backup and restore partition table</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Using_dd"><span class="tocnumber">3.1</span> <span class="toctext">Using dd</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Using_sfdisk"><span class="tocnumber">3.2</span> <span class="toctext">Using sfdisk</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Using_sgdisk"><span class="tocnumber">3.3</span> <span class="toctext">Using sgdisk</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Create_a_partition_table_and_partitions"><span class="tocnumber">4</span> <span class="toctext">Create a partition table and partitions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8">
+<a href="#Start_the_partition_manipulator"><span class="tocnumber">4.1</span> <span class="toctext">Start the partition manipulator</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#fdisk"><span class="tocnumber">4.1.1</span> <span class="toctext">fdisk</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#gdisk"><span class="tocnumber">4.1.2</span> <span class="toctext">gdisk</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Create_new_table"><span class="tocnumber">4.2</span> <span class="toctext">Create new table</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Create_partitions"><span class="tocnumber">4.3</span> <span class="toctext">Create partitions</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Write_changes_to_disk"><span class="tocnumber">4.4</span> <span class="toctext">Write changes to disk</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Tips_and_tricks"><span class="tocnumber">5</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Convert_between_MBR_and_GPT"><span class="tocnumber">5.1</span> <span class="toctext">Convert between MBR and GPT</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Sort_partitions"><span class="tocnumber">5.2</span> <span class="toctext">Sort partitions</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Recover_GPT_header"><span class="tocnumber">5.3</span> <span class="toctext">Recover GPT header</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>To use <i>fdisk</i> and its associated utilities, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span> package, which is part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group is required.
+</p>
+<p>To use <i>gdisk</i> and its associated utilities, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span> package.
+</p>
+<h2><span class="mw-headline" id="List_partitions">List partitions</span></h2>
+<p>To list partition tables and partitions on a device, you can run the following, where device is a name like <code>/dev/sda</code>:
+</p>
+<pre># fdisk -l /dev/sda
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If the device is not specified, <i>fdisk</i> will list all partitions in <code>/proc/partitions</code>.</div>
+<p>Or for the <i>gdisk</i>:
+</p>
+<pre># gdisk -l /dev/sda
+</pre>
+<h2><span class="mw-headline" id="Backup_and_restore_partition_table">Backup and restore partition table</span></h2>
+<p>Before making changes to a hard disk, you may want to backup the partition table and partition scheme of the drive. You can also use a backup to copy the same partition layout to numerous drives.
+</p>
+<h3><span class="mw-headline" id="Using_dd">Using dd</span></h3>
+<p>Because the MBR is located on the disk it can be backed up and later recovered.
+</p>
+<p>To backup the MBR:
+</p>
+<pre># dd if=/dev/sda of=/path/mbr-backup bs=512 count=1
+</pre>
+<p>Restore the MBR:
+</p>
+<pre># dd if=/path/mbr-backup of=/dev/sda bs=512 count=1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Restoring the MBR with a mismatching partition table will make your data unreadable and nearly impossible to recover. If you simply need to reinstall the bootloader see their respective pages as they also employ the <a rel="nofollow" class="external text" href="http://www.pixelbeat.org/docs/disk/">DOS compatibility region</a>: <a href="../en/GRUB.html" title="GRUB">GRUB</a> or <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a>.</div>
+<p>To erase the MBR (may be useful if you have to do a full reinstall of another operating system) only the first 446 bytes are zeroed because the rest of the data contains the partition table:
+</p>
+<pre># dd if=/dev/zero of=/dev/sda bs=446 count=1
+</pre>
+<h3><span class="mw-headline" id="Using_sfdisk">Using sfdisk</span></h3>
+<p>For both GPT and MBR you can use <i>sfdisk</i> to save the partition layout of your device to a file with the <code>--dump</code> option. Run the following command for device <code>/dev/sda</code>:
+</p>
+<pre># sfdisk -d /dev/sda &gt; sda.dump
+</pre>
+<p>The file should look something like this for a single ext4 partition that is 1GB in size:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">sda.dump</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+label: gpt
+label-id: AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE
+device: /dev/sda
+unit: sectors
+first-lba: 34
+last-lba: 1048576
+
+/dev/sda1 : start=2048, size=1048576, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=BBF1CD36-9262-463E-A4FB-81E32C12BDE7
+</pre>
+<p>To later restore this layout you can run:
+</p>
+<pre># sfdisk /dev/sda &lt; sda.dump
+</pre>
+<h3><span class="mw-headline" id="Using_sgdisk">Using sgdisk</span></h3>
+<p>Using <i>sgdisk</i> you can create a binary backup consisting of the protective MBR, the main GPT header, the backup GPT header, and one copy of the partition table:
+</p>
+<pre># sgdisk -b=sgdisk-sda.bak
+</pre>
+<p>You can later restore the backup by running:
+</p>
+<pre># sgdisk -l=sgdisk-sda.bak
+</pre>
+<p>If you want to clone your current device's partition layout (/dev/sda in this case) to another drive (/dev/sdc) run:
+</p>
+<pre># sgdisk -R=/dev/sdc /dev/sda
+</pre>
+<p>If both drives will be in the same computer, you need to randomize the GUID's:
+</p>
+<pre># sgdisk -G /dev/sdc
+</pre>
+<h2><span class="mw-headline" id="Create_a_partition_table_and_partitions">Create a partition table and partitions</span></h2>
+<p>The first step to <a href="../en/Partitioning.html" title="Partitioning">partitioning</a> a disk is making a partition table. After that, the actual partitions are created according to the desired <a href="../en/Partitioning.html#Partition_scheme" title="Partition scheme" class="mw-redirect">partition scheme</a>. See the <a href="../en/Partitioning.html#Partition_table" title="Partition table" class="mw-redirect">partition table</a> article to help decide whether to use <a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a> or <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a>.
+</p>
+<p>Before beginning, you may wish to <a href="#Backup_and_restore_partition_table">backup</a> your current partition table and scheme.
+</p>
+<p>The following shows how to use both <i>gdisk</i> and <i>fdisk</i> to perform both the creation of a partition table and the creation of the actual partitions. Differences are noted when necessary.
+</p>
+<h3><span class="mw-headline" id="Start_the_partition_manipulator">Start the partition manipulator</span></h3>
+<p>Start either <i>fdisk</i> or <i>gdisk</i> as instructed in the following sections. Then continue with <a href="#Create_new_table">#Create new table</a>.
+</p>
+<h4><span class="mw-headline" id="fdisk">fdisk</span></h4>
+<p>Using <a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a>, the utility for editing the partition table is called <i>fdisk</i>. Recent versions of <i>fdisk</i> have abandoned the deprecated system of using cylinders as the default display unit, as well as MS-DOS compatibility by default. The latest <i>fdisk</i> automatically aligns all partitions to 2048 sectors, or 1024 KiB, which should work for all EBS sizes that are known to be used by SSD manufacturers. This means that the default settings will give you proper alignment.
+</p>
+<p>Start <i>fdisk</i> against your drive as root. In this example we are using <code>/dev/sda</code>:
+</p>
+<pre># fdisk /dev/sda
+</pre>
+<p>This opens the <i>fdisk</i> dialogue where you can type in commands.
+</p>
+<h4><span class="mw-headline" id="gdisk">gdisk</span></h4>
+<p>Using <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a>, the utility for editing the partition table is called <i>gdisk</i>. Alternatively, you may use the curses-based version called <i>cgdisk</i>; however, the following instructions do not apply to it. See <span class="plainlinks archwiki-template-man" title="$ man 8 cgdisk"><a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/cgdisk.html">cgdisk(8)</a></span> for its usage.
+</p>
+<p><i>gdisk</i> performs partition alignment automatically on a 2048 sector (or 1024KiB) block size base which should be compatible with the vast majority of SSDs if not all. <a href="../en/GNU_Parted.html" title="GNU Parted">GNU Parted</a> also supports GPT, but is <a rel="nofollow" class="external text" href="http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=601813">less user-friendly</a> for aligning partitions.
+</p>
+<p>To use <i>gdisk</i>, run the program with the name of the device you want to change/edit. This example uses <code>/dev/sda</code>:
+</p>
+<pre># gdisk /dev/sda
+</pre>
+<h3><span class="mw-headline" id="Create_new_table">Create new table</span></h3>
+<p>To create a new MBR partition table and clear all current partition data, type <code>o</code> at the prompt. Skip this step if the table you require has already been created.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you create a new partition table on a disk with data on it, it will erase all the data on the disk. Make sure this is what you want to do.</div>
+<h3><span class="mw-headline" id="Create_partitions">Create partitions</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Suggest using <a rel="nofollow" class="external text" href="https://www.freedesktop.org/wiki/Specifications/DiscoverablePartitionsSpec/">Discoverable Partitions</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Fdisk">Talk:Fdisk#</a>)</div>
+</div>
+<p>Create a new partition with the <code>n</code> command. You enter a partition type (<i>fdisk</i> only), partition number, starting sector, and an ending sector.
+</p>
+<p>For <i>fdisk</i>, when prompted, specify the partition type, type <code>p</code> to create a primary partition or <code>e</code> to create an extended one. There may be up to four primary partitions. 
+</p>
+<p>Both start and end sectors can be specified in absolute terms as sector numbers or as positions measured in kibibytes (<code>K</code>), mebibytes (<code>M</code>), gibibytes (<code>G</code>), tebibytes (<code>T</code>), or pebibytes (<code>P</code>); for instance, <code>40M</code> specifies a position 40MiB from the start of the disk. You can specify locations relative to the start or end of the specified default range by preceding the number by a <code>+</code> or <code>-</code> symbol, as in <code>+2G</code> to specify a point 2GiB after the default start sector, or <code>-200M</code> to specify a point 200MiB before the last available sector. Pressing the <code>Enter</code> key with no input specifies the default value, which is the start of the largest available block for the start sector and the end of the same block for the end sector.
+</p>
+<p>Select the partition's type id. The default, <code>Linux filesystem</code>, should be fine for most use. Press <code>l</code> to show the codes list.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> When partitioning it is always a good idea to follow the default values for first and last partition sectors. Additionally, specify partition sizes with the <i>+&lt;size&gt;{M,G,...}</i> notation. Such partitions are always aligned according to the device properties.</li>
+<li> <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a> requires code <code>ef00</code> with <i>gdisk</i> and <code>EFI System</code> with <i>fdisk</i>.</li>
+<li> <a href="../en/GRUB.html" title="GRUB">GRUB</a> requires a BIOS boot partition with code <code>ef02</code> with <i>gdisk</i> and <code>BIOS boot</code> with <i>fdisk</i> when installing GRUB to a disk.</li>
+<li> It is recommended to use <code>8200</code> with <i>gdisk</i> and <code>Linux swap</code> with <i>fdisk</i> for any <a href="../en/Swap.html" title="Swap">swap</a> partitions, since systemd will automount it.</li>
+</ul>
+<p>See the respective articles for considerations concerning the size and location of these partitions.
+</p>
+</div>
+<p>Repeat this procedure until you have the partitions you desire.
+</p>
+<h3><span class="mw-headline" id="Write_changes_to_disk">Write changes to disk</span></h3>
+<p>Write the table to disk and exit via the <code>w</code> command.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Convert_between_MBR_and_GPT">Convert between MBR and GPT</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Remove opinions "one of the best". Consolidate long note. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Fdisk">Talk:Fdisk#</a>)</div>
+</div>
+<p><i>gdisk</i>, <i>sgdisk</i> and <i>cgdisk</i> have the ability to convert MBR and <a href="https://en.wikipedia.org/wiki/BSD_disklabel" class="extiw" title="wikipedia:BSD disklabel">BSD disklabels</a> to GPT without data loss. Upon conversion, all the MBR primary partitions and the logical partitions become GPT partitions with the correct partition type GUIDs and Unique partition GUIDs created for each partition.  See Rod Smith's <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/mbr2gpt.html">Converting to or from GPT</a> for more info.
+</p>
+<p>After conversion, the bootloaders will need to be reinstalled to configure them to boot from GPT.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> GPT stores a secondary table at the end of disk. This data structure consumes 33 512-byte sectors by default. MBR doesn't have a similar data structure at its end, which means that the last partition on an MBR disk sometimes extends to the very end of the disk and prevents complete conversion. If this happens to you, you must abandon the conversion and resize the final partition.</li>
+<li> If your boot loader is GRUB, it needs a <a href="../en/GRUB.html#GUID_Partition_Table_.28GPT.29_specific_instructions" title="GRUB">BIOS Boot Partition</a>.</li>
+<li> There are known corruption issues with the backup GPT table on laptops that are Intel chipset based, and run in RAID mode. The solution is to use AHCI instead of RAID, if possible.</li>
+</ul>
+</div>
+<p>To convert an MBR partition table to GPT, use <i>sgdisk</i>.
+</p>
+<pre># sgdisk -g /dev/sda
+</pre>
+<p>To convert GPT to MBR use the <code>m</code> option. Note that it is not possible to convert more than four partitions from GPT to MBR.
+</p>
+<pre># sgdisk -m /dev/sda
+</pre>
+<p>If the device will be bootable you will need to set the bootable flag with <i>fdisk</i>.
+</p>
+<h3><span class="mw-headline" id="Sort_partitions">Sort partitions</span></h3>
+<p>This applies for when a new partition is created in the space between two partitions or a partition is deleted.
+</p>
+<p>MBR
+</p>
+<pre># sfdisk -r <i>/dev/sda</i>
+</pre>
+<p>GPT
+</p>
+<pre># sgdisk -s <i>/dev/sda</i>
+</pre>
+<p>After sorting the partitions if you are not using <a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a>, it might be required to adjust the <code>/etc/fstab</code> and/or the <code>/etc/crypttab</code> configuration files.
+</p>
+<h3><span class="mw-headline" id="Recover_GPT_header">Recover GPT header</span></h3>
+<p>In case main GPT header or backup GPT header gets damaged, you can recover one from the other with <i>gdisk</i>.
+</p>
+<pre># gdisk <i>/dev/sda</i>
+</pre>
+<p>choose <code>r</code> for recovery and transformation options (experts only). From there choose either
+</p>
+<ul>
+<li> <code>b</code>: use backup GPT header (rebuilding main)</li>
+<li> <code>d</code>: use main GPT header (rebuilding backup)</li>
+</ul>
+<p>When done write the table to disk and exit via the <code>w</code> command.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li>
+<a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/index.html">GPT fdisk Tutorial</a> - offical webpage of gdisk with detailed walkthroughs.</li>
+<li><a rel="nofollow" class="external text" href="http://www.novell.com/coolsolutions/feature/19350.html">Manually Partitioning Your Hard Drive with fdisk</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+<li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

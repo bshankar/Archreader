@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Icinga - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Icinga skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Icinga</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.icinga.org/">Icinga</a> is an open source host, service and network monitoring program. It monitors specified hosts and services, alerting you to any developing issues, errors or improvements. This article describes the installation and configuration of Icinga.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Icinga_configuration"><span class="tocnumber">2</span> <span class="toctext">Icinga configuration</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Icinga2_configuration"><span class="tocnumber">3</span> <span class="toctext">Icinga2 configuration</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Webserver_configuration"><span class="tocnumber">4</span> <span class="toctext">Webserver configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Additional_Nginx_configuration"><span class="tocnumber">4.1</span> <span class="toctext">Additional Nginx configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Icinga-web"><span class="tocnumber">5</span> <span class="toctext">Icinga-web</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Configure_IDOUtils"><span class="tocnumber">5.1</span> <span class="toctext">Configure IDOUtils</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Configure_web_server"><span class="tocnumber">5.2</span> <span class="toctext">Configure web server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Configure_PHP"><span class="tocnumber">5.2.1</span> <span class="toctext">Configure PHP</span></a></li>
+<li class="toclevel-3 tocsection-10">
+<a href="#Configure_database"><span class="tocnumber">5.2.2</span> <span class="toctext">Configure database</span></a>
+<ul>
+<li class="toclevel-4 tocsection-11"><a href="#MySQL"><span class="tocnumber">5.2.2.1</span> <span class="toctext">MySQL</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Finally"><span class="tocnumber">5.3</span> <span class="toctext">Finally</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Upgrade_database"><span class="tocnumber">6</span> <span class="toctext">Upgrade database</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Follow <a href="../en/Web_application_package_guidelines.html#Install_web_application_package" title="Web application package guidelines">Install Web Application Package</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> 
+</p>
+<p>Before you install the package create the user <code>icinga:icinga</code> with these commands:
+</p>
+<pre># groupadd -g 667 icinga
+# useradd -u 667 -g icinga -G http -d /dev/null -s /bin/false icinga
+</pre>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/icinga/">icinga</a></span><sup><small>AUR</small></sup> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/icinga2/">icinga2</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>Users may also want to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=monitoring-plugins">monitoring-plugins</a></span> from the Community repositories.
+</p>
+<h2><span class="mw-headline" id="Icinga_configuration">Icinga configuration</span></h2>
+<p>Copy the sample config files as root:
+</p>
+<pre># cd /etc/icinga
+# cp cgi.cfg.sample cgi.cfg
+# cp resource.cfg.sample resource.cfg
+# cp icinga.cfg.sample icinga.cfg
+# cp objects/commands.cfg.sample objects/commands.cfg
+# cp objects/contacts.cfg.sample objects/contacts.cfg
+# cp objects/localhost.cfg.sample objects/localhost.cfg
+# cp objects/templates.cfg.sample objects/templates.cfg
+# cp objects/timeperiods.cfg.sample objects/timeperiods.cfg
+</pre>
+<p>Edit <code>/etc/icinga/resource.cfg</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/icinga/resource.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Default monitoring plugins
+$USER1$=/usr/lib/monitoring-plugins
+# or legacy Nagios plugins 
+#$USER1$=/usr/share/nagios/libexec</pre>
+<h2><span class="mw-headline" id="Icinga2_configuration">Icinga2 configuration</span></h2>
+<p>By default Icinga 2 uses the following files and directories:
+</p>
+<pre># /etc/icinga2	                Contains Icinga 2 configuration files.
+# /etc/init.d/icinga2	        The Icinga 2 init script.
+# /usr/sbin/icinga2*	        The Icinga 2 binary.
+# /usr/share/doc/icinga2	Documentation files that come with Icinga 2.
+# /usr/share/icinga2/include	The Icinga Template Library and plugin command configuration.
+# /var/run/icinga2	        PID file.
+# /var/run/icinga2/cmd	        Command pipe and Livestatus socket.
+# /var/cache/icinga2	        status.dat/objects.cache, icinga2.debug files
+# /var/spool/icinga2	        Used for performance data spool files.
+# /var/lib/icinga2	        Icinga 2 state file, cluster log, local CA and configuration files.
+# /var/log/icinga2	        Log file location and compat/ directory for the CompatLogger feature.
+</pre>
+<h2><span class="mw-headline" id="Webserver_configuration">Webserver configuration</span></h2>
+<p>Create htpasswd.users file with a username and password.
+</p>
+<pre># htpasswd -c /etc/icinga/htpasswd.users icingaadmin
+</pre>
+<p>If you define another user foo, you need grant access permission to that user. Edit /etc/icinga/cgi.cfg
+</p>
+<pre>authorized_for_system_information=icingaadmin,foo
+authorized_...
+...
+</pre>
+<h3><span class="mw-headline" id="Additional_Nginx_configuration">Additional Nginx configuration</span></h3>
+<p>Configure Authentication:
+</p>
+<pre> location /icinga/ {
+   alias                   /usr/share/webapps/icinga/;
+   auth_basic              "Restricted";
+   auth_basic_user_file    /etc/icinga/htpasswd.users;
+ }
+</pre>
+<p>Configure CGI:
+</p>
+<pre>   location ~ ^/icinga/(.*)\.cgi$ {
+     root           /usr/share/webapps/;
+     fastcgi_pass   unix:/var/run/fcgiwrap.sock;
+     include        fastcgi.conf;
+     fastcgi_param  AUTH_USER          $remote_user;
+     fastcgi_param  REMOTE_USER        $remote_user;
+   }
+</pre>
+<h2><span class="mw-headline" id="Icinga-web">Icinga-web</span></h2>
+<p>Follow <a href="../en/Web_application_package_guidelines.html#Install_web_application_package" title="Web application package guidelines">Install Web Application Package</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> 
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/icinga-web/">icinga-web</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Configure_IDOUtils">Configure IDOUtils</span></h3>
+<pre> # cd /etc/icinga
+ # mv idomod.cfg-sample idomod.cfg
+ # mv ido2db.cfg-sample ido2db.cfg
+ 
+ # cd /etc/icinga/modules
+ # mv idoutils.cfg-sample idoutils.cfg
+ 
+ ! Database Setup
+ 
+ (Mysql)
+ $ mysql -u root -p
+ &gt; CREATE USER 'icinga'@'localhost' IDENTIFIED BY 'icinga';
+ &gt; CREATE DATABASE icinga;
+ &gt; GRANT USAGE ON icinga.* TO 'icinga'@'localhost' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0;
+ &gt; GRANT SELECT , INSERT , UPDATE , DELETE, DROP, CREATE VIEW, INDEX
+  ON icinga.* TO 'icinga'@'localhost';
+ &gt; FLUSH PRIVILEGES;
+ &gt; quit
+ 
+ $ mysql -u root -p icinga &lt; /usr/share/icinga/idoutils/db/mysql/mysql.sql
+</pre>
+<h3><span class="mw-headline" id="Configure_web_server">Configure web server</span></h3>
+<p>Example config files are located at
+</p>
+<pre> /etc/icinga-web/apache.example.conf
+ /etc/icinga-web/nginx.example.conf
+</pre>
+<p>If you get 503 'Access denied' errors, check in these configuration files to see if you're allowed to visit the page:
+</p>
+<pre> Order allow,deny
+ Allow from all
+</pre>
+<p>in sections <i>&lt;Directory "/usr/local/icinga-web/lib/ext3/"&gt;</i> and <i>&lt;Directory "/usr/local/icinga-web/pub/"&gt;</i>.
+</p>
+<h4><span class="mw-headline" id="Configure_PHP">Configure PHP</span></h4>
+<p>Edit <code>/etc/php.ini</code>
+</p>
+<pre> open_basedir = ...:/usr/share/icinga-web:/var/cache/icinga-web:/var/log/icinga
+ extension=pdo_mysql.so
+ extension=xsl.so
+ extension=sockets.so
+</pre>
+<h4><span class="mw-headline" id="Configure_database">Configure database</span></h4>
+<h5><span class="mw-headline" id="MySQL">MySQL</span></h5>
+<pre>! Create database and grants.
+# mysql -u root -p
+&gt; CREATE USER 'icinga_web'@'localhost' IDENTIFIED BY 'icinga_web';
+&gt; CREATE DATABASE icinga_web;
+&gt; GRANT USAGE ON icinga_web.* TO 'icinga_web'@'localhost' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0;
+&gt; GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, ALTER, INDEX ON icinga_web.* TO 'icinga_web'@'localhost';
+&gt; quit
+  
+ ! Import the schema.
+# mysql -u root -p icinga_web &lt; /usr/share/icinga-web/etc/schema/mysql.sql
+</pre>
+<h3><span class="mw-headline" id="Finally">Finally</span></h3>
+<pre>! Start IDOUtils
+# systemctl start ido2db
+
+! Start Icinga
+# systemctl start icinga
+
+! Start Mysql
+# systemctl start mysqld
+
+! Start Web Server
+# systemctl start httpd or nginx
+
+! goto <a rel="nofollow" class="external free" href="http://localhost/icinga-web">http://localhost/icinga-web</a>
+&gt; login with 'root' and 'password'
+</pre>
+<h2><span class="mw-headline" id="Upgrade_database">Upgrade database</span></h2>
+<p>A new version usually requires an upgrade of the database. You find the sql upgrade scripts in:
+</p>
+<pre>/usr/share/icinga/idoutils/db/mysql/upgrade
+/usr/share/icinga-web/etc/schema/updates/mysql
+</pre>
+<p>Commands to upgrade with these scripts are:
+</p>
+<pre># mysql -u root -p icinga &lt; ./mysql-upgrade-1.8.0.sql 
+# mysql -u root -p icinga_web &lt; ./mysql_v1-7-2_to_v1-8-0.sql
+# systemctl --system daemon-reload
+# systemctl restart icinga
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.icinga.org/">icinga.org</a> - Official website</li>
+<li> <a rel="nofollow" class="external text" href="https://www.monitoring-plugins.org/">monitoring-plugins</a> - Default plugins for Icinga and other monitoring applications</li>
+<li> <a rel="nofollow" class="external text" href="http://www.nagiosplugins.org/">Nagios Plugins</a> - The home of the legacy plugins </li>
+<li> <a href="https://en.wikipedia.org/wiki/Icinga" class="extiw" title="wikipedia:Icinga">wikipedia.org</a> - Wikipedia article</li>
+<li> <a rel="nofollow" class="external text" href="http://www.nagiosexchange.org">NagiosExchange</a> - Overview of plugins, addons, mailing lists for Icinga</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Network_monitoring.html" title="Category:Network monitoring">Network monitoring</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

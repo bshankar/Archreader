@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Tilda - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Tilda skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Tilda</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://github.com/lanoxx/tilda/">Tilda</a> is a "pop-up virtual terminal" for X, just like <a href="../en/Yakuake.html" title="Yakuake">Yakuake</a> (<a href="../en/KDE.html" title="KDE">KDE</a>) or <a href="../en/Guake.html" title="Guake">Guake</a> (<a href="../en/GNOME.html" title="GNOME">GNOME</a>), but a little more lightweight and a little more maintained than sjterm.
+</p>
+<h2><span class="mw-headline" id="Why_Tilda">Why Tilda</span></h2>
+<p>You may find it very convenient to drop into a shell quickly without wasting screen estate. Tilda allows you to do that, as it is already open and therefore can be accessed very quickly, while staying unobtrusively in the "background" when you do not need it.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tilda">tilda</a></span> package.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Tilda is not compatible with Wayland, see <a rel="nofollow" class="external text" href="https://github.com/lanoxx/tilda/issues/150">Github</a>.</div>
+<h2><span class="mw-headline" id="Using_with_dwm">Using with dwm</span></h2>
+<p><a href="../en/Dwm.html" title="Dwm">dwm</a> is a tiling <a href="../en/Window_manager.html" title="Window manager">window manager</a>, which manages placement of windows automatically, so it takes some configuration to make Tilda work properly.
+</p>
+<p>You have to edit dwm's <code>config.h</code> and recompile/reinstall dwm to properly account for Tilda.
+</p>
+<p>Get the latest <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILD</a> for dwm:
+</p>
+<pre># abs community/dwm
+</pre>
+<p>Copy newest sources to your working directory, I am using <code>~/sources</code>:
+</p>
+<pre>$ cp -r /var/abs/community/dwm ~/sources
+</pre>
+<p>Get into working directory to start config:
+</p>
+<pre>$ cd ~/sources/dwm
+</pre>
+<p>Edit config.h:
+</p>
+ <pre>static const Rule rules[] = {
+	/* class      instance    title       tags mask     isfloating   monitor */
+	{ "Gimp",     NULL,       NULL,       0,            True,        -1 },
+	{ "Firefox",  NULL,       NULL,       1 &lt;&lt; 8,       False,       -1 },
+//add the line below
+	{ "Tilda",  NULL,       NULL,       0,       True,       -1 },
+	{ "Volumeicon",  NULL,       NULL,       0,       True,       -1 },
+};</pre>
+<p>The above makes all windows with the WM_CLASS "Tilda" floating. The word "Tilda" has to be uppercase, as shown by
+</p>
+<pre>$ xprop |grep WM_CLASS
+</pre>
+<p>Save <code>config.h</code>, then compile and install dwm:
+</p>
+<pre>$ makepkg -g &gt;&gt; PKGBUILD &amp;&amp; makepkg -efi
+</pre>
+<p>Start dwm or restart dwm if it is already active, either by MOD+SHIFT+Q or killing dwm and restarting it.
+</p>
+<p>Launch tilda with -C option:
+</p>
+<pre>$ tilda -C
+</pre>
+<p>Now you can configure Tilda, I recommend the following options:
+</p>
+<pre>Font: Clean 9
+Appearance: Height: 50%, Width: 70%, Centered Horizontally
+Extras: Enable Transparency Level 15
+Animated Pulldown: 1500 usec, Orientation: Top
+Colors: Built-in Scheme "Green on Black"
+Scrolling: Scrollbar is on the left, 2000 lines scrollback
+Key Binding: F9
+</pre>
+<p>Here is what my config looks like after those settings in <code>~/.config/tilda/config_0</code>:
+</p>
+<pre>
+tilda_config_version = "0.9.6"
+# image = ""
+# command = ""
+font = "Clean 9"
+key = "F9"
+title = "Tilda"
+background_color = "white"
+# working_dir = ""
+web_browser = "firefox"
+lines = 2000
+max_width = 956
+max_height = 384
+min_width = 1
+min_height = 1
+transparency = 15
+x_pos = 205
+y_pos = 1
+tab_pos = 0
+backspace_key = 0
+delete_key = 1
+d_set_title = 3
+command_exit = 2
+scheme = 1
+slide_sleep_usec = 1500
+animation_orientation = 0
+scrollbar_pos = 0
+back_red = 0
+back_green = 0
+back_blue = 0
+text_red = 0
+text_green = 65535
+text_blue = 0
+scroll_background = true
+scroll_on_output = false
+notebook_border = false
+antialias = true
+scrollbar = false
+use_image = false
+grab_focus = true
+above = true
+notaskbar = true
+bold = true
+blinks = true
+scroll_on_key = true
+bell = false
+run_command = false
+pinned = true
+animation = true
+hidden = true
+centered_horizontally = true
+centered_vertically = false
+enable_transparency = true
+double_buffer = false
+</pre>
+<p>It is important you enable the pulldown-animation, otherwise Tilda will keep jumping down each time you unhide it, must be a dwm issue.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Terminal_emulators.html" title="Category:Terminal emulators">Terminal emulators</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Ventrilo - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Ventrilo skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Ventrilo</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.ventrilo.com/">Ventrilo</a> is a voice communication program for Windows that runs quite well on the latest <a href="../en/Wine.html" title="Wine">Wine</a>. This article outlines a few workarounds necessary to using Ventrilo naturally on Linux.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Running Ventrilo under Wine is no longer necessary; <a rel="nofollow" class="external text" href="http://www.mangler.org/">Mangler</a> is a stable open-source client in the community repository (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mangler">mangler</a></span>) that connects to Ventrilo 3.0 servers.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Global_Push_to_Talk_Hotkey"><span class="tocnumber">1</span> <span class="toctext">Global Push to Talk Hotkey</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Finding_the_input_device"><span class="tocnumber">1.1</span> <span class="toctext">Finding the input device</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Startup_Script"><span class="tocnumber">1.2</span> <span class="toctext">Startup Script</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Example_Ventrilo_Startup_Script"><span class="tocnumber">1.3</span> <span class="toctext">Example Ventrilo Startup Script</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Allowing_sudo_for_ventriloctrl"><span class="tocnumber">1.4</span> <span class="toctext">Allowing sudo for ventriloctrl</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Mangler_and_ALSA"><span class="tocnumber">2</span> <span class="toctext">Mangler and ALSA</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Additional_Resources"><span class="tocnumber">3</span> <span class="toctext">Additional Resources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Global_Push_to_Talk_Hotkey">Global Push to Talk Hotkey</span></h2>
+<p>One problem that Wine Ventrilo users face is that the push to talk hotkey only being detected when a Wine window (such as Ventrilo itself) is in focus. The solution to this is using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ventriloctrl/">ventriloctrl</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/ventriloctrl">aur-mirror</a>]</sup>, a simple program that sends X input to Ventrilo.
+</p>
+<h3><span class="mw-headline" id="Finding_the_input_device">Finding the input device</span></h3>
+<p>The acceptable input devices are in <code>/dev/input/</code>. If you want to use a mouse use the event-mouse in <code>/dev/input/by-id/</code>. For a keyboard use <code>/dev/input/event[#]</code>.
+</p>
+<p>You will probably need to do a bit of trial and error to find the proper event number or device. The best way to do this is just to run <code>ventriloctrl /dev/input/[whatever]</code> as root, and press keys or click your mouse and see if it is detected by the program. If it is detected, it will show an example line with a number at the end. That number is the button number that you will use to run ventriloctrl in the future.
+</p>
+<p>For example, my <code>ventriloctrl /dev/input/by-id/usb-Logitech_USB_Receiver-event-mouse</code> shows:
+</p>
+<pre># ventriloctrl /dev/input/by-id/usb-Logitech_USB_Receiver-event-mouse 272
+</pre>
+<p>If that was the button I wanted to use, I would run ventriloctrl with that line in the future.
+</p>
+<h3><span class="mw-headline" id="Startup_Script">Startup Script</span></h3>
+<p>Now we will make a script to run ventriloctrl using the parameters you discovered. This could also be done with an alias or other user-specific methods. Edit your script with your favorite editor and call it whatever you want. Mine is going to be called <code>ventriloctrl+</code>.
+</p>
+<pre># nano /usr/bin/ventriloctrl+
+</pre>
+<p>By default, a normal user does not have the access to the <code>/dev/input/</code> devices that ventriloctrl needs to use. To get around this you can either make a <a href="../en/Udev.html" title="Udev">udev</a> rule, or just use <a href="../en/Sudo.html" title="Sudo">sudo</a>. So far, I am just going to show what your script should look like with sudo.
+</p>
+<pre>#!/bin/sh
+sudo ventriloctrl /dev/input/by-id/usb-Logitech_USB_Receiver-event-mouse 272
+</pre>
+<p>Of course, the device and event number should be replaced with the ones you found earlier. Essentially you just want to add sudo to the front of your previous input device line.
+</p>
+<p>Make sure your script is executable:
+</p>
+<pre># chmod +x /usr/bin/ventriloctrl+
+</pre>
+<p>All done. Now you just need to make the <code>ventriloctrl+</code> script run when ventrilo runs.
+</p>
+<h3><span class="mw-headline" id="Example_Ventrilo_Startup_Script">Example Ventrilo Startup Script</span></h3>
+<p>We previously made a script to start ventriloctrl. Now, you may wish to make a script that starts ventriloctrl after Ventrilo starts. The tough part about this is determining when Ventrilo has started completely, as it is a Wine app. If anyone else has a better way of doing this please add it. Otherwise, here is my method.
+</p>
+<p>Take a look at the first post in the <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=56646">self-made command line utilities thread</a> on the Arch forums. The script we are going to use from that is the try script.
+</p>
+<p>Copy it into a script file such as <code>/usr/bin/try</code>. Make sure the script is executable.
+</p>
+<pre># chmod +x /usr/bin/try
+</pre>
+<p>Now create another script to start Ventrilo named whatever you want. Mine will be called <code>ventrilo</code>.
+</p>
+<pre># nano /usr/bin/ventrilo
+</pre>
+<p>In the script, you will first want to cd to your Ventrilo install. By default, this should work for any users that have it installed to their default <code>~/.wine</code> directory. In my example, I run <code>Ventrilo.exe</code> and save its pid to the VENT variable, and then I use the try script to run <code>ventriloctrl+</code> and save its pid to the CTRL variable. Then I wait until VENT finishes, and kill CTRL. The effect? Ventrilo starts and ventriloctrl attempts to start until it does, then it runs until Ventrilo closes. Here is my script:
+</p>
+<pre>#!/bin/bash
+cd ~/.wine/drive_c/Program\ Files/Ventrilo
+wine Ventrilo.exe 2&gt;/dev/null &amp; VENT=$!
+try ventriloctrl+ &amp; CTRL=$!
+wait $VENT
+kill $CTRL
+</pre>
+<p>Also make sure your ventrilo script is executable.
+</p>
+<pre># chmod +x /usr/bin/ventrilo
+</pre>
+<p>That should be it. You should now be able to run Ventrilo with the ventrilo command.
+</p>
+<h3><span class="mw-headline" id="Allowing_sudo_for_ventriloctrl">Allowing sudo for ventriloctrl</span></h3>
+<p>You might also want to run ventriloctrl with nopasswd for <a href="../en/Sudo.html" title="Sudo">sudo</a>. To do this, edit the sudo config file:
+</p>
+<pre># visudo
+</pre>
+<p>Add a line like the following. <code>%wheel</code> can be replaced with specific usernames if desired, otherwise it will work for any users in the wheel group.
+</p>
+<pre>%wheel ALL=NOPASSWD:/usr/bin/ventriloctrl
+</pre>
+<h2><span class="mw-headline" id="Mangler_and_ALSA">Mangler and ALSA</span></h2>
+<p>Currently, mangler and mangler-svn from the AUR defaults to using pulseaudio at launch, regardless if it is not installed and will cause the application to hang at the terminal or not start at all. To build Mangler without pulseaudio, edit the PKGBUILD ./configure line, add --without-pulseaudio, like so:
+</p>
+<pre>./configure --prefix=/usr --without-pulseaudio
+</pre>
+<p>Also, should your microphone fail to transmit any audio or should you get an error from a terminal that looks like this:
+</p>
+<pre>(snd_pcm_set_params) Rate does not match (requested 32000Hz, get 0Hz)
+</pre>
+<p>It is due to the recording device failing to re-sample to the Ventrilo server's rate. To fix this, go Edit -&gt; Settings and then the Audio tab and select Custom for the input device and type in:
+</p>
+<pre>plughw:X,0
+</pre>
+<p>Where X is your microphone or recording device ID. To determine your recording device ID:
+</p>
+<pre>cat /proc/asound/cards
+</pre>
+<p>The number next to each device is the device ID. Also, do not forget to raise the volume on your recording device through alsamixer.
+</p>
+<p>Should none of this work and problems still persist, switching to pulseaudio might be the way to go, at least until Mangler is fixed.
+</p>
+<h2><span class="mw-headline" id="Additional_Resources">Additional Resources</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://appdb.winehq.org/objectManager.php?sClass=application&amp;iId=2169">WineHQ AppDB entry for Ventrilo</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://ubuntuforums.org/showpost.php?p=2662867&amp;postcount=83">Ubuntu Forums Source</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Telephony_and_voice.html" title="Category:Telephony and voice">Telephony and voice</a></li>
+<li><a href="../en/Category:Wine.html" title="Category:Wine">Wine</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

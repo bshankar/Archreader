@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>AppArmor - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-AppArmor skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">AppArmor</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SELinux.html" title="SELinux">SELinux</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/TOMOYO_Linux.html" title="TOMOYO Linux">TOMOYO Linux</a></li>
+</ul>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/AppArmor" class="extiw" title="wikipedia:AppArmor">AppArmor</a> is a <a href="https://en.wikipedia.org/wiki/Mandatory_access_control" class="extiw" title="wikipedia:Mandatory access control">Mandatory Access Control</a> (MAC) system, implemented upon the <a href="https://en.wikipedia.org/wiki/Linux_Security_Modules" class="extiw" title="wikipedia:Linux Security Modules">Linux Security Modules</a> (LSM).
+</p>
+<p>AppArmor, like most other LSMs, supplements rather than replaces the default Discretionary Access Control (DAC). As such it's impossible to grant a process more privileges than it had in the first place. 
+</p>
+<p>Ubuntu, SUSE and a number of other distributions use it by default. RHEL (and it's variants) use SELinux which requires good userspace integration to work properly. SELinux attaches labels to all files, processes and objects and is therefore very flexible. However configuring SELinux is considered to be very complicated and requires a supported filesystem. AppArmor on the other hand works using file paths and its configuration can be easily adapted.
+</p>
+<p>AppArmor proactively protects the operating system and applications from external or internal threats and even zero-day attacks by enforcing a specific rule set on a per application basis. Security policies completely define what system resources individual applications can access, and with what privileges. Access is denied by default if no profile says otherwise. A few default policies are included with AppArmor and using a combination of advanced static analysis and learning-based tools, AppArmor policies for even very complex applications can be deployed successfully in a matter of hours.
+</p>
+<p>Every breach of policy triggers a message in the system log, and AppArmor can be configured to notify users with real-time violation warnings popping up on the desktop.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Kernel"><span class="tocnumber">1.1</span> <span class="toctext">Kernel</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Userspace_Tools"><span class="tocnumber">1.2</span> <span class="toctext">Userspace Tools</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Testing"><span class="tocnumber">1.3</span> <span class="toctext">Testing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Disabling"><span class="tocnumber">2</span> <span class="toctext">Disabling</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Configuration"><span class="tocnumber">3</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Auditing_and_generating_profiles"><span class="tocnumber">3.1</span> <span class="toctext">Auditing and generating profiles</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Editing_and_understanding_profiles"><span class="tocnumber">3.2</span> <span class="toctext">Editing and understanding profiles</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Parsing_profiles"><span class="tocnumber">3.3</span> <span class="toctext">Parsing profiles</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Security_considerations"><span class="tocnumber">4</span> <span class="toctext">Security considerations</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Preventing_circumvention_of_path-based_MAC_via_links"><span class="tocnumber">4.1</span> <span class="toctext">Preventing circumvention of path-based MAC via links</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Tips_and_tricks"><span class="tocnumber">5</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Get_desktop_notification_on_DENIED_actions"><span class="tocnumber">5.1</span> <span class="toctext">Get desktop notification on DENIED actions</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Cache_profiles"><span class="tocnumber">5.2</span> <span class="toctext">Cache profiles</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Kernel">Kernel</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The highly disputed user namespace (<code>CONFIG_USER_NS=Y</code>) isn't set in the <a href="../en/Kernels.html" title="Kernel" class="mw-redirect">kernel</a> configuration, but may bring additional functionality to AppArmor. See <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/36969">FS#36969</a> for details on user namespaces.</div>
+<p>When compiling the kernel, it is required to at least set the following options:
+</p>
+<pre>CONFIG_SECURITY_APPARMOR=y
+CONFIG_SECURITY_APPARMOR_BOOTPARAM_VALUE=1
+CONFIG_DEFAULT_SECURITY_APPARMOR=y
+CONFIG_AUDIT=y
+</pre>
+<p>For those new or altered variables to not get overridden, place them at the bottom of the config file or adjust the previous invocations accordingly.
+</p>
+<p>Instead of setting <code>CONFIG_SECURITY_APPARMOR_BOOTPARAM_VALUE</code> and <code>CONFIG_DEFAULT_SECURITY_APPARMOR</code>, you can also set <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel boot parameters</a>: <code>apparmor=1 security=apparmor</code>.
+</p>
+<h3><span class="mw-headline" id="Userspace_Tools">Userspace Tools</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since AppArmor builds and installs a kernel module it must be rebuilt against the current kernel on each update</div>
+<p>The userspace tools and libraries to control AppArmor are supplied by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/apparmor/">apparmor</a></span><sup><small>AUR</small></sup> package.
+</p>
+<p>The package is a split package which consists of following sub-packages:
+</p>
+<ul>
+<li> apparmor (meta package)</li>
+<li> apparmor-libapparmor</li>
+<li> apparmor-utils</li>
+<li> apparmor-parser</li>
+<li> apparmor-profiles</li>
+<li> apparmor-pam</li>
+<li> apparmor-vim</li>
+</ul>
+<p>To load all AppArmor profiles on startup, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>apparmor.service</code>.
+</p>
+<h3><span class="mw-headline" id="Testing">Testing</span></h3>
+<p>After a reboot you can test if AppArmor is really enabled using this command as root:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cat /sys/module/apparmor/parameters/enabled</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Y
+</pre>
+<p>(Y=enabled, N=disabled, no such file = module not in kernel)
+</p>
+<h2><span class="mw-headline" id="Disabling">Disabling</span></h2>
+<p>To disable AppArmor for the current session, <a href="../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">stop</a> <code>apparmor.service</code>, or <a href="../en/Systemd.html#Using_units" title="Disable" class="mw-redirect">disable</a> it to prevent it from starting at the next boot.
+</p>
+<p>Alternatively you may choose to disable the kernel modules required by AppArmor by appending <code>apparmor=0 security=""</code> to the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel boot parameters</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Auditing_and_generating_profiles">Auditing and generating profiles</span></h3>
+<p>To create new profiles using <code>aa-genprof</code>, <code>auditd.service</code> from the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=audit">audit</a></span> must be running. This is because Arch Linux adopted systemd and doesn't do kernel logging to file by default. Apparmor can grab kernel audit logs from the userspace auditd daemon, allowing you to build a profile.
+To get kernel audit logs, you'll need to have rules in place to monitor the desired application. Most often a basic rule configured with <span class="plainlinks archwiki-template-man" title="$ man 8 auditctl"><a rel="nofollow" class="external text" href="http://linux.die.net/man/8/auditctl">auditctl(8)</a></span> will suffice:
+</p>
+<pre># auditctl -a exit,always -F arch=b64 -S all -F path=/usr/bin/chromium -F key=MonitorChromium
+</pre>
+<p>but be sure to read <a href="../en/Audit_framework.html#Adding_rules" title="Audit framework">Audit framework#Adding rules</a> if this is unfamiliar to you.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Remember to stop the service afterwards (and maybe clear <code>/var/log/audit/audit.log</code>) because it may cause overhead depending on your rules.</div>
+<h3><span class="mw-headline" id="Editing_and_understanding_profiles">Editing and understanding profiles</span></h3>
+<p>Profiles are human readable text files residing under <code>/etc/apparmor.d/</code> describing how binaries should be treated when executed. A basic profile looks similar to this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/apparmor.d/usr.bin.test</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#include &lt;tunables/global&gt;
+
+profile test /usr/lib/test/test_binary {
+    #include &lt;abstractions/base&gt;
+
+    # Main libraries and plugins
+    /usr/share/TEST/** r,
+    /usr/lib/TEST/** rm,
+
+    # Configuration files and logs
+    @{HOME}/.config/ r,
+    @{HOME}/.config/TEST/** rw,
+}
+</pre>
+<p>Text preceded by a <code>@</code> symbol are variables defined by abstractions (<code>/etc/apparmor.d/abstractions/</code>), tunables (<code>/etc/apparmor.d/tunables/</code>) or by the profile itself. <code>#include</code> includes other profile-files directly. Paths followed by a set of characters are <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_Core_Policy_Reference#File_access_rules">access permissions</a>. Pattern matching is done using <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_Core_Policy_Reference#AppArmor_globbing_syntax">AppArmor's globbing syntax</a>.
+</p>
+<p>Most common use cases are covered by the following statements:
+</p>
+<ul>
+<li> <code>r</code> — read: read data</li>
+<li> <code>w</code> — write: create, delete, write to a file and extend it</li>
+<li> <code>m</code> — memory map executable: memory map a file executable</li>
+<li> <code>x</code> — execute: execute file; needs to be preceded by a <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_Core_Policy_Reference#Execute_rules">qualifier</a>
+</li>
+</ul>
+<p>Remember that those permission do not allow binaries to exceed the permission dictated by the Discretionary Access Control (DAC).
+</p>
+<p>This is merely a short overview, for a more detailed guide be sure to have a look at the <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_Core_Policy_Reference">documentation</a>.
+</p>
+<h3><span class="mw-headline" id="Parsing_profiles">Parsing profiles</span></h3>
+<p>To load, unload, reload, cache and stat profiles use <code>apparmor_parser</code>. The default action (<code>-a</code>) is to load a new profile, in order to overwrite an existing profile use the <code>-r</code> option and to remove a profile use <code>-R</code>. Each action may also apply to multiple profiles. Refer to <span class="plainlinks archwiki-template-man" title="$ man 8 apparmor_parser"><a rel="nofollow" class="external text" href="http://man.cx/apparmor_parser(8)">apparmor_parser(8)</a></span> man page for more information.
+</p>
+<h2><span class="mw-headline" id="Security_considerations">Security considerations</span></h2>
+<h3><span class="mw-headline" id="Preventing_circumvention_of_path-based_MAC_via_links">Preventing circumvention of path-based MAC via links</span></h3>
+<p>AppArmor can be circumvented via hardlinks in the standard POSIX security model. However, the kernel <a rel="nofollow" class="external text" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=800179c9b8a1e796e441674776d11cd4c05d61d7">included</a> the ability to prevent this vulnerability via the following settings: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/sysctl.d/50-default.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1</pre>
+<p>Patches distributions like Ubuntu have applied to their kernels as workarounds as not needed anymore.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Get_desktop_notification_on_DENIED_actions">Get desktop notification on DENIED actions</span></h3>
+<p>The notify daemon displays desktop notifications whenever AppArmor denies a program access. The script must be started at each boot and needs a few additional parameters:
+</p>
+<pre># aa-notify -p -f /var/log/audit/audit.log --display $DISPLAY
+</pre>
+<p>The daemon relies on the auditing events being logged to a text file which can be specified using <code>-f</code>. To circumvent <a href="../en/Systemd.html" title="Systemd">systemd</a> not logging to a file it is necessary to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>auditd.service</code> and pass its log file to <code>aa-notify</code>. No special auditing rules are necessary for this to work, therefore the overhead is not as significant as it was when <a href="#Creating_new_profiles">#Creating new profiles</a>.
+</p>
+<h3><span class="mw-headline" id="Cache_profiles">Cache profiles</span></h3>
+<p>Since AppArmor has to translate the configured profiles into a binary format it may take some time to load them. Besides being bothersome for the user, it may also increases the boot time significantly!
+</p>
+<p>To circumvent some of those problems AppArmor can cache profiles in <code>/etc/apparmor.d/cache/</code>. However this behaviour is disabled by default therefore it must be done manually with <code>apparmor_parser</code>. In order to write to the cache use <code>-W</code> (overwrite existing profiles with <code>-T</code>) and reload the profiles using <code>-r</code>. Refer to <a href="#Parsing_profiles">#Parsing profiles</a> for a brief overview of additional arguments.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/">AppArmor wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_Core_Policy_Reference">AppArmor Core Policy Reference</a> — Detailed description of available options in a profile</li>
+<li> <a rel="nofollow" class="external text" href="http://ubuntuforums.org/showthread.php?t=1008906">Ubuntu Tutorial</a> — General overview of available utilities and profile creation</li>
+<li> <a rel="nofollow" class="external text" href="https://help.ubuntu.com/community/AppArmor">Ubuntu Wiki</a> — Basic command overview</li>
+<li> <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/AppArmor_versions">AppArmor Verions</a> — Version overview and links to the respective release notes</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 5 apparmor.d"><a rel="nofollow" class="external text" href="http://manpages.ubuntu.com/manpages/oneiric/man5/apparmor.d.5.html">apparmor.d(5)</a></span> — Structure of the AppArmor configuration directory</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 8 apparmor_parse"><a rel="nofollow" class="external text" href="http://manpages.ubuntu.com/manpages/oneiric/man8/apparmor_parser.8.html">apparmor_parse(8)</a></span> — The most fundamental AppArmor utility to load, unload, cache and stat profiles</li>
+<li> <a rel="nofollow" class="external text" href="http://wiki.apparmor.net/index.php/Kernel_interfaces">Kernel Interfaces</a> — Low level interfaces to the AppArmor kernel module</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.ubuntu.com/ApparmorProfileMigration">Apparmor Profile Migration</a> — Emergence of profiles</li>
+<li> <a href="https://en.wikipedia.org/wiki/Linux_Security_Modules" class="extiw" title="wikipedia:Linux Security Modules">wikipedia:Linux Security Modules</a> — Linux kernel module on which basis AppArmor is build upon</li>
+<li> <a rel="nofollow" class="external text" href="https://launchpad.net/apparmor">Launchpad Project Page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/21406">FS#21406</a> — Initial discussion about the introduction of AppArmor</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

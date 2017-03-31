@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Keyboard backlight - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Keyboard_backlight skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Keyboard backlight</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Any_vendor">Any vendor</span></h2>
+<p>You can control your computer keyboard backlight via the <a href="../en/D-Bus.html" title="D-Bus">D-Bus</a> interface.
+The benefits of using it are that no modification to device files is required
+and it is vendor agnostic.
+</p>
+<p>Here is an example implementation in <a href="../en/Python.html" title="Python">Python</a> 3.
+Place the following script in <code>/usr/local/bin/</code> and make it executable.
+You can then map your keyboard shortcuts to run <code>/usr/local/bin/kb-light.py +</code>
+and <code>/usr/local/bin/kb-light.py -</code> to increase and decrease your keyboard
+backlight level.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/kb-light.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/usr/bin/env python3
+# coding: utf-8
+
+from sys import argv
+import dbus
+
+
+def kb_light_set(delta):
+    bus = dbus.SystemBus()
+    kbd_backlight_proxy = bus.get_object('org.freedesktop.UPower', '/org/freedesktop/UPower/KbdBacklight')
+    kbd_backlight = dbus.Interface(kbd_backlight_proxy, 'org.freedesktop.UPower.KbdBacklight')
+
+    current = kbd_backlight.GetBrightness()
+    maximum = kbd_backlight.GetMaxBrightness()
+    new = max(0, current + delta)
+
+    if new &gt;= 0 and new &lt;= maximum:
+        current = new
+        kbd_backlight.SetBrightness(current)
+
+    # Return current backlight level percentage
+    return 100 * current / maximum
+
+if __name__ == '__main__':
+    if len(argv[1:]) == 1:
+        if argv[1] == "--up" or argv[1] == "+":
+            # ./kb-light.py (+|--up) to increment
+            print(kb_light_set(1))
+        elif argv[1] == "--down" or argv[1] == "-":
+            # ./kb-light.py (-|--down) to decrement
+            print(kb_light_set(-1))
+        else:
+            print("Unknown argument:", argv[1])
+    else:
+        print("Script takes exactly one argument.", len(argv[1:]), "arguments provided.")</pre>
+<h2><span class="mw-headline" id="Asus">Asus</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The following way is not recommended. It provides world-writeable permissions to the keyboard backlight device file meaning that any and every user can control it.</div>
+<p>The keyboard backlight file is usually locked out from editing. To unlock this file at bootup, you will need to create a <a href="../en/Systemd.html" title="Systemd">systemd</a> service.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/asus-kbd-backlight.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Asus Keyboard Backlight
+Wants=systemd-backlight@leds:asus::kbd_backlight.service
+After=systemd-backlight@leds:asus::kbd_backlight.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/chmod 666 /sys/class/leds/asus::kbd_backlight/brightness
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>You are now able to use a keyboard backlight changer script. For an example, see <a href="../en/ASUS_G55VW.html#keyboard_backlight_script" title="ASUS G55VW">ASUS G55VW#keyboard backlight script</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Keyboards.html" title="Category:Keyboards">Keyboards</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

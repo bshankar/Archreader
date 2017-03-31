@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Exim with remote SMTP server - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Exim_with_remote_SMTP_server skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Exim with remote SMTP server</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Postfix.html" title="Postfix">Postfix</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenSMTPD.html" title="OpenSMTPD">OpenSMTPD</a></li>
+</ul>
+</div>
+<p>This document describes how to set up Exim (a mail transfer agent) to use a remote smtp server, for example your ISP's smtp server.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Hide_machine_name"><span class="tocnumber">2.1</span> <span class="toctext">Hide machine name</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Update:_11-Feb-05"><span class="tocnumber">3</span> <span class="toctext">Update: 11-Feb-05</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Update:_10-Feb-08"><span class="tocnumber">4</span> <span class="toctext">Update: 10-Feb-08</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Update_10-Oct-15"><span class="tocnumber">5</span> <span class="toctext">Update 10-Oct-15</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Using_Gmail_as_smarthost"><span class="tocnumber">6</span> <span class="toctext">Using Gmail as smarthost</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#451_Temporary_local_problem"><span class="tocnumber">7.1</span> <span class="toctext">451 Temporary local problem</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=exim">exim</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Edit <code>/etc/mail/exim.conf</code> and add or change the following:
+</p>
+<p>In Main Configuration Settings uncomment <code>primary_hostname</code> and add the hostname of your box (see the <code>/etc/hostname</code> file):
+</p>
+<pre>primary_hostname = myhostname          # change to your hostname
+</pre>
+<p>At the end of the Routers Configuration section add:
+</p>
+<pre>pass<i>on</i>to_isp:
+  driver = manualroute
+  domains = !+local_domains
+  transport = remote_smtp
+  route_list = * smtp.myisp.com        # change to the desired smtp server</pre>
+<p>Make sure that in Transports Configuration it says (uncommented):
+</p>
+<pre>remote_smtp:
+  driver = smtp</pre>
+<h3><span class="mw-headline" id="Hide_machine_name">Hide machine name</span></h3>
+<p>If you have a laptop, or a machine in a smarthost configuration, where you do not want the name of the machine to appear in the outgoing email then you must enable exim's rewriting facilities.
+</p>
+<p>In the Rewriting section you should have something like:
+</p>
+<pre>*@<i>machine</i>.<i>mydomain</i> $1@<i>mydomain</i>
+</pre>
+<p>where <code><i>machine</i></code> is the hostname of your laptop or PC and <code><i>mydomain</i></code> is the domain name of the machine and the outgoing mail.
+</p>
+<h2><span class="mw-headline" id="Update:_11-Feb-05">Update: 11-Feb-05</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Written in first person, see <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a>. Should be integrated normally with the rest of the article (a wiki is not a blog). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Exim_with_remote_SMTP_server">Talk:Exim with remote SMTP server#</a>)</div>
+</div>
+<p>FYI - I just got done wrestling with Exim (4.44) to get it up and running in this configuration on my machine, and I had to do a number of things quite differently than the other person.  Thought I would capture them here for posterity, since I had to go through a pretty painful process that cost me a lot of time and aggravation before I hit upon the right config.  Hopefully this will save others from a similar fate.
+</p>
+<p>By the way, I should note:  my Exim server does not receive any emails directly from the Net.  I'm using fetchmail to grab the mail's from an external POP mail drop and dump them into my Exim server.  So perhaps this is different than the other person's configuration.
+</p>
+<p>Anyway, here is what worked for me.
+</p>
+<p>I did not need to update <code>primary_hostname</code>.  If you leave it commented out, like this:
+</p>
+<pre># primary_hostname =</pre>
+<p>then exim will just automatically use whatever your system's <code>hostname</code> command outputs.  (i.e., the <code>HOSTNAME</code> that you have set in rc.conf.)
+I very much DID need to update this line:
+</p>
+<pre>domainlist local_domains = @</pre>
+<p>and it caused me much grief until I got it right!
+In my case, it needed to look like this:
+</p>
+<pre>domainlist local_domains = @:localhost:mydnamicdnshostname.homeip.net</pre>
+<p>I think the dynamic dns entry might be optional (since I never really deliver any mail to an address at that FQDN), but the <code>@</code> and the <code>localhost</code> are both critical.
+</p>
+<ul>
+<li> <code>@</code> basically means again to use whatever your system's <code>hostname</code> command outputs.  That is needed because some daemons that run on your box may try to send emails to the root user at the host, and they will get rejected if you do not have the <code>@</code> entry.</li>
+<li> <code>localhost</code> was necessary in order to allow fetchmail to deliver all the messages that it fetched.  Without that entry there, Exim would fail to deliver them, and then generate a bounce message in response.  Even worse, most of my fetched messages were spam, and so it would try to send the bounce back to the return address on the spam which 1) often was forged, and thus a bad thing to do, and 2) often would get rejected either due to an invalid email address or because I was trying to initiate email from a residential dynamic IP address and thus was also a bad thing to do.  In the latter case, those messages wound up frozen on the queue, and I had to spend some time manually purging them from the queue.  Just a bad situation all around until I got this piece right.</li>
+<li> I also wanted to allow other boxes on my LAN to relay messages through this exim server.  By default, though, that is blocked.  You can enable it by changing this:</li>
+</ul>
+<pre>hostlist   relay<i>from</i>hosts = 127.0.0.1</pre>
+<p>to this:
+</p>
+<pre>hostlist   relay<i>from</i>hosts = 127.0.0.1 : 192.168.0.0/24</pre>
+<p>While, you are at it, it actually could not hurt to make it this:
+</p>
+<pre>hostlist   relay<i>from</i>hosts = 127.0.0.1 : ::::1 : 192.168.0.0/24</pre>
+<p>(The <code>::::1</code> is just the ipv6 equivalent of 127.0.0.1)
+</p>
+<p>Despite what was written by the other person, I found that that the <code>pass<i>on</i>to_isp</code> router should NOT go at the end of the Routers Configuration section.  Since it is at the end, it will not get executed if some other router gets executed first, and that is exactly what was happening to me.  This router, which appears before it was getting executed instead:
+</p>
+<pre>dnslookup:
+  driver = dnslookup
+  domains = ! +local_domains
+  transport = remote_smtp
+  ignore<i>target</i>hosts = 0.0.0.0 : 127.0.0.0/8
+  no_more</pre>
+<p>That router might be desired in some configurations, but not this one.  That will cause exim to try to deliver the message itself, rather than passing it on to your ISP's MTA.  (And as I indicated above, that will often fail if you are on a residential dynamic IP adddress.)
+To set this up properly, do it like this:
+</p>
+<pre>#dnslookup:
+#  driver = dnslookup
+#  domains = ! +local_domains
+#  transport = remote_smtp
+#  ignore<i>target</i>hosts = 0.0.0.0 : 127.0.0.0/8
+#  no_more
+
+pass<i>on</i>to_isp:
+  driver = manualroute
+  domains = !+local_domains
+  transport = remote_smtp
+  route_list = * smtp.myisp.com        # change to the desired smtp server</pre>
+<p>One last thing:  make sure to also update the <code>/etc/mail/aliases</code> file, if you have got any daemons running on your box that need to send email to the root user.  You will probably want those emails to get delivered to your non-root user account instead, and this is how you set that behavior.  Look for these lines:
+</p>
+<pre>
+# Person who should get root's mail
+#root:
+</pre>
+<p>And uncomment and add your local user account to the <code>root:</code> line:
+</p>
+<pre>
+# Person who should get root's mail
+root: johndoe
+</pre>
+<p>Hope this all spares someone some hair-pulling and lost sleep down the road.  I wish I had read an entry like this before I started - I would not be so tired right now!
+</p>
+<h2><span class="mw-headline" id="Update:_10-Feb-08">Update: 10-Feb-08</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Should be integrated normally with the rest of the article (a wiki is not a blog). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Exim_with_remote_SMTP_server">Talk:Exim with remote SMTP server#</a>)</div>
+</div>
+<pre>pass<i>on</i>to_isp:
+  driver = manualroute
+  domains = !+local_domains
+  transport = remote_smtp
+  route_list = * smtp.myisp.com        # change to the desired smtp server</pre>
+<p>should be changed to 
+</p>
+<pre>send_to_gateway:
+  driver = manualroute
+  domains = !+local_domains
+  transport = remote_smtp
+  route_list = * smtp.myisp.com        # change to the desired smtp server</pre>
+<h2><span class="mw-headline" id="Update_10-Oct-15">Update 10-Oct-15</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Written in first person, see <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a>. Should be integrated normally with the rest of the article (a wiki is not a blog). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Exim_with_remote_SMTP_server">Talk:Exim with remote SMTP server#</a>)</div>
+</div>
+<p>I found the information here a little confusing and may be out of date. The following sum total changes worked for me:
+</p>
+<pre> diff /etc/exim.conf.orig /etc/exim.conf
+ 405c405
+ &lt;   require verify        = sender
+ ---
+ &gt;   #require verify        = sender
+ 555,559c555,559
+ &lt; dnslookup:
+ &lt;   driver = dnslookup
+ &lt;   domains = ! +local_domains
+ &lt;   transport = remote_smtp
+ &lt;   ignore_target_hosts = 0.0.0.0 : 127.0.0.0/8
+ ---
+ &gt; #dnslookup:
+ &gt; #  driver = dnslookup
+ &gt; #  domains = ! +local_domains
+ &gt; #  transport = remote_smtp
+ &gt; #  ignore_target_hosts = 0.0.0.0 : 127.0.0.0/8
+ 562c562
+ &lt;   no_more
+ ---
+ &gt; #  no_more
+ 578a579,584
+ &gt; smarthost:
+ &gt;   driver = manualroute
+ &gt;   domains = !+local_domains
+ &gt;   transport = remote_smtp
+ &gt;   route_list = * mail.internode.on.net
+ &gt;   ignore_target_hosts = &lt;; 0.0.0.0 ; 127.0.0.0/8 ; ::1
+ 772a779
+ &gt; *@* $1@bullet.homenet.org Ffr
+</pre>
+<p>I.e. just comment out the dnslookup block and add the smarthost block plus the single rewrite rule (last line above). That line is added just after the "begin rewrite" section. I was getting DNS timeouts for the "require verify = sender" for most messages so I had to disable that also. Restart exim and it is good to go.
+</p>
+<h2><span class="mw-headline" id="Using_Gmail_as_smarthost">Using Gmail as smarthost</span></h2>
+<p>In the beginning of the exim conf file, you must enable TLS using
+</p>
+<pre>tls_advertise_hosts = +local_network : *.gmail.com</pre>
+<p>or to advertise tls to all hosts
+</p>
+<pre>tls_advertise_hosts = *</pre>
+<p>More information about TLS can be found in the <a rel="nofollow" class="external text" href="http://www.exim.org/exim-html-current/doc/html/spec_html/ch-encrypted_smtp_connections_using_tlsssl.html">exim documentation</a>.
+</p>
+<p><br>
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The following must be put in the appropriate sections of the configuration file, eg, after <b>begin authenticators</b>.</div>
+<p>Add a router before or instead of the dnslookup router:
+</p>
+<pre>gmail_route:
+  driver = manualroute
+  transport = gmail_relay
+  route_list = * smtp.gmail.com</pre>
+<p>Add a transport:
+</p>
+<pre>gmail_relay:
+  driver = smtp
+  port = 587
+  tls_verify_certificates = /etc/ssl/certs/ca-certificates.crt
+  # this forces host verification.
+  tls_verify_hosts = smtp.gmail.com
+  hosts_require_auth = &lt;; $host_address
+  hosts_require_tls = &lt;; $host_address</pre>
+<p>Because of host verification, your exim log might contain
+</p>
+<pre>SSL verify error: certificate name mismatch: "/C=US/ST=California/L=Mountain View/O=Google Inc/CN=smtp.gmail.com"</pre>
+<p>But this has no effect on mail-delivery and can be ignored.
+Add an authenticator (replacing myaccount@gmail.com and mypassword with your own account details):
+</p>
+<pre>gmail_login:
+  driver = plaintext
+  public_name = LOGIN
+  hide client_send = : myaccount@gmail.com : mypassword</pre>
+<p><code>$host_address</code> is used for <code>hosts_require_auth</code> and <code>hosts_require_tls</code> instead of smtp.gmail.com to avoid occasional 530 5.5.1 Authentication Required errors. These are caused by the changing IP addresses in DNS queries for smtp.gmail.com. <code>$host_address</code> will expand to the particular IP address that was resolved by the <code>gmail_route</code> router.
+</p>
+<p>For added security, use a per-application password. This works with Google Apps accounts as well.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="451_Temporary_local_problem">451 Temporary local problem</span></h3>
+<p>If you are getting a "451 Temporary Local Problem" when testing SMTP, you are probably sending as root. By default Exim will not allow you to send as root.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

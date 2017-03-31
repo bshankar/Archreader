@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>WebDAV authentication - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-WebDAV_authentication skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">WebDAV authentication</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/WebDAV.html" title="WebDAV">WebDAV</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the second argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:WebDAV_authentication">Talk:WebDAV authentication#</a>)</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Goals"><span class="tocnumber">1</span> <span class="toctext">Goals</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Required_packages"><span class="tocnumber">1.1</span> <span class="toctext">Required packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#WebDav_Configuration"><span class="tocnumber">2</span> <span class="toctext">WebDav Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Step_1:_Edit_.2Fetc.2Fhttpd.2Fconf.2Fhttpd.conf"><span class="tocnumber">2.1</span> <span class="toctext">Step 1: Edit /etc/httpd/conf/httpd.conf</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Step_2:_Create_needed_directories_and_assign_permissions"><span class="tocnumber">2.2</span> <span class="toctext">Step 2: Create needed directories and assign permissions</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Step_3:_Authentication"><span class="tocnumber">2.3</span> <span class="toctext">Step 3: Authentication</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Step_4:_Restart_apache"><span class="tocnumber">2.4</span> <span class="toctext">Step 4: Restart apache</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Goals">Goals</span></h2>
+<p>The goal of this how to use simple authentication with WebDAV.
+Please refer to <a href="/index.php?title=WebDav&amp;action=edit&amp;redlink=1" class="new" title="WebDav (page does not exist)">WebDav</a> on setting up WebDAV.
+</p>
+<h3><span class="mw-headline" id="Required_packages">Required packages</span></h3>
+<ul>
+<li>apache</li>
+<li>cadaver (for testing)</li>
+</ul>
+<h2><span class="mw-headline" id="WebDav_Configuration">WebDav Configuration</span></h2>
+<h3><span class="mw-headline" id="Step_1:_Edit_.2Fetc.2Fhttpd.2Fconf.2Fhttpd.conf">Step 1: Edit /etc/httpd/conf/httpd.conf</span></h3>
+<pre>
+DAVLockDB /var/log/httpd/DavLock/DavLockDB
+&lt;Location /dav&gt;
+DAV On
+AuthType Digest
+AuthName "WebDAV"
+AuthUserFile /etc/httpd/conf/passwd
+Require user foo
+&lt;/Location&gt;
+</pre>
+<h3><span class="mw-headline" id="Step_2:_Create_needed_directories_and_assign_permissions">Step 2: Create needed directories and assign permissions</span></h3>
+<pre>
+# mkdir -p /var/log/httpd/DavLock
+# touch /var/log/httpd/DavLock/DavLockDB
+# chown -R nobody.nobody /var/log/httpd/DavLock
+# mkdir -p /home/httpd/html/dav
+# chown -R nobody.nobody /home/httpd/html/dav
+</pre>
+<h3><span class="mw-headline" id="Step_3:_Authentication">Step 3: Authentication</span></h3>
+<p>There are numerous different protocols you can use:
+</p>
+<ul>
+<li> plain</li>
+<li> digest</li>
+<li> others</li>
+</ul>
+<p>This is an example for using digest (make sure it is enabled in httpd.conf)
+</p>
+<pre>htdigest -c /etc/httpd/conf/passwd WebDAV foo</pre>
+<p>Please make sure that the path is identical to the one you entered in your httpd.conf.  Also when using digest you have to enter the AuthName from httpd.conf.  For plain authentication you would not need this.
+</p>
+<p>With the above setup the user *foo* is required for everything.
+</p>
+<p>If you want to permit everybody to read, you could use this in your httpd.conf
+</p>
+<pre>
+&lt;Location /dav&gt;
+DAV On
+AuthType Digest
+AuthName "WebDAV"
+AuthUserFile /etc/httpd/conf/passwd
+&lt;LimitExcept GET HEAD OPTIONS PROPFIND&gt;
+require user foo
+&lt;/LimitExcept&gt;
+&lt;/Location&gt;
+</pre>
+<h3><span class="mw-headline" id="Step_4:_Restart_apache">Step 4: Restart apache</span></h3>
+<p>Restart <code>httpd.service</code> to apply any changes.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Installing VMWare vCLI - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Installing_VMWare_vCLI skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Installing VMWare vCLI</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/VMware.html" title="VMware">VMware</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/VMware/Installing_Arch_as_a_guest.html" title="Installing Arch Linux in VMWare" class="mw-redirect">Installing_Arch_Linux_in_VMWare</a></li>
+</ul>
+</div>
+<p>The vCLI utilities make it possible to manage VMWare ESX servers (with the possibility of using vCenter). Eventhough Archlinux is not one of the "supported platforms"; the installation process is relatively straightforward. We have a two method's of VMWare vCLI installation. It's a build package from AUR, or manually installation.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation_from_AUR"><span class="tocnumber">1</span> <span class="toctext">Installation from AUR</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Manually_installation"><span class="tocnumber">2</span> <span class="toctext">Manually installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Download_location"><span class="tocnumber">2.1</span> <span class="toctext">Download location</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Dependencies"><span class="tocnumber">2.2</span> <span class="toctext">Dependencies</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Installation"><span class="tocnumber">2.3</span> <span class="toctext">Installation</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation_from_AUR">Installation from AUR</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-vcli/">vmware-vcli</a></span><sup><small>AUR</small></sup> from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h2><span class="mw-headline" id="Manually_installation">Manually installation</span></h2>
+<h3><span class="mw-headline" id="Download_location">Download location</span></h3>
+<p>The utilities can be downloaded from <a rel="nofollow" class="external free" href="http://www.vmware.com/support/developer/vcli">http://www.vmware.com/support/developer/vcli</a>. Registration is mandatory.
+It seems that registration is not enough to download latest release from this link. It gives "Download is not available."
+</p>
+<p>5.1 can be downloaded from here: <a rel="nofollow" class="external free" href="https://my.vmware.com/group/vmware/details?downloadGroup=VSP510-VCLI-510&amp;productId=285">https://my.vmware.com/group/vmware/details?downloadGroup=VSP510-VCLI-510&amp;productId=285</a>
+</p>
+<h3><span class="mw-headline" id="Dependencies">Dependencies</span></h3>
+<p>vCLI has quite a few dependencies which can easily be managed via pacman:
+</p>
+<pre>pacman -S e2fsprogs openssl libxml2 perl perl-libxml perl-xml-sax perl-crypt-ssleay \ 
+perl-archive-zip perl-html-parser perl-data-dump perl-soap-lite perl-uri \ 
+perl-lwp-protocol-https perl-class-methodmaker perl-net-ssleay perl-xml-libxml
+</pre>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>Unpack the archive:
+</p>
+<pre>tar xzvf VMware-vSphere-CLI-5*.tar.gz
+</pre>
+<p>Change to the newly created directory:
+</p>
+<pre>cd vmware-vsphere-cli-distrib/
+</pre>
+<p>Open the file <code>vmware-install.pl</code> with your favorite editor. Change the following rules:
+</p>
+<pre>my $installed_ssl_version = '1.0.0';   # rule 5248
+my $ssleay_installed = 1;              # rule 5250
+my $OpenSSL_installed = 1;             # rule 5256
+my $LibXML2_installed = 1;             # rule 5257
+my $OpenSSL_dev_installed = 1;         # rule 5258
+my $e2fsprogs_installed = 1;           # rule 5261 
+my $e2fsprogs_version = '1.42';        # rule 5262
+my $install_rhel55_local = 1;          # rule 5266
+</pre>
+<p>The next step is to configure a ftp and http proxy. These values are mandatory, even when you're not using a proxy (in which case you leave the values in a blank state):
+</p>
+<pre>export ftp_proxy=""
+export http_proxy=""
+</pre>
+<p>Fire up the installation:
+</p>
+<pre>./vmware-install.pl 
+</pre>
+<p>Potential warnings about rpm and versions can be safely ignored.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

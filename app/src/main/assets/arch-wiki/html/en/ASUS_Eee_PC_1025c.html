@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ASUS Eee PC 1025c - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ASUS_Eee_PC_1025c skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ASUS Eee PC 1025c</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b>  (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:ASUS_Eee_PC_1025c">Talk:ASUS Eee PC 1025c#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This laptop uses a <a href="../en/Intel_GMA_500.html" title="Poulsbo" class="mw-redirect">Poulsbo</a> GPU. Hardware acceleration for GPU-related tasks is unsupported. Use the VESA display driver.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Bootloader"><span class="tocnumber">1</span> <span class="toctext">Bootloader</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Audio"><span class="tocnumber">2</span> <span class="toctext">Audio</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Mono_format"><span class="tocnumber">2.1</span> <span class="toctext">Mono format</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#HDMI"><span class="tocnumber">3</span> <span class="toctext">HDMI</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Video"><span class="tocnumber">3.1</span> <span class="toctext">Video</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Audio_2"><span class="tocnumber">3.2</span> <span class="toctext">Audio</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Global"><span class="tocnumber">3.2.1</span> <span class="toctext">Global</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#User_specific"><span class="tocnumber">3.2.2</span> <span class="toctext">User specific</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Dynamic"><span class="tocnumber">3.2.3</span> <span class="toctext">Dynamic</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Screen_Brightness"><span class="tocnumber">4</span> <span class="toctext">Screen Brightness</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Bootloader">Bootloader</span></h2>
+<p>Use i686 even if Intel ARK mentions support for Intel 64. The Arch ISO will detect i686.
+</p>
+<p>For BIOS legacy boot, create a <a href="../en/USB_flash_installation_media.html#Using_dd" title="USB flash installation media">USB stick with dd</a>. Press F2 to go into the boot menu. Choose the entry for your USB stick that doesn't say "UEFI:".
+The BIOS gives an option for UEFI booting but the option seems to be broken.
+</p>
+<h2><span class="mw-headline" id="Audio">Audio</span></h2>
+<h3><span class="mw-headline" id="Mono_format">Mono format</span></h3>
+<p>In case of missing voices, play all sounds in mono format. Using <a href="../en/Advanced_Linux_Sound_Architecture.html" title="ALSA" class="mw-redirect">ALSA</a> add to <code>.asoundrc</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.asoundrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+pcm.card0 {
+  type hw
+  card 0
+}
+
+ctl.card0 {
+  type hw
+  card 0
+}
+
+pcm.monocard {
+  slave.pcm card0
+  slave.channels 2
+#  type plug
+  type route
+  ttable {
+   # Copy both input channels to output channel 0 (Left). 
+    0.0 1
+    1.0 1
+   # Send nothing to output channel 1 (Right). 
+    0.1 0
+    1.1 0
+  }
+}
+
+ctl.monocard {
+  type hw
+  card 0
+} 
+
+pcm.!default monocard
+</pre>
+<p>Save and reload ALSA.
+</p>
+<p>To set mono in a <a href="../en/PulseAudio.html" title="PulseAudio">PulseAudio</a>, run:
+</p>
+<pre> $ pacmd list-sinks | grep name | head -n1 
+</pre>
+<p>To get the master device name. The output of command will look like this:
+</p>
+<pre> name: &lt;alsa_output.pci-0000_00_1b.0.analog-stereo&gt;
+</pre>
+<p>Put device name (in my case <i>alsa_output.pci-0000_00_1b.0.analog-stereo</i>) in field 'master' of the command below:
+</p>
+<pre> $ pacmd load-module module-remap-sink sink_name=mono master=alsa_output.pci-0000_00_1b.0.analog-stereo channels=2 channel_map=front-right,mono
+</pre>
+<p>This only works if PulseAudio is running. To make this permanent, add the pacmd argument last to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre> # echo "load-module module-remap-sink sink_name=mono master=alsa_output.pci-0000_00_1b.0.analog-stereo channels=2 channel_map=front-right,mono" &gt;&gt; /etc/pulse/default.pa
+</pre>
+<h2><span class="mw-headline" id="HDMI">HDMI</span></h2>
+<h3><span class="mw-headline" id="Video">Video</span></h3>
+<p>You have to change the <a href="../en/Intel_GMA_500.html" title="Poulsbo" class="mw-redirect">video driver</a>. 
+If the HDMI cable is plugged in, it is enabled  on boot. If plugged in after boot, use <a href="../en/Xrandr.html" title="Xrandr">xrandr</a> to enable the second monitor:
+</p>
+<pre># xrandr --output DVI-0 --auto
+</pre>
+<h3><span class="mw-headline" id="Audio_2">Audio</span></h3>
+<p>You need to know the number of your sound card and the the HDMI device number:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">aplay -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Karte 0: Intel [HDA Intel], Gerät 0: ALC269VB Analog [ALC269VB Analog]
+  Sub-Geräte: 1/1
+  Sub-Gerät #0: subdevice #0
+Karte 0: Intel [HDA Intel], Gerät 3: HDMI 0 [HDMI 0]
+  Sub-Geräte: 1/1
+  Sub-Gerät #0: subdevice #0
+</pre>
+<h4><span class="mw-headline" id="Global">Global</span></h4>
+<p>In <code>/usr/share/alsa/alsa.conf</code> search the lines
+</p>
+<pre>default.pcm.card 0
+default.pcm.device 0
+</pre>
+<p>If you change the numbers to your card and device (in my case card is 0 and device is 3) and reboot, the audio output switches to HDMI.
+</p>
+<h4><span class="mw-headline" id="User_specific">User specific</span></h4>
+<p>See <a href="../en/Advanced_Linux_Sound_Architecture.html#HDMI_Output_Does_Not_Work" title="Advanced Linux Sound Architecture">Advanced Linux Sound Architecture#HDMI Output Does Not Work</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<h4><span class="mw-headline" id="Dynamic">Dynamic</span></h4>
+<p>The audio device can also be configured with <code>/etc/asound.conf</code>
+So you can create a script that links asound.conf to a configuration depending on the hdmi cable plugged in or not: (for some reason my HDMI device is listed as DVI)
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hdmi_switched.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#! /bin/bash
+hdmi_status="$(cat /sys/class/drm/card0-DVI-D-1/status)"
+ln -f "/etc/alsa/hdmi_$hdmi_status" /etc/alsa/asound.conf
+alsactl restore
+</pre>
+<p>Configuration files:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hdmi_connected</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+pcm.!default {
+      type hw
+      card 0
+      device 3 
+}
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hdmi_disconnected</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+pcm.!default {
+      type hw
+      card 0
+      device 0 
+}
+</pre>
+<p>Create a symbolic link to /etc/asound.conf
+</p>
+<pre>ln -s /etc/alsa/asound.conf /etc/asound.conf
+</pre>
+<p>If the user is allowed to run the hdmi_switch.sh script and is also allowed to change files in /etc/alsa folder you can bind that script to a key :D
+If you also want to change to monitor read <a href="../en/Advanced_Linux_Sound_Architecture.html#Using_udev_to_automatically_turn_HDMI_audio_on_or_off" title="Advanced Linux Sound Architecture">this</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<h2><span class="mw-headline" id="Screen_Brightness">Screen Brightness</span></h2>
+<p>The backlight directory is /sys/class/backlight/acpi_video0. The display keys are now handled by the kernel.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:ASUS.html" title="Category:ASUS">ASUS</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

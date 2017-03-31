@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Galera - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Galera skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Galera</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Galera is a synchronous multi-master cluster for MySQL/InnoDB databases. For more information about the product and its features, please visit the <a rel="nofollow" class="external text" href="http://codership.com/content/using-galera-cluster">official webpage</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Currently replication is supported only for InnoDB tables.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Installation_MariaDB"><span class="tocnumber">2</span> <span class="toctext">Installation MariaDB</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Configuration"><span class="tocnumber">3</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Compile_Galera"><span class="tocnumber">4</span> <span class="toctext">Compile Galera</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The two components Galera cluster comprised of are Galera plugin itself and a patched version of MySQL server which connect using wsrep API. 
+</p>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mysql-wsrep/">mysql-wsrep</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/mysql-wsrep">aur-mirror</a>]</sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/galera/">galera</a></span><sup><small>AUR</small></sup> packages from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Systemd">Start/Enable</a> the <code>mysqld.service</code> daemon.
+</p>
+<h2><span class="mw-headline" id="Installation_MariaDB">Installation <a href="../en/MySQL.html" title="MariaDB" class="mw-redirect">MariaDB</a></span></h2>
+<p>MariaDB V&gt;10.1 is ready to use galera / wsrep out of the box. <a rel="nofollow" class="external autonumber" href="https://mariadb.org/mariadb-10-1-1-galera-support/">[1]</a>
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> these packages:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span> — Standard MariaDB Package</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/galera/">galera</a></span><sup><small>AUR</small></sup> — ATM this package does not install the galera library to the right place so you should <a href="../en/Galera.html#Compile_Galera" title="Galera">Galera#Compile Galera</a> yourself.</li>
+</ul>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Once you have installed the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/galera/">galera</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mysql-wsrep/">mysql-wsrep</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/mysql-wsrep">aur-mirror</a>]</sup> packages, you need to configure the cluster.
+</p>
+<p>On each node edit <code>/etc/mysql/my.cnf</code> and update the wsrep_cluster_address variable so it contains the list of all nodes in the cluster:
+</p>
+<pre>wsrep_cluster_address="gcomm://192.168.1.4,192.168.1.5,192.168.1.6"
+</pre>
+<p>Change the variables wsrep_node_address and wsrep_node_name to the IP address/hostname and name(this doesn't need to be unique) for each node, e.g.:
+</p>
+<pre>wsrep_node_address='192.168.1.4'
+wsrep_node_name='node1'
+</pre>
+<p>The wsrep_cluster_name variable should contain the same name for all cluster nodes:
+</p>
+<pre>wsrep_cluster_name='my_galera_cluster'
+</pre>
+<p>Also, set wsrep_sst_method to the desired state snapshot transfer method, the preferred one is rsync.
+</p>
+<pre>wsrep_sst_method=rsync
+</pre>
+<p>When you have finished with <code>/etc/mysql/my.cnf</code>, start the mysqld service on the first node:
+</p>
+<pre># systemctl start mysqld-bootstrap.service
+</pre>
+<p>This will bootstrap the cluster. Use MySQL's command line tool to log in as root into your MySQL server:
+</p>
+<pre>$ mysql -p -u root
+</pre>
+<p>Check the status of the cluster:
+</p>
+<pre>mysql&gt; SHOW STATUS LIKE 'wsrep_%';
+</pre>
+<p>This will show you wsrep-related status variables:
+</p>
+<pre>...
+| wsrep_local_state          | 4                                    |
+| wsrep_local_state_comment  | Synced                               |
+| wsrep_cert_index_size      | 0                                    |
+| wsrep_causal_reads         | 0                                    |
+| wsrep_incoming_addresses   | 192.168.1.4:3306                     |
+| wsrep_cluster_conf_id      | 1                                    |
+| wsrep_cluster_size         | 1                                    |
+| wsrep_cluster_state_uuid   | 6cd96745-2ea8-11e3-bbc8-d666651b51ef |
+| wsrep_cluster_status       | Primary                              |
+| wsrep_connected            | ON                                   |
+| wsrep_local_index          | 0                                    |
+| wsrep_provider_name        | Galera                               |
+...
+</pre>
+<p>If you use xtrabackup or mysqldump SST method, you will need to create a MySQL user for sst transfers.
+</p>
+<p>Once you configured the first node, you should be able to start all other nodes with:
+</p>
+<pre># systemctl start mysqld.service
+</pre>
+<h2><span class="mw-headline" id="Compile_Galera">Compile Galera</span></h2>
+<ul>
+<li> Download galera from github <a rel="nofollow" class="external text" href="https://github.com/codership/galera/releases">Galera Releases</a>
+</li>
+<li> Extract content and run scons in root directory</li>
+</ul>
+<pre>$ tar xvfz release_*.tar.gz &amp;&amp; cd galera_release_* &amp;&amp; scons
+</pre>
+<ul><li> Copy lib to <code>/usr/lib/galera/libgalera_smm.so</code>
+</li></ul>
+<pre>$ sudo mkdir /usr/lib/galera &amp;&amp; sudo cp libgalera_smm.so /usr/lib/galera/
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<p><a rel="nofollow" class="external text" href="http://www.codership.com/wiki/doku.php?id=galera_wiki">Galera Wiki</a>
+<a rel="nofollow" class="external text" href="http://www.percona.com/doc/percona-xtradb-cluster/index.html">Percona XtraDB Cluster’s documentation</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Database_management_systems.html" title="Category:Database management systems">Database management systems</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

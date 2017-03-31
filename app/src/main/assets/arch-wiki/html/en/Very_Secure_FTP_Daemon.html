@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Very Secure FTP Daemon - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Very_Secure_FTP_Daemon skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Very Secure FTP Daemon</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>vsftpd</b> (Very Secure FTP Daemon) is a lightweight, stable and secure FTP server for UNIX-like systems.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Enabling_uploading"><span class="tocnumber">2.1</span> <span class="toctext">Enabling uploading</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Local_user_login"><span class="tocnumber">2.2</span> <span class="toctext">Local user login</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Anonymous_login"><span class="tocnumber">2.3</span> <span class="toctext">Anonymous login</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Chroot_jail"><span class="tocnumber">2.4</span> <span class="toctext">Chroot jail</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Limiting_user_login"><span class="tocnumber">2.5</span> <span class="toctext">Limiting user login</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Limiting_connections"><span class="tocnumber">2.6</span> <span class="toctext">Limiting connections</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Using_xinetd"><span class="tocnumber">2.7</span> <span class="toctext">Using xinetd</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Using_SSL_to_Secure_FTP"><span class="tocnumber">2.8</span> <span class="toctext">Using SSL to Secure FTP</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Dynamic_DNS"><span class="tocnumber">2.9</span> <span class="toctext">Dynamic DNS</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Port_configurations"><span class="tocnumber">2.10</span> <span class="toctext">Port configurations</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Configuring_iptables"><span class="tocnumber">2.11</span> <span class="toctext">Configuring iptables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15">
+<a href="#PAM_with_virtual_users"><span class="tocnumber">3.1</span> <span class="toctext">PAM with virtual users</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#Adding_private_folders_for_the_virtual_users"><span class="tocnumber">3.1.1</span> <span class="toctext">Adding private folders for the virtual users</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#vsftpd:_no_connection_.28Error_500.29_with_recent_kernels_.283.5_and_newer.29_and_.service"><span class="tocnumber">4.1</span> <span class="toctext">vsftpd: no connection (Error 500) with recent kernels (3.5 and newer) and .service</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#vsftpd:_refusing_to_run_with_writable_root_inside_chroot.28.29"><span class="tocnumber">4.2</span> <span class="toctext">vsftpd: refusing to run with writable root inside chroot()</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#FileZilla_Client:_GnuTLS_error_-8_-15_-110_when_connecting_via_SSL"><span class="tocnumber">4.3</span> <span class="toctext">FileZilla Client: GnuTLS error -8 -15 -110 when connecting via SSL</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#vsftpd.service_fails_to_run_on_boot"><span class="tocnumber">4.4</span> <span class="toctext">vsftpd.service fails to run on boot</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#ipv6_only_fails_with:_500_OOPS:_run_two_copies_of_vsftpd_for_IPv4_and_IPv6"><span class="tocnumber">4.5</span> <span class="toctext">ipv6 only fails with: 500 OOPS: run two copies of vsftpd for IPv4 and IPv6</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vsftpd">vsftpd</a></span>.
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Systemd">Start/Enable</a> the <code>vsftpd.service</code> daemon.
+</p>
+<p>See the <a href="#Using_xinetd">#Using xinetd</a> for procedures to use vsftpd with xinetd.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Most of the settings in vsftpd are done by editing the file <code>/etc/vsftpd.conf</code>. The file itself is well-documented, so this section only highlights some important changes you may want to modify. For all available options and documentation, see the man page for vsftpd.conf (5), or <a rel="nofollow" class="external text" href="https://security.appspot.com/vsftpd/vsftpd_conf.html">view it online</a>. Files are served by default from <code>/srv/ftp</code>.
+</p>
+<p>Enable connections <code>/etc/hosts.allow</code>:
+</p>
+<pre># Allow all connections
+vsftpd: ALL
+# IP adress range
+vsftpd: 10.0.0.0/255.255.255.0
+</pre>
+<h3><span class="mw-headline" id="Enabling_uploading">Enabling uploading</span></h3>
+<p>The <code>WRITE_ENABLE</code> flag must be set to YES in <code>/etc/vsftpd.conf</code> in order to allow changes to the filesystem, such as uploading:
+</p>
+<pre>write_enable=YES
+</pre>
+<h3><span class="mw-headline" id="Local_user_login">Local user login</span></h3>
+<p>One must set the line <code>local_enable</code> in <code>/etc/vsftpd.conf</code> to <code>YES</code> in order to allow users in <code>/etc/passwd</code> to login:
+</p>
+<pre>local_enable=YES
+</pre>
+<h3><span class="mw-headline" id="Anonymous_login">Anonymous login</span></h3>
+<p>These lines controls whether anonymous users can login. By default, anonymous logins are enabled for download only from <code>/srv/ftp</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/vsftpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+# Allow anonymous FTP? (Beware - allowed by default if you comment this out).
+anonymous_enable=YES
+...
+# Uncomment this to allow the anonymous FTP user to upload files. This only
+# has an effect if the above global write enable is activated. Also, you will
+# obviously need to create a directory writable by the FTP user.
+#anon_upload_enable=YES
+#
+# Uncomment this if you want the anonymous FTP user to be able to create
+# new directories.
+#anon_mkdir_write_enable=YES
+...</pre>
+<p>You may also add e.g. the following options (see <code>man vsftpd.conf</code> for more):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/vsftpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># No password is required for an anonymous login          
+no_anon_password=YES
+
+# Maximum transfer rate for an anonymous client in Bytes/second          
+anon_max_rate=30000
+
+# Directory to be used for an anonymous login  
+anon_root=/example/directory/</pre>
+<h3><span class="mw-headline" id="Chroot_jail">Chroot jail</span></h3>
+<p>A chroot environment that prevents the user from leaving its home directory can be set up. To enable this, add the following lines to <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd.chroot_list
+</pre>
+<p>The <code>chroot_list_file</code> variable specifies the file which contains users that are jailed.
+</p>
+<p>For a more restricted environment, specify the line:
+</p>
+<pre>chroot_local_user=YES
+</pre>
+<p>This will make local users jailed by default. In this case, the file specified by <code>chroot_list_file</code> lists users that are <b>not</b> in a chroot jail.
+</p>
+<h3><span class="mw-headline" id="Limiting_user_login">Limiting user login</span></h3>
+<p>It's possible to prevent users from logging into the FTP server by adding two lines to <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>userlist_enable=YES
+userlist_file=/etc/vsftpd.user_list
+</pre>
+<p><code>userlist_file</code> now specifies the file which lists users that are not able to login.
+</p>
+<p>If you only want to allow certain users to login, add the line:
+</p>
+<pre>userlist_deny=NO
+</pre>
+<p>The file specified by <code>userlist_file</code> will now contain users that are able to login.
+</p>
+<h3><span class="mw-headline" id="Limiting_connections">Limiting connections</span></h3>
+<p>The data transfer rate, i.e. number of clients and connections per IP for local users can be limited by adding the information in <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>local_max_rate=1000000 # Maximum data transfer rate in bytes per second
+max_clients=50         # Maximum number of clients that may be connected
+max_per_ip=2           # Maximum connections per IP
+</pre>
+<h3><span class="mw-headline" id="Using_xinetd">Using xinetd</span></h3>
+<p>Xinetd provides enhanced capabilities for monitoring and controlling connections. It is not necessary though for a basic good working vsftpd-server.
+</p>
+<p>Installation of vsftpd will add a necessary service file, <code>/etc/xinetd.d/vsftpd</code>. By default services are disabled. Enable the ftp service:
+</p>
+<pre>
+service ftp
+{
+        socket_type             = stream
+        wait                    = no
+        user                    = root
+        server                  = /usr/bin/vsftpd
+        log_on_success  += HOST DURATION
+        log_on_failure  += HOST
+        disable                 = no
+}
+</pre>
+<p>If you have set the vsftpd daemon to run in standalone mode make the following change in <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>listen=NO
+</pre>
+<p>Otherwise connection will fail:
+</p>
+<pre>500 OOPS: could not bind listening IPv4 socket
+</pre>
+<p>Instead of starting the vsftpd daemon start and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>xinetd.service</code>.
+</p>
+<h3><span class="mw-headline" id="Using_SSL_to_Secure_FTP">Using SSL to Secure FTP</span></h3>
+<p>Generate an SSL Cert, e.g. like that: 
+</p>
+<pre># cd /etc/ssl/certs
+# openssl req -x509 -nodes -days 7300 -newkey rsa:2048 -keyout /etc/ssl/certs/vsftpd.pem -out /etc/ssl/certs/vsftpd.pem
+# chmod 600 /etc/ssl/certs/vsftpd.pem
+</pre>
+<p>You will be asked a lot of Questions about your Company etc., as your Certificate is not a trusted one it doesn't really matter what you fill in. You will use this for encryption! If you plan to use this in a matter of trust get one from a CA like thawte, verisign etc. 
+</p>
+<p>edit your configuration <code>/etc/vsftpd.conf</code>
+</p>
+<pre>
+#this is important
+ssl_enable=YES
+
+#choose what you like, if you accept anon-connections
+# you may want to enable this
+# allow_anon_ssl=NO
+
+#choose what you like,
+# it's a matter of performance i guess
+# force_local_data_ssl=NO
+
+#choose what you like
+force_local_logins_ssl=YES
+
+#you should at least enable this if you enable ssl...
+ssl_tlsv1=YES
+#choose what you like
+ssl_sslv2=YES
+#choose what you like
+ssl_sslv3=YES
+#give the correct path to your currently generated *.pem file
+rsa_cert_file=/etc/ssl/certs/vsftpd.pem
+#the *.pem file contains both the key and cert
+rsa_private_key_file=/etc/ssl/certs/vsftpd.pem
+</pre>
+<h3><span class="mw-headline" id="Dynamic_DNS">Dynamic DNS</span></h3>
+<p>Make sure you put the following two lines in <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>pasv_addr_resolve=YES
+pasv_address=yourdomain.noip.info
+</pre>
+<p>It is <b>not</b> necessary to use a script that updates pasv_address periodically and restarts the server, as it can be found elsewhere!
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You won't be able to connect in passive mode via LAN anymore. Try the active mode on your LAN PC's FTP client.</div>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Port_configurations">Port configurations</span></h3>
+<p>Especially for private FTP servers that are exposed to the web it's recommended to change the listening port to something other than the standard port 21. This can be done using the following lines in <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>listen_port=2211
+</pre>
+<p>Furthermore a custom passive port range can be given by:
+</p>
+<pre>pasv_min_port=49152
+pasv_max_port=65534
+</pre>
+<h3><span class="mw-headline" id="Configuring_iptables">Configuring iptables</span></h3>
+<p>Often the server running the FTP daemon is protected by an <a href="../en/Iptables.html" title="Iptables">iptables</a> firewall. To allow access to the FTP server the corresponding port needs to be opened using something like
+</p>
+<pre># iptables -A INPUT -m state --state NEW -m tcp -p tcp --dport 21 -j ACCEPT
+</pre>
+<p>This article won't provide any instruction on how to set up iptables but here is an example: <a href="../en/Simple_stateful_firewall.html" title="Simple stateful firewall">Simple stateful firewall</a>.
+</p>
+<p>There are some kernel modules needed for proper FTP connection handling by iptables that should be referenced here. Among those especially <i>nf_conntrack_ftp</i>. It is needed as FTP uses the given <i>listen_port</i> (21 by default) for commands only; all the data transfer is done over different ports. These ports are chosen by the FTP daemon at random and for each session (also depending on whether active or passive mode is used). To tell iptables that packets on ports should be accepted, <i>nf_conntrack_ftp</i> is required. To load it automatically on boot create a new file in <code>/etc/modules-load.d</code> e.g.:
+</p>
+<pre># echo nf_conntrack_ftp &gt; /etc/modules-load.d/nf_conntrack_ftp.conf
+</pre>
+<p>If the kernel &gt;= 4.7 you either need to set <i>net.netfilter.nf_conntrack_helper=1</i> via <i>sysctl</i> e.g. 
+</p>
+<pre># echo net.netfilter.nf_conntrack_helper=1 &gt; /etc/sysctl.d/70-conntrack.conf
+</pre>
+<p>or use
+</p>
+<pre># iptables -A PREROUTING -t raw -p tcp --dport 21 -j CT --helper ftp
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="PAM_with_virtual_users">PAM with virtual users</span></h3>
+<p>Since <a href="../en/PAM.html" title="PAM">PAM</a> no longer provides <code>pam_userdb.so</code> another easy method is to use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libpam_pwdfile/">libpam_pwdfile</a></span><sup><small>AUR</small></sup>. For environments with many users another option could be <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pam_mysql/">pam_mysql</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/pam_mysql">aur-mirror</a>]</sup>. This section is however limited to explain how to configure a chroot environment and authentication by <code>pam_pwdfile.so</code>.
+</p>
+<p>In this example we create the directory <code>vsftpd</code>:
+</p>
+<pre># mkdir /etc/vsftpd
+</pre>
+<p>One option to create and store user names and passwords is to use the Apache generator htpasswd:
+</p>
+<pre># htpasswd -c /etc/vsftpd/.passwd
+</pre>
+<p>A problem with the above command is that vsftpd might not be able to read the generated MD5 hashed password. If running the same command with the -d switch, crypt() encryption, password become readable by vsftpd, but the downside of this is less security and a password limited to 8 characters. Openssl could be used to produce a MD5 based BSD password with algorithm 1:
+</p>
+<pre># openssl passwd -1
+</pre>
+<p>Whatever solution the produced <code>/etc/vsftpd/.passwd</code> should look like this:
+</p>
+<pre>username1:hashed_password1
+username2:hashed_password2
+...
+</pre>
+<p>Next you need to create a PAM service using <code>pam_pwdfile.so</code> and the generated <code>/etc/vsftpd/.passwd</code> file. In this example we create a PAM policy for <i>vsftpd</i> with the following content:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/vsftpd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth required pam_pwdfile.so pwdfile /etc/vsftpd/.passwd
+account required pam_permit.so</pre>
+<p>Now it is time to create a home for the virtual users. In the example <code>/srv/ftp</code> is decided to host data for virtual users, which also reflects the default directory structure of Arch. First create the general user virtual and make <code>/srv/ftp</code> its home:
+</p>
+<pre># useradd -d /srv/ftp virtual
+</pre>
+<p>Make virtual the owner:
+</p>
+<pre># chown virtual:virtual /srv/ftp
+</pre>
+<p>A basic <code>/etc/vsftpd.conf</code> with no private folders configured, which will default to the home folder of the virtual user:
+</p>
+<pre># pointing to the correct PAM service file
+pam_service_name=vsftpd
+write_enable=YES
+hide_ids=YES
+listen=YES
+connect_from_port_20=YES
+anonymous_enable=NO
+local_enable=YES
+dirmessage_enable=YES
+xferlog_enable=YES
+chroot_local_user=YES
+guest_enable=YES
+guest_username=virtual
+virtual_use_local_privs=YES
+</pre>
+<p>Some parameters might not be necessary for your own setup. If you want the chroot environment to be writable you will need to add the following to the configuration file:
+</p>
+<pre>allow_writeable_chroot=YES
+</pre>
+<p>Otherwise vsftpd because of default security settings will complain if it detects that chroot is writable.
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>vsftpd.service</code>.
+</p>
+<p>You should now be able to login from a ftp-client with any of the users and passwords stored in <code>/etc/vsftpd/.passwd</code>.
+</p>
+<h4><span class="mw-headline" id="Adding_private_folders_for_the_virtual_users">Adding private folders for the virtual users</span></h4>
+<p>First create directories for users:
+</p>
+<pre># mkdir /srv/ftp/user1
+# mkdir /srv/ftp/user2
+# chown virtual:virtual /srv/ftp/user?/
+</pre>
+<p>Then, add the following lines to <code>/etc/vsftpd.conf</code>:
+</p>
+<pre>local_root=/srv/ftp/$USER
+user_sub_token=$USER
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="vsftpd:_no_connection_.28Error_500.29_with_recent_kernels_.283.5_and_newer.29_and_.service">vsftpd: no connection (Error 500) with recent kernels (3.5 and newer) and .service</span></h3>
+<p>add this to your /etc/vsftpd.conf
+</p>
+<pre>seccomp_sandbox=NO
+</pre>
+<h3><span class="mw-headline" id="vsftpd:_refusing_to_run_with_writable_root_inside_chroot.28.29">vsftpd: refusing to run with writable root inside chroot()</span></h3>
+<p>As of vsftpd 2.3.5, the chroot directory that users are locked to must not be writable. This is in order to prevent a security vulnerabilty.
+</p>
+<p>The safe way to allow upload is to keep chroot enabled, and configure your FTP directories.
+</p>
+<pre>local_root=/srv/ftp/user
+</pre>
+<pre># mkdir -p /srv/ftp/user/upload
+#
+# chmod 550 /srv/ftp/user
+# chmod 750 /srv/ftp/user/upload
+</pre>
+<p>If you must:
+</p>
+<p>You can put this into your <code>/etc/vsftpd.conf</code> to workaround this security enhancement (since vsftpd 3.0.0; from <a rel="nofollow" class="external text" href="http://www.benscobie.com/fixing-500-oops-vsftpd-refusing-to-run-with-writable-root-inside-chroot/">Fixing 500 OOPS: vsftpd: refusing to run with writable root inside chroot ()</a>):
+</p>
+<pre>allow_writeable_chroot=YES
+</pre>
+<p>or alternative:
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vsftpd-ext/">vsftpd-ext</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/vsftpd-ext">aur-mirror</a>]</sup> and set in the conf file allow_writable_root=YES
+</p>
+<h3><span class="mw-headline" id="FileZilla_Client:_GnuTLS_error_-8_-15_-110_when_connecting_via_SSL">FileZilla Client: GnuTLS error -8 -15 -110 when connecting via SSL</span></h3>
+<p>vsftpd tries to display plain-text error messages in the SSL session. In order to debug this, temporarily disable encryption and you will see the correct error message.<a rel="nofollow" class="external autonumber" href="http://ramblings.linkerror.com/?p=45">[1]</a> <a rel="nofollow" class="external autonumber" href="https://serverfault.com/questions/772494/vsftpd-list-causes-gnutls-error-15">[2]</a>
+</p>
+<h3><span class="mw-headline" id="vsftpd.service_fails_to_run_on_boot">vsftpd.service fails to run on boot</span></h3>
+<p>If you have enabled the vsftpd service and it fails to run on boot, make sure it is set to load after network.target in the service file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/vsftpd.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=vsftpd daemon
+After=network.target</pre>
+<h3><span class="mw-headline" id="ipv6_only_fails_with:_500_OOPS:_run_two_copies_of_vsftpd_for_IPv4_and_IPv6">ipv6 only fails with: 500 OOPS: run two copies of vsftpd for IPv4 and IPv6</span></h3>
+<p>you most likely have commented out the line
+</p>
+<pre># When "listen" directive is enabled, vsftpd runs in standalone mode and
+# listens on IPv4 sockets. This directive cannot be used in conjunction
+# with the listen_ipv6 directive.
+#listen=YES
+#
+# This directive enables listening on IPv6 sockets. To listen on IPv4 and IPv6
+# sockets, you must run two copies of vsftpd with two configuration files.
+# Make sure, that one of the listen options is commented !!
+listen_ipv6=YES
+</pre>
+<p>instead of setting
+</p>
+<pre># When "listen" directive is enabled, vsftpd runs in standalone mode and
+# listens on IPv4 sockets. This directive cannot be used in conjunction
+# with the listen_ipv6 directive.
+listen=NO
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://vsftpd.beasts.org/">vsftpd official homepage</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://vsftpd.beasts.org/vsftpd_conf.html">vsftpd.conf man page</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_Transfer_Protocol.html" title="Category:File Transfer Protocol">File Transfer Protocol</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

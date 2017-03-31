@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Taskd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Taskd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Taskd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://tasktools.org/projects/taskd.html">taskd</a> is a lightweight, secure server providing multi-user, multi-client access to task data. This allows true syncing between desktop and mobile clients.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Server"><span class="tocnumber">1</span> <span class="toctext">Server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Setup"><span class="tocnumber">1.2</span> <span class="toctext">Setup</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Adding_a_user_in_taskd"><span class="tocnumber">1.3</span> <span class="toctext">Adding a user in taskd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Client"><span class="tocnumber">2</span> <span class="toctext">Client</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#User_configuration"><span class="tocnumber">2.1</span> <span class="toctext">User configuration</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Using_the_Android_Taskwarrior_app"><span class="tocnumber">2.2</span> <span class="toctext">Using the Android Taskwarrior app</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">3</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Unreachable_Server"><span class="tocnumber">3.1</span> <span class="toctext">Unreachable Server</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#.22Bad_Key.22"><span class="tocnumber">3.2</span> <span class="toctext">"Bad Key"</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Server">Server</span></h2>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>taskd is available in the AUR as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/taskd/">taskd</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/taskd-git/">taskd-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h3><span class="mw-headline" id="Setup">Setup</span></h3>
+Once taskd is installed, you need to set it up. The first step is to <pre>export TASKDDATA=/var/lib/taskd </pre> (otherwise you need to append <code>--data /var/lib/taskd</code> to every taskd command).
+<p>Next, edit the <code>/usr/share/doc/taskd/pki/vars</code> file. The <code>CN=</code> line must either match the server's hostname or IP address, depending on how you connect. Once the file is edited to your heart's content, run <code>/usr/share/doc/taskd/pki/generate</code>. This will create selfsigned certificates for your server. Copy all generated *.pem-files to <code>/var/lib/taskd</code>. Note that at least the ca.cert.pem must remain in the pki folder for the user-certificate generation later on.
+</p>
+<p>Now you need to configure the taskd config. This can be done by either using <code>taskd config</code> or editing <code>/var/lib/taskd/config</code> directly.
+</p>
+<pre>taskd config --force client.cert $TASKDDATA/client.cert.pem
+taskd config --force client.key $TASKDDATA/client.key.pem
+taskd config --force server.cert $TASKDDATA/server.cert.pem
+taskd config --force server.key $TASKDDATA/server.key.pem
+taskd config --force server.crl $TASKDDATA/server.crl.pem
+taskd config --force ca.cert $TASKDDATA/ca.cert.pem</pre>
+<p>Additionally you should change where taskd logs to, since the default is /tmp/log. This can be done by running
+</p>
+<pre>touch /var/log/taskd.log
+chown taskd:taskd /var/log/taskd.log
+taskd config --force log /var/log/taskd.log</pre>
+<p>The last step is to set taskd's server name, which must be the same as the one used in the certificates: <code>taskd config --force server servername:port</code>. Note that taskd has no default port and it must be set manually.
+</p>
+<h3><span class="mw-headline" id="Adding_a_user_in_taskd">Adding a user in taskd</span></h3>
+<p>taskd knows about groups and users, and each user must be in a group. The group- and usernames can be whatever you want.
+</p>
+<pre>taskd add org group
+taskd add user group username</pre>
+<p>Note the key the last command returns, the user will need it to synchronize.
+</p>
+Return to <code>/usr/share/doc/taskd/pki/</code> and run <pre>./generate.client username</pre> This will return username.cert.pem and username.key.pem. The username.key.pem, username.cert.pem and ca.cert.pem must be added to the user's <code>~/.task</code> directory.
+<h2><span class="mw-headline" id="Client">Client</span></h2>
+<h3><span class="mw-headline" id="User_configuration">User configuration</span></h3>
+<p>Once the *.pem files are added to <code>~/.task</code>, they must be added to the task config, along with the servername and unique ID.
+</p>
+<pre>task config taskd.certificate ~/.task/username.cert.pem
+task config taskd.key ~/.task/username.key.pem
+task config taskd.ca ~/.task/ca.cert.pem
+task config taskd.server servername:port
+task config taskd.credentials group/username/key</pre>
+<p>After you're done, check the config file. task likes to escape slashes.
+</p>
+<p>After running a <code>task sync init</code>, the user is able to synchronize taskwarrior whereever pleased.
+</p>
+<h3><span class="mw-headline" id="Using_the_Android_Taskwarrior_app">Using the Android Taskwarrior app</span></h3>
+<p>Before you even download the android app, you need to create a folder. On your external storage (or if you only have an internal one, then there) create the folder <code>Android/data/kvj.taskw/files/key</code> where "key" is the same as the key given when creating the user in taskd. Then add the username.key.pem, username.cert.pem and ca.cert.pem files to that folder. Create a new file in that folder called <code>.taskrc.android</code>. It should look like this:
+</p>
+<pre>taskd.server=servername:port
+taskd.credentials=group/username/key
+taskd.certificate=username.cert.pem
+taskd.key=username.key.pem
+taskd.ca=ca.cert.pem</pre>
+<p>Now download the app and start it. When adding a profile, choose the datafolder you just created. Taskwarrior should now sync and work as expected.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Unreachable_Server">Unreachable Server</span></h3>
+<p>Should the server be unreachable but running, it bound itself to an IPv6 address. You can force IPv4 by adding <code>family=IPv4</code> to <code>/var/lib/taskd/config</code>. Restart taskd afterwards.
+</p>
+<h3><span class="mw-headline" id=".22Bad_Key.22">"Bad Key"</span></h3>
+<p>If the server responds with a "Bad Key" error even though you just generated them, check the permissions of the created folders (everything in <code>/var/lib/taskd/</code> and subfolders). taskd doesn't set it's own uid / gid, so those folders must be manually chowned to taskd.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

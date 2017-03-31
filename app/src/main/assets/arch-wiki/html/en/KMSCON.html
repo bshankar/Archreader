@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>KMSCON - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-KMSCON skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">KMSCON</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Kernel_mode_setting.html" title="KMS" class="mw-redirect">KMS</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd.html" title="Systemd">systemd</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fbterm.html" title="Fbterm">fbterm</a></li>
+</ul>
+</div>
+<p>From the project's <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/~dvdhrm/kmscon/tree/README">git repository</a>:
+</p>
+<dl><dd><i>Kmscon is a simple terminal emulator based on linux <a href="../en/Kernel_mode_setting.html" title="Kernel mode setting">kernel mode setting</a>. It is an attempt to replace the in-kernel VT implementation with a userspace console.</i></dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Features"><span class="tocnumber">1</span> <span class="toctext">Features</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Install"><span class="tocnumber">2</span> <span class="toctext">Install</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#CJK_support"><span class="tocnumber">3</span> <span class="toctext">CJK support</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Features">Features</span></h2>
+<p>Kmscon can function as a drop-in replacement for the in-kernel linux-console. Features include:
+</p>
+<ul>
+<li> Full vt220 to vt510 implementation.</li>
+<li> Full internationalization support:
+<ul>
+<li> Kmscon supports printing full Unicode glyphs, including the CJK ones.</li>
+<li> Kmscon provides internationalized keyboard handling through libxkbcommon, thus allowing it to use the full range of keyboard layouts supported in X keyboard.</li>
+</ul>
+</li>
+<li> Hardware accelerated rendering.</li>
+<li> Multi-seat capability.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In order to be able to log into a kmscon console as root, you have to disable the <code>pam_securetty</code> module by removing or commenting out the corresponding line in <code>/etc/pam.d/login</code>. </div>
+<h2><span class="mw-headline" id="Install">Install</span></h2>
+<p>Despite its name, KMS is not a hard requirement for kmscon. Kmscon supports the following video backends: fbdev (Linux fbdev video backend), drm2d (Linux DRM software-rendering backend), drm3d (Linux DRM hardware-rendering backend). Make sure one of them is available on your system.
+</p>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kmscon">kmscon</a></span> package from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>. Alternatively, you can install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/kmscon-git/">kmscon-git</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>Normally, there is a special systemd configuration for tty1.  To be conservative, you can continue to run the traditional agetty on tty1 and only run kmscon on all the other virtual terminals.  Or you can run kmscon on both tty1 and the other VTs.
+</p>
+<p>To enable kmscon on tty1, run:
+</p>
+<pre>
+# systemctl disable getty@tty1.service
+# systemctl enable kmsconvt@tty1.service
+</pre>
+<p>To enable kmscon on all virtual terminals, run:
+</p>
+<pre>
+# ln -s /usr/lib/systemd/system/kmsconvt\@.service /etc/systemd/system/autovt\@.service
+</pre>
+<p>This will make <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> start kmscon instead of agetty on each VT. More precisely, this will make <i>systemd-logind</i> use <code>kmsconvt@.service</code> instead of <code>getty@.service</code> for new VTs. Additionally, all other systemd units that use <code>getty@.service</code> will not be affected by this change.
+</p>
+<p>If <i>kmscon</i> cannot start for whatever reason, this unit will cause <code>getty@.service</code> to be started instead. Furthermore, if no VTs are available, this unit will not start anything.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you've replaced agetty on all terminals, take care to ensure <i>kmscon</i> presents you with a prompt before rebooting your machine, otherwise you may have to recover through a live CD.</div>
+<h2><span class="mw-headline" id="CJK_support">CJK support</span></h2>
+<p>Kmscon supports rendering CJK characters through the default font engine <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pango">pango</a></span>. However, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=fontconfig">fontconfig</a></span> has to be globally configured to map the monospace font alias to proper CJK fonts. For Chinese users, the following template is provided and proved to result in satisfactory Chinese characters rendering:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fonts/conf.d/99-kmscon.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+&lt;?xml version="1.0"?&gt;
+&lt;!DOCTYPE fontconfig SYSTEM "fonts.dtd"&gt;
+&lt;fontconfig&gt;
+&lt;match&gt;
+        &lt;test name="family"&gt;&lt;string&gt;monospace&lt;/string&gt;&lt;/test&gt;
+        &lt;edit name="family" mode="prepend" binding="strong"&gt;
+                &lt;string&gt;DejaVu Sans Mono&lt;/string&gt;
+                &lt;string&gt;WenQuanYi Micro Hei Mono&lt;/string&gt;
+        &lt;/edit&gt;
+&lt;/match&gt;
+&lt;/fontconfig&gt;
+</pre>
+<p>You need to have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ttf-dejavu">ttf-dejavu</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wqy-microhei">wqy-microhei</a></span>, both available from the official repositories, installed.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<ul><li> You may want to add <code>hwaccel</code> to <code>/etc/kmscon/kmscon.conf</code> if you have problems with switching between <a href="../en/Xorg.html" title="Xorg">Xorg</a> and kmscon.</li></ul>
+<p>The file and folder are not part of the package and therefore have to be created manually. Another possibility would be <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">editing the systemd service file</a>.
+</p>
+<ul><li> As version 7, if you cannot control the audio, add your user to <b>audio</b> <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a>. Be aware of the <a href="../en/Advanced_Linux_Sound_Architecture.html#Installation" title="Alsa" class="mw-redirect">shortcomings</a> of this choice.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Terminal_emulators.html" title="Category:Terminal emulators">Terminal emulators</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

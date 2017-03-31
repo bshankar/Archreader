@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Disable PC speaker beep - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Disable_PC_speaker_beep skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Disable PC speaker beep</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Beep.html" title="Beep">beep</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> ...and rename to <a href="/index.php?title=PC_speaker&amp;action=edit&amp;redlink=1" class="new" title="PC speaker (page does not exist)">PC speaker</a>? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Disable_PC_speaker_beep">Talk:Disable PC speaker beep#</a>)</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Globally"><span class="tocnumber">2</span> <span class="toctext">Globally</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Locally"><span class="tocnumber">3</span> <span class="toctext">Locally</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#In_X"><span class="tocnumber">3.1</span> <span class="toctext">In X</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#In_console"><span class="tocnumber">3.2</span> <span class="toctext">In console</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Using_ALSA"><span class="tocnumber">3.3</span> <span class="toctext">Using ALSA</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#In_GNOME"><span class="tocnumber">3.4</span> <span class="toctext">In GNOME</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#In_Cinnamon"><span class="tocnumber">3.5</span> <span class="toctext">In Cinnamon</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#GTK.2B"><span class="tocnumber">3.6</span> <span class="toctext">GTK+</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>The computer often seems to make beep noises or other sounds at various times, whether we want them or not. They come from various sources, and as such, you may be able to configure if or when they occur.
+</p>
+<p>Further, the sounds from the computer can be heard from the built-in case speaker, or the speakers or headphones which are plugged into the sound card (in which case the noise may be unexpectedly loud). This article deals primarily with the former.
+</p>
+<p>The sounds are caused by the BIOS (Basic Input/Output System), the OS (Operating System), the DE (Desktop Environment), or various software programs. The BIOS is a particularly troublesome problem because it is kept inside an EPROM chip on the motherboard, and the only direct control the user has is by turning the power on or off.  Unless the BIOS setup has a setting you can adjust or you wish to attempt to reprogram that chip with the proper light source, it is not likely you will be able to change it at all. BIOS-generated beep sounds are not addressed here, except to say that unplugging your computer case speaker will stop all such sounds from being heard.  (Do so at your own risk.)
+</p>
+<p>However, everything else which can cause a sound to come out of the computer case speaker can be handled with the suggestions listed below.
+</p>
+<p>One should also note that the option of turning off a particular instance of a sound, while leaving the others operational, is possible if one can identify which portion of the environment is the source of the particular sound generation. This can make a very customized selection of attention-getting sounds possible. Please feel free to add your findings to this wiki page when you find particular examples of settings combinations which may be useful for other users.
+</p>
+<h2><span class="mw-headline" id="Globally">Globally</span></h2>
+<p>The PC speaker can be disabled by <a href="../en/Kernel_modules.html#Manual_module_handling" title="Kernel modules">unloading</a> the <code>pcspkr</code> module:
+</p>
+<pre># rmmod pcspkr
+</pre>
+<p><a href="../en/Kernel_modules.html#Blacklisting" title="Blacklisting" class="mw-redirect">Blacklisting</a> the <code>pcspkr</code> module will prevent <a href="../en/Udev.html" title="Udev">udev</a> from loading it at boot:
+</p>
+<pre># echo "blacklist pcspkr" &gt; /etc/modprobe.d/nobeep.conf
+</pre>
+<p><a href="../en/Kernel_modules.html#Using_kernel_command_line_2" title="Kernel modules">Blacklisting it on the kernel command line</a> is yet another way. Simply add <code>modprobe.blacklist=pcspkr</code> to your bootloader's kernel line.
+</p>
+<h2><span class="mw-headline" id="Locally">Locally</span></h2>
+<h3><span class="mw-headline" id="In_X">In X</span></h3>
+<pre>$ xset -b
+</pre>
+<p>You can add this command to a startup file, such as <a href="../en/Xprofile.html" title="Xprofile">xprofile</a> to make it permanent.
+</p>
+<h3><span class="mw-headline" id="In_console">In console</span></h3>
+<p>You can add this command in <code>/etc/profile</code> or a dedicated file like <code>/etc/profile.d/disable-beep.sh</code> (must be executable):
+</p>
+<pre>setterm -blength 0
+</pre>
+<p>Another way is to add or uncomment this line in <code>/etc/inputrc</code> or <code>~/.inputrc</code>:
+</p>
+<pre>set bell-style none
+</pre>
+<h3><span class="mw-headline" id="Using_ALSA">Using ALSA</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For most Intel's cards, if you do not see PC Speaker in alsamixer's default device, then try selecting "HDA Intel PCH" device by pressing F6. It is listed as "Beep" there. This is because PulseAudio proxy controls may not list all PC Speakers.</div>
+<p>Try muting the PC Speaker:
+</p>
+<pre>$ amixer set 'PC Speaker' 0% mute
+</pre>
+<p>For certain sound cards, it is the PC Beep:
+</p>
+<pre>$ amixer set 'PC Beep' 0% mute
+</pre>
+<p>Or merely Beep:
+</p>
+<pre>$ amixer set 'Beep' 0% mute
+</pre>
+<p>You can also use alsamixer for a console GUI
+</p>
+<pre>$ alsamixer
+</pre>
+<p>Scroll to PC beep and press 'M' to mute. Save your alsa settings:
+</p>
+<pre># alsactl store
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Not every sound card creates a PC Speaker or PC Beep slider control in alsamixer.</div>
+<h3><span class="mw-headline" id="In_GNOME">In GNOME</span></h3>
+<p>Using GSettings:
+</p>
+<pre>$ gsettings set org.gnome.desktop.wm.preferences audible-bell false
+</pre>
+<h3><span class="mw-headline" id="In_Cinnamon">In Cinnamon</span></h3>
+<p>Cinnamon seems to play a "water drop" sound. To disable it, set in dconf:
+</p>
+<pre>$ dconf write /org/cinnamon/desktop/wm/preferences/audible-bell false
+</pre>
+<h3><span class="mw-headline" id="GTK.2B">GTK+</span></h3>
+<p>Append this line to <code>~/.gtkrc-2.0</code>:
+</p>
+<pre>gtk-error-bell = 0
+</pre>
+<p>Add the same line to the [Settings] section of <code>$XDG_CONFIG_HOME/gtk-3.0/settings.ini</code>:
+</p>
+<pre>[Settings]
+gtk-error-bell = 0
+</pre>
+<p>This is documented in the <a rel="nofollow" class="external text" href="https://developer.gnome.org/gtk3/stable/GtkSettings.html">Gnome Developer Handbook</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> Have a look at these <code>man</code> pages for further information: <code>xset(1)</code>, <code>setterm(1)</code>, <code>readline(3)</code>.</li>
+<li> <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Sound.html" title="Category:Sound">Sound</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

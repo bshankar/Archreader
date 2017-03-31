@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>F2FS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-F2FS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">F2FS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+</ul>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/F2FS" class="extiw" title="wikipedia:F2FS">F2FS</a> (Flash-Friendly File System) is a file system intended for NAND-based flash memory. It is supported from kernel 3.8 onwards.
+</p>
+<h2><span class="mw-headline" id="Creating_a_F2FS_partition">Creating a F2FS partition</span></h2>
+<p>In order to create a F2FS partition, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=f2fs-tools">f2fs-tools</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>Create the partition:
+</p>
+<pre># mkfs.f2fs -l mylabel <i>/dev/sdxY</i>
+</pre>
+<p>where <code><i>/dev/sdxY</i></code> is the target volume to format in F2FS.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If using F2FS as your root partition, you will need to add the following modules to the <code>MODULES</code> line in your <code>/etc/mkinitcpio.conf</code> file <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=210673">[1]</a>:
+<p>For newer CPU (having PCLMUL acceleration):
+</p>
+<pre>
+MODULES="f2fs libcrc32c crc32c-intel crc32-pclmul"
+</pre>
+<p>For old CPU:
+</p>
+<pre>
+MODULES="f2fs libcrc32c crc32_generic crc32c_generic"
+</pre>
+</div>
+<h2><span class="mw-headline" id="Mounting_a_F2FS_partition">Mounting a F2FS partition</span></h2>
+<p>Users will likely need to manually load the F2FS kernel module before mounting. Issue as root:
+</p>
+<pre># modprobe f2fs
+</pre>
+<p>The partition can then be mounted:
+</p>
+<pre># mount -t f2fs /dev/sdxY /mnt
+</pre>
+<h2><span class="mw-headline" id="Install_Arch_Linux_on_F2FS_partition">Install Arch Linux on F2FS partition</span></h2>
+<p>With the latest <a rel="nofollow" class="external text" href="https://www.archlinux.org/download/">installation media</a> it is possible to install Arch linux with root located on a F2FS filesystem:
+</p>
+<ol>
+<li> Create the root partition as F2FS as described in section <a href="#Creating_a_F2FS_partition">#Creating a F2FS partition</a>.</li>
+<li> If your <a href="../en/Bootloader.html" title="Bootloader" class="mw-redirect">bootloader</a> does not support F2FS, create a separate <code>/boot</code> partition using a filesystem that it does.</li>
+<li> Continue with the installation procedure as per <a href="../en/Installation_guide.html#Mount_the_partitions" title="Installation guide">Installation guide#Mount the partitions</a> until <a href="../en/Change_root.html" title="Change root">chrooted</a>.</li>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=f2fs-tools">f2fs-tools</a></span> on the newly installed system as well.</li>
+<li> Regenerate the <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a> while chrooted.</li>
+</ol>
+<p>The driver included in the kernel 4.6 or higher uses Crypto API for computing CRC32. Add <code>crc32_generic</code> and <code>crc32-pclmul</code> to the <code>MODULES</code> array in <code>/etc/mkinitcpio.conf</code> and regenerate the initramfs if the driver fails to load a CRC32 module at boot.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

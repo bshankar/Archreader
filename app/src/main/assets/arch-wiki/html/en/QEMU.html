@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>QEMU - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-QEMU skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">QEMU</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Category:Hypervisors</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Libvirt.html" title="Libvirt">Libvirt</a></li>
+</ul>
+</div>
+<p>According to the <a rel="nofollow" class="external text" href="http://wiki.qemu.org/Main_Page">QEMU about page</a>, "QEMU is a generic and open source machine emulator and virtualizer."
+</p>
+<p>When used as a machine emulator, QEMU can run OSes and programs made for one machine (e.g. an ARM board) on a different machine (e.g. your x86 PC). By using dynamic translation, it achieves very good performance.
+</p>
+<p>QEMU can use other hypervisors like <a href="../en/Xen.html" title="Xen">Xen</a> or <a href="../en/KVM.html" title="KVM">KVM</a> to use CPU extensions (<a href="https://en.wikipedia.org/wiki/Hardware-assisted_virtualization" class="extiw" title="wikipedia:Hardware-assisted virtualization">HVM</a>) for virtualization. When used as a virtualizer, QEMU achieves near native performances by executing the guest code directly on the host CPU.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Graphical_front-ends_for_QEMU"><span class="tocnumber">2</span> <span class="toctext">Graphical front-ends for QEMU</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Creating_new_virtualized_system"><span class="tocnumber">3</span> <span class="toctext">Creating new virtualized system</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#Creating_a_hard_disk_image"><span class="tocnumber">3.1</span> <span class="toctext">Creating a hard disk image</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Overlay_storage_images"><span class="tocnumber">3.1.1</span> <span class="toctext">Overlay storage images</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Resizing_an_image"><span class="tocnumber">3.1.2</span> <span class="toctext">Resizing an image</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Preparing_the_installation_media"><span class="tocnumber">3.2</span> <span class="toctext">Preparing the installation media</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Installing_the_operating_system"><span class="tocnumber">3.3</span> <span class="toctext">Installing the operating system</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Running_virtualized_system"><span class="tocnumber">4</span> <span class="toctext">Running virtualized system</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Enabling_KVM"><span class="tocnumber">4.1</span> <span class="toctext">Enabling KVM</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Enabling_IOMMU_.28Intel_VT-d.2FAMD-Vi.29_support"><span class="tocnumber">4.2</span> <span class="toctext">Enabling IOMMU (Intel VT-d/AMD-Vi) support</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Moving_data_between_host_and_guest_OS"><span class="tocnumber">5</span> <span class="toctext">Moving data between host and guest OS</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Network"><span class="tocnumber">5.1</span> <span class="toctext">Network</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#QEMU.27s_built-in_SMB_server"><span class="tocnumber">5.2</span> <span class="toctext">QEMU's built-in SMB server</span></a></li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Mounting_a_partition_inside_a_raw_disk_image"><span class="tocnumber">5.3</span> <span class="toctext">Mounting a partition inside a raw disk image</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#With_manually_specifying_byte_offset"><span class="tocnumber">5.3.1</span> <span class="toctext">With manually specifying byte offset</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#With_loop_module_autodetecting_partitions"><span class="tocnumber">5.3.2</span> <span class="toctext">With loop module autodetecting partitions</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#With_kpartx"><span class="tocnumber">5.3.3</span> <span class="toctext">With kpartx</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Mounting_a_partition_inside_a_qcow2_image"><span class="tocnumber">5.4</span> <span class="toctext">Mounting a partition inside a qcow2 image</span></a></li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Using_any_real_partition_as_the_single_primary_partition_of_a_hard_disk_image"><span class="tocnumber">5.5</span> <span class="toctext">Using any real partition as the single primary partition of a hard disk image</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#By_specifying_kernel_and_initrd_manually"><span class="tocnumber">5.5.1</span> <span class="toctext">By specifying kernel and initrd manually</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Simulate_virtual_disk_with_MBR_using_linear_RAID"><span class="tocnumber">5.5.2</span> <span class="toctext">Simulate virtual disk with MBR using linear RAID</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Networking"><span class="tocnumber">6</span> <span class="toctext">Networking</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#Link-level_address_caveat"><span class="tocnumber">6.1</span> <span class="toctext">Link-level address caveat</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#User-mode_networking"><span class="tocnumber">6.2</span> <span class="toctext">User-mode networking</span></a></li>
+<li class="toclevel-2 tocsection-26">
+<a href="#Tap_networking_with_QEMU"><span class="tocnumber">6.3</span> <span class="toctext">Tap networking with QEMU</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#Host-only_networking"><span class="tocnumber">6.3.1</span> <span class="toctext">Host-only networking</span></a></li>
+<li class="toclevel-3 tocsection-28"><a href="#Internal_networking"><span class="tocnumber">6.3.2</span> <span class="toctext">Internal networking</span></a></li>
+<li class="toclevel-3 tocsection-29"><a href="#Bridged_networking_using_qemu-bridge-helper"><span class="tocnumber">6.3.3</span> <span class="toctext">Bridged networking using qemu-bridge-helper</span></a></li>
+<li class="toclevel-3 tocsection-30"><a href="#Creating_bridge_manually"><span class="tocnumber">6.3.4</span> <span class="toctext">Creating bridge manually</span></a></li>
+<li class="toclevel-3 tocsection-31"><a href="#Network_sharing_between_physical_device_and_a_Tap_device_through_iptables"><span class="tocnumber">6.3.5</span> <span class="toctext">Network sharing between physical device and a Tap device through iptables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-32">
+<a href="#Networking_with_VDE2"><span class="tocnumber">6.4</span> <span class="toctext">Networking with VDE2</span></a>
+<ul>
+<li class="toclevel-3 tocsection-33"><a href="#What_is_VDE.3F"><span class="tocnumber">6.4.1</span> <span class="toctext">What is VDE?</span></a></li>
+<li class="toclevel-3 tocsection-34"><a href="#Basics"><span class="tocnumber">6.4.2</span> <span class="toctext">Basics</span></a></li>
+<li class="toclevel-3 tocsection-35"><a href="#Startup_scripts"><span class="tocnumber">6.4.3</span> <span class="toctext">Startup scripts</span></a></li>
+<li class="toclevel-3 tocsection-36"><a href="#Alternative_method"><span class="tocnumber">6.4.4</span> <span class="toctext">Alternative method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-37">
+<a href="#VDE2_Bridge"><span class="tocnumber">6.5</span> <span class="toctext">VDE2 Bridge</span></a>
+<ul>
+<li class="toclevel-3 tocsection-38"><a href="#Basics_2"><span class="tocnumber">6.5.1</span> <span class="toctext">Basics</span></a></li>
+<li class="toclevel-3 tocsection-39"><a href="#Startup_scripts_2"><span class="tocnumber">6.5.2</span> <span class="toctext">Startup scripts</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-40">
+<a href="#Graphics"><span class="tocnumber">7</span> <span class="toctext">Graphics</span></a>
+<ul>
+<li class="toclevel-2 tocsection-41"><a href="#std"><span class="tocnumber">7.1</span> <span class="toctext">std</span></a></li>
+<li class="toclevel-2 tocsection-42">
+<a href="#qxl"><span class="tocnumber">7.2</span> <span class="toctext">qxl</span></a>
+<ul>
+<li class="toclevel-3 tocsection-43"><a href="#SPICE"><span class="tocnumber">7.2.1</span> <span class="toctext">SPICE</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-44"><a href="#vmware"><span class="tocnumber">7.3</span> <span class="toctext">vmware</span></a></li>
+<li class="toclevel-2 tocsection-45"><a href="#virtio"><span class="tocnumber">7.4</span> <span class="toctext">virtio</span></a></li>
+<li class="toclevel-2 tocsection-46"><a href="#cirrus"><span class="tocnumber">7.5</span> <span class="toctext">cirrus</span></a></li>
+<li class="toclevel-2 tocsection-47"><a href="#none"><span class="tocnumber">7.6</span> <span class="toctext">none</span></a></li>
+<li class="toclevel-2 tocsection-48"><a href="#vnc"><span class="tocnumber">7.7</span> <span class="toctext">vnc</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-49">
+<a href="#Installing_virtio_drivers"><span class="tocnumber">8</span> <span class="toctext">Installing virtio drivers</span></a>
+<ul>
+<li class="toclevel-2 tocsection-50"><a href="#Preparing_an_.28Arch.29_Linux_guest"><span class="tocnumber">8.1</span> <span class="toctext">Preparing an (Arch) Linux guest</span></a></li>
+<li class="toclevel-2 tocsection-51">
+<a href="#Preparing_a_Windows_guest"><span class="tocnumber">8.2</span> <span class="toctext">Preparing a Windows guest</span></a>
+<ul>
+<li class="toclevel-3 tocsection-52">
+<a href="#Block_device_drivers"><span class="tocnumber">8.2.1</span> <span class="toctext">Block device drivers</span></a>
+<ul>
+<li class="toclevel-4 tocsection-53"><a href="#New_Install_of_Windows"><span class="tocnumber">8.2.1.1</span> <span class="toctext">New Install of Windows</span></a></li>
+<li class="toclevel-4 tocsection-54"><a href="#Change_Existing_Windows_VM_to_use_virtio"><span class="tocnumber">8.2.1.2</span> <span class="toctext">Change Existing Windows VM to use virtio</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-55"><a href="#Network_drivers"><span class="tocnumber">8.2.2</span> <span class="toctext">Network drivers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-56"><a href="#Preparing_a_FreeBSD_guest"><span class="tocnumber">8.3</span> <span class="toctext">Preparing a FreeBSD guest</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-57">
+<a href="#Tips_and_tricks"><span class="tocnumber">9</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-58">
+<a href="#Starting_QEMU_virtual_machines_on_boot"><span class="tocnumber">9.1</span> <span class="toctext">Starting QEMU virtual machines on boot</span></a>
+<ul>
+<li class="toclevel-3 tocsection-59"><a href="#With_libvirt"><span class="tocnumber">9.1.1</span> <span class="toctext">With libvirt</span></a></li>
+<li class="toclevel-3 tocsection-60"><a href="#Custom_script"><span class="tocnumber">9.1.2</span> <span class="toctext">Custom script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-61"><a href="#Mouse_integration"><span class="tocnumber">9.2</span> <span class="toctext">Mouse integration</span></a></li>
+<li class="toclevel-2 tocsection-62"><a href="#Pass-through_host_USB_device"><span class="tocnumber">9.3</span> <span class="toctext">Pass-through host USB device</span></a></li>
+<li class="toclevel-2 tocsection-63"><a href="#Enabling_KSM"><span class="tocnumber">9.4</span> <span class="toctext">Enabling KSM</span></a></li>
+<li class="toclevel-2 tocsection-64"><a href="#Multi-monitor_support"><span class="tocnumber">9.5</span> <span class="toctext">Multi-monitor support</span></a></li>
+<li class="toclevel-2 tocsection-65"><a href="#Copy_and_paste"><span class="tocnumber">9.6</span> <span class="toctext">Copy and paste</span></a></li>
+<li class="toclevel-2 tocsection-66">
+<a href="#Windows-specific_notes"><span class="tocnumber">9.7</span> <span class="toctext">Windows-specific notes</span></a>
+<ul>
+<li class="toclevel-3 tocsection-67"><a href="#Fast_startup"><span class="tocnumber">9.7.1</span> <span class="toctext">Fast startup</span></a></li>
+<li class="toclevel-3 tocsection-68"><a href="#Remote_Desktop_Protocol"><span class="tocnumber">9.7.2</span> <span class="toctext">Remote Desktop Protocol</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-69">
+<a href="#Troubleshooting"><span class="tocnumber">10</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-70"><a href="#Mouse_cursor_is_jittery_or_erratic"><span class="tocnumber">10.1</span> <span class="toctext">Mouse cursor is jittery or erratic</span></a></li>
+<li class="toclevel-2 tocsection-71"><a href="#No_visible_Cursor"><span class="tocnumber">10.2</span> <span class="toctext">No visible Cursor</span></a></li>
+<li class="toclevel-2 tocsection-72"><a href="#Keyboard_seems_broken_or_the_arrow_keys_do_not_work"><span class="tocnumber">10.3</span> <span class="toctext">Keyboard seems broken or the arrow keys do not work</span></a></li>
+<li class="toclevel-2 tocsection-73"><a href="#Virtual_machine_runs_too_slowly"><span class="tocnumber">10.4</span> <span class="toctext">Virtual machine runs too slowly</span></a></li>
+<li class="toclevel-2 tocsection-74"><a href="#Guest_display_stretches_on_window_resize"><span class="tocnumber">10.5</span> <span class="toctext">Guest display stretches on window resize</span></a></li>
+<li class="toclevel-2 tocsection-75"><a href="#ioctl.28KVM_CREATE_VM.29_failed:_16_Device_or_resource_busy"><span class="tocnumber">10.6</span> <span class="toctext">ioctl(KVM_CREATE_VM) failed: 16 Device or resource busy</span></a></li>
+<li class="toclevel-2 tocsection-76"><a href="#libgfapi_error_message"><span class="tocnumber">10.7</span> <span class="toctext">libgfapi error message</span></a></li>
+<li class="toclevel-2 tocsection-77"><a href="#Kernel_panic_on_LIVE-environments"><span class="tocnumber">10.8</span> <span class="toctext">Kernel panic on LIVE-environments</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-78"><a href="#See_also"><span class="tocnumber">11</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu">qemu</a></span> package (or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-headless">qemu-headless</a></span> for the version without GUI) and below optional packages for your needs:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-arch-extra">qemu-arch-extra</a></span> - extra architectures support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-block-gluster">qemu-block-gluster</a></span> - glusterfs block support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-block-iscsi">qemu-block-iscsi</a></span> - iSCSI block support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-block-rbd">qemu-block-rbd</a></span> - RBD block support </li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=samba">samba</a></span> - SMB/CIFS server support</li>
+</ul>
+<h2><span class="mw-headline" id="Graphical_front-ends_for_QEMU">Graphical front-ends for QEMU</span></h2>
+<p>Unlike other virtualization programs such as <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a> and <a href="../en/VMware.html" title="VMware">VMware</a>, QEMU does not provide a GUI to manage virtual machines (other than the window that appears when running a virtual machine), nor does it provide a way to create persistent virtual machines with saved settings. All parameters to run a virtual machine must be specified on the command line at every launch, unless you have created a custom script to start your virtual machine(s). However, there are several GUI front-ends for QEMU:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-launcher">qemu-launcher</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qtemu">qtemu</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/aqemu/">aqemu</a></span><sup><small>AUR</small></sup>
+</li>
+</ul>
+<p>Additional front-ends with QEMU support are available for <a href="../en/Libvirt.html" title="Libvirt">libvirt</a>.
+</p>
+<h2><span class="mw-headline" id="Creating_new_virtualized_system">Creating new virtualized system</span></h2>
+<h3><span class="mw-headline" id="Creating_a_hard_disk_image">Creating a hard disk image</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See the <a rel="nofollow" class="external text" href="https://en.wikibooks.org/wiki/QEMU/Images">QEMU Wikibook</a> for more information on QEMU images.</div>
+<p>To run QEMU you will need a hard disk image, unless you are booting a live system from CD-ROM or the network (and not doing so to install an operating system to a hard disk image). A hard disk image is a file which stores the contents of the emulated hard disk.
+</p>
+<p>A hard disk image can be <i>raw</i>, so that it is literally byte-by-byte the same as what the guest sees, and will always use the full capacity of the guest hard drive on the host. This method provides the least I/O overhead, but can waste a lot of space, as not-used space on the guest cannot be used on the host.
+</p>
+<p>Alternatively, the hard disk image can be in a format such as <i>qcow2</i> which only allocates space to the image file when the guest operating system actually writes to those sectors on its virtual hard disk. The image appears as the full size to the guest operating system, even though it may take up only a very small amount of space on the host system. Using this format instead of <i>raw</i> will likely affect performance.
+</p>
+<p>QEMU provides the <code>qemu-img</code> command to create hard disk images. For example to create a 4 GB image in the <i>raw</i> format:
+</p>
+<pre>$ qemu-img create -f raw <i>image_file</i> 4G
+</pre>
+<p>You may use <code>-f qcow2</code> to create a <i>qcow2</i> disk instead.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can also simply create a <i>raw</i> image by creating a file of the needed size using <code>dd</code> or <code>fallocate</code>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you store the hard disk images on a <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> file system, you should consider disabling <a href="../en/Btrfs.html#Copy-On-Write_.28CoW.29" title="Btrfs">Copy-on-Write</a> for the directory before creating any images.</div>
+<h4><span class="mw-headline" id="Overlay_storage_images">Overlay storage images</span></h4>
+<p>You can create a storage image once (the 'backing' image) and have QEMU keep mutations to this image in an overlay image. This allows you to revert to a previous state of this storage image. You could revert by creating a new overlay image at the time you wish to revert, based on the original backing image.
+</p>
+<p>To create an overlay image, issue a command like:
+</p>
+<pre>$ qemu-img create -o backing_file=<i>img1.raw</i>,backing_fmt=<i>raw</i> -f <i>qcow2</i> <i>img1.cow</i>
+</pre>
+<p>After that you can run your QEMU VM as usual (see <a href="#Running_virtualized_system">#Running virtualized system</a>):
+</p>
+<pre>$ qemu-system-i386 <i>img1.cow</i>
+</pre>
+<p>The backing image will then be left intact and mutations to this storage will be recorded in the overlay image file.
+</p>
+<p>When the path to the backing image changes, repair is required.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The backing image's absolute filesystem path is stored in the (binary) overlay image file. Changing the backing image's path requires some effort.</div>
+<p>Make sure that the original backing image's path still leads to this image. If necessary, make a symbolic link at the original path to the new path. Then issue a command like:
+</p>
+<pre>$ qemu-img rebase -b <i>/new/img1.raw</i> <i>/new/img1.cow</i>
+</pre>
+<p>At your discretion, you may alternatively perform an 'unsafe' rebase where the old path to the backing image is not checked:
+</p>
+<pre>$ qemu-img rebase -u -b <i>/new/img1.raw</i> <i>/new/img1.cow</i>
+</pre>
+<h4><span class="mw-headline" id="Resizing_an_image">Resizing an image</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Resizing an image containing an NTFS boot file system could make the operating system installed on it unbootable. For full explanation and workaround see <a rel="nofollow" class="external autonumber" href="http://tjworld.net/wiki/Howto/ResizeQemuDiskImages">[1]</a>.</div>
+<p>The <code>qemu-img</code> executable has the <code>resize</code> option, which enables easy resizing of a hard drive image. It works for both <i>raw</i> and <i>qcow2</i>. For example, to increase image space by 10 GB, run:
+</p>
+<pre>$ qemu-img resize <i>disk_image</i> +10G
+</pre>
+<p>After enlarging the disk image, you must use file system and partitioning tools inside the virtual machine to actually begin using the new space. When shrinking a disk image, you must <b>first reduce the allocated file systems and partition sizes</b> using the file system and partitioning tools inside the virtual machine and then shrink the disk image accordingly, otherwise shrinking the disk image will result in data loss!
+</p>
+<h3><span class="mw-headline" id="Preparing_the_installation_media">Preparing the installation media</span></h3>
+<p>To install an operating system into your disk image, you need the installation medium (e.g. optical disk, USB-drive, or ISO image) for the operating system. The installation medium should not be mounted because QEMU accesses the media directly.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If using an optical disk, it is a good idea to first dump the media to a file because this both improves performance and does not require you to have direct access to the devices (that is, you can run QEMU as a regular user without having to change access permissions on the media's device file). For example, if the CD-ROM device node is named <code>/dev/cdrom</code>, you can dump it to a file with the command: <pre>$ dd if=/dev/cdrom of=<i>cd_image.iso</i></pre>
+</div>
+<h3><span class="mw-headline" id="Installing_the_operating_system">Installing the operating system</span></h3>
+<p>This is the first time you will need to start the emulator. To install the operating system on the disk image, you must attach both the disk image and the installation media to the virtual machine, and have it boot from the installation media.
+</p>
+<p>For example on i386 guests, to install from a bootable ISO file as CD-ROM and a raw disk image:
+</p>
+<pre>$ qemu-system-i386 -cdrom <i>iso_image</i> -boot order=d -drive file=<i>disk_image</i>,format=raw
+</pre>
+<p>See <code>qemu(1)</code> for more information about loading other media types (such as floppy, disk images or physical drives) and <a href="#Running_virtualized_system">#Running virtualized system</a> for other useful options.
+</p>
+<p>After the operating system has finished installing, the QEMU image can be booted directly (see <a href="#Running_virtualized_system">#Running virtualized system</a>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>By default only 128 MB of memory is assigned to the machine. The amount of memory can be adjusted with the <code>-m</code> switch, for example <code>-m 512M</code> or <code>-m 2G</code>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Instead of specifying <code>-boot order=x</code>, some users may feel more comfortable using a boot menu: <code>-boot menu=on</code>, at least during configuration and experimentation.</li>
+<li> If you need to replace floppies or CDs as part of the installation process, you can use the QEMU machine monitor (press <code>Ctrl+Alt+2</code> in the virtual machine's window) to remove and attach storage devices to a virtual machine. Type <code>info block</code> to see the block devices, and use the <code>change</code> command to swap out a device. Press <code>Ctrl+Alt+1</code> to go back to the virtual machine.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="Running_virtualized_system">Running virtualized system</span></h2>
+<p><code>qemu-system-*</code> binaries (for example <code>qemu-system-i386</code> or <code>qemu-system-x86_64</code>, depending on guest's architecture) are used to run the virtualized guest. The usage is:
+</p>
+<pre>$ qemu-system-i386 <i>options</i> <i>disk_image</i>
+</pre>
+<p>Options are the same for all <code>qemu-system-*</code> binaries, see <code>qemu(1)</code> for documentation of all options.
+</p>
+<p>By default, QEMU will show the virtual machine's video output in a window. One thing to keep in mind: when you click inside the QEMU window, the mouse pointer is grabbed. To release it, press <code>Ctrl+Alt+g</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>QEMU should never be run as root. If you must launch it in a script as root, you should use the <code>-runas</code> option to make QEMU drop root privileges.</div>
+<h3><span class="mw-headline" id="Enabling_KVM">Enabling KVM</span></h3>
+<p>KVM must be supported by your processor and kernel, and necessary <a href="../en/Kernel_modules.html" title="Kernel modules">kernel modules</a> must be loaded. See <a href="../en/KVM.html" title="KVM">KVM</a> for more information.
+</p>
+<p>To start QEMU in KVM mode, append <code>-enable-kvm</code> to the additional start options. To check if KVM is enabled for a running VM, enter the QEMU <a rel="nofollow" class="external text" href="https://en.wikibooks.org/wiki/QEMU/Monitor">Monitor</a> using <code>Ctrl+Alt+Shift+2</code>, and type <code>info kvm</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you start your VM with a GUI tool and experience very bad performance, you should check for proper KVM support, as QEMU may be falling back to software emulation.</li>
+<li> KVM needs to be enabled in order to start Windows 7 and Windows 8 properly without a <i>blue screen</i>.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Enabling_IOMMU_.28Intel_VT-d.2FAMD-Vi.29_support">Enabling IOMMU (Intel VT-d/AMD-Vi) support</span></h3>
+<p>Using IOMMU opens to features like PCI passthrough and memory protection from faulty or malicious devices, see <a href="https://en.wikipedia.org/wiki/Input-output_memory_management_unit#Advantages" class="extiw" title="wikipedia:Input-output memory management unit">wikipedia:Input-output memory management unit#Advantages</a> and <a rel="nofollow" class="external text" href="https://www.quora.com/Memory-Management-computer-programming/Could-you-explain-IOMMU-in-plain-English">Memory Management (computer programming): Could you explain IOMMU in plain English?</a>.
+</p>
+<p>To enable IOMMU:
+</p>
+<ol>
+<li>Ensure that AMD-Vi/Intel VT-d is supported by the CPU and is enabled in the BIOS settings.</li>
+<li>Add <code>intel_iommu=on</code> if you have an Intel CPU or <code>amd_iommu=on</code> if you have an AMD CPU, to the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.</li>
+<li>Reboot and ensure IOMMU is enabled by checking <code>dmesg</code> for <code>DMAR</code>: <code>[0.000000] DMAR: IOMMU enabled</code>
+</li>
+<li>Add <code>iommu=on</code> or <code>q35,iommu=on</code> depending on the <code>-machine</code>, as <i>option</i>.</li>
+</ol>
+<h2><span class="mw-headline" id="Moving_data_between_host_and_guest_OS">Moving data between host and guest OS</span></h2>
+<h3><span class="mw-headline" id="Network">Network</span></h3>
+<p>Data can be shared between the host and guest OS using any network protocol that can transfer files, such as <a href="../en/NFS.html" title="NFS">NFS</a>, <a href="../en/Samba.html" title="SMB" class="mw-redirect">SMB</a>, <a href="https://en.wikipedia.org/wiki/Network_Block_Device" class="extiw" title="wikipedia:Network Block Device">NBD</a>, HTTP, <a href="../en/Very_Secure_FTP_Daemon.html" title="Very Secure FTP Daemon">FTP</a>, or <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a>, provided that you have set up the network appropriately and enabled the appropriate services.
+</p>
+<p>The default user-mode networking allows the guest to access the host OS at the IP address 10.0.2.2. Any servers that you are running on your host OS, such as a SSH server or SMB server, will be accessible at this IP address. So on the guests, you can mount directories exported on the host via <a href="../en/Samba.html" title="SMB" class="mw-redirect">SMB</a> or <a href="../en/NFS.html" title="NFS">NFS</a>, or you can access the host's HTTP server, etc.
+It will not be possible for the host OS to access servers running on the guest OS, but this can be done with other network configurations (see <a href="#Tap_networking_with_QEMU">#Tap networking with QEMU</a>).
+</p>
+<h3><span class="mw-headline" id="QEMU.27s_built-in_SMB_server">QEMU's built-in SMB server</span></h3>
+<p>QEMU's documentation says it has a "built-in" SMB server, but actually it just starts up <a href="../en/Samba.html" title="Samba">Samba</a> with an automatically generated <code>smb.conf</code> file located at <code>/tmp/qemu-smb.<i>pid</i>-0/smb.conf</code> and makes it accessible to the guest at a different IP address (10.0.2.4 by default). This only works for user networking, and this is not necessarily very useful since the guest can also access the normal <a href="../en/Samba.html" title="Samba">Samba</a> service on the host if you have set up shares on it.
+</p>
+<p>To enable this feature, start QEMU with a command like:
+</p>
+<pre>$ qemu-system-i386 <i>disk_image</i> -net nic -net user,smb=<i>shared_dir_path</i>
+</pre>
+<p>where <code><i>shared_dir_path</i></code> is a directory that you want to share between the guest and host.
+</p>
+<p>Then, in the guest, you will be able to access the shared directory on the host 10.0.2.4 with the share name "qemu". For example, in Windows Explorer you would go to <code>\\10.0.2.4\qemu</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you are using sharing options multiple times like <code>-net user,smb=<i>shared_dir_path1</i> -net user,smb=<i>shared_dir_path2</i></code> or <code>-net user,smb=<i>shared_dir_path1</i>,smb=<i>shared_dir_path2</i></code> then it will share only the last defined one.</li>
+<li> If you cannot access the shared folder and the guest system is Windows, check that the <a rel="nofollow" class="external text" href="http://ecross.mvps.org/howto/enable-netbios-over-tcp-ip-with-windows.htm">NetBIOS protocol is enabled</a> and that a firewall does not block <a rel="nofollow" class="external text" href="http://technet.microsoft.com/en-us/library/cc940063.aspx">ports</a> used by the NetBIOS protocol.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Mounting_a_partition_inside_a_raw_disk_image">Mounting a partition inside a raw disk image</span></h3>
+<p>When the virtual machine is not running, it is possible to mount partitions that are inside a raw disk image file by setting them up as loopback devices. This does not work with disk images in special formats, such as qcow2, although those can be mounted using <code>qemu-nbd</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>You must make sure to unmount the partitions before running the virtual machine again. Otherwise, data corruption is very likely to occur.</div>
+<h4><span class="mw-headline" id="With_manually_specifying_byte_offset">With manually specifying byte offset</span></h4>
+<p>One way to mount a disk image partition is to mount the disk image at a certain offset using a command like the following:
+</p>
+<pre># mount -o loop,offset=32256 <i>disk_image</i> <i>mountpoint</i>
+</pre>
+<p>The <code>offset=32256</code> option is actually passed to the <code>losetup</code> program to set up a loopback device that starts at byte offset 32256 of the file and continues to the end. This loopback device is then mounted. You may also use the <code>sizelimit</code> option to specify the exact size of the partition, but this is usually unnecessary.
+</p>
+<p>Depending on your disk image, the needed partition may not start at offset 32256. Run <code>fdisk -l <i>disk_image</i></code> to see the partitions in the image. fdisk gives the start and end offsets in 512-byte sectors, so multiply by 512 to get the correct offset to pass to <code>mount</code>.
+</p>
+<h4><span class="mw-headline" id="With_loop_module_autodetecting_partitions">With loop module autodetecting partitions</span></h4>
+<p>The Linux loop driver actually supports partitions in loopback devices, but it is disabled by default. To enable it, do the following:
+</p>
+<ul>
+<li> Get rid of all your loopback devices (unmount all mounted images, etc.).</li>
+<li> <a href="../en/Kernel_modules.html#Manual_module_handling" title="Kernel modules">Unload</a> the <code>loop</code> kernel module, and load it with the <code>max_part=15</code> parameter set. Additionally, the maximum number of loop devices can be controlled with the <code>max_loop</code> parameter.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can put an entry in <code>/etc/modprobe.d</code> to load the loop module with <code>max_part=15</code> every time, or you can put <code>loop.max_part=15</code> on the kernel command-line, depending on whether you have the <code>loop.ko</code> module built into your kernel or not.</div>
+<p>Set up your image as a loopback device:
+</p>
+<pre># losetup -f -P <i>disk_image</i>
+</pre>
+<p>Then, if the device created was <code>/dev/loop0</code>, additional devices <code>/dev/loop0pX</code> will have been automatically created, where X is the number of the partition. These partition loopback devices can be mounted directly. For example:
+</p>
+<pre># mount /dev/loop0p1 <i>mountpoint</i>
+</pre>
+<p>To mount the disk image with <i>udisksctl</i>, see <a href="../en/Udisks.html#Mount_loop_devices" title="Udisks">Udisks#Mount loop devices</a>.
+</p>
+<h4><span class="mw-headline" id="With_kpartx">With kpartx</span></h4>
+<p><b>kpartx</b> from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/multipath-tools/">multipath-tools</a></span><sup><small>AUR</small></sup> package can read a partition table on a device and create a new device for each partition. For example:
+</p>
+<pre># kpartx -a <i>disk_image</i>
+</pre>
+<p>This will setup the loopback device and create the necessary partition(s) device(s) in <code>/dev/mapper/</code>.
+</p>
+<h3><span class="mw-headline" id="Mounting_a_partition_inside_a_qcow2_image">Mounting a partition inside a qcow2 image</span></h3>
+<p>You may mount a partition inside a qcow2 image using <code>qemu-nbd</code>. See <a rel="nofollow" class="external text" href="http://en.wikibooks.org/wiki/QEMU/Images#Mounting_an_image_on_the_host">Wikibooks</a>.
+</p>
+<h3><span class="mw-headline" id="Using_any_real_partition_as_the_single_primary_partition_of_a_hard_disk_image">Using any real partition as the single primary partition of a hard disk image</span></h3>
+<p>Sometimes, you may wish to use one of your system partitions from within QEMU. Using a raw partition for a virtual machine will improve performance, as the read and write operations do not go through the file system layer on the physical host. Such a partition also provides a way to share data between the host and guest.
+</p>
+<p>In Arch Linux, device files for raw partitions are, by default, owned by <i>root</i> and the <i>disk</i> group. If you would like to have a non-root user be able to read and write to a raw partition, you need to change the owner of the partition's device file to that user.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Although it is possible, it is not recommended to allow virtual machines to alter critical data on the host system, such as the root partition.</li>
+<li> You must not mount a file system on a partition read-write on both the host and the guest at the same time. Otherwise, data corruption will result.</li>
+</ul>
+</div>
+<p>After doing so, you can attach the partition to a QEMU virtual machine as a virtual disk.
+</p>
+<p>However, things are a little more complicated if you want to have the <i>entire</i> virtual machine contained in a partition. In that case, there would be no disk image file to actually boot the virtual machine since you cannot install a bootloader to a partition that is itself formatted as a file system and not as a partitioned device with a MBR. Such a virtual machine can be booted either by specifying the <a href="../en/Kernels.html" title="Kernel" class="mw-redirect">kernel</a> and <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initrd</a> manually, or by simulating a disk with a MBR by using linear <a href="../en/RAID.html" title="RAID">RAID</a>.
+</p>
+<h4><span class="mw-headline" id="By_specifying_kernel_and_initrd_manually">By specifying kernel and initrd manually</span></h4>
+<p>QEMU supports loading <a href="../en/Kernels.html" title="Kernels">Linux kernels</a> and <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">init ramdisks</a> directly, thereby circumventing bootloaders such as <a href="../en/GRUB.html" title="GRUB">GRUB</a>. It then can be launched with the physical partition containing the root file system as the virtual disk, which will not appear to be partitioned. This is done by issuing a command similar to the following:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In this example, it is the <b>host's</b> images that are being used, not the guest's. If you wish to use the guest's images, either mount <code>/dev/sda3</code> read-only (to protect the file system from the host) and specify the <code>/full/path/to/images</code> or use some kexec hackery in the guest to reload the guest's kernel (extends boot time). </div>
+<pre>$ qemu-system-i386 -kernel /boot/vmlinuz-linux -initrd /boot/initramfs-linux.img -append root=/dev/sda /dev/sda3
+</pre>
+<p>In the above example, the physical partition being used for the guest's root file system is <code>/dev/sda3</code> on the host, but it shows up as <code>/dev/sda</code> on the guest.
+</p>
+<p>You may, of course, specify any kernel and initrd that you want, and not just the ones that come with Arch Linux.
+</p>
+<p>When there are multiple <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> to be passed to the <code>-append</code> option, they need to be quoted using single or double quotes. For example:
+</p>
+<pre>... -append 'root=/dev/sda1 console=ttyS0'
+</pre>
+<h4><span class="mw-headline" id="Simulate_virtual_disk_with_MBR_using_linear_RAID">Simulate virtual disk with MBR using linear RAID</span></h4>
+<p>A more complicated way to have a virtual machine use a physical partition, while keeping that partition formatted as a file system and not just having the guest partition the partition as if it were a disk, is to simulate a MBR for it so that it can boot using a bootloader such as GRUB.
+</p>
+<p>You can do this using software <a href="../en/RAID.html" title="RAID">RAID</a> in linear mode (you need the <code>linear.ko</code> kernel driver) and a loopback device: the trick is to dynamically prepend a master boot record (MBR) to the real partition you wish to embed in a QEMU raw disk image.
+</p>
+<p>Suppose you have a plain, unmounted <code>/dev/hdaN</code> partition with some file system on it you wish to make part of a QEMU disk image. First, you create some small file to hold the MBR:
+</p>
+<pre>$ dd if=/dev/zero of=<i>/path/to/mbr</i> count=32
+</pre>
+<p>Here, a 16 KB (32 * 512 bytes) file is created. It is important not to make it too small (even if the MBR only needs a single 512 bytes block), since the smaller it will be, the smaller the chunk size of the software RAID device will have to be, which could have an impact on performance. Then, you setup a loopback device to the MBR file:
+</p>
+<pre># losetup -f <i>/path/to/mbr</i>
+</pre>
+<p>Let us assume the resulting device is <code>/dev/loop0</code>, because we would not already have been using other loopbacks. Next step is to create the "merged" MBR + <code>/dev/hdaN</code> disk image using software RAID:
+</p>
+<pre># modprobe linear
+# mdadm --build --verbose /dev/md0 --chunk=16 --level=linear --raid-devices=2 /dev/loop0 /dev/hda<i>N</i>
+</pre>
+<p>The resulting <code>/dev/md0</code> is what you will use as a QEMU raw disk image (do not forget to set the permissions so that the emulator can access it). The last (and somewhat tricky) step is to set the disk configuration (disk geometry and partitions table) so that the primary partition start point in the MBR matches the one of <code>/dev/hda<i>N</i></code> inside <code>/dev/md0</code> (an offset of exactly 16 * 512 = 16384 bytes in this example). Do this using <code>fdisk</code> on the host machine, not in the emulator: the default raw disc detection routine from QEMU often results in non-kilobyte-roundable offsets (such as 31.5 KB, as in the previous section) that cannot be managed by the software RAID code. Hence, from the the host:
+</p>
+<pre># fdisk /dev/md0
+</pre>
+<p>Press <code>X</code> to enter the expert menu. Set number of 's'ectors per track so that the size of one cylinder matches the size of your MBR file. For two heads and a sector size of 512, the number of sectors per track should be 16, so we get cylinders of size 2x16x512=16k.
+</p>
+<p>Now, press <code>R</code> to return to the main menu.
+</p>
+<p>Press <code>P</code> and check that the cylinder size is now 16k.
+</p>
+<p>Now, create a single primary partition corresponding to <code>/dev/hda<i>N</i></code>. It should start at cylinder 2 and end at the end of the disk (note that the number of cylinders now differs from what it was when you entered fdisk.
+</p>
+<p>Finally, 'w'rite the result to the file: you are done. You now have a partition you can mount directly from your host, as well as part of a QEMU disk image:
+</p>
+<pre>$ qemu-system-i386 -hdc /dev/md0 <i>[...]</i>
+</pre>
+<p>You can, of course, safely set any bootloader on this disk image using QEMU, provided the original <code>/dev/hda<i>N</i></code> partition contains the necessary tools.
+</p>
+<h2><span class="mw-headline" id="Networking">Networking</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Network topologies (sections <a href="#Host-only_networking">#Host-only networking</a>, <a href="#Internal_networking">#Internal networking</a> and info spread out across other sections) should not be described alongside the various virtual interfaces implementations, such as <a href="#User-mode_networking">#User-mode networking</a>, <a href="#Tap_networking_with_QEMU">#Tap networking with QEMU</a>, <a href="#Networking_with_VDE2">#Networking with VDE2</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:QEMU">Talk:QEMU#</a>)</div>
+</div>
+<p>The performance of virtual networking should be better with tap devices and bridges than with user-mode networking or vde because tap devices and bridges are implemented in-kernel.
+</p>
+<p>In addition, networking performance can be improved by assigning virtual machines a <a rel="nofollow" class="external text" href="http://wiki.libvirt.org/page/Virtio">virtio</a> network device rather than the default emulation of an e1000 NIC. See <a href="#Installing_virtio_drivers">#Installing virtio drivers</a> for more information.
+</p>
+<h3><span class="mw-headline" id="Link-level_address_caveat">Link-level address caveat</span></h3>
+<p>By giving the <code>-net nic</code> argument to QEMU, it will, by default, assign a virtual machine a network interface with the link-level address <code>52:54:00:12:34:56</code>. However, when using bridged networking with multiple virtual machines, it is essential that each virtual machine has a unique link-level (MAC) address on the virtual machine side of the tap device. Otherwise, the bridge will not work correctly, because it will receive packets from multiple sources that have the same link-level address. This problem occurs even if the tap devices themselves have unique link-level addresses because the source link-level address is not rewritten as packets pass through the tap device.
+</p>
+<p>Make sure that each virtual machine has a unique link-level address, but it should always start with <code>52:54:</code>. Use the following option, replace <i>X</i> with arbitrary hexadecimal digit:
+</p>
+<pre>$ qemu-system-i386 -net nic,macaddr=52:54:<i>XX:XX:XX:XX</i> -net vde <i>disk_image</i>
+</pre>
+<p>Generating unique link-level addresses can be done in several ways:
+</p>
+<ol>
+<li>Manually specify unique link-level address for each NIC. The benefit is that the DHCP server will assign the same IP address each time the virtual machine is run, but it is unusable for large number of virtual machines.
+</li>
+<li>Generate random link-level address each time the virtual machine is run. Practically zero probability of collisions, but the downside is that the DHCP server will assign a different IP address each time. You can use the following command in a script to generate random link-level address in a <code>macaddr</code> variable:
+
+<pre>printf -v macaddr "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM &amp; 0xff)) $(( $RANDOM &amp; 0xff )) $(( $RANDOM &amp; 0xff)) $(( $RANDOM &amp; 0xff ))
+qemu-system-i386 -net nic,macaddr="$macaddr" -net vde <i>disk_image</i></pre>
+</li>
+<li>Use the following script <code>qemu-mac-hasher.py</code> to generate the link-level address from the virtual machine name using a hashing function. Given that the names of virtual machines are unique, this method combines the benefits of the aforementioned methods: it generates the same link-level address each time the script is run, yet it preserves the practically zero probability of collisions.
+
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">qemu-mac-hasher.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/usr/bin/env python
+
+import sys
+import zlib
+
+if len(sys.argv) != 2:
+    print("usage: %s &lt;VM Name&gt;" % sys.argv[0])
+    sys.exit(1)
+
+crc = zlib.crc32(sys.argv[1].encode("utf-8")) &amp; 0xffffffff
+crc = str(hex(crc))[2:]
+print("52:54:%s%s:%s%s:%s%s:%s%s" % tuple(crc))
+</pre>
+<p>In a script, you can use for example:
+</p>
+<pre>vm_name="<i>VM Name</i>"
+qemu-system-i386 -name "$vm_name" -net nic,macaddr=$(qemu-mac-hasher.py "$vm_name") -net vde <i>disk_image</i>
+</pre>
+</li>
+</ol>
+<h3><span class="mw-headline" id="User-mode_networking">User-mode networking</span></h3>
+<p>By default, without any <code>-netdev</code> arguments, QEMU will use user-mode networking with a built-in DHCP server. Your virtual machines will be assigned an IP address when they run their DHCP client, and they will be able to access the physical host's network through IP masquerading done by QEMU.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This only works with the TCP and UDP protocols, so ICMP, including <code>ping</code>, will not work. Do not use <code>ping</code> to test network connectivity.</div>
+<p>This default configuration allows your virtual machines to easily access the Internet, provided that the host is connected to it, but the virtual machines will not be directly visible on the external network, nor will virtual machines be able to talk to each other if you start up more than one concurrently.
+</p>
+<p>QEMU's user-mode networking can offer more capabilities such as built-in TFTP or SMB servers, redirecting host ports to the guest (for example to allow SSH connections to the guest) or attaching guests to VLANs so that they can talk to each other. See the QEMU documentation on the <code>-net user</code> flag for more details.
+</p>
+<p>However, user-mode networking has limitations in both utility and performance. More advanced network configurations require the use of tap devices or other methods.
+</p>
+<h3><span class="mw-headline" id="Tap_networking_with_QEMU">Tap networking with QEMU</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/TUN/TAP" class="extiw" title="wikipedia:TUN/TAP">Tap devices</a> are a Linux kernel feature that allows you to create virtual network interfaces that appear as real network interfaces. Packets sent to a tap interface are delivered to a userspace program, such as QEMU, that has bound itself to the interface.
+</p>
+<p>QEMU can use tap networking for a virtual machine so that packets sent to the tap interface will be sent to the virtual machine and appear as coming from a network interface (usually an Ethernet interface) in the virtual machine. Conversely, everything that the virtual machine sends through its network interface will appear on the tap interface.
+</p>
+<p>Tap devices are supported by the Linux bridge drivers, so it is possible to bridge together tap devices with each other and possibly with other host interfaces such as <code>eth0</code>. This is desirable if you want your virtual machines to be able to talk to each other, or if you want other machines on your LAN to be able to talk to the virtual machines.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you bridge together tap device and some host interface, such as <code>eth0</code>, your virtual machines will appear directly on the external network, which will expose them to possible attack. Depending on what resources your virtual machines have access to, you may need to take all the <a href="../en/Firewalls.html" title="Firewalls">precautions</a> you normally would take in securing a computer to secure your virtual machines. If the risk is too great, virtual machines have little resources or you set up multiple virtual machines, a better solution might be to use <a href="#Host-only_networking">host-only networking</a> and set up NAT. In this case you only need one firewall on the host instead of multiple firewalls for each guest.</div>
+<p>As indicated in the user-mode networking section, tap devices offer higher networking performance than user-mode.  If the guest OS supports virtio network driver, then the networking performance will be increased considerably as well.  Supposing the use of the tap0 device, that the virtio driver is used on the guest, and that no scripts are used to help start/stop networking, next is part of the qemu command one should see:
+</p>
+<pre>-net nic,model=virtio -net tap,ifname=tap0,script=no,downscript=no
+</pre>
+<p>But if already using a tap device with virtio networking driver, one can even boost the networking performance by enabling vhost, like:
+</p>
+<pre>-net nic,model=virtio -net tap,ifname=tap0,script=no,downscript=no,vhost=on
+</pre>
+<p>See <a rel="nofollow" class="external free" href="http://www.linux-kvm.com/content/how-maximize-virtio-net-performance-vhost-net">http://www.linux-kvm.com/content/how-maximize-virtio-net-performance-vhost-net</a> for more information.
+</p>
+<h4><span class="mw-headline" id="Host-only_networking">Host-only networking</span></h4>
+<p>If the bridge is given an IP address and traffic destined for it is allowed, but no real interface (e.g. <code>eth0</code>) is connected to the bridge, then the virtual machines will be able to talk to each other and the host system. However, they will not be able to talk to anything on the external network, provided that you do not set up IP masquerading on the physical host. This configuration is called <i>host-only networking</i> by other virtualization software such as <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> If you want to set up IP masquerading, e.g. NAT for virtual machines, see the <a href="../en/Internet_sharing.html#Enable_NAT" title="Internet sharing">Internet sharing#Enable NAT</a> page.</li>
+<li> You may want to have a DHCP server running on the bridge interface to service the virtual network. For example, to use the <code>172.20.0.1/16</code> subnet with <a href="../en/Dnsmasq.html" title="Dnsmasq">dnsmasq</a> as the DHCP server:</li>
+</ul>
+<pre># ip addr add 172.20.0.1/16 dev br0
+# ip link set br0 up
+# dnsmasq --interface=br0 --bind-interfaces --dhcp-range=172.20.0.2,172.20.255.254
+</pre>
+</div>
+<h4><span class="mw-headline" id="Internal_networking">Internal networking</span></h4>
+<p>If you do not give the bridge an IP address and add an <a href="../en/Iptables.html" title="Iptables">iptables</a> rule to drop all traffic to the bridge in the INPUT chain, then the virtual machines will be able to talk to each other, but not to the physical host or to the outside network. This configuration is called <i>internal networking</i> by other virtualization software such as <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a>. You will need to either assign static IP addresses to the virtual machines or run a DHCP server on one of them.
+</p>
+<p>By default iptables would drop packets in the bridge network. You may need to use such iptables rule to allow packets in a bridged network:
+</p>
+<pre># iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+</pre>
+<h4><span class="mw-headline" id="Bridged_networking_using_qemu-bridge-helper">Bridged networking using qemu-bridge-helper</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method is available since QEMU 1.1, see <a rel="nofollow" class="external free" href="http://wiki.qemu.org/Features/HelperNetworking">http://wiki.qemu.org/Features/HelperNetworking</a>.</div>
+<p>This method does not require a start-up script and readily accommodates multiple taps and multiple bridges. It uses <code>/usr/lib/qemu/qemu-bridge-helper</code> binary, which allows creating tap devices on an existing bridge.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See <a href="../en/Network_bridge.html" title="Network bridge">Network bridge</a> for information on creating bridge.</div>
+<p>First, create a configuration file containing the names of all bridges to be used by QEMU:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/qemu/bridge.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+allow <i>bridge0</i>
+allow <i>bridge1</i>
+...</pre>
+<p>Now start the VM. The most basic usage would be:
+</p>
+<pre>$ qemu-system-i386 -net nic -net bridge,br=<i>bridge0</i> <i>[...]</i>
+</pre>
+<p>With multiple taps, the most basic usage requires specifying the VLAN for all additional NICs:
+</p>
+<pre>$ qemu-system-i386 -net nic -net bridge,br=<i>bridge0</i> -net nic,vlan=1 -net bridge,vlan=1,br=<i>bridge1</i> <i>[...]</i>
+</pre>
+<h4><span class="mw-headline" id="Creating_bridge_manually">Creating bridge manually</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This section needs serious cleanup and may contain out-of-date information. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:QEMU">Talk:QEMU#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Since QEMU 1.1, the <a rel="nofollow" class="external text" href="http://wiki.qemu.org/Features/HelperNetworking">network bridge helper</a> can set tun/tap up for you without the need for additional scripting. See <a href="#Bridged_networking_using_qemu-bridge-helper">#Bridged networking using qemu-bridge-helper</a>.</div>
+<p>The following describes how to bridge a virtual machine to a host interface such as <code>eth0</code>, which is probably the most common configuration. This configuration makes it appear that the virtual machine is located directly on the external network, on the same Ethernet segment as the physical host machine.
+</p>
+<p>We will replace the normal Ethernet adapter with a bridge adapter and bind the normal Ethernet adapter to it.
+</p>
+<ul><li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bridge-utils">bridge-utils</a></span>, which provides <code>brctl</code> to manipulate bridges.</li></ul>
+<ul><li> Enable IPv4 forwarding:</li></ul>
+<pre># sysctl net.ipv4.ip_forward=1
+</pre>
+<p>To make the change permanent, change <code>net.ipv4.ip_forward = 0</code> to <code>net.ipv4.ip_forward = 1</code> in <code>/etc/sysctl.d/99-sysctl.conf</code>.
+</p>
+<ul><li> Load the <code>tun</code> module and configure it to be loaded on boot. See <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a> for details.</li></ul>
+<ul><li> Now create the bridge. See <a href="../en/Bridge_with_netctl.html" title="Bridge with netctl">Bridge with netctl</a> for details. Remember to name your bridge as <code>br0</code>, or change the scripts below to your bridge's name.</li></ul>
+<ul><li> Create the script that QEMU uses to bring up the tap adapter with <code>root:kvm</code> 750 permissions:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/qemu-ifup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+
+echo "Executing /etc/qemu-ifup"
+echo "Bringing up $1 for bridged mode..."
+sudo /usr/bin/ip link set $1 up promisc on
+echo "Adding $1 to br0..."
+sudo /usr/bin/brctl addif br0 $1
+sleep 2
+</pre>
+<ul><li> Create the script that QEMU uses to bring down the tap adapter in <code>/etc/qemu-ifdown</code> with <code>root:kvm</code> 750 permissions:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/qemu-ifdown</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+
+echo "Executing /etc/qemu-ifdown"
+sudo /usr/bin/ip link set $1 down
+sudo /usr/bin/brctl delif br0 $1
+sudo /usr/bin/ip link delete dev $1
+</pre>
+<ul><li> Use <code>visudo</code> to add the following to your <code>sudoers</code> file:</li></ul>
+<pre>
+Cmnd_Alias      QEMU=/usr/bin/ip,/usr/bin/modprobe,/usr/bin/brctl
+%kvm     ALL=NOPASSWD: QEMU
+</pre>
+<ul><li> You launch QEMU using the following <code>run-qemu</code> script:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">run-qemu</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+USERID=$(whoami)
+
+# Get name of newly created TAP device; see https://bbs.archlinux.org/viewtopic.php?pid=1285079#p1285079
+precreationg=$(/usr/bin/ip tuntap list | /usr/bin/cut -d: -f1 | /usr/bin/sort)
+sudo /usr/bin/ip tuntap add user $USERID mode tap
+postcreation=$(/usr/bin/ip tuntap list | /usr/bin/cut -d: -f1 | /usr/bin/sort)
+IFACE=$(comm -13 &lt;(echo "$precreationg") &lt;(echo "$postcreation"))
+
+# This line creates a random MAC address. The downside is the DHCP server will assign a different IP address each time
+printf -v macaddr "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM &amp; 0xff)) $(( $RANDOM &amp; 0xff )) $(( $RANDOM &amp; 0xff)) $(( $RANDOM &amp; 0xff ))
+# Instead, uncomment and edit this line to set a static MAC address. The benefit is that the DHCP server will assign the same IP address.
+# macaddr='52:54:be:36:42:a9'
+
+qemu-system-i386 -net nic,macaddr=$macaddr -net tap,ifname="$IFACE" $*
+
+sudo ip link set dev $IFACE down &amp;&gt; /dev/null
+sudo ip tuntap del $IFACE mode tap &amp;&gt; /dev/null
+</pre>
+<p>Then to launch a VM, do something like this
+</p>
+<pre>$ run-qemu -hda <i>myvm.img</i> -m 512 -vga std
+</pre>
+<ul><li> It is recommended for performance and security reasons to disable the <a rel="nofollow" class="external text" href="http://ebtables.netfilter.org/documentation/bridge-nf.html">firewall on the bridge</a>:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/10-disable-firewall-on-bridge.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+net.bridge.bridge-nf-call-ip6tables = 0
+net.bridge.bridge-nf-call-iptables = 0
+net.bridge.bridge-nf-call-arptables = 0
+</pre>
+<p>Run <code>sysctl -p /etc/sysctl.d/10-disable-firewall-on-bridge.conf</code> to apply the changes immediately.
+</p>
+<p>See the <a rel="nofollow" class="external text" href="http://wiki.libvirt.org/page/Networking#Creating_network_initscripts">libvirt wiki</a> and <a rel="nofollow" class="external text" href="https://bugzilla.redhat.com/show_bug.cgi?id=512206">Fedora bug 512206</a>. If you get errors by sysctl during boot about non-existing files, make the <code>bridge</code> module load at boot. See <a href="../en/Kernel_modules.html#Automatic_module_handling" title="Kernel modules">Kernel modules#Automatic module handling</a>.
+</p>
+<p>Alternatively, you can configure <a href="../en/Iptables.html" title="Iptables">iptables</a> to allow all traffic to be forwarded across the bridge by adding a rule like this:
+</p>
+<pre>-I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+</pre>
+<h4><span class="mw-headline" id="Network_sharing_between_physical_device_and_a_Tap_device_through_iptables">Network sharing between physical device and a Tap device through iptables</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Internet_sharing.html" title="Internet sharing">Internet_sharing</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Duplication, not specific to QEMU. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:QEMU">Talk:QEMU#</a>)</div>
+</div>
+<p>Bridged networking works fine between a wired interface (Eg. eth0), and it is easy to setup.  However if the host gets connected to the network through a wireless device, then bridging is not possible.
+</p>
+<p>See <a href="../en/Network_bridge.html#Wireless_interface_on_a_bridge" title="Network bridge">Network bridge#Wireless interface on a bridge</a> as a reference.
+</p>
+<p>One way to overcome that is to setup a tap device with a static IP, making linux automatically handle the routing for it, and then forward traffic between the tap interface and the device connected to the network through iptables rules.
+</p>
+<p>See <a href="../en/Internet_sharing.html" title="Internet sharing">Internet sharing</a> as a reference.
+</p>
+<p>There you can find what is needed to share the network between devices, included tap and tun ones.  The following just hints further on some of the host configurations required.  As indicated in the reference above, the client needs to be configured for a static IP, using the IP assigned to the tap interface as the gateway.  The caveat is that the DNS servers on the client might need to be manually edited if they change when changing from one host device connected to the network to another.
+</p>
+<p>To allow IP forwarding on every boot, one need to add the following lines to sysctl configuration file inside /etc/sysctl.d:
+</p>
+<pre>net.ipv4.ip_forward = 1
+net.ipv6.conf.default.forwarding = 1
+net.ipv6.conf.all.forwarding = 1
+</pre>
+<p>The iptables rules can look like:
+</p>
+<pre># Forwarding from/to outside
+iptables -A FORWARD -i ${INT} -o ${EXT_0} -j ACCEPT
+iptables -A FORWARD -i ${INT} -o ${EXT_1} -j ACCEPT
+iptables -A FORWARD -i ${INT} -o ${EXT_2} -j ACCEPT
+iptables -A FORWARD -i ${EXT_0} -o ${INT} -j ACCEPT
+iptables -A FORWARD -i ${EXT_1} -o ${INT} -j ACCEPT
+iptables -A FORWARD -i ${EXT_2} -o ${INT} -j ACCEPT
+# NAT/Masquerade (network address translation)
+iptables -t nat -A POSTROUTING -o ${EXT_0} -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ${EXT_1} -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ${EXT_2} -j MASQUERADE
+</pre>
+<p>The prior supposes there are 3 devices connected to the network sharing traffic with one internal device, where for example:
+</p>
+<pre>INT=tap0
+EXT_0=eth0
+EXT_1=wlan0
+EXT_2=tun0
+</pre>
+<p>The prior shows a forwarding that would allow sharing wired and wireless connections with the tap device.
+</p>
+<p>The forwarding rules shown are stateless, and for pure forwarding.  One could think of restricting specific traffic, putting a firewall in place to protect the guest and others.  However those would decrease the networking performance, while a simple bridge does not include any of that.
+</p>
+<p>Bonus:  Whether the connection is wired or wireless, if one gets connected through VPN to a remote site with a tun device, supposing the tun device opened for that connection is tun0, and the prior iptables rules are applied, then the remote connection gets also shared with the guest.  This avoids the need for the guest to also open a VPN connection.  Again, as the guest networking needs to be static, then if connecting the host remotely this way, one most probably will need to edit the DNS servers on the guest.
+</p>
+<h3><span class="mw-headline" id="Networking_with_VDE2">Networking with VDE2</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This section needs serious cleanup and may contain out-of-date information. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:QEMU">Talk:QEMU#</a>)</div>
+</div>
+<h4><span class="mw-headline" id="What_is_VDE.3F">What is VDE?</span></h4>
+<p>VDE stands for Virtual Distributed Ethernet. It started as an enhancement of <a href="../en/User-mode_Linux.html" title="User-mode Linux">uml</a>_switch. It is a toolbox to manage virtual networks.
+</p>
+<p>The idea is to create virtual switches, which are basically sockets, and to "plug" both physical and virtual machines in them. The configuration we show here is quite simple; However, VDE is much more powerful than this, it can plug virtual switches together, run them on different hosts and monitor the traffic in the switches. You are invited to read <a rel="nofollow" class="external text" href="http://wiki.virtualsquare.org/wiki/index.php/Main_Page">the documentation of the project</a>.
+</p>
+<p>The advantage of this method is you do not have to add sudo privileges to your users. Regular users should not be allowed to run modprobe.
+</p>
+<h4><span class="mw-headline" id="Basics">Basics</span></h4>
+<p>VDE support can be <a href="../en/Pacman.html" title="Pacman">installed</a> via the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vde2">vde2</a></span> package in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>In our config, we use tun/tap to create a virtual interface on my host. Load the <code>tun</code> module (see <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a> for details):
+</p>
+<pre># modprobe tun
+</pre>
+<p>Now create the virtual switch:
+</p>
+<pre># vde_switch -tap tap0 -daemon -mod 660 -group users
+</pre>
+<p>This line creates the switch, creates <code>tap0</code>, "plugs" it, and allows the users of the group <code>users</code> to use it.
+</p>
+<p>The interface is plugged in but not configured yet. To configure it, run this command:
+</p>
+<pre># ip addr add 192.168.100.254/24 dev tap0
+</pre>
+<p>Now, you just have to run KVM with these <code>-net</code> options as a normal user:
+</p>
+<pre>$ qemu-system-i386 -net nic -net vde -hda <i>[...]</i>
+</pre>
+<p>Configure networking for your guest as you would do in a physical network.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You might want to set up NAT on tap device to access the internet from the virtual machine. See <a href="../en/Internet_sharing.html#Enable_NAT" title="Internet sharing">Internet sharing#Enable NAT</a> for more information.</div>
+<h4><span class="mw-headline" id="Startup_scripts">Startup scripts</span></h4>
+<p>Example of main script starting VDE:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/scripts/qemu-network-env</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+# QEMU/VDE network environment preparation script
+
+# The IP configuration for the tap device that will be used for
+# the virtual machine network:
+
+TAP_DEV=tap0
+TAP_IP=192.168.100.254
+TAP_MASK=24
+TAP_NETWORK=192.168.100.0
+
+# Host interface
+NIC=eth0
+
+case "$1" in
+  start)
+        echo -n "Starting VDE network for QEMU: "
+
+        # If you want tun kernel module to be loaded by script uncomment here
+	#modprobe tun 2&gt;/dev/null
+	## Wait for the module to be loaded
+ 	#while ! lsmod | grep -q "^tun"; do echo "Waiting for tun device"; sleep 1; done
+
+        # Start tap switch
+        vde_switch -tap "$TAP_DEV" -daemon -mod 660 -group users
+
+        # Bring tap interface up
+        ip address add "$TAP_IP"/"$TAP_MASK" dev "$TAP_DEV"
+        ip link set "$TAP_DEV" up
+
+        # Start IP Forwarding
+        echo "1" &gt; /proc/sys/net/ipv4/ip_forward
+        iptables -t nat -A POSTROUTING -s "$TAP_NETWORK"/"$TAP_MASK" -o "$NIC" -j MASQUERADE
+        ;;
+  stop)
+        echo -n "Stopping VDE network for QEMU: "
+        # Delete the NAT rules
+        iptables -t nat -D POSTROUTING "$TAP_NETWORK"/"$TAP_MASK" -o "$NIC" -j MASQUERADE
+
+        # Bring tap interface down
+        ip link set "$TAP_DEV" down
+
+        # Kill VDE switch
+        pgrep -f vde_switch | xargs kill -TERM
+        ;;
+  restart|reload)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+  *)
+        echo "Usage: $0 {start|stop|restart|reload}"
+        exit 1
+esac
+exit 0
+</pre>
+<p>Example of systemd service using the above script:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/qemu-network-env.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Manage VDE Switch
+
+[Service]
+Type=oneshot
+ExecStart=/etc/systemd/scripts/qemu-network-env start
+ExecStop=/etc/systemd/scripts/qemu-network-env stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Change permissions for <code>qemu-network-env</code> to be executable
+</p>
+<pre># chmod u+x /etc/systemd/scripts/qemu-network-env
+</pre>
+<p>You can <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>qemu-network-env.service</code> as usual.
+</p>
+<h4><span class="mw-headline" id="Alternative_method">Alternative method</span></h4>
+<p>If the above method does not work or you do not want to mess with kernel configs, TUN, dnsmasq, and iptables you can do the following for the same result.
+</p>
+<pre># vde_switch -daemon -mod 660 -group users
+# slirpvde --dhcp --daemon
+</pre>
+<p>Then, to start the VM with a connection to the network of the host:
+</p>
+<pre>$ qemu-system-i386 -net nic,macaddr=52:54:00:00:EE:03 -net vde <i>disk_image</i>
+</pre>
+<h3><span class="mw-headline" id="VDE2_Bridge">VDE2 Bridge</span></h3>
+<p>Based on <a rel="nofollow" class="external text" href="http://selamatpagicikgu.wordpress.com/2011/06/08/quickhowto-qemu-networking-using-vde-tuntap-and-bridge/">quickhowto: qemu networking using vde, tun/tap, and bridge</a> graphic. Any virtual machine connected to vde is externally exposed. For example, each virtual machine can receive DHCP configuration directly from your ADSL router.
+</p>
+<h4><span class="mw-headline" id="Basics_2">Basics</span></h4>
+<p>Remember that you need <code>tun</code> module and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bridge-utils">bridge-utils</a></span> package.
+</p>
+<p>Create the vde2/tap device:
+</p>
+<pre># vde_switch -tap tap0 -daemon -mod 660 -group users
+# ip link set tap0 up
+</pre>
+<p>Create bridge:
+</p>
+<pre># brctl addbr br0
+</pre>
+<p>Add devices:
+</p>
+<pre># brctl addif br0 eth0
+# brctl addif br0 tap0
+</pre>
+<p>And configure bridge interface:
+</p>
+<pre># dhcpcd br0
+</pre>
+<h4><span class="mw-headline" id="Startup_scripts_2">Startup scripts</span></h4>
+<p>All devices must be set up. And only the bridge needs an IP address. For physical devices on the bridge (e.g. <code>eth0</code>), this can be done with <a href="../en/Netctl.html" title="Netctl">netctl</a> using a custom Ethernet profile with:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/ethernet-noip</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Description='A more versatile static Ethernet connection'
+Interface=eth0
+Connection=ethernet
+IP=no
+</pre>
+<p>The following custom systemd service can be used to create and activate a VDE2 tap interface for use in the <code>users</code> user group.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vde2@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Network Connectivity for %i
+Wants=network.target
+Before=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/vde_switch -tap %i -daemon -mod 660 -group users
+ExecStart=/usr/bin/ip link set dev %i up
+ExecStop=/usr/bin/ip addr flush dev %i
+ExecStop=/usr/bin/ip link set dev %i down
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>And finally, you can create the <a href="../en/Bridge_with_netctl.html" title="Bridge with netctl">bridge interface with netctl</a>.
+</p>
+<h2><span class="mw-headline" id="Graphics">Graphics</span></h2>
+<p>QEMU can use the following different graphic outputs: <code>std</code>, <code>qxl</code>, <code>vmware</code>, <code>virtio</code>, <code>cirrus</code> and <code>none</code>.
+</p>
+<h3><span class="mw-headline" id="std">std</span></h3>
+<p>With <code>-vga std</code> you can get a resolution of up to 2560 x 1600 pixels without requiring guest drivers. This is the default since QEMU 2.2.
+</p>
+<h3><span class="mw-headline" id="qxl">qxl</span></h3>
+<p>QXL is a paravirtual graphics driver with 2D support. To use it, pass the <code>-vga qxl</code> option and install drivers in the guest. You may want to use SPICE for improved graphical performance when using QXL.
+</p>
+<p>On Linux guests, the <code>qxl</code> and <code>bochs_drm</code> kernel modules must be loaded in order to gain a decent performance.
+</p>
+<h4><span class="mw-headline" id="SPICE">SPICE</span></h4>
+<p>The <a rel="nofollow" class="external text" href="http://spice-space.org/">SPICE project</a> aims to provide a complete open source solution for remote access to virtual machines in a seamless way.
+</p>
+<p>SPICE can only be used when using QXL as the graphical output.
+</p>
+<p>The following is example of booting with SPICE as the remote desktop protocol:
+</p>
+<pre>$ qemu-system-i386 -vga qxl -spice port=5930,disable-ticketing -chardev spicevm 
+</pre>
+<p>Connect to the guest by using a SPICE client. At the moment <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=spice-gtk3">spice-gtk3</a></span> is recommended, however other <a rel="nofollow" class="external text" href="http://www.spice-space.org/download.html">clients</a>, including other platforms, are available:
+</p>
+<pre>$ spicy -h 127.0.0.1 -p 5930
+</pre>
+<p>Using <a href="https://en.wikipedia.org/wiki/Unix_socket" class="extiw" title="wikipedia:Unix socket">Unix sockets</a> instead of TCP ports does not involve using network stack on the host system, so it is <a rel="nofollow" class="external text" href="https://unix.stackexchange.com/questions/91774/performance-of-unix-sockets-vs-tcp-ports">reportedly</a> better for performance. Example:
+</p>
+<pre>$ qemu-system-x86_64 -vga qxl -device virtio-serial-pci -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent -spice unix,addr=/tmp/vm_spice.socket,disable-ticketing,playback-compression=off
+$ spicy --uri="spice+unix:///tmp/vm_spice.socket"
+</pre>
+<p>For improved support for multiple monitors, clipboard sharing, etc. the following packages should be installed on the guest:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=spice-vdagent">spice-vdagent</a></span>: Spice agent xorg client that enables copy and paste between client and X-session and more</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xf86-video-qxl/">xf86-video-qxl</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xf86-video-qxl-git/">xf86-video-qxl-git</a></span><sup><small>AUR</small></sup>: Xorg X11 qxl video driver</li>
+<li> For other operating systems, see the Guest section on <a rel="nofollow" class="external text" href="http://www.spice-space.org/download.html">SPICE-Space download</a> page.</li>
+</ul>
+<h3><span class="mw-headline" id="vmware">vmware</span></h3>
+<p>Although it is a bit buggy, it performs better than std and cirrus. Install the VMware drivers <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-vmware">xf86-video-vmware</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span> for Arch Linux guests.
+</p>
+<h3><span class="mw-headline" id="virtio">virtio</span></h3>
+<p><code>virtio-vga</code> / <code>virtio-gpu</code> is a paravirtual 3D graphics driver based on <a rel="nofollow" class="external text" href="https://virgil3d.github.io/">virgl</a>. Currently a work in progress, supporting only very recent (&gt;= 4.4) Linux guests with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa">mesa</a></span> (&gt;=11.2) compiled with the option <code>--with-gallium-drivers=virgl</code>.
+</p>
+<p>To enable 3D acceleration on the guest system select this vga with <code>-vga virtio</code> and enable the opengl context in the display device with <code>-display sdl,gl=on</code> or <code>-display gtk,gl=on</code> for the sdl and gtk display output respectively. Successful configuration can be confirmed looking at the kernel log in the guest:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dmesg | grep drm </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[drm] pci: virtio-vga detected
+[drm] virgl 3d acceleration enabled
+</pre>
+<p>As of September 2016, support for the spice protocol is under development and can be tested installing the development release of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=spice">spice</a></span> (&gt;= 0.13.2) and recompiling qemu.
+</p>
+<p>For more information visit <a rel="nofollow" class="external text" href="https://www.kraxel.org/blog/tag/virgl/">kraxel's blog</a>.
+</p>
+<h3><span class="mw-headline" id="cirrus">cirrus</span></h3>
+<p>The cirrus graphical adapter was the default <a rel="nofollow" class="external text" href="http://wiki.qemu.org/ChangeLog/2.2#VGA">before 2.2</a>. It <a rel="nofollow" class="external text" href="https://www.kraxel.org/blog/2014/10/qemu-using-cirrus-considered-harmful/">should not</a> be used on modern systems.
+</p>
+<h3><span class="mw-headline" id="none">none</span></h3>
+<p>This is like a PC that has no VGA card at all. You would not even be able to access it with the <code>-vnc</code> option. Also, this is different from the <code>-nographic</code> option which lets QEMU emulate a VGA card, but disables the SDL display.
+</p>
+<h3><span class="mw-headline" id="vnc">vnc</span></h3>
+<p>Given that you used the <code>-nographic</code> option, you can add the <code>-vnc display</code> option to have QEMU listen on <code>display</code> and redirect the VGA display to the VNC session. There is an example of this in the <a href="#Starting_QEMU_virtual_machines_on_boot">#Starting QEMU virtual machines on boot</a> section's example configs.
+</p>
+<pre>$ qemu-system-i386 -vga std -nographic -vnc :0
+$ gvncviewer :0
+</pre>
+<p>When using VNC, you might experience keyboard problems described (in gory details) <a rel="nofollow" class="external text" href="https://www.berrange.com/posts/2010/07/04/more-than-you-or-i-ever-wanted-to-know-about-virtual-keyboard-handling/">here</a>. The solution is <i>not</i> to use the <code>-k</code> option on QEMU, and to use <code>gvncviewer</code> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtk-vnc">gtk-vnc</a></span>. See also <a rel="nofollow" class="external text" href="http://www.mail-archive.com/libvir-list@redhat.com/msg13340.html">this</a> message posted on libvirt's mailing list.
+</p>
+<h2><span class="mw-headline" id="Installing_virtio_drivers">Installing virtio drivers</span></h2>
+<p>QEMU offers guests the ability to use paravirtualized block and network devices using the <a rel="nofollow" class="external text" href="http://wiki.libvirt.org/page/Virtio">virtio</a> drivers, which provide better performance and lower overhead.
+</p>
+<ul><li> A virtio block device requires the option <code>-drive</code> instead of the simple <code>-hd*</code> plus <code>if=virtio</code>:</li></ul>
+<pre>$ qemu-system-i386 -boot order=c -drive file=<i>disk_image</i>,if=virtio
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>-boot order=c</code> is absolutely necessary when you want to boot from it. There is no auto-detection as with <code>-hd*</code>.</div>
+<ul><li> Almost the same goes for the network:</li></ul>
+<pre>$ qemu-system-i386 -net nic,model=virtio
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This will only work if the guest machine has drivers for virtio devices. Linux does, and the required drivers are included in Arch Linux, but there is no guarantee that virtio devices will work with other operating systems.</div>
+<h3><span class="mw-headline" id="Preparing_an_.28Arch.29_Linux_guest">Preparing an (Arch) Linux guest</span></h3>
+<p>To use virtio devices after an Arch Linux guest has been installed, the following modules must be loaded in the guest: <code>virtio</code>, <code>virtio_pci</code>, <code>virtio_blk</code>, <code>virtio_net</code>, and <code>virtio_ring</code>. For 32-bit guests, the specific "virtio" module is not necessary.
+</p>
+<p>If you want to boot from a virtio disk, the initial ramdisk must contain the necessary modules. By default, this is handled by <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>'s <code>autodetect</code> hook. Otherwise use the <code>MODULES</code> array in <code>/etc/mkinitcpio.conf</code> to include the necessary modules and rebuild the initial ramdisk.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES="virtio virtio_blk virtio_pci virtio_net"</pre>
+<p>Virtio disks are recognized with the prefix <code><b>v</b></code> (e.g. <code><b>v</b>da</code>, <code><b>v</b>db</code>, etc.); therefore, changes must be made in at least <code>/etc/fstab</code> and <code>/boot/grub/grub.cfg</code> when booting from a virtio disk.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>When referencing disks by <a href="../en/Persistent_block_device_naming.html#by-uuid" title="UUID" class="mw-redirect">UUID</a> in both <code>/etc/fstab</code> and bootloader, nothing has to be done.</div>
+<p>Further information on paravirtualization with KVM can be found <a rel="nofollow" class="external text" href="http://www.linux-kvm.org/page/Boot_from_virtio_block_device">here</a>.
+</p>
+<p>You might also want to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu-guest-agent">qemu-guest-agent</a></span> to implement support for QMP commands that will enhance the hypervisor management capabilities. After installing the package you can enable and start the <code>qemu-ga.service</code>.
+</p>
+<h3><span class="mw-headline" id="Preparing_a_Windows_guest">Preparing a Windows guest</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The only (reliable) way to upgrade a Windows 8.1 guest to Windows 10 seems to be to temporarily choose cpu core2duo,nx for the install <a rel="nofollow" class="external autonumber" href="http://ubuntuforums.org/showthread.php?t=2289210">[2]</a>. After the install, you may revert to other cpu settings (8/8/2015).</div>
+<h4><span class="mw-headline" id="Block_device_drivers">Block device drivers</span></h4>
+<h5><span class="mw-headline" id="New_Install_of_Windows">New Install of Windows</span></h5>
+<p>Windows does not come with the virtio drivers. Therefore, you will need to load them during installation. There are basically two ways to do this: via Floppy Disk or via ISO files. Both images can be downloaded from the <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Fedora repository</a>.
+</p>
+<p>The floppy disk option is difficult because you will need to press F6 (Shift-F6 on newer Windows) at the very beginning of powering on the QEMU. This is difficult since you need time to connect your VNC console window. You can attempt to add a delay to the boot sequence. See <code>man qemu-system</code> for more details about applying a delay at boot.
+</p>
+<p>The ISO option to load drivers is the preferred way, but it is available only on Windows Vista and Windows Server 2008 and later. The procedure is to load the image with virtio drivers in an additional cdrom device along with the primary disk device and Windows installer:
+</p>
+<pre>$ qemu-system-i386 ... \
+-drive file=<i>/path/to/primary/disk.img</i>,index=0,media=disk,if=virtio \
+-drive file=<i>/path/to/installer.iso</i>,index=2,media=cdrom \
+-drive file=<i>/path/to/virtio.iso</i>,index=3,media=cdrom \
+...
+</pre>
+<p>During the installation, the Windows installer will ask you for your Product key and perform some additional checks. When it gets to the "Where do you want to install Windows?" screen, it will give a warning that no disks are found. Follow the example instructions below (based on Windows Server 2012 R2 with Update).
+</p>
+<ul>
+<li> Select the option <code>Load Drivers</code>.</li>
+<li> Uncheck the box for "Hide drivers that aren't compatible with this computer's hardware".</li>
+<li> Click the Browse button and open the CDROM for the virtio iso, usually named "virtio-win-XX".</li>
+<li> Now browse to <code>E:\viostor\[your-os]\amd64</code>, select it, and press OK.</li>
+<li> Click Next</li>
+</ul>
+<p>You should now see your virtio disk(s) listed here, ready to be selected, formatted and installed to.
+</p>
+<h5><span class="mw-headline" id="Change_Existing_Windows_VM_to_use_virtio">Change Existing Windows VM to use virtio</span></h5>
+<p>Modifying an existing Windows guest for booting from virtio disk is a bit tricky.
+</p>
+<p>You can download the virtio disk driver from the <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers">Fedora repository</a>.
+</p>
+<p>Now you need to create a new disk image, which fill force Windows to search for the driver. For example:
+</p>
+<pre>$ qemu-img create -f qcow2 <i>fake.qcow2</i> 1G
+</pre>
+<p>Run the original Windows guest (with the boot disk still in IDE mode) with the fake disk (in virtio mode) and a CD-ROM with the driver.
+</p>
+<pre>$ qemu-system-i386 -m 512 -vga std -drive file=<i>windows_disk_image</i>,if=ide -drive file=<i>fake.qcow2</i>,if=virtio -cdrom virtio-win-0.1-81.iso
+</pre>
+<p>Windows will detect the fake disk and try to find a driver for it. If it fails, go to the <i>Device Manager</i>, locate the SCSI drive with an exclamation mark icon (should be open), click <i>Update driver</i> and select the virtual CD-ROM. Do not forget to select the checkbox which says to search for directories recursively.
+</p>
+<p>When the installation is successful, you can turn off the virtual machine and launch it again, now with the boot disk attached in virtio mode:
+</p>
+<pre>$ qemu-system-i386 -m 512 -vga std -drive file=<i>windows_disk_image</i>,if=virtio
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you encounter the Blue Screen of Death, make sure you did not forget the <code>-m</code> parameter, and that you do not boot with virtio instead of ide for the system drive before drivers are installed.</div>
+<h4><span class="mw-headline" id="Network_drivers">Network drivers</span></h4>
+<p>Installing virtio network drivers is a bit easier, simply add the <code>-net</code> argument as explained above.
+</p>
+<pre>$ qemu-system-i386 -m 512 -vga std -drive file=<i>windows_disk_image</i>,if=virtio -net nic,model=virtio -cdrom virtio-win-0.1-74.iso
+</pre>
+<p>Windows will detect the network adapter and try to find a driver for it. If it fails, go to the <i>Device Manager</i>, locate the network adapter with an exclamation mark icon (should be open), click <i>Update driver</i> and select the virtual CD-ROM. Do not forget to select the checkbox which says to search for directories recursively.
+</p>
+<h3><span class="mw-headline" id="Preparing_a_FreeBSD_guest">Preparing a FreeBSD guest</span></h3>
+<p>Install the <code>emulators/virtio-kmod</code> port if you are using FreeBSD 8.3 or later up until 10.0-CURRENT where they are included into the kernel. After installation, add the following to your <code>/boot/loader.conf</code> file:
+</p>
+<pre>
+virtio_loader="YES"
+virtio_pci_load="YES"
+virtio_blk_load="YES"
+if_vtnet_load="YES"
+virtio_balloon_load="YES"
+</pre>
+<p>Then modify your <code>/etc/fstab</code> by doing the following:
+</p>
+<pre>
+sed -i bak "s/ada/vtbd/g" /etc/fstab
+</pre>
+<p>And verify that <code>/etc/fstab</code> is consistent. If anything goes wrong, just boot into a rescue CD and copy <code>/etc/fstab.bak</code> back to <code>/etc/fstab</code>.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Starting_QEMU_virtual_machines_on_boot">Starting QEMU virtual machines on boot</span></h3>
+<h4><span class="mw-headline" id="With_libvirt">With libvirt</span></h4>
+<p>If a virtual machine is set up with <a href="../en/Libvirt.html" title="Libvirt">libvirt</a>, it can be configured through the virt-manager GUI to start at host boot by going to the Boot Options for the virtual machine and selecting "Start virtual machine on host boot up".
+</p>
+<h4><span class="mw-headline" id="Custom_script">Custom script</span></h4>
+<p>To run QEMU VMs on boot, you can use following systemd unit and config.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/qemu@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=QEMU virtual machine
+
+[Service]
+Environment="type=system-x86_64" "haltcmd=kill -INT $MAINPID"
+EnvironmentFile=/etc/conf.d/qemu.d/%i
+ExecStart=/usr/bin/env qemu-${type} -name %i -nographic $args
+ExecStop=/bin/sh -c ${haltcmd}
+TimeoutStopSec=30
+KillMode=none
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>According to <code>systemd.service(5)</code> and <code>systemd.kill(5)</code> man pages it is necessary to use the <code>KillMode=none</code> option. Otherwise the main qemu process will be killed immediately after the <code>ExecStop</code> command quits (it simply echoes one string) and your quest system will not be able to shutdown correctly.</div>
+<p>Then create per-VM configuration files, named <code>/etc/conf.d/qemu.d/<i>vm_name</i></code>, with the following variables set:
+</p>
+<dl>
+<dt> type</dt>
+<dd> QEMU binary to call. If specified, will be prepended with <code>/usr/bin/qemu-</code> and that binary will be used to start the VM. I.e. you can boot e.g. <code>qemu-system-arm</code> images with <code>type="system-arm"</code>.</dd>
+<dt> args</dt>
+<dd> QEMU command line to start with. Will always be prepended with <code>-name ${vm} -nographic</code>.</dd>
+<dt> haltcmd</dt>
+<dd> Command to shut down a VM safely. I am using <code>-monitor telnet:..</code> and power off my VMs via ACPI by sending <code>system_powerdown</code> to monitor. You can use SSH or some other ways.</dd>
+</dl>
+<p>Example configs:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/conf.d/qemu.d/one</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+type="system-x86_64"
+
+args="-enable-kvm -m 512 -hda /dev/mapper/vg0-vm1 -net nic,macaddr=DE:AD:BE:EF:E0:00 \
+ -net tap,ifname=tap0 -serial telnet:localhost:7000,server,nowait,nodelay \
+ -monitor telnet:localhost:7100,server,nowait,nodelay -vnc :0"
+
+haltcmd="echo 'system_powerdown' | nc localhost 7100" # or netcat/ncat
+
+# You can use other ways to shut down your VM correctly
+#haltcmd="ssh powermanager@vm1 sudo poweroff"
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/conf.d/qemu.d/two</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+args="-enable-kvm -m 512 -hda /srv/kvm/vm2.img -net nic,macaddr=DE:AD:BE:EF:E0:01 \
+ -net tap,ifname=tap1 -serial telnet:localhost:7001,server,nowait,nodelay \
+ -monitor telnet:localhost:7101,server,nowait,nodelay -vnc :1"
+
+haltcmd="echo 'system_powerdown' | nc localhost 7101"
+</pre>
+<p>To set which virtual machines will start on boot-up, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>qemu@<i>vm_name</i>.service</code> systemd unit.
+</p>
+<h3><span class="mw-headline" id="Mouse_integration">Mouse integration</span></h3>
+<p>To prevent the mouse from being grabbed when clicking on the guest operating system's window, add the option <code>-usbdevice tablet</code>. This means QEMU is able to report the mouse position without having to grab the mouse. This also overrides PS/2 mouse emulation when activated. For example:
+</p>
+<pre>$ qemu-system-i386 -hda <i>disk_image</i> -m 512 -vga std -usbdevice tablet
+</pre>
+<p>If that does not work, try the tip at <a href="#Mouse_cursor_is_jittery_or_erratic">#Mouse cursor is jittery or erratic</a>.
+</p>
+<h3><span class="mw-headline" id="Pass-through_host_USB_device">Pass-through host USB device</span></h3>
+<p>To access physical USB device connected to host from VM, you can use the option: <code>-usbdevice host:<i>vendor_id</i>:<i>product_id</i></code>.
+</p>
+<p>You can find <code>vendor_id</code> and <code>product_id</code> of your device with <code>lsusb</code> command.
+</p>
+<p>Since the default I440FX chipset emulated by qemu feature a single UHCI controller (USB 1), the <code>-usbdevice</code> option will try to attach your physical device to it. In some cases this may cause issues with newer devices. A possible solution is to emulate the <a rel="nofollow" class="external text" href="http://wiki.qemu.org/Features/Q35">ICH9</a> chipset, which offer an EHCI controller supporting up to 12 devices, using the option <code>-machine type=q35</code>.
+</p>
+<p>A less invasive solution is to emulate an EHCI (USB 2) or XHCI (USB 3) controller with the option <code>-device usb-ehci,id=ehci</code> or <code>-device nec-usb-xhci,id=xhci</code> respectively and then attach your physical device to it with the option <code>-device usb-host,..</code> as follows:
+</p>
+<pre>-device usb-host,bus=<b>controller_id</b>.0,vendorid=0x<b>vendor_id</b>,productid=0x<b>product_id</b>
+</pre>
+<p>You can also add the <code>...,port=<i>&lt;n&gt;</i></code> setting to the previous option to specify in which physical port of the virtual controller you want to attach your device, useful in the case you want to add multiple usb devices to the VM.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you encounter permission errors when running QEMU, see <a href="../en/Udev.html#Writing_udev_rules" title="Udev">Udev#Writing udev rules</a> for information on how to set permissions of the device.</div>
+<h3><span class="mw-headline" id="Enabling_KSM">Enabling KSM</span></h3>
+<p>Kernel Samepage Merging (KSM) is a feature of the Linux kernel that allows for an application to register with the kernel to have its pages merged with other processes that also register to have their pages merged. The KSM mechanism allows for guest virtual machines to share pages with each other. In an environment where many of the guest operating systems are similar, this can result in significant memory savings.
+</p>
+<p>To enable KSM, simply run
+</p>
+<pre># echo 1 &gt; /sys/kernel/mm/ksm/run
+</pre>
+<p>To make it permanent, you can use <a href="../en/Systemd.html#Temporary_files" title="Systemd">systemd's temporary files</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/ksm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+w /sys/kernel/mm/ksm/run - - - - 1
+</pre>
+<p>If KSM is running, and there are pages to be merged (i.e. at least two similar VMs are running), then <code>/sys/kernel/mm/ksm/pages_shared</code> should be non-zero. See <a rel="nofollow" class="external free" href="https://www.kernel.org/doc/Documentation/vm/ksm.txt">https://www.kernel.org/doc/Documentation/vm/ksm.txt</a> for more information.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>An easy way to see how well KSM is performing is to simply print the contents of all the files in that directory: <pre>$ grep . /sys/kernel/mm/ksm/*</pre>
+</div>
+<h3><span class="mw-headline" id="Multi-monitor_support">Multi-monitor support</span></h3>
+<p>The Linux QXL driver supports four heads (virtual screens) by default. This can be changed via the <code>qxl.heads=N</code> kernel parameter.
+</p>
+<p>The default VGA memory size for QXL devices is 16M (VRAM size is 64M). This is not sufficient if you would like to enable two 1920x1200 monitors since that requires 2 × 1920 × 4 (color depth) × 1200 = 17.6 MiB VGA memory. This can be changed by replacing <code>-vga qxl</code> by <code>-vga none -device qxl-vga,vgamem_mb=32</code>. If you ever increase vgamem_mb beyond 64M, then you also have to increase the <code>vram_size_mb</code> option.
+</p>
+<h3><span class="mw-headline" id="Copy_and_paste">Copy and paste</span></h3>
+<p>To have copy and paste between the host and the guest you need to enable the spice agent communication channel. It requires to add a virtio-serial device to the guest, and open a port for the spice vdagent. It is also required to install the spice vdagent in guest (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=spice-vdagent">spice-vdagent</a></span> for Arch guests, <a rel="nofollow" class="external text" href="http://www.spice-space.org/download.html">Windows guest tools</a> for Windows guests). Make sure the agent is running (and for future, started automatically).
+</p>
+<p>Start QEMU with the following options:
+</p>
+<pre>$ qemu-system-i386 -vga qxl -spice port=5930,disable-ticketing -device virtio-serial-pci -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent
+</pre>
+<p>The <code>-device virtio-serial-pci</code> option adds the virtio-serial device, <code>-device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0</code> opens a port for spice vdagent in that device and <code>-chardev spicevmc,id=spicechannel0,name=vdagent</code> adds a spicevmc chardev for that port.
+</p>
+<p>It is important that the <code>chardev=</code> option of the <code>virtserialport</code> device matches the <code>id=</code> option given to the <code>chardev</code> option (<code>spicechannel0</code> in this example). It is also important that the port name is <code>com.redhat.spice.0</code>, because that is the namespace where vdagent is looking for in the guest. And finally, specify <code>name=vdagent</code> so that spice knows what this channel is for.
+</p>
+<h3><span class="mw-headline" id="Windows-specific_notes">Windows-specific notes</span></h3>
+<p>QEMU can run any version of Windows from Windows 95 through Windows 10.
+</p>
+<p>It is possible to run <a href="../en/Windows_PE.html" title="Windows PE">Windows PE</a> in QEMU.
+</p>
+<h4><span class="mw-headline" id="Fast_startup">Fast startup</span></h4>
+<p>For Windows 8 (or later) guests it is better to disable "Fast Startup" from the Power Options of the Control Panel, as it causes the guest to hang during every other boot.
+</p>
+<p>Fast Startup may also need to be disabled for changes to the <code>-smp</code> option to be properly applied.
+</p>
+<h4><span class="mw-headline" id="Remote_Desktop_Protocol">Remote Desktop Protocol</span></h4>
+<p>If you use a MS Windows guest, you might want to use RDP to connect to your guest VM. If you are using a VLAN or are not in the same network as the guest, use:
+</p>
+<pre>$ qemu-system-i386 -nographic -net user,hostfwd=tcp::5555-:3389
+</pre>
+<p>Then connect with either <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rdesktop">rdesktop</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=freerdp">freerdp</a></span> to the guest. For example:
+</p>
+<pre>$ xfreerdp -g 2048x1152 localhost:5555 -z -x lan
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Mouse_cursor_is_jittery_or_erratic">Mouse cursor is jittery or erratic</span></h3>
+<p>If the cursor jumps around the screen uncontrollably, entering this on the terminal before starting QEMU might help:
+</p>
+<pre>$ export SDL_VIDEO_X11_DGAMOUSE=0
+</pre>
+<p>If this helps, you can add this to your <code>~/.bashrc</code> file.
+</p>
+<h3><span class="mw-headline" id="No_visible_Cursor">No visible Cursor</span></h3>
+<p>Add <code>-show-cursor</code> to QEMU's options to see a mouse cursor.
+</p>
+<p>If that still doesn't work, make sure you've set your display device appropriately.
+</p>
+<p>For example: <code>-vga qxl</code>
+</p>
+<h3><span class="mw-headline" id="Keyboard_seems_broken_or_the_arrow_keys_do_not_work">Keyboard seems broken or the arrow keys do not work</span></h3>
+<p>Should you find that some of your keys do not work or "press" the wrong key (in particular, the arrow keys), you likely need to specify your keyboard layout as an option. The keyboard layouts can be found in <code>/usr/share/qemu/keymaps</code>.
+</p>
+<pre>$ qemu-system-i386 -k <i>keymap</i> <i>disk_image</i>
+</pre>
+<h3><span class="mw-headline" id="Virtual_machine_runs_too_slowly">Virtual machine runs too slowly</span></h3>
+<p>There are a number of techniques that you can use to improve the performance if your virtual machine. For example:
+</p>
+<ul>
+<li> Use the <code>-cpu host</code> option to make QEMU emulate the host's exact CPU. If you do not do this, it may be trying to emulate a more generic CPU.</li>
+<li> If the host machine has multiple CPUs, assign the guest more CPUs using the <code>-smp</code> option.</li>
+<li> Make sure you have assigned the virtual machine enough memory. By default, QEMU only assigns 128 MiB of memory to each virtual machine. Use the <code>-m</code> option to assign more memory. For example, <code>-m 1024</code> runs a virtual machine with 1024 MiB of memory.</li>
+<li> Use KVM if possible: add <code>-machine type=pc,accel=kvm</code> to the QEMU start command you use.</li>
+<li> If supported by drivers in the guest operating system, use <a rel="nofollow" class="external text" href="http://wiki.libvirt.org/page/Virtio">virtio</a> for network and/or block devices. For example:</li>
+</ul>
+<pre>$ qemu-system-i386 -net nic,model=virtio -net tap,if=tap0,script=no -drive file=<i>disk_image</i>,media=disk,if=virtio
+</pre>
+<ul>
+<li> Use TAP devices instead of user-mode networking. See <a href="#Tap_networking_with_QEMU">#Tap networking with QEMU</a>.</li>
+<li> If the guest OS is doing heavy writing to its disk, you may benefit from certain mount options on the host's file system. For example, you can mount an <a href="../en/Ext4.html" title="Ext4">ext4 file system</a> with the option <code>barrier=0</code>. You should read the documentation for any options that you change because sometimes performance-enhancing options for file systems come at the cost of data integrity.</li>
+<li> If you have a raw disk image, you may want to disable the cache:</li>
+</ul>
+<pre>$ qemu-system-i386 -drive file=<i>disk_image</i>,if=virtio,cache=none
+</pre>
+<ul><li> Use the native Linux AIO:</li></ul>
+<pre>$ qemu-system-i386 -drive file=<i>disk_image</i>,if=virtio,aio=native
+</pre>
+<ul><li> If you are running multiple virtual machines concurrently that all have the same operating system installed, you can save memory by enabling <a href="https://en.wikipedia.org/wiki/Kernel_SamePage_Merging_(KSM)" class="extiw" title="wikipedia:Kernel SamePage Merging (KSM)">kernel same-page merging</a>:</li></ul>
+<pre># echo 1 &gt; /sys/kernel/mm/ksm/run
+</pre>
+<ul><li> In some cases, memory can be reclaimed from running virtual machines by running a memory ballooning driver in the guest operating system and launching QEMU with the <code>-balloon virtio</code> option.</li></ul>
+<p>See <a rel="nofollow" class="external free" href="http://www.linux-kvm.org/page/Tuning_KVM">http://www.linux-kvm.org/page/Tuning_KVM</a> for more information.
+</p>
+<h3><span class="mw-headline" id="Guest_display_stretches_on_window_resize">Guest display stretches on window resize</span></h3>
+<p>To restore default window size, press <code>Ctrl+Alt+u</code>.
+</p>
+<h3><span class="mw-headline" id="ioctl.28KVM_CREATE_VM.29_failed:_16_Device_or_resource_busy">ioctl(KVM_CREATE_VM) failed: 16 Device or resource busy</span></h3>
+<p>If an error message like this is printed when starting QEMU with <code>-enable-kvm</code> option:
+</p>
+<pre>ioctl(KVM_CREATE_VM) failed: 16 Device or resource busy
+failed to initialize KVM: Device or resource busy
+</pre>
+<p>that means another <a href="../en/Hypervisor.html" title="Hypervisor" class="mw-redirect">hypervisor</a> is currently running. It is not recommended or possible to run several hypervisors in parallel.
+</p>
+<h3><span class="mw-headline" id="libgfapi_error_message">libgfapi error message</span></h3>
+<p>The error message displayed at startup:
+</p>
+<pre>Failed to open module: libgfapi.so.0: cannot open shared object file: No such file or directory
+</pre>
+<p>is not a problem, it just means that you are lacking the optional GlusterFS dependency.
+</p>
+<h3><span class="mw-headline" id="Kernel_panic_on_LIVE-environments">Kernel panic on LIVE-environments</span></h3>
+<p>If you start a live-environment (or better: booting a system) you may encounter this:
+</p>
+<pre>[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown block(0,0)
+</pre>
+<p>or some other boot hindering process (e.g. cannot unpack initramfs, cant start service foo).
+Try starting the VM with the <code>-m VALUE</code> switch and an appropriate amount of RAM, if the ram is to low you will probably encounter similar issues as above/without the memory-switch.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://qemu.org">Official QEMU website</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linux-kvm.org">Official KVM website</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://qemu.weilnetz.de/qemu-doc.html">QEMU Emulator User Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://en.wikibooks.org/wiki/QEMU">QEMU Wikibook</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://alien.slackbook.org/dokuwiki/doku.php?id=slackware:qemu">Hardware virtualization with QEMU</a> by AlienBOB (last updated in 2008)</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.falconindy.com/articles/build-a-virtual-army.html">Building a Virtual Army</a> by Falconindy</li>
+<li> <a rel="nofollow" class="external text" href="http://git.qemu.org/?p=qemu.git;a=tree;f=docs">Lastest docs</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://qemu.weilnetz.de/">QEMU on Windows</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Qemu" class="extiw" title="wikipedia:Qemu">Wikipedia</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.debian.org/QEMU">QEMU - Debian Wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://people.gnome.org/~markmc/qemu-networking.html">QEMU Networking on gnome.org</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://bsdwiki.reedmedia.net/wiki/networking_qemu_virtual_bsd_systems.html">Networking QEMU Virtual BSD Systems</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.gnu.org/software/hurd/hurd/running/qemu.html">QEMU on gnu.org</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.freebsd.org/qemu">QEMU on FreeBSD as host</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Emulators.html" title="Category:Emulators">Emulators</a></li>
+<li><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Hypervisors</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

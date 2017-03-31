@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ThinkPad OSD - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ThinkPad_OSD skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ThinkPad OSD</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>New desktop environments (<a href="../en/GNOME.html" title="GNOME">GNOME</a>, <a href="../en/KDE.html" title="KDE">KDE</a>, and maybe even <a href="../en/Xfce.html" title="Xfce">Xfce</a>) support their own osd notifications for important events (volume up/down/mute and brightness up/down), which might be enough for most users. In order to use those notifications instead of the ones provided by TPB, map the keyboard-events of those keys to the proper keycodes.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Loading_nvram_at_boot_and_give_permission_to_access_.2Fdev.2Fnvram"><span class="tocnumber">1</span> <span class="toctext">Loading nvram at boot and give permission to access /dev/nvram</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Setting_a_more_readable_color_and_better_placement"><span class="tocnumber">2</span> <span class="toctext">Setting a more readable color and better placement</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Starting_with_KDE"><span class="tocnumber">3</span> <span class="toctext">Starting with KDE</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Starting_with_Fluxbox"><span class="tocnumber">4</span> <span class="toctext">Starting with Fluxbox</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Play_a_sound_on_volume_change"><span class="tocnumber">5</span> <span class="toctext">Play a sound on volume change</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Loading_nvram_at_boot_and_give_permission_to_access_.2Fdev.2Fnvram">Loading nvram at boot and give permission to access /dev/nvram</span></h2>
+<ul>
+<li> Check with lsmod if the nvram module is loaded on boot</li>
+<li> If not, add <code>nvram</code> to <code>MODULES=(... nvram)</code> in <code>/etc/rc.conf</code>
+</li>
+<li> Check /dev/nvram permissions, your user must have read access to it.</li>
+<li> Edit /etc/udev/rules.d/51-arch.rules (WARNING: It will be overwritten with new udev update!)</li>
+</ul>
+<pre>KERNEL=="nvram",   NAME="misc/%k", SYMLINK+="%k", GROUP="kmem", MODE="0660"
+</pre>
+<ul><li> Note: this line seems to work better for some users:</li></ul>
+<pre>KERNEL=="nvram", GROUP="kmem", MODE="0660"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Check if there is already a line matching <code>nvram</code> in the <code>/etc/udev/rules.d/</code> directory.
+In this case, you have to modify the existing entry, and do not create a tpb.rules.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Write access to nvram is only needed to set volume with MIXER ON. see /etc/tpbrc.</div>
+<h2><span class="mw-headline" id="Setting_a_more_readable_color_and_better_placement">Setting a more readable color and better placement</span></h2>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tpbrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+OSDCOLOR    Green
+OSDVERTICAL 0
+OSDHORIZONTAL 0
+OSDPOS      MIDDLE
+OSDALIGN    CENTER
+</pre>
+<h2><span class="mw-headline" id="Starting_with_KDE">Starting with KDE</span></h2>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.kde/Autostart/tpb-startup.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Start Thinkpad OSD daemon
+if [ -x /usr/bin/tpb ] &amp;&amp;  [ -w /dev/nvram ] &amp;&amp; [ -r /dev/nvram ]; then
+    /usr/bin/tpb -d
+fi
+</pre>
+<h2><span class="mw-headline" id="Starting_with_Fluxbox">Starting with Fluxbox</span></h2>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.fluxbox/startup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Start Thinkpad OSD daemon
+if [ -x /usr/bin/tpb ] &amp;&amp;  [ -w /dev/nvram ] &amp;&amp; [ -r /dev/nvram ]; then
+    /usr/bin/tpb -d
+fi
+</pre>
+<h2><span class="mw-headline" id="Play_a_sound_on_volume_change">Play a sound on volume change</span></h2>
+<p>You can play a sound when using the volume buttons (mac like).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tpbrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+CALLBACK /usr/local/bin/callback_volume.sh
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/callback_volume.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+[ "$1" = "volume" ] &amp;&amp; exec canberra-gtk-play --file=/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga</pre>
+<p>Then:
+</p>
+<pre># chmod +x /usr/local/bin/callback_volume.sh
+</pre>
+<p>Finally, restart tpb.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external free" href="http://www.thinkwiki.org/wiki/Tpb">http://www.thinkwiki.org/wiki/Tpb</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Lenovo.html" title="Category:Lenovo">Lenovo</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

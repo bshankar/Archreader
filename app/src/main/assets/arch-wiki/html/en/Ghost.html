@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Ghost - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Ghost skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Ghost</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Ghost is a free and open source blogging platform written in JavaScript and distributed under the MIT License, designed to simplify the process of online publishing for individual bloggers as well as online publications.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#AUR_installation"><span class="tocnumber">1</span> <span class="toctext">AUR installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Custom_installation"><span class="tocnumber">2</span> <span class="toctext">Custom installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Prerequisites"><span class="tocnumber">2.1</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Installation"><span class="tocnumber">2.2</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Creating_a_service"><span class="tocnumber">2.3</span> <span class="toctext">Creating a service</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="AUR_installation">AUR installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/Ghost/">Ghost</a></span><sup><small>AUR</small></sup>, and modify <code>/srv/ghost/config.js</code>. Then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>ghost.service</code>. If you are happy with it, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it for automatic start when the system boots.
+</p>
+<p>Visit <a rel="nofollow" class="external free" href="http://127.0.0.1:2368/ghost">http://127.0.0.1:2368/ghost</a> for final configuration.
+</p>
+<h2><span class="mw-headline" id="Custom_installation">Custom installation</span></h2>
+<h3><span class="mw-headline" id="Prerequisites">Prerequisites</span></h3>
+<p>This instruction will guide you through the installation of Ghost using <a href="../en/Nginx.html" title="Nginx">nginx</a> as web server.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nginx">nginx</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=npm">npm</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sqlite">sqlite</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2">python2</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=unzip">unzip</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nodejs">nodejs</a></span>.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>Now it is time to configure the web server to act as a proxy of your blog.
+In the server block configuration file of nginx (etc/nginx/nginx.conf), change the location lines to the following:
+</p>
+<pre>location / {
+       proxy_set_header   X-Real-IP $remote_addr;
+       proxy_set_header   Host      $http_host;
+       proxy_pass         <a rel="nofollow" class="external free" href="http://127.0.0.1:2368">http://127.0.0.1:2368</a>;
+   }
+</pre>
+<p>Create the ghost user and directory for ghost:
+</p>
+<pre>$ useradd -r -s /bin/false ghost
+$ mkdir -p /srv/http/example.org
+</pre>
+<p>Now <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>nginx.service</code>.
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/Ghost/">Ghost</a></span><sup><small>AUR</small></sup> or grab the latest version of Ghost from Ghost.org, install it manually and change into the extraction directory::
+</p>
+<pre>$ curl -L <a rel="nofollow" class="external free" href="https://ghost.org/zip/ghost-latest.zip">https://ghost.org/zip/ghost-latest.zip</a> -o ghost.zip
+$ unzip ghost.zip -d /srv/http/example.org
+$ cd /srv/http/example.org
+</pre>
+<p>Temporarily link the python path variable to python 2 instead of python 3:
+First create a dummy folder:
+</p>
+<pre>$ mkdir ~/bin
+</pre>
+<p>Then add a symlink python to python2 and the config scripts in it:
+</p>
+<pre>$ ln -s /usr/bin/python2 ~/bin/python
+$ ln -s /usr/bin/python2-config ~/bin/python-config
+</pre>
+<p>Finally put the new folder at the beginning of your PATH variable:
+</p>
+<pre>$ export PATH=~/bin:$PATH
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method of changing <a href="../en/Environment_variables.html" title="Environment variables">environment variables</a> is not permanent and is only active in the current terminal session.</div>
+<p>Install ghost - you do not need this step when you have installed it from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>:
+</p>
+<pre>$ npm install --production
+</pre>
+<p>Start ghost:
+</p>
+<pre>$ npm start --production
+</pre>
+<p>Done! Open the browser and go to 127.0.0.1 or the IP of the device you installed ghost.
+</p>
+<h3><span class="mw-headline" id="Creating_a_service">Creating a service</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You do not need this step when you have installed Ghost from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.</div>
+<p>If you want to run Ghost in the background, you have to create a service. <a href="../en/Systemd.html#Writing_unit_files" title="Systemd">Create</a> a new service unit for the local system: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/ghost-example-com.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Ghost blog example.org  
+After=network.target
+
+[Service]
+Type=simple  
+PIDFile=/run/ghost-example-org.pid  
+WorkingDirectory=/srv/http/example.org  
+User=ghost  
+Group=ghost  
+ExecStart=/usr/bin/npm start --production /srv/http/example.org  
+ExecStop=/usr/bin/npm stop /srv/http/example.org  
+StandardOutput=null  
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Change the owner of the blog directory and start Ghost:
+</p>
+<pre>$ chown -R ghost:ghost /srv/http/example.org
+$ systemctl start ghost-example-com
+</pre>
+<p>If everything is working fine, you can <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the new unit <code> ghost-example-com</code> as well as the webserver <code>nginx.service</code>.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

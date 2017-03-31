@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Network configuration - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Network_configuration skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Network configuration</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Jumbo_frames.html" title="Jumbo frames">Jumbo frames</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Firewalls.html" title="Firewalls">Firewalls</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Wireless_network_configuration.html" title="Wireless network configuration">Wireless network configuration</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Network_bridge.html" title="Network bridge">Network bridge</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/List_of_applications/Internet.html#Network_managers" title="List of applications/Internet">List of applications/Internet#Network managers</a></li>
+</ul>
+</div>
+<p>This page explains how to set up a <b>wired</b> connection to a network. If you need to set up <b>wireless</b> networking see the <a href="../en/Wireless_network_configuration.html" title="Wireless network configuration">Wireless network configuration</a> page.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Check_the_connection"><span class="tocnumber">1</span> <span class="toctext">Check the connection</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Set_the_hostname"><span class="tocnumber">2</span> <span class="toctext">Set the hostname</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Local_network_hostname_resolution"><span class="tocnumber">2.1</span> <span class="toctext">Local network hostname resolution</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Device_driver"><span class="tocnumber">3</span> <span class="toctext">Device driver</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Check_the_status"><span class="tocnumber">3.1</span> <span class="toctext">Check the status</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Load_the_module"><span class="tocnumber">3.2</span> <span class="toctext">Load the module</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Network_interfaces"><span class="tocnumber">4</span> <span class="toctext">Network interfaces</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8">
+<a href="#Device_names"><span class="tocnumber">4.1</span> <span class="toctext">Device names</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Get_current_device_names"><span class="tocnumber">4.1.1</span> <span class="toctext">Get current device names</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Change_device_name"><span class="tocnumber">4.1.2</span> <span class="toctext">Change device name</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Reverting_to_traditional_device_names"><span class="tocnumber">4.1.3</span> <span class="toctext">Reverting to traditional device names</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Set_device_MTU_and_queue_length"><span class="tocnumber">4.2</span> <span class="toctext">Set device MTU and queue length</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Enabling_and_disabling_network_interfaces"><span class="tocnumber">4.3</span> <span class="toctext">Enabling and disabling network interfaces</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Configure_the_IP_address"><span class="tocnumber">5</span> <span class="toctext">Configure the IP address</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15">
+<a href="#Dynamic_IP_address"><span class="tocnumber">5.1</span> <span class="toctext">Dynamic IP address</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#systemd-networkd"><span class="tocnumber">5.1.1</span> <span class="toctext">systemd-networkd</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#dhcpcd"><span class="tocnumber">5.1.2</span> <span class="toctext">dhcpcd</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#dhclient"><span class="tocnumber">5.1.3</span> <span class="toctext">dhclient</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#netctl"><span class="tocnumber">5.1.4</span> <span class="toctext">netctl</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Static_IP_address"><span class="tocnumber">5.2</span> <span class="toctext">Static IP address</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#netctl_2"><span class="tocnumber">5.2.1</span> <span class="toctext">netctl</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#systemd-networkd_2"><span class="tocnumber">5.2.2</span> <span class="toctext">systemd-networkd</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#dhcpcd_2"><span class="tocnumber">5.2.3</span> <span class="toctext">dhcpcd</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Manual_assignment"><span class="tocnumber">5.2.4</span> <span class="toctext">Manual assignment</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#Calculating_addresses"><span class="tocnumber">5.2.5</span> <span class="toctext">Calculating addresses</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-26">
+<a href="#Tips_and_tricks"><span class="tocnumber">6</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-27"><a href="#ifplugd_for_laptops"><span class="tocnumber">6.1</span> <span class="toctext">ifplugd for laptops</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Bonding_or_LAG"><span class="tocnumber">6.2</span> <span class="toctext">Bonding or LAG</span></a></li>
+<li class="toclevel-2 tocsection-29">
+<a href="#IP_address_aliasing"><span class="tocnumber">6.3</span> <span class="toctext">IP address aliasing</span></a>
+<ul>
+<li class="toclevel-3 tocsection-30"><a href="#Example"><span class="tocnumber">6.3.1</span> <span class="toctext">Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-31"><a href="#Change_MAC.2Fhardware_address"><span class="tocnumber">6.4</span> <span class="toctext">Change MAC/hardware address</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Internet_sharing"><span class="tocnumber">6.5</span> <span class="toctext">Internet sharing</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#Router_configuration"><span class="tocnumber">6.6</span> <span class="toctext">Router configuration</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Promiscuous_mode"><span class="tocnumber">6.7</span> <span class="toctext">Promiscuous mode</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-35">
+<a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-36"><a href="#Swapping_computers_on_the_cable_modem"><span class="tocnumber">7.1</span> <span class="toctext">Swapping computers on the cable modem</span></a></li>
+<li class="toclevel-2 tocsection-37">
+<a href="#The_TCP_window_scaling_problem"><span class="tocnumber">7.2</span> <span class="toctext">The TCP window scaling problem</span></a>
+<ul>
+<li class="toclevel-3 tocsection-38"><a href="#How_to_diagnose_the_problem"><span class="tocnumber">7.2.1</span> <span class="toctext">How to diagnose the problem</span></a></li>
+<li class="toclevel-3 tocsection-39">
+<a href="#Ways_of_fixing_it"><span class="tocnumber">7.2.2</span> <span class="toctext">Ways of fixing it</span></a>
+<ul>
+<li class="toclevel-4 tocsection-40"><a href="#Bad"><span class="tocnumber">7.2.2.1</span> <span class="toctext">Bad</span></a></li>
+<li class="toclevel-4 tocsection-41"><a href="#Good"><span class="tocnumber">7.2.2.2</span> <span class="toctext">Good</span></a></li>
+<li class="toclevel-4 tocsection-42"><a href="#Best"><span class="tocnumber">7.2.2.3</span> <span class="toctext">Best</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-43"><a href="#More_about_it"><span class="tocnumber">7.2.3</span> <span class="toctext">More about it</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-44">
+<a href="#Realtek_no_link_.2F_WOL_problem"><span class="tocnumber">7.3</span> <span class="toctext">Realtek no link / WOL problem</span></a>
+<ul>
+<li class="toclevel-3 tocsection-45"><a href="#Enable_the_NIC_directly_in_Linux"><span class="tocnumber">7.3.1</span> <span class="toctext">Enable the NIC directly in Linux</span></a></li>
+<li class="toclevel-3 tocsection-46"><a href="#Rollback.2Fchange_Windows_driver"><span class="tocnumber">7.3.2</span> <span class="toctext">Rollback/change Windows driver</span></a></li>
+<li class="toclevel-3 tocsection-47"><a href="#Enable_WOL_in_Windows_driver"><span class="tocnumber">7.3.3</span> <span class="toctext">Enable WOL in Windows driver</span></a></li>
+<li class="toclevel-3 tocsection-48"><a href="#Newer_Realtek_Linux_driver"><span class="tocnumber">7.3.4</span> <span class="toctext">Newer Realtek Linux driver</span></a></li>
+<li class="toclevel-3 tocsection-49"><a href="#Enable_LAN_Boot_ROM_in_BIOS.2FCMOS"><span class="tocnumber">7.3.5</span> <span class="toctext">Enable <i>LAN Boot ROM</i> in BIOS/CMOS</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-50"><a href="#No_interface_with_Atheros_chipsets"><span class="tocnumber">7.4</span> <span class="toctext">No interface with Atheros chipsets</span></a></li>
+<li class="toclevel-2 tocsection-51"><a href="#Broadcom_BCM57780"><span class="tocnumber">7.5</span> <span class="toctext">Broadcom BCM57780</span></a></li>
+<li class="toclevel-2 tocsection-52"><a href="#Realtek_RTL8111.2F8168B"><span class="tocnumber">7.6</span> <span class="toctext">Realtek RTL8111/8168B</span></a></li>
+<li class="toclevel-2 tocsection-53"><a href="#Gigabyte_Motherboard_with_Realtek_8111.2F8168.2F8411"><span class="tocnumber">7.7</span> <span class="toctext">Gigabyte Motherboard with Realtek 8111/8168/8411</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-54"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Check_the_connection">Check the connection</span></h2>
+<p>The basic installation procedure typically has a functional network configuration. Use <span class="plainlinks archwiki-template-man" title="$ man 8 ping"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ping.8.html">ping(8)</a></span> to check the connection:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ping www.google.com</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING www.l.google.com (74.125.132.105) 56(84) bytes of data.
+64 bytes from wb-in-f105.1e100.net (74.125.132.105): icmp_req=1 ttl=50 time=17.0 ms
+...</pre>
+<p>If the ping is successful (you see 64 bytes messages as above), then the network is configured. Press <code>Control-C</code> to stop the ping.
+</p>
+<p>If the ping failed with an <i>Unknown hosts</i> error, it  means that your machine was unable to resolve this domain name. It may be related to your service provider or your router/gateway. Try pinging a static IP address to prove that your machine has access to the Internet:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ping 8.8.8.8</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+64 bytes from 8.8.8.8: icmp_req=1 ttl=53 time=52.9 ms
+...
+</pre>
+<p>If you are able to ping <code>8.8.8.8</code> but not <code>www.google.com</code>, check your DNS configuration. See <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a> for details. The <code>hosts</code> line in <code>/etc/nsswitch.conf</code> is another place you can check.
+</p>
+<p>If not, check for cable issues before diagnosing further.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you receive an error like <code>ping: icmp open socket: Operation not permitted</code> when executing <i>ping</i>, try to re-install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iputils">iputils</a></span> package.</li>
+<li> The <code>-c <i>num</i></code> option can be used to make exactly <code><i>num</i></code> pings, otherwise it pings infinitely and has to be terminated manually. See <code>man ping</code> for more information.</li>
+<li> <code>8.8.8.8</code> is a static address that is easy to remember. It is the address of Google's primary DNS server, therefore it can be considered reliable, and is generally not blocked by content filtering systems and proxies.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="Set_the_hostname">Set the hostname</span></h2>
+<p>A <a href="https://en.wikipedia.org/wiki/Hostname" class="extiw" title="wikipedia:Hostname">hostname</a> is a unique name created to identify a machine on a network, configured in <code>/etc/hostname</code>—see <span class="plainlinks archwiki-template-man" title="$ man 5 hostname"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/hostname.5.html">hostname(5)</a></span> and <span class="plainlinks archwiki-template-man" title="$ man 7 hostname"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man7/hostname.7.html">hostname(7)</a></span> for details. The file can contain the system's domain name, if any. To set the hostname, <a href="../en/Help:Reading.html#Append,_add,_create,_edit" title="Textedit" class="mw-redirect">edit</a> <code>/etc/hostname</code> to include a single line with <code><i>myhostname</i></code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/hostname</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+<i>myhostname</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For advice on choosing a hostname, see <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc1178">RFC 1178</a>.</div>
+<p>Alternatively, using <span class="plainlinks archwiki-template-man" title="$ man 1 hostnamectl"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/hostnamectl.1.html">hostnamectl(1)</a></span>:
+</p>
+<pre># hostnamectl set-hostname <i>myhostname</i>
+</pre>
+<p>To temporarily set the hostname (until reboot), use <span class="plainlinks archwiki-template-man" title="$ man 1 hostname"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/hostname.1.html">hostname(1)</a></span> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=inetutils">inetutils</a></span>:
+</p>
+<pre># hostname <i>myhostname</i>
+</pre>
+<p>To set the "pretty" hostname and other machine metadata, see <span class="plainlinks archwiki-template-man" title="$ man 5 machine-info"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/machine-info.5.html#https%3A%2F%2Fwww.freedesktop.org%2Fsoftware%2Fsystemd%2Fman%2Fmachine-info.html">machine-info(5)</a></span>.
+</p>
+<h3><span class="mw-headline" id="Local_network_hostname_resolution">Local network hostname resolution</span></h3>
+<p>The pre-requisite is to <a href="#Set_the_hostname">#Set the hostname</a>, after which hostname resolution works on the local system itself:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ping <i>myhostname</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING myhostname (192.168.1.2) 56(84) bytes of data.
+64 bytes from myhostname (192.168.1.2): icmp_seq=1 ttl=64 time=0.043 ms</pre>
+<p>To allow other machines to address the host by name, it is necessary to either:
+</p>
+<ul>
+<li> Configure the <span class="plainlinks archwiki-template-man" title="$ man 5 hosts"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/hosts.5.html">hosts(5)</a></span> file, or</li>
+<li> Enable a service which resolves the hostname.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> provides hostname resolution via the <code>myhostname</code> nss module, enabled by default in <code>/etc/nsswitch.conf</code>. However, clients may still rely on <code>/etc/hosts</code>, see <a rel="nofollow" class="external autonumber" href="https://lists.debian.org/debian-devel/2013/07/msg00809.html">[1]</a> <a rel="nofollow" class="external autonumber" href="https://bugzilla.mozilla.org/show_bug.cgi?id=87717#c55">[2]</a> for examples.</div>
+<p>To configure the hosts file, add the following line to <code>/etc/hosts</code>:
+</p>
+<pre>127.0.1.1	<i>myhostname</i>.localdomain	<i>myhostname</i>
+</pre>
+<p>As a result the system resolves to both entries: 
+</p>
+<pre>$ getent hosts 
+127.0.0.1       localhost
+127.0.1.1       myhostname.localdomain myhostname
+</pre>
+<p>For a system with a permanent IP address, that permanent IP address should be used instead of <code>127.0.1.1</code>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Another option is to set up a full DNS server such as <a href="../en/BIND.html" title="BIND">BIND</a> or <a href="../en/Unbound.html" title="Unbound">Unbound</a>, but that is overkill and too complex for most systems. For small networks and dynamic flexibility with hosts joining and leaving the network <a href="https://en.wikipedia.org/wiki/Zero-configuration_networking" class="extiw" title="wikipedia:Zero-configuration networking">zero-configuration networking</a> services may be more applicable:
+<ul>
+<li>
+<a href="../en/Samba.html" title="Samba">Samba</a> provides hostname resolution via Microsoft's <b>NetBIOS</b>. It only requires installation of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=samba">samba</a></span> and enabling of the <code>nmbd.service</code> service. Computers running Windows, macOS, or Linux with <code>nmbd</code> running, will be able to find your machine.</li>
+<li>
+<a href="../en/Avahi.html" title="Avahi">Avahi</a> provides hostname resolution via <b>zeroconf</b>, also known as Avahi or Bonjour. It requires slightly more complex configuration than Samba: see <a href="../en/Avahi.html#Hostname_resolution" title="Avahi">Avahi#Hostname resolution</a> for details. Computers running macOS, or Linux with an Avahi daemon running, will be able to find your machine. Windows does not have an built-in Avahi client or daemon.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="Device_driver">Device driver</span></h2>
+<h3><span class="mw-headline" id="Check_the_status">Check the status</span></h3>
+<p><a href="../en/Udev.html" title="Udev">udev</a> should detect your network interface card (see <a href="https://en.wikipedia.org/wiki/Network_interface_controller" class="extiw" title="wikipedia:Network interface controller">Wikipedia:Network interface controller</a>) and automatically load the necessary module at start up. Check the "Ethernet controller" entry (or similar) from the <code>lspci -v</code> output. It should tell you which kernel module contains the driver for your network device. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -v</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+02:00.0 Ethernet controller: Attansic Technology Corp. L1 Gigabit Ethernet Adapter (rev b0)
+ 	...
+ 	Kernel driver in use: atl1
+ 	Kernel modules: atl1
+</pre>
+<p>Next, check that the driver was loaded via <code>dmesg | grep <i>module_name</i></code>. For example:
+</p>
+<pre>$ dmesg | grep atl1
+    ...
+    atl1 0000:02:00.0: eth0 link is up 100 Mbps full duplex
+</pre>
+<p>Skip the next section if the driver was loaded successfully. Otherwise, you will need to know which module is needed for your particular model.
+</p>
+<h3><span class="mw-headline" id="Load_the_module">Load the module</span></h3>
+<p>Search in the Internet for the right module/driver for the chipset. Some common modules are <code>8139too</code> for cards with a Realtek chipset, or <code>sis900</code> for cards with a SiS chipset. Once you know which module to use, try to <a href="../en/Kernel_modules.html#Manual_module_handling" title="Kernel modules">load it manually</a>. If you get an error saying that the module was not found, it's possible that the driver is not included in Arch kernel. You may search the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> for the module name.
+</p>
+<p>If udev is not detecting and loading the proper module automatically during bootup, see <a href="../en/Kernel_modules.html#Automatic_module_handling" title="Kernel modules">Kernel modules#Automatic module handling</a>.
+</p>
+<h2><span class="mw-headline" id="Network_interfaces">Network interfaces</span></h2>
+<h3><span class="mw-headline" id="Device_names">Device names</span></h3>
+<p>For computers with multiple NICs, it is important to have fixed device names. Many configuration problems are caused by interface name changing.
+</p>
+<p><a href="../en/Udev.html" title="Udev">udev</a> is responsible for which device gets which name. Systemd v197 introduced <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames">Predictable Network Interface Names</a>, which automatically assigns static names to network devices. Interfaces are now prefixed with <code>en</code> (wired/<a href="https://en.wikipedia.org/wiki/Ethernet" class="extiw" title="w:Ethernet">Ethernet</a>), <code>wl</code> (wireless/WLAN), or <code>ww</code> (<a href="https://en.wikipedia.org/wiki/Wireless_WAN" class="extiw" title="w:Wireless WAN">WWAN</a>) followed by an automatically generated identifier, creating an entry such as <code>enp0s25</code>. This behavior may be disabled by adding <code>net.ifnames=0</code> to the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When changing the interface naming scheme, do not forget to update all network-related configuration files and custom systemd unit files to reflect the change. Specifically, if you have <a href="../en/Netctl.html#Basic_method" title="Netctl">netctl static profiles</a> enabled, run <code>netctl reenable <i>profile</i></code> to update the generated service file.</div>
+<h4><span class="mw-headline" id="Get_current_device_names">Get current device names</span></h4>
+<p>Current NIC names can be found via <code>sysfs</code> or <code>ip link</code>. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls /sys/class/net</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+lo enp0s3
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ip link</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default 
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 08:00:27:23:6f:3a brd ff:ff:ff:ff:ff:ff
+</pre>
+<p>Wireless device names can also be retrieved using <code>iw dev</code>. See <a href="../en/Wireless_network_configuration.html#Getting_some_useful_information" title="Wireless network configuration">Wireless network configuration#Getting some useful information</a> for details.
+</p>
+<h4><span class="mw-headline" id="Change_device_name">Change device name</span></h4>
+<p>You can change the device name by defining the name manually with an udev-rule. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-network.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="aa:bb:cc:dd:ee:ff", NAME="net1"
+SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="ff:ee:dd:cc:bb:aa", NAME="net0"
+</pre>
+<p>These rules will be applied automatically at boot.
+</p>
+<p>A couple of things to note:
+</p>
+<ul>
+<li> To get the MAC address of each card, use this command: <code>cat /sys/class/net/<i>device_name</i>/address</code>
+</li>
+<li> Make sure to use the lower-case hex values in your udev rules. It doesn't like upper-case.</li>
+</ul>
+<p>If the network card has a dynamic MAC, you can use <code>DEVPATH</code>, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-network.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+SUBSYSTEM=="net", DEVPATH=="/devices/platform/wemac.*", NAME="int"
+SUBSYSTEM=="net", DEVPATH=="/devices/pci*/*1c.0/*/net/*", NAME="en"
+</pre>
+<p>The device path should match both the new and old device name, since the rule may be executed more than once on bootup. For example, in the second rule, <code>"/devices/pci*/*1c.0/*/net/enp*"</code> would be wrong since it will stop matching once the name is changed to <code>en</code>. Only the system-default rule will fire the second time around, causing the name to be changed back to e.g. <code>enp1s0</code>.
+</p>
+<p>To <a href="../en/Udev.html#Testing_rules_before_loading" title="Udev">test</a> your rules, they can be triggered directly from userspace, e.g. with <code>udevadm --debug test /sys/<i>DEVPATH</i></code>. Remember to first take down the interface you are trying to rename (e.g. <code>ip link set enp1s0 down</code>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When choosing the static names <b>it should be avoided to use names in the format of "eth<i>X</i>" and "wlan<i>X</i>"</b>, because this may lead to race conditions between the kernel and udev during boot. Instead, it is better to use interface names that are not used by the kernel as default, e.g.: <code>net0</code>, <code>net1</code>, <code>wifi0</code>, <code>wifi1</code>. For further details please see the <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames">systemd</a> documentation.</div>
+<h4><span class="mw-headline" id="Reverting_to_traditional_device_names">Reverting to traditional device names</span></h4>
+<p>If you would prefer to retain traditional interface names such as eth0,  <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames">Predictable Network Interface Names</a> can be disabled with the following:
+</p>
+<pre> # ln -s /dev/null /etc/udev/rules.d/80-net-setup-link.rules
+</pre>
+<h3><span class="mw-headline" id="Set_device_MTU_and_queue_length">Set device MTU and queue length</span></h3>
+<p>You can change the device MTU and queue length by defining manually with an udev-rule. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-network.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="wl*", ATTR{mtu}="1480", ATTR{tx_queue_len}="2000"
+</pre>
+<h3><span class="mw-headline" id="Enabling_and_disabling_network_interfaces">Enabling and disabling network interfaces</span></h3>
+<p>You can activate or deactivate network interfaces using:
+</p>
+<pre># ip link set eth0 up
+# ip link set eth0 down
+</pre>
+<p>To check the result:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ip link show dev eth0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+2: eth0: &lt;BROADCAST,MULTICAST,PROMISC,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast master br0 state UP mode DEFAULT qlen 1000
+...
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> If your default route is through interface <code>eth0</code>, taking it down will also remove the route, and bringing it back up will not automatically reestablish the default route.  See <a href="#Manual_assignment">#Manual assignment</a> for reestablishing it.</div>
+<h2><span class="mw-headline" id="Configure_the_IP_address">Configure the IP address</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Use a single method to manage the network, as several methods may conflict.</div>
+<p>You have two options: a dynamically assigned address using <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol" class="extiw" title="wikipedia:Dynamic Host Configuration Protocol">DHCP</a>, or an unchanging "static" address. See also <a href="../en/List_of_applications.html#Network_managers" title="List of applications">List of applications#Network managers</a>.
+</p>
+<h3><span class="mw-headline" id="Dynamic_IP_address">Dynamic IP address</span></h3>
+<h4><span class="mw-headline" id="systemd-networkd">systemd-networkd</span></h4>
+<p>An easy way to setup DHCP for simple requirements is to use <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a> service provided by systemd. See <a href="../en/Systemd-networkd.html#Basic_DHCP_network" title="Systemd-networkd">systemd-networkd#Basic DHCP network</a>. 
+</p>
+<h4><span class="mw-headline" id="dhcpcd">dhcpcd</span></h4>
+<p><a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a> is the default client in Arch Linux to setup DHCP on the installation ISO. It is a powerful tool with many configurable DHCP client options. See <a href="../en/Dhcpcd.html#Running" title="Dhcpcd">dhcpcd#Running</a> on how to activate it for an interface.
+</p>
+<h4><span class="mw-headline" id="dhclient">dhclient</span></h4>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dhclient">dhclient</a></span> is the Internet Systems Consortium DHCP client. <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> the <code>dhclient@<i>interface</i>.service</code>, where <code><i>interface</i></code> is a wired <a href="#Device_name">#Device name</a>. See <span class="plainlinks archwiki-template-man" title="$ man 8 dhclient">dhclient(8)</span> and <span class="plainlinks archwiki-template-man" title="$ man 5 dhclient.conf">dhclient.conf(5)</span> for details.
+</p>
+<h4><span class="mw-headline" id="netctl">netctl</span></h4>
+<p><a href="../en/Netctl.html" title="Netctl">netctl</a> is a CLI-based tool for configuring and managing network connections through user-created profiles. Create a profile as shown in <a href="../en/Netctl.html#Example_profiles" title="Netctl">netctl#Example profiles</a>, then enable it as described in <a href="../en/Netctl.html#Basic_method" title="Netctl">netctl#Basic method</a>.
+</p>
+<h3><span class="mw-headline" id="Static_IP_address">Static IP address</span></h3>
+<p>A static IP address can be configured with most standard Arch Linux networking tools. Independent of the tool you choose, you will probably need to be prepared with the following information:
+</p>
+<ul>
+<li> Static IP address</li>
+<li> Subnet mask, or possibly its <a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation" class="extiw" title="wikipedia:Classless Inter-Domain Routing">CIDR notation</a>, for example <code>/24</code> is the CIDR notation of <code>255.255.255.0</code> netmask.</li>
+<li> <a href="https://en.wikipedia.org/wiki/Broadcast_address" class="extiw" title="wikipedia:Broadcast address">Broadcast address</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Default_gateway" class="extiw" title="wikipedia:Default gateway">Gateway</a>'s IP address</li>
+<li> Name server (DNS) IP addresses. See also <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a>.</li>
+</ul>
+<p>If you are running a private network, it is safe to use IP addresses in <code>192.168.*.*</code> for your IP addresses, with a subnet mask of <code>255.255.255.0</code> and a broadcast address of <code>192.168.*.255</code>. The gateway is usually <code>192.168.*.1</code> or <code>192.168.*.254</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Make sure manually assigned IP addresses do not conflict with DHCP assigned ones. See <a rel="nofollow" class="external text" href="http://www.raspberrypi.org/forums/viewtopic.php?f=28&amp;t=16797">this forum thread</a>.</li>
+<li> If you share your Internet connection from a Windows machine without a router, be sure to use static IP addresses on both computers to avoid LAN problems.</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Addresses can be calculated with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ipcalc">ipcalc</a></span> package; see <a href="#Calculating_addresses">#Calculating addresses</a>.</div>
+<h4><span class="mw-headline" id="netctl_2">netctl</span></h4>
+<p>To create a <a href="../en/Netctl.html" title="Netctl">netctl</a> profile with a static IP, set the <code>IP=static</code> option as well as <code>Address</code>, <code>Gateway</code>, and <code>DNS</code>. See <a href="../en/Netctl.html#Wired" title="Netctl">netctl#Wired</a>.
+</p>
+<h4><span class="mw-headline" id="systemd-networkd_2">systemd-networkd</span></h4>
+<p>The <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a> service provided by systemd can set up a static IP using a simple configuration file. See <a href="../en/Systemd-networkd.html#Wired_adapter_using_a_static_IP" title="Systemd-networkd">systemd-networkd#Wired adapter using a static IP</a>.
+</p>
+<h4><span class="mw-headline" id="dhcpcd_2">dhcpcd</span></h4>
+<p>See <a href="../en/Dhcpcd.html#Static_profile" title="Dhcpcd">dhcpcd#Static profile</a>.
+</p>
+<h4><span class="mw-headline" id="Manual_assignment">Manual assignment</span></h4>
+<p>It is possible to manually set up a static IP using only the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iproute2">iproute2</a></span> package. This is a good way to test connection settings since the connection made using this method will not persist across reboots. First enable the <a href="#Network_interfaces">network interface</a>:
+</p>
+<pre># ip link set <i>interface</i> up
+</pre>
+<p>Assign a static IP address in the console:
+</p>
+<pre># ip addr add <i>IP_address</i>/<i>subnet_mask</i> broadcast <i>broadcast_address</i> dev <i>interface</i>
+</pre>
+<p>Then add your gateway IP address:
+</p>
+<pre># ip route add default via <i>default_gateway</i>
+</pre>
+<p>For example:
+</p>
+<pre># ip link set eth0 up
+# ip addr add 192.168.1.2/24 broadcast 192.168.1.255 dev eth0
+# ip route add default via 192.168.1.1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you get the message <code>RTNETLINK answers: Network is unreachable</code>, try to break up the route creation in the following two parts:
+<pre># ip route add 192.168.1.1 dev eth0
+# ip route add default via 192.168.1.1 dev eth0
+</pre>
+</div>
+<p>To undo these steps (e.g. before switching to a dynamic IP), first remove any assigned IP address:
+</p>
+<pre># ip addr flush dev <i>interface</i>
+</pre>
+<p>Then remove any assigned gateway:
+</p>
+<pre># ip route flush dev <i>interface</i>
+</pre>
+<p>And finally disable the interface:
+</p>
+<pre># ip link set <i>interface</i> down
+</pre>
+<p>For more options, see the <code>ip(8)</code> man page. These commands can be automated using scripts and <a href="../en/Systemd.html#Writing_unit_files" title="Systemd">systemd units</a>.
+</p>
+<h4><span class="mw-headline" id="Calculating_addresses">Calculating addresses</span></h4>
+<p>You can use <code>ipcalc</code> provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ipcalc">ipcalc</a></span> package to calculate IP broadcast, network, netmask, and host ranges for more advanced configurations. An example is using Ethernet over Firewire to connect a Windows machine to Linux. To improve security and organization, both machines have their own network with the netmask and broadcast configured accordingly. 
+</p>
+<p>Finding out the respective netmask and broadcast addresses is done with <code>ipcalc</code>, by specifying the IP of the Linux NIC <code>10.66.66.1</code> and the number of hosts (here two):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ipcalc -nb 10.66.66.1 -s 1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Address:   10.66.66.1
+
+Netmask:   255.255.255.252 = 30
+Network:   10.66.66.0/30
+HostMin:   10.66.66.1
+HostMax:   10.66.66.2
+Broadcast: 10.66.66.3
+Hosts/Net: 2                     Class A, Private Internet
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="ifplugd_for_laptops">ifplugd for laptops</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a> provides the same feature out of the box.</div>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ifplugd">ifplugd</a></span> in <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> is a daemon which will automatically configure your Ethernet device when a cable is plugged in and automatically unconfigure it if the cable is pulled. This is useful on laptops with onboard network adapters, since it will only configure the interface when a cable is really connected. Another use is when you just need to restart the network but do not want to restart the computer or do it from the shell.
+</p>
+<p>By default it is configured to work for the <code>eth0</code> device. This and other settings like delays can be configured in <code>/etc/ifplugd/ifplugd.conf</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a href="../en/Netctl.html" title="Netctl">netctl</a> package includes <code>netctl-ifplugd@.service</code>, otherwise you can use <code>ifplugd@.service</code> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ifplugd">ifplugd</a></span> package. For example, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>ifplugd@eth0.service</code>.</div>
+<h3><span class="mw-headline" id="Bonding_or_LAG">Bonding or LAG</span></h3>
+<p>See <a href="../en/Netctl.html#Bonding" title="Netctl">netctl#Bonding</a> or <a href="../en/Wireless_bonding.html" title="Wireless bonding">Wireless bonding</a>.
+</p>
+<h3><span class="mw-headline" id="IP_address_aliasing">IP address aliasing</span></h3>
+<p>IP aliasing is the process of adding more than one IP address to a network interface. With this, one node on a network can have multiple connections to a network, each serving a different purpose. Typical uses are virtual hosting of Web and FTP servers, or reorganizing servers without having to update any other machines (this is especially useful for nameservers).
+</p>
+<h4><span class="mw-headline" id="Example">Example</span></h4>
+<p>To manually set an alias, for some NIC, use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iproute2">iproute2</a></span> to execute
+</p>
+<pre># ip addr add 192.168.2.101/24 dev eth0 label eth0:1
+</pre>
+<p>To remove a given alias execute
+</p>
+<pre># ip addr del 192.168.2.101/24 dev eth0:1
+</pre>
+<p>Packets destined for a subnet will use the primary alias by default. If the destination IP is within a subnet of a secondary alias, then the source IP is set respectively. Consider the case where there is more than one NIC, the default routes can be listed with <code>ip route</code>.
+</p>
+<h3><span class="mw-headline" id="Change_MAC.2Fhardware_address">Change MAC/hardware address</span></h3>
+<p>See <a href="../en/MAC_address_spoofing.html" title="MAC address spoofing">MAC address spoofing</a>.
+</p>
+<h3><span class="mw-headline" id="Internet_sharing">Internet sharing</span></h3>
+<p>See <a href="../en/Internet_sharing.html" title="Internet sharing">Internet sharing</a>.
+</p>
+<h3><span class="mw-headline" id="Router_configuration">Router configuration</span></h3>
+<p>See <a href="../en/Router.html" title="Router">Router</a>.
+</p>
+<h3><span class="mw-headline" id="Promiscuous_mode">Promiscuous mode</span></h3>
+<p>Toggling <a href="https://en.wikipedia.org/wiki/Promiscuous_mode" class="extiw" title="wikipedia:Promiscuous mode">promiscuous mode</a> will make a (wireless) NIC forward all traffic it receives to the OS for further processing. This is opposite to "normal mode" where a NIC will drop frames it is not intended to receive. It is most often used for advanced network troubleshooting and <a href="https://en.wikipedia.org/wiki/Packet_sniffing" class="extiw" title="wikipedia:Packet sniffing">packet sniffing</a>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/promiscuous@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Set %i interface in promiscuous mode
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ip link set dev %i promisc on
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>If you want to enable promiscuous mode on interface <code>eth0</code> run <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>promiscuous@eth0.service</code>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Swapping_computers_on_the_cable_modem">Swapping computers on the cable modem</span></h3>
+<p>Some cable ISPs (videotron for example) have the cable modem configured to recognize only one client PC, by the MAC address of its network interface. Once the cable modem has learned the MAC address of the first PC or equipment that talks to it, it will not respond to another MAC address in any way. Thus if you swap one PC for another (or for a router), the new PC (or router) will not work with the cable modem, because the new PC (or router) has a MAC address different from the old one. To reset the cable modem so that it will recognise the new PC, you must power the cable modem off and on again. Once the cable modem has rebooted and gone fully online again (indicator lights settled down), reboot the newly connected PC so that it makes a DHCP request, or manually make it request a new DHCP lease.
+</p>
+<p>If this method does not work, you will need to clone the MAC address of the original machine. See also <a href="#Change_MAC.2Fhardware_address">#Change MAC/hardware address</a>.
+</p>
+<h3><span class="mw-headline" id="The_TCP_window_scaling_problem">The TCP window scaling problem</span></h3>
+<p>TCP packets contain a "window" value in their headers indicating how much data the other host may send in return. This value is represented with only 16 bits, hence the window size is at most 64Kb. TCP packets are cached for a while (they have to be reordered), and as memory is (or used to be) limited, one host could easily run out of it.
+</p>
+<p>Back in 1992, as more and more memory became available, <a rel="nofollow" class="external text" href="http://www.faqs.org/rfcs/rfc1323.html">RFC 1323</a> was written to improve the situation: Window Scaling. The "window" value, provided in all packets, will be modified by a Scale Factor defined once, at the very beginning of the connection. That 8-bit Scale Factor allows the Window to be up to 32 times higher than the initial 64Kb.
+</p>
+<p>It appears that some broken routers and firewalls on the Internet are rewriting the Scale Factor to 0 which causes misunderstandings between hosts. The Linux kernel 2.6.17 introduced a new calculation scheme generating higher Scale Factors, virtually making the aftermaths of the broken routers and firewalls more visible.
+</p>
+<p>The resulting connection is at best very slow or broken.
+</p>
+<h4><span class="mw-headline" id="How_to_diagnose_the_problem">How to diagnose the problem</span></h4>
+<p>First of all, let's make it clear: this problem is odd. In some cases, you will not be able to use TCP connections (HTTP, FTP, ...) at all and in others, you will be able to communicate with some hosts (very few).
+</p>
+<p>When you have this problem, the <code>dmesg</code>'s output is OK, logs are clean and <code>ip addr</code> will report normal status... and actually everything appears normal.
+</p>
+<p>If you cannot browse any website, but you can ping some random hosts, chances are great that you're experiencing this problem: ping uses ICMP and is not affected by TCP problems.
+</p>
+<p>You can try to use <a href="../en/Wireshark.html" title="Wireshark">Wireshark</a>. You might see successful UDP and ICMP communications but unsuccessful TCP communications (only to foreign hosts).
+</p>
+<h4><span class="mw-headline" id="Ways_of_fixing_it">Ways of fixing it</span></h4>
+<h5><span class="mw-headline" id="Bad">Bad</span></h5>
+<p>To fix it the bad way, you can change the <code>tcp_rmem</code> value, on which Scale Factor calculation is based. Although it should work for most hosts, it is not guaranteed, especially for very distant ones.
+</p>
+<pre># echo "4096 87380 174760" &gt; /proc/sys/net/ipv4/tcp_rmem
+</pre>
+<h5><span class="mw-headline" id="Good">Good</span></h5>
+<p>Simply disable Window Scaling. Since Window Scaling is a nice TCP feature, it may be uncomfortable to disable it, especially if you cannot fix the broken router. There are several ways to disable Window Scaling, and it seems that the most bulletproof way (which will work with most kernels) is to add the following line to <code>/etc/sysctl.d/99-disable_window_scaling.conf</code> (see also <a href="../en/Sysctl.html" title="Sysctl">sysctl</a>):
+</p>
+<pre>net.ipv4.tcp_window_scaling = 0
+</pre>
+<h5><span class="mw-headline" id="Best">Best</span></h5>
+<p>This problem is caused by broken routers/firewalls, so let's change them. Some users have reported that the broken router was their very own DSL router.
+</p>
+<h4><span class="mw-headline" id="More_about_it">More about it</span></h4>
+<p>This section is based on the LWN article <a rel="nofollow" class="external text" href="http://lwn.net/Articles/92727/">TCP window scaling and broken routers</a> and a Kernel Trap article: <a rel="nofollow" class="external text" href="http://kerneltrap.org/node/6723">Window Scaling on the Internet</a>.
+</p>
+<p>There are also several relevant threads on the LKML.
+</p>
+<h3><span class="mw-headline" id="Realtek_no_link_.2F_WOL_problem">Realtek no link / WOL problem</span></h3>
+<p>Users with Realtek 8168 8169 8101 8111(C) based NICs (cards / and on-board) may notice a problem where the NIC seems to be disabled on boot and has no Link light. This can usually be found on a dual boot system where Windows is also installed. It seems that using the offical Realtek drivers (dated anything after May 2007) under Windows is the cause. These newer drivers disable the Wake-On-LAN feature by disabling the NIC at Windows shutdown time, where it will remain disabled until the next time Windows boots. You will be able to notice if this problem is affecting you if the Link light remains off until Windows boots up; during Windows shutdown the Link light will switch off. Normal operation should be that the link light is always on as long as the system is on, even during POST. This problem will also affect other operating systems without newer drivers (eg. Live CDs). Here are a few fixes for this problem.
+</p>
+<h4><span class="mw-headline" id="Enable_the_NIC_directly_in_Linux">Enable the NIC directly in Linux</span></h4>
+<p>Follow <a href="#Enabling_and_disabling_network_interfaces">#Enabling and disabling network interfaces</a> to enable the interface.
+</p>
+<h4><span class="mw-headline" id="Rollback.2Fchange_Windows_driver">Rollback/change Windows driver</span></h4>
+<p>You can roll back your Windows NIC driver to the Microsoft provided one (if available), or roll back/install an official Realtek driver pre-dating May 2007 (may be on the CD that came with your hardware).
+</p>
+<h4><span class="mw-headline" id="Enable_WOL_in_Windows_driver">Enable WOL in Windows driver</span></h4>
+<p>Probably the best and the fastest fix is to change this setting in the Windows driver. This way it should be fixed system-wide and not only under Arch (eg. live CDs, other operating systems). In Windows, under Device Manager, find your Realtek network adapter and double-click it. Under the "Advanced" tab, change "Wake-on-LAN after shutdown" to "Enable".
+</p>
+<p>In Windows XP (example):
+</p>
+<pre>Right click my computer and choose "Properties"
+--&gt; "Hardware" tab
+  --&gt; Device Manager
+    --&gt; Network Adapters
+      --&gt; "double click" Realtek ...
+        --&gt; Advanced tab
+          --&gt; Wake-On-Lan After Shutdown
+            --&gt; Enable
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Newer Realtek Windows drivers (tested with <i>Realtek 8111/8169 LAN Driver v5.708.1030.2008</i>, dated 2009/01/22, available from GIGABYTE) may refer to this option slightly differently, like <i>Shutdown Wake-On-LAN --&gt; Enable</i>. It seems that switching it to <code>Disable</code> has no effect (you will notice the Link light still turns off upon Windows shutdown). One rather dirty workaround is to boot to Windows and just reset the system (perform an ungraceful restart/shutdown) thus not giving the Windows driver a chance to disable LAN. The Link light will remain on and the LAN adapter will remain accessible after POST - that is until you boot back to Windows and shut it down properly again.</div>
+<h4><span class="mw-headline" id="Newer_Realtek_Linux_driver">Newer Realtek Linux driver</span></h4>
+<p>Any newer driver for these Realtek cards can be found for Linux on the realtek site (untested but believed to also solve the problem).
+</p>
+<h4><span class="mw-headline" id="Enable_LAN_Boot_ROM_in_BIOS.2FCMOS">Enable <i>LAN Boot ROM</i> in BIOS/CMOS</span></h4>
+<p>It appears that setting <i>Integrated Peripherals --&gt; Onboard LAN Boot ROM --&gt; Enabled</i> in BIOS/CMOS reactivates the Realtek LAN chip on system boot-up, despite the Windows driver disabling it on OS shutdown.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This was tested several times on a GIGABYTE GA-G31M-ES2L motherboard, BIOS version F8 released on 2009/02/05.</div>
+<h3><span class="mw-headline" id="No_interface_with_Atheros_chipsets">No interface with Atheros chipsets</span></h3>
+<p>Users of some Atheros ethernet chips are reporting it does not work out-of-the-box (with installation media of February 2014). The working solution for this is to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/backports-patched/">backports-patched</a></span><sup><small>AUR</small></sup>.
+</p>
+<h3><span class="mw-headline" id="Broadcom_BCM57780">Broadcom BCM57780</span></h3>
+<p>This Broadcom chipset sometimes does not behave well unless you specify the order of the modules to be loaded. The modules are <code>broadcom</code> and <code>tg3</code>, the former needing to be loaded first.
+</p>
+<p>These steps should help if your computer has this chipset:
+</p>
+<ul><li> Find your NIC in <i>lspci</i> output:</li></ul>
+<pre>$ lspci | grep Ethernet
+02:00.0 Ethernet controller: Broadcom Corporation NetLink BCM57780 Gigabit Ethernet PCIe (rev 01)
+</pre>
+<ul><li> If your wired networking is not functioning in some way or another, try unplugging your cable then doing the following:</li></ul>
+<pre># modprobe -r tg3
+# modprobe broadcom
+# modprobe tg3
+</pre>
+<ul><li> Plug your network cable in. If this solves your problems you can make this permanent by adding <code>broadcom</code> and <code>tg3</code> (in this order) to the <code>MODULES</code> array in <code>/etc/mkinitcpio.conf</code>:</li></ul>
+<pre>MODULES=".. broadcom tg3 .."
+</pre>
+<ul><li> Rebuild the initramfs:</li></ul>
+<pre># mkinitcpio -p linux
+</pre>
+<ul><li> Alternatively, you can create an <code>/etc/modprobe.d/broadcom.conf</code>:</li></ul>
+<pre>softdep tg3 pre: broadcom
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>These methods may work for other chipsets, such as BCM57760.</div>
+<h3><span class="mw-headline" id="Realtek_RTL8111.2F8168B">Realtek RTL8111/8168B</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lspci | grep Ethernet</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+03:00.0 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168B PCI Express Gigabit Ethernet controller (rev 02)
+</pre>
+<p>The adapter should be recognized by the <code>r8169</code> module. However, with some chip revisions the connection may go off and on all the time. The alternative <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=r8168">r8168</a></span> can be found in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> and should be used for a reliable connection in this case. <a href="../en/Kernel_modules.html#Blacklisting" title="Blacklist" class="mw-redirect">Blacklist</a> <code>r8169</code>, if <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=r8168">r8168</a></span> is not automatically loaded by <a href="../en/Udev.html" title="Udev">udev</a>, see <a href="../en/Kernel_modules.html#Automatic_module_handling" title="Kernel modules">Kernel modules#Automatic module handling</a>.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> "some revisions", no proof the driver is the cause, and not e.g poorly configured DNS servers (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Network_configuration">Talk:Network configuration#</a>)</div>
+</div>
+<p>Another fault in the drivers for some revisions of this adapter is poor IPv6 support. <a href="../en/IPv6.html#Disable_functionality" title="IPv6">IPv6#Disable functionality</a> can be helpful if you encounter issues such as hanging webpages and slow speeds.
+</p>
+<h3><span class="mw-headline" id="Gigabyte_Motherboard_with_Realtek_8111.2F8168.2F8411">Gigabyte Motherboard with Realtek 8111/8168/8411</span></h3>
+<p>With motherboards such as the Gigabyte GA-990FXA-UD3, booting with IOMMU off (which can be the default) will cause the network interface to be unreliable, often failing to connect or connecting but allowing no throughput. This will apply not only to the onboard NIC, but any other pci-NIC you put in the box because the IOMMU setting affects the entire network interface on the board. Enabling IOMMU and booting with the install media will throw AMD I-10/xhci page faults for a second, but then boot normally, resulting in a fully functional onboard NIC (even with the r8169 module).
+</p>
+<p>When configuring the boot process for your installation, add <code>iommu=soft</code> as a <a href="../en/Kernel_parameters.html" title="Kernel parameter" class="mw-redirect">kernel parameter</a> to eliminate the error messages on boot and restore USB3.0 functionality.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://www.debian.org/doc/manuals/debian-reference/ch05.en.html">Debian Reference: Network setup</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Networking_Guide/">RHEL7: Networking Guide</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Network_configuration.html" title="Category:Network configuration">Network configuration</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

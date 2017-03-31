@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SysVinit/runlevels - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SysVinit_runlevels skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SysVinit/runlevels</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/SysVinit.html" title="SysVinit">SysVinit</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/SysVinit.html" title="SysVinit">SysVinit</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../../en/SysVinit.html" title="Sysvinit" class="mw-redirect">sysvinit</a>.</b><a href="../../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the second argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SysVinit/runlevels">Talk:SysVinit/runlevels#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a href="../../en/Systemd.html" title="Systemd">systemd</a> is used by default, which uses targets (see <code>man systemd.target</code>) rather than runlevels.</div>
+<p>From the <a rel="nofollow" class="external text" href="http://unixhelp.ed.ac.uk/CGI/man-cgi?init+8">init</a> man page:
+</p>
+<dl><dd><i>A  runlevel is a software configuration of the system which allows only a selected group of processes to exist. The processes spawned by init for each of these runlevels are defined in the /etc/inittab file.</i></dd></dl>
+<p>If something goes wrong with your Arch setup in such way that you are completely helpless when the system boots up, you may need this.
+</p>
+<p>For example, if you use some deffective display drivers, the system may freeze when the X server starts. If you have a display manager in your startup daemons list, you need to take full control of your system before that daemon starts.
+</p>
+<p>And how do you do that?
+</p>
+<p>What you need is called "booting to another runlevel". 
+This basically determines in what state the system will be when the boot sequence terminates.
+Normally you finish in the multi-user mode with all daemons started (=runlevel 3).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#List_of_initscripts_runlevels"><span class="tocnumber">1</span> <span class="toctext">List of initscripts runlevels</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Runlevel_invocation"><span class="tocnumber">2</span> <span class="toctext">Runlevel invocation</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Adding_runlevels"><span class="tocnumber">3</span> <span class="toctext">Adding runlevels</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#First_method"><span class="tocnumber">3.1</span> <span class="toctext">First method</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Another_way.2C_without_adding_any_symlink"><span class="tocnumber">3.2</span> <span class="toctext">Another way, without adding any symlink</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Other_distributions"><span class="tocnumber">4</span> <span class="toctext">Other distributions</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="List_of_initscripts_runlevels">List of initscripts runlevels</span></h2>
+<p>And what are the possible runlevels?
+</p>
+<ul>
+<li> 1: Single user (maintainance mode): You want to use this one if you have problems.</li>
+<li> 3: Multi user: Normal mode</li>
+<li> 5: Multi user with X11: The same as 3 but with X11 loaded in virtual terminal 8 by default</li>
+<li> 0: Halt</li>
+<li> 6: Reboot</li>
+<li> 2, 4: Not used</li>
+</ul>
+<p>Take a look to <code>/etc/inittab</code> to see how it works.
+</p>
+<h2><span class="mw-headline" id="Runlevel_invocation">Runlevel invocation</span></h2>
+<p>You specify what runlevel you would like to enter on the kernel commandline.
+You just have to pass the number of the desired runlevel as an option on that commandline, so it may look like this if you are in trouble and you want to use single user mode (only the last number is important here)
+</p>
+<pre>kernel /vmlinuz-linux ... root=/dev/sda2 ro <b>1</b>
+</pre>
+<p>And yes, in a case when you can not boot, you will have to append the runlevel number to the the kernel command line in the boot manager during bootup.
+</p>
+<h2><span class="mw-headline" id="Adding_runlevels">Adding runlevels</span></h2>
+<h3><span class="mw-headline" id="First_method">First method</span></h3>
+<p>Throughout this page, 4 will be used for an example since it is not used by default in Arch.
+To create another runlevel:
+</p>
+<pre>cd /etc
+cp rc.multi rc.multi4
+sed -i "s/DAEMONS/DAEMONS4/g" /etc/rc.multi4
+</pre>
+<p>The execution of sed will change <code>/etc/rc.multi4</code> to look at the new DAEMONS array that will be defined in a couple of steps.
+</p>
+<p>Next, we will add our new <code>/etc/rc.multi4</code> script to <code>/etc/<a href="../../en/SysVinit.html" title="Inittab" class="mw-redirect">inittab</a></code> by changing this line:
+</p>
+<pre>rm:2345:wait:/etc/rc.multi
+</pre>
+<p>to:
+</p>
+<pre>rm:235:wait:/etc/rc.multi
+ra:4:wait:/etc/rc.multi4
+</pre>
+<p>You can also add a new line to <code>/etc/inittab</code> to execute another script or program to do anything you would like.
+</p>
+<p>Example: Log into X as a single user for a special purpose:
+</p>
+<pre>xa:4:respawn:/bin/su - $USER -c "/usr/bin/startx"
+</pre>
+<p>The next step will be to add a new DAEMONS array to your <code>/etc/<a href="../../en/SysVinit.html" title="Rc.conf" class="mw-redirect">rc.conf</a></code> file, call it <code>DAEMONS4=(...)</code> and populate this array with any daemons you would like to run for the new runlevel.
+</p>
+<p>The <code>/etc/rc.conf</code> gives the suggestion to put a <code>!</code> in front of daemons you want to disable. How this is handled in the default <code>/etc/rc.multi</code>, is that anything prefaced with the <code>!</code> is skipped. A downside to this is if you use the above method to define a different set of daemons for your new runlevel (i.e, want to stop some, keep others going, and/or start new ones) any daemon prefaced with <code>!</code> will not be stopped when switching to or from your new runlevel. The following <code>/etc/rc.multi</code> changes this behavior.
+</p>
+<p>Example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/rc.multi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ #!/bin/bash
+ #
+ # /etc/rc.multi
+ #
+  
+ . /etc/rc.conf
+ . /etc/rc.d/functions
+ 
+ run_hook multi_start
+ 
+ # Load sysctl variables if sysctl.conf is present
+ [ -r /etc/sysctl.conf ] &amp;&amp; /sbin/sysctl -q -p &amp;&gt;/dev/null
+ 
+ # Start daemons
+ # _remember to change DAEMONS in next line for the file /etc/rc.multi4
+ for daemon in "${DAEMONS[@]}"; do
+         if [ "$daemon" = "${daemon#!}" ]; then
+                 # check to see if daemon is running.
+                 ck_daemon $daemon
+                 if [ $? -eq 1 ]; then
+                         # daemon is running, skip it.
+                         status_started
+                 else
+                         # daemon is not running, start it.
+                         if [ "$daemon" = "${daemon#@}" ]; then
+                                 start_daemon $daemon
+                         else
+                                 start_daemon_bkgd ${daemon:1}
+                         fi
+                 fi
+         else
+                 # check previous runlevel. if it's N, then we've just booted
+                 #   and do not need to stop any daemons. otherwise, stop daemons
+                 #   when runlevel changes as requested in DAEMONS array.
+                 if [ `/sbin/runlevel | cut -d ' ' -f 1` != "N" ] ; then
+                         ck_daemon ${daemon:1}
+                         if [ $? -eq 1 ] ; then
+                                  # daemon is running, let's stop it.
+                                  stop_daemon ${daemon:1}
+                         fi
+                 fi
+         fi
+ done
+ 
+ if [ -x /etc/rc.local ]; then
+         /etc/rc.local
+ fi
+ 
+ run_hook multi_end
+ 
+ # vim: set ts=2 noet:
+</pre>
+<p>Here is what this does:
+</p>
+<pre>DAEMONS=(syslog-ng network netfs sshd alsa !jack !gpm)      # runlevel 3
+DAEMONS4=(syslog-ng network netfs !sshd alsa jack gpm)      # runlevel 4
+</pre>
+<p>In runlevel 3, jack and gpm are disabled, and in runlevel 4 sshd is not needed, but jack and gpm are. The above <code>/etc/rc.multi</code> script will scan the daemons array and check for:
+</p>
+<pre>1) if a daemon is running (without <code>!</code>). if it is, skip it. if not, start it.
+2) if a daemon is disabled (<code>!</code>), stop it. (this is skipped on boot-up)
+3) it still honors starting daemons in the background (<code>@</code>)
+</pre>
+<p>In the above example, when going from runlevel 3 to runlevel 4, syslog-ng, network, netfs, and alsa are checked and found to be running so they'll be skipped. sshd will be disabled then jack and gpm will be started. And when going from runlevel 4 to runlevel 3, syslog-ng, network, netfs, and alsa are still running, so will be skipped again, but jack and gpm will be stopped, while sshd will be started again.
+</p>
+<p>In summary:
+</p>
+<pre>1) copy <code>/etc/rc.multi</code> to <code>/etc/rc.multi4</code>
+2) add DAEMONS4 to the end of your <code>/etc/rc.conf</code> and add daemons to it
+2) be sure to change <code>/etc/rc.multi4</code> by changing DAEMONS to DAEMONS4
+3) edit <code>/etc/inittab</code> to add the runlevel and take appropriate actions
+</pre>
+<p>If you do use the above <code>/etc/rc.multi</code>, proper operation is for it to be both your main <code>/etc/rc.multi</code> and your new <code>/etc/rc.multi4</code> to ensure that all daemons are processed as you desire. It will not break your system to have two different versions of <code>/etc/rc.multi</code>.
+</p>
+<p>While your new runlevel setup should not be written over by any system updates, it is always handy to have backups on hand in the event that something unforeseen happens.
+</p>
+<h3><span class="mw-headline" id="Another_way.2C_without_adding_any_symlink">Another way, without adding any symlink</span></h3>
+<p>With a simple modification on <code>/etc/rc.multi</code>, runlevels can be simply added by adding a new DAEMONS line in <code>/etc/<a href="../../en/SysVinit.html" title="Rc.conf" class="mw-redirect">rc.conf</a></code>.
+</p>
+<p>Here is the patch:
+</p>
+<pre>--- rc.multi	2008-06-22 23:58:29.000000000 +0200
++++ rc.multi.new	2008-06-23 00:14:05.000000000 +0200
+@@ -11,8 +11,25 @@
+ # Load sysctl variables if sysctl.conf is present
+ [ -r /etc/sysctl.conf ] &amp;&amp; /sbin/sysctl -q -p &amp;&gt;/dev/null
+ 
++# Load the appropriate DAEMONS array according to runlevel specified in the kernel boot cmdline
++RUNLEVEL=""
++FINAL_DAEMONS=()
++ 
++for param in `cat /proc/cmdline`; do
++  param_rl=`echo $param | grep ^runlevel`
++  if [ ! "$param_rl" = "" ]; then
++    RUNLEVEL=`echo $param_rl | sed -r -e "s#runlevel=(.+)#\1#"`
++  fi
++done;
++
++if [ "${RUNLEVEL}" = "" ]; then
++	eval FINAL_DAEMONS=(${DAEMONS[@]})
++else
++	eval FINAL_DAEMONS=(\${DAEMONS_${RUNLEVEL}[@]})
++	if [ "${#FINAL_DAEMONS[@]}" = "0" ]; then
++		eval FINAL_DAEMONS=(${DAEMONS[@]})
++	fi	
++fi
++
+ # Start daemons
+-for daemon in "${DAEMONS[@]}"; do
++for daemon in "${FINAL_DAEMONS[@]}"; do
+ 	if [ "$daemon" = "${daemon#!}" ]; then
+ 		if [ "$daemon" = "${daemon#@}" ]; then
+ 			/etc/rc.d/$daemon start
+
+</pre>
+<p>Now, to add a runlevel, add a new array in <code>/etc/rc.conf</code> (in this example I named it <code>FOO</code>):
+</p>
+<pre>DAEMONS_FOO=( ...whatever... )
+</pre>
+<p>and to run the system with this runlevel, simply add <code>runlevel=FOO</code> to your boot arguments in <a href="../../en/LILO.html" title="LILO">LILO</a> or <a href="../../en/GRUB.html" title="GRUB">GRUB</a>.
+</p>
+<h2><span class="mw-headline" id="Other_distributions">Other distributions</span></h2>
+<p>Runlevels exist in all Linux distributions and while runlevel 1 is usually single-user "emergency mode", 0 means halt and 6 mean reboot, the meaning of other runlevels varies from one distribution to another.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=SysVinit/runlevels&amp;oldid=447431">https://wiki.archlinux.org/index.php?title=SysVinit/runlevels&amp;oldid=447431</a>"</li>
+					<li id="lastmod"> This page was last modified on 22 August 2016, at 16:41.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

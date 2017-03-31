@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Thinkpad Fan Control - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Thinkpad_Fan_Control skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Thinkpad Fan Control</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>By default, the EC regulates fan speed.  If it's too conservative/loud for your taste, you might want a daemon to take over control.  But this is risky: you take responsibility for temperature control.  Excessive temperatures can damage or shorten the lifespan of components in your laptop.
+</p>
+<p>From the <a rel="nofollow" class="external free" href="http://www.thinkwiki.org/wiki/How_to_control_fan_speed">http://www.thinkwiki.org/wiki/How_to_control_fan_speed</a>:
+</p>
+<dl><dd><i>Fan control operations are disabled by default for safety reasons.  To enable fan control, the module parameter fan_control=1 must be given to thinkpad-acpi.</i></dd></dl>
+<p>Current fan control daemons available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> are <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/simpfand-git/">simpfand-git</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/thinkfan/">thinkfan</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/thinkfan/">thinkfan</a></span><sup><small>AUR</small></sup>.  Then have a look at the files:
+</p>
+<pre># pacman -Ql thinkfan
+</pre>
+<p>Note that the thinkfan package installs /usr/lib/modprobe.d/thinkpad_acpi.conf, which contains
+</p>
+<pre>options thinkpad_acpi fan_control=1
+</pre>
+<p>So fan control is enabled by default.  
+</p>
+<pre>$ su
+# modprobe thinkpad_acpi
+# cat /proc/acpi/ibm/fan
+</pre>
+<p>You should see that the fan level is "auto" by default, but you can echo a level command to the same file to control the fan speed manually.  The thinkfan daemon will do this automatically.
+</p>
+<p>You will need to copy one of the example config files (e.g. /usr/share/doc/thinkfan/examples/thinkfan.conf.simple) to /etc/thinkfan.conf, and modify to taste.  This file specifies which sensors to read, and which interface to use to control the fan.  Some systems have /proc/acpi/ibm/fan available; on others, you will need to specify something like
+</p>
+<pre>hwmon /sys/devices/virtual/thermal/thermal_zone0/temp
+</pre>
+<p>to use generic hwmon sensors instead of thinkpad-specific ones.
+</p>
+<h2><span class="mw-headline" id="Running">Running</span></h2>
+<p>You can test your configuration first by running thinkfan manually (as root):
+</p>
+<pre># thinkfan -n
+</pre>
+<p>and see how it reacts to the load level of whatever other programs you have running.
+</p>
+<p>When you have it configured correctly, the thinkfan daemon can be started by running (as root):
+</p>
+<pre># systemctl start thinkfan
+</pre>
+<p>or by automatically loading it on system startup:
+</p>
+<pre># systemctl enable thinkfan
+</pre>
+<h2><span class="mw-headline" id="Old_packages_which_have_gone_missing">Old packages which have gone missing</span></h2>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tpfand/">tpfand</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/tpfand">aur-mirror</a>]</sup> and a version that doesn't require <a href="../en/Udev.html" title="HAL" class="mw-redirect">HAL</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tpfand-no-hal/">tpfand-no-hal</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/tpfand-no-hal">aur-mirror</a>]</sup> are not actively developed anymore, and no longer available.  An additional GTK+ frontend was provided in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tpfan-admin/">tpfan-admin</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/tpfan-admin">aur-mirror</a>]</sup> package in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> which enables the monitoring of temperatures as well as the graphical adjustment of trigger points.
+</p>
+<p>Due to tpfand not beeing actively developed anymore, there was a fork called tpfanco (which in fact uses the same names for the executables as tpfand): <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tpfanco-svn/">tpfanco-svn</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/tpfanco-svn">aur-mirror</a>]</sup>.
+</p>
+<p>The configuration file for tpfand (same for tpfanco) was <code>/etc/tpfand.conf</code>.
+</p>
+<p>Additionally, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tpfand-profiles/">tpfand-profiles</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/tpfand-profiles">aur-mirror</a>]</sup> package in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> provided the latest fan profiles for various thinkpad models.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Lenovo.html" title="Category:Lenovo">Lenovo</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

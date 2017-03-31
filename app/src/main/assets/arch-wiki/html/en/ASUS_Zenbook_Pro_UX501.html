@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ASUS Zenbook Pro UX501 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ASUS_Zenbook_Pro_UX501 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ASUS Zenbook Pro UX501</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page contains instructions, tips, pointers, and links for installing and configuring Arch Linux on the ASUS Zenbook Pro UX501. 
+</p>
+<p>For general instructions see <a href="../en/Laptop.html" title="Laptop">Laptop</a> and comparable models from the summary page <a href="../en/Laptop/Asus.html" title="Laptop/Asus">Laptop/Asus</a> and <a href="../en/Category:ASUS.html" title="Category:ASUS">Category:ASUS</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Kernel_Options"><span class="tocnumber">1</span> <span class="toctext">Kernel Options</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Module_Configuration"><span class="tocnumber">2</span> <span class="toctext">Module Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Touch_Pad"><span class="tocnumber">3</span> <span class="toctext">Touch Pad</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Fan_Control"><span class="tocnumber">4</span> <span class="toctext">Fan Control</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Virtual_Terminal_Fonts"><span class="tocnumber">5</span> <span class="toctext">Virtual Terminal Fonts</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Kernel_Options">Kernel Options</span></h2>
+<p>To prevent random lock ups just before or as X loads, add the following option to your boot loader config:
+</p>
+<pre>i915.enable_execlists=0
+</pre>
+<p>To get brightness media keys and brightness adjustment working, add the following:
+</p>
+<pre>acpi_osi= acpi_backlight=native
+</pre>
+<p>To allow X to start without locking up when the GPU is powered down via bbswitch, replace the acpi_osi= above with:
+</p>
+<pre>acpi_osi=! acpi_osi="Windows 2009"
+</pre>
+<h2><span class="mw-headline" id="Module_Configuration">Module Configuration</span></h2>
+<p>Warning: Before trying out below fixes run pacman -Syu
+</p>
+<p>To fix noise headphone noise create <code>/etc/modprobe.d/alsa-base.conf</code> containing:
+</p>
+<pre>options snd-hda-intel model=dell-headset-multi
+</pre>
+<p>To enable power saving functionality for the audio card create <code>/etc/modprobe.d/audio_powersave.conf</code> containing:
+</p>
+<pre>options snd_hda_intel power_save=1
+</pre>
+<p>To enable power-saving functionality for the Intel graphics card create <code>/etc/modprobe.d/i915.conf</code> containing:
+</p>
+<pre>options i915 enable_rc6=1 enable_fbc=1 lvds_downclock=1 semaphores=1
+</pre>
+<p>But be careful with <code>/etc/modprobe.d/i915.conf</code>. It may cause screen freezing.
+</p>
+<h2><span class="mw-headline" id="Touch_Pad">Touch Pad</span></h2>
+<p>The touch pad will work with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Fan_Control">Fan Control</span></h2>
+<p>To setup variable fan control, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lm_sensors">lm_sensors</a></span> package and load the <code>coretemp</code> module at boot by creating <code>/etc/modules-load.d/lm_sensors.conf</code> containing:
+</p>
+<pre>coretemp
+</pre>
+<h2><span class="mw-headline" id="Virtual_Terminal_Fonts">Virtual Terminal Fonts</span></h2>
+<p>The 4k resolution causes the default virtual terminal font to be extremely small, one way to resolve this is to install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=terminus-font">terminus-font</a></span> package and then creating <code>/etc/vconsole.conf</code> containing:
+</p>
+<pre>FONT=ter-v28b
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <b><a href="../en/Bumblebee.html" title="Bumblebee">Bumblebee</a></b> - To configure intel/nvidia hybrid graphics</li>
+<li> <b><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=213363">iwlwifi issue</a></b> - if you have [***      ] A start job is running for wlp3s0 (14 s / 1min 30s).</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:ASUS.html" title="Category:ASUS">ASUS</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

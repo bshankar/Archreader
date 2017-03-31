@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Grsecurity - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Grsecurity skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Grsecurity</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PaX.html" title="PaX">PaX</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Security.html" title="Security">Security</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Sysctl.html" title="Sysctl">sysctl</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://grsecurity.net/">Grsecurity</a> is an extensive security enhancement to the Linux kernel that defends against a wide range of security threats. The <a href="../en/PaX.html" title="PaX">PaX</a> project is included, hardening both userspace applications and the kernel against memory corruption-based exploits. Grsecurity includes a powerful Mandatory Access Control system with an effortless automatic learning mode and a host of other miscellaneous hardening features.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Custom_kernel"><span class="tocnumber">1.1</span> <span class="toctext">Custom kernel</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Compatibility"><span class="tocnumber">2</span> <span class="toctext">Compatibility</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#PaX"><span class="tocnumber">3</span> <span class="toctext">PaX</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Configuration"><span class="tocnumber">4</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Trusted_path_execution"><span class="tocnumber">5</span> <span class="toctext">Trusted path execution</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Using_the_tpe_group_as_a_whitelist_or_blacklist"><span class="tocnumber">5.1</span> <span class="toctext">Using the tpe group as a whitelist or blacklist</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Compatibility_2"><span class="tocnumber">5.2</span> <span class="toctext">Compatibility</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Partially_restrict_all_non-root_users"><span class="tocnumber">5.3</span> <span class="toctext">Partially restrict all non-root users</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#chroot_hardening"><span class="tocnumber">6</span> <span class="toctext">chroot hardening</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Socket_restrictions"><span class="tocnumber">7</span> <span class="toctext">Socket restrictions</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Auditing"><span class="tocnumber">8</span> <span class="toctext">Auditing</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Hide_information_from_.2Fproc"><span class="tocnumber">9</span> <span class="toctext">Hide information from /proc</span></a></li>
+<li class="toclevel-1 tocsection-14">
+<a href="#RBAC"><span class="tocnumber">10</span> <span class="toctext">RBAC</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Working_with_gradm"><span class="tocnumber">10.1</span> <span class="toctext">Working with gradm</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Generating_a_policy"><span class="tocnumber">10.2</span> <span class="toctext">Generating a policy</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Tweaking_your_policy"><span class="tocnumber">10.3</span> <span class="toctext">Tweaking your policy</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Tweaking_.2Fetc.2Fgrsec.2Fpolicy_directly"><span class="tocnumber">10.4</span> <span class="toctext">Tweaking /etc/grsec/policy directly</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Using_Wine.3B_Changes_needed_to_.2Fetc.2Fgrsec.2Fpolicy"><span class="tocnumber">10.5</span> <span class="toctext">Using Wine; Changes needed to /etc/grsec/policy</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Troubleshooting"><span class="tocnumber">11</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Out-of-tree_kernel_module_compilation_failure"><span class="tocnumber">11.1</span> <span class="toctext">Out-of-tree kernel module compilation failure</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package provides the grsecurity hardened kernel. In most cases, this package is a drop-in replacement for the vanilla kernel and will not cause any issues. By default, many of the user-facing features are disabled, but there is significant hardening of the kernel itself against exploitation.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a rel="nofollow" class="external text" href="https://grsecurity.net/announce.php">Upstream</a> no longer provides a long-term support version of <i>grsecurity</i>, which it calls the "stable" series. The package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> is known at upstream as the "test" series.</div> 
+<p>After <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installing</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package, edit your <a href="../en/Bootloader.html" title="Bootloader" class="mw-redirect">bootloader</a> settings to load <code>vmlinuz-linux-grsec</code> and <code>initramfs-linux-grsec.img</code>.
+</p>
+<p>Installing the optional <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> package causes the PaX exploit mitigations to be enabled, protecting userspace processes. It automatically applies the necessary exceptions for packages in the repositories. See <a href="../en/PaX.html#PaX_exceptions" title="PaX">PaX#PaX exceptions</a> for more details.
+</p>
+<p>Also included are <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=checksec">checksec</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pax-utils">pax-utils</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxtest">paxtest</a></span> packages providing useful tooling for working with PaX and verifying that the exploit mitigation techniques are active.
+</p>
+<p>The optional <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gradm">gradm</a></span> package provides the userspace tooling for managing RBAC policies. RBAC is disabled by default, and the sample policy is not usable without significant configuration (likely via heavy use of the learning mode).
+</p>
+<h3><span class="mw-headline" id="Custom_kernel">Custom kernel</span></h3>
+<p>Compiling a custom kernel based on the official package with <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> is worth considering. There are several important compromises to make between performance and security, so while the official configuration is solid it is not perfect for every use case. See <a href="../en/PaX.html#Performance" title="PaX">PaX#Performance</a> for coverage of the PaX options with a significant performance impact. The official package prioritizes security over performance.
+</p>
+<p>The /proc and /sys restrictions are unacceptable for a general purpose package due to breaking too much software, but can be worth enabling to plug potential information leaks.
+</p>
+<p>Some features like the RANDSTRUCT plugin and hiding symbol addresses are only truly useful with a custom kernel, since the pre-built kernel is available for analysis by any attacker. The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package enables <code>CONFIG_RANDOMIZE_BASE</code>, but a custom build can provide unique symbol offsets in addition to the randomized base, making <code>CONFIG_GRKERNSEC_HIDESYM</code> valuable.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-libre-grsec/">linux-libre-grsec</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-zen-grsec/">linux-zen-grsec</a></span><sup><small>AUR</small></sup> are also available.
+</p>
+<h2><span class="mw-headline" id="Compatibility">Compatibility</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>An incompatibility between <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> and another package should not be reported as a bug in that package. It should be filed against the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package and will either be fixed or documented as a compatibility issue here.</div>
+<p>The following incompatibilities require building a custom kernel with fewer features enabled:
+</p>
+<ul>
+<li> hibernation is not supported (conflicts with <code>CONFIG_GRKERNSEC_KMEM</code>, <code>CONFIG_PAX_MEMORY_SANITIZE</code> and <code>CONFIG_RANDOMIZE_BASE</code>)</li>
+<li> Xen and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virtualbox">virtualbox</a></span> are not supported (conflicts with <code>CONFIG_PAX_KERNEXEC</code> and <code>CONFIG_PAX_MEMORY_UDEREF</code>)</li>
+<li> The code reuse attacks protection (RAP), enabled with <code>CONFIG_PAX_RAP</code>, is not compatible with out-of-tree binary code, as, for example, the patched proprietary nvidia driver <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nvidia-grsec/">nvidia-grsec</a></span><sup><small>AUR</small></sup> in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.</li>
+</ul>
+<p>Known incompatibilities with other packages:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pkgstats">pkgstats</a></span> - tries to list the loaded modules as non-root and treats it as a fatal error when it fails</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/broadcom-wl-dkms/">broadcom-wl-dkms</a></span><sup><small>AUR</small></sup> - fails to be compiled with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec-headers">linux-grsec-headers</a></span> due to illegal memory access</li>
+</ul>
+<p>Out-of-tree modules may require patches for compatibility with kernel hardening features like <code>CONFIG_PAX_SIZE_OVERFLOW</code>:
+</p>
+<ul><li> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nvidia-grsec/">nvidia-grsec</a></span><sup><small>AUR</small></sup> package in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> patches the proprietary <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a> driver for compatibility with the <code>CONFIG_PAX_USERCOPY</code> and <code>CONFIG_PAX_CONSTIFY_PLUGIN</code> features</li></ul>
+<h2><span class="mw-headline" id="PaX">PaX</span></h2>
+<p>The <a href="https://en.wikipedia.org/wiki/PaX" class="extiw" title="wikipedia:PaX">PaX</a> project provides many of the exploit mitigations offered by grsecurity. See <a href="../en/PaX.html" title="PaX">the documentation on PaX</a> for more information.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>The user-facing features are configurable at runtime via <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> settings. Sane defaults are set in the <code>/etc/sysctl.d/05-grsecurity.conf</code> configuration file and it can be modified as desired.
+</p>
+<h2><span class="mw-headline" id="Trusted_path_execution">Trusted path execution</span></h2>
+<p>Trusted path execution (TPE) is an opt-in feature restricting file execution. It can be enabled by setting the <code>kernel.grsecurity.tpe</code> <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> switch to <code>1</code>. TPE prevents users from executing any file writeable by a non-root user. By tightening up the rules for executing files, some exploits (such as upload + CGI exploits on a web server) and persistent backdoors will be prevented.
+</p>
+<h3><span class="mw-headline" id="Using_the_tpe_group_as_a_whitelist_or_blacklist">Using the <code>tpe</code> group as a whitelist or blacklist</span></h3>
+<p>By default, <code>kernel.grsecurity.tpe_invert</code> is set to <code>1</code>, causing TPE to operate with a whitelist-based model. It will be applied to every user that is not a member of the <code>tpe</code> group. If <code>kernel.grsecurity.tpe_invert</code> is set to <code>0</code>, the <code>tpe</code> group will instead function as a blacklist of users with the restriction, with users not in the group unaffected.
+</p>
+<p>The whitelist model is recommended, and adding non-system users to the whitelist is usually enough. It will slightly improve the isolation of services running as non-root while not getting in anyone's way.
+</p>
+<h3><span class="mw-headline" id="Compatibility_2">Compatibility</span></h3>
+<p><a href="../en/Linux_Containers.html" title="Linux Containers">Containers</a> or plain <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroots</a> can throw a wrench into the ease of using TPE, as each one has a local <code>/etc/group</code>. A group with the same id in the container will still work as a whitelist, but this will be broken if the container makes use of user namespaces (not yet supported by Arch kernels).
+</p>
+<h3><span class="mw-headline" id="Partially_restrict_all_non-root_users">Partially restrict all non-root users</span></h3>
+<p>Setting the <code>kernel.grsecurity.tpe_restrict_all</code> <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> switch to <code>1</code> will prevent non-root users from executing files writeable by a user other than themselves or root. This feature is enabled by the default <code>/etc/sysctl.d/05-grsecurity.conf</code>.
+</p>
+<h2><span class="mw-headline" id="chroot_hardening">chroot hardening</span></h2>
+<p>A <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroot</a> is a common isolation mechanism for services. Grsecurity includes features for eliminating many common escape routes from chroots and can lock them down to the point where the confinement is equivalent to a container. These features can all be toggled on and off via sysctl switches. For a detailed explanantion of these features, see the <a rel="nofollow" class="external text" href="https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Chroot_jail_restrictions">configuration documentation</a>.
+</p>
+<p>The following features are enabled in <code>/etc/sysctl.d/05-grsecurity.conf</code> by default and are unlikely to cause any compatibility issues:
+</p>
+<pre>kernel.grsecurity.chroot_deny_fchdir = 1
+kernel.grsecurity.chroot_deny_shmat = 1
+kernel.grsecurity.chroot_deny_sysctl = 1
+kernel.grsecurity.chroot_deny_unix = 1
+kernel.grsecurity.chroot_enforce_chdir = 1
+kernel.grsecurity.chroot_findtask = 1
+</pre>
+<p>The remaining features are left off by default, to remain compatible with containers:
+</p>
+<pre>#kernel.grsecurity.chroot_caps = 1
+#kernel.grsecurity.chroot_deny_chmod = 1
+#kernel.grsecurity.chroot_deny_chroot = 1
+#kernel.grsecurity.chroot_deny_mknod = 1
+#kernel.grsecurity.chroot_deny_mount = 1
+#kernel.grsecurity.chroot_deny_pivot = 1
+#kernel.grsecurity.chroot_restrict_nice = 1
+</pre>
+<h2><span class="mw-headline" id="Socket_restrictions">Socket restrictions</span></h2>
+<p>There are 3 groups for restricting access to sockets. Users in the <code>socket-deny-client</code> group are forbidden from connecting to other hosts. Users in the <code>socket-deny-server</code> group are unable to listen on a port. The <code>socket-deny-all</code> group includes both of the restrictions.
+</p>
+<h2><span class="mw-headline" id="Auditing">Auditing</span></h2>
+<p>There are a few security-related logging features added to the kernel.
+</p>
+<p>By default, only <code>kernel.grsecurity.rwxmap_logging</code> is enabled. It logs an error whenever an application has an <code>mprotect</code> or <code>mmap</code> system call rejected due to the PaX MPROTECT feature along with some other edge cases. In most cases, the application is intentionally doing dynamic machine code generation and just needs an exception. However, it may indicate a compiler / linker bug or a bug in application / library code and the errors will also be logged when an exploit attempt is prevented by the MPROTECT feature. See <a href="../en/PaX.html" title="PaX">PaX</a> for more information about exceptions.
+</p>
+<p>The remaining audit features are currently disabled by default due to the high number of false positives, but can be enabled via <a href="../en/Sysctl.html" title="Sysctl">sysctl</a>. The <code>kernel.grsecurity.audit_group</code> switch can be set to <code>1</code> to limit <code>kernel.grsecurity.audit_chdir</code> and <code>kernel.grsecurity.exec_logging</code> to users in the <code>audit</code> group as they will generate a LOT of log messages.
+</p>
+<h2><span class="mw-headline" id="Hide_information_from_.2Fproc">Hide information from /proc</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> package does not enable the strict <code>/proc</code> restrictions (<code>CONFIG_GRKERNSEC_PROC</code>). Instead, the <code>hidepid=2</code> mount option can be set on <code>/proc</code> to hide processes of other users and the <code>gid</code> option can be used to make a group with an exception from the restrictions. The <code>hidepid</code> mount option is less invasive because it's local to each process namespace so it can be set per <a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">container</a>. However, it's missing the additional miscellaneous information hiding so compiling a custom kernel may be desired.
+</p>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hidepid">hidepid</a></span> package can be installed to set up the necessary <code>systemd-logind</code> exception and enable <code>hidepid=2</code>. It will also work with <code>CONFIG_GRKERNSEC_PROC</code> in a custom kernel configured to use the correct proc group gid.
+</p>
+<h2><span class="mw-headline" id="RBAC">RBAC</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This section needs an overhaul, including fixing some inaccuracies. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Grsecurity">Talk:Grsecurity#</a>)</div>
+</div>
+<p>Role Based Access Control
+</p>
+<p>There are two basic types of access control mechanisms used to prevent unauthorized access to files (or information in general): DAC (Discretionary Access Control) and MAC (Mandatory Access Control). By default, Linux uses a DAC mechanism: the creator of the file can define who has access to the file. A MAC system however forces everyone to follow rules set by the administrator.
+</p>
+<p>The MAC implementation grsecurity supports is called Role Based Access Control. RBAC associates roles with each user. Each role defines what operations can be performed on certain objects. Given a well-written collection of roles and operations your users will be restricted to perform only those tasks that you tell them they can do. The default "deny-all" ensures you that a user cannot perform an action you have not thought of.
+</p>
+<h3><span class="mw-headline" id="Working_with_gradm">Working with gradm</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gradm">gradm</a></span> is a tool which allows you to administer and maintain a policy for your system. With it, you can enable or disable the RBAC system, reload the RBAC roles, change your role, set a password for admin mode, etc.
+</p>
+<p>When you install gradm a default policy will be installed in /etc/grsec/policy.
+</p>
+<p>By default, the RBAC policies are not activated. It is the sysadmin's job to determine when the system should have an RBAC policy enforced. Before activating the RBAC system you should set an admin password.
+</p>
+<pre># gradm -P admin
+Setting up grsecurity RBAC password
+Password: (Enter a well-chosen password)
+Re-enter Password: (Enter the same password for confirmation)
+Password written in /etc/grsec/pw
+# gradm -E
+</pre>
+<p>To disable the RBAC system, run gradm -D. If you are not allowed to, you first need to switch to the admin role:
+</p>
+<pre># gradm -a admin
+Password: (Enter your admin role password)
+# gradm -D
+</pre>
+<p>If you want to leave the admin role, run gradm -u admin:
+</p>
+<pre># gradm -u admin
+</pre>
+<h3><span class="mw-headline" id="Generating_a_policy">Generating a policy</span></h3>
+<p>The RBAC system comes with a great feature called "learning mode". The learning mode can generate an anticipatory least privilege policy for your system. This allows for time and money savings by being able to rapidly deploy multiple secure servers.
+</p>
+<p>To use the learning mode, activate it using gradm:
+</p>
+<pre># gradm -F -L /etc/grsec/learning.log
+</pre>
+<p>Now use your system, do the things you would normally do. Try to avoid rsyncing, running locate or any other heavy file i/o operation as this can really slow down the processing time.
+</p>
+<p>When you believe you have used your system sufficiently to obtain a good policy, let gradm process them and propose roles under <code>/etc/grsec/learning.roles</code>:
+</p>
+<pre># gradm -D
+# gradm -F -L /etc/grsec/learning.log -O /etc/grsec/learning.roles
+</pre>
+<p>Audit the <code>/etc/grsec/learning.roles</code> and save it as <code>/etc/grsec/policy</code> (mode <code>0600</code>) when you are finished.
+</p>
+<pre># mv /etc/grsec/learning.roles /etc/grsec/policy
+# chmod 0600 /etc/grsec/policy
+</pre>
+<p>You will now be able to enable the RBAC system with your new learned policy.
+</p>
+<pre># gradm -E
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you receive the error <b>Viewing access is allowed by role &lt;insert user&gt; to /etc/grsec, the directory which stores RBAC policies and RBAC password information.</b>, add the following to your <b>subject /</b> under <b># Role: &lt;insert user&gt;</b>:
+<pre>/etc/grsec h
+</pre>
+<p>Example:
+</p>
+<pre># Role: root
+subject /  {
+       /                               h
+       /etc                            rx
+       /etc/grsec                      h
+</pre>
+</div>
+<p>The reasoning for this can be found <a rel="nofollow" class="external text" href="https://forums.grsecurity.net/viewtopic.php?f=5&amp;t=1607">here</a>
+</p>
+<h3><span class="mw-headline" id="Tweaking_your_policy">Tweaking your policy</span></h3>
+<p>An interesting feature of grsecurity 2.x is Set Operation Support for the configuration file. Currently it supports unions, intersections and differences of sets (of objects in this case).
+</p>
+<pre>define objset1 {
+/root/blah rw
+/root/blah2 r
+/root/blah3 x
+}
+
+define somename2 {
+/root/test1 rw
+/root/blah2 rw
+/root/test3 h
+}
+</pre>
+<p>Here is an example of its use, and the resulting objects that will be added to your subject:
+</p>
+<pre>subject /somebinary o
+$objset1 &amp; $somename2
+</pre>
+<p>The above would expand to:
+</p>
+<pre>subject /somebinary o
+/root/blah2 r
+</pre>
+<p>This is the result of the &amp; operator which takes both sets and returns the files that exist in both sets and the permission for those files that exist in both sets.
+</p>
+<pre>subject /somebinary o
+$objset1 | $somename2
+</pre>
+<p>This example would expand to:
+</p>
+<pre>subject /somebinary o
+/root/blah rw
+/root/blah2 rw
+/root/blah3 x
+/root/test1 rw
+/root/test3 h
+</pre>
+<p>This is the result of the | operator which takes both sets and returns the files that exist in either set. If a file exists in both sets, it is returned as well and the mode contains the flags that exist in either set.
+</p>
+<pre>subject /somebinary o
+$objset1 - $somename2
+</pre>
+<p>This example would expand to:
+</p>
+<pre>subject /somebinary o
+/root/blah rw
+/root/blah2 h
+/root/blah3 x
+</pre>
+<p>This is the result of the - operator which takes both sets and returns the files that exist in the set on the left but not in the match of the file in set on the right. If a file exists on the left and a match is found on the right (either the filenames are the same, or a parent directory exists in the right set), the file is returned and the mode of the second set is removed from the first set, and that file is returned.
+</p>
+<p>In some obscure pseudo-language you could see this as:
+</p>
+<pre>if ( ($objset1 contained /tmp/blah rw) and
+     ($objset2 contained /tmp/blah r) )
+then
+  $objset1 - $objset2 would contain /tmp/blah w
+
+if ( ($objset1 contained /tmp/blah rw) and
+     ($objset2 contained / rwx) )
+then 
+  $objset1 - $objset2 would contain /tmp/blah h
+</pre>
+<p>As for order of precedence (from highest to lowest): "-, &amp; |".
+</p>
+<p>If you do not want to bother remembering precedence, parenthesis support is also included, so you can do things like:
+</p>
+<pre>(($set1 - $set2) | $set3) &amp; $set4
+</pre>
+<h3><span class="mw-headline" id="Tweaking_.2Fetc.2Fgrsec.2Fpolicy_directly">Tweaking /etc/grsec/policy directly</span></h3>
+<p>Sometimes, full learning mode doesnt work for a particular program and direct revisions to the policy file will need to be made. One might simply want to tweak the policy file to add or remove access to directories without requiring one to reinitiate learning mode or recreating a policy file. The file itself is composed of Roles and Subjects. A Role determines what user the ruleset applies to, while the Subject could be seen as what process/program the ruleset applies to. 
+</p>
+<p>Consider a situation where the role is "username", while the subject is /usr/lib/firefox/firefox. Within the curly braces of this role/subject rule, directories will be listed, along with flags that dictate what capacities (read, write, execute, etc) you wish to give that subject (firefox for example) under that role (username, when firefox is ran under the user "username" for example). Here is a list of flags and what they do:
+</p>
+<pre>  a 	This object can be opened for appending.
+  c 	Allow creation of the file/directory.
+  d 	Allow deletion of the file/directory.
+  f 	Needed to mark the pipe used for communication with init to transfer the privilege of the 		persistent role; only valid within a persistent role. Transfer only occurs when the file is opened for writing.
+  h 	This object is hidden.
+  i 	This mode only applies to binaries. When the object is executed, it inherits the ACL of the     subject in which it was contained.
+  l 	Lowercase L. Allow a hardlink at this path. Hardlinking requires a minimum of c and l modes, and the target link cannot have any greater permission than the source file.
+  m 	Allow creation of setuid/setgid files/directories and modification of files/directories to be setuid/setgid.
+  p 	Reject all ptraces to this object.
+  r 	This object can be opened for reading.
+  t 	This object can be ptraced, but cannot modify the running task. This is referred to as a 'read-only ptrace'.
+  w 	This object can be opened for writing or appending.
+  x 	This object can be executed (or mmap'd with PROT_EXEC into a task).
+</pre>
+<p>So for example, if you want firefox to have read access to the home folder of the user username, be able to do everything (read, write, create and destroy files, execute) in /home/username/Downloads, but not be able to see /home/username/secretstuff or anything in /, your ruleset might look like this:
+</p>
+<pre>  # Role: username
+  subject /usr/lib/firefox/firefox o {
+      /                                               h
+      /home/username                       r
+      /home/username/Downloads     rwxcd
+      /home/username/secretstuff      h
+  }
+</pre>
+<p>Of course, a Firefox ruleset will need more than just the above (like access to directories it needs to run in /usr for example); compare the above with what is generated by full-learning-mode and you quickly see the pattern. The idea is that you want to limit each process as much as possible to limit the changes it can make to the filesystem in the event it is compromised. Much more info is available on the <a rel="nofollow" class="external text" href="http://en.wikibooks.org/wiki/Grsecurity/The_RBAC_System">GRsecurity RBAC wiki page.</a>
+</p>
+<h3><span class="mw-headline" id="Using_Wine.3B_Changes_needed_to_.2Fetc.2Fgrsec.2Fpolicy">Using Wine; Changes needed to /etc/grsec/policy</span></h3>
+<p>In the event you use wine, your executables for wine apps are on an NTFS partition, and you want it to work while RBAC is enabled, you will need to append "O" to the Subject mode of /usr/bin/wine-preloader for the Role (user) using this subject. I am unsure if this applies to executables in .wine as I do not have the free space to test it. I put my system into full-learning mode and ran wine, and after generating a /etc/grsec/policy from this session RBAC still prevented my wine program from running with:
+</p>
+<pre>grsec: (username:U:/usr/bin/wine-preloader) denied load of writable library /mnt/winblows/Program Files (x86)/Diablo II/Game.exe by /usr/bin/wine-preloader[Game.exe:7518] uid...
+</pre>
+<p>Appending "O" to the end of the Subject mode will fix this problem. An example of a working ruleset (notice the capital O after subject /usr/bin/wine-preloader):
+</p>
+<pre># Role: username
+subject /usr/bin/wine-preloader O {
+ /					r
+ &lt;other listed files generated by full-learning mode&gt;   rwcdx
+}
+</pre>
+<p>"O" is one of a number of flags you might append to the Subject mode. Others include:
+</p>
+<pre>A 	Protect the shared memory of this subject. No other processes but processes contained within this subject may access the shared memory of this subject.
+C 	Auto-kill all processes belonging to the attacker's IP address upon violation of security policy.
+K 	When processes belonging to this subject generate an alert, kill the process.
+O 	Allow loading of writable libraries.
+T 	Deny execution of binaries or scripts that are writable by any other subject in the policy. This flag is evaluated at policy enable time. All binaries with execute permission that are writable by another subject (ignoring special roles) will be reported and the RBAC system will not allow itself to be enabled until the changes are made.
+</pre>
+<p>See <a rel="nofollow" class="external text" href="http://en.wikibooks.org/wiki/Grsecurity/Appendix/Subject_Modes">this link.</a>
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Out-of-tree_kernel_module_compilation_failure">Out-of-tree kernel module compilation failure</span></h3>
+<p>PaX and grsecurity implement some hardening features via GCC plugins. The compiler configuration / version used to build the plugins provided in the package needs to be the same when building a kernel module. For example, the compiler provided in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gcc-multilib">gcc-multilib</a></span> package will not work - one should use the same compiler toolchain that was used to build the kernel. This also means <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> needs to be rebuilt after even minor GCC upgrades before modules built with the new compiler can work with it. Rebuilding a kernel can be accomplished with the <a href="../en/Kernels/Arch_Build_System.html" title="Kernels/Arch Build System">Arch Build System</a>. See bug <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43057">FS#43057</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

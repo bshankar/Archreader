@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>GnuPG - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GnuPG skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">GnuPG</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Package_signing.html" title="Pacman/Package signing">pacman/Package signing</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Disk_encryption.html" title="Disk encryption">Disk encryption</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/List_of_applications/Security.html#Encryption.2C_signing.2C_steganography" title="List of applications/Security">List of applications/Security#Encryption, signing, steganography</a></li>
+</ul>
+</div>
+<p>According to the <a rel="nofollow" class="external text" href="http://www.gnupg.org">official website</a>:
+</p>
+<dl><dd>GnuPG is a complete and free implementation of the <a rel="nofollow" class="external text" href="http://openpgp.org/about/">OpenPGP</a> standard as defined by <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc4880">RFC4880</a> (also known as PGP). GnuPG allows to encrypt and sign your data and communication, features a versatile key management system as well as access modules for all kinds of public key directories. GnuPG, also known as GPG, is a command line tool with features for easy integration with other applications. A wealth of frontend applications and libraries are available. Version 2 of GnuPG also provides support for S/MIME and Secure Shell (ssh).</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Directory_location"><span class="tocnumber">2.1</span> <span class="toctext">Directory location</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Configuration_files"><span class="tocnumber">2.2</span> <span class="toctext">Configuration files</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Default_options_for_new_users"><span class="tocnumber">2.3</span> <span class="toctext">Default options for new users</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Create_key_pair"><span class="tocnumber">3.1</span> <span class="toctext">Create key pair</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#List_keys"><span class="tocnumber">3.2</span> <span class="toctext">List keys</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Export_your_public_key"><span class="tocnumber">3.3</span> <span class="toctext">Export your public key</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Import_a_public_key"><span class="tocnumber">3.4</span> <span class="toctext">Import a public key</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Use_a_keyserver"><span class="tocnumber">3.5</span> <span class="toctext">Use a keyserver</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Encrypt_and_decrypt"><span class="tocnumber">3.6</span> <span class="toctext">Encrypt and decrypt</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Key_maintenance"><span class="tocnumber">4</span> <span class="toctext">Key maintenance</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Backup_your_private_key"><span class="tocnumber">4.1</span> <span class="toctext">Backup your private key</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Edit_your_key"><span class="tocnumber">4.2</span> <span class="toctext">Edit your key</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Exporting_subkey"><span class="tocnumber">4.3</span> <span class="toctext">Exporting subkey</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Rotating_subkeys"><span class="tocnumber">4.4</span> <span class="toctext">Rotating subkeys</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Signatures"><span class="tocnumber">5</span> <span class="toctext">Signatures</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Sign_a_file"><span class="tocnumber">5.1</span> <span class="toctext">Sign a file</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Clearsign_a_file_or_message"><span class="tocnumber">5.2</span> <span class="toctext">Clearsign a file or message</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#Make_a_detached_signature"><span class="tocnumber">5.3</span> <span class="toctext">Make a detached signature</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Verify_a_signature"><span class="tocnumber">5.4</span> <span class="toctext">Verify a signature</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#gpg-agent"><span class="tocnumber">6</span> <span class="toctext">gpg-agent</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#Configuration_2"><span class="tocnumber">6.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Reload_the_agent"><span class="tocnumber">6.2</span> <span class="toctext">Reload the agent</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#pinentry"><span class="tocnumber">6.3</span> <span class="toctext">pinentry</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Start_gpg-agent_with_systemd_user"><span class="tocnumber">6.4</span> <span class="toctext">Start gpg-agent with systemd user</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Unattended_passphrase"><span class="tocnumber">6.5</span> <span class="toctext">Unattended passphrase</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#SSH_agent"><span class="tocnumber">6.6</span> <span class="toctext">SSH agent</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-30">
+<a href="#Smartcards"><span class="tocnumber">7</span> <span class="toctext">Smartcards</span></a>
+<ul>
+<li class="toclevel-2 tocsection-31"><a href="#GnuPG_only_setups"><span class="tocnumber">7.1</span> <span class="toctext">GnuPG only setups</span></a></li>
+<li class="toclevel-2 tocsection-32">
+<a href="#GnuPG_with_PSCD-Lite"><span class="tocnumber">7.2</span> <span class="toctext">GnuPG with PSCD-Lite</span></a>
+<ul>
+<li class="toclevel-3 tocsection-33"><a href="#Always_use_PSCD-Light"><span class="tocnumber">7.2.1</span> <span class="toctext">Always use PSCD-Light</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-34">
+<a href="#Tips_and_tricks"><span class="tocnumber">8</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-35"><a href="#Different_algorithm"><span class="tocnumber">8.1</span> <span class="toctext">Different algorithm</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Encrypt_a_password"><span class="tocnumber">8.2</span> <span class="toctext">Encrypt a password</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Revoking_a_key"><span class="tocnumber">8.3</span> <span class="toctext">Revoking a key</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Change_trust_model"><span class="tocnumber">8.4</span> <span class="toctext">Change trust model</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Hide_all_recipient_id.27s"><span class="tocnumber">8.5</span> <span class="toctext">Hide all recipient id's</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#Using_caff_for_keysigning_parties"><span class="tocnumber">8.6</span> <span class="toctext">Using caff for keysigning parties</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#Always_show_long_ID.27s_and_fingerprints"><span class="tocnumber">8.7</span> <span class="toctext">Always show long ID's and fingerprints</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-42">
+<a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-43"><a href="#Not_enough_random_bytes_available"><span class="tocnumber">9.1</span> <span class="toctext">Not enough random bytes available</span></a></li>
+<li class="toclevel-2 tocsection-44"><a href="#su"><span class="tocnumber">9.2</span> <span class="toctext">su</span></a></li>
+<li class="toclevel-2 tocsection-45"><a href="#Agent_complains_end_of_file"><span class="tocnumber">9.3</span> <span class="toctext">Agent complains end of file</span></a></li>
+<li class="toclevel-2 tocsection-46"><a href="#KGpg_configuration_permissions"><span class="tocnumber">9.4</span> <span class="toctext">KGpg configuration permissions</span></a></li>
+<li class="toclevel-2 tocsection-47"><a href="#Conflicts_between_gnome-keyring_and_gpg-agent"><span class="tocnumber">9.5</span> <span class="toctext">Conflicts between gnome-keyring and gpg-agent</span></a></li>
+<li class="toclevel-2 tocsection-48"><a href="#GNOME_on_Wayland_overrides_SSH_agent_socket"><span class="tocnumber">9.6</span> <span class="toctext">GNOME on Wayland overrides SSH agent socket</span></a></li>
+<li class="toclevel-2 tocsection-49"><a href="#mutt_and_gpg"><span class="tocnumber">9.7</span> <span class="toctext">mutt and gpg</span></a></li>
+<li class="toclevel-2 tocsection-50"><a href="#.22Lost.22_keys.2C_upgrading_to_gnupg_version_2.1"><span class="tocnumber">9.8</span> <span class="toctext">"Lost" keys, upgrading to gnupg version 2.1</span></a></li>
+<li class="toclevel-2 tocsection-51"><a href="#gpg_hanged_for_all_keyservers_.28when_trying_to_receive_keys.29"><span class="tocnumber">9.9</span> <span class="toctext">gpg hanged for all keyservers (when trying to receive keys)</span></a></li>
+<li class="toclevel-2 tocsection-52"><a href="#Smartcard_not_detected"><span class="tocnumber">9.10</span> <span class="toctext">Smartcard not detected</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-53"><a href="#See_also"><span class="tocnumber">10</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnupg">gnupg</a></span> package.
+</p>
+<p>This will also install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pinentry">pinentry</a></span>, a collection of simple PIN or passphrase entry dialogs which GnuPG uses for passphrase entry. Which <i>pinentry</i> dialog is used is determined by the symbolic link <code>/usr/bin/pinentry</code>, which by default points to <code>/usr/bin/pinentry-gtk-2</code>.
+</p>
+<p>If you want to use a graphical frontend or program that integrates with GnuPG, see <a href="../en/List_of_applications/Security.html#Encryption.2C_signing.2C_steganography" title="List of applications/Security">List of applications/Security#Encryption, signing, steganography</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Directory_location">Directory location</span></h3>
+<p><code>$GNUPGHOME</code> is used by GnuPG to point to the directory where its configuration files are stored. By default <code>$GNUPGHOME</code> is not set and your <code>$HOME</code> is used instead; thus, you will find a <code>~/.gnupg</code> directory right after installation. 
+</p>
+<p>To change the default location, either run gpg this way <code>$ gpg --homedir <i>path/to/file</i></code> or set <code>GNUPGHOME</code> in one of your regular <a href="../en/Autostarting.html" title="Startup files" class="mw-redirect">startup files</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration_files">Configuration files</span></h3>
+<p>The default configuration files are <code>~/.gnupg/gpg.conf</code> and <code>~/.gnupg/dirmngr.conf</code>. 
+</p>
+<p>By default, the gnupg directory has its <a href="../en/File_permissions_and_attributes.html" title="Permissions" class="mw-redirect">permissions</a> set to <code>700</code> and the files it contains have their permissions set to <code>600</code>. Only the owner of the directory has permission to read, write, and access the files. This is for security purposes and should not be changed. In case this directory or any file inside it does not follow this security measure, you will get warnings about unsafe file and home directory permissions.
+</p>
+<p>Append to these files any long options you want. Do not write the two dashes, but simply the name of the option and required arguments. You will find skeleton files in <code>/usr/share/gnupg</code>. These files are copied to <code>~/.gnupg</code> the first time gpg is run if they do not exist there. Other examples are found in <a href="#See_also">#See also</a>.
+</p>
+<p>Additionally, <a href="../en/Pacman.html" title="Pacman">pacman</a> uses a different set of configuration files for package signature verification. See <a href="../en/Pacman/Package_signing.html" title="Pacman/Package signing">Pacman/Package signing</a> for details.
+</p>
+<h3><span class="mw-headline" id="Default_options_for_new_users">Default options for new users</span></h3>
+<p>If you want to setup some default options for new users, put configuration files in <code>/etc/skel/.gnupg/</code>. When the new user is added in system, files from here will be copied to its GnuPG home directory. There is also a simple script called <i>addgnupghome</i> which you can use to create new GnuPG home directories for existing users:
+</p>
+<pre># addgnupghome user1 user2
+</pre>
+<p>This will add the respective <code>/home/user1/.gnupg</code> and <code>/home/user2/.gnupg</code> and copy the files from the skeleton directory to it. Users with existing GnuPG home directory are simply skipped.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Whenever a <i><code>&lt;user-id&gt;</code></i> is required in a command, it can be specified with your key ID, fingerprint, a part of your name or email address, etc. GnuPG is flexible on this.
+</div>
+<h3><span class="mw-headline" id="Create_key_pair">Create key pair</span></h3>
+<p>Generate a key pair by typing in a terminal:
+</p>
+<pre>$ gpg --full-gen-key
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Use the <code>--expert</code> option for getting alternative ciphers like <a href="https://en.wikipedia.org/wiki/Elliptic_curve_cryptography" class="extiw" title="wikipedia:Elliptic curve cryptography">ECC</a>.</div>
+<p>The command will prompt for answers to several questions. For general use most people will want: 
+</p>
+<ul>
+<li> the RSA (sign only) and a RSA (encrypt only) key.</li>
+<li> a keysize of the default value (2048). A larger keysize of 4096 "gives us almost nothing, while costing us quite a lot"<a rel="nofollow" class="external autonumber" href="https://www.gnupg.org/faq/gnupg-faq.html#no_default_of_rsa4096">[1]</a>.</li>
+<li> an expiration date. A period of a year is good enough for the average user. This way even if access is lost to the keyring, it will allow others to know that it is no longer valid. Later, if necessary, the expiration date can be extended without having to re-issue a new key.</li>
+<li> your name and email address. You can add multiple identities to the same key later (<i>e.g.</i>, if you have multiple email addresses you want to associate with this key).</li>
+<li> <i>no</i> optional comment. Since the semantics of the comment field are <a rel="nofollow" class="external text" href="https://lists.gnupg.org/pipermail/gnupg-devel/2015-July/030150.html">not well-defined</a>, it has limited value for identification.</li>
+<li> <a href="../en/Security.html#Choosing_secure_passwords" title="Security">a secure passphrase</a>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The name and email address you enter here will be seen by anybody who imports your key.</div>
+<h3><span class="mw-headline" id="List_keys">List keys</span></h3>
+<p>To list keys in your public key ring:
+</p>
+<pre>$ gpg --list-keys
+</pre>
+<p>To list keys in your secret key ring:
+</p>
+<pre>$ gpg --list-secret-keys
+</pre>
+<h3><span class="mw-headline" id="Export_your_public_key">Export your public key</span></h3>
+<p>gpg's main usage is to ensure confidentiality of exchanged messages via public-key cryptography. With it each user distributes the public key of their keyring, which can be be used by others to encrypt messages to the user. The private key must <i>always</i> be kept private, otherwise confidentiality is broken. See <a href="https://en.wikipedia.org/wiki/Public-key_cryptography" class="extiw" title="w:Public-key cryptography">w:Public-key cryptography</a> for examples about the message exchange. 
+</p>
+<p>So, in order for others to send encrypted messages to you, they need your public key. 
+</p>
+<p>To generate an ASCII version of your public key (<i>e.g.</i> to distribute it by e-mail):
+</p>
+<pre>$ gpg --output <i>public.key</i> --armor --export <i>&lt;user-id&gt;</i> 
+</pre>
+<p>Alternatively, or in addition, you can <a href="#Use_a_keyserver">#Use a keyserver</a> to share your key. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Add <code>--no-emit-version</code> to avoid printing the version number, or add the corresponding setting to your configuration file.</div>
+<h3><span class="mw-headline" id="Import_a_public_key">Import a public key</span></h3>
+<p>In order to encrypt messages to others, as well as verify their signatures, you need their public key. To import a public key with file name <code><i>public.key</i></code> to your public key ring:
+</p>
+<pre>$ gpg --import <i>public.key</i>
+</pre>
+<p>Alternatively, <a href="#Use_a_keyserver">#Use a keyserver</a> to find a public key.
+</p>
+<h3><span class="mw-headline" id="Use_a_keyserver">Use a keyserver</span></h3>
+<p>You can register your key with a public PGP key server, so that others can retrieve your key without having to contact you directly:
+</p>
+<pre>$ gpg --send-keys <i>&lt;key-id&gt;</i>
+</pre>
+<p>To find out details of a key on the keyserver, without importing it, do:
+</p>
+<pre>$ gpg --search-keys <i>&lt;key-id&gt;</i>
+</pre>
+<p>To import a key from a key server:
+</p>
+<pre>$ gpg --recv-keys <i>&lt;key-id&gt;</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> You should verify the authenticity of the retrieved public key by comparing its fingerprint with one that the owner published on an independent source(s) (i.e., contacting the person directly). See <a href="https://en.wikipedia.org/wiki/Public_key_fingerprint" class="extiw" title="wikipedia:Public key fingerprint">Wikipedia:Public key fingerprint</a> for more information.</li>
+<li> Using a short ID may encounter collisions. All keys will be imported that have the short ID. To avoid this, use the full fingerprint or long key ID when receiving a key.<a rel="nofollow" class="external autonumber" href="https://lkml.org/lkml/2016/8/15/445">[2]</a>
+</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Adding <code>keyserver-options auto-key-retrieve</code> to <code>gpg.conf</code> will automatically fetch keys from the key server as needed.</li>
+<li> An alternative key server is <code>pool.sks-keyservers.net</code> and can be specified with <code>keyserver</code> in <code>dirmngr.conf</code>.; see also <a href="https://en.wikipedia.org/wiki/Key_server_(cryptographic)#Keyserver_examples" class="extiw" title="wikipedia:Key server (cryptographic)">wikipedia:Key server (cryptographic)#Keyserver examples</a>.</li>
+<li> You can connect to the keyserver over <a href="../en/Tor.html" title="Tor">Tor</a> using <code>--use-tor</code>. <code>hkp://jijrk5u4osbsr34t5.onion</code> is the onion address for the sks-keyservers pool. <a rel="nofollow" class="external text" href="https://gnupg.org/blog/20151224-gnupg-in-november-and-december.html">See this GnuPG blog post</a> for more information.</li>
+<li> You can connect to a keyserver using a proxy by setting the <code>http_proxy</code> environment variable and setting <code>honor-http-proxy</code> in <code>dirmngr.conf</code>. Alternatively, set <code>http-proxy <i>host[:port]</i></code> in <code>dirmngr.conf</code>, overriding the <code>http_proxy</code> environment variable.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Encrypt_and_decrypt">Encrypt and decrypt</span></h3>
+<p>You need to <a href="#Import_a_public_key">#Import a public key</a> of a user before encrypting (options <code>--encrypt</code> or <code>-e</code>) a file or message to that recipient (options <code>--recipient</code> or <code>-r</code>).
+</p>
+<p>To encrypt a file with the name <i>doc</i>, use:
+</p>
+<pre>$ gpg --recipient <i>&lt;user-id&gt;</i> --encrypt <i>doc</i>
+</pre>
+<p>To decrypt (option <code>--decrypt</code> or <code>-d</code>) a file with the name <i>doc.gpg</i> encrypted with your public key, use:
+</p>
+<pre>$ gpg --output <i>doc</i> --decrypt <i>doc.gpg</i>
+</pre>
+<p><i>gpg</i> will prompt you for your passphrase and then decrypt and write the data from <i>doc.gpg</i> to <i>doc</i>. If you omit the <code>-o</code> (<code>--output</code>) option, <i>gpg</i> will write the decrypted data to stdout.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Add <code>--armor</code> to encrypt a file using ASCII armor (suitable for copying and pasting a message in text format)</li>
+<li> Use <code>-R <i>&lt;user-id&gt;</i></code> or <code>--hidden-recipient <i>&lt;user-id&gt;</i></code> instead of <code>-r</code> to not put the recipient key IDs in the encrypted message. This helps to hide the receivers of the message and is a limited countermeasure against traffic analysis.</li>
+<li> Add <code>--no-emit-version</code> to avoid printing the version number, or add the corresponding setting to your configuration file.</li>
+<li> You can use gnupg to encrypt your sensitive documents by using your own user-id as recipient, but only individual files at a time, though you can always tarball various files and then encrypt the tarball. See also <a href="../en/Disk_encryption.html#Available_methods" title="Disk encryption">Disk encryption#Available methods</a> if you want to encrypt directories or a whole file-system.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="Key_maintenance">Key maintenance</span></h2>
+<h3><span class="mw-headline" id="Backup_your_private_key">Backup your private key</span></h3>
+<p>To backup your private key do the following:
+</p>
+<pre>$ gpg --export-secret-keys --armor <i>&lt;user-id&gt;</i> &gt; <i>privkey.asc</i>
+</pre>
+<p>Note that <i>gpg</i> release 2.1 changed default behaviour so that the above command enforces a passphrase protection, even if you deliberately chose not to use one on key creation. This is because otherwise anyone who gains access to the above exported file would be able to encrypt and sign documents as if they were you <i>without</i> needing to know your passphrase. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The passphrase is usually the weakest link in protecting your secret key. Place the private key in a safe place on a different system/device, such as a locked container or encrypted drive. It is the only safety you have to regain control to your keyring in case of, for example, a drive failure, theft or worse.</div>
+<p>To import the backup of your private key:
+</p>
+<pre>$ gpg --allow-secret-key-import --import <i>privkey.asc</i>
+</pre>
+<h3><span class="mw-headline" id="Edit_your_key">Edit your key</span></h3>
+<p>Running the <code>gpg --edit-key <i>&lt;user-id&gt;</i></code> command will present a menu which enables you to do most of your key management related tasks.
+</p>
+<p>Some useful commands in the edit key sub menu:
+</p>
+<pre>&gt; passwd       # change the passphrase
+&gt; clean        # compact any user ID that is no longer usable (e.g revoked or expired)
+&gt; revkey       # revoke a key
+&gt; addkey       # add a subkey to this key
+&gt; expire       # change the key expiration time
+</pre>
+<p>Type <code>help</code> in the edit key sub menu for more commands.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you have multiple email accounts you can add each one of them as an identity, using <code>adduid</code> command. You can then set your favourite one as <code>primary</code>.</div>
+<h3><span class="mw-headline" id="Exporting_subkey">Exporting subkey</span></h3>
+<p>If you plan to use the same key across multiple devices, you may want to strip out your master key and only keep the bare minimum encryption subkey on less secure systems.
+</p>
+<p>First, find out which subkey you want to export.
+</p>
+<pre>$ gpg -K
+</pre>
+<p>Select only that subkey to export.
+</p>
+<pre>$ gpg -a --export-secret-subkeys [subkey id]! &gt; /tmp/subkey.gpg
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you forget to add the !, all of your subkeys will be exported.</div>
+<p>At this point you could stop, but it is most likely a good idea to change the passphrase as well. Import the key into a temporary folder. 
+</p>
+<pre>$ gpg --homedir /tmp/gpg --import /tmp/subkey.gpg
+$ gpg --homedir /tmp/gpg --edit-key <i>&lt;user-id&gt;</i>
+&gt; passwd
+&gt; save
+$ gpg --homedir /tmp/gpg -a --export-secret-subkeys [subkey id]! &gt; /tmp/subkey.altpass.gpg
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You will get a warning that the master key was not available and the password was not changed, but that can safely be ignored as the subkey password was.</div>
+<p>At this point, you can now use <code>/tmp/subkey.altpass.gpg</code> on your other devices.
+</p>
+<h3><span class="mw-headline" id="Rotating_subkeys">Rotating subkeys</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><b>Never</b> delete your expired or revoked subkeys unless you have a good reason. Doing so will cause you to lose the ability to decrypt files encrypted with the old subkey. Please <b>only</b> delete expired or revoked keys from other users to clean your keyring.</div>
+<p>If you have set your subkeys to expire after a set time, you can create new ones. Do this a few weeks in advance to allow others to update their keyring.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You do not need to create a new key simply because it is expired. You can extend the expiration date.</div>
+<p>Create new subkey (repeat for both signing and encrypting key)
+</p>
+<pre>$ gpg --edit-key <i>&lt;user-id&gt;</i>
+&gt; addkey
+</pre>
+<p>And answer the following questions it asks (see previous section for suggested settings).
+</p>
+<p>Save changes
+</p>
+<pre>&gt; save
+</pre>
+<p>Update it to a keyserver.
+</p>
+<pre>$ gpg --keyserver pgp.mit.edu --send-keys <i>&lt;user-id&gt;</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Revoking expired subkeys is unnecessary and arguably bad form. If you are constantly revoking keys, it may cause others to lack confidence in you.</div>
+<h2><span class="mw-headline" id="Signatures">Signatures</span></h2>
+<p>Signatures certify and timestamp documents. If the document is modified, verification of the signature will fail. Unlike encryption which uses public keys to encrypt a document, signatures are created with the user's private key. The recipient of a signed document then verifies the signature using the sender's public key.
+</p>
+<h3><span class="mw-headline" id="Sign_a_file">Sign a file</span></h3>
+<p>To sign a file use the <code>--sign</code> or <code>-s</code> flag:
+</p>
+<pre> $ gpg --output <i>doc.sig</i> --sign <i>doc</i>
+</pre>
+<p>The above also encrypts the file and stores it in binary format.
+</p>
+<h3><span class="mw-headline" id="Clearsign_a_file_or_message">Clearsign a file or message</span></h3>
+<p>To sign a file without compressing it into binary format use:
+</p>
+<pre> $ gpg --clearsign <i>doc</i>
+</pre>
+<p>This wraps the document into an ASCII-armored signature, but does not modify the document.
+</p>
+<h3><span class="mw-headline" id="Make_a_detached_signature">Make a detached signature</span></h3>
+<p>To create a separate signature file to be distributed separately from the document or file itself, use the <code>--detach-sig</code> flag:
+</p>
+<pre> $ gpg --output <i>doc.sig</i> --detach-sig <i>doc</i>
+</pre>
+<p>This method is often used in distributing software projects to allow users to verify that the program has not been modified by a third party.
+</p>
+<h3><span class="mw-headline" id="Verify_a_signature">Verify a signature</span></h3>
+<p>To verify a signature use the <code>--verify</code> flag:
+</p>
+<pre> $ gpg --verify <i>doc.sig</i>
+</pre>
+<p>where <code><i>doc.sig</i></code> is the signature you wish to verify.
+</p>
+<p>To verify and decrypt a file at the same time, use the <code>--decrypt</code> flag as you normally would in decrypting a file.
+</p>
+<p>If you are verifying a detached signature, both the file and the signature must be present when verifying. For example, to verify Arch Linux's latest iso you would do:
+</p>
+<pre> $ gpg --verify <i>archlinux-&lt;version&gt;-dual.iso.sig</i>
+</pre>
+<p>where <code><i>archlinux-&lt;version&gt;-dual.iso</i></code> must be located in the same directory.
+</p>
+<h2><span class="mw-headline" id="gpg-agent">gpg-agent</span></h2>
+<p><i>gpg-agent</i> is mostly used as daemon to request and cache the password for the keychain. This is useful if GnuPG is used from an external program like a mail client.
+</p>
+<p>Starting with GnuPG 2.1.0 the use of <i>gpg-agent</i> is required. <i>gpg-agent</i> is started on-demand by the GnuPG tools, so there is usually no reason to start it manually.
+</p>
+<h3><span class="mw-headline" id="Configuration_2">Configuration</span></h3>
+<p>gpg-agent can be configured via <code>~/.gnupg/gpg-agent.conf</code> file. The configuration options are listed in <code>man gpg-agent</code>. For example you can change cache ttl for unused keys:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg-agent.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+default-cache-ttl 3600
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To cache your passphrase for the whole session, please run the following command:
+<pre>$ /usr/lib/gnupg/gpg-preset-passphrase --preset XXXXXX
+</pre>
+<p>where XXXX is the keygrip. You can get its value when running <code>gpg --with-keygrip -K</code>. Passphrase will be stored until <code>gpg-agent</code> is restarted. If you set up <code>default-cache-ttl</code> value, it will take precedence.
+</p>
+</div>
+<h3><span class="mw-headline" id="Reload_the_agent">Reload the agent</span></h3>
+<p>After changing the configuration, reload the agent using <i>gpg-connect-agent</i>:
+</p>
+<pre>$ gpg-connect-agent reloadagent /bye
+</pre>
+<p>The command should print <code>OK</code>.
+</p>
+<h3><span class="mw-headline" id="pinentry">pinentry</span></h3>
+<p>Finally, the agent needs to know how to ask the user for the password. This can be set in the gpg-agent configuration file.
+</p>
+<p>The default uses a gtk dialog. There are other options - see <code>info pinentry</code>. To change the dialog implementation set <code>pinentry-program</code> configuration option:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg-agent.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+# PIN entry program
+# pinentry-program /usr/bin/pinentry-curses
+# pinentry-program /usr/bin/pinentry-qt
+# pinentry-program /usr/bin/pinentry-kwallet
+
+pinentry-program /usr/bin/pinentry-gtk-2
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For using <code>/usr/bin/pinentry-kwallet</code> you have to install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kwalletcli">kwalletcli</a></span><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/kwalletcli">aur-mirror</a>]</sup> package.</div>
+<p>After making this change, reload the gpg-agent.
+</p>
+<h3><span class="mw-headline" id="Start_gpg-agent_with_systemd_user">Start gpg-agent with systemd user</span></h3>
+<p>It is possible to use the <a href="../en/Systemd/User.html" title="Systemd/User">Systemd/User</a> facilities to start the agent.
+</p>
+<p>Create a systemd unit file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/gpg-agent.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=GnuPG private key agent
+IgnoreOnIsolate=true
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/gpg-agent --daemon
+Restart=on-abort
+
+[Install]
+WantedBy=default.target</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you use non-default value for the <a href="#Directory_location">GNUPGHOME</a> environment variable, you need to pass it to the service. See <a href="../en/Systemd/User.html#Environment_variables" title="Systemd/User">systemd/User#Environment variables</a> for details.</div>
+<h3><span class="mw-headline" id="Unattended_passphrase">Unattended passphrase</span></h3>
+<p>Starting with GnuPG 2.1.0 the use of gpg-agent and pinentry is required, which may break backwards compatibility for passphrases piped in from STDIN using the <code>--passphrase-fd 0</code> commandline option. In order to have the same type of functionality as the older releases two things must be done:
+</p>
+<p>First, edit the gpg-agent configuration to allow <i>loopback</i> pinentry mode:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg-agent.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">allow-loopback-pinentry</pre>
+<p>Restart the gpg-agent process if it is running to let the change take effect.
+</p>
+<p>Second, either the application needs to be updated to include a commandline parameter to use loopback mode like so:
+</p>
+<pre>$ gpg --pinentry-mode loopback ...
+</pre>
+<p>...or if this is not possible, add the option to the configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">pinentry-mode loopback</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The upstream author indicates setting <code>pinentry-mode loopback</code> in <code>gpg.conf</code> may break other usage, using the commandline option should be preferred if at all possible. <a rel="nofollow" class="external autonumber" href="https://bugs.g10code.com/gnupg/issue1772">[3]</a>
+</div>
+<h3><span class="mw-headline" id="SSH_agent">SSH agent</span></h3>
+<p><i>gpg-agent</i> has OpenSSH agent emulation. If you already use the GnuPG suite, you might consider using its agent to also cache your <a href="../en/SSH_keys.html" title="SSH keys">SSH keys</a>.  Additionally, some users may prefer the PIN entry dialog GnuPG agent provides as part of its passphrase management.
+</p>
+<p>To start using GnuPG agent for your SSH keys, enable SSH support in the <code>~/.gnupg/gpg-agent.conf</code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg-agent.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+enable-ssh-support
+</pre>
+<p>Next, make sure that <i>gpg-agent</i> is always started. Either follow <a href="#Start_gpg-agent_with_systemd_user">#Start gpg-agent with systemd user</a>, or add the following to your <code>.bashrc</code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Start the gpg-agent if not already running
+if ! pgrep -x -u "${USER}" gpg-agent &gt;/dev/null 2&gt;&amp;1; then
+  gpg-connect-agent /bye &gt;/dev/null 2&gt;&amp;1
+fi
+</pre>
+<p>Then set <code>SSH_AUTH_SOCK</code> so that SSH will use <i>gpg-agent</i> instead of <i>ssh-agent</i>. To make sure each process can find your <i>gpg-agent</i> instance regardless of e.g. the type of shell it is child of use <a href="../en/Environment_variables.html#Using_pam_env" title="Environment variables">pam_env</a>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.pam_environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SSH_AGENT_PID	DEFAULT=
+SSH_AUTH_SOCK	DEFAULT="${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh"</pre>
+<p>Alternatively, depend on Bash:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Set SSH to use gpg-agent
+unset SSH_AGENT_PID
+if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+  export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
+fi
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you use non-default GnuPG <a href="#Directory_location">#Directory location</a>, run <code>gpgconf --create-socketdir</code> to create a socket directory under <code>/run/user/$UID/gnupg/</code>. Otherwise the socket will be placed in the GnuPG home directory.</li>
+<li> The test involving the <code>gnupg_SSH_AUTH_SOCK_by</code> variable is for the case where the agent is started as <code>gpg-agent --daemon /bin/sh</code>, in which case the shell inherits the <code>SSH_AUTH_SOCK</code> variable from the parent, <i>gpg-agent</i> <a rel="nofollow" class="external autonumber" href="http://git.gnupg.org/cgi-bin/gitweb.cgi?p=gnupg.git;a=blob;f=agent/gpg-agent.c;hb=7bca3be65e510eda40572327b87922834ebe07eb#l1307">[4]</a>.</li>
+</ul>
+</div>
+<p>Also set the GPG_TTY and refresh the TTY in case user has switched into an X session as stated in <code>man gpg-agent</code>. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Set GPG TTY
+export GPG_TTY=$(tty)
+
+# Refresh gpg-agent tty in case user switches into an X session
+gpg-connect-agent updatestartuptty /bye &gt;/dev/null
+</pre>
+<p>Once <i>gpg-agent</i> is running you can use <i>ssh-add</i> to approve keys, following the same steps as for <a href="../en/SSH_keys.html#ssh-agent" title="SSH keys">ssh-agent</a>. The list of approved keys is stored in the <code>~/.gnupg/sshcontrol</code> file. Once your key is approved, you will get a <i>pinentry</i> dialog every time your passphrase is needed. You can control passphrase caching in the <code>~/.gnupg/gpg-agent.conf</code> file. The following example would have <i>gpg-agent</i> cache your keys for 3 hours:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg-agent.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+default-cache-ttl-ssh 10800
+max-cache-ttl-ssh 10800
+</pre>
+<h2><span class="mw-headline" id="Smartcards">Smartcards</span></h2>
+<p>GnuPG uses <i>scdaemon</i> as an interface to your smartcard reader, please refer to the <a href="../en/Man_page.html" title="Man page">man page</a> for details.
+</p>
+<h3><span class="mw-headline" id="GnuPG_only_setups">GnuPG only setups</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> To allow scdaemon direct access to USB smarcard readers the optional dependency <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libusb-compat">libusb-compat</a></span> have to be installed</div>
+<p>If you do not plan to use other cards but those based on GnuPG, you should check the <code>reader-port</code> parameter in <code>~/.gnupg/scdaemon.conf</code>. The value '0' refers to the first available serial port reader and a value of '32768' (default) refers to the first USB reader.
+</p>
+<h3><span class="mw-headline" id="GnuPG_with_PSCD-Lite">GnuPG with PSCD-Lite</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pcsclite">pcsclite</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ccid">ccid</a></span> have to be installed, and the contained <a href="../en/Systemd.html#Using_units" title="Systemd">systemd</a> service <code>pcscd.service</code> has to be running, or the socket <code>pscd.socket</code> has to be listening.</div>
+<p>PSCD-Lite is a daemon which handles access to smartcard (SCard API). If GnuPG's scdaemon fails to connect the smartcard directly (e.g. by using its integrated CCID support), it will fallback and try to find a smartcard using the PSCD-Lite driver.
+</p>
+<h4><span class="mw-headline" id="Always_use_PSCD-Light">Always use PSCD-Light</span></h4>
+<p>If you are using any smartcard with an opensc driver (e.g.: ID cards from some countries) you should pay some attention to GnuPG configuration. Out of the box you might receive a message like this when using <code>gpg --card-status</code>
+</p>
+<pre>gpg: selecting openpgp failed: ec=6.108
+</pre>
+<p>By default, scdaemon will try to connect directly to the device. This connection will fail if the reader is being used by another process. For example: the pcscd daemon used by OpenSC. To cope with this situation we should use the same underlying driver as opensc so they can work well together. In order to point scdaemon to use pcscd you should remove <code>reader-port</code> from <code>~/.gnupg/scdaemon.conf</code>, specify the location to <code>libpcsclite.so</code> library and disable ccid so we make sure that we use pcscd:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/scdaemon.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+pcsc-driver /usr/lib/libpcsclite.so
+card-timeout 5
+disable-ccid
+</pre>
+<p>Please check <code>man scdaemon</code> if you do not use OpenSC.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Different_algorithm">Different algorithm</span></h3>
+<p>You may want to use stronger algorithms:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.gnupg/gpg.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+
+personal-digest-preferences SHA512
+cert-digest-algo SHA512
+default-preference-list SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 ZLIB BZIP2 ZIP Uncompressed
+personal-cipher-preferences TWOFISH CAMELLIA256 AES 3DES
+</pre>
+<p>In the latest version of GnuPG, the default algorithms used are SHA256 and AES, both of which are secure enough for most people. However, if you are using a version of GnuPG older than 2.1, or if you want an even higher level of security, then you should follow the above step.
+</p>
+<h3><span class="mw-headline" id="Encrypt_a_password">Encrypt a password</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a href="../en/Pass.html" title="Pass">pass</a> automates this process.</div>
+<p>It can be useful to encrypt some password, so it will not be written in clear on a configuration file. A good example is your email password.
+</p>
+<p>First create a file with your password. You <b>need</b> to leave <b>one</b> empty line after the password, otherwise gpg will return an error message when evaluating the file.
+</p>
+<p>Then run:
+</p>
+<pre>$ gpg -e -a -r <i>&lt;user-id&gt;</i> <i>your_password_file</i>
+</pre>
+<p><code>-e</code> is for encrypt, <code>-a</code> for armor (ASCII output), <code>-r</code> for recipient user ID.
+</p>
+<p>You will be left with a new <code><i>your_password_file</i>.asc</code> file.
+</p>
+<h3><span class="mw-headline" id="Revoking_a_key">Revoking a key</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li>Anybody having access to your revocation certificate can revoke your key, rendering it useless.</li>
+<li>Key revocation should only be performed if your key is compromised or lost, or you forget your passphrase.</li>
+</ul>
+</div>
+<p>Revocation certificates are automatically generated for newly generated keys, although one can be generated manually by the user later. These are located at <code>~/.gnupg/openpgp-revocs.d/</code>. The filename of the certificate is the fingerprint of the key it will revoke.
+</p>
+<p>To revoke your key, simply import the revocation certificate:
+</p>
+<pre>$ gpg --import <i>&lt;fingerprint&gt;</i>.rev
+</pre>
+<p>Now update the keyserver:
+</p>
+<pre>$ gpg --keyserver subkeys.pgp.net --send <i>&lt;userid&gt;</i>
+</pre>
+<h3><span class="mw-headline" id="Change_trust_model">Change trust model</span></h3>
+<p>By default GnuPG uses the <a href="https://en.wikipedia.org/wiki/Web_of_Trust" class="extiw" title="wikipedia:Web of Trust">Web of Trust</a> as the trust model. You can change this to <a href="https://en.wikipedia.org/wiki/Trust_on_first_use" class="extiw" title="wikipedia:Trust on first use">Trust on first use</a> by adding <code>--trust-model=tofu</code> when adding a key or adding this option to your GnuPG configuration file. More details are in <a rel="nofollow" class="external text" href="https://lists.gnupg.org/pipermail/gnupg-devel/2015-October/030341.html">this email to the GnuPG list</a>.
+</p>
+<h3><span class="mw-headline" id="Hide_all_recipient_id.27s">Hide all recipient id's</span></h3>
+<p>By default the recipient's key ID is in the encrypted message. This can be removed at encryption time for a recipient by using <code>hidden-recipient <i>&lt;user-id&gt;</i></code>. To remove it for all recipients add <code>throw-keyids</code> to your configuration file. This helps to hide the receivers of the message and is a limited countermeasure against traffic analysis. (Using a little social engineering anyone who is able to decrypt the message can check whether one of the other recipients is the one he suspects.)  On the receiving side, it may slow down the decryption process because all available secret keys must be tried (<i>e.g.</i> with <code>--try-secret-key <i>&lt;user-id&gt;</i></code>).
+</p>
+<h3><span class="mw-headline" id="Using_caff_for_keysigning_parties">Using caff for keysigning parties</span></h3>
+<p>To allow users to validate keys on the keyservers and in their keyrings (i.e. make sure they are from whom they claim to be), PGP/GPG uses he <a href="https://en.wikipedia.org/wiki/Web_of_Trust" class="extiw" title="wikipedia:Web of Trust">Web of Trust</a>. Keysigning parties allow users to get together in physical location to validate keys. The <a href="https://en.wikipedia.org/wiki/Zimmermann%E2%80%93Sassaman_key-signing_protocol" class="extiw" title="wikipedia:Zimmermann–Sassaman key-signing protocol">Zimmermann-Sassaman</a> key-signing protocol is a way of making these very effective. <a rel="nofollow" class="external text" href="http://www.cryptnet.net/fdp/crypto/keysigning_party/en/keysigning_party.html">Here</a> you will find a how-to article.
+</p>
+<p>For an easier process of signing keys and sending signatures to the owners after a keysigning party, you can use the tool <i>caff</i>. It can be installed from the AUR with the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/caff-svn/">caff-svn</a></span><sup><small>AUR</small></sup>.
+</p>
+<p>To send the signatures to their owners you need a working <a href="https://en.wikipedia.org/wiki/Message_transfer_agent" class="extiw" title="wikipedia:Message transfer agent">MTA</a>. If you do not have already one, install <a href="../en/Msmtp.html" title="Msmtp">msmtp</a>.
+</p>
+<h3><span class="mw-headline" id="Always_show_long_ID.27s_and_fingerprints">Always show long ID's and fingerprints</span></h3>
+<p>To always show long key ID's add <code>keyid-format 0xlong</code> to your configuration file. To always show full fingerprints of keys, add <code>with-fingerprint</code> to your configuration file.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Not_enough_random_bytes_available">Not enough random bytes available</span></h3>
+<p>When generating a key, gpg can run into this error:
+</p>
+<pre>Not enough random bytes available. Please do some other work to give the OS a chance to collect more entropy!
+</pre>
+<p>To check the available entropy, check the kernel parameters:
+</p>
+<pre>cat /proc/sys/kernel/random/entropy_avail
+</pre>
+<p>A healthy Linux system with a lot of entropy available will have return close to the full 4,096 bits of entropy. If the value returned is less than 200, the system is running low on entropy. 
+</p>
+<p>To solve it, remember you do not often need to create keys and best just do what the message suggests (e.g. create disk activity, move the mouse, edit the wiki - all will create entropy). If that does not help, check which service is using up the entropy and consider stopping it for the time. If that is no alternative, see <a href="../en/Random_number_generation.html#Faster_alternatives" title="Random number generation">Random number generation#Faster alternatives</a>.
+</p>
+<h3><span class="mw-headline" id="su">su</span></h3>
+<p>When using <code>pinentry</code>, you must have the proper permissions of the terminal device (e.g. <code>/dev/tty1</code>) in use. However, with <i>su</i> (or <i>sudo</i>), the ownership stays with the original user, not the new one. This means that pinentry will fail, even as root. The fix is to change the permissions of the device at some point before the use of pinentry (i.e. using gpg with an agent). If doing gpg as root, simply change the ownership to root right before using gpg:
+</p>
+<pre># chown root /dev/ttyN  # where N is the current tty
+</pre>
+<p>and then change it back after using gpg the first time. The equivalent is likely to be true with <code>/dev/pts/</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The owner of tty <i>must</i> match with the user for which pinentry is running. Being part of the group <code>tty</code> <b>is not</b> enough.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you run gpg with <code>script</code> it will use a new tty with the correct ownership:
+<pre># script -q -c "gpg --gen-key" /dev/null
+</pre>
+</div>
+<h3><span class="mw-headline" id="Agent_complains_end_of_file">Agent complains end of file</span></h3>
+<p>The default pinentry program is pinentry-gtk-2, which needs a DBus session bus to run properly. See <a href="../en/General_troubleshooting.html#Session_permissions" title="General troubleshooting">General troubleshooting#Session permissions</a> for details.
+</p>
+<p>Alternatively, you can use <code>pinentry-qt</code>. See <a href="#pinentry">#pinentry</a>.
+</p>
+<h3><span class="mw-headline" id="KGpg_configuration_permissions">KGpg configuration permissions</span></h3>
+<p>There have been issues with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kdeutils-kgpg">kdeutils-kgpg</a></span> being able to access the <code>~/.gnupg/</code> options. One issue might be a result of a deprecated <i>options</i> file, see the <a rel="nofollow" class="external text" href="https://bugs.kde.org/show_bug.cgi?id=290221">bug</a> report.
+</p>
+<p>Another user reported that <i>KGpg</i> failed to start until the <code>~/.gnupg</code> folder is set to <code>drwxr-xr-x</code> permissions. If you require this work-around, ensure that the directory contents retain <code>-rw-------</code> permissions! Further, report it as a bug to the <a rel="nofollow" class="external text" href="https://bugs.kde.org/buglist.cgi?quicksearch=kgpg">developers</a>.
+</p>
+<h3><span class="mw-headline" id="Conflicts_between_gnome-keyring_and_gpg-agent">Conflicts between gnome-keyring and gpg-agent</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See <a href="#GPG_AGENT_INFO">#GPG_AGENT_INFO</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:GnuPG">Talk:GnuPG#</a>)</div>
+</div>
+<p>While the Gnome keyring implements a GPG agent component, as of GnuPG version 2.1, GnuPG ignores the <code>GPG_AGENT_INFO</code> environment variable, so that Gnome keyring can no longer be used as a GPG agent.
+</p>
+<p>However, since version 0.9.6 the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pinentry">pinentry</a></span> provides the <code>pinentry-gnome3</code> program. You may set the following option in your <code>gpg-agent.conf</code> file
+</p>
+<pre> pinentry-program /usr/bin/pinentry-gnome3
+</pre>
+<p>in order to make use of that pinentry program.
+</p>
+<p>Since version 0.9.2 all pinentry programs can be configured to optionally save a passphrase with libsecret. For example, when the user is asked for a passphrase via <code>pinentry-gnome3</code>, a checkbox is shown whether to save the passphrase using a password manager. Unfortunately, the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pinentry">pinentry</a></span> does not have this feature enabled (see <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/46059">FS#46059</a> for the reasons). You may use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pinentry-libsecret/">pinentry-libsecret</a></span><sup><small>AUR</small></sup> as a replacement for it, which has support for libsecret enabled.
+</p>
+<h3><span class="mw-headline" id="GNOME_on_Wayland_overrides_SSH_agent_socket">GNOME on Wayland overrides SSH agent socket</span></h3>
+<p>For Wayland sessions, <code>gnome-session</code> sets <code>SSH_AUTH_SOCK</code> to the standard gnome-keyring socket, <code>$XDG_RUNTIME_DIR/keyring/ssh</code>. This overrides any value set in <code>~/.pam_environmment</code> or systemd unit files.
+</p>
+<p>To disable this behavior, set the <code>GSM_SKIP_AGENT_WORKAROUND</code> variable:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.pam_environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SSH_AGENT_PID	DEFAULT=
+SSH_AUTH_SOCK	DEFAULT="${XDG_RUNTIME_DIR}/gnupg/S.gpg-agent.ssh"
+GSM_SKIP_SSH_AGENT_WORKAROUND	DEFAULT="true"</pre>
+<h3><span class="mw-headline" id="mutt_and_gpg">mutt and gpg</span></h3>
+<p>To be asked for your GnuPG password only once per session as of GnuPG 2.1, see <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1490821#p1490821">this forum thread</a>.
+</p>
+<h3><span class="mw-headline" id=".22Lost.22_keys.2C_upgrading_to_gnupg_version_2.1">"Lost" keys, upgrading to gnupg version 2.1</span></h3>
+<p>When <code>gpg --list-keys</code> fails to show keys that used to be there, and applications complain about missing or invalid keys, some keys may not have been migrated to the new format.
+</p>
+<p>Please read <a rel="nofollow" class="external text" href="http://jo-ke.name/wp/?p=111">GnuPG invalid packet workaround</a>. Basically, it says that there is a bug with keys in the old <code>pubring.gpg</code> and <code>secring.gpg</code> files, which have now been superseded by the new <code>pubring.kbx</code> file and the <code>private-keys-v1.d/</code> subdirectory and files.  Your missing keys can be recovered with the following commnads:
+</p>
+<pre>$ cd
+$ cp -r .gnupg gnupgOLD
+$ gpg --export-ownertrust &gt; otrust.txt
+$ gpg --import .gnupg/pubring.gpg
+$ gpg --import-ownertrust otrust.txt
+$ gpg --list-keys
+</pre>
+<h3><span class="mw-headline" id="gpg_hanged_for_all_keyservers_.28when_trying_to_receive_keys.29">gpg hanged for all keyservers (when trying to receive keys)</span></h3>
+<p>If gpg hanged with a certain keyserver when trying to receive keys, you might need to kill dirmngr in order to get access to other keyservers which are actually working, otherwise it might keeping hanging for all of them.
+</p>
+<h3><span class="mw-headline" id="Smartcard_not_detected">Smartcard not detected</span></h3>
+<p>Your user might not have the permission to access the smartcard which results in a <code>card error</code> to be thrown, even though the card is correctly set up and inserted.
+</p>
+<p>One possible solution is to add a new group <code>scard</code> including the users who need access to the smartcard.
+</p>
+<p>Then use an <a href="../en/Udev.html#Writing_udev_rules" title="Udev">udev</a> rule, similar to the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/71-gnupg-ccid.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ACTION=="add", SUBSYSTEM=="usb", ENV{ID_VENDOR_ID}=="1050", ENV{ID_MODEL_ID}=="0116|0111", MODE="660", GROUP="scard"
+</pre>
+<p>One needs to adapt VENDOR and MODEL according to the <code>lsusb</code> output, the above example is for a YubikeyNEO.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://gnupg.org/">GNU Privacy Guard Homepage</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc4880">RFC4880 "OpenPGP Message Format"</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Creating_GPG_Keys">Creating GPG Keys (Fedora)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.debian.org/Subkeys">OpenPGP subkeys in Debian</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.sanctum.geek.nz/series/linux-crypto/">A more comprehensive gpg Tutorial</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://help.riseup.net/en/security/message-security/openpgp/gpg-best-practices">gpg.conf recommendations and best practices</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/ioerror/torbirdy/blob/master/gpg.conf">Torbirdy gpg.conf</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.reddit.com/r/GPGpractice/">/r/GPGpractice - a subreddit to practice using GnuPG.</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Encryption.html" title="Category:Encryption">Encryption</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

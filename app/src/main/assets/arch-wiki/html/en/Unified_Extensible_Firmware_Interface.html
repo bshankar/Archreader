@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Unified Extensible Firmware Interface - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Unified_Extensible_Firmware_Interface skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Unified Extensible Firmware Interface</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Secure_Boot.html" title="Secure Boot">Secure Boot</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface/Hardware.html" title="UEFI/Hardware" class="mw-redirect">UEFI/Hardware</a></li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>While the choice to install in UEFI mode is forward looking, early vendor UEFI implementations may carry more bugs than their BIOS counterparts. It is advised to do a search relating to your particular mainboard model before proceeding.</div>
+<p>The <a rel="nofollow" class="external text" href="http://www.uefi.org/">Unified Extensible Firmware Interface</a> (EFI or UEFI for short) is a new model for the interface between operating systems and firmware. It provides a standard environment for booting an operating system and running pre-boot applications.
+</p>
+<p>It is distinct from the commonly used "<a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a> boot code" method followed for <a href="https://en.wikipedia.org/wiki/BIOS" class="extiw" title="wikipedia:BIOS">BIOS</a> systems. See <a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a> for their differences and the boot process using UEFI. To set up UEFI Boot Loaders, see <a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#UEFI_versions"><span class="tocnumber">1</span> <span class="toctext">UEFI versions</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#UEFI_Firmware_bitness"><span class="tocnumber">2</span> <span class="toctext">UEFI Firmware bitness</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Non_Macs"><span class="tocnumber">2.1</span> <span class="toctext">Non Macs</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Apple_Macs"><span class="tocnumber">2.2</span> <span class="toctext">Apple Macs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Linux_Kernel_Config_options_for_UEFI"><span class="tocnumber">3</span> <span class="toctext">Linux Kernel Config options for UEFI</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#UEFI_Variables"><span class="tocnumber">4</span> <span class="toctext">UEFI Variables</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#UEFI_Variables_Support_in_Linux_Kernel"><span class="tocnumber">4.1</span> <span class="toctext">UEFI Variables Support in Linux Kernel</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Requirements_for_UEFI_variable_support"><span class="tocnumber">4.2</span> <span class="toctext">Requirements for UEFI variable support</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Mount_efivarfs"><span class="tocnumber">4.2.1</span> <span class="toctext">Mount efivarfs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Userspace_tools"><span class="tocnumber">4.3</span> <span class="toctext">Userspace tools</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#efibootmgr"><span class="tocnumber">4.3.1</span> <span class="toctext">efibootmgr</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#UEFI_Shell"><span class="tocnumber">5</span> <span class="toctext">UEFI Shell</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Obtaining_UEFI_Shell"><span class="tocnumber">5.1</span> <span class="toctext">Obtaining UEFI Shell</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Launching_UEFI_Shell"><span class="tocnumber">5.2</span> <span class="toctext">Launching UEFI Shell</span></a></li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Important_UEFI_Shell_Commands"><span class="tocnumber">5.3</span> <span class="toctext">Important UEFI Shell Commands</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#bcfg"><span class="tocnumber">5.3.1</span> <span class="toctext">bcfg</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#map"><span class="tocnumber">5.3.2</span> <span class="toctext">map</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#edit"><span class="tocnumber">5.3.3</span> <span class="toctext">edit</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#UEFI_Linux_Hardware_Compatibility"><span class="tocnumber">6</span> <span class="toctext">UEFI Linux Hardware Compatibility</span></a></li>
+<li class="toclevel-1 tocsection-20">
+<a href="#UEFI_Bootable_Media"><span class="tocnumber">7</span> <span class="toctext">UEFI Bootable Media</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Create_UEFI_bootable_USB_from_ISO"><span class="tocnumber">7.1</span> <span class="toctext">Create UEFI bootable USB from ISO</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Remove_UEFI_boot_support_from_Optical_Media"><span class="tocnumber">7.2</span> <span class="toctext">Remove UEFI boot support from Optical Media</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Testing_UEFI_in_systems_without_native_support"><span class="tocnumber">8</span> <span class="toctext">Testing UEFI in systems without native support</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#OVMF_for_Virtual_Machines"><span class="tocnumber">8.1</span> <span class="toctext">OVMF for Virtual Machines</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#DUET_for_BIOS_only_systems"><span class="tocnumber">8.2</span> <span class="toctext">DUET for BIOS only systems</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-26">
+<a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-27"><a href="#Windows_7_will_not_boot_in_UEFI_Mode"><span class="tocnumber">9.1</span> <span class="toctext">Windows 7 will not boot in UEFI Mode</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Windows_changes_boot_order"><span class="tocnumber">9.2</span> <span class="toctext">Windows changes boot order</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#USB_media_gets_struck_with_black_screen"><span class="tocnumber">9.3</span> <span class="toctext">USB media gets struck with black screen</span></a></li>
+<li class="toclevel-2 tocsection-30">
+<a href="#Booting_64-bit_kernel_on_32-bit_UEFI"><span class="tocnumber">9.4</span> <span class="toctext">Booting 64-bit kernel on 32-bit UEFI</span></a>
+<ul>
+<li class="toclevel-3 tocsection-31"><a href="#Using_GRUB"><span class="tocnumber">9.4.1</span> <span class="toctext">Using GRUB</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-32"><a href="#UEFI_boot_loader_does_not_show_up_in_firmware_menu"><span class="tocnumber">9.5</span> <span class="toctext">UEFI boot loader does not show up in firmware menu</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-33"><a href="#See_also"><span class="tocnumber">10</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="UEFI_versions">UEFI versions</span></h2>
+<ul>
+<li> UEFI started as Intel's EFI in versions 1.x.</li>
+<li> Later, a group of companies called the UEFI Forum took over its development, which renamed it as Unified EFI starting with version 2.0.</li>
+<li> Unless specified as EFI 1.x, EFI and UEFI terms are used interchangeably to denote UEFI 2.x firmware.</li>
+<li> Apple's EFI implementation is neither a EFI 1.x version nor UEFI 2.x version but mixes up both. This kind of firmware does not fall under any one (U)EFI specification and therefore is not a standard UEFI firmware. Unless stated explicitly, these instructions are general and some of them may not work or may be different in <a href="../en/MacBook.html" title="MacBook">Apple Macs</a>.</li>
+</ul>
+<p>The latest UEFI Specification can be found at <a rel="nofollow" class="external free" href="http://uefi.org/specifications">http://uefi.org/specifications</a>.
+</p>
+<h2><span class="mw-headline" id="UEFI_Firmware_bitness">UEFI Firmware bitness</span></h2>
+<p>Under UEFI, every program whether it is an OS loader or a utility (e.g. a memory testing app or recovery tool), should be a UEFI Application corresponding to the EFI firmware bitness/architecture.
+</p>
+<p>The vast majority of UEFI firmwares, including recent Apple Macs, use x86_64 EFI firmware. The only known devices that use IA32 (32-bit) EFI are older (pre 2008) Apple Macs, some Intel Cloverfield ultrabooks and some older Intel Server boards that are known to operate on Intel EFI 1.10 firmware.
+</p>
+<p>An x86_64 EFI firmware does not include support for launching 32-bit EFI apps (unlike x86_64 Linux and Windows versions which include such support). Therefore the UEFI application must be compiled for that specific firmware processor bitness/architecture.
+</p>
+<h3><span class="mw-headline" id="Non_Macs">Non Macs</span></h3>
+<p>Check whether the dir <code>/sys/firmware/efi</code> exists, if it exists it means the kernel has booted in EFI mode. In that case the UEFI bitness is same as kernel bitness. (ie. i686 or x86_64)
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Intel Atom System-on-Chip systems ship with 32-bit UEFI (as on 2 November 2013). See <a href="#Booting_64-bit_kernel_on_32-bit_UEFI">#Booting 64-bit kernel on 32-bit UEFI</a> for more info.</div>
+<h3><span class="mw-headline" id="Apple_Macs">Apple Macs</span></h3>
+<p>Pre-2008 Macs mostly have i386-efi firmware while &gt;=2008 Macs have mostly x86_64-efi. All Macs capable of running Mac OS X Snow Leopard 64-bit Kernel have x86_64 EFI 1.x firmware.
+</p>
+<p>To find out the arch of the efi firmware in a Mac, type the following into the Mac OS X terminal:
+</p>
+<pre>$ ioreg -l -p IODeviceTree | grep firmware-abi
+</pre>
+<p>If the command returns EFI32 then it is IA32 (32-bit) EFI firmware. If it returns EFI64 then it is x86_64 EFI firmware. Most of the Macs do not have UEFI 2.x firmware as Apple's EFI implementation is not fully compliant with UEFI 2.x Specification.
+</p>
+<h2><span class="mw-headline" id="Linux_Kernel_Config_options_for_UEFI">Linux Kernel Config options for UEFI</span></h2>
+<p>The required Linux Kernel configuration options for UEFI systems are :
+</p>
+<pre>CONFIG_RELOCATABLE=y
+CONFIG_EFI=y
+CONFIG_EFI_STUB=y
+CONFIG_FB_EFI=y
+CONFIG_FRAMEBUFFER_CONSOLE=y
+</pre>
+<p>UEFI Runtime Variables Support (<b>efivarfs</b> filesystem - <code>/sys/firmware/efi/efivars</code>). This option is important as this is required to manipulate UEFI Runtime Variables using tools like <code>/usr/bin/efibootmgr</code>. The below config option has been added in kernel 3.10 and above.
+</p>
+<pre>CONFIG_EFIVAR_FS=y
+</pre>
+<p>UEFI Runtime Variables Support (old <b>efivars sysfs</b> interface - <code>/sys/firmware/efi/vars</code>). This option should be disabled to prevent any potential issues with both efivarfs and sysfs-efivars enabled.
+</p>
+<pre>CONFIG_EFI_VARS=n
+</pre>
+<p>GUID Partition Table <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> config option - mandatory for UEFI support
+</p>
+<pre>CONFIG_EFI_PARTITION=y
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>All of the above options are required to boot Linux via UEFI, and are enabled in Archlinux kernels in official repos.</div>
+<p>Retrieved from <a rel="nofollow" class="external free" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/plain/Documentation/x86/x86_64/uefi.txt">https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/plain/Documentation/x86/x86_64/uefi.txt</a> .
+</p>
+<h2><span class="mw-headline" id="UEFI_Variables">UEFI Variables</span></h2>
+<p>UEFI defines variables through which an operating system can interact with the firmware. UEFI Boot Variables are used by the boot-loader and used by the OS only for early system start-up. UEFI Runtime Variables allow an OS to manage certain settings of the firmware like the UEFI Boot Manager or managing the keys for UEFI Secure Boot Protocol etc. You can get the list using
+</p>
+<pre>$ efivar -l
+</pre>
+<h3><span class="mw-headline" id="UEFI_Variables_Support_in_Linux_Kernel">UEFI Variables Support in Linux Kernel</span></h3>
+<p>Linux kernel exposes EFI variables data to userspace via <b>efivarfs</b> (<b>EFI</b> <b>VAR</b>iable <b>F</b>ile<b>S</b>ystem) interface (<code>CONFIG_EFIVAR_FS</code>) - mounted using <code>efivarfs</code> kernel module at <code>/sys/firmware/efi/efivars</code> - it has no maximum per-variable size limitation and supports UEFI Secure Boot variables. Introduced in kernel 3.8.
+</p>
+<h3><span class="mw-headline" id="Requirements_for_UEFI_variable_support">Requirements for UEFI variable support</span></h3>
+<ol>
+<li> Kernel processor <a href="#UEFI_Firmware_bitness">bitness</a> and EFI processor bitness should match.</li>
+<li> Kernel should be booted in EFI mode (via <a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a> or any <a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">EFI boot loader</a>, not via BIOS/CSM or Apple's "bootcamp" which is also BIOS/CSM).</li>
+<li> EFI Runtime Services support should be present in the kernel (<code>CONFIG_EFI=y</code>, check if present with <code>zgrep CONFIG_EFI /proc/config.gz</code>).</li>
+<li> EFI Runtime Services in the kernel SHOULD NOT be disabled via kernel cmdline, i.e. <code>noefi</code> kernel parameter SHOULD NOT be used.</li>
+<li> <code>efivarfs</code> filesystem should be mounted at <code>/sys/firmware/efi/efivars</code>, otherwise follow <a href="#Mount_efivarfs">#Mount efivarfs</a> section below.</li>
+<li> <code>efivar</code> should list (option <code>-l</code>) the EFI Variables without any error.</li>
+</ol>
+<p>If EFI Variables support does not work even after the above conditions are satisfied, try the below workarounds:
+</p>
+<ol>
+<li> If any userspace tool is unable to modify efi variables data, check for existence of <code>/sys/firmware/efi/efivars/dump-*</code> files. If they exist, delete them, reboot and retry again.</li>
+<li> If the above step does not fix the issue, try booting with <code>efi_no_storage_paranoia</code> kernel parameter to disable kernel efi variable storage space check that may prevent writing/modification of efi variables.</li>
+</ol>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>efi_no_storage_paranoia</code> should only be used when needed and should not be left as a normal boot option. The effect of this kernel command line parameter turns off a safeguard that was put in place to help avoid the bricking of machines when the NVRAM gets too full.</div>
+<h4><span class="mw-headline" id="Mount_efivarfs">Mount efivarfs</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><i>efivars</i> is mounted writeable by default <a rel="nofollow" class="external autonumber" href="https://github.com/systemd/systemd/issues/2402">[1]</a>, which may cause permanent damage to the system. <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=207549">[2]</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup> As such, consider mounting <i>efivars</i> read-only (<code>-o ro</code>) as described below. Note that when it is mounted read-only, tools such as <i>efibootmgr</i> and bootloaders will not be able to change boot settings, nor will commands like <code>systemctl reboot --firmware-setup</code> work.</div>
+<p>If <code>efivarfs</code> is not automatically mounted at <code>/sys/firmware/efi/efivars</code> by <a href="../en/Systemd.html" title="Systemd">systemd</a> during boot, then you need to manually mount it to expose UEFI variables to <a href="#Userspace_tools">#Userspace tools</a> like <code>efibootmgr</code>:
+</p>
+<pre># mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The above command should be run both <b>outside</b> (<b>before</b>) and <b>inside</b> the <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroot</a>, if any.</div>
+<p>To mount <code>efivarfs</code> read-only during boot, add to <code>/etc/fstab</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">efivarfs    /sys/firmware/efi/efivars    efivarfs    <b>ro</b>,nosuid,nodev,noexec,noatime 0 0</pre>
+<p>To remount with write support, run:
+</p>
+<pre># mount -o remount /sys/firmware/efi/efivars -o <b>rw</b>,nosuid,nodev,noexec,noatime
+</pre>
+<h3><span class="mw-headline" id="Userspace_tools">Userspace tools</span></h3>
+<p>There are few tools that can access/modify the UEFI variables, namely
+</p>
+<ul><li> <b>efivar</b> — Library and Tool to manipulate UEFI Variables (used by efibootmgr)</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/vathpela/efivar">https://github.com/vathpela/efivar</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=efivar">efivar</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/efivar-git/">efivar-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>efibootmgr</b> — Tool to manipulate UEFI Firmware Boot Manager Settings</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/vathpela/efibootmgr">https://github.com/vathpela/efibootmgr</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=efibootmgr">efibootmgr</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/efibootmgr-git/">efibootmgr-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>uefivars</b> — Dumps list of EFI variables with some additional PCI related info (uses efibootmgr code internally)</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/fpmurphy/Various/tree/master/uefivars-2.0">https://github.com/fpmurphy/Various/tree/master/uefivars-2.0</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uefivars-git/">uefivars-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>efitools</b> — Tools for manipulating UEFI secure boot platforms</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://git.kernel.org/cgit/linux/kernel/git/jejb/efitools.git">http://git.kernel.org/cgit/linux/kernel/git/jejb/efitools.git</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=efitools">efitools</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/efitools-git/">efitools-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>Ubuntu's Firmware Test Suite</b> — Test suite that performs sanity checks on Intel/AMD PC firmware</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://wiki.ubuntu.com/FirmwareTestSuite/">https://wiki.ubuntu.com/FirmwareTestSuite/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/fwts-git/">fwts-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h4><span class="mw-headline" id="efibootmgr">efibootmgr</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If <i>efibootmgr</i> does not work on your system, you can reboot into <a href="#UEFI_Shell">#UEFI Shell</a> and use <code>bcfg</code> to create a boot entry for the bootloader.</li>
+<li> If you are unable to use <code>efibootmgr</code>, some UEFI firmwares allow users to directly manage uefi boot entries from within its boot-time interface.  For example, some ASUS firmwares have an "Add New Boot Option" choice which enables you to select a local EFI System Partition and manually enter the EFI application location e.g. <code>\EFI\refind\refind_x64.efi</code>.</li>
+<li> The below commands use <a href="../en/REFInd.html" title="REFInd">rEFInd</a> boot-loader as example.</li>
+</ul>
+</div>
+<p>To add a new boot option using <i>efibootmgr</i> you need to know three things:
+</p>
+<ol>
+<li> The disk containing the ESP: <code>/dev/sd<i>X</i></code>
+</li>
+<li> The partition number of the ESP on that disk: the <code><i>Y</i></code> in <code>/dev/sdX<i>Y</i></code>
+</li>
+<li> The path to the UEFI application (relative to the root of the ESP)</li>
+</ol>
+<p>For example, if you want to add a boot option for <code>/boot/efi/EFI/refind/refind_x64.efi</code> where <code>/boot/efi</code> is the mount point of the ESP, run
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ findmnt /boot/efi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">TARGET    SOURCE     FSTYPE OPTIONS
+/boot/efi /dev/sda1  vfat   rw,flush,tz=UTC</pre>
+<p>In this example, this indicates that the ESP is on disk <code>/dev/sda</code> and has partition number 1. The path to the UEFI application relative to the root of the ESP is <code>/EFI/refind/refind_x64.efi</code>. So you would create the boot entry as follows:
+</p>
+<pre># efibootmgr --create --disk /dev/sda --part 1 --loader /EFI/refind/refind_x64.efi --label "rEFInd Boot Manager"
+</pre>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 8 efibootmgr">efibootmgr(8)</span> or <a rel="nofollow" class="external text" href="https://raw.githubusercontent.com/rhinstaller/efibootmgr/master/README">efibootmgr README</a> for more info.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>UEFI uses backward slash <code>\</code> as path separator but <i>efibootmgr</i> automatically converts UNIX-style <code>/</code> path separators.</div>
+<h2><span class="mw-headline" id="UEFI_Shell">UEFI Shell</span></h2>
+<p>The UEFI Shell is a shell/terminal for the firmware which allows launching uefi applications which include uefi bootloaders. Apart from that, the shell can also be used to obtain various other information about the system or the firmware like memory map (memmap), modifying boot manager variables (bcfg), running partitioning programs (diskpart), loading uefi drivers, editing text files (edit), hexedit etc.
+</p>
+<h3><span class="mw-headline" id="Obtaining_UEFI_Shell">Obtaining UEFI Shell</span></h3>
+<p>You can download a BSD licensed UEFI Shell from Intel's Tianocore UDK/EDK2 Sourceforge.net project:
+</p>
+<ul>
+<li> <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uefi-shell-git/">uefi-shell-git</a></span><sup><small>AUR</small></sup> (recommended) - provides x86_64 Shell in x86_64 system and IA32 Shell in i686 system - compiled directly from latest Tianocore EDK2 SVN source</li>
+<li> There are copies of Shell v1 and Shell v2 in the EFI directory on the Arch install media image.</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/tianocore/edk2/tree/master/ShellBinPkg">Precompiled UEFI Shell v2 binaries</a> (may not be up-to-date)</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/tianocore/edk2/tree/master/EdkShellBinPkg">Precompiled UEFI Shell v1 binaries</a> (not updated anymore upstream)</li>
+<li> <a rel="nofollow" class="external text" href="http://dl.dropbox.com/u/17629062/Shell2.zip">Precompiled UEFI Shell v2 binary with bcfg modified to work with UEFI pre-2.3 firmware</a> - from Clover EFI bootloader</li>
+</ul>
+<p>Shell v2 works best in UEFI 2.3+ systems and is recommended over Shell v1 in those systems. Shell v1 should work in all UEFI systems irrespective of the spec. version the firmware follows. More info at <a rel="nofollow" class="external text" href="http://sourceforge.net/apps/mediawiki/tianocore/index.php?title=ShellPkg">ShellPkg</a> and <a rel="nofollow" class="external text" href="http://sourceforge.net/mailarchive/message.php?msg_id=28690732">this mail</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup>
+</p>
+<h3><span class="mw-headline" id="Launching_UEFI_Shell">Launching UEFI Shell</span></h3>
+<p>Few Asus and other AMI Aptio x86_64 UEFI firmware based motherboards (from Sandy Bridge onwards) provide an option called <code>"Launch EFI Shell from filesystem device"</code> . For those motherboards, download the x86_64 UEFI Shell and copy it to your EFI System Partition as <code>&lt;EFI_SYSTEM_PARTITION&gt;/shellx64.efi</code> (mostly <code>/boot/efi/shellx64.efi</code>) .
+</p>
+<p>Systems with Phoenix SecureCore Tiano UEFI firmware are known to have embedded UEFI Shell which can be launched using either <code>F6</code>, <code>F11</code> or <code>F12</code> key.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are unable to launch UEFI Shell from the firmware directly using any of the above mentioned methods, create a FAT32 USB pen drive with <code>Shell.efi</code> copied as <code>(USB)/efi/boot/bootx64.efi</code>. This USB should come up in the firmware boot menu. Launching this option will launch the UEFI Shell for you.</div>
+<h3><span class="mw-headline" id="Important_UEFI_Shell_Commands">Important UEFI Shell Commands</span></h3>
+<p>UEFI Shell commands usually support <code>-b</code> option which makes output pause after each page. Run <code>help -b</code> to list available commands.
+</p>
+<p>More info at <a rel="nofollow" class="external free" href="http://software.intel.com/en-us/articles/efi-shells-and-scripting/">http://software.intel.com/en-us/articles/efi-shells-and-scripting/</a>
+</p>
+<h4><span class="mw-headline" id="bcfg">bcfg</span></h4>
+<p><code>bcfg</code> modifies the UEFI NVRAM entries which allows the user to change the boot entries or driver options. This command is described in detail in page 83 (Section 5.3) of "UEFI Shell Specification 2.0" PDF document.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> Try <code>bcfg</code> only if <code>efibootmgr</code> fails to create working boot entries on your system.</li>
+<li> UEFI Shell v1 official binary does not support <code>bcfg</code> command. See <a href="#Obtaining_UEFI_Shell">#Obtaining UEFI Shell</a> for a modified UEFI Shell v2 binary which may work in UEFI pre-2.3 firmwares.</li>
+</ul>
+</div>
+<p>To dump a list of current boot entries:
+</p>
+<pre>Shell&gt; bcfg boot dump -v
+</pre>
+<p>To add a boot menu entry for rEFInd (for example) as 4th (numbering starts from zero) option in the boot menu:
+</p>
+<pre>Shell&gt; bcfg boot add 3 fs0:\EFI\refind\refind_x64.efi "rEFInd"
+</pre>
+<p>where <code>fs0:</code> is the mapping corresponding to the EFI System Partition and <code>fs0:\EFI\refind\refind_x64.efi</code> is the file to be launched.
+</p>
+<p>To add an entry to boot directly into your system without a bootloader, configure a boot option using your kernel as an <a href="../en/EFISTUB.html#UEFI_Shell" title="EFISTUB">EFISTUB</a>:
+</p>
+<pre>Shell&gt; bcfg boot add <b>N</b> fs<b>V</b>:\vmlinuz-linux "Arch Linux"
+Shell&gt; bcfg boot -opt <b>N</b> "root=<b>/dev/sdX#</b> initrd=\initramfs-linux.img"
+</pre>
+<p>where <code>N</code> is the priority, <code>V</code> is the volume number of your EFI partition, and <code>/dev/sdX#</code> is your root partition.
+</p>
+<p>To remove the 4th boot option:
+</p>
+<pre>Shell&gt; bcfg boot rm 3
+</pre>
+<p>To move the boot option #3 to #0 (i.e. 1st or the default entry in the UEFI Boot menu):
+</p>
+<pre>Shell&gt; bcfg boot mv 3 0
+</pre>
+<p>For bcfg help text:
+</p>
+<pre>Shell&gt; help bcfg -v -b
+</pre>
+<p>or:
+</p>
+<pre>Shell&gt; bcfg -? -v -b
+</pre>
+<h4><span class="mw-headline" id="map">map</span></h4>
+<p><code>map</code> displays a list of device mappings i.e. the names of available file systems (<code>fs0</code>) and storage devices (<code>blk0</code>).
+</p>
+<p>Before running file system commands such as <code>cd</code> or <code>ls</code>, you need to change the shell to the appropriate file system by typing its name:
+</p>
+<pre>Shell&gt; fs0:
+fs0:\&gt; cd EFI/
+</pre>
+<h4><span class="mw-headline" id="edit">edit</span></h4>
+<p><code>edit</code> provides a basic text editor with an interface similar to nano, but slightly less functional. It handles UTF-8 encoding and takes care or LF vs CRLF line endings.
+</p>
+<p>For example, to edit rEFInd's <code>refind.conf</code> in the EFI System Partition (<code>fs0:</code> in the firmware),
+</p>
+<pre>Shell&gt; edit FS0:\EFI\refind\refind.conf
+</pre>
+<p>Type <code>Ctrl-E</code> for help.
+</p>
+<h2><span class="mw-headline" id="UEFI_Linux_Hardware_Compatibility">UEFI Linux Hardware Compatibility</span></h2>
+<p>See <a href="../en/Unified_Extensible_Firmware_Interface/Hardware.html" title="Unified Extensible Firmware Interface/Hardware">Unified Extensible Firmware Interface/Hardware</a> for more information.
+</p>
+<h2><span class="mw-headline" id="UEFI_Bootable_Media">UEFI Bootable Media</span></h2>
+<h3><span class="mw-headline" id="Create_UEFI_bootable_USB_from_ISO">Create UEFI bootable USB from ISO</span></h3>
+<p>Follow <a href="../en/USB_flash_installation_media.html#BIOS_and_UEFI_Bootable_USB" title="USB flash installation media">USB flash installation media#BIOS and UEFI Bootable USB</a>
+</p>
+<h3><span class="mw-headline" id="Remove_UEFI_boot_support_from_Optical_Media">Remove UEFI boot support from Optical Media</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This section mentions removing UEFI boot support from a <b>CD/DVD only</b> (Optical Media), not from a USB flash drive.</div>
+<p>Most of the 32-bit EFI Macs and some 64-bit EFI Macs refuse to boot from a UEFI(X64)+BIOS bootable CD/DVD. If one wishes to proceed with the installation using optical media, it might be necessary to remove UEFI support first.
+</p>
+<ul><li> Mount the official installation media and obtain the <code>archisolabel</code> as shown in the previous section.</li></ul>
+<pre># mount -o loop <i>input.iso</i> /mnt/iso
+</pre>
+<ul><li> Then rebuild the ISO, excluding the UEFI Optical Media booting support, using <code>xorriso</code> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libisoburn">libisoburn</a></span>. Be sure to set the correct archisolabel, e.g. "ARCH_201411" or similar:</li></ul>
+<pre>$ xorriso -as mkisofs -iso-level 3 \
+    -full-iso9660-filenames\
+    -volid "<i>archisolabel</i>" \
+    -appid "Arch Linux CD" \
+    -publisher "Arch Linux &lt;<a rel="nofollow" class="external free" href="https://www.archlinux.org">https://www.archlinux.org</a>&gt;" \
+    -preparer "prepared by $USER" \
+    -eltorito-boot isolinux/isolinux.bin \
+    -eltorito-catalog isolinux/boot.cat \
+    -no-emul-boot -boot-load-size 4 -boot-info-table \
+    -isohybrid-mbr "/mnt/iso/isolinux/isohdpfx.bin" \
+    -output <i>output.iso</i> /mnt/iso/</pre>
+<ul><li> Burn <code><i>output.iso</i></code> to optical media and proceed with installation normally.</li></ul>
+<h2><span class="mw-headline" id="Testing_UEFI_in_systems_without_native_support">Testing UEFI in systems without native support</span></h2>
+<h3><span class="mw-headline" id="OVMF_for_Virtual_Machines">OVMF for Virtual Machines</span></h3>
+<p><a rel="nofollow" class="external text" href="https://tianocore.github.io/ovmf/">OVMF</a> is a tianocore project to enable UEFI support for Virtual Machines. OVMF contains a sample UEFI firmware for QEMU.
+</p>
+<p>You can install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ovmf">ovmf</a></span> from the extra repository and run it as follows:
+</p>
+<pre>$ qemu-system-x86_64 -enable-kvm -net none -m 1024 -drive file=/usr/share/ovmf/ovmf_x64.bin,format=raw,if=pflash,readonly
+</pre>
+<p>As shorter alternative, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ovmf">ovmf</a></span> can be loaded using <code>-bios</code> parameter
+</p>
+<pre>$ qemu-system-x86_64 -enable-kvm -m 1G -bios /usr/share/ovmf/ovmf_x64.bin
+</pre>
+<h3><span class="mw-headline" id="DUET_for_BIOS_only_systems">DUET for BIOS only systems</span></h3>
+<p>DUET is a tianocore project that enables chainloading a full UEFI environment from a BIOS system, in a way similar to BIOS OS booting. This method is being discussed extensively in <a rel="nofollow" class="external free" href="http://www.insanelymac.com/forum/topic/186440-linux-and-windows-uefi-boot-using-tianocore-duet-firmware/">http://www.insanelymac.com/forum/topic/186440-linux-and-windows-uefi-boot-using-tianocore-duet-firmware/</a>. Pre-build DUET images can be downloaded from one of the repos at <a rel="nofollow" class="external free" href="https://gitorious.org/tianocore_uefi_duet_builds">https://gitorious.org/tianocore_uefi_duet_builds</a> <sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup>. Specific instructions for setting up DUET is available at <a rel="nofollow" class="external free" href="https://gitorious.org/tianocore_uefi_duet_builds/tianocore_uefi_duet_installer/blobs/raw/master/Migle_BootDuet_INSTALL.txt">https://gitorious.org/tianocore_uefi_duet_builds/tianocore_uefi_duet_installer/blobs/raw/master/Migle_BootDuet_INSTALL.txt</a> <sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup>.
+</p>
+<p>You can also try <a rel="nofollow" class="external free" href="http://sourceforge.net/projects/cloverefiboot/">http://sourceforge.net/projects/cloverefiboot/</a> which provides modified DUET images that may contain some system specific fixes and is more frequently updated compared to the gitorious repos.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Windows_7_will_not_boot_in_UEFI_Mode">Windows 7 will not boot in UEFI Mode</span></h3>
+<p>If you have installed Windows to a different hard disk with GPT partitioning and still have a MBR partitioned hard disk in your computer, then it is possible that the firmware (UEFI) is starting its CSM support (for booting MBR partitions) and therefore Windows will not boot. To solve this merge your MBR hard disk to GPT partitioning or disable the SATA port where the MBR hard disk is plugged in or unplug the SATA connector from this hard disk.
+</p>
+<p>Mainboards with this kind of problem:
+</p>
+<ul><li> Gigabyte Z77X-UD3H rev. 1.1 (UEFI version F19e)
+<ul><li> The firmware option for booting "UEFI Only" does not prevent the firmware from starting CSM.</li></ul>
+</li></ul>
+<h3><span class="mw-headline" id="Windows_changes_boot_order">Windows changes boot order</span></h3>
+<p>If you <a href="../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">dual boot with Windows</a> and your motherboard just boots Windows immediately instead of your chosen UEFI application, there are several possible causes and workarounds.
+</p>
+<ul>
+<li> Ensure <a href="../en/Dual_boot_with_Windows.html#Fast_Start-Up" title="Dual boot with Windows">Fast Startup</a> is disabled in your Windows power options</li>
+<li> Ensure <a href="../en/Secure_Boot.html" title="Secure Boot">Secure Boot</a> is disabled in your BIOS (if you are not using a signed boot loader)</li>
+<li> Ensure your UEFI boot order does not have Windows Boot Manager set first e.g. using <a href="#efibootmgr">#efibootmgr</a> and what you see in the configuration tool of the UEFI. Some motherboards override by default any settings set with efibootmgr by Windows if it detects it. This is confirmed in a Packard Bell laptop.</li>
+<li> If your motherboard is booting the default UEFI path (<code>\EFI\BOOT\BOOTX64.EFI</code>), this file may have been overwritten with the Windows boot loader. Try setting the correct boot path e.g. using <a href="#efibootmgr">#efibootmgr</a>.</li>
+<li> If the previous steps do not work, you can tell the Windows boot loader to run a different UEFI application. From a Windows Administrator command prompt: <pre># bcdedit /set {bootmgr} path \EFI\<i>path</i>\<i>to</i>\<i>app.efi</i></pre>
+</li>
+<li> Alternatively, you can set a startup script in Windows that ensures that the boot order is set correctly every time you boot Windows.
+<ol>
+<li> Open a command prompt with admin privlages. Run <code>bcdedit /enum firmware</code> and find your desired boot entry.</li>
+<li> Copy the Identifier, including the brackets, e.g. <code>{31d0d5f4-22ad-11e5-b30b-806e6f6e6963}</code>
+</li>
+<li> Create a batch file with the command <code>bcdedit /set {fwbootmgr} DEFAULT <i>{copied boot identifier}</i></code>
+</li>
+<li> Open <i>gpedit</i> and under <i>Local Computer Policy &gt; Computer Configuration &gt; Windows Settings &gt; Scripts(Startup/Shutdown)</i>, choose <i>Startup</i>
+</li>
+<li> Under the <i>Scripts</i> tab, choose the <i>Add</i> button, and select your batch file</li>
+</ol>
+</li>
+</ul>
+<h3><span class="mw-headline" id="USB_media_gets_struck_with_black_screen">USB media gets struck with black screen</span></h3>
+<p>This issue can occur due to <a href="../en/Kernel_mode_setting.html" title="KMS" class="mw-redirect">KMS</a> issue. Try <a href="../en/Kernel_mode_setting.html#Disabling_modesetting" title="Kernel mode setting">Disabling KMS</a> while booting the USB.
+</p>
+<h3><span class="mw-headline" id="Booting_64-bit_kernel_on_32-bit_UEFI">Booting 64-bit kernel on 32-bit UEFI</span></h3>
+<p>Both Official ISO (<a href="../en/Archiso.html" title="Archiso">Archiso</a>) and <a href="../en/Archboot.html" title="Archboot">Archboot</a> iso use EFISTUB (via <a href="../en/Systemd-boot.html" title="Systemd-boot">systemd-boot</a> Boot Manager for menu) for booting the kernel in UEFI mode. In such a case you have to use <a href="../en/GRUB.html" title="GRUB">GRUB</a> as the USB's UEFI bootloader by following the below section.
+</p>
+<h4><span class="mw-headline" id="Using_GRUB">Using GRUB</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The given configuration entries can also be entered inside a <a href="../en/GRUB.html#Using_the_command_shell" title="GRUB">GRUB command-shell</a>.</div>
+<ul><li> <a href="../en/USB_flash_installation_media.html#BIOS_and_UEFI_Bootable_USB" title="USB flash installation media">Create an USB Flash Installation</a>
+</li></ul>
+<ul><li> Backup <code>EFI/boot/loader.efi</code> to <code>EFI/boot/gummiboot.efi</code>
+</li></ul>
+<ul><li> <a href="../en/GRUB.html#GRUB_standalone" title="GRUB">Create a GRUB standalone image</a> and copy the generate <code>grub*.efi</code> to the USB as <code>EFI/boot/loader.efi</code> and/or <code>EFI/boot/bootia32.efi</code>
+</li></ul>
+<ul><li> Create <code>EFI/boot/grub.cfg</code> with the following contents (replace <code>ARCH_YYYYMM</code> with the required archiso label e.g. <code>ARCH_201507</code>):</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">grub.cfg for Official ISO</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+insmod part_gpt
+insmod part_msdos
+insmod fat
+
+insmod efi_gop
+insmod efi_uga
+insmod video_bochs
+insmod video_cirrus
+
+insmod font
+
+if loadfont "${prefix}/fonts/unicode.pf2" ; then
+    insmod gfxterm
+    set gfxmode="1024x768x32;auto"
+    terminal_input console
+    terminal_output gfxterm
+fi
+
+menuentry "Arch Linux archiso x86_64" {
+    set gfxpayload=keep
+    search --no-floppy --set=root --label ARCH_YYYYMM
+    linux /arch/boot/x86_64/vmlinuz archisobasedir=arch archisolabel=ARCH_YYYYMM add_efi_memmap
+    initrd /arch/boot/x86_64/archiso.img
+}
+
+menuentry "UEFI Shell x86_64 v2" {
+    search --no-floppy --set=root --label ARCH_YYYYMM
+    chainloader /EFI/shellx64_v2.efi
+}
+
+menuentry "UEFI Shell x86_64 v1" {
+    search --no-floppy --set=root --label ARCH_YYYYMM
+    chainloader /EFI/shellx64_v1.efi
+}
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">grub.cfg for Archboot ISO</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+insmod part_gpt
+insmod part_msdos
+insmod fat
+
+insmod efi_gop
+insmod efi_uga
+insmod video_bochs
+insmod video_cirrus
+
+insmod font
+
+if loadfont "${prefix}/fonts/unicode.pf2" ; then
+    insmod gfxterm
+    set gfxmode="1024x768x32;auto"
+    terminal_input console
+    terminal_output gfxterm
+fi
+
+menuentry "Arch Linux x86_64 Archboot" {
+    set gfxpayload=keep
+    search --no-floppy --set=root --file /boot/vmlinuz_x86_64
+    linux /boot/vmlinuz_x86_64 cgroup_disable=memory loglevel=7 add_efi_memmap
+    initrd /boot/initramfs_x86_64.img
+}
+
+menuentry "UEFI Shell x86_64 v2" {
+    search --no-floppy --set=root --file /boot/vmlinuz_x86_64
+    chainloader /EFI/tools/shellx64_v2.efi
+}
+
+menuentry "UEFI Shell x86_64 v1" {
+    search --no-floppy --set=root --file /boot/vmlinuz_x86_64
+    chainloader /EFI/tools/shellx64_v1.efi
+}
+</pre>
+<h3><span class="mw-headline" id="UEFI_boot_loader_does_not_show_up_in_firmware_menu">UEFI boot loader does not show up in firmware menu</span></h3>
+<p>On certain UEFI motherboards like some boards with an Intel Z77 chipset, adding entries with <code>efibootmgr</code> or <code>bcfg</code> from the EFI Shell will not work because they do not show up on the boot menu list after being added to NVRAM.
+</p>
+<p>This issue is caused because the motherboards can only load Microsoft Windows. To solve this you have to place the <code>.efi</code> file in the location that Windows uses.
+</p>
+<p>Copy the <code>bootx64.efi</code> file from the Arch Linux installation medium (<code>FSO:</code>) to the Microsoft directory your <a href="../en/EFI_System_Partition.html" title="ESP" class="mw-redirect">ESP</a> partition on your hard drive (<code>FS1:</code>). Do this by booting into EFI shell and typing:
+</p>
+<pre>FS1:
+cd EFI
+mkdir Microsoft
+cd Microsoft
+mkdir Boot
+cp FS0:\EFI\BOOT\bootx64.efi FS1:\EFI\Microsoft\Boot\bootmgfw.efi
+</pre>
+<p>After reboot, any entries added to NVRAM should show up in the boot menu.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/UEFI" class="extiw" title="wikipedia:UEFI">Wikipedia:UEFI</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.uefi.org/home/">UEFI Forum</a> - contains the official <a rel="nofollow" class="external text" href="http://uefi.org/specifications">UEFI Specifications</a> - GUID Partition Table is part of UEFI Specification</li>
+<li> <a rel="nofollow" class="external text" href="https://www.happyassassin.net/2014/01/25/uefi-boot-how-does-that-actually-work-then/">UEFI boot: how does that actually work, then? - A blog post by AdamW</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/plain/Documentation/x86/x86_64/uefi.txt">Linux Kernel x86_64 UEFI Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.intel.com/technology/efi/">Intel's page on EFI</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-07-16]</sup>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://firmware.intel.com/">Intel Architecture Firmware Resource Center</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://firmware.intel.com/blog/linux-efi-boot-stub">Matt Fleming - The Linux EFI Boot Stub</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://firmware.intel.com/blog/accessing-uefi-variables-linux">Matt Fleming - Accessing UEFI Variables from Linux</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/linux-uefi/">Rod Smith - Linux on UEFI: A Quick Installation Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://lkml.org/lkml/2011/6/8/322">UEFI Boot problems on some newer machines (LKML)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linuxplumbers.ubicast.tv/videos/plumbing-uefi-into-linux/">LPC 2012 Plumbing UEFI into Linux</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linuxplumbers.ubicast.tv/videos/uefi-tutorial-part-1/">LPC 2012 UEFI Tutorial : part 1</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linuxplumbers.ubicast.tv/videos/uefi-tutorial-part-2/">LPC 2012 UEFI Tutorial : part 2</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://sourceforge.net/apps/mediawiki/tianocore/index.php?title=Welcome_to_TianoCore">Intel's Tianocore Project</a> for Open-Source UEFI firmware which includes DuetPkg for direct BIOS based booting and OvmfPkg used in QEMU and Oracle VirtualBox</li>
+<li> <a rel="nofollow" class="external text" href="https://jdebp.eu/FGA/efi-boot-process.html">FGA: The EFI boot process</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.microsoft.com/whdc/device/storage/GPT_FAQ.mspx">Microsoft's Windows and GPT FAQ</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://gitorious.org/tianocore_uefi_duet_builds/pages/Windows_x64_BIOS_to_UEFI">Convert Windows x64 from BIOS-MBR mode to UEFI-GPT mode without Reinstall</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://gitorious.org/tianocore_uefi_duet_builds/pages/Linux_Windows_BIOS_UEFI_boot_USB">Create a Linux BIOS+UEFI and Windows x64 BIOS+UEFI bootable USB drive</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-08-21]</sup>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://rodsbooks.com/bios2uefi/">Rod Smith - A BIOS to UEFI Transformation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://software.intel.com/en-us/articles/efi-shells-and-scripting/">EFI Shells and Scripting - Intel Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://software.intel.com/en-us/articles/uefi-shell/">UEFI Shell  - Intel Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.hpuxtips.es/?q=node/293">UEFI Shell - bcfg command info</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

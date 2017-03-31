@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SPF - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SPF skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SPF</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><br>
+Sender Policy Framework (SPF) is a protocol to indentify qualified servers, which are allowed to send emails on behalf of a domain.
+It consists of two parts, a DNS TXT record explained in <a href="#Record">record</a> and a validating mail filter explained in <a href="#Validator">validator</a>.
+SPF can lead to problems when forwarding mail. For a solution for this see the Sender Rewrite Scheme (SRS) section below.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Record"><span class="tocnumber">1</span> <span class="toctext">Record</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Validator"><span class="tocnumber">2</span> <span class="toctext">Validator</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Installation"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Configuration"><span class="tocnumber">2.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Postfix_integration"><span class="tocnumber">2.3</span> <span class="toctext">Postfix integration</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Testing"><span class="tocnumber">2.4</span> <span class="toctext">Testing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Sender_Rewrite_Scheme_.28SRS.29"><span class="tocnumber">3</span> <span class="toctext">Sender Rewrite Scheme (SRS)</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Remarks"><span class="tocnumber">4</span> <span class="toctext">Remarks</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Known_problems"><span class="tocnumber">5</span> <span class="toctext">Known problems</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Record">Record</span></h2>
+<p>An example record could look like this <code>v=spf1 ip4:192.0.2.0/24 ip4:198.51.100.123 a -all</code> and is entered as TXT record of the email sending domain.
+</p>
+<p>The following mechanisms are supported:
+</p>
+<table class="wikitable">
+<tr>
+<th> Tag Name </th>
+<th>	Explanation
+</th>
+</tr>
+<tr>
+<td>ALL	</td>
+<td> Matches always; used for a default result like -all for all IPs not matched by prior mechanisms.
+</td>
+</tr>
+<tr>
+<td>A	</td>
+<td> Matches domains A and AAAA record
+</td>
+</tr>
+<tr>
+<td>IP4	</td>
+<td> Matches given IPv4 address or address range
+</td>
+</tr>
+<tr>
+<td>IP6	</td>
+<td> Matches given IPv6 address or address range
+</td>
+</tr>
+<tr>
+<td>MX	</td>
+<td> Matches domains mx record
+</td>
+</tr>
+<tr>
+<td>PTR	</td>
+<td> Matches PTR record. This mechanism is deprecated and should no longer be used.
+</td>
+</tr>
+<tr>
+<td>EXISTS	</td>
+<td> Matches if domain exists, regardless of the address. This is rarely used. Along with the SPF macro language it offers more complex matches like DNSBL-queries.
+</td>
+</tr>
+<tr>
+<td>INCLUDE	</td>
+<td> Includes the SPF record of a given domain
+</td>
+</tr>
+</table>
+<p>where you can use the following quantifiers:
+</p>
+<table class="wikitable">
+<tr>
+<th> Qantifier </th>
+<th>	Explanation
+</th>
+</tr>
+<tr>
+<td>+ </td>
+<td> PASS result. This can be omitted; e.g., +mx is the same as mx.
+</td>
+</tr>
+<tr>
+<td>? </td>
+<td> NEUTRAL result interpreted like NONE (no policy).
+</td>
+</tr>
+<tr>
+<td>~ </td>
+<td> SOFTFAIL, a debugging aid between NEUTRAL and FAIL. Typically, messages that return a SOFTFAIL are accepted but tagged.
+</td>
+</tr>
+<tr>
+<td>- </td>
+<td> FAIL, the mail should be rejected (see below).
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Validator">Validator</span></h2>
+<p>This is shown for <a href="../en/Postfix.html" title="Postfix">Postfix</a> only.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>There are several SPF validators available <a rel="nofollow" class="external autonumber" href="http://www.openspf.org/Implementations">[1]</a>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-mail-spf">perl-mail-spf</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-mail-spf-query">perl-mail-spf-query</a></span> can be found in the official Repositories.
+Below <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python-postfix-policyd-spf/">python-postfix-policyd-spf</a></span><sup><small>AUR</small></sup> is combined with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=postfix">postfix</a></span> mailserver.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>Edit <code>/etc/python-policyd-spf/policyd-spf.conf</code> to your needs. An extensively commented version can be found at <code>/etc/python-policyd-spf/policyd-spf.conf.commented</code>.
+Pay some extra attention to the HELO check policy, as standard settings strictly reject HELO failures.
+</p>
+<h3><span class="mw-headline" id="Postfix_integration">Postfix integration</span></h3>
+<p>In the main.cf add a timeout for the policyd:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/main.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">policy-spf_time_limit = 3600s</pre>
+<p>Then add a transport
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/master.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">policy-spf  unix  -       n       n       -       0       spawn
+     user=nobody argv=/usr/bin/policyd-spf</pre>
+<p>Lastly you need to add the policyd to the <code>smtpd_recipient_restrictions</code>. To minimize load put it to the end of the restrictions:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/main.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">smtpd_recipient_restrictions=
+     ...
+     permit_sasl_authenticated
+     permit_mynetworks
+     reject_unauth_destination
+     check_policy_service unix:private/policy-spf
+</pre>
+<h3><span class="mw-headline" id="Testing">Testing</span></h3>
+<p>You can test your Setup with the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/python-policyd-spf/policyd-spf.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">defaultSeedOnly = 0</pre>
+<h2><span class="mw-headline" id="Sender_Rewrite_Scheme_.28SRS.29">Sender Rewrite Scheme (SRS)</span></h2>
+<p>To prevent future SPF checks from failing when forwarding mails, SRS provides a scheme to rewrite the ENVELOPE-FROM field to your own domain, thus passing the SPF test at the recipient server. To prevent creating open relays and still catch and backwrite bounces, this often contains a hash of the original adress combined with a secret only known to the server, providing validability of bounce email.
+For <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=postfix">postfix</a></span> install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/postsrsd/">postsrsd</a></span><sup><small>AUR</small></sup> and adjust the settings:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postsrsd/postsrsd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SRS_DOMAIN=yourdomain.tld
+SRS_EXCLUDE_DOMAINS=yourotherdomain.tld,yet.anotherdomain.tld
+SRS_SEPARATOR==
+SRS_SECRET=/etc/postsrsd/postsrsd.secret
+SRS_FORWARD_PORT=10001
+SRS_REVERSE_PORT=10002
+RUN_AS=postsrsd
+CHROOT=/usr/lib/postsrsd</pre>
+<p>Enable and start the daemon, making sure it runs after reboot as well.
+Then configure postfix accordingly by tweaking the following lines:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/main.cf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">sender_canonical_maps = tcp:localhost:10001
+sender_canonical_classes = envelope_sender
+recipient_canonical_maps = tcp:localhost:10002
+recipient_canonical_classes= envelope_recipient,header_recipient</pre>
+<p>Restart postfix and start forwarding mail.
+</p>
+<h2><span class="mw-headline" id="Remarks">Remarks</span></h2>
+<p>SPF can even be helpful for domains not supposed to send email. Publishing a policy like <code>v=spfv -all</code> prevents anyone from sending in this domains name thus preventing misuse.
+</p>
+<h2><span class="mw-headline" id="Known_problems">Known problems</span></h2>
+<p>Some contact form providers send mails impersonating the sender using its email address in FROM-field. This is bad practice but still used, and leads to rejected emails with strict SPF policies (such als <code>v=spf1 a -all</code>).
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.kitterman.com/spf/validate.html">SPF Record Checker</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

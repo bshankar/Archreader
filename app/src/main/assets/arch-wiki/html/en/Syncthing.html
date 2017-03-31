@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Syncthing - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Syncthing skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Syncthing</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Synchronization_and_backup_programs.html" title="Synchronization and backup programs">Synchronization and backup programs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dropbox.html" title="Dropbox">Dropbox</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://syncthing.net">Syncthing</a> is an open-source file synchronization client/server application, written in Go, implementing its own, equally free Block Exchange Protocol. All transit communications between syncthing nodes are encrypted, and all nodes are uniquely identified with cryptographic certificates.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Starting_Syncthing"><span class="tocnumber">2</span> <span class="toctext">Starting Syncthing</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Run_binary"><span class="tocnumber">2.1</span> <span class="toctext">Run binary</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#System_service"><span class="tocnumber">2.2</span> <span class="toctext">System service</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#User_service"><span class="tocnumber">2.3</span> <span class="toctext">User service</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Accessing_the_web-interface"><span class="tocnumber">3</span> <span class="toctext">Accessing the web-interface</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Configuration"><span class="tocnumber">4</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Use_Inotify"><span class="tocnumber">5</span> <span class="toctext">Use Inotify</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Custom_Settings"><span class="tocnumber">5.1</span> <span class="toctext">Custom Settings</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Run_a_Relay"><span class="tocnumber">6</span> <span class="toctext">Run a Relay</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Stop_journal_spam"><span class="tocnumber">7</span> <span class="toctext">Stop journal spam</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Discovery_Server"><span class="tocnumber">8</span> <span class="toctext">Discovery Server</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Syncthing can be <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=syncthing">syncthing</a></span> or the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=syncthing-gtk">syncthing-gtk</a></span> package. This latter includes additional features such as synchronization by inotify, desktop notifications and integration with Nautilus, Nemo and Caja.
+</p>
+<p>After installing, you can <a href="#Starting_Syncthing">start Syncthing</a>.
+</p>
+<h2><span class="mw-headline" id="Starting_Syncthing">Starting Syncthing</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can run multiple copies of syncthing, but only one instance per user as syncthing locks the database to it. Check logs for errors related to locked database.</div>
+<h3><span class="mw-headline" id="Run_binary">Run binary</span></h3>
+<p>Run the <code>syncthing</code> binary manually from a terminal.
+</p>
+<h3><span class="mw-headline" id="System_service">System service</span></h3>
+<p>Running Syncthing as a system service ensures that it is running at startup even if the user has no active session, it is intended to be used on a server.
+</p>
+<p>Enable and start the service. Replace <i>myuser</i> with the actual Syncthing user after the @:
+</p>
+<pre># systemctl enable syncthing@myuser.service
+# systemctl start syncthing@myuser.service 
+</pre>
+<h3><span class="mw-headline" id="User_service">User service</span></h3>
+<p>Running Syncthing as a <a href="../en/Systemd/User.html" title="Systemd/User">user service</a> ensures that Syncthing only starts after the user has logged into the system (e.g., via the graphical login screen, or ssh). Thus, the user service is intended to be used on a (multiuser) desktop computer. It avoids unnecessarily running Syncthing instances. Run this provided <code>syncthing.service</code>:
+</p>
+<pre>$ systemctl --user enable syncthing.service
+$ systemctl --user start syncthing.service
+</pre>
+<p>The systemd services need to be started for a specific user in any case, see <a rel="nofollow" class="external text" href="http://docs.syncthing.net/users/autostart.html#using-systemd">Autostart-syncthing with systemd</a> for detailed information on the services. 
+</p>
+<h2><span class="mw-headline" id="Accessing_the_web-interface">Accessing the web-interface</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Syncthing can only be accessed on the running computer. Change <code>&lt;address&gt;127.0.0.1:8384&lt;/address&gt;</code> in <code>~/.config/syncthing/config.xml</code> to <code>&lt;address&gt;0.0.0.0:8384&lt;/address&gt;</code> and restart the <a href="../en/Systemd.html" title="Systemd">systemd</a> service to allow access from another computer.</div>
+<p>When Syncthing is started, a web interface will be provided by default on <a rel="nofollow" class="external text" href="http://localhost:8384">localhost port 8384</a>. If you started syncthing manually, it should open the admin page in your browser.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In syncthing releases before 0.11 (or when you have updated from 0.10) the web interface is available at port 8080. Since port 8080 often conflicts with web development utilities <a rel="nofollow" class="external text" href="https://github.com/syncthing/syncthing/commit/960c0cbddf8802ae440f2f9ae33bced4e2d72e44">the default port has been changed to port 8384</a> ('ST' in ASCII). Custom port number can be configured under "GUI Listen Addresses" in the settings, configuration from versions prior to 0.11 were <b>not</b> adjusted automatically.</div>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>After installation Syncthing already has a proper start-up configuration. You may now add new servers and/or folders by visiting the web interface. For detailed instructions on how to set up a simple network, read <a rel="nofollow" class="external text" href="http://docs.syncthing.net/intro/getting-started.html">Syncthing's getting started</a>. 
+</p>
+<p>After a successful first start, it will create the default repository at <code>~/Sync</code>. You can see this in the web admin interface. On the right is the list of nodes you have added. On the left is the list of repositories, which are folders you can choose to share with other nodes.
+</p>
+<p>To add another node, click "Add Node" underneath the list of nodes. You will be prompted for their Node ID (which can be found on the other machine by clicking <code>Edit &gt; Show ID</code>) as well as a short name and the address.
+If you specify "dynamic" for the address, the syncthing announce server will be used to automatically exchange addresses between nodes. If you want to know more about Node IDs, including the cryptographic implications, you can read the appropriate <a rel="nofollow" class="external text" href="http://docs.syncthing.net/dev/device-ids.html">Syncthing documentation page</a>.
+</p>
+<p>After saving the configuration, you will be prompted to restart the syncthing server, and once restarted, the changes will be applied.
+</p>
+<p>Next, you can either change the configuration of the default node (click its name and then <code>Edit</code>), or create a new one to share data with. Simply tick the node you wish to share the data with, and they will have permission to access it.
+</p>
+<h2><span class="mw-headline" id="Use_Inotify">Use Inotify</span></h2>
+<p>Inotify (inode notify) is a Linux kernel subsystem that acts to extend filesystems to notice changes to the filesystem, and report those changes to applications. Syncthing does not support Inotify yet but there is an official extension module which talks to the Syncthing REST API. The usage of Inotify avoids expensive rescans every minute. The rescan interval of each folder is automatically increased to avoid expensive, regular rescans. Syncthing-inotify can be installed with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=syncthing-inotify">syncthing-inotify</a></span> package. If Syncthing is managed through systemd, it is ensured by systemd dependencies that <code>syncthing-inotify.service</code> is started and stopped automatically.
+</p>
+<h3><span class="mw-headline" id="Custom_Settings">Custom Settings</span></h3>
+<p>Run <code>$ syncthing-inotify -help</code> for available options, such as setting the API key.
+</p>
+<p>To set options for syncthing-inotify service, create a <code>.conf</code> file in <code>/etc/systemd/user/syncthing-inotify.service.d/</code> (When running as <a href="#User_service">#User service</a>) and/or <code>/etc/systemd/system/syncthing-inotify@<b>user</b>.service.d/</code> (<a href="#System_service">#System service</a>), e.g.:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/user/syncthing-inotify.service.d/start.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+ExecStart=
+ExecStart=/usr/bin/syncthing-inotify -logflags=0 -api="0M6ubcgtcy7KBLucu0jeXrgqB8U7YKp9"
+RuntimeDirectory=syncthing-inotify</pre>
+<h2><span class="mw-headline" id="Run_a_Relay">Run a Relay</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b>  (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Syncthing">Talk:Syncthing#</a>)</div>
+</div>
+<p>Since version 0.12 Syncthing has the ability to connect two devices via a relay when there exists no direct path between them. There is a default set of relays that is used out of the box. Relayed connections are encrypted in the usual manner, end to end, so the relay has no more insight into the connection than any other random eavesdropper on the internet <a rel="nofollow" class="external autonumber" href="https://forum.syncthing.net/t/syncthing-v0-12-beryllium-bedbug-release-notes-v0-12-0-beta1/5480?u=rumpelsepp">[1]</a>. To run a relay install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/syncthing-relaysrv-git/">syncthing-relaysrv-git</a></span><sup><small>AUR</small></sup> from AUR, then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>syncthing-relaysrv.service</code> service.
+</p>
+<p>More information about the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/syncthing-relaysrv-git/">syncthing-relaysrv-git</a></span><sup><small>AUR</small></sup> package are available in the <a rel="nofollow" class="external text" href="https://forum.syncthing.net/t/syncthing-relaysrv-for-arch-linux/5862u=rumpelsepp">Syncthing forum</a>.
+</p>
+<p>Per default the relay joins the <a rel="nofollow" class="external text" href="https://relays.syncthing.net/">Syncthing relay pool</a> and is publicy available. Rate limiting and other options can be configured via command line flags (check <code>syncthing-relaysrv -help</code>). To edit the command line flags just create a <a href="../en/Systemd.html#Drop-in_snippets" title="Systemd">drop-in snippet</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for <code>syncthing-relaysrv.service</code> and replace the <code>ExecStart</code> directive:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/syncthing-relaysrv.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Service]
+ExecStart=
+ExecStart=/usr/bin/syncthing-relaysrv FLAGS</pre>
+<p>A traffic statistics page is available at port 22070, e.g. <a rel="nofollow" class="external free" href="http://78.47.248.86:22070/status">http://78.47.248.86:22070/status</a>.
+</p>
+<h2><span class="mw-headline" id="Stop_journal_spam">Stop journal spam</span></h2>
+<p>Syncthing can be quite noise even while it isn't doing anything. The service ExecStart can be overridden like this to filter output directly without an extra script (adjust "grep" as needed):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/syncthing@.service.d/nospam.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Service]
+ExecStart=
+ExecStart=/bin/bash -c 'set -o pipefail; /usr/bin/syncthing -no-browser -no-restart -logflags=0 | grep -v "INFO: "'</pre>
+<h2><span class="mw-headline" id="Discovery_Server">Discovery Server</span></h2>
+<p>The Syncthing Discovery Server is available in the AUR under <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/syncthing-discosrv/">syncthing-discosrv</a></span><sup><small>AUR</small></sup>. Documentation is provided <a rel="nofollow" class="external text" href="https://docs.syncthing.net/users/discosrv.html">here</a>. 
+</p>
+<p>Note, that the discovery server requires certificates to run, which should ideally be placed in <code>/var/discosrv</code>, and the user/group <code>syncthing</code> needs permissions to able to read the certificate files. Currently, you will need to edit the systemd unit file to correctly point to the certificates (as well as any other configuration changes you want to undertake, see <a rel="nofollow" class="external text" href="https://docs.syncthing.net/users/discosrv.html#configuring">list</a>).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/syncthing-discosrv.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Syncthing discovery server
+After=network.target
+
+[Service]
+User=syncthing
+Group=syncthing
+ExecStart=/bin/sh -c "/usr/bin/syncthing-discosrv -db-dsn='file:///var/discosrv/discosrv.db' -cert /var/discosrv/chain.pem -key /var/discosrv/key.pem"
+Restart=on-failure
+SuccessExitStatus=2
+
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>To point the client at your discovery server, change the <code>Global Discovery Servers</code> variable under Settings, to point to <code>https://yourserver:8443/</code> (default port) or whatever port you have reconfigured to. The variable takes a comma-seperated list of discovery servers, it is possible to include multiple ones, including the default one. 
+</p>
+<p>If you are using self-signed certificates, the client will refuse to connect unless you append the discovery server ID to its domain. The ID is printed to stdout upon launching the discovery server. Amend the Global Discovery Servers entry to add the ID: <code>https://yourserver.com:8443/?id=AAAAAAA-BBBBBBB-CCCCCCC-DDDDDDD-EEEEEEE-FFFFFFF-GGGGGGG-HHHHHHH</code>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>See <a rel="nofollow" class="external text" href="http://docs.syncthing.net/dev/debugging.html">Debugging syncthing</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

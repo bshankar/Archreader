@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Varnish - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Varnish skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Varnish</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Varnish Cache is a web application accelerator also known as a caching HTTP reverse proxy. You install it in front of any server that speaks HTTP and configure it to cache the contents.
+</p>
+<h2><span class="mw-headline" id="Multiple_backends">Multiple backends</span></h2>
+<p>By default, varnish comes configured in <code>/etc/varnish/default.vcl</code> to use <b>localhost:8080</b> as the only backend, default.vcl is called by the default systemd varnish.service file :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"> /usr/lib/systemd/system/varnish.service </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Web Application Accelerator
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/varnishd -a 0.0.0.0:80 -f /etc/varnish/default.vcl -T localhost:6082 -s malloc,64M -u nobody -g nobody -F
+ExecReload=/usr/bin/varnish-vcl-reload
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>systemctl enable merely makes a symlink to the default
+</p>
+<pre>$ systemctl enable varnish
+ln -s '/usr/lib/systemd/system/varnish.service' '/etc/systemd/system/multi-user.target.wants/varnish.service'</pre>
+<p>instead copy it and edit to increase malloc default.vcl etc:
+</p>
+<pre>$ cp '/usr/lib/systemd/system/varnish.service' '/etc/systemd/system/varnish.service'</pre>
+<p>then enable varnish and it will use your customized .service file instead:
+</p>
+<pre>$ systemctl enable varnish
+ln -s '/etc/systemd/system/varnish.service' '/etc/systemd/system/multi-user.target.wants/varnish.service'</pre>
+<p>Also, if you change the config file <code>/etc/varnish/default.vcl</code> you'll need to reload varnish:
+</p>
+<pre>$ systemctl reload varnish.service</pre>
+<p>or restart
+</p>
+<pre>$ systemctl restart varnish.service</pre>
+<h3><span class="mw-headline" id="Manual_VCL_load">Manual VCL load</span></h3>
+<p>If the previous VCL configuration reload failed, try loading the VCL file manually:
+</p>
+<ol>
+<li> Connect to the varnish console: <pre>$ varnishadm -T localhost:6082</pre>
+</li>
+<li> Load the default VCL. Make sure it has at least one backend: <pre>varnish&gt; vcl.load default /etc/varnish/default.vcl</pre>
+</li>
+<li> Make it active: <pre>varnish&gt; vcl.use default</pre>
+</li>
+<li> Start the child proccess (optional): <pre>varnish&gt; start</pre>
+</li>
+</ol>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

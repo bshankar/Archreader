@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PostGIS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PostGIS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PostGIS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>PostGIS adds support for geographic objects in the PostgreSQL database. This document describes the process for installing PostGIS and creating a template PostGIS database. It is assumed that PostgreSQL has been installed. If it hasn't, please refer to the <a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a> page.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing_PostGIS"><span class="tocnumber">1</span> <span class="toctext">Installing PostGIS</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Installing_PostGIS_Extension"><span class="tocnumber">2</span> <span class="toctext">Installing PostGIS Extension</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Creating_a_Template_PostGIS_Database"><span class="tocnumber">3</span> <span class="toctext">Creating a Template PostGIS Database</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Creating_a_PostGIS_Database_From_the_Template"><span class="tocnumber">4</span> <span class="toctext">Creating a PostGIS Database From the Template</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#More_Resources"><span class="tocnumber">5</span> <span class="toctext">More Resources</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#PostGIS_failing_with_json_tokener_error"><span class="tocnumber">6</span> <span class="toctext">PostGIS failing with json_tokener_error</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing_PostGIS">Installing PostGIS</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=postgis">postgis</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Installing_PostGIS_Extension">Installing PostGIS Extension</span></h2>
+<p>Since [[PostgreSQL 9.1]<a rel="nofollow" class="external autonumber" href="http://postgis.net/docs/postgis_installation.html#make_install_postgis_extensions">[1]</a>], the preferred approach is to install PostGIS and enable postgis extension for each spatial database.
+</p>
+<pre>$ psql
+
+-- verify available extensions
+SELECT name, default_version,installed_version 
+FROM pg_available_extensions WHERE name LIKE 'postgis%' ;
+
+-- install extension for spatial database mygisdb
+\c mygisdb
+CREATE EXTENSION postgis;
+CREATE EXTENSION postgis_topology;
+CREATE EXTENSION fuzzystrmatch;
+CREATE EXTENSION postgis_tiger_geocoder;
+</pre>
+<p>You don't need to do the below "Creating a Template PostGIS Database" step if you use PostGIS extension.
+</p>
+<ul><li> upgrade postgis extension</li></ul>
+<pre>$ psql
+
+ALTER EXTENSION postgis UPDATE TO "2.1.0";
+</pre>
+<ul><li> migrate spatial database created with postgis_template</li></ul>
+<p>Dump and drop the spatial database, re-create a spatial database with extension, and restore the dumped database.  Follow <a rel="nofollow" class="external free" href="http://www.postgis.net/docs/postgis_installation.html#hard_upgrade">http://www.postgis.net/docs/postgis_installation.html#hard_upgrade</a> for specific commands.
+</p>
+<h2><span class="mw-headline" id="Creating_a_Template_PostGIS_Database">Creating a Template PostGIS Database</span></h2>
+<ul><li>Become the postgres user.</li></ul>
+<pre>$ su
+# su - postgres
+</pre>
+<ul><li>If you haven't created a superuser for accessing PostgreSQL, you may want do that now. You will be prompted for granting permissions to that user.</li></ul>
+<pre>$ createuser [username]
+</pre>
+<ul><li>Create a new database called "template_postgis".</li></ul>
+<pre>$ createdb -O [username] template_postgis -E UTF-8
+</pre>
+<ul><li>PostGIS requires the pl/pgSQL language to be installed on a database.</li></ul>
+<pre>$ createlang plpgsql template_postgis
+</pre>
+<ul><li>Load the PostGIS spatial types for PostgreSQL and spatial reference systems. "postgis.sql" and "spatial_ref_sys.sql" are part of the installation of PostGIS, and may reside somewhere else besides "/usr/sharepostgresql/contrib/postgis-2.1/" depending on the installation. <i>(Below is for default postgis 2.1 installation)</i>
+</li></ul>
+<pre>$ psql -d template_postgis -f /usr/share/postgresql/contrib/postgis-2.1/postgis.sql
+$ psql -d template_postgis -f /usr/share/postgresql/contrib/postgis-2.1/spatial_ref_sys.sql
+</pre>
+<ul><li>Make it a real template. </li></ul>
+<pre>$ psql
+
+UPDATE pg_database SET datistemplate = TRUE WHERE datname = 'template_postgis';
+</pre>
+<h2><span class="mw-headline" id="Creating_a_PostGIS_Database_From_the_Template">Creating a PostGIS Database From the Template</span></h2>
+<ul><li>It's common practice to reserve a bare template for creating new PostGIS databases. As a PostgreSQL superuser, the following command will create a new database:</li></ul>
+<pre>$ createdb -T template_postgis [new_postgis_db]
+</pre>
+<h2><span class="mw-headline" id="More_Resources">More Resources</span></h2>
+<p>For additional resources concerning PostGIS, check out the <a rel="nofollow" class="external text" href="http://postgis.refractions.net/documentation/">PostGIS Documentation</a>.
+</p>
+<h2><span class="mw-headline" id="PostGIS_failing_with_json_tokener_error">PostGIS failing with json_tokener_error</span></h2>
+<p>This happends when adding postgis as an extension.  The libjson-c package has changed, and PostGIS hasn't put out a stable release with this yet.  Its in 2.1.0rc1, though.  The bug-report is <a rel="nofollow" class="external free" href="http://trac.osgeo.org/postgis/ticket/2213">http://trac.osgeo.org/postgis/ticket/2213</a>
+</p>
+<p>The fix is to download the postgis PKGBUILD and then change the version to '2.1.0rc1'.  Don't forget to change the sha256sum.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Database_management_systems.html" title="Category:Database management systems">Database management systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

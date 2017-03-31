@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Package Proxy Cache - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Package_Proxy_Cache skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Package Proxy Cache</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>If you want to install the same Arch packages over and over - like for testing AIF profiles - it could help if you wouldn't have to get the packages every time from the internet. This article shows you how to setup a <a href="../en/Squid.html" title="Squid">Squid</a> proxy that only caches arch packages and can be used with aif/pacman/wget/etc with minimal configuration on the client system.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Install_Squid"><span class="tocnumber">1</span> <span class="toctext">Install Squid</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configure_Squid"><span class="tocnumber">2</span> <span class="toctext">Configure Squid</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Cache_Rules"><span class="tocnumber">2.1</span> <span class="toctext">Cache Rules</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Maximum_Filesize"><span class="tocnumber">2.2</span> <span class="toctext">Maximum Filesize</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Cache_Directory"><span class="tocnumber">2.3</span> <span class="toctext">Cache Directory</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Shutdown_Lifetime"><span class="tocnumber">2.4</span> <span class="toctext">Shutdown Lifetime</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Start_Squid"><span class="tocnumber">3</span> <span class="toctext">Start Squid</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Follow_Squid_access_log"><span class="tocnumber">4</span> <span class="toctext">Follow Squid access log</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Manual_Arch_Install"><span class="tocnumber">5</span> <span class="toctext">Manual Arch Install</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Intercepting_local_requests"><span class="tocnumber">6</span> <span class="toctext">Intercepting local requests</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Install_Squid">Install Squid</span></h2>
+<pre># pacman -S squid</pre>
+<h2><span class="mw-headline" id="Configure_Squid">Configure Squid</span></h2>
+<p>This is the minimum configuration to get squid cache arch packages.
+</p>
+<h3><span class="mw-headline" id="Cache_Rules">Cache Rules</span></h3>
+<p>Before defining these rules, remove/comment (if you do not need them) all the default refresh_patterns
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/squid/squid.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">refresh_pattern \.pkg\.tar\.   0       20%     4320      reload-into-ims
+refresh_pattern .              0       0%      0</pre>
+<p>That should define that *.pkg.tar.* gets cached, and anything else should not.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external free" href="http://www.squid-cache.org/Doc/config/refresh_pattern">http://www.squid-cache.org/Doc/config/refresh_pattern</a>
+</div>
+<h3><span class="mw-headline" id="Maximum_Filesize">Maximum Filesize</span></h3>
+<p>Objects larger than this size will NOT be saved on disk:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/squid/squid.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">maximum_object_size 256 MB</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external free" href="http://www.squid-cache.org/Doc/config/maximum_object_size">http://www.squid-cache.org/Doc/config/maximum_object_size</a>
+</div>
+<h3><span class="mw-headline" id="Cache_Directory">Cache Directory</span></h3>
+<p>Set the cache dir and its maximum size and subdirs:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/squid/squid.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">cache_dir aufs /var/cache/squid 10000 16 256</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external free" href="http://www.squid-cache.org/Doc/config/cache_dir">http://www.squid-cache.org/Doc/config/cache_dir</a>
+</div>
+<h3><span class="mw-headline" id="Shutdown_Lifetime">Shutdown Lifetime</span></h3>
+<p>Time to wait until all active client sockets are closed:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/squid/squid.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">shutdown_lifetime 1 seconds </pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external free" href="http://www.squid-cache.org/Doc/config/shutdown_lifetime">http://www.squid-cache.org/Doc/config/shutdown_lifetime</a>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<p>Every time you change the cache_dir path (and after fresh install), you need to (re)create this directory:
+</p>
+<pre># squid -z</pre>
+<p>and it could be helpful to check the config file before running squid:
+</p>
+<pre># squid -k check</pre>
+</div>
+<h2><span class="mw-headline" id="Start_Squid">Start Squid</span></h2>
+<pre># systemctl start squid.service</pre>
+<p>or if squid is already running:
+</p>
+<pre># systemctl restart squid.service</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<p>It could be helpful to check the config file before running:
+</p>
+<pre># squid -k check</pre>
+</div>
+<h2><span class="mw-headline" id="Follow_Squid_access_log">Follow Squid access log</span></h2>
+<p>To see the access to squid:
+</p>
+<pre># tail -f /var/log/squid/access.log</pre>
+<p>You should see this for packages that are directed to original host:
+</p>
+<pre>...TCP_MISS/200...DIRECT...</pre>
+<p>and for packages that are delivered from the cache:
+</p>
+<pre>...TCP_HIT/200...NONE...</pre>
+<h2><span class="mw-headline" id="Manual_Arch_Install">Manual Arch Install</span></h2>
+<p>Before running /arch/setup, add variables for your proxy. To do so, run on the console:
+</p>
+<pre># export http_proxy='<a rel="nofollow" class="external free" href="http://your_squid_machine_ip:3128'">http://your_squid_machine_ip:3128'</a><br># export ftp_proxy='<a rel="nofollow" class="external free" href="ftp://your_squid_machine_ip:3128'">ftp://your_squid_machine_ip:3128'</a></pre>
+<p>Now just use /arch/setup to normally install the system, and it should use your proxy. Watch the squid logs to verify this.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you want to use the proxy settings in the installed system, you need to add the http_proxy and/or ftp_proxy variables in an appropriate place on the installed system. (like /etc/profile.d/proxy.sh)</div>
+<h2><span class="mw-headline" id="Intercepting_local_requests">Intercepting local requests</span></h2>
+<p>If you want all HTTP requests on local machine <i>automagically</i> go through squid, we first need to add an intercepting port for squid:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/squid/squid.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">http_port 3127 intercept</pre>
+<p>and iptables rules to redirect all (except the ones from squid) port 80 requests to squid:
+</p>
+<pre># iptables -t nat -A OUTPUT -p tcp --dport 80 -m owner --uid-owner proxy -j ACCEPT
+# iptables -t nat -A OUTPUT -p tcp --dport 80 -j REDIRECT --to-ports 3127</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external free" href="http://wiki.squid-cache.org/ConfigExamples/Intercept/LinuxLocalhost">http://wiki.squid-cache.org/ConfigExamples/Intercept/LinuxLocalhost</a>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+if you get random slow download speeds in vagrant/packer/virtualbox, try using <code>virtio</code> network device type.</div>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_management.html" title="Category:Package management">Package management</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

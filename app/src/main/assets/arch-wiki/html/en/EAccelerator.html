@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>EAccelerator - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-EAccelerator skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">EAccelerator</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>eAccelerator is a free open-source PHP accelerator &amp; optimizer. It increases the performance of PHP scripts by caching them in their compiled state, so that the overhead of compiling is almost completely eliminated. It also optimizes scripts to speed up their execution. eAccelerator typically reduces server load and increases the speed of your PHP code by 1-10 times.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Enable_it_in_PHP"><span class="tocnumber">2</span> <span class="toctext">Enable it in PHP</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Check_if_installation_was_ok"><span class="tocnumber">3</span> <span class="toctext">Check if installation was ok</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Sources"><span class="tocnumber">5</span> <span class="toctext">Sources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Download the tarball from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/eaccelerator/">eaccelerator</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/eaccelerator">aur-mirror</a>]</sup> or use your favorite tool for AUR.
+</p>
+<p>IMPORTANT: If you are having problems with open_basedir, you need to edit the PKGBUILD, change the ./configure line to
+</p>
+<pre>./configure --without-eaccelerator-use-inode --prefix=/usr
+</pre>
+<p>I recommend that you do it anyway since future versions of eAccelerator won't be using inodes.
+You can find more info here: <a rel="nofollow" class="external free" href="http://eaccelerator.net/ticket/104#comment:13">http://eaccelerator.net/ticket/104#comment:13</a>
+</p>
+<p>Compile the package with
+</p>
+<pre>makepkg -s
+</pre>
+<h2><span class="mw-headline" id="Enable_it_in_PHP">Enable it in PHP</span></h2>
+<p>After the discussion here and the guidance by Spider.007 (also the maintainer of the AUR package) it is clear that you should do nothing special in order for eAccelerator to work.
+</p>
+<h2><span class="mw-headline" id="Check_if_installation_was_ok">Check if installation was ok</span></h2>
+<p>You can either from the command line or using phpinfo(). If the command line php binary uses the same configuration file as the php-fastcgi version and/or the mod_php version, you can check it by executing:
+</p>
+<pre>$ php -v
+</pre>
+<p>If installation was succesfull you should see something similar to the following:
+</p>
+<pre>Zend Engine v2.3.0, Copyright (c) 1998-2011 Zend Technologies
+   with eAccelerator v0.9.6.1, Copyright (c) 2004-2010 eAccelerator, by eAccelerator
+</pre>
+<p>This will show eAccelerator has been loaded successfully, but this doesn't necessarily show that eAccelerator is working like it should. Load a php script running on your webserver in your browser. Assuming you didn't disable the filecache with shm_only = 1, a cached script should appear in the cache directory.
+</p>
+<p>You could/should also check using phpinfo(). To do so add:
+</p>
+<pre>&lt;?php
+  phpinfo();
+?&gt;
+</pre>
+<p>to a file and open it with your browser. eAccelerator should have its own section.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>If you get this error
+</p>
+<pre>PHP Warning:  Module 'eAccelerator' already loaded in Unknown on line 0
+</pre>
+<p>Then eAccelerator is loaded twice in your config files. Make sure you are not loading eAccelerator in both php.ini and its own config file. If you followed this wiki you shouldn't be having this problem.
+</p>
+<p>If after upgrading php (through pacman) you get this
+</p>
+<pre>[eAccelerator] This build of "eAccelerator" was compiled for PHP version 5.3.6. Rebuild it for your PHP version (5.3.8) or download precompiled binaries.
+</pre>
+<p>Then uninstall eAccelerator (I did a pacman -Rcsun eaccelerator), rebuild it from AUR and reinstall. Everything should be fine once again.
+</p>
+<h2><span class="mw-headline" id="Sources">Sources</span></h2>
+<ul>
+<li>
+<a href="../en/Lighttpd.html#FastCGI_and_PHP_with_eAcceleration" title="Lighttpd for SSL and non-SSL" class="mw-redirect">Lighttpd for SSL and non-SSL#FastCGI and PHP with eAcceleration</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> - helped me install eAccelerator and contains most of the above info and more.</li>
+<li><a rel="nofollow" class="external text" href="http://eaccelerator.net/wiki/Settings">eAccelerator Wiki, Settings</a></li>
+<li><a rel="nofollow" class="external text" href="http://eaccelerator.net/ticket/104">eAccelerator info on open_basedir errors</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.sitepoint.com/forums/server-management-97/module-eaccelerator-already-loaded-644487.html">Module 'eAccelerator' already loaded</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

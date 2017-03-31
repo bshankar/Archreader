@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Virtual Private Server - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Virtual_Private_Server skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Virtual Private Server</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Server.html" title="Server">Server</a></li>
+</ul>
+</div>
+<p>From <a href="https://en.wikipedia.org/wiki/Virtual_private_server" class="extiw" title="wikipedia:Virtual private server">Wikipedia:Virtual private server</a>:
+</p>
+<dl><dd>Virtual private server (VPS) is a term used by Internet hosting services to refer to a virtual machine. The term is used for emphasizing that the virtual machine, although running in software on the same physical computer as other customers' virtual machines, is in many respects functionally equivalent to a separate physical computer, is dedicated to the individual customer's needs, has the privacy of a separate physical computer, and can be configured to run server software.</dd></dl>
+<p>This article discusses the use of Arch Linux on Virtual Private Servers, and includes some fixes and installation instructions specific to VPSes.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Linux 2.6.32 is not supported by systemd since version 205 (and will not work with systemd-212 or higher). Since many container-based virtualization environments rely on older kernels, it may be impossible to keep an Arch Linux install up-to-date in such an environment.  However, OpenVZ, as of <a rel="nofollow" class="external text" href="http://openvz.org/Download/kernel/rhel6/042stab094.7">kernel build 042stab094.7</a>, has backported the CLOCK_BOOTTIME feature, making it work with later versions of systemd.</li>
+<li> Systemd since version 220 doesn't work on OpenVZ containers. <a rel="nofollow" class="external autonumber" href="https://github.com/systemd/systemd/issues/421">[1]</a>  This issue has been fixed in OpenVZ kernel 042stab111.1 <a rel="nofollow" class="external autonumber" href="https://bugzilla.openvz.org/show_bug.cgi?id=3280#c11">[2]</a>
+</li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Providers_that_offer_Arch_Linux"><span class="tocnumber">1</span> <span class="toctext">Providers that offer Arch Linux</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#KVM"><span class="tocnumber">2.1</span> <span class="toctext">KVM</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#OpenVZ"><span class="tocnumber">2.2</span> <span class="toctext">OpenVZ</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5">
+<a href="#Installing_the_latest_Arch_Linux_on_any_OpenVZ_provider"><span class="tocnumber">2.2.1</span> <span class="toctext">Installing the latest Arch Linux on any OpenVZ provider</span></a>
+<ul>
+<li class="toclevel-4 tocsection-6"><a href="#Prerequisites"><span class="tocnumber">2.2.1.1</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-4 tocsection-7"><a href="#Building_a_clean_Arch_Linux_installation"><span class="tocnumber">2.2.1.2</span> <span class="toctext">Building a clean Arch Linux installation</span></a></li>
+<li class="toclevel-4 tocsection-8"><a href="#Replacing_everything_on_the_VPS_with_the_Arch_build"><span class="tocnumber">2.2.1.3</span> <span class="toctext">Replacing everything on the VPS with the Arch build</span></a></li>
+<li class="toclevel-4 tocsection-9"><a href="#Configuration"><span class="tocnumber">2.2.1.4</span> <span class="toctext">Configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#Xen"><span class="tocnumber">2.3</span> <span class="toctext">Xen</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Providers_that_offer_Arch_Linux">Providers that offer Arch Linux</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>We cannot vouch for the honesty or quality of any provider. Please conduct due diligence before ordering.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This list is for providers with a convenient Arch Linux template. Using Arch on other providers is possible but requires more work.  Example methods include: 
+<ul>
+<li> Loading custom disc images (requires hardware virtualization such as in Xen or KVM), </li>
+<li> <a href="../en/Installation_guide.html" title="Installation guide">Installing under chroot</a>, for example with the help of the <a rel="nofollow" class="external text" href="https://github.com/drizzt/vps2arch">vps2arch</a> script (it will download the latest iso; be particularly aware of the  systemd 220/221 <a rel="nofollow" class="external text" href="https://github.com/systemd/systemd/issues/421">bug</a>), or </li>
+<li> Following <a href="#Installing_the_latest_Arch_Linux_on_any_OpenVZ_provider">#Installing the latest Arch Linux on any OpenVZ provider</a> instructions, using rsync to synchronize Arch over the top of another distribution.</li>
+</ul>
+</div>
+<table class="wikitable">
+<tr>
+<th> Provider </th>
+<th> Arch Release </th>
+<th> Virtualization </th>
+<th> Locations </th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.4smart.cz/">4smart.cz</a> </td>
+<td> 2013.08 </td>
+<td> OpenVZ </td>
+<td> Prague, CZ </td>
+<td> (Czech language site only) when updating system make sure you use [tredaelli-systemd] in pacman.conf (see <a href="../en/Unofficial_user_repositories.html" title="Unofficial user repositories">Unofficial user repositories</a>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.affinity.net.nz/">affinity.net.nz</a> </td>
+<td> 2013.08.01 </td>
+<td> KVM </td>
+<td> Auckland, New Zealand (NZ) </td>
+<td> IRC channel is #affinity on ircs.kiwicon.org
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.atlantic.net/">Atlantic.Net</a> </td>
+<td> 2015.05.01 </td>
+<td> KVM </td>
+<td> NYC/SF/Toronto/Dallas/Orlando, US &amp; Canada </td>
+<td> 100% SSD 1-click Arch Linux, ready in 30 seconds
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.buyvm.net/">BuyVM</a> </td>
+<td> 2013.07.01 </td>
+<td> KVM </td>
+<td> LA, Buffalo NY </td>
+<td> Must chose a different OS at sign up.  Once accessible, choose to mount the latest Arch ISO and reboot to install manually.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://coinshost.com/en/vps">Coinshost</a> </td>
+<td> 2015.04 </td>
+<td> Xen </td>
+<td> Zurich, Switzerland </td>
+<td> Bitcoin and other cryptocurrencies accepted.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.directvps.nl/">DirectVPS</a> </td>
+<td> 2014.01.xx </td>
+<td> OpenVZ </td>
+<td> Amsterdam, NL; Rotterdam, NL </td>
+<td> (Dutch language site only)
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.edis.at/en/">Edis</a> </td>
+<td> <a rel="nofollow" class="external text" href="http://www.edis.at/en/support-and-service/faq/server-faq/which-distributions-are-available-with-edis-kvm-vps-plans/">2013.03.01</a> </td>
+<td> vServer, KVM, OpenVZ </td>
+<td> <a rel="nofollow" class="external text" href="http://www.edis.at/en/server/kvm-vps/austria/">Multiple international locations</a>. </td>
+<td> Also offer dedicated server options as well as an "off-shore" location at the Isle of Man (IM).
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.gandi.net/hosting/">Gandi</a> </td>
+<td> 2013.10.27 </td>
+<td> Xen </td>
+<td> Paris, FR; Baltimore, MD, US; Bissen, LU </td>
+<td> Very granular scaling of system resources (e.g. RAM, disk space); IPv6-only option available; you can supply your own install image, version based on keyring package version; Baltimore facility shutting down 2016-12-01
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.gigatux.com/virtual.php">GigaTux</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://www.gigatux.com/distro/">2013.06.01</a> </td>
+<td> Xen </td>
+<td> Chicago, US-IL; Frankfurt, DE; London, GB; San Jose, US-CA </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.hostvirtual.com/">Host Virtual</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://www.hostvirtual.com/os/linux-vps/archlinux-vps">2014.06.01</a> </td>
+<td> KVM </td>
+<td> <a rel="nofollow" class="external text" href="http://www.vr.org/cloud-locations/">Multiple International Locations</a> </td>
+<td> Appears to use KVM virtualization. Site lists "Xen based virtualization" and <a rel="nofollow" class="external text" href="http://www.vr.org/features/">features</a> lists ability to install from ISO.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://hostigation.com/">Hostigation</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://hostigation.com/wiki/index.php?title=KVM:Install">2010.05 i686</a> </td>
+<td> OpenVZ, KVM </td>
+<td> Charlotte, US-NC; Los Angeles, US-CA </td>
+<td> You can <a href="../en/Migrating_between_architectures.html" title="Migrating Between Architectures Without Reinstalling" class="mw-redirect">migrate to x86_64</a>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.kloud51.com">Kloud51</a> </td>
+<td> Latest </td>
+<td> OpenVZ </td>
+<td> US-CA, Canada </td>
+<td> SSD, 2 images available:  A bare-bones system or a pre-configured Desktop with OpenBox, XRDP, Firefox, SSH Brute Force, Geany, and Yaourt.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://leapswitch.com">Leapswitch Networks</a> </td>
+<td> 2013.10.xx </td>
+<td> OpenVZ/KVM </td>
+<td> USA, India, Portugal, Spain, Ukraine, Germany </td>
+<td> Arch Linux currently available in Control Panel for reinstall, not on order form.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://linevast.de">Linevast.de</a> </td>
+<td> Latest </td>
+<td> OpenVZ, KVM </td>
+<td> Germany </td>
+<td> Arch Linux is possible on openvz and on KVM with the one click os installer.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.linode.com">Linode.com</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://www.linode.com/faq.cfm">2015.08 and 2015.02</a> </td>
+<td> Xen, KVM </td>
+<td> <a rel="nofollow" class="external text" href="https://www.linode.com/speedtest/">Tokyo, JP; Multiple US; London, GB</a> </td>
+<td> To run a custom kernel, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-linode/">linux-linode</a></span><sup><small>AUR</small></sup> (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> will break on a 32-bit Linode). When shipped, the NIC enp4s0 is renamed to eth0 and reverts back to enp4s0 on reboot --- on reboot, this may cause sshd load to fail.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://lylix.net/">LYLIX</a> </td>
+<td> <a rel="nofollow" class="external text" href="http://lylix.net/archlinux">2014.01.xx</a> </td>
+<td> OpenVZ </td>
+<td> Multiple US; Europe </td>
+<td> 32-bit and 64-bit available
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.nodedeploy.com/">Node Deploy</a> </td>
+<td> 2014.10.01 </td>
+<td> OpenVZ, KVM </td>
+<td> Germany (DE); Los Angeles, US-CA; Atlanta, US-GA; Phoenix, US-AZ </td>
+<td> "At NodeDeploy we support virtually every linux distribution." Arch Linux is listed under their Operating Systems. No version information.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.netcup.de/">Netcup</a> </td>
+<td> 2012.11.xx </td>
+<td> KVM </td>
+<td> Germany (DE)</td>
+<td> (German language site only)
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.onepoundwebhosting.co.uk/">OnePoundWebHosting</a> </td>
+<td> 2014.01 </td>
+<td> Xen PV, Xen HVM </td>
+<td> United Kingdom (UK) </td>
+<td> They are a registrar too. Unable to verify server locations.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.ovh.com/us/vps/">OVH</a> </td>
+<td> Latest </td>
+<td> KVM </td>
+<td> France, Canada </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.pacmanvps.com/">PacmanVPS</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://panel.pacmanvps.com/machines/new">Latest</a> </td>
+<td> KVM </td>
+<td> Canada (CA), Poland (PL) </td>
+<td> Support for any kernel. Ready to use template or install manually from ISO in VNC console.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.proplay.de/">Proplay</a> </td>
+<td> Latest </td>
+<td> OpenVZ, KVM </td>
+<td> Germany (DE) </td>
+<td> (German language site only)
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.rackspace.com/cloud/servers">Rackspace Cloud</a> </td>
+<td> 2013.6 </td>
+<td> Xen </td>
+<td> <a rel="nofollow" class="external text" href="https://www.rackspace.com/whyrackspace/network/datacenters/">Multiple international locations</a> </td>
+<td> Billed per hour. Use their "next gen" VPSes (using the mycloud.rackspace.com panel); the Arch image on the first gen Rackspace VPSes is out of date.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.ramhost.us/">RamHost.us</a> </td>
+<td> <a rel="nofollow" class="external text" href="http://www.ramhost.us/?page=news">2013.05.01</a> </td>
+<td> OpenVZ, KVM </td>
+<td> Los Angeles, US-CA; Great Britain (GB); Atlanta, US-GA; Germany (DE) </td>
+<td> You can request a newer ISO on RamHost's IRC network.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.ramnode.com/">RamNode</a>  </td>
+<td> <a rel="nofollow" class="external text" href="https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&amp;id=48">2016.01.01</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&amp;id=39">SSD and SSD Cached:</a> <a rel="nofollow" class="external text" href="https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&amp;id=52">KVM</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&amp;id=50">Alblasserdam, NL; Atlanta, GA-US; Los Angeles, CA-US; New York, NY-US; Seattle, WA-US</a> </td>
+<td>  You can request Host/CPU passthrough with KVM service.<a rel="nofollow" class="external autonumber" href="https://clientarea.ramnode.com/knowledgebase.php?action=displayarticle&amp;id=66">[3]</a> Frequent use of discount promotions.<a rel="nofollow" class="external autonumber" href="https://twitter.com/search?q=ramnode%20code&amp;src=typd">[4]</a>, Must install Arch manually from an ISO using VNC viewer.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.rosehosting.com/">RoseHosting</a> </td>
+<td> Latest </td>
+<td> OpenVZ, KVM </td>
+<td> St. Louis, Missouri, USA </td>
+<td> SSD powered hosting plans with free fully-managed 24/7 support
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.tilaa.com/">Tilaa</a> </td>
+<td> 2016.03.01 </td>
+<td> <a rel="nofollow" class="external text" href="https://www.tilaa.com/pages/vps/technology">KVM</a> </td>
+<td> Amsterdam, NL </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.transip.eu/">TransIP</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://www.transip.eu/vps/vps-os/">2016.02.01</a> </td>
+<td> <a rel="nofollow" class="external text" href="https://www.transip.eu/vps/vps-technology/">KVM</a> </td>
+<td> Amsterdam, NL </td>
+<td> Also registrar.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://upcube.io">upCUBE</a> </td>
+<td> Latest </td>
+<td> Docker </td>
+<td> Germany </td>
+<td> Different prepared arch linux templates available
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.xenvz.co.uk/">XenVZ</a> </td>
+<td> 2009.12.07 </td>
+<td> OpenVZ, Xen </td>
+<td> United Kingdom (UK), United States (US) </td>
+<td> <a rel="nofollow" class="external text" href="http://www.xenvz.co.uk/faq.php#use2">Hardware</a>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://virpus.com/">Virpus</a> </td>
+<td> <a rel="nofollow" class="external text" href="http://virpus.com/linux-vps.php">2014.11.07</a> </td>
+<td> Xen </td>
+<td> Kansas City, US-KS; Los Angeles, US-CA </td>
+<td> A subcompany of Wow Technologies, Inc.  24/7 support via Live Chat, Email, Phone, and Ticket System.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.virtualmaster.com/">Virtual Master</a> </td>
+<td> 2012-08 </td>
+<td> ?? </td>
+<td> Prague, CZ </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.vmline.pl/">VMLine</a> </td>
+<td> 2013.09.01 </td>
+<td> KVM, OpenVZ </td>
+<td> Kraków, PL </td>
+<td> (Polish language site only) <a rel="nofollow" class="external text" href="http://www.s-net.pl/en/">S-Net</a> reseller. Full virtualization.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.vpsbg.eu/">VPSBG.eu</a> </td>
+<td> 2013.10 </td>
+<td> OpenVZ </td>
+<td> <a rel="nofollow" class="external text" href="https://vpsbg.eu/en/index.php?page=vps-datacenter">Sofia, Bulgaria</a> </td>
+<td> Offshore VPS in Bulgaria - anonymous registrations and Bitcoin are accepted.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://vps6.net/">VPS6.NET</a> </td>
+<td> 2013.01.xx </td>
+<td> OpenVZ, Xen, HVM-ISO </td>
+<td> <a rel="nofollow" class="external text" href="http://vps6.net/network/">Multiple US</a>; Frankfurt, DE; Bucharest, RO; Istanbul, TR </td>
+<td> Registrar.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.world4you.com/">World4You</a> </td>
+<td> 2015.10.28 </td>
+<td> OpenVZ </td>
+<td> Austria (AT) </td>
+<td> Internet hosting provider; quick setup; 24/7 support; shared web hosting; also CentOS, Debian, Ubuntu, Fedora and Arch OpenVZ servers; supports newest systemd (227 atm)
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="KVM">KVM</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Are there instructions specific to VPSes? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Virtual_Private_Server">Talk:Virtual Private Server#</a>)</div>
+</div>
+<p>See <a href="../en/QEMU.html#Preparing_an_.28Arch.29_Linux_guest" title="QEMU">QEMU#Preparing an (Arch) Linux guest</a>.
+</p>
+<h3><span class="mw-headline" id="OpenVZ">OpenVZ</span></h3>
+<h4><span class="mw-headline" id="Installing_the_latest_Arch_Linux_on_any_OpenVZ_provider">Installing the latest Arch Linux on any OpenVZ provider</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>See the <a href="#top">above warning</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> about older kernel builds and systemd.</div>
+<p>It is possible to directly copy an installation of Arch Linux over the top of a working OpenVZ VPS.  This tutorial explains how to create a basic installation of Arch Linux with <code>pacstrap</code> (as used in a standard install) and then replace the contents of a target VPS with it using <a href="../en/Rsync.html" title="Rsync">rsync</a>.
+</p>
+<p>This process (with minor modification) also works to migrate existing Arch installations between various environments and has been confirmed to work in migrating from OpenVZ to Xen and from Xen to OpenVZ.  For an install to Xen, other hardware-virtualized platforms, or probably even to physical hardware (unconfirmed), extra steps (basically running <code>mkinitcpio</code> and <a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">installing a bootloader</a>) are needed.
+</p>
+<h5><span class="mw-headline" id="Prerequisites">Prerequisites</span></h5>
+<ul>
+<li> A working Arch Linux installation
+<ul>
+<li> To keep things simple, it should match the architecture you want to install on your VPS (x86_64 or i686).</li>
+<li> To build from other distributions, <a href="../en/Install_from_existing_Linux.html" title="Archbootstrap" class="mw-redirect">arch-bootstrap.sh</a> can be used in place of <code>pacstrap</code>.</li>
+</ul>
+</li>
+<li> The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rsync">rsync</a></span>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span> packages from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>
+<ul><li> SSH is not strictly required, but rsync over SSH is the method used here.</li></ul>
+</li>
+<li> A VPS running any distribution, with <code>rsync</code> and a working SSH server
+<ul><li> Its architecture (x86_64 or i686) does not matter as long as the OpenVZ installation can support your target architecture.</li></ul>
+</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since Arch Linux uses symlinks for <code>/bin</code>, <code>/sbin</code>, <code>/lib</code> and <code>/lib64</code>, it is recommended to use a distribution that does the same to avoid issues while installing Arch Linux with <code>rsync</code>. An example of such a distribution is Fedora 23.</div>
+<ul><li> OpenVZ's serial console feature (usually accessible via your provider's control panel)
+<ul><li> Without this, any network configuration for the target VPS will have to be done immediately after the "Build" step below.</li></ul>
+</li></ul>
+<h5><span class="mw-headline" id="Building_a_clean_Arch_Linux_installation">Building a clean Arch Linux installation</span></h5>
+<p>As root, build the installation (optionally replacing <code>build</code> with your preferred target directory):
+</p>
+<pre># mkdir build
+# pacstrap -cd build
+</pre>
+<p>Other tweaks for the <code>pacstrap</code> command:
+</p>
+<ul>
+<li>
+<code>-C custom-pacman-config.conf</code> - Use a custom pacman configuration file. By default, <code>pacstrap</code> builds according to your local pacman.conf.  This determines the architecture (i686 or x86_64) of the build, the mirror list, etc.</li>
+<li>
+<code>-G</code> - Prevent <code>pacstrap</code> from copying your system's pacman keyring to the new build. If you use this option, you will need to run <code>pacman-key --init</code> and <code>pacman-key --populate archlinux</code> in the <a href="#Configuration">Configuration</a> step to set up the keyring.</li>
+<li>
+<code>-M</code> - Prevent <code>pacstrap</code> from copying your system's pacman mirror list to the new build.</li>
+<li>You can pass a list of packages to <code>pacstrap</code> to add them to your install, instead of the default <code>base</code> group. For example: <code>pacstrap -cd build base openssh dnsutils gnu-netcat traceroute vim</code>
+</li>
+</ul>
+<h5><span class="mw-headline" id="Replacing_everything_on_the_VPS_with_the_Arch_build">Replacing everything on the VPS with the Arch build</span></h5>
+<p>Replace all files, directories, etc. on your target VPS with the contents of your <code>build</code> directory (replacing "YOUR.VPS.IP.ADDRESS" below):
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Be careful with the following command. By design, <code>rsync</code> is very destructive, especially with any of the <code>--delete</code> options.</div>
+<pre># rsync -axH --delete-delay -e ssh --stats -P build/ YOUR.VPS.IP.ADDRESS:/
+</pre>
+<p>Explanation of options:
+</p>
+<p>At minimum, only the <code>-a</code> (preserve timestamps, permissions, etc.), <code>-x</code> (do not cross filesystem boundaries), and <code>--delete</code> (delete anything in the target that does not exist in the source) options are required.  The <code>--delete-delay</code> option is an alternate deletion mode which waits to delete anything until the synchronization is otherwise complete; this is not necessary but may reduce the risk of a slow transfer causing the target VPS to lock-up. The <code>-H</code> causes hardlinks to be preserved. The <code>-e ssh</code> (use rsync over SSH) option is recommended and makes things simple.  The <code>--stats</code> and <code>-P</code> options are just to show more information.
+</p>
+<h5><span class="mw-headline" id="Configuration">Configuration</span></h5>
+<ol>
+<li> Reboot the VPS externally (using your provider's control panel, for example).</li>
+<li> Using OpenVZ's serial console feature, configure the <a href="../en/Network_configuration.html" title="Network" class="mw-redirect">network</a> and <a href="../en/Installation_guide.html#Configure_the_system" title="Installation guide">basic system settings</a> (ignoring fstab generation and arch-chroot steps).
+<ul>
+<li> If you do not have access to the serial console feature, you will need to preconfigure your network settings before synchronizing Arch to the VPS.</li>
+<li> On some VPS configuration you won't have a gateway to connect to, here is an example <a href="../en/Netctl.html" title="Netctl">netctl</a> configuration for this setup. It configures static IP addresses and default routes on venet0 and uses Google Public DNS.</li>
+</ul>
+</li>
+</ol>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/venet</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Description='VPS venet connection'
+Interface=venet0
+Connection=ethernet
+
+IP=static
+Address=('192.0.2.42/32')
+Routes=('default')
+
+IP6=static
+Address6=('2001:db8::1234:5678/128')
+Routes6=('default')
+
+DNS=('2001:4860:4860::8888' '2001:4860:4860::8844' '8.8.8.8' '8.8.4.4')</pre>
+<h3><span class="mw-headline" id="Xen">Xen</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Are there instructions specific to VPSes? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Virtual_Private_Server">Talk:Virtual Private Server#</a>)</div>
+</div>
+<p>See <a href="../en/Xen.html#Arch_as_Xen_guest_.28PVHVM_mode.29" title="Xen">Xen#Arch as Xen guest (PVHVM mode)</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> and/or <a href="../en/Xen.html#Arch_as_Xen_guest_.28PV_mode.29" title="Xen">Xen#Arch as Xen guest (PV mode)</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+<li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

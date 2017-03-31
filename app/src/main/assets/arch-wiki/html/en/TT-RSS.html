@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>TT-RSS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-TT-RSS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">TT-RSS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Tiny Tiny RSS is an open source web-based news feed (RSS/Atom) aggregator, designed to allow you to read news from any location, while feeling as close to a real desktop application as possible.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tt-rss">tt-rss</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>tt-rss is installed into <code>/usr/share/webapps/tt-rss/</code>; you'll need to make this directory available from your web server. The simplest way is to do :
+</p>
+<p>- With <a href="../en/Apache_HTTP_Server.html" title="Apache HTTP Server">Apache HTTP Server</a> :
+</p>
+<pre># ln -s /usr/share/webapps/tt-rss /srv/http/tt-rss 
+</pre>
+<p>- With <a href="../en/Nginx.html" title="Nginx">Nginx</a> :
+</p>
+<pre># ln -s /usr/share/webapps/tt-rss /usr/share/nginx/http/tt-rss
+</pre>
+<h3><span class="mw-headline" id="Set_up_php_and_database">Set up php and database</span></h3>
+<p>You'll need to set up a database, either <a href="../en/MySQL.html" title="MySQL">MySQL</a> or <a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a>. Create a user and database, e.g. with mysql:
+</p>
+<pre>$ mysql -p -u root
+mysql&gt; CREATE USER 'ttrss'@'localhost' IDENTIFIED BY 'somepassword';
+mysql&gt; CREATE DATABASE ttrss;
+mysql&gt; GRANT ALL PRIVILEGES ON ttrss.* TO "ttrss"@"localhost" IDENTIFIED BY 'somepassword';
+</pre>
+<p>You also need to add some paths to <code>/etc/php/php.ini</code> (starting with PHP 7.0 it is <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/php-70-packages-released/">unset by default</a>, so no change is required):
+</p>
+<pre>...
+open_basedir = ... :/usr/share/webapps/:/etc/webapps/:/var/lib/tt-rss
+...
+</pre>
+<p>In the same file, enable the following modules:
+</p>
+<pre>extension=curl.so
+extension=iconv.so
+extension=mysqli.so # extension=pdo_mysql.so might be an alternative
+extension=soap.so
+</pre>
+<p>Application initialization can be done either automatically or manually.
+</p>
+<p>Automatic way:
+</p>
+<ul>
+<li> remove default config file <code>/etc/webapps/tt-rss/config.php</code>, without this file tt-rss webapp enters installation wizard.</li>
+<li> navigate to (your-servers-root)/tt-rss/ and proceed with the installer.</li>
+<li> save generated config file to <code>/etc/webapps/tt-rss/config.php</code>.</li>
+</ul>
+<p>Manual way:
+</p>
+<ul>
+<li> edit tt-rss config file<code>/etc/webapps/tt-rss/config.php</code> and update database settings.</li>
+<li> re-create database from <code>/usr/share/webapps/tt-rss/schema/ttrss_schema_TYPE.sql</code>. With MySQL run:</li>
+</ul>
+<pre>$ mysql --user ttrss --password=&lt;PASSWORD&gt; ttrss &lt; /usr/share/webapps/tt-rss/schema/ttrss_schema_mysql.sql
+</pre>
+<h3><span class="mw-headline" id="Set_up_an_update_daemon">Set up an update daemon</span></h3>
+<p>See <a rel="nofollow" class="external free" href="https://tt-rss.org/gitlab/fox/tt-rss/wikis/UpdatingFeeds">https://tt-rss.org/gitlab/fox/tt-rss/wikis/UpdatingFeeds</a> – but you should be able to simply
+</p>
+<pre># systemctl enable tt-rss
+</pre>
+<p>Do 
+</p>
+<pre>$ systemctl status tt-rss
+</pre>
+<p>to check that it's running fine.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

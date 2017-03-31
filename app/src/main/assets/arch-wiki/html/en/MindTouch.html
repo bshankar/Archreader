@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>MindTouch - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-MindTouch skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">MindTouch</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>MindTouch is an enterprise wiki and collaborative portal.  For more information, see the <a href="https://en.wikipedia.org/wiki/MindTouch_Core" class="extiw" title="wikipedia:MindTouch Core">Wikipedia article</a>, and the <a rel="nofollow" class="external text" href="https://sourceforge.net/projects/dekiwiki/">SourceForge project</a>.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Feel free to follow along on the <a rel="nofollow" class="external text" href="http://developer.mindtouch.com/en/docs/mindtouch_setup/010Installation/080Installing_from_source">MindTouch Installation Guide</a>.  However, these installation instructions assume you'll be using <a href="../en/Nginx.html" title="Nginx">Nginx</a> instead of <a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a>.
+</p>
+<ul>
+<li> Install <a href="../en/MySQL.html" title="MySQL">MySQL</a>.</li>
+<li> Install <a href="../en/Nginx.html" title="Nginx">Nginx</a> and php-fpm.</li>
+<li> Compile the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mindtouch/">mindtouch</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/mindtouch">aur-mirror</a>]</sup> <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a> package and install the resulting <code>mindtouch</code> and <code>mindtouch-setup</code> packages.</li>
+<li> If you would like to use <a rel="nofollow" class="external text" href="http://www.princexml.com/">Prince</a> to allow PDF export, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/princexml/">princexml</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Although Prince is not free for commercial use, there is an <a rel="nofollow" class="external text" href="http://www.princexml.com/purchase/mindtouch">explicit exception</a> made for MindTouch, which allows it to be used for free, even if your MindTouch installation will be used for commercial purposes.  (A note is added to the first page of every generated PDF.)  Prince can also be installed at a later date if necessary.</div>
+<ul><li> The <code>mindtouch</code> package added a file that can be used to simplify the nginx configuration, but you'll need to create a link to it in your nginx configuration directory. As root:</li></ul>
+<pre>
+# cd /etc/nginx/conf
+# ln -s /usr/share/mindtouch/nginx-rewrites mindtouch-rewrites
+</pre>
+<ul><li> Add the following configuration to nginx, modifying to suit your needs:</li></ul>
+<pre>
+server {
+  listen       80;
+  server_name  mindtouch;
+
+  location / {
+    root /usr/share/webapps/mindtouch;
+    index index.php;
+    include mindtouch-rewrites;
+  }
+
+  location ~ \.php$ {
+    root          /usr/share/webapps/mindtouch;
+    fastcgi_pass  unix:/var/run/php-fpm/php-fpm.sock;
+    fastcgi_buffers 256 4k;
+    fastcgi_buffer_size 128k;
+    include       fastcgi.conf;
+  }
+
+  location /@api/ {
+    proxy_pass <a rel="nofollow" class="external free" href="http://localhost:8081/">http://localhost:8081/</a>;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Host $host:$server_port;
+  }
+}
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The fastcgi buffer configuration is necessary, or certain MindTouch pages will cause a Bad Gateway error because the returned HTTP headers are too large for the default buffer size.</div>
+<ul><li> Edit the <code>/etc/php/php.ini</code> file, and ensure that the paths assigned to <code>open_basedir</code> contain the following:
+<ul>
+<li> /usr/share/webapps/</li>
+<li> /etc/webapps/</li>
+<li> /usr/bin</li>
+</ul>
+</li></ul>
+<p>For instance:
+</p>
+<pre>open_basedir = /srv/http/:/home/:/tmp/:/usr/share/pear/:/usr/share/webapps:/etc/webapps:/usr/bin</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>/usr/bin</code> is required because MindTouch needs to run certain external tools, such as <code>/usr/bin/identify</code> (from ImageMagick).  This is not a serious security risk, as the <code>http</code> user is still not able to write to <code>/usr/bin</code>.</div>
+<ul><li> Restart Nginx and php-fpm if necessary, and open the relevant URL in your favourite web browser (e.g. <a rel="nofollow" class="external free" href="http://mindtouch">http://mindtouch</a>).</li></ul>
+<ul><li> Select "MindTouch Core", and proceed through the installation steps.  Pay special attention to specifying <code>localhost</code> as the database host (instead of <code>127.0.0.1</code>).  This will ensure that the unix socket is used for communication with the database.  By default, MySQL does not enable network access.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have a remote MySQL installation, enter those details here, but be aware that further configuration will be required shortly, and this has not yet been tested with this package.</div>
+<ul><li> After clicking "Install MindTouch", you should be taken to a confirmation page indicating that your MindTouch licence was successfully generated.</li></ul>
+<ul><li> Please <b>ignore</b> the instructions provided in the "You're not done yet!" section.  Instead, perform the following commands, which achieve the same goal:</li></ul>
+<pre>
+# mindtouch-install-config
+# pacman -R mindtouch-setup
+</pre>
+<ul><li> If you have a remote MySQL server, you'll need to follow these additional steps:
+<ul>
+<li> Edit the <code>/etc/webapps/mindtouch/mindtouch.deki.startup.xml</code> file.</li>
+<li> Search for the <code>db-options</code> configuration.</li>
+<li> Remove the <code>server=/var...</code> key.</li>
+<li> Replace <code>Protocol=unix</code> with <code>Protocol=socket</code>.</li>
+</ul>
+</li></ul>
+<ul><li> Start the MindTouch API:</li></ul>
+<pre>
+# /etc/rc.d/mindtouch start
+</pre>
+<ul><li> Click "Continue to MindTouch".</li></ul>
+<h2><span class="mw-headline" id="Installing_or_Removing_Prince">Installing or Removing Prince</span></h2>
+<p>MindTouch can be configured to start using Prince if it's installed after the MindTouch installation.  It's also possible to remove Prince, in which case the PDF export option becomes unavailable in MindTouch.
+</p>
+<ul>
+<li> Install (or remove) the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/princexml/">princexml</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.</li>
+<li> Edit the <code>/etc/webapps/mindtouch/mindtouch.deki.startup.xml</code> file.</li>
+<li> Find the <code>princexml-path</code> configuration tag.</li>
+<li> Set the content of the tag to be <code>/usr/bin/prince</code>, or remove it if you want to remove Prince.</li>
+<li> Restart the MindTouch API.</li>
+</ul>
+<h2><span class="mw-headline" id="More_Resources">More Resources</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://developer.mindtouch.com">MindTouch Community Portal</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

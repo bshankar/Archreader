@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Alienware 13 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Alienware_13 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Alienware 13</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This article documents configuration and troubleshooting specific to the Alienware 13 laptop.
+</p>
+<p>See the <a href="../en/Installation_guide.html" title="Installation guide">Installation guide</a> for general installation instructions.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Getting_Linux_to_boot"><span class="tocnumber">1</span> <span class="toctext">Getting Linux to boot</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Touchpad"><span class="tocnumber">2</span> <span class="toctext">Touchpad</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Wireless"><span class="tocnumber">3</span> <span class="toctext">Wireless</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Switchable_graphics"><span class="tocnumber">4</span> <span class="toctext">Switchable graphics</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Keyboard_Lights"><span class="tocnumber">5</span> <span class="toctext">Keyboard Lights</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Getting_Linux_to_boot">Getting Linux to boot</span></h2>
+<p>First of all we must create a <a href="../en/USB_flash_installation_media.html" title="USB flash installation media">bootable usb</a>, after that we must reboot the computer and press <code>F12</code> button while the bios is loading to access to the boot menu, from there we select the USB and boot from there.
+</p>
+<p>The first issue that we can find is that the distribution does not boot but gets stuck into a nouveau loop or a black screen. If this happens, we must change the kernel parameters to get ArchLinux to boot. Try to erase all default parameters and use only <code>nomodeset</code>. 
+</p>
+<h2><span class="mw-headline" id="Touchpad">Touchpad</span></h2>
+<p>If the touchpad does not work, try to unload the <code>i2c_hid</code> module: 
+</p>
+<pre># modprobe -r i2c_hid
+</pre>
+<p>and restart the graphical environment. If that helps, consider <a href="../en/Kernel_modules.html#Blacklisting" title="Blacklist" class="mw-redirect">blacklisting</a> the module.
+</p>
+<h2><span class="mw-headline" id="Wireless">Wireless</span></h2>
+<p>At the moment of writing this, the wifi network of the Alienware13 is a Atheros Qualcomm Killer N1525, which is not configured by the default installation. 
+</p>
+<pre>$ lspci
+...
+01:00.0 Network controller: Qualcomm Atheros QCA6174 802.11ac Wireless Network Adapter (rev 20)
+02:00.0 Ethernet controller: Qualcomm Atheros Killer E220x Gigabit Ethernet Controller (rev 10)
+...
+</pre>
+<p>Here is the <a rel="nofollow" class="external text" href="https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1383184">ubuntu bug</a>. 
+</p>
+<p>Fortunately, the enclosed patch is able to get it to work. It was tested on Kernel 4.2.5-1 as follows:
+</p>
+<pre>$ git clone <a rel="nofollow" class="external free" href="https://github.com/sumdog/ath10k-firmware">https://github.com/sumdog/ath10k-firmware</a>
+# cp -a ath10k-firmware/ath10k/QCA6174 /lib/firmware/ath10k/QCA6174
+# echo "options ath10k_core skip_otp=y" | tee -a /etc/modprobe.d/ath10k.conf
+</pre>
+<p>After a reboot, wireless should work, including wifi-ac speeds.
+</p>
+<h2><span class="mw-headline" id="Switchable_graphics">Switchable graphics</span></h2>
+<p>To have switchable graphics see <a href="../en/Bumblebee.html" title="Bumblebee">bumblebee</a> instructions. The utility is able to turn on and off the dedicated graphics card ondemand and without having to restart the computer or reopening session. 
+</p>
+<p>At the time of writing the Nvidia graphic chip was not yet recognised by the Nouveau driver, so you need to follow <a href="../en/Bumblebee.html#Installing_Bumblebee_with_Intel.2FNVIDIA" title="Bumblebee">Installing Bumblebee with Intel and NVIDIA</a> 
+for the functionality for now. 
+</p>
+<p>The following (with dependencies) was installed for the example machine:  
+</p>
+<pre># pacman -S bumblebee xf86-video-intel dkms bbswitch nvidia primus mesa-demos
+</pre>
+<p>After finishing setup and a reboot, the dedicated graphics card should be off. To check: 
+</p>
+<pre>$ optirun --status
+Bumblebee status: Ready (3.2.1). X inactive. Discrete video card is on.
+</pre>
+<p>And we can make use of it by calling <i>primusrun</i> or <i>optirun</i> before the program we want to run; for example:
+</p>
+<pre>$ glxspheres64
+...
+OpenGL Renderer: Mesa DRI Intel(R) HD Graphics 5500 (Broadwell GT2) 
+60.004917 frames/sec - 28.911809 Mpixels/sec
+...
+ 
+$ primusrun glxspheres64
+...
+OpenGL Renderer: GeForce GTX 860M/PCIe/SSE2
+61.130011 frames/sec - 68.221092 Mpixels/sec
+...
+</pre>
+<p>With this we have the graphics card working ondemand
+</p>
+<h2><span class="mw-headline" id="Keyboard_Lights">Keyboard Lights</span></h2>
+<p>To get access to the keyboard lights they can be controlling by sending data to the correct usb.
+</p>
+<pre> $ lsusb
+ ...
+ Bus 002 Device 003: ID 187c:0527 Alienware Corporation 
+ ...
+</pre>
+<p>There plenty of programs like pyAlienFX or Alienware-kbl and none of these worked for me, but there is a github project that consists on sending data to USB using <code>libusb</code> that worked fine.
+</p>
+<pre> git clone <a rel="nofollow" class="external free" href="https://github.com/snooze6/hack-alienfx">https://github.com/snooze6/hack-alienfx</a>
+ make all
+</pre>
+<p>In case of a compilation error similar to <code>"FILE is not defined"</code>, try adding a <code>stdio.h include</code> to the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/include/readline/rltypedefs.h</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Add
+#include &lt;stdio.h&gt;</pre>
+<p>And try compilation again. 
+</p>
+<p>Once it is compiled, test by running: 
+</p>
+<pre> # ./run seq/snooze
+</pre>
+<p>and keyboard lights should work. 
+</p>
+<p>To register it as a command and can use this program without being root we can do the next:
+</p>
+<pre> # cp run /usr/local/bin/
+ # mkdir /usr/local/fx
+ # cp seq/* /usr/local/fx
+ # chmod 4755 /bin/fx
+ # cp lights.sh /usr/local/bin/lights
+ # chmod +x /usr/local/bin/lights
+</pre>
+<p>Now it should trigger by executing: 
+</p>
+<pre> $ lights
+ $ lights on
+ $ lights off
+</pre>
+<p>from a console. 
+</p>
+<p>We can simply add the commands to the energy admin or the startup to make keyboard lights change automatically.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Alienware.html" title="Category:Alienware">Alienware</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

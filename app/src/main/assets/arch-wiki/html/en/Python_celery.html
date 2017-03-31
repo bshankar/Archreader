@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Python celery - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Python_celery skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Python celery</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Quoting authors of the <a rel="nofollow" class="external text" href="http://www.celeryproject.org/">project</a>: 
+</p>
+<dl><dd>Celery is "an asynchronous task queue/job queue based on distributed message passing. It is focused on real-time operation, but supports scheduling as well. (...) Tasks can execute asynchronously (in the background) or synchronously (wait until ready)."</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Celery"><span class="tocnumber">2.1</span> <span class="toctext">Celery</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#RabbitMQ"><span class="tocnumber">2.2</span> <span class="toctext">RabbitMQ</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Security"><span class="tocnumber">2.3</span> <span class="toctext">Security</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Example_task"><span class="tocnumber">3</span> <span class="toctext">Example task</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Celery_application"><span class="tocnumber">3.1</span> <span class="toctext">Celery application</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Test_run"><span class="tocnumber">3.2</span> <span class="toctext">Test run</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Prepare_module_for_Celery_service"><span class="tocnumber">3.3</span> <span class="toctext">Prepare module for Celery service</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Run_tasks_periodically"><span class="tocnumber">3.4</span> <span class="toctext">Run tasks periodically</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Run_Celery_in_chroot_.28experimental.29"><span class="tocnumber">4</span> <span class="toctext">Run Celery in chroot (experimental)</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Create_chroot_directory_and_devices"><span class="tocnumber">4.1</span> <span class="toctext">Create chroot directory and devices</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Create_necessary_directories"><span class="tocnumber">4.2</span> <span class="toctext">Create necessary directories</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Populate_chroot"><span class="tocnumber">4.3</span> <span class="toctext">Populate chroot</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Your_package_within_chroot"><span class="tocnumber">4.4</span> <span class="toctext">Your package within chroot</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Test_chroot"><span class="tocnumber">4.5</span> <span class="toctext">Test chroot</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#systemd_chroot_unit"><span class="tocnumber">4.6</span> <span class="toctext">systemd chroot unit</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-celery">python-celery</a></span>. As with most python-based packages you get a package compatible with Python 3.x. If you need Python 2.x compatibility, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2-celery">python2-celery</a></span> instead.
+</p>
+<p>Quoting <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html">Celery documentation</a>: "Celery requires a solution to send and receive messages" - one of the options is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rabbitmq">rabbitmq</a></span> which also can be installed from official repositories.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Celery">Celery</span></h3>
+<p>For configuration files the directory <code>/etc/celery/</code> needs to be created. An example configuration file is provided within <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html#example-configuration">Celery documentation</a>.
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> the <code>celery@<i>celery</i>.service</code>.
+</p>
+<h3><span class="mw-headline" id="RabbitMQ">RabbitMQ</span></h3>
+<p>RabbitMQ stores its configuration within <code>/etc/rabbitmq/rabbitmq-env.conf</code>
+</p>
+<p>The default configuration:
+</p>
+<pre>   NODENAME=rabbit@rakieta
+   NODE_IP_ADDRESS=0.0.0.0
+   NODE_PORT=5672
+   
+   LOG_BASE=/var/log/rabbitmq
+   MNESIA_BASE=/var/lib/rabbitmq/mnesia
+</pre>
+<p>You probably want to replace <code>0.0.0.0</code> with <code>127.0.0.1</code>, RabbitMQ does not support Unix sockets. Read more about environmental variables within <a rel="nofollow" class="external text" href="http://www.rabbitmq.com/configure.html">RabbitMQ docs</a>
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> the <code>rabbitmq.service</code>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>rabbitmq-service</code> is being started as rabbitmq user with home folder stored within <code>/var/lib/rabbitmq</code> - you may want to make sure rabbitmq user owns this folder and all subfolders</div>
+<p>Follow <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/getting-started/brokers/rabbitmq.html#broker-rabbitmq">RabbitMQ documentation</a> and add your user and virtual host:
+</p>
+<pre>$ cd /var/lib/rabbitmq
+$ su rabbitmq -c 'rabbitmqctl add_user myuser mypassword'
+$ su rabbitmq -c 'rabbitmqctl add_vhost myvhost'
+$ su rabbitmq -c 'rabbitmqctl set_user_tags myuser mytag'
+$ su rabbitmq -c 'rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"'
+</pre>
+<p>Read <a rel="nofollow" class="external text" href="http://www.rabbitmq.com/admin-guide.html#access-control">RabbitMQ admin guide</a> to understand the above.
+</p>
+<p>If issuing <code>su rabbitmq -c "rabbitmqctl status"</code> results in <code>badrpc,nodedown</code> visit <a rel="nofollow" class="external text" href="http://www.somic.org/2009/02/19/on-rabbitmqctl-and-badrpcnodedown/">this blog post</a> for more information how to fix the problem.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may also want to run <code>su rabbitmq -c "erl"</code> and as a result you should get an erlang prompt with no errors</div>
+<h3><span class="mw-headline" id="Security">Security</span></h3>
+<p>You may want to read a security section from <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/userguide/security.html">relevant Celery documentation</a>
+</p>
+<h2><span class="mw-headline" id="Example_task">Example task</span></h2>
+<h3><span class="mw-headline" id="Celery_application">Celery application</span></h3>
+<p>Follow <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#application">Celery documentation</a> to create a python sample task:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nano test.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">from celery import Celery
+    
+    app = Celery('tasks', backend='amqp', broker='amqp://myuser:mypassword@localhost:5672/myvhost')
+    
+    @app.task
+    def add(x, y):
+        return x + y</pre>
+<p><code>amqp://myuser:mypassword@localhost:5672/myvhost</code> - use the same credentials/vhost you have created when configuring RabbitMQ
+</p>
+<p><code>backend='amqp'</code> - this parameter is optional since RabbitMQ is the default broker utilised by celery.
+</p>
+<h3><span class="mw-headline" id="Test_run">Test run</span></h3>
+<p>While in the same directory as your <code>test.py</code> you can run: 
+</p>
+<pre>$ celery -A task worker --loglevel=info
+</pre>
+<p>Then from another console (but within same directory) create: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nano call.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">from test import add
+    
+    add.delay(4, 4)</pre>
+<p>Run it:
+</p>
+<pre>$ python call.py
+</pre>
+<p>First, the console should log some information suggesting worker was called:
+</p>
+<pre>Received task: task.add[f4aff99a-7477-44db-9f6e-7e0f9342cd4e]
+Task task.add[f4aff99a-7477-44db-9f6e-7e0f9342cd4e] succeeded in 0.0007182330009527504s: 8
+</pre>
+<h3><span class="mw-headline" id="Prepare_module_for_Celery_service">Prepare module for Celery service</span></h3>
+<p>Procedure below is slightly different than what you will find within <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/getting-started/next-steps.html#our-project">Celery documentation</a>
+</p>
+<p>Create <code>test_task</code> module:
+</p>
+<pre># mkdir /lib/python3.5/site-packages/test_task
+# touch /lib/python3.5/site-packages/test_task/__init__.py
+# touch /lib/python3.5/site-packages/test_task/test_task.py
+# touch /lib/python3.5/site-packages/test_task/celery.py
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nano /lib/python3.5/site-packages/test_task/celery.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">from __future__ import absolute_import
+
+from celery import Celery
+
+app = Celery('tasks', backend='amqp', broker='amqp://myuser:mypassword@localhost:5672/myvhost')
+
+if __name__ == '__main__':
+ app.start()</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nano /lib/python3.5/site-packages/test_task/test_task.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">from __future__ import absolute_import
+
+from test_task.celery import app
+
+@app.task
+def add(x, y):
+ return x + y</pre>
+<p>At this point if you issue <code>python</code> in your console you should be able to issue following without any error:
+</p>
+<pre>&gt;&gt;&gt; from test_task import celery
+</pre>
+<p>In <code>/etc/celery/celery.conf</code> replace:
+</p>
+<pre>CELERY_APP="proj"
+</pre>
+<p>with the following line:
+</p>
+<pre>CELERY_APP="test_task"
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the <code>celery@<i>celery</i>.service</code>.
+</p>
+<h3><span class="mw-headline" id="Run_tasks_periodically">Run tasks periodically</span></h3>
+<p>Tasks can be ran periodicaly through Celery Beat, basic setup is described within relevant <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html">Celery documentation pages</a>. An example: 
+</p>
+<p>If you want to specify <code>CELERYBEAT_SCHEDULE</code> within your <code>celery.py</code>, then you need to add the <code>app.conf</code> prefix to make celery recognise your scheduled tasks. After that you need to add the <code>--beat --schedule=/var/lib/celery/celerybeat-schedule</code> parameters when you start the celery daemon. Further, the <code>/var/lib/celery</code> directory must exist within the celery-relevant environment and be owned by the user that runs celery.
+</p>
+<h2><span class="mw-headline" id="Run_Celery_in_chroot_.28experimental.29">Run Celery in chroot (experimental)</span></h2>
+<p>Installing celery in a <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroot</a> adds an additional layer of security. To achieve an advanced security level, the chroot should include only the files needed to run the Celery application and all files should have the most restrictive permissions possible. For example, as much as possible should be owned by root, directories such as <code>/usr/bin</code> should be unreadable and unwriteable, etc.
+</p>
+<p>This section adapts <a href="../en/Nginx.html#Installation_in_a_chroot" title="Nginx">Nginx#Installation in a chroot</a> for creating the Celery chroot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This is experimental approach and no guarantee is given that resulting configuration will be stable or usable. Use at your own risk.</div>
+<h3><span class="mw-headline" id="Create_chroot_directory_and_devices">Create chroot directory and devices</span></h3>
+<p>Arch comes with an <code>http</code> user and group by default which we can use to run celery. The chroot will be in <code>/srv/http/apps/celery</code>.
+</p>
+<pre># mkdir -p /srv/http/apps/celery
+# cd /srv/http/apps/celery
+</pre>
+<p>Celery needs <code>/dev/null</code> and <code>/dev/urandom</code>. Celery will not crash at startup if <code>/dev/random</code> is missing. To install these in the chroot create the <code>/dev/</code> directory and add the devices with <i>mknod</i>. Avoid mounting all of <code>/dev/</code> to ensure that, even if the chroot is compromised, an attacker must break out of the chroot to access important devices like <code>/dev/sda1</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Be sure that <code>/srv/http/apps/celery</code> is mounted without no-dev option</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See <code>man mknod</code> and <code>ls -l /dev/{null,urandom}</code> to better understand the <i>mknod</i> options.</div>
+<pre># mkdir /srv/http/apps/celery/dev
+# mknod -m 0666 /srv/http/apps/celery/dev/null c 1 3
+# mknod -m 0666 /srv/http/apps/celery/dev/random c 1 8
+# mknod -m 0444 /srv/http/apps/celery/dev/urandom c 1 9
+</pre>
+<h3><span class="mw-headline" id="Create_necessary_directories">Create necessary directories</span></h3>
+<p>The original idea was to use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-virtualenv">python-virtualenv</a></span> to bring all necessary python deliverables. Unfortunately, virtualenv does only half of work for us and since we are going to run Celery in chroot we need to take care of all other dependencies. We use an environment created by virtualenv for further adjustments:
+</p>
+<pre># virtualenv --always-copy /srv/http/apps/celery
+</pre>
+<p>Create required directories:
+</p>
+<pre># cd /srv/http/apps/celery
+# mkdir {usr,dev,etc,run,tmp,var,proc}
+# mv {lib,bin,include} usr
+# ln -s usr/lib lib
+# ln -s usr/bin bin
+# ln -s usr/lib lib64
+# ln -s usr/include include
+# cd usr/
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If using a 64 bit kernel you will need to create symbolic links <code>lib64</code> and <code>usr/lib64</code> to <code>usr/lib</code>: <code>cd $JAIL; ln -s usr/lib lib64</code> and <code>cd $JAIL/usr; ln -s lib lib64</code>.</div>
+<pre># ln -s lib lib64
+</pre>
+<p>Celery requires <code>/proc/loadavg</code> - bind mount it together with <code>/srv/http/apps/celery/tmp</code> and <code>/srv/http/apps/celery/run</code> as tmpfs's. The size should be limited to ensure an attacker cannot eat all the RAM:
+</p>
+<pre># touch /srv/http/apps/celery/proc/loadavg
+# mount --bind /proc/loadavg /srv/http/apps/celery/proc/loadavg
+# mount -t tmpfs none /srv/http/apps/celery/run -o 'noexec,size=1M'
+# mount -t tmpfs none /srv/http/apps/celery/tmp -o 'noexec,size=100M'
+</pre>
+<p>In order to preserve the mounts across reboots, the following entries should be added to <code>/etc/fstab</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ tmpfs   /srv/http/apps/celery/run   tmpfs   rw,noexec,relatime,size=1024k   0       0
+ tmpfs   /srv/http/apps/celery/tmp   tmpfs   rw,noexec,relatime,size=102400k 0       0
+ /proc/loadavg /srv/http/apps/celery/proc/loadavg none bind
+</pre>
+<p>Create a log folder for celery:
+</p>
+<pre># mkdir -p /srv/http/apps/celery/var/log/celery
+# chown http:http /srv/http/apps/celery/var/log/celery
+</pre>
+<h3><span class="mw-headline" id="Populate_chroot">Populate chroot</span></h3>
+<p>Copy python dependencies:
+</p>
+<pre># cp $(ldd /usr/bin/python | grep /usr/lib | sed -sre 's/(.+)(\/usr\/lib\/\S+).+/\2/g') /srv/http/apps/celery/lib
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Do not try to copy <code>linux-vdso.so</code>: it is not a real library and does not exist in <code>/usr/lib</code>. Also <code>ld-linux-x86-64.so</code> will likely be listed in <code>/lib64</code> for a 64 bit system.</div>
+<p>We are running from chroot, hence normal virtualenv behavior will not work and we need to accommodate for that by copying complete python lib folder (without site-packages):
+</p>
+<pre># mv /srv/http/apps/celery/lib/python3.5/site-packages /tmp 
+# rm -r /srv/http/apps/celery/lib/python3.5/* 
+# mv /tmp/site-packages /srv/http/apps/celery/lib/python3.5/
+# 
+# cp -r -p /usr/lib/python3.5 /tmp
+# rm -r /tmp/python3.5/site-packages
+# mv /tmp/python3.5/* /srv/http/apps/celery/lib/python3.5/
+</pre>
+<p>Install celery:
+</p>
+<pre># source /srv/http/apps/celery/bin/activate
+# pip install celery
+</pre>
+<p>Celery requires <code>libssl</code>:
+</p>
+<pre># cp $(ldd /usr/lib/libssl.so.1.0.0 | grep /usr/lib | sed -sre 's/(.+)(\/usr\/lib\/\S+).+/\2/g') /srv/http/apps/celery/usr/lib
+# cp /usr/lib/libssl.so* /srv/http/apps/celery/usr/lib
+</pre>
+<p>Celery requires <code>libgcc_s</code> if you want to use multithreading:
+</p>
+<pre># cp /usr/lib/libgcc_s* /srv/http/apps/celery/usr/lib
+</pre>
+<pre># cp $(ldd /usr/lib/libssl.so.1.0.0 | grep /usr/lib | sed -sre 's/(.+)(\/usr\/lib\/\S+).+/\2/g') /srv/http/apps/celery/usr/lib
+# cp /usr/lib/libssl.so* /srv/http/apps/celery/usr/lib
+</pre>
+<p>Celery also requires <code>/bin/getent</code>, which in turn requires <code>libnss_files</code>:
+</p>
+<pre># cp /bin/getent /srv/http/apps/celery/bin
+# cp /lib/libnss_files* /srv/http/apps/celery/lib
+</pre>
+<p><code>/bin/env</code> is required to register <code>$HOME</code> after chrooting but before running celery:
+</p>
+<pre># cp /bin/env /srv/http/apps/celery/bin
+</pre>
+<p>Copy your task module (in this example the task module is called <code>test_task</code> and is stored within <code>/lib/python3.5/site-packages/test_task</code>):
+</p>
+<pre># cp -r /lib/python3.5/site-packages/test_task lib/python3.5/site-packages
+</pre>
+<p>Copy over some miscellaneous but necessary libraries and system files.
+</p>
+<pre># cp -rfvL /etc/{services,localtime,nsswitch.conf,nscd.conf,protocols,hosts,ld.so.cache,ld.so.conf,resolv.conf,host.conf} /srv/http/apps/celery/etc
+</pre>
+<p>Create restricted user/group files for the chroot. This way only the users needed for the chroot to function exist in it and none of the system users/groups are leaked to attackers, should they gain access to the chroot.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/apps/celery/etc/group</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+http:x:33:
+nobody:x:99:
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/apps/celery/etc/passwd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+http:x:33:33:http:/:/bin/false
+nobody:x:99:99:nobody:/:/bin/false
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/apps/celery/etc/shadow</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+http:x:14871::::::
+nobody:x:14871::::::
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/apps/celery/etc/gshadow</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+http:::
+nobody:::
+</pre>
+<h3><span class="mw-headline" id="Your_package_within_chroot">Your package within chroot</span></h3>
+<p>Now you can copy your package into chroot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See <a rel="nofollow" class="external text" href="http://python-packaging-user-guide.readthedocs.org/en/latest/distributing/#configuring-your-project">packaging</a> and and <a rel="nofollow" class="external text" href="http://docs.celeryproject.org/en/latest/getting-started/next-steps.html#our-project">celery project structure</a> for python packaging instructions.</div>
+<p>Assuming your project lives in <code>your_project</code> directory and its structure looks like following:
+</p>
+<pre>.
+|-setup.py
+|-CHANGES.txt
+|-MANIFEST.in
+|-README.txt
+|-package_name
+   |-__init__.py
+   |-celery.py
+   |-task_1.py
+   |-task_2.py
+   |-(...)
+</pre>
+<p>Install your package in development mode:
+</p>
+<pre># cd /srv/http/apps/celery/your_project
+# source ../bin/activate
+# pip install -e .
+</pre>
+<p>All paths are relevant to your main root, you need to:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nano /srv/http/apps/celery/lib/python3.5/site-packages/package_name.egg-link</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/your_project
+.</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nano /srv/http/apps/celery/lib/python3.5/site-packages/easy-install.pth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/your_project
+(...)</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>easy-install.pth will contain other packages installed within your virtualenv, make sure you do not modify other entries than the one that points to your_project</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>you can also install your package running <code>python setup.py develop</code> and in such case you would have to update <code>/srv/http/apps/celery/lib/python3.5/site-packages/setuptools.pth</code>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nano /srv/http/apps/celery/lib/python3.5/site-packages/setuptools.pth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/usr/lib/python3.5/site-packages</pre>
+<h3><span class="mw-headline" id="Test_chroot">Test chroot</span></h3>
+<p>Run following to confirm chroot is correctly set up:
+</p>
+<pre># /usr/bin/chroot --userspec=root:root /srv/http/apps/celery env -i HOME=/ /usr/bin/python -m celery worker -c 10 -A package_name --uid=33 --gid=33 --pidfile=/run/celery.pid --logfile=/var/log/celery/celery.log --loglevel="INFO"
+</pre>
+<p>Celery will be started by root but then will drop to http user. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> RabbitMQ must be running before you perform above test. </li>
+<li> Broker credentials within your project must match what was set within RabbitMQ.</li>
+<li> You may wish to ensure your firewall is configured to allow celery/rabbitmq traffic.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="systemd_chroot_unit">systemd chroot unit</span></h3>
+<p>Prepare a systemd unit: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nano /etc/systemd/system/celery.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit] 
+Description=Celery Nodes Daemon 
+After=network.target 
+
+[Service] 
+Type=oneshot 
+ExecStart=/usr/bin/chroot --userspec=root:root /srv/http/apps/celery /usr/bin/env -i HOME=/ /usr/bin/python -m celery multi start worker1 -c 2 -A package_name --uid=33 --gid=33 --pidfile=/run/celery/celery.pid --logfile=/var/log/celery/celery.log 
+ExecStop=/usr/bin/chroot --userspec=root:root /srv/http/apps/celery /usr/bin/python -m celery multi stopwait worker1 --uid=33 --gid=33 --pidfile=/run/celery/celery.pid --logfile=/var/log/celery/celery.log --loglevel="INFO" 
+ExecReload=/usr/bin/chroot --userspec=root:root /srv/http/apps/celery /usr/bin/python -m celery multi restart worker1 -c 2 -A package_name --uid=33 --gid=33 --pidfile=/run/celery/celery.pid --logfile=/var/log/celery/celery.log 
+KillMode=control-group 
+RemainAfterExit=yes 
+
+[Install] 
+WantedBy=multi-user.target</pre>
+<p>At this stage following should work:
+</p>
+<pre># systemctl start celery
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>If the <a href="#systemd_chroot_unit">#systemd chroot unit</a> does not report issues but the celery service is not running, you can start the chrooted celery from console and add a more detailed log level. For example: 
+</p>
+<pre># /usr/bin/chroot --userspec=root:root /srv/http/apps/celery /usr/bin/env -i HOME=/ /usr/bin/python -m celery worker -A package_name --uid=33 --gid=33 --pidfile=/run/celery.pid --logfile=/var/log/celery/celery.log --loglevel="INFO"
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Daemons_and_system_services.html" title="Category:Daemons and system services">Daemons and system services</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

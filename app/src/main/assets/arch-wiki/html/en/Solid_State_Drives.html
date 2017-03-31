@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Solid State Drives - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Solid_State_Drives skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Solid State Drives</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Solid_State_Drives/NVMe.html" title="Solid State Drives/NVMe">Solid State Drives/NVMe</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Solid_State_Drives/Memory_cell_clearing.html" title="Solid State Drives/Memory cell clearing">Solid State Drives/Memory cell clearing</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Benchmarking/Data_storage_devices.html" title="Benchmarking/Data storage devices">Benchmarking/Data storage devices</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Improving_performance.html#Storage_devices" title="Improving performance">Improving performance#Storage devices</a></li>
+</ul>
+</div>
+<p>This article covers special topics for operating <a href="https://en.wikipedia.org/wiki/Solid_State_Drive" class="extiw" title="w:Solid State Drive">w:Solid State Drives</a> (SSDs) and other flash-memory based storage devices. If you want to partition a SSD for a specific purpose, it may be useful to consider the <a href="https://en.wikipedia.org/wiki/List_of_file_systems#File_systems_optimized_for_flash_memory.2C_solid_state_media" class="extiw" title="w:List of file systems">List of file systems optimized for flash memory</a>. For general usage, you should simply choose your preferred <a href="../en/File_systems.html" title="Filesystem" class="mw-redirect">filesystem</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#TRIM"><span class="tocnumber">1.1</span> <span class="toctext">TRIM</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Periodic_TRIM"><span class="tocnumber">1.1.1</span> <span class="toctext">Periodic TRIM</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Continuous_TRIM"><span class="tocnumber">1.1.2</span> <span class="toctext">Continuous TRIM</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#LVM"><span class="tocnumber">1.1.3</span> <span class="toctext">LVM</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#dm-crypt"><span class="tocnumber">1.1.4</span> <span class="toctext">dm-crypt</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Maximizing_performance"><span class="tocnumber">1.2</span> <span class="toctext">Maximizing performance</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Security"><span class="tocnumber">1.3</span> <span class="toctext">Security</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Hdparm_shows_.22frozen.22_state"><span class="tocnumber">1.3.1</span> <span class="toctext">Hdparm shows "frozen" state</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#SSD_memory_cell_clearing"><span class="tocnumber">1.3.2</span> <span class="toctext">SSD memory cell clearing</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Hardware_encryption"><span class="tocnumber">1.3.3</span> <span class="toctext">Hardware encryption</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Troubleshooting"><span class="tocnumber">2</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Resolving_NCQ_errors"><span class="tocnumber">2.1</span> <span class="toctext">Resolving NCQ errors</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Resolving_SATA_power_management_related_errors"><span class="tocnumber">2.2</span> <span class="toctext">Resolving SATA power management related errors</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Firmware"><span class="tocnumber">3</span> <span class="toctext">Firmware</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#ADATA"><span class="tocnumber">3.1</span> <span class="toctext">ADATA</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Crucial"><span class="tocnumber">3.2</span> <span class="toctext">Crucial</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Intel"><span class="tocnumber">3.3</span> <span class="toctext">Intel</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Kingston"><span class="tocnumber">3.4</span> <span class="toctext">Kingston</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Mushkin"><span class="tocnumber">3.5</span> <span class="toctext">Mushkin</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#OCZ"><span class="tocnumber">3.6</span> <span class="toctext">OCZ</span></a></li>
+<li class="toclevel-2 tocsection-22">
+<a href="#Samsung"><span class="tocnumber">3.7</span> <span class="toctext">Samsung</span></a>
+<ul>
+<li class="toclevel-3 tocsection-23"><a href="#Native_upgrade"><span class="tocnumber">3.7.1</span> <span class="toctext">Native upgrade</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-24"><a href="#SanDisk"><span class="tocnumber">3.8</span> <span class="toctext">SanDisk</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-25"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="TRIM">TRIM</span></h3>
+<p>Most SSDs support the <a href="https://en.wikipedia.org/wiki/TRIM" class="extiw" title="wikipedia:TRIM">ATA_TRIM command</a> for sustained long-term performance and wear-leveling. A <a rel="nofollow" class="external text" href="http://www.techspot.com/review/737-ocz-vector-150-ssd/page9.html">techspot</a> article shows performance benchmark examples of before and after filling an SSD with data.
+</p>
+<p>As of Linux kernel version 3.8 onwards, support for TRIM was continually added for the different filesystems. See the following table for an indicative overview and the respective filesystems' articles for further details:
+</p>
+<table class="wikitable">
+<tr>
+<th> File system </th>
+<th> Continuous TRIM <br> (<code>discard</code> option) </th>
+<th> Periodic TRIM <br> (<i>fstrim</i>) </th>
+<th> References<br> and notes
+</th>
+</tr>
+<tr>
+<td> <a href="../en/Ext3.html" title="Ext3">Ext3</a> </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: inherit; color: inherit; vertical-align: middle; text-align: center;">? </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Ext4.html" title="Ext4">Ext4</a> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> <a rel="nofollow" class="external autonumber" href="http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/filesystems/ext4.txt#n344">[1]</a>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/JFS.html" title="JFS">JFS</a> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> <a rel="nofollow" class="external autonumber" href="http://www.phoronix.com/scan.php?page=news_item&amp;px=MTE5ODY">[2]</a>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/XFS.html" title="XFS">XFS</a> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> <a rel="nofollow" class="external autonumber" href="http://xfs.org/index.php/FITRIM/discard">[3]</a>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/F2FS.html" title="F2FS">F2FS</a> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> VFAT </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ntfs-3g">ntfs-3g</a></span> </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> since version 2015.3.14, <a rel="nofollow" class="external autonumber" href="http://permalink.gmane.org/gmane.comp.file-systems.ntfs-3g.devel/1101">[4]</a>
+</td>
+</tr>
+</table>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Users need to be certain that their SSD supports TRIM before attempting to use it. Data loss can occur otherwise!</div>
+<p>To verify TRIM support, run:
+</p>
+<pre># hdparm -I /dev/sda | grep TRIM
+        *    Data Set Management TRIM supported (limit 1 block)
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There are different types of TRIM support defined by the specification. Hence, the output may differ depending what the drive supports. See <a href="https://en.wikipedia.org/wiki/TRIM#ATA" class="extiw" title="w:TRIM">w:TRIM#ATA</a> for more information.</div>
+<h4><span class="mw-headline" id="Periodic_TRIM">Periodic TRIM</span></h4>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span> package provides <code>fstrim.service</code> and <code>fstrim.timer</code> <a href="../en/Systemd.html" title="Systemd">systemd</a> unit files. <a href="../en/Systemd.html#Using_units" title="Enabling" class="mw-redirect">Enabling</a> the timer will activate the service weekly, which will then trim all mounted filesystems on devices that support the <i>discard</i> operation.
+</p>
+<p>The timer relies on the timestamp of <code>/var/lib/systemd/timers/stamp-fstrim.timer</code> (which it will create upon first invocation) to know whether a week has elapsed since it last ran. Therefore there is no need to worry about too frequent invocations, in an <i>anacron</i>-like fashion.
+</p>
+<p>To query the units activity and status, see <a href="../en/Systemd.html#Journal" title="Journalctl" class="mw-redirect">journalctl</a>. To change the periodicity of the timer or the command run, <a href="../en/Systemd.html#Editing_provided_units" title="Edit" class="mw-redirect">edit</a> the provided unit files.
+</p>
+<h4><span class="mw-headline" id="Continuous_TRIM">Continuous TRIM</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Unfortunately, there are wide quality gaps of SSD's bios' to perform continuous TRIM, which is also why using the <code>discard</code> mount flag is <a rel="nofollow" class="external text" href="http://thread.gmane.org/gmane.comp.file-systems.ext4/41974">recommended against</a> generally by filesystem developer Theodore Ts'o. If in doubt about your hardware, apply <a href="#Periodic_TRIM">#Periodic TRIM</a> instead.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Before <a href="https://en.wikipedia.org/wiki/Serial_ATA#SATA_revision_3.1" class="extiw" title="w:Serial ATA">SATA 3.1</a> all TRIM commands were synchronous, so continuous trimming would produce frequent system freezes. In this case, applying <a href="#Periodic_TRIM">#Periodic TRIM</a> less often is better alternative. Similar issue holds also for a <a rel="nofollow" class="external text" href="https://github.com/torvalds/linux/blob/master/drivers/ata/libata-core.c#L4403-L4417">number of devices</a>, for which queued TRIM command execution was blacklisted due to <a rel="nofollow" class="external text" href="https://blog.algolia.com/when-solid-state-drives-are-not-that-solid/">serious data corruption</a>. See <a href="https://en.wikipedia.org/wiki/Trim_(computing)#Shortcomings" class="extiw" title="wikipedia:Trim (computing)">Wikipedia:Trim (computing)#Shortcomings</a> for details.</div>
+<p>Using the <code>discard</code> option for a mount in <code>/etc/fstab</code> enables continuous TRIM in device operations:
+</p>
+<pre>/dev/sda2  /boot       ext4  defaults,noatime,<b>discard</b>   0  2
+/dev/sda1  /boot/efi   vfat  defaults,noatime,<b>discard</b>   0  2
+/dev/sda3  /           ext4  defaults,noatime,<b>discard</b>   0  2
+</pre>
+<p>The main benefit of continuous TRIM is speed; an SSD can perform more efficient <a rel="nofollow" class="external text" href="http://arstechnica.com/gadgets/2015/04/ask-ars-my-ssd-does-garbage-collection-so-i-dont-need-trim-right/">garbage collection</a>. However, results vary and particularly earlier SSD generations may also show just the opposite effect. Also for this reason, some distributions decided against using it (e.g. Ubuntu: see <a rel="nofollow" class="external text" href="http://www.phoronix.com/scan.php?page=news_item&amp;px=MTUxOTY">this article</a> and the <a rel="nofollow" class="external text" href="https://blueprints.launchpad.net/ubuntu/+spec/core-1311-ssd-trimming">related blueprint</a>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is no need for the <code>discard</code> flag if you run <code>fstrim</code> periodically.</div>
+<p>On the ext4 filesystem, the <code>discard</code> flag can also be set as a <a href="../en/Access_Control_Lists.html#Enabling_ACL" title="Access Control Lists">default mount option</a> using <i>tune2fs</i>:
+</p>
+<pre># tune2fs -o discard /dev/sd<b>XY</b>
+</pre>
+<p>Using the default mount options instead of an entry in <code>/etc/fstab</code> is useful for external drives, because such partition will be mounted with the default options also on other machines. There is no need to edit <code>/etc/fstab</code> on every machine.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The default mount options are not listed in <code>/proc/mounts</code>.</div>
+<h4><span class="mw-headline" id="LVM">LVM</span></h4>
+<p>Change the value of <code>issue_discards</code> option from 0 to 1 in <code>/etc/lvm/lvm.conf</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Enabling this option will "issue discards to a logical volumes's underlying physical volume(s) when the logical volume is no longer using the physical volumes' space (e.g. <i>lvremove</i>, <i>lvreduce</i>, etc)" (see <span class="plainlinks archwiki-template-man" title="$ man 5 lvm.conf"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/lvm.conf.5.html">lvm.conf(5)</a></span> and/or inline comments in <code>/etc/lvm/lvm.conf</code>). As such it does not seem to be required for "regular" TRIM requests (file deletions inside a filesystem) to be functional.</div>
+<h4><span class="mw-headline" id="dm-crypt">dm-crypt</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The discard option allows discard requests to be passed through the encrypted block device. This improves performance on SSD storage but has security implications. See <a href="../en/Dm-crypt/Specialties.html#Discard.2FTRIM_support_for_solid_state_drives_.28SSD.29" title="Dm-crypt/Specialties">Dm-crypt/TRIM support for SSD</a> for more information.</div>
+<p>For non-root filesystems, configure <code>/etc/crypttab</code> to include <code>discard</code> in the list of options for encrypted block devices located on a SSD (see <a href="../en/Dm-crypt/System_configuration.html#crypttab" title="Dm-crypt/System configuration">Dm-crypt/System configuration#crypttab</a>).
+</p>
+<p>For the root filesystem, follow the instructions from <a href="../en/Dm-crypt/Specialties.html#Discard.2FTRIM_support_for_solid_state_drives_.28SSD.29" title="Dm-crypt/Specialties">Dm-crypt/TRIM support for SSD</a> to add the right kernel parameter to the bootloader configuration.
+</p>
+<h3><span class="mw-headline" id="Maximizing_performance">Maximizing performance</span></h3>
+<p>Follow the tips in <a href="../en/Improving_performance.html#Storage_devices" title="Improving performance">Improving performance#Storage devices</a> to maximize the performance of your drives.
+</p>
+<h3><span class="mw-headline" id="Security">Security</span></h3>
+<h4><span class="mw-headline" id="Hdparm_shows_.22frozen.22_state">Hdparm shows "frozen" state</span></h4>
+<p>Some motherboard BIOS' issue a "security freeze" command to attached storage devices on initialization. Likewise some SSD (and HDD) BIOS' are set to "security freeze" in the factory already. Both result in the device's password security settings to be set to <b>frozen</b>, as shown in below output: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hdparm -I /dev/sda</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Security: 
+ 	Master password revision code = 65534
+ 		supported
+ 	not	enabled
+ 	<b>not	locked</b>
+ 		<b>frozen</b>
+ 	not	expired: security count
+ 		supported: enhanced erase
+ 	4min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<p>Operations like formatting the device or installing operating systems are not affected by the "security freeze". 
+</p>
+<p>The above output shows the device is <b>not locked</b> by a HDD-password on boot and the <b>frozen</b> state safeguards the device against malwares which may try to lock it by setting a password to it at runtime. 
+</p>
+<p>If you intend to set a password to a "frozen" device yourself, a motherboard BIOS with support for it is required. A lot of notebooks have support, because it is required for <a href="https://en.wikipedia.org/wiki/Hardware-based_full_disk_encryption" class="extiw" title="wikipedia:Hardware-based full disk encryption">hardware encryption</a>, but support may not be trivial for a desktop/server board. For the Intel DH67CL/BL motherboard, for example, the motherboard has to be set to "maintenance mode" by a physical jumper to access the settings (see <a rel="nofollow" class="external autonumber" href="http://sstahlman.blogspot.in/2014/07/hardware-fde-with-intel-ssd-330-on.html?showComment=1411193181867#c4579383928221016762">[5]</a>, <a rel="nofollow" class="external autonumber" href="https://communities.intel.com/message/251978#251978">[6]</a>). 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not try to change the above <b>lock</b> security settings with <code>hdparm</code> unless you know exactly what you are doing.</div>
+<p>If you intend to erase the SSD, see <a href="../en/Securely_wipe_disk.html#hdparm" title="Securely wipe disk">Securely wipe disk#hdparm</a> and <a href="#SSD_memory_cell_clearing">#SSD memory cell clearing</a> below.
+</p>
+<h4><span class="mw-headline" id="SSD_memory_cell_clearing">SSD memory cell clearing</span></h4>
+<p>On occasion, users may wish to completely reset an SSD's cells to the same virgin state they were at the time the device was installed thus restoring it to its <a rel="nofollow" class="external text" href="http://www.anandtech.com/storage/showdoc.aspx?i=3531&amp;p=8">factory default write performance</a>. Write performance is known to degrade over time even on SSDs with native TRIM support. TRIM only safeguards against file deletes, not replacements such as an incremental save.
+</p>
+<p>The reset is easily accomplished in a three step procedure denoted on the <a href="../en/Solid_State_Drives/Memory_cell_clearing.html" title="SSD memory cell clearing" class="mw-redirect">SSD memory cell clearing</a> wiki article. If the reason for the reset is to wipe data, you may not want to rely on the SSD bios to perform it securely. See <a href="../en/Securely_wipe_disk.html#Flash_memory" title="Securely wipe disk">Securely wipe disk#Flash memory</a> for further information and examples to perform a wipe.
+</p>
+<h4><span class="mw-headline" id="Hardware_encryption">Hardware encryption</span></h4>
+<p>As noted in <a href="#Hdparm_shows_.22frozen.22_state">#Hdparm shows frozen state</a> setting a password for a storage device (SSD/HDD) in the BIOS may also initialize the hardware encryption of devices supporting it. If the device also conforms to the OPAL standard, this may also be achieved without a respective BIOS feature to set the passphrase, see <a href="../en/Self-Encrypting_Drives.html" title="Self-Encrypting Drives">Self-Encrypting Drives</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>It is possible that the issue you are encountering is a firmware bug which is not Linux specific, so before trying to troubleshoot an issue affecting the SSD device, you should first check if updates are available for:
+</p>
+<ul>
+<li> The <a href="../en/Solid_State_Drives.html" title="Solid State Drives/Firmware" class="mw-redirect">SSD's firmware</a>
+</li>
+<li> The <a href="../en/Flashing_BIOS_from_Linux.html" title="Flashing BIOS from Linux">motherboard's BIOS/UEFI firmware</a>
+</li>
+</ul>
+<p>Even if it is a firmware bug it might be possible to avoid it, so if there are no updates to the firmware or you hesitant on updating firmware then the following might help.
+</p>
+<h3><span class="mw-headline" id="Resolving_NCQ_errors">Resolving NCQ errors</span></h3>
+<p>Some SSDs and SATA chipsets do not work properly with Linux Native Command Queueing (NCQ). The tell-tale dmesg errors look like this:
+</p>
+<pre>[ 9.115544] ata9: exception Emask 0x0 SAct 0xf SErr 0x0 action 0x10 frozen
+[ 9.115550] ata9.00: failed command: READ FPDMA QUEUED
+[ 9.115556] ata9.00: cmd 60/04:00:d4:82:85/00:00:1f:00:00/40 tag 0 ncq 2048 in
+[ 9.115557] res 40/00:18:d3:82:85/00:00:1f:00:00/40 Emask 0x4 (timeout)
+</pre>
+<p>To disable NCQ on boot, add <code>libata.force=noncq</code> to the kernel command line in the <a href="../en/Bootloader.html" title="Bootloader" class="mw-redirect">bootloader</a> configuration. To disable NCQ only for disk 0 on port 1 use: <code>libata.force=1.00:noncq</code>
+</p>
+<p>Alternatively, you may disable NCQ for a specific drive without rebooting via sysfs:
+</p>
+<pre>
+# echo 1 &gt; /sys/block/sdX/device/queue_depth
+</pre>
+<p>If this (and also updating the firmware) does not resolves the problem or cause other issues, then <a href="../en/Reporting_bug_guidelines.html" title="Reporting bug guidelines">file a bug report</a>.
+</p>
+<h3><span class="mw-headline" id="Resolving_SATA_power_management_related_errors">Resolving SATA power management related errors</span></h3>
+<p>Some SSDs (e.g. Transcend MTS400) are failing when SATA Active Link Power Management, <a href="https://en.wikipedia.org/wiki/Aggressive_Link_Power_Management" class="extiw" title="wikipedia:Aggressive Link Power Management">ALPM</a>, is enabled.
+ALPM is disabled by default and enabled by a power saving daemon (e.g. <a href="../en/TLP.html" title="TLP">TLP</a>, <a href="../en/Laptop_Mode_Tools.html" title="Laptop Mode Tools">Laptop Mode Tools</a>).
+</p>
+<p>If you starting to encounter SATA related errors when using such daemon then you should try to disable ALPM by setting its state to <code>max_performance</code> for both battery and AC powered profiles.
+</p>
+<h2><span class="mw-headline" id="Firmware">Firmware</span></h2>
+<h3><span class="mw-headline" id="ADATA">ADATA</span></h3>
+<p>ADATA has a utility available for Linux (i686) on their support page <a rel="nofollow" class="external text" href="http://www.adata.com.tw/index.php?action=ss_main&amp;page=ss_content_driver&amp;lan=en">here</a>. The link to latest firmware will appear after selecting the model.  The latest Linux update utility is packed with firmware and needs to be run as root. One may need to set correct permissions for binary file first.
+</p>
+<h3><span class="mw-headline" id="Crucial">Crucial</span></h3>
+<p>Crucial provides an option for updating the firmware with an ISO image. These images can be found after selecting the product <a rel="nofollow" class="external text" href="http://www.crucial.com/usa/en/support-ssd">here</a> and downloading the "Manual Boot File."  Owners of an M4 Crucial model, may check if a firmware upgrade is needed with <code>smartctl</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ smartctl --all /dev/sd<b>X</b></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+==&gt; WARNING: This drive may hang after 5184 hours of power-on time:
+<a rel="nofollow" class="external free" href="http://www.tomshardware.com/news/Crucial-m4-Firmware-BSOD,14544.html">http://www.tomshardware.com/news/Crucial-m4-Firmware-BSOD,14544.html</a>
+See the following web pages for firmware updates:
+<a rel="nofollow" class="external free" href="http://www.crucial.com/support/firmware.aspx">http://www.crucial.com/support/firmware.aspx</a>
+<a rel="nofollow" class="external free" href="http://www.micron.com/products/solid-state-storage/client-ssd#software">http://www.micron.com/products/solid-state-storage/client-ssd#software</a>
+</pre>
+<p>Users seeing this warning are advised to backup all sensible data and <b>consider upgrading immediately</b>.
+</p>
+<h3><span class="mw-headline" id="Intel">Intel</span></h3>
+<p>Intel has a Linux live system based <a rel="nofollow" class="external text" href="https://downloadcenter.intel.com/download/18363">Firmware Update Tool</a> for operating systems that are not compatible with its <a rel="nofollow" class="external text" href="https://downloadcenter.intel.com/download/18455">Intel® Solid-State Drive Toolbox</a> software.
+</p>
+<h3><span class="mw-headline" id="Kingston">Kingston</span></h3>
+<p>Kingston has a Linux utility to update the firmware of Sandforce controller based drives:  <a rel="nofollow" class="external text" href="http://www.kingston.com/en/ssd">SSD support page</a>.  Click the images on the page to go to a support page for your SSD model.  Support specifically for, e.g. the SH100S3 SSD, can be found here:  <a rel="nofollow" class="external text" href="http://www.kingston.com/en/support/technical/downloads?product=sh100s3&amp;filename=sh100_503fw_win">support page</a>.
+</p>
+<h3><span class="mw-headline" id="Mushkin">Mushkin</span></h3>
+<p>The lesser known Mushkin brand Solid State drives also use Sandforce controllers, and have a Linux utility (nearly identical to Kingston's) to update the firmware.
+</p>
+<h3><span class="mw-headline" id="OCZ">OCZ</span></h3>
+<p>OCZ has a command line utility available for Linux (i686 and x86_64) on their forum <a rel="nofollow" class="external text" href="http://www.ocztechnology.com/ssd_tools/">here</a>.
+</p>
+<h3><span class="mw-headline" id="Samsung">Samsung</span></h3>
+<p>Samsung notes that update methods other than using their Magician Software are "not supported," but it is possible. The Magician Software can be used to make a USB drive bootable with the firmware update. Samsung provides pre-made <a rel="nofollow" class="external text" href="http://www.samsung.com/global/business/semiconductor/samsungssd/downloads.html">bootable ISO images</a> that can be used to update the firmware. Another option is to use Samsung's <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/samsung_magician/">samsung_magician</a></span><sup><small>AUR</small></sup>, which is available in the AUR. Magician only supports Samsung-branded SSDs; those manufactured by Samsung for OEMs (e.g., Lenovo) are not supported.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Samsung does not make it obvious at all that they actually provide these. They seem to have 4 different firmware update pages, and each references different ways of doing things.</div>
+<p>Users preferring to run the firmware update from a live USB created under Linux (without using Samsung's "Magician" software under Microsoft Windows) can refer to <a rel="nofollow" class="external text" href="http://fomori.org/blog/?p=933">this post</a> for reference.
+</p>
+<h4><span class="mw-headline" id="Native_upgrade">Native upgrade</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Assumes use of <a href="../en/Udisks.html" title="Udisks">udisks</a>; loop mounts can be done directly via <a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">mount</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Solid_State_Drives">Talk:Solid State Drives#</a>)</div>
+</div>
+<p>Alternatively, the firmware can be upgraded natively, without making a bootable USB stick, as shown below.
+</p>
+<p>First visit the <a rel="nofollow" class="external text" href="http://www.samsung.com/global/business/semiconductor/minisite/SSD/global/html/support/downloads.html">Samsung downloads page</a> and download the latest firmware for Windows, which is available as a disk image. In the following, <code>Samsung_SSD_840_EVO_EXT0DB6Q.iso</code> is used as an example file name, adjust it accordingly.
+</p>
+<p>Setup the disk image:
+</p>
+<pre>$ udisksctl loop-setup -r -f Samsung_SSD_840_EVO_EXT0DB6Q.iso
+</pre>
+<p>This will make the ISO available as a loop device, and display the device path. Assuming it was <code>/dev/loop0</code>:
+</p>
+<pre>$ udisksctl mount -b /dev/loop0
+</pre>
+<p>Get the contents of the disk:
+</p>
+<pre>$ mkdir Samsung_SSD_840_EVO_EXT0DB6Q
+$ cp -r /run/media/$USER/CDROM/isolinux/ Samsung_SSD_840_EVO_EXT0DB6Q
+</pre>
+<p>Unmount the iso:
+</p>
+<pre>$ udisksctl unmount -b /dev/loop0
+$ cd Samsung_SSD_840_EVO_EXT0DB6Q/isolinux
+</pre>
+<p>There is a FreeDOS image here that contains the firmware. Mount the image as before:
+</p>
+<pre>$ udisksctl loop-setup -r -f btdsk.img
+$ udisksctl mount -b /dev/loop1
+$ cp -r /run/media/$USER/C04D-1342/ Samsung_SSD_840_EVO_EXT0DB6Q
+$ cd Samsung_SSD_840_EVO_EXT0DB6Q/C04D-1342/samsung
+</pre>
+<p>Get the disk number from magician:
+</p>
+<pre># magician -L
+</pre>
+<p>Assuming it was 0:
+</p>
+<pre># magician --disk 0 -F -p DSRD
+</pre>
+<p>Verify that the latest firmware has been installed:
+</p>
+<pre># magician -L
+</pre>
+<p>Finally reboot.
+</p>
+<h3><span class="mw-headline" id="SanDisk">SanDisk</span></h3>
+<p>SanDisk makes <b>ISO firmware images</b> to allow SSD firmware update on operating systems that are unsupported by their SanDisk SSD Toolkit. One must choose the firmware for the right <i>SSD model</i>, as well as for the <i>capacity</i> that it has (e.g. 60GB, <b>or</b> 256GB). After burning the adequate ISO firmware image, simply restart the PC to boot with the newly created CD/DVD boot disk (may work from a USB stick).
+</p>
+<p>The iso images just contain a linux kernel and an initrd. Extract them to <code>/boot</code> partition and boot them with <a href="../en/GRUB.html" title="GRUB">GRUB</a> or <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a> to update the firmware.
+</p>
+<p>See also:
+</p>
+<p>SanDisk Extreme SSD <a rel="nofollow" class="external text" href="http://kb.sandisk.com/app/answers/detail/a_id/10127">Firmware Release notes</a> and <a rel="nofollow" class="external text" href="http://kb.sandisk.com/app/answers/detail/a_id/10476">Manual Firmware update version R211</a> 
+</p>
+<p>SanDisk Ultra SSD <a rel="nofollow" class="external text" href="http://kb.sandisk.com/app/answers/detail/a_id/10192">Firmware release notes</a> and <a rel="nofollow" class="external text" href="http://kb.sandisk.com/app/answers/detail/a_id/10477">Manual Firmware update version 365A13F0</a>
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.reddit.com/r/archlinux/comments/rkwjm/what_should_i_keep_in_mind_when_installing_on_ssd/">Discussion on Reddit about installing Arch on an SSD</a>
+</li>
+<li> See the <a href="../en/Flashcache.html" title="Flashcache">Flashcache</a> article for advanced information on using solid-state with rotational drives for top performance.</li>
+<li> <a rel="nofollow" class="external text" href="http://lifehacker.com/5837769/make-sure-your-partitions-are-correctly-aligned-for-optimal-solid-state-drive-performance">Speed Up Your SSD By Correctly Aligning Your Partitions</a> (using GParted)</li>
+<li> <a rel="nofollow" class="external text" href="http://permalink.gmane.org/gmane.comp.file-systems.btrfs/19446">Re: Varying Leafsize and Nodesize in Btrfs</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://thread.gmane.org/gmane.comp.file-systems.btrfs/19650/focus=19667">Re: SSD alignment and Btrfs sector size</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://forums.anandtech.com/showthread.php?t=2266113">Erase Block (Alignment) Misinformation?</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://superuser.com/questions/492084/is-alignment-to-erase-block-size-needed-for-modern-ssds">Is alignment to erase block size needed for modern SSD's?</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://thread.gmane.org/gmane.comp.file-systems.btrfs/15646">Btrfs support for efficient SSD operation (data blocks alignment)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://serverfault.com/questions/356534/ssd-erase-block-size-lvm-pv-on-raw-device-alignment">SSD, Erase Block Size &amp; LVM: PV on raw device, Alignment</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Storage.html" title="Category:Storage">Storage</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

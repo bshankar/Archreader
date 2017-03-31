@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Joy2key - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Joy2key skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Joy2key</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a><b>This article is being considered for redirection to <a href="../en/Gamepad.html#Using_Joystick_to_send_keystrokes" title="Joystick" class="mw-redirect">Joystick#Using Joystick to send keystrokes</a>.</b><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the second argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Joy2key">Talk:Joy2key#</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> initscripts are mentioned (<code>/etc/inittab</code>), also deprecated. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Joy2key">Talk:Joy2key#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="Use_a_joystick.2Fgamepad_to_control_applications_which_accept_keyboard_commands">Use a joystick/gamepad to control applications which accept keyboard commands</span></h3>
+<p>I use <a rel="nofollow" class="external text" href="http://interreality.org/~tetron/technology/joy2key/">joy2key</a> to work around issues with the Logitech Cordless RumblePad 2 "hat" (a.k.a. d-pad) in <a rel="nofollow" class="external text" href="http://xbmc.org/">XBMC</a>.
+</p>
+<p>XBMC 10.0 or probably a recent Arch update (SDL?) broke the joystick hat functionality for me.
+On XBMC startup, <code>xbmc.log</code> shows 0 hats and 6 - instead of 4 - axes:
+</p>
+<pre>17:00:36 T:3020363648 M:1703337984  NOTICE: Enabled Joystick: Logitech Logitech Cordless RumblePad 2
+17:00:36 T:3020363648 M:1703337984  NOTICE: Details: Total Axis: 6 Total Hats: 0 Total Buttons: 12
+</pre>
+<p><br>
+My solution was to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/joy2key/">joy2key</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. Here is my config which could potentially save you hours of frustration or fun, depending on how you look at it:
+</p>
+<pre>#
+# ~/.joy2keyrc
+#
+
+COMMON
+-dev /dev/input/js0
+-thresh -16383 16383 -16383 16383 -16383 16383 -16383 16383 -16383 16383 -16383 16383
+#-autorepeat 5
+#-deadzone 50
+
+START xbmc
+-X
+# -axis &lt;axis0min&gt; &lt;axis0max&gt; &lt;axis1min&gt; &lt;axis1max&gt; ...
+#       0 = left analog stick X-axis
+#       1 = left analog stick Y-axis
+#       2 = right analog stick X-axis
+#       3 = right analog stick Y-axis
+#       4 = hat (d-pad) X-axis
+#       5 = hat (d-pad) Y-axis
+#
+# actions: Left/Right/Up/Down (arrow keys) - first letter capital!
+#          plus/minus (ASCII characters) - lower case!
+#          blank = special
+# more info in /usr/include/X11/keysymdef.h
+#
+# .....0..........1.......2..........3..........4..........5......
+#-axis Left Right Up Down minus plus plus minus Left Right Up Down
+-axis blank blank blank blank blank blank blank blank Left Right Up Down
+
+# EoF
+</pre>
+<p><br>
+joy2key needs to start <b>after</b> XBMC to be able to see its window. Here's my XBMC standalone system config:
+</p>
+<pre>#
+# ~/.xinitrc
+#
+
+# Enable Ctrl+Alt+Bksp.
+setxkbmap -option terminate:ctrl_alt_bksp &amp;
+
+# Start joy2key after XBMC has been detected running. (Function takes arguments, some optional.)
+start_joy2key()
+{
+  for n in $(seq $4 || seq 5)
+  do
+    xwininfo -display :0 -name "$1" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; joy2key "$1" -config "$2"
+    sleep $3 || sleep 3
+  done
+}
+# syntax: start_joy2key &lt;window name&gt; &lt;config file&gt; [wait # of sec between tries] [repeat # of times]
+start_joy2key "XBMC Media Center" xbmc 3 5 &amp;
+
+# Start XBMC.
+xbmc-standalone
+
+# EoF
+</pre>
+<p><br>
+And here is my joy2key config section for controlling <a href="../en/Kodi.html" title="Boxee-source" class="mw-redirect">Boxee-source</a>:
+</p>
+<pre>START boxee
+-X
+-axis blank blank Page_Up Page_Down blank blank plus minus Left Right Up Down
+# .......1.2......3......4.5....6.....7...........8............9.0.1.2
+-buttons v Return Escape c Left Right bracketleft bracketright i z s h
+</pre>
+<p><br>
+Add this to <code>~/.xinitrc</code> below the XBMC section to alternate between launching XBMC and Boxee:
+</p>
+<pre>start_joy2key Boxee boxee 3 3 &amp;
+/opt/boxee/run-boxee-desktop
+</pre>
+<p><br>
+This gets respawned over and over from <code>/etc/inittab</code>:
+</p>
+<pre>x:5:respawn:/bin/su xbmc -l -c "/bin/bash --login -c /usr/bin/startx &gt;/dev/null 2&gt;&amp;1"
+</pre>
+<p><br>
+References to the sources where I learned about this:
+</p>
+<ul>
+<li>
+<a rel="nofollow" class="external autonumber" href="http://hans.fugal.net/blog/2007/06/02/joystick-hat-in-x-plane-in-linux/">[1]</a> blog entry: <i>Joystick Hat in X-Plane in Linux</i>
+</li>
+<li>
+<a rel="nofollow" class="external autonumber" href="http://ubuntuforums.org/showthread.php?t=646564">[2]</a> Ubuntu forum post: <i>How to use joy2key for SIXAXIS joypad (or any really!) </i>
+</li>
+<li>
+<a rel="nofollow" class="external autonumber" href="http://wiki.xbmc.org/index.php?title=Installing_XBMC_for_Linux#Autostarting_XBMC">[3]</a> XBMC wiki: <i>Installing XBMC for Linux &gt; Autostarting XBMC</i>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Input_devices.html" title="Category:Input devices">Input devices</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_flagged_with_Template:Redirect.html" title="Category:Pages flagged with Template:Redirect">Pages flagged with Template:Redirect</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

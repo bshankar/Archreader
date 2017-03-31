@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Rutorrent with lighttpd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Rutorrent_with_lighttpd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Rutorrent with lighttpd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/RuTorrent.html" title="RuTorrent">RuTorrent</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Same topic. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Rutorrent_with_lighttpd#Merge">Talk:Rutorrent with lighttpd#Merge</a>)</div>
+</div>
+<p><a rel="nofollow" class="external text" href="http://code.google.com/p/rutorrent/">Rutorrent</a> is a php frontend to the <a rel="nofollow" class="external text" href="http://libtorrent.rakshasa.no/">rtorrent</a> bitorrent client.
+</p>
+<p>It communicates with rtorrent using XML-RPC. It requires a web server such as lighttpd or apache to serve it's pages.
+</p>
+<p>To set up rutorrent, we will need to have rtorrent and lighttpd set up.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#rtorrent"><span class="tocnumber">1</span> <span class="toctext">rtorrent</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#lighttpd"><span class="tocnumber">2</span> <span class="toctext">lighttpd</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#lighttpd.conf"><span class="tocnumber">2.1</span> <span class="toctext">lighttpd.conf</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Test"><span class="tocnumber">2.1.1</span> <span class="toctext">Test</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#php.ini"><span class="tocnumber">2.2</span> <span class="toctext">php.ini</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#rutorrent"><span class="tocnumber">3</span> <span class="toctext">rutorrent</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Testing"><span class="tocnumber">4</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Plugins"><span class="tocnumber">5</span> <span class="toctext">Plugins</span></a></li>
+<li class="toclevel-1 tocsection-9">
+<a href="#SSL_and_Authentication"><span class="tocnumber">6</span> <span class="toctext">SSL and Authentication</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#User_Authentication"><span class="tocnumber">6.1</span> <span class="toctext">User Authentication</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#SSL"><span class="tocnumber">6.2</span> <span class="toctext">SSL</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#See_Also"><span class="tocnumber">8</span> <span class="toctext">See Also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="rtorrent">rtorrent</span></h2>
+<p>Install rtorrent and configure to your liking.
+</p>
+<pre># pacman -S rtorrent
+</pre>
+<p>Information on configuring rtorrent can be found on it's wiki page: <a href="../en/RTorrent.html" title="RTorrent">RTorrent</a>.
+</p>
+<p>rtorrent in the repos should be compiled with XML-RPC support.
+</p>
+<p>Add the following line to your rtorrent config file, usually ~/.rtorrent.rc.
+</p>
+<pre>scgi_port = localhost:5050
+</pre>
+<p>Instead of using a tcp port, it is also possible to use a socket using the scgi_local option instead. This did not work for me, as lighttpd complained about permissions regardless of permissions / location of socket file.
+</p>
+<p>You can choose a port other than 5050 if you like.
+</p>
+<h2><span class="mw-headline" id="lighttpd">lighttpd</span></h2>
+<p>Install lighthttp and php.
+</p>
+<pre># pacman -S lighttpd php php-cgi fcgi
+</pre>
+<p>Information on setting up lighthttp can be found on it's wiki page: <a href="../en/Lighttpd.html" title="Lighttpd">Lighttpd</a>
+</p>
+<p>After starting lighthttp as per the wiki, you should be able to access the test page at <a rel="nofollow" class="external free" href="http://localhost:80">http://localhost:80</a>.
+</p>
+<p>By default the pages are served from /srv/http, this is where we will be putting rutorrent.
+</p>
+<h3><span class="mw-headline" id="lighttpd.conf">lighttpd.conf</span></h3>
+<p>Edit lighthttpd's config file, /etc/lighttpd/lighttpd.conf.
+</p>
+<p>The following lines tell lighttpd to load the fastcgi and simple-cgi modules. Fast cgi is needed for rutorrent itself, and scgi for rutorrent to communicate with rtorrent.
+</p>
+<pre>server.modules += ( "mod_fastcgi" )
+server.modules += ( "mod_scgi" )
+</pre>
+<p>We need to tell lighttpd how to treat files like css, images (jpg etc.), js. Otherwise it will not know what to do with them, and you may get a dialog to download the file or rutorrent will just not work properly.
+</p>
+<p>Here is a long list of filetypes, it is probably overkill as most of them are not needed, but easier to cover them all.
+</p>
+<p>Add this to /etc/lighttpd/lighttpd.conf also.
+</p>
+<pre>mimetype.assign             = (
+      ".rpm"          =&gt;      "application/x-rpm",
+      ".pdf"          =&gt;      "application/pdf",
+      ".sig"          =&gt;      "application/pgp-signature",
+      ".spl"          =&gt;      "application/futuresplash",
+      ".class"        =&gt;      "application/octet-stream",
+      ".ps"           =&gt;      "application/postscript",
+      ".torrent"      =&gt;      "application/x-bittorrent",
+      ".dvi"          =&gt;      "application/x-dvi",
+      ".gz"           =&gt;      "application/x-gzip",
+      ".pac"          =&gt;      "application/x-ns-proxy-autoconfig",
+      ".swf"          =&gt;      "application/x-shockwave-flash",
+      ".tar.gz"       =&gt;      "application/x-tgz",
+      ".tgz"          =&gt;      "application/x-tgz",
+      ".tar"          =&gt;      "application/x-tar",
+      ".zip"          =&gt;      "application/zip",
+      ".mp3"          =&gt;      "audio/mpeg",
+      ".m3u"          =&gt;      "audio/x-mpegurl",
+      ".wma"          =&gt;      "audio/x-ms-wma",
+      ".wax"          =&gt;      "audio/x-ms-wax",
+      ".ogg"          =&gt;      "application/ogg",
+      ".wav"          =&gt;      "audio/x-wav",
+      ".gif"          =&gt;      "image/gif",
+      ".jar"          =&gt;      "application/x-java-archive",
+      ".jpg"          =&gt;      "image/jpeg",
+      ".jpeg"         =&gt;      "image/jpeg",
+      ".png"          =&gt;      "image/png",
+      ".xbm"          =&gt;      "image/x-xbitmap",
+      ".xpm"          =&gt;      "image/x-xpixmap",
+      ".xwd"          =&gt;      "image/x-xwindowdump",
+      ".css"          =&gt;      "text/css",
+      ".html"         =&gt;      "text/html",
+      ".htm"          =&gt;      "text/html",
+      ".js"           =&gt;      "text/javascript",
+      ".asc"          =&gt;      "text/plain",
+      ".c"            =&gt;      "text/plain",
+      ".cpp"          =&gt;      "text/plain",
+      ".log"          =&gt;      "text/plain",
+      ".conf"         =&gt;      "text/plain",
+      ".text"         =&gt;      "text/plain",
+      ".txt"          =&gt;      "text/plain",
+      ".dtd"          =&gt;      "text/xml",
+      ".xml"          =&gt;      "text/xml",
+      ".mpeg"         =&gt;      "video/mpeg",
+      ".mpg"          =&gt;      "video/mpeg",
+      ".mov"          =&gt;      "video/quicktime",
+      ".qt"           =&gt;      "video/quicktime",
+      ".avi"          =&gt;      "video/x-msvideo",
+      ".asf"          =&gt;      "video/x-ms-asf",
+      ".asx"          =&gt;      "video/x-ms-asf",
+      ".wmv"          =&gt;      "video/x-ms-wmv",
+      ".bz2"          =&gt;      "application/x-bzip",
+      ".tbz"          =&gt;      "application/x-bzip-compressed-tar",
+      ".tar.bz2"      =&gt;      "application/x-bzip-compressed-tar",
+      # default mime type
+      ""              =&gt;      "application/octet-stream",
+     )
+</pre>
+<p>Next we add the configuration for scgi to connect to rtorrent. Make sure to use the same port as when configuring rtorrent.
+</p>
+<pre>scgi.server = ( "/RPC2" =&gt;
+    ( "127.0.0.1" =&gt;
+        (
+            "host" =&gt; "127.0.0.1",
+            "port" =&gt; 5050,
+            "check-local" =&gt; "disable"
+        )
+    )
+)
+</pre>
+<p>And finally the fastcgi settings so lighthttpd knows how to deal with php.
+</p>
+<pre>
+fastcgi.server = ( ".php" =&gt; ((
+                 "bin-path" =&gt; "/usr/bin/php-cgi",
+                 "socket" =&gt; "/tmp/php.socket"
+)))
+</pre>
+<h4><span class="mw-headline" id="Test">Test</span></h4>
+<p>At this point, you should be able to test if rtorrent and lighttpd's scgi are working properly using the xmlrpc command to ask rtorrent for a list of functions. ( See <a rel="nofollow" class="external free" href="http://libtorrent.rakshasa.no/wiki/RTorrentXMLRPCGuide#Usage">http://libtorrent.rakshasa.no/wiki/RTorrentXMLRPCGuide#Usage</a> ).
+</p>
+<pre>   $ xmlrpc localhost system.listMethods
+</pre>
+<p>This should output a log list of methods that can be accessed through rtorrent's scgi interface. If it doesn't then something may be wrong. If you get error 500 (internal server error), make sure rTorrent is running.
+</p>
+<h3><span class="mw-headline" id="php.ini">php.ini</span></h3>
+<p>We need to make a small change to the open_basedir line in /etc/php/php.ini, to allow rutorrent to access the binaries it needs to run.
+</p>
+<pre>   open_basedir = /srv/http/:/home/:/tmp/:/usr/share/pear/:/usr/bin
+</pre>
+<p>The binaries are stat, id, php, curl, gzip. If these are installed somewhere other than /usr/bin, then you may need to append that to the line also.
+</p>
+<h2><span class="mw-headline" id="rutorrent">rutorrent</span></h2>
+<p>We will download rutorrent to lighttpd http directory.
+</p>
+<pre>   # cd /srv/http
+   # wget http://dl.bintray.com/novik65/generic/rutorrent-3.6.tar.gz
+   # tar xvfx rutorrent-3.6.tar.gz
+   # rm rutorrent-3.6.tar.gz
+</pre>
+<p>These should download and extract rutorrent to /srv/http. You may need to change rutorrent-3.6 to the desired version from the rutorrent website.
+</p>
+<p>rutorrent's config files are in <b>/srv/http/rutorrent/conf/</b>.
+</p>
+<p>We need to edit <b>/srv/http/rutorrent/conf/config.php</b>, and change the port to the one we used in rtorrent and lighttpd.
+</p>
+<pre>$scgi_port = 5050;
+$scgi_host = "127.0.0.1";
+</pre>
+<p>Change the owner of the rutorrent to http (the user that lighttpd runs as by default).
+</p>
+<pre># chown -R http rutorrent
+</pre>
+<h2><span class="mw-headline" id="Testing">Testing</span></h2>
+<p>rutorrent should now be set up.
+</p>
+<p>Start rtorrent, and restart lighttpd if you have not done so since changing the configuration.
+</p>
+<p>You should now be able to access the rutorrent interface on localhost or 127.0.0.1 on port 80 (assuming you did not change the default port for lighttpd).
+</p>
+<p><a rel="nofollow" class="external free" href="http://localhost">http://localhost</a>
+</p>
+<h2><span class="mw-headline" id="Plugins">Plugins</span></h2>
+<p>To install plugins for rutorrent, download the archive of the plugin you want and extract to rutorrent's plugin directory.
+</p>
+<pre>/srv/http/rutorrent/plugins
+</pre>
+<p>Plugins can be found on the rutorrent website: <a rel="nofollow" class="external free" href="http://code.google.com/p/rutorrent/wiki/Plugins">http://code.google.com/p/rutorrent/wiki/Plugins</a>
+</p>
+<h2><span class="mw-headline" id="SSL_and_Authentication">SSL and Authentication</span></h2>
+<h3><span class="mw-headline" id="User_Authentication">User Authentication</span></h3>
+<p>Detailed information on the different authentication methods can be found here: <a rel="nofollow" class="external free" href="http://redmine.lighttpd.net/projects/1/wiki/Docs_ModAuth">http://redmine.lighttpd.net/projects/1/wiki/Docs_ModAuth</a>
+</p>
+<p>In this example we will digest authentication with htdigest method.
+</p>
+<p>In your lighttpd directory, we will create a file called "lighttpd-htdigest.user" or some other filename of your choice to hold the passwords.
+</p>
+<p>For htdigest, the format of the lines is:
+</p>
+<pre>username:Realm:hash
+</pre>
+<p>Username is your desired username, Realm is a name you chose to give to the access level. Hash is an md5sum of a string that looks like:
+</p>
+<pre>username:Realm:password
+</pre>
+<p>So your actual password is not stored in the file, it just contributes to the md5sum.
+</p>
+<p>So using username: 'tom', Realm: 'rtorrent' and password: 'secret_pass', we can obtain the hash by running:
+</p>
+<pre>   $ echo -n "tom:rtorrent:secret_pass" | md5sum | cut -b -32
+   6a4aaa1091eb2d1d025bbd692dee3f0c
+</pre>
+<p>-n tells echo not to print a newline, the cut command takes just the first 32 bytes so we don't get the dash at the end.
+</p>
+<p>So now save the hash in a variable by running:
+</p>
+<pre>   $ hash=$(echo -n "tom:rtorrent:secret_pass" | md5sum | cut -b -32)
+   $ echo $hash
+   6a4aaa1091eb2d1d025bbd692dee3f0c
+</pre>
+<p>Now save it to our password file:
+</p>
+<pre># echo "tom:rtorrent:$hash" &gt; /etc/lighttpd/lighttpd-htdigest.user
+</pre>
+<p>You can use any file name you like, just add the same file to lighttpd.conf.
+</p>
+<p>root as owner of this file should work ok, however it didn't work for me unless I made http owner.
+</p>
+<pre># chown http /etc/lighttpd/lighttpd-htdigest.user
+# chmod 400 /etc/lighttpd/lighttpd-htdigest.user
+</pre>
+<p>Now we will change /etc/lighttpd/lighttpd.conf to tell it to use this password file for anytime rutorrent is accessed.
+</p>
+<p>Add the following lines:
+</p>
+<pre>   server.modules += ( "mod_auth" )
+   auth.debug = 0
+   auth.backend = "htdigest"
+   auth.backend.htdigest.userfile = "/etc/lighttpd/lighttpd-htdigest.user"
+</pre>
+<p><br>
+</p>
+<pre>   auth.require = ( "/rutorrent/" =&gt; (
+                    "method"  =&gt; "digest",
+                    "realm"   =&gt; "rtorrent",
+                    "require" =&gt; "valid-user"
+                  ))
+</pre>
+<p>Restart lighttpd, and it should now require you to enter your username and password when you reload rutorrent.
+</p>
+<pre># systemctl restart lighttpd
+</pre>
+<h3><span class="mw-headline" id="SSL">SSL</span></h3>
+<p>The following resources can help you add ssl to lighttpd:
+</p>
+<p><a href="../en/Lighttpd.html#SSL" title="Lighttpd">Lighttpd#SSL</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+<a rel="nofollow" class="external free" href="http://redmine.lighttpd.net/projects/1/wiki/Docs_SSL">http://redmine.lighttpd.net/projects/1/wiki/Docs_SSL</a>
+<a rel="nofollow" class="external free" href="http://redmine.lighttpd.net/projects/1/wiki/HowToSimpleSSL">http://redmine.lighttpd.net/projects/1/wiki/HowToSimpleSSL</a>
+</p>
+<p>If you just want to get it working, the following commands should work.
+</p>
+<p>Create pem file:
+</p>
+<pre>   sudo mkdir /etc/lighttpd/certs
+   sudo openssl req -new -x509 -newkey rsa:2048 -keyout /etc/lighttpd/certs/lighttpd.pem -out /etc/lighttpd/certs/lighttpd.pem -days 730 -nodes
+</pre>
+<p>Then add the following lines to /etc/lighttpd/lighttpd.conf (remove '#' comments if you still want plain http enabled:
+</p>
+<pre>   #$SERVER["socket"] == ":443" {
+        ssl.engine = "enable"
+        ssl.pemfile = "/etc/lighttpd/certs/lighttpd.pem"
+   #}
+</pre>
+<p>And change this line from 80 to 443 (if you only want ssl enabled):
+</p>
+<pre>   server.port     = 443
+</pre>
+<p>Then https should work, and depending on what you changed, http may not work anymore.
+</p>
+<p>Note: This cert is not signed by a Certificate Authority, so you will have to add an exception in firefox.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>For problems with rutorrent or lighttpd, the best place to check first is probably the lighttpd log files, in <b>/var/log/lighttpd/</b>. Particularly error.log.
+</p>
+<pre>   $ tail /var/log/lighttpd/error.log
+</pre>
+<h2><span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://code.google.com/p/rutorrent/">rutorrent Project page</a>
+</li>
+<li> <a href="../en/RTorrent.html" title="RTorrent">rTorrent</a>
+</li>
+<li> <a href="../en/Lighttpd.html" title="Lighttpd">Lighttpd</a>
+</li>
+<li> <a href="../en/RuTorrent.html" title="RuTorrent">RuTorrent (with Apache)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://libtorrent.rakshasa.no/wiki/RTorrentXMLRPCGuide">Using XMLRPC with rtorrent</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

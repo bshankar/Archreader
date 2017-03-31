@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>GRUB - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GRUB skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">GRUB</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GRUB_Legacy.html" title="GRUB Legacy">GRUB Legacy</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GRUB/EFI_examples.html" title="GRUB/EFI examples">GRUB/EFI examples</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GRUB/Tips_and_tricks.html" title="GRUB/Tips and tricks">GRUB/Tips and tricks</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Multiboot_USB_drive.html" title="Multiboot USB drive">Multiboot USB drive</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://www.gnu.org/software/grub/">GRUB</a> — not to be confused with <a href="../en/GRUB_Legacy.html" title="GRUB Legacy">GRUB Legacy</a> — is the next generation of the GRand Unified Bootloader. GRUB is derived from <a rel="nofollow" class="external text" href="http://www.nongnu.org/pupa/">PUPA</a> which was a research project to develop the next generation of what is now GRUB Legacy. GRUB has been rewritten from scratch to clean up everything and provide modularity and portability <a rel="nofollow" class="external autonumber" href="https://www.gnu.org/software/grub/grub-faq.html#q1">[1]</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Preface"><span class="tocnumber">1</span> <span class="toctext">Preface</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#BIOS_systems"><span class="tocnumber">2</span> <span class="toctext">BIOS systems</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#GUID_Partition_Table_.28GPT.29_specific_instructions"><span class="tocnumber">2.1</span> <span class="toctext">GUID Partition Table (GPT) specific instructions</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Master_Boot_Record_.28MBR.29_specific_instructions"><span class="tocnumber">2.2</span> <span class="toctext">Master Boot Record (MBR) specific instructions</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Installation"><span class="tocnumber">2.3</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6">
+<a href="#Install_boot_files"><span class="tocnumber">2.3.1</span> <span class="toctext">Install boot files</span></a>
+<ul>
+<li class="toclevel-4 tocsection-7"><a href="#Install_to_disk"><span class="tocnumber">2.3.1.1</span> <span class="toctext">Install to disk</span></a></li>
+<li class="toclevel-4 tocsection-8"><a href="#Install_to_external_USB_stick"><span class="tocnumber">2.3.1.2</span> <span class="toctext">Install to external USB stick</span></a></li>
+<li class="toclevel-4 tocsection-9"><a href="#Install_to_partition_or_partitionless_disk"><span class="tocnumber">2.3.1.3</span> <span class="toctext">Install to partition or partitionless disk</span></a></li>
+<li class="toclevel-4 tocsection-10"><a href="#Generate_core.img_alone"><span class="tocnumber">2.3.1.4</span> <span class="toctext">Generate core.img alone</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#UEFI_systems"><span class="tocnumber">3</span> <span class="toctext">UEFI systems</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Check_if_you_have_GPT_and_an_ESP"><span class="tocnumber">3.1</span> <span class="toctext">Check if you have GPT and an ESP</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Create_an_ESP"><span class="tocnumber">3.2</span> <span class="toctext">Create an ESP</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Installation_2"><span class="tocnumber">3.3</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Further_reading"><span class="tocnumber">3.4</span> <span class="toctext">Further reading</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#Alternative_install_method"><span class="tocnumber">3.4.1</span> <span class="toctext">Alternative install method</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#UEFI_firmware_workaround"><span class="tocnumber">3.4.2</span> <span class="toctext">UEFI firmware workaround</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Create_a_GRUB_entry_in_the_firmware_boot_manager"><span class="tocnumber">3.4.3</span> <span class="toctext">Create a GRUB entry in the firmware boot manager</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#GRUB_standalone"><span class="tocnumber">3.4.4</span> <span class="toctext">GRUB standalone</span></a></li>
+<li class="toclevel-3 tocsection-20"><a href="#Technical_information"><span class="tocnumber">3.4.5</span> <span class="toctext">Technical information</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21"><a href="#Generate_the_main_configuration_file"><span class="tocnumber">4</span> <span class="toctext">Generate the main configuration file</span></a></li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Configuration"><span class="tocnumber">5</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#Additional_arguments"><span class="tocnumber">5.1</span> <span class="toctext">Additional arguments</span></a></li>
+<li class="toclevel-2 tocsection-24">
+<a href="#Dual-booting"><span class="tocnumber">5.2</span> <span class="toctext">Dual-booting</span></a>
+<ul>
+<li class="toclevel-3 tocsection-25"><a href="#.22Shutdown.22_menu_entry"><span class="tocnumber">5.2.1</span> <span class="toctext">"Shutdown" menu entry</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#.22Restart.22_menu_entry"><span class="tocnumber">5.2.2</span> <span class="toctext">"Restart" menu entry</span></a></li>
+<li class="toclevel-3 tocsection-27">
+<a href="#GNU.2FLinux_menu_entry"><span class="tocnumber">5.2.3</span> <span class="toctext">GNU/Linux menu entry</span></a>
+<ul>
+<li class="toclevel-4 tocsection-28"><a href="#Encrypted_GNU.2FLinux_menuentry"><span class="tocnumber">5.2.3.1</span> <span class="toctext">Encrypted GNU/Linux menuentry</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-29">
+<a href="#FreeBSD_menu_entry"><span class="tocnumber">5.2.4</span> <span class="toctext">FreeBSD menu entry</span></a>
+<ul>
+<li class="toclevel-4 tocsection-30"><a href="#Loading_the_kernel_directly"><span class="tocnumber">5.2.4.1</span> <span class="toctext">Loading the kernel directly</span></a></li>
+<li class="toclevel-4 tocsection-31"><a href="#Chainloading_the_embedded_boot_record"><span class="tocnumber">5.2.4.2</span> <span class="toctext">Chainloading the embedded boot record</span></a></li>
+<li class="toclevel-4 tocsection-32"><a href="#Running_the_traditional_BSD_2nd_stage_loader"><span class="tocnumber">5.2.4.3</span> <span class="toctext">Running the traditional BSD 2nd stage loader</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-33"><a href="#Windows_installed_in_UEFI-GPT_Mode_menu_entry"><span class="tocnumber">5.2.5</span> <span class="toctext">Windows installed in UEFI-GPT Mode menu entry</span></a></li>
+<li class="toclevel-3 tocsection-34"><a href="#Windows_installed_in_BIOS-MBR_mode"><span class="tocnumber">5.2.6</span> <span class="toctext">Windows installed in BIOS-MBR mode</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-35"><a href="#LVM"><span class="tocnumber">5.3</span> <span class="toctext">LVM</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#RAID"><span class="tocnumber">5.4</span> <span class="toctext">RAID</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Multiple_entries"><span class="tocnumber">5.5</span> <span class="toctext">Multiple entries</span></a></li>
+<li class="toclevel-2 tocsection-38">
+<a href="#Encryption"><span class="tocnumber">5.6</span> <span class="toctext">Encryption</span></a>
+<ul>
+<li class="toclevel-3 tocsection-39"><a href="#Root_partition"><span class="tocnumber">5.6.1</span> <span class="toctext">Root partition</span></a></li>
+<li class="toclevel-3 tocsection-40"><a href="#Boot_partition"><span class="tocnumber">5.6.2</span> <span class="toctext">Boot partition</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-41">
+<a href="#Using_the_command_shell"><span class="tocnumber">6</span> <span class="toctext">Using the command shell</span></a>
+<ul>
+<li class="toclevel-2 tocsection-42"><a href="#Pager_support"><span class="tocnumber">6.1</span> <span class="toctext">Pager support</span></a></li>
+<li class="toclevel-2 tocsection-43">
+<a href="#Using_the_command_shell_environment_to_boot_operating_systems"><span class="tocnumber">6.2</span> <span class="toctext">Using the command shell environment to boot operating systems</span></a>
+<ul>
+<li class="toclevel-3 tocsection-44"><a href="#Chainloading_a_partition"><span class="tocnumber">6.2.1</span> <span class="toctext">Chainloading a partition</span></a></li>
+<li class="toclevel-3 tocsection-45"><a href="#Chainloading_a_disk.2Fdrive"><span class="tocnumber">6.2.2</span> <span class="toctext">Chainloading a disk/drive</span></a></li>
+<li class="toclevel-3 tocsection-46"><a href="#Chainloading_Windows.2FLinux_installed_in_UEFI_mode"><span class="tocnumber">6.2.3</span> <span class="toctext">Chainloading Windows/Linux installed in UEFI mode</span></a></li>
+<li class="toclevel-3 tocsection-47"><a href="#Normal_loading"><span class="tocnumber">6.2.4</span> <span class="toctext">Normal loading</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-48"><a href="#Using_the_rescue_console"><span class="tocnumber">6.3</span> <span class="toctext">Using the rescue console</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-49">
+<a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-50">
+<a href="#Intel_BIOS_not_booting_GPT"><span class="tocnumber">7.1</span> <span class="toctext">Intel BIOS not booting GPT</span></a>
+<ul>
+<li class="toclevel-3 tocsection-51"><a href="#MBR"><span class="tocnumber">7.1.1</span> <span class="toctext">MBR</span></a></li>
+<li class="toclevel-3 tocsection-52"><a href="#EFI_path"><span class="tocnumber">7.1.2</span> <span class="toctext">EFI path</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-53"><a href="#Enable_debug_messages"><span class="tocnumber">7.2</span> <span class="toctext">Enable debug messages</span></a></li>
+<li class="toclevel-2 tocsection-54"><a href="#.22No_suitable_mode_found.22_error"><span class="tocnumber">7.3</span> <span class="toctext">"No suitable mode found" error</span></a></li>
+<li class="toclevel-2 tocsection-55"><a href="#msdos-style_error_message"><span class="tocnumber">7.4</span> <span class="toctext">msdos-style error message</span></a></li>
+<li class="toclevel-2 tocsection-56">
+<a href="#UEFI"><span class="tocnumber">7.5</span> <span class="toctext">UEFI</span></a>
+<ul>
+<li class="toclevel-3 tocsection-57"><a href="#Common_installation_errors"><span class="tocnumber">7.5.1</span> <span class="toctext">Common installation errors</span></a></li>
+<li class="toclevel-3 tocsection-58"><a href="#Drop_to_rescue_shell"><span class="tocnumber">7.5.2</span> <span class="toctext">Drop to rescue shell</span></a></li>
+<li class="toclevel-3 tocsection-59"><a href="#GRUB_UEFI_not_loaded"><span class="tocnumber">7.5.3</span> <span class="toctext">GRUB UEFI not loaded</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-60"><a href="#Invalid_signature"><span class="tocnumber">7.6</span> <span class="toctext">Invalid signature</span></a></li>
+<li class="toclevel-2 tocsection-61"><a href="#Boot_freezes"><span class="tocnumber">7.7</span> <span class="toctext">Boot freezes</span></a></li>
+<li class="toclevel-2 tocsection-62"><a href="#Arch_not_found_from_other_OS"><span class="tocnumber">7.8</span> <span class="toctext">Arch not found from other OS</span></a></li>
+<li class="toclevel-2 tocsection-63"><a href="#Warning_when_installing_in_chroot"><span class="tocnumber">7.9</span> <span class="toctext">Warning when installing in chroot</span></a></li>
+<li class="toclevel-2 tocsection-64"><a href="#GRUB_loads_slowly"><span class="tocnumber">7.10</span> <span class="toctext">GRUB loads slowly</span></a></li>
+<li class="toclevel-2 tocsection-65"><a href="#error:_unknown_filesystem"><span class="tocnumber">7.11</span> <span class="toctext">error: unknown filesystem</span></a></li>
+<li class="toclevel-2 tocsection-66"><a href="#grub-reboot_not_resetting"><span class="tocnumber">7.12</span> <span class="toctext">grub-reboot not resetting</span></a></li>
+<li class="toclevel-2 tocsection-67"><a href="#Old_BTRFS_prevents_installation"><span class="tocnumber">7.13</span> <span class="toctext">Old BTRFS prevents installation</span></a></li>
+<li class="toclevel-2 tocsection-68"><a href="#Windows_8_not_found"><span class="tocnumber">7.14</span> <span class="toctext">Windows 8 not found</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-69"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Preface">Preface</span></h2>
+<p>A <i>bootloader</i> is the first software program that runs when a computer starts. It is responsible for loading and transferring control to the Linux kernel. The kernel, in turn, initializes the rest of the operating system. The name <i>GRUB</i> officially refers to version <i>2</i> of the software. See <a rel="nofollow" class="external autonumber" href="https://www.gnu.org/software/grub/">[2]</a>. If you are looking for the article on the legacy version, see <a href="../en/GRUB_Legacy.html" title="GRUB Legacy">GRUB Legacy</a>.
+</p>
+<p>GRUB has a few root file system-specific limitations:
+</p>
+<ul><li> <a href="../en/F2FS.html" title="F2FS">F2FS</a> is not supported</li></ul>
+<p>If your root partition is on an unsupported file system, you must create a separate <code>/boot</code> partition with a supported file system. In some cases, the development version of GRUB <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grub-git/">grub-git</a></span><sup><small>AUR</small></sup> has native support.
+</p>
+<h2><span class="mw-headline" id="BIOS_systems">BIOS systems</span></h2>
+<h3><span class="mw-headline" id="GUID_Partition_Table_.28GPT.29_specific_instructions">GUID Partition Table (GPT) specific instructions</span></h3>
+<p>On a BIOS/<a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> configuration a <a rel="nofollow" class="external text" href="http://www.gnu.org/software/grub/manual/html_node/BIOS-installation.html">BIOS boot partition</a> is required.  GRUB embeds its <code>core.img</code> into this partition.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> Before attempting this method keep in mind that not all systems will be able to support this partitioning scheme. Read more on <a href="../en/Partitioning.html#BIOS_systems" title="GUID Partition Table" class="mw-redirect">GUID partition tables</a>.</li>
+<li> This additional partition is only needed on a GRUB, BIOS/GPT partitioning scheme.  Previously, for a GRUB, BIOS/MBR partitioning scheme, GRUB used the Post-MBR gap for the embedding the <code>core.img</code>).  GRUB for GPT, however, does not use the Post-GPT gap to conform to GPT specifications that require 1_megabyte/2048_sector disk boundaries.</li>
+<li> For <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> systems this extra partition is not required, since no embedding of boot sectors takes place in that case. However, UEFI systems still require an <a href="../en/EFI_System_Partition.html" title="ESP" class="mw-redirect">ESP</a>.</li>
+</ul>
+</div>
+<p>Create a mebibyte partition (<code>+1M</code> with <a href="../en/Fdisk.html" title="Fdisk">fdisk</a> or <a href="../en/Fdisk.html" title="Gdisk" class="mw-redirect">gdisk</a>) on the disk with no file system and with partition type BIOS boot. Select <code>BIOS boot</code> and partition type number <code>4</code> for <i>fdisk</i>, <code>ef02</code> for <i>gdisk</i>, and <code>bios_grub</code> for <i>parted</i>.  This partition can be in any position order but has to be on the first 2 TiB of the disk.  This partition needs to be created before GRUB installation.  When the partition is ready, install the bootloader as per the instructions below.
+</p>
+<p>The post-GPT gap can also be used as the BIOS boot partition though it will be out of GPT alignment specification.  Since the partition will not be regularly accessed performance issues can be disregarded, though some disk utilities will display a warning about it.  In <i>fdisk</i> or <i>gdisk</i> create a new partition starting at sector 34 and spanning to 2047 and set the type.  To have the viewable partitions begin at the base consider adding this partition last.
+</p>
+<h3><span class="mw-headline" id="Master_Boot_Record_.28MBR.29_specific_instructions">Master Boot Record (MBR) specific instructions</span></h3>
+<p>Usually the post-<a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a> gap (after the 512 byte MBR region and before the start of the first partition) in many MBR (or 'msdos' disklabel) partitioned systems is 31 KiB when DOS compatibility cylinder alignment issues are satisfied in the partition table. However a post-MBR gap of about 1 to 2 MiB is recommended to provide sufficient room for embedding GRUB's <code>core.img</code> (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/24103">FS#24103</a>). It is advisable to use a partitioning tool that supports 1 MiB partition alignment to obtain this space as well as to satisfy other non-512 byte sector issues (which are unrelated to embedding of <code>core.img</code>).
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grub">grub</a></span> package. It will replace <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grub-legacy/">grub-legacy</a></span><sup><small>AUR</small></sup>, where already installed.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Simply installing the package will not update the <code>/boot/grub/i386-pc/core.img</code> file and the GRUB modules in <code>/boot/grub/i386-pc</code>. You need to update them manually using <code>grub-install</code> as explained below.</div>
+<h4><span class="mw-headline" id="Install_boot_files">Install boot files</span></h4>
+<p>There are 4 ways to install GRUB boot files in BIOS booting:
+</p>
+<ul>
+<li> <a href="#Install_to_disk">Install to disk</a> (recommended)</li>
+<li> <a href="#Install_to_external_USB_stick">Install to external USB stick</a> (for recovery)</li>
+<li> <a href="#Install_to_partition_or_partitionless_disk">Install to partition or partitionless disk</a> (not recommended)</li>
+<li> <a href="#Generate_core.img_alone">Generate core.img alone</a> (safest method, but requires another BIOS bootloader like <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a> to be installed to chainload <code>/boot/grub/i386-pc/core.img</code>)</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>See <a rel="nofollow" class="external free" href="https://www.gnu.org/software/grub/manual/html_node/BIOS-installation.html">https://www.gnu.org/software/grub/manual/html_node/BIOS-installation.html</a> for additional documentation.</div>
+<h5><span class="mw-headline" id="Install_to_disk">Install to disk</span></h5>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The method is specific to installing GRUB to a partitioned (MBR or GPT) disk, with GRUB files installed to <code>/boot/grub</code> and its first stage code installed to the 440-byte MBR boot code region (not to be confused with MBR partition table). </div>
+<p>The following commands will:
+</p>
+<ul>
+<li> Set up GRUB in the 440-byte Master Boot Record boot code region</li>
+<li> Populate the <code>/boot/grub</code> directory</li>
+<li> Generate the <code>/boot/grub/i386-pc/core.img</code> file</li>
+<li> Embed it in the 31 KiB (minimum size - varies depending on partition alignment) post-MBR gap in case of MBR partitioned disk</li>
+<li> In the case of a GPT partitioned disk it will embed it in the BIOS Boot Partition , denoted by <code>bios_grub</code> flag in parted and EF02 type code in gdisk</li>
+</ul>
+<pre># grub-install --target=i386-pc /dev/sd<i>x</i>
+# grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p>If you use <a href="../en/LVM.html" title="LVM">LVM</a> for your <code>/boot</code>, you can install GRUB on multiple physical disks.
+</p>
+<h5><span class="mw-headline" id="Install_to_external_USB_stick">Install to external USB stick</span></h5>
+<p>Assume your USB stick's first partition is FAT32 and its partition is /dev/sdy1
+</p>
+<pre># mkdir -p /mnt/usb
+# mount /dev/sdy1 /mnt/usb
+# grub-install --target=i386-pc --debug --boot-directory=/mnt/usb/boot /dev/sdy
+# grub-mkconfig -o /mnt/usb/boot/grub/grub.cfg
+</pre>
+<p>Optionally backup configuration files of <code>grub.cfg</code>:
+</p>
+<pre># mkdir -p /mnt/usb/etc/default
+# cp /etc/default/grub /mnt/usb/etc/default
+# cp -a /etc/grub.d /mnt/usb/etc
+</pre>
+<pre># sync; umount /mnt/usb
+</pre>
+<h5><span class="mw-headline" id="Install_to_partition_or_partitionless_disk">Install to partition or partitionless disk</span></h5>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>GRUB <b>strongly discourages</b> installation to a partition boot sector or a partitionless disk as GRUB Legacy or Syslinux does. This setup is prone to breakage, especially during updates, and is <b>not supported</b> by the Arch developers.</div>
+<p>To set up grub to a partition boot sector, to a partitionless disk (also called superfloppy) or to a floppy disk, run (using for example <code>/dev/sdaX</code> as the <code>/boot</code> partition):
+</p>
+<pre># chattr -i /boot/grub/i386-pc/core.img
+# grub-install --target=i386-pc --debug --force /dev/sdaX
+# chattr +i /boot/grub/i386-pc/core.img
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> <code>/dev/sdaX</code> used for example only.</li>
+<li> <code>--target=i386-pc</code> instructs <code>grub-install</code> to install for BIOS systems only. It is recommended to always use this option to remove ambiguity in <i>grub-install</i>.</li>
+</ul>
+</div>
+<p>You need to use the <code>--force</code> option to allow usage of blocklists and should not use <code>--grub-setup=/bin/true</code> (which is similar to simply generating <code>core.img</code>).
+</p>
+<p><code>grub-install</code> will give out warnings like which should give you the idea of what might go wrong with this approach:
+</p>
+<pre>/sbin/grub-setup: warn: Attempting to install GRUB to a partitionless disk or to a partition. This is a BAD idea.
+/sbin/grub-setup: warn: Embedding is not possible. GRUB can only be installed in this setup by using blocklists.
+                        However, blocklists are UNRELIABLE and their use is discouraged.
+</pre>
+<p>Without <code>--force</code> you may get the below error and <code>grub-setup</code> will not setup its boot code in the partition boot sector:
+</p>
+<pre>/sbin/grub-setup: error: will not proceed with blocklists
+</pre>
+<p>With <code>--force</code> you should get:
+</p>
+<pre>Installation finished. No error reported.
+</pre>
+<p>The reason why <code>grub-setup</code> does not by default allow this is because in case of partition or a partitionless disk is that GRUB relies on embedded blocklists in the partition bootsector to locate the <code>/boot/grub/i386-pc/core.img</code> file and the prefix directory <code>/boot/grub</code>. The sector locations of <code>core.img</code> may change whenever the file system in the partition is being altered (files copied, deleted etc.). For more info, see <a rel="nofollow" class="external free" href="https://bugzilla.redhat.com/show_bug.cgi?id=728742">https://bugzilla.redhat.com/show_bug.cgi?id=728742</a> and <a rel="nofollow" class="external free" href="https://bugzilla.redhat.com/show_bug.cgi?id=730915">https://bugzilla.redhat.com/show_bug.cgi?id=730915</a>.
+</p>
+<p>The workaround for this is to set the immutable flag on <code>/boot/grub/i386-pc/core.img</code> (using <code>chattr</code> command as mentioned above) so that the sector locations of the <code>core.img</code> file in the disk is not altered. The immutable flag on <code>/boot/grub/i386-pc/core.img</code> needs to be set only if GRUB is installed to a partition boot sector or a partitionless disk, not in case of installation to MBR or simple generation of <code>core.img</code> without embedding any bootsector (mentioned above).
+</p>
+<p>Unfortunately, the <code>grub.cfg</code> file that is created will not contain the proper UUID in order to boot, even if it reports no errors. see <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1294604#p1294604">https://bbs.archlinux.org/viewtopic.php?pid=1294604#p1294604</a>.
+In order to fix this issue the following commands:
+</p>
+<pre># mount /dev/sdxY /mnt        #Your root partition.
+# mount /dev/sdxZ /mnt/boot   #Your boot partition (if you have one).
+# arch-chroot /mnt
+# pacman -S linux
+# grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<h5><span class="mw-headline" id="Generate_core.img_alone">Generate core.img alone</span></h5>
+<p>To populate the <code>/boot/grub</code> directory and generate a <code>/boot/grub/i386-pc/core.img</code> file <b>without</b> embedding any GRUB bootsector code in the MBR, post-MBR region, or the partition bootsector, add <code>--grub-setup=/bin/true</code> to <code>grub-install</code>:
+</p>
+<pre># grub-install --target=i386-pc --grub-setup=/bin/true --debug /dev/sda
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> <code>/dev/sda</code> used for example only.</li>
+<li> <code>--target=i386-pc</code> instructs <code>grub-install</code> to install for BIOS systems only. It is recommended to always use this option to remove ambiguity in grub-install.</li>
+</ul>
+</div>
+<p>You can then chainload GRUB's <code>core.img</code> from GRUB Legacy or syslinux as a Linux kernel or as a multiboot kernel (see also <a href="../en/Syslinux.html#Chainloading" title="Syslinux">Syslinux#Chainloading</a>).
+</p>
+<h2><span class="mw-headline" id="UEFI_systems">UEFI systems</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> It is recommended to read and understand the <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a>, <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> and <a href="../en/UEFI_Bootloaders.html" title="UEFI Bootloaders" class="mw-redirect">UEFI Bootloaders</a> pages.</li>
+<li> When installing to use UEFI it is important to start the install with your machine in UEFI mode. The Arch Linux install media must be UEFI bootable.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Check_if_you_have_GPT_and_an_ESP">Check if you have GPT and an ESP</span></h3>
+<p>An <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a> (ESP) is needed on every disc you want to boot using EFI. GPT is not strictly necessary, but it is highly recommended and is the only method currently supported in this article. If you are installing Arch Linux on an EFI-capable computer with an already-working operating system, like Windows 8 for example, it is very likely that you already have an ESP. To check for GPT and for an ESP, use <code>parted</code> as root to print the partition table of the disk you want to boot from. (We are calling it <code>/dev/sda</code>.)
+</p>
+<pre># parted /dev/sda print
+</pre>
+<p>For GPT, you are looking for "Partition Table: GPT". For EFI, you are looking for a small (512 MiB or less) partition with a vfat file system and the <i>boot</i> flag enabled. On it, there should be a directory named "EFI". If these criteria are met, this is your ESP. Make note of the partition number. You will need to know which one it is, so you can mount it later on while installing GRUB to it.
+</p>
+<h3><span class="mw-headline" id="Create_an_ESP">Create an ESP</span></h3>
+<p>If you do not have an ESP, you will need to create one. See <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>
+</p>
+<h3><span class="mw-headline" id="Installation_2">Installation</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>UEFI firmware are not implemented consistently by hardware manufacturers. The installation examples provided are intended to work on the widest range of UEFI systems possible. Those experiencing problems despite applying these methods are encouraged to share detailed information for their hardware-specific cases, especially where solving these problems. A <a href="../en/GRUB/EFI_examples.html" title="GRUB/EFI examples">GRUB/EFI examples</a> article has been provided for such cases.</div>
+<p>This section assumes you are installing GRUB for x86_64 systems (x86_64-efi). For i686 systems, replace <code>x86_64-efi</code> with <code>i386-efi</code> where appropriate.
+</p>
+<p>Make sure you are in a <a href="../en/Bash.html" title="Bash">bash</a> shell. For example, when booting from the Arch ISO:
+</p>
+<pre># arch-chroot /mnt /bin/bash
+</pre>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the packages <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grub">grub</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=efibootmgr">efibootmgr</a></span>. <i>GRUB</i> is the bootloader, <i>efibootmgr</i> creates bootable <code>.efi</code> stub entries used by the GRUB installation script.
+</p>
+<p>The following steps install the GRUB UEFI application to <code><i>esp</i>/EFI/grub</code>, install its modules to <code>/boot/grub/x86_64-efi</code>, and place the bootable <code>grubx64.efi</code> stub in <code><i>esp</i>/EFI/grub</code>.
+</p>
+<p>First, tell GRUB to use UEFI, set the boot directory and set the bootloader ID. Mount the ESP partition to e.g. <code>/boot</code> or <code>/boot/efi</code> and in the following change <code><i>esp</i></code> to that mount point (usually <code>/boot</code>):
+</p>
+<pre># grub-install --target=x86_64-efi --efi-directory=<i>esp</i> --bootloader-id=<b>grub</b>
+</pre>
+<p>The <code>--bootloader-id</code> is what appears in the boot options to identify the GRUB EFI boot option; make sure this is something you will recognize later. The install will create a directory of the same name under <code><i>esp</i>/EFI/</code> where the EFI binary bootloader will be placed.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you use <code>boot</code> as your bootloader-id then you will have the additional ability of being able to boot from the drive in case EFI variables are reset or you move the drive to another computer.  Usually you can do this by selecting the drive itself similar to how you would using BIOS.  If dual booting with Windows, be aware Windows usually has a folder called boot inside the EFI folder of the EFI partition, but the only purpose this serves is to recreate the EFI boot option for Windows.</div>
+<p>After the above install finished the main GRUB directory is located at <code>/boot/grub/</code>. 
+</p>
+<p>Remember to <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a> after finalizing further setup dependant <a href="#Configuration">#Configuration</a>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> While some distributions require a <code>/boot/efi</code> or <code>/boot/EFI</code> directory, Arch does not.</li>
+<li> <code>--efi-directory</code> and <code>--bootloader-id</code> are specific to GRUB UEFI. <code>--efi-directory</code> specifies the mountpoint of the ESP. It replaces <code>--root-directory</code>, which is deprecated. </li>
+<li> You might note the absence of a &lt;device_path&gt; option (e.g.: <code>/dev/sda</code>) in the <code>grub-install</code> command. In fact any &lt;device_path&gt; provided will be ignored by the GRUB install script, as UEFI bootloaders do not use a MBR or partition boot sector at all.</li>
+</ul>
+</div>
+<p>See <a href="#UEFI">UEFI troubleshooting</a> in case of problems.
+</p>
+<h3><span class="mw-headline" id="Further_reading">Further reading</span></h3>
+<p>Below is other relevant information regarding installing Arch via UEFI
+</p>
+<h4><span class="mw-headline" id="Alternative_install_method">Alternative install method</span></h4>
+<p>Usually, GRUB keeps all files, including configuration files, in <code>/boot</code>, regardless of where the EFI System Partition is mounted.
+</p>
+<p>If you want to keep these files inside the EFI System Partition itself, add <code>--boot-directory=<i>esp</i></code> to the grub-install command:
+</p>
+<pre># grub-install --target=x86_64-efi --efi-directory=<i>esp</i> --bootloader-id=grub --boot-directory=<i>esp</i> --debug
+</pre>
+<p>This puts all GRUB files in <code><i>esp</i>/grub</code>, instead of in <code>/boot/grub</code>. When using this method, make sure you have <i>grub-mkconfig</i> put the configuration file in the same place:
+</p>
+<pre># grub-mkconfig -o <i>esp</i>/grub/grub.cfg
+</pre>
+<p>Configuration is otherwise the same.
+</p>
+<h4><span class="mw-headline" id="UEFI_firmware_workaround">UEFI firmware workaround</span></h4>
+<p>Some UEFI firmware requires that the bootable <code>.efi</code> stub have a specific name and be placed in a specific location: <code><i>esp</i>/EFI/boot/bootx64.efi</code> (where <code><i>esp</i></code> is the UEFI partition mountpoint). Failure to do so in such instances will result in an unbootable installation. Fortunately, this will not cause any problems with other firmware that does not require this.
+</p>
+<p>To do so, first create the necessary directory, and then copy across the grub <code>.efi</code> stub, renaming it in the process:
+</p>
+<pre># mkdir <i>esp</i>/EFI/boot
+# cp <i>esp</i>/EFI/grub_uefi/grubx64.efi <i>esp</i>/EFI/boot/bootx64.efi
+</pre>
+<h4><span class="mw-headline" id="Create_a_GRUB_entry_in_the_firmware_boot_manager">Create a GRUB entry in the firmware boot manager</span></h4>
+<p><code>grub-install</code> automatically tries to create a menu entry in the boot manager. If it does not, then see <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="UEFI" class="mw-redirect">UEFI#efibootmgr</a> for instructions to use <code>efibootmgr</code> to create a menu entry. However, the problem is likely to be that you have not booted your CD/USB in UEFI mode, as in <a href="../en/Unified_Extensible_Firmware_Interface.html#Create_UEFI_bootable_USB_from_ISO" title="UEFI" class="mw-redirect">UEFI#Create UEFI bootable USB from ISO</a>.
+</p>
+<h4><span class="mw-headline" id="GRUB_standalone">GRUB standalone</span></h4>
+<p>This section assumes you are creating a standalone GRUB for x86_64 systems (x86_64-efi). For i686 systems, replace <code>x86_64-efi</code> with <code>i386-efi</code> where appropriate.
+</p>
+<p>It is possible to create a <code>grubx64_standalone.efi</code> application which has all the modules embedded in a tar archive within the UEFI application, thus removing the need for having a separate directory populated with all of the GRUB UEFI modules and other related files. This is done using the <code>grub-mkstandalone</code> command (included in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grub">grub</a></span>) as follows:
+</p>
+<pre># echo 'configfile ${cmdpath}/grub.cfg' &gt; /tmp/grub.cfg
+# grub-mkstandalone -d /usr/lib/grub/x86_64-efi/ -O x86_64-efi --modules="part_gpt part_msdos" --fonts="unicode" --locales="en@quot" --themes="" -o "<i>esp</i>/EFI/grub/grubx64_standalone.efi"  "boot/grub/grub.cfg=/tmp/grub.cfg" -v
+</pre>
+<p>Then copy the GRUB config file to <code><i>esp</i>/EFI/grub/grub.cfg</code> and create a UEFI Boot Manager entry for <code><i>esp</i>/EFI/grub/grubx64_standalone.efi</code> using <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="UEFI" class="mw-redirect">efibootmgr</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<p>The option <code>--modules="part_gpt part_msdos"</code> (with the quotes) is necessary for the <code>${cmdpath} </code> feature to work properly.
+</p>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>You may find that the <code>grub.cfg</code> file is not loaded due to <code>${cmdpath} </code> missing a slash (i.e. <code>(hd1,msdos2)EFI/Boot</code> instead of <code>(hd1,msdos2)/EFI/Boot</code>) and so you are dropped into a GRUB shell. If this happens determine what <code>${cmdpath} </code> is set to (<code>echo ${cmdpath} </code>) and then load the config file manually (e.g. <code>configfile (hd1,msdos2)/EFI/Boot/grub.cfg</code>).</div>
+<h4><span class="mw-headline" id="Technical_information">Technical information</span></h4>
+<p>The GRUB EFI file always expects its config file to be at <code>${prefix}/grub.cfg</code>. However in the standalone GRUB EFI file, the <code>${prefix} </code> is located inside a tar archive and embedded inside the standalone GRUB EFI file itself (inside the GRUB environment, it is denoted by <code>"(memdisk)"</code>, without quotes). This tar archive contains all the files that would be stored normally at <code>/boot/grub</code> in case of a normal GRUB EFI install.
+</p>
+<p>Due to this embedding of <code>/boot/grub</code> contents inside the standalone image itself, it does not rely on actual (external) <code>/boot/grub</code> for anything. Thus in case of standalone GRUB EFI file <code>${prefix}==(memdisk)/boot/grub</code> and the standalone GRUB EFI file reads expects the config file to be at <code>${prefix}/grub.cfg==(memdisk)/boot/grub/grub.cfg</code>.
+</p>
+<p>Hence to make sure the standalone GRUB EFI file reads the external <code>grub.cfg</code> located in the same directory as the EFI file (inside the GRUB environment, it is denoted by <code>${cmdpath} </code>), we create a simple <code>/tmp/grub.cfg</code> which instructs GRUB to use <code>${cmdpath}/grub.cfg</code> as its config (<code>configfile ${cmdpath}/grub.cfg</code> command in <code>(memdisk)/boot/grub/grub.cfg</code>). We then instruct grub-mkstandalone to copy this <code>/tmp/grub.cfg</code> file to <code>${prefix}/grub.cfg</code> (which is actually <code>(memdisk)/boot/grub/grub.cfg</code>) using the option <code>"boot/grub/grub.cfg=/tmp/grub.cfg"</code>.
+</p>
+<p>This way, the standalone GRUB EFI file and actual <code>grub.cfg</code> can be stored in any directory inside the EFI System Partition (as long as they are in the same directory), thus making them portable.
+</p>
+<h2><span class="mw-headline" id="Generate_the_main_configuration_file">Generate the main configuration file</span></h2>
+<p>After the installation, the main configuration file <code>grub.cfg</code> needs to be generated. The generation process can be influenced by a variety of options in <code>/etc/default/grub</code> and scripts in <code>/etc/grub.d/</code>; see <a href="#Configuration">#Configuration</a>. 
+</p>
+<p>If you have not done additional configuration, the automatic generation will determine the root filesystem of the system to boot for the configuration file. For that to succeed it is important that the system is either booted or chrooted into. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Remember that <code>grub.cfg</code> has to be re-generated after any change to <code>/etc/default/grub</code> or files in <code>/etc/grub.d/</code>.</div>
+<p>Use the <i>grub-mkconfig</i> tool to generate <code>grub.cfg</code>:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> The default file path is <code>/boot/grub/grub.cfg</code>, not <code>/boot/grub/i386-pc/grub.cfg</code>. The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grub">grub</a></span> includes a sample <code>/boot/grub/grub.cfg</code>; ensure your intended changes were written to this file.</li>
+<li> If you are trying to run <i>grub-mkconfig</i> in a chroot or <i>systemd-nspawn</i> container, you might notice that it does not work, complaining that <i>grub-probe</i> cannot get the "canonical path of /dev/sdaX". In this case, try using <i>arch-chroot</i> as described in the <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1225067#p1225067">BBS post</a>.</li>
+</ul>
+</div>
+<p>By default the generation scripts automatically add menu entries for Arch Linux to any generated configuration. See <a href="../en/Multiboot_USB_drive.html#Boot_entries" title="Multiboot USB drive">Multiboot USB drive#Boot entries</a> and <a href="#Dual-booting">#Dual-booting</a> for custom menu entries for other systems.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To have <i>grub-mkconfig</i> search for other installed systems, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=os-prober">os-prober</a></span>.</div>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>This section only covers editing the <code>/etc/default/grub</code> configuration file. See <a href="../en/GRUB/Tips_and_tricks.html" title="GRUB/Tips and tricks">GRUB/Tips and tricks</a> for more information.
+</p>
+<p>Remember to always <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a> after making changes to <code>/etc/default/grub</code>.
+</p>
+<h3><span class="mw-headline" id="Additional_arguments">Additional arguments</span></h3>
+<p>To pass custom additional arguments to the Linux image, you can set the <code>GRUB_CMDLINE_LINUX</code> + <code>GRUB_CMDLINE_LINUX_DEFAULT</code> variables in <code>/etc/default/grub</code>. The two are appended to each other and passed to kernel when generating regular boot entries. For the <i>recovery</i> boot entry, only <code>GRUB_CMDLINE_LINUX</code> is used in the generation.
+</p>
+<p>It is not necessary to use both, but can be useful. For example, you could use <code>GRUB_CMDLINE_LINUX_DEFAULT="resume=/dev/sdaX quiet"</code> where <code>sda<b>X</b></code> is your swap partition to enable resume after hibernation. This would generate a recovery boot entry without the resume and without <i>quiet</i> suppressing kernel messages during a boot from that menu entry. Though, the other (regular) menu entries would have them as options.
+</p>
+<p>By default <i>grub-mkconfig</i> determines the <a href="../en/Persistent_block_device_naming.html#by-uuid" title="UUID" class="mw-redirect">UUID</a> of the root filesystem for the configuration. To disable this, uncomment <code>GRUB_DISABLE_LINUX_UUID=true</code>. 
+</p>
+<p>For generating the GRUB recovery entry you also have to comment out <code>#GRUB_DISABLE_RECOVERY=true</code> in <code>/etc/default/grub</code>.
+</p>
+<p>You can also use <code>GRUB_CMDLINE_LINUX="resume=UUID=uuid-of-swap-partition"</code>
+</p>
+<p>See <a href="../en/Kernel_parameters.html" title="Kernel parameters">Kernel parameters</a> for more info.
+</p>
+<h3><span class="mw-headline" id="Dual-booting">Dual-booting</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Multiboot_USB_drive.html" title="Multiboot USB drive">Multiboot USB drive</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Same topic, substituting USB drives for SATA drives is trivial. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:GRUB">Talk:GRUB#</a>)</div>
+</div>
+<p>The best way to add other entries is editing the <code>/etc/grub.d/40_custom</code> or <code>/boot/grub/custom.cfg</code>. The entries in this file will be automatically added when running <code>grub-mkconfig</code>.
+After adding the new lines, run:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg</pre>
+<p>or, for UEFI-GPT Mode (As per <a href="#Alternative_install_method">#Alternative install method</a>):
+</p>
+<pre># grub-mkconfig -o /boot/efi/EFI/GRUB/grub.cfg</pre>
+<p>to generate an updated <code>grub.cfg</code>.
+</p>
+<h5><span class="mw-headline" id=".22Shutdown.22_menu_entry">"Shutdown" menu entry</span></h5>
+<pre>menuentry "System shutdown" {
+	echo "System shutting down..."
+	halt
+}</pre>
+<h5><span class="mw-headline" id=".22Restart.22_menu_entry">"Restart" menu entry</span></h5>
+<pre>menuentry "System restart" {
+	echo "System rebooting..."
+	reboot
+}</pre>
+<h5><span class="mw-headline" id="GNU.2FLinux_menu_entry">GNU/Linux menu entry</span></h5>
+<p>Assuming that the other distro is on partition <code>sda2</code>:
+</p>
+<pre>menuentry "Other Linux" {
+	set root=(hd0,2)
+	linux /boot/vmlinuz (add other options here as required)
+	initrd /boot/initrd.img (if the other kernel uses/needs one)
+}</pre>
+<p>Alternatively let grub search for the right partition by <i>UUID</i> or <i>label</i>:
+</p>
+<pre>menuentry "Other Linux" {
+        # assuming that UUID is 763A-9CB6
+	search --set=root --fs-uuid 763A-9CB6
+
+        # search by label OTHER_LINUX (make sure that partition label is unambiguous)
+        #search --set=root --label OTHER_LINUX
+
+	linux /boot/vmlinuz (add other options here as required, for example: root=UUID=763A-9CB6)
+	initrd /boot/initrd.img (if the other kernel uses/needs one)
+}</pre>
+<h6><span class="mw-headline" id="Encrypted_GNU.2FLinux_menuentry">Encrypted GNU/Linux menuentry</span></h6>
+<pre>menuentry "Other Linux (Encrypted)"{
+      insmod luks
+      cryptomount (hd0,2)
+      set root=(crypto0)
+      linux /boot/vmlinuz cryptdevice=/dev/sda2:cryptroot root=/dev/mapper/cryptroot (add more options if required)
+      initrd /boot/initrd.img (If the other kernel uses/needs one)
+}</pre>
+<h5><span class="mw-headline" id="FreeBSD_menu_entry">FreeBSD menu entry</span></h5>
+<p>The following three methods require that FreeBSD is installed on a single partition with UFS(v2). Assuming the nested BSD partition table is on <code>sda4</code>:
+</p>
+<h6><span class="mw-headline" id="Loading_the_kernel_directly">Loading the kernel directly</span></h6>
+<pre>menuentry 'FreeBSD' {
+	insmod ufs2
+	set root='hd0,gpt4,bsd1'
+	## or 'hd0,msdos4,bsd1', if using an IBM-PC (MS-DOS) style partition table
+	kfreebsd /boot/kernel/kernel
+	kfreebsd_loadenv /boot/device.hints
+	set kFreeBSD.vfs.root.mountfrom=ufs:/dev/ada0s4a
+	set kFreeBSD.vfs.root.mountfrom.options=rw
+}</pre>
+<h6><span class="mw-headline" id="Chainloading_the_embedded_boot_record">Chainloading the embedded boot record</span></h6>
+<pre>menuentry 'FreeBSD' {
+	insmod ufs2
+	set root='hd0,gpt4,bsd1'
+	chainloader +1
+}</pre>
+<h6><span class="mw-headline" id="Running_the_traditional_BSD_2nd_stage_loader">Running the traditional BSD 2nd stage loader</span></h6>
+<pre>menuentry 'FreeBSD' {
+  insmod ufs2
+  set root='(hd0,4)'
+  kfreebsd /boot/loader
+}</pre>
+<h5><span class="mw-headline" id="Windows_installed_in_UEFI-GPT_Mode_menu_entry">Windows installed in UEFI-GPT Mode menu entry</span></h5>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This menuentry will work only in UEFI boot mode and only if the Windows bitness matches the UEFI bitness. It <b>WILL NOT WORK</b> in BIOS installed GRUB. See <a href="../en/Dual_boot_with_Windows.html#Windows_UEFI_vs_BIOS_limitations" title="Dual boot with Windows">Dual boot with Windows#Windows UEFI vs BIOS limitations</a> and <a href="../en/Dual_boot_with_Windows.html#Bootloader_UEFI_vs_BIOS_limitations" title="Dual boot with Windows">Dual boot with Windows#Bootloader UEFI vs BIOS limitations</a> for more info.</div>
+<pre>if [ "${grub_platform}" == "efi" ]; then
+	menuentry "Microsoft Windows Vista/7/8/8.1 UEFI-GPT" {
+		insmod part_gpt
+		insmod fat
+		insmod search_fs_uuid
+		insmod chain
+		search --fs-uuid --set=root $hints_string $fs_uuid
+		chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+	}
+fi</pre>
+<p>where <code>$hints_string</code> and <code>$fs_uuid</code> are obtained with the following two commands. <code>$fs_uuid</code>'s command:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># grub-probe --target=fs_uuid $esp/EFI/Microsoft/Boot/bootmgfw.efi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1ce5-7f28</pre>
+<p><code>$hints_string</code>'s command:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># grub-probe --target=hints_string $esp/EFI/Microsoft/Boot/bootmgfw.efi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">--hint-bios=hd0,gpt1 --hint-efi=hd0,gpt1 --hint-baremetal=ahci0,gpt1</pre>
+<p>These two commands assume the ESP Windows uses is mounted at <code>$esp</code>. There might be case differences in the path to Windows's EFI file, what with being Windows, and all.
+</p>
+<h5><span class="mw-headline" id="Windows_installed_in_BIOS-MBR_mode">Windows installed in BIOS-MBR mode</span></h5>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This section does not fit into the others, should be slimmed down a bit. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:GRUB">Talk:GRUB#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>GRUB supports booting <code>bootmgr</code> directly and chainload of partition boot sector is no longer required to boot Windows in a BIOS-MBR setup.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>It is the <b>system partition</b> that has <code>/bootmgr</code>, not your "real" Windows partition (usually C:). In <code>blkid</code> output, the system partition is the one with <code>LABEL="SYSTEM RESERVED"</code> or <code>LABEL="SYSTEM"</code> and is only about 100 to 200 MB in size (much like the boot partition for Arch). See <a href="https://en.wikipedia.org/wiki/System_partition_and_boot_partition" class="extiw" title="wikipedia:System partition and boot partition">Wikipedia:System partition and boot partition</a> for more info.</div>
+<p>Throughout this section, it is assumed your Windows partition is <code>/dev/sda1</code>. A different partition will change every instance of hd0,msdos1. First, find the UUID of the NTFS file system of the Windows's SYSTEM PARTITION where the <code>bootmgr</code> and its files reside. For example, if Windows <code>bootmgr</code> exists at <code>/media/SYSTEM_RESERVED/bootmgr</code>:
+</p>
+<p>For Windows Vista/7/8/8.1:
+</p>
+<pre># grub-probe --target=fs_uuid /media/SYSTEM_RESERVED/bootmgr
+69B235F6749E84CE
+</pre>
+<pre># grub-probe --target=hints_string /media/SYSTEM_RESERVED/bootmgr
+--hint-bios=hd0,msdos1 --hint-efi=hd0,msdos1 --hint-baremetal=ahci0,msdos1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For Windows XP, replace <code>bootmgr</code> with <code>NTLDR</code> in the above commands. And note that there may not be a separate SYSTEM_RESERVED partition; just probe the file NTLDR on your Windows partition.</div>
+<p>Then, add the below code to <code>/etc/grub.d/40_custom</code> or <code>/boot/grub/custom.cfg</code> and regenerate <code>grub.cfg</code> with <code>grub-mkconfig</code> as explained above to boot Windows (XP, Vista, 7 or 8) installed in BIOS-MBR mode:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>These menuentries will work only in Legacy BIOS boot mode. It WILL NOT WORK in uefi installed grub(2). See <a href="../en/Dual_boot_with_Windows.html#Windows_UEFI_vs_BIOS_limitations" title="Dual boot with Windows">Dual boot with Windows#Windows UEFI vs BIOS limitations</a> and <a href="../en/Dual_boot_with_Windows.html#Bootloader_UEFI_vs_BIOS_limitations" title="Dual boot with Windows">Dual boot with Windows#Bootloader UEFI vs BIOS limitations</a>.</div>
+<p>For Windows Vista/7/8/8.1:
+</p>
+<pre>if [ "${grub_platform}" == "pc" ]; then
+  menuentry "Microsoft Windows Vista/7/8/8.1 BIOS-MBR" {
+    insmod part_msdos
+    insmod ntfs
+    insmod search_fs_uuid
+    insmod ntldr     
+    search --fs-uuid --set=root --hint-bios=hd0,msdos1 --hint-efi=hd0,msdos1 --hint-baremetal=ahci0,msdos1 69B235F6749E84CE
+    ntldr /bootmgr
+  }
+fi
+</pre>
+<p>For Windows XP:
+</p>
+<pre>if [ "${grub_platform}" == "pc" ]; then
+  menuentry "Microsoft Windows XP" {
+    insmod part_msdos
+    insmod ntfs
+    insmod search_fs_uuid
+    insmod ntldr     
+    search --fs-uuid --set=root --hint-bios=hd0,msdos1 --hint-efi=hd0,msdos1 --hint-baremetal=ahci0,msdos1 69B235F6749E84CE
+    ntldr /ntldr
+  }
+fi
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In some cases, mine I have installed GRUB before a clean Windows 8, you cannot boot Windows having an error with <code>\boot\bcd</code> (error code <code>0xc000000f</code>). You can fix it going to Windows Recovery Console (cmd from install disk) and executing:
+<pre>x:\&gt; "bootrec.exe /fixboot" 
+x:\&gt; "bootrec.exe /RebuildBcd".
+</pre>
+<p>Do <b>not</b> use <code>bootrec.exe /Fixmbr</code> because it will wipe GRUB out.
+</p>
+Or you can use Boot Repair function in Troubleshooting menu - it won't wipe out GRUB but will fix most error.</div>
+<p><code>/etc/grub.d/40_custom</code> can be used as a template to create <code>/etc/grub.d/nn_custom</code>. Where <code>nn</code> defines the precendence, indicating the order the script is executed.  The order scripts are executed determine the placement in the grub boot menu.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>nn</code> should be greater than 06 to ensure necessary scripts are executed first.</div>
+<h3><span class="mw-headline" id="LVM">LVM</span></h3>
+<p>If you use <a href="../en/LVM.html" title="LVM">LVM</a> for your <code>/boot</code>, make sure that the <code>lvm</code> module is preloaded:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_PRELOAD_MODULES="lvm"</pre>
+<h3><span class="mw-headline" id="RAID">RAID</span></h3>
+<p>GRUB provides convenient handling of RAID volumes. You need to add <code>insmod mdraid09</code> or <code>mdraid1x</code> which allows you to address the volume natively. For example, <code>/dev/md0</code> becomes:
+</p>
+<pre>set root=(md/0)
+</pre>
+<p>whereas a partitioned RAID volume (e.g. <code>/dev/md0p1</code>) becomes:
+</p>
+<pre>set root=(md/0,1)
+</pre>
+<p>To install grub when using RAID1 as the <code>/boot</code> partition (or using <code>/boot</code> housed on a RAID1 root partition), on devices with GPT ef02/'BIOS boot partition', simply run <i>grub-install</i> on both of the drives, such as:
+</p>
+<pre># grub-install --target=i386-pc --debug /dev/sda
+# grub-install --target=i386-pc --debug /dev/sdb
+</pre>
+<p>Where the RAID 1 array housing <code>/boot</code> is housed on <code>/dev/sda</code> and <code>/dev/sdb</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>GRUB currently (Sep 2015) supports booting from <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> RAID 0/1/10, but <i>not</i> RAID 5/6. You may use <a href="../en/RAID.html" title="Mdadm" class="mw-redirect">mdadm</a> for RAID 5/6, which is supported by GRUB.</div>
+<h3><span class="mw-headline" id="Multiple_entries">Multiple entries</span></h3>
+<p>For tips on managing multiple GRUB entries, for example when using both <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-lts">linux-lts</a></span> kernels, see <a href="../en/GRUB/Tips_and_tricks.html#Multiple_entries" title="GRUB/Tips and tricks">GRUB/Tips and tricks#Multiple entries</a>.
+</p>
+<h3><span class="mw-headline" id="Encryption">Encryption</span></h3>
+<h4><span class="mw-headline" id="Root_partition">Root partition</span></h4>
+<p>To encrypt a root filesystem to be used with GRUB, add the <code>encrypt</code> hook or the <code>sd-encrypt</code> hook (if using systemd hooks) to <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>. See <a href="../en/Dm-crypt/System_configuration.html#mkinitcpio" title="Dm-crypt/System configuration">dm-crypt/System configuration#mkinitcpio</a> for details, and <a href="../en/Mkinitcpio.html#Common_hooks" title="Mkinitcpio">Mkinitcpio#Common hooks</a> for alternative encryption hooks.
+</p>
+<p>If using the <code>encrypt</code> hook, add <code>cryptdevice</code> to <code>/etc/default/grub</code>. In the example below, the <code>sda2</code> partition has been encrypted as <code>/dev/mapper/cryptroot</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX="cryptdevice=/dev/sda2:cryptroot"</pre>
+<p>If using the <code>sd-encrypt</code> hook, add <code>luks.uuid</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX="luks.uuid=<i>UUID</i>"</pre>
+<p>where <i>UUID</i> is the UUID of the LUKS-encrypted device.
+</p>
+<p>Be sure to <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a> when done.
+</p>
+<p>For further information about bootloader configuration for encrypted devices, see <a href="../en/Dm-crypt/System_configuration.html#Boot_loader" title="Dm-crypt/System configuration">Dm-crypt/System configuration#Boot loader</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you wish to encrypt <code>/boot</code> either as a separate partition or part of the <code>/</code> partition, further setup is required. See <a href="#Boot_partition">#Boot partition</a>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you are upgrading from a working GRUB Legacy configuration, check <code>/boot/grub/menu.lst.pacsave</code> for the correct device/label to add. Look for them after the text <code>kernel /vmlinuz-linux</code>.</div>
+<h4><span class="mw-headline" id="Boot_partition">Boot partition</span></h4>
+<p>GRUB can be set to ask for a password to open a <a href="../en/Dm-crypt.html" title="LUKS" class="mw-redirect">LUKS</a> blockdevice in order to read its configuration and load any <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a> and <a href="../en/Kernels.html" title="Kernel" class="mw-redirect">kernel</a> from it. This option tries to solve the issue of having an <a href="../en/Dm-crypt/Specialties.html#Securing_the_unencrypted_boot_partition" title="Dm-crypt/Specialties">unencrypted boot partition</a>. <code>/boot</code> is <b>not</b> required to be kept in a separate partition; it may also stay under the system's root <code>/</code> directory tree.
+</p>
+<p>To enable this feature encrypt the partition with <code>/boot</code> residing on it using <a href="../en/Dm-crypt.html" title="LUKS" class="mw-redirect">LUKS</a> as normal. Then add the following option to <code>/etc/default/grub</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_ENABLE_CRYPTODISK=y</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>GRUB_ENABLE_CRYPTODISK=1</code> <a rel="nofollow" class="external text" href="https://savannah.gnu.org/bugs/?41524">will not work</a> as opposed to the request shown in GRUB 2.02-beta2.</div>
+<p>Be sure to <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a> while the partition containing <code>/boot</code> is mounted. 
+</p>
+<p>Without further changes you will be prompted twice for a passhrase: the first for GRUB to unlock the <code>/boot</code> mount point in early boot, the second to unlock the root filesystem itself as described in <a href="#Root_partition">#Root partition</a>. You can use a <a href="../en/Dm-crypt/Device_encryption.html#With_a_keyfile_embedded_in_the_initramfs" title="Dm-crypt/Device encryption">keyfile</a> to avoid this.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you use a special keymap, a default GRUB installation will not know it. This is relevant for how to enter the passphrase to unlock the LUKS blockdevice.</li>
+<li> In order to perform system updates involving the <code>/boot</code> mount point, ensure that the encrypted <code>/boot</code> is unlocked and mounted before performing an update. With a separate <code>/boot</code> partition, this may be accomplished automatically on boot by using <a href="../en/Dm-crypt/System_configuration.html#crypttab" title="Dm-crypt/System configuration">crypttab</a> with a <a href="../en/Dm-crypt/Device_encryption.html#With_a_keyfile_embedded_in_the_initramfs" title="Dm-crypt/Device encryption">keyfile</a>.</li>
+<li> If you experience issues getting the prompt for a password to display (errors regarding cryptouuid, cryptodisk, or "device not found"), try reinstalling grub as below appending the following to the end of your installation command:</li>
+</ul>
+<pre># grub-install --target=x86_64-efi --efi-directory=$esp --bootloader-id=grub <b>--modules="part_gpt part_msdos"</b></pre>
+</div>
+<h2><span class="mw-headline" id="Using_the_command_shell">Using the command shell</span></h2>
+<p>Since the MBR is too small to store all GRUB modules, only the menu and a few basic commands reside there. The majority of GRUB functionality remains in modules in <code>/boot/grub</code>, which are inserted as needed. In error conditions (e.g. if the partition layout changes) GRUB may fail to boot. When this happens, a command shell may appear.
+</p>
+<p>GRUB offers multiple shells/prompts. If there is a problem reading the menu but the bootloader is able to find the disk, you will likely be dropped to the "normal" shell:
+</p>
+<pre>grub&gt;
+</pre>
+<p>If there is a more serious problem (e.g. GRUB cannot find required files), you may instead be dropped to the "rescue" shell:
+</p>
+<pre>grub rescue&gt;
+</pre>
+<p>The rescue shell is a restricted subset of the normal shell, offering much less functionality. If dumped to the rescue shell, first try inserting the "normal" module, then starting the "normal" shell:
+</p>
+<pre>grub rescue&gt; set prefix=(hdX,Y)/boot/grub
+grub rescue&gt; insmod (hdX,Y)/boot/grub/i386-pc/normal.mod
+rescue:grub&gt; normal
+</pre>
+<h3><span class="mw-headline" id="Pager_support">Pager support</span></h3>
+<p>GRUB supports pager for reading commands that provide long output (like the <code>help</code> command). This works only in normal shell mode and not in rescue mode. To enable pager, in GRUB command shell type:
+</p>
+<pre>sh:grub&gt; set pager=1
+</pre>
+<h3><span class="mw-headline" id="Using_the_command_shell_environment_to_boot_operating_systems">Using the command shell environment to boot operating systems</span></h3>
+<pre>grub&gt;
+</pre>
+<p>The GRUB's command shell environment can be used to boot operating systems.
+A common scenario may be to boot Windows / Linux stored on a drive/partition via <b>chainloading</b>.
+</p>
+<p><i>Chainloading</i> means to load another boot-loader from the current one, ie, chain-loading.
+</p>
+<p>The other bootloader may be embedded at the starting of the disk(MBR) or at the starting of a partition or as an EFI file in the ESP in the case of UEFI.
+</p>
+<h4><span class="mw-headline" id="Chainloading_a_partition">Chainloading a partition</span></h4>
+<pre>set root=(hdX,Y)
+chainloader +1
+boot
+</pre>
+<p>X=0,1,2...
+Y=1,2,3...
+</p>
+<p>For example to chainload Windows stored in the first partiton of the first hard disk,
+</p>
+<pre>set root=(hd0,1)
+chainloader +1
+boot
+</pre>
+<p>Similarly GRUB installed to a partition can be chainloaded.
+</p>
+<h4><span class="mw-headline" id="Chainloading_a_disk.2Fdrive">Chainloading a disk/drive</span></h4>
+<pre>set root=hdX
+chainloader +1
+boot
+</pre>
+<h4><span class="mw-headline" id="Chainloading_Windows.2FLinux_installed_in_UEFI_mode">Chainloading Windows/Linux installed in UEFI mode</span></h4>
+<pre>insmod ntfs
+set root=(hd0,gpt4)
+chainloader (${root})/EFI/Microsoft/Boot/bootmgfw.efi
+boot
+</pre>
+<p><i>insmod ntfs</i> used for loading the ntfs file system module for loading Windows.
+(hd0,gpt4) or /dev/sda4 is my EFI System Partition (ESP).
+The entry in the <i>chainloader</i> line specifies the path of the .efi file to be chain-loaded.
+</p>
+<h4><span class="mw-headline" id="Normal_loading">Normal loading</span></h4>
+<p>See the examples in <a href="#Using_the_rescue_console">#Using the rescue console</a>
+</p>
+<h3><span class="mw-headline" id="Using_the_rescue_console">Using the rescue console</span></h3>
+<p>See <a href="#Using_the_command_shell">#Using the command shell</a> first. If unable to activate the standard shell, one possible solution is to boot using a live CD or some other rescue disk to correct configuration errors and reinstall GRUB. However, such a boot disk is not always available (nor necessary); the rescue console is surprisingly robust.
+</p>
+<p>The available commands in GRUB rescue include <code>insmod</code>, <code>ls</code>, <code>set</code>, and <code>unset</code>. This example uses <code>set</code> and <code>insmod</code>. <code>set</code> modifies variables and <code>insmod</code> inserts new modules to add functionality.
+</p>
+<p>Before starting, the user must know the location of their <code>/boot</code> partition (be it a separate partition, or a subdirectory under their root):
+</p>
+<pre>grub rescue&gt; set prefix=(hdX,Y)/boot/grub
+</pre>
+<p>where X is the physical drive number and Y is the partition number.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>With a separate boot partition, omit <code>/boot</code> from the path, (i.e. type <code>set prefix=(hdX,Y)/grub</code>).</div>
+<p>To expand console capabilities, insert the <code>linux</code> module:
+</p>
+<pre>grub rescue&gt; insmod i386-pc/linux.mod
+</pre>
+<p>or simply
+</p>
+<pre>grub rescue&gt; insmod linux
+</pre>
+<p>This introduces the <code>linux</code> and <code>initrd</code> commands, which should be familiar.
+</p>
+<p>An example, booting Arch Linux:
+</p>
+<pre>set root=(hd0,5)
+linux /boot/vmlinuz-linux root=/dev/sda5
+initrd /boot/initramfs-linux.img
+boot
+</pre>
+<p>With a separate boot partition (e.g. when using EFI), again change the lines accordingly: 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since boot is a separate partition and not part of your root partition, you must address the boot partition manually, in the same way as for the prefix variable.</div>
+<pre>set root=(hd0,5)
+linux (hdX,Y)/vmlinuz-linux root=/dev/sda6
+initrd (hdX,Y)/initramfs-linux.img
+boot
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you experienced <code>error: premature end of file /YOUR_KERNEL_NAME</code> during execution of <code>linux</code> command, you can try <code>linux16</code> instead.</div>
+<p>After successfully booting the Arch Linux installation, users can correct <code>grub.cfg</code> as needed and then reinstall GRUB.
+</p>
+<p>To reinstall GRUB and fix the problem completely, changing <code>/dev/sda</code> if needed. See <a href="#Installation">#Installation</a> for details.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Intel_BIOS_not_booting_GPT">Intel BIOS not booting GPT</span></h3>
+<h4><span class="mw-headline" id="MBR">MBR</span></h4>
+<p>Some Intel BIOS's require at least one bootable MBR partition to be present at boot, causing GPT-partitioned boot setups to be unbootable.
+</p>
+<p>This can be circumvented by using (for instance) fdisk to mark one of the GPT partitions (preferably the 1007 KiB partition you have created for GRUB already) bootable in the MBR. This can be achieved, using fdisk, by the following commands: Start fdisk against the disk you are installing, for instance <code>fdisk /dev/sda</code>, then press <code>a</code> and select the partition you wish to mark as bootable (probably #1) by pressing the corresponding number, finally press <code>w</code> to write the changes to the MBR.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The bootable-marking must be done in <code>fdisk</code> or similar, not in GParted or others, as they will not set the bootable flag in the MBR.</div>
+<p>With cfdisk, the steps are similar, just <code>cfdisk /dev/sda</code>, choose bootable (at the left) in the desired hard disk, and quit saving.
+</p>
+<p>More information is available <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/bios.html">here</a>
+</p>
+<h4><span class="mw-headline" id="EFI_path">EFI path</span></h4>
+<p>Some UEFI firmwares require a bootable file at a known location before they will show UEFI NVRAM boot entries.  If this is the case, <code>grub-install</code> will claim <code>efibootmgr</code> has added an entry to boot GRUB, however the entry will not show up in the VisualBIOS boot order selector.  The solution is to place a file at one of the known locations.  Assuming the EFI partition is at <code>/boot/efi/</code> this will work:
+</p>
+<pre>mkdir /boot/efi/EFI/boot
+cp /boot/efi/EFI/grub/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+</pre>
+<p>This solution worked for an Intel DH87MC motherboard with firmware dated Jan 2014.
+</p>
+<h3><span class="mw-headline" id="Enable_debug_messages">Enable debug messages</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This change is overwritten when <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a>.</div>
+<p>Add:
+</p>
+<pre>set pager=1
+set debug=all
+</pre>
+<p>to <code>grub.cfg</code>.
+</p>
+<h3><span class="mw-headline" id=".22No_suitable_mode_found.22_error">"No suitable mode found" error</span></h3>
+<p>If you get this error when booting any menuentry:
+</p>
+<pre>error: no suitable mode found
+Booting however
+</pre>
+<p>Then you need to initialize GRUB graphical terminal (<code>gfxterm</code>) with proper video mode (<code>gfxmode</code>) in GRUB. This video mode is passed by GRUB to the linux kernel via 'gfxpayload'. In case of UEFI systems, if the GRUB video mode is not initialized, no kernel boot messages will be shown in the terminal (atleast until KMS kicks in).
+</p>
+<p>Copy <code>/usr/share/grub/unicode.pf2</code> to ${GRUB_PREFIX_DIR} (<code>/boot/grub/</code> in case of BIOS and UEFI systems). If GRUB UEFI was installed with <code>--boot-directory=$esp/EFI</code> set, then the directory is <code>$esp/EFI/grub/</code>:
+</p>
+<pre># cp /usr/share/grub/unicode.pf2 ${GRUB_PREFIX_DIR}
+</pre>
+<p>If <code>/usr/share/grub/unicode.pf2</code> does not exist, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bdf-unifont">bdf-unifont</a></span>, create the <code>unifont.pf2</code> file and then copy it to <code>${GRUB_PREFIX_DIR}</code>:
+</p>
+<pre># grub-mkfont -o unicode.pf2 /usr/share/fonts/misc/unifont.bdf
+</pre>
+<p>Then, in the <code>grub.cfg</code> file, add the following lines to enable GRUB to pass the video mode correctly to the kernel, without of which you will only get a black screen (no output) but booting (actually) proceeds successfully without any system hang.
+</p>
+<p>BIOS systems:
+</p>
+<pre>insmod vbe
+</pre>
+<p>UEFI systems:
+</p>
+<pre>insmod efi_gop
+insmod efi_uga
+</pre>
+<p>After that add the following code (common to both BIOS and UEFI):
+</p>
+<pre>insmod font
+</pre>
+<pre>if loadfont ${prefix}/fonts/unicode.pf2
+then
+    insmod gfxterm
+    set gfxmode=auto
+    set gfxpayload=keep
+    terminal_output gfxterm
+fi
+</pre>
+<p>As you can see for gfxterm (graphical terminal) to function properly, <code>unicode.pf2</code> font file should exist in <code>${GRUB_PREFIX_DIR}</code>.
+</p>
+<h3><span class="mw-headline" id="msdos-style_error_message">msdos-style error message</span></h3>
+<pre>grub-setup: warn: This msdos-style partition label has no post-MBR gap; embedding will not be possible!
+grub-setup: warn: Embedding is not possible. GRUB can only be installed in this setup by using blocklists.
+            However, blocklists are UNRELIABLE and its use is discouraged.
+grub-setup: error: If you really want blocklists, use --force.
+</pre>
+<p>This error may occur when you try installing GRUB in a VMware container. Read more about it <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=581760#p581760">here</a>. It happens when the first partition starts just after the MBR (block 63), without the usual space of 1 MiB (2048 blocks) before the first partition. Read <a href="#Master_Boot_Record_.28MBR.29_specific_instructions">#Master Boot Record (MBR) specific instructions</a>
+</p>
+<h3><span class="mw-headline" id="UEFI">UEFI</span></h3>
+<h4><span class="mw-headline" id="Common_installation_errors">Common installation errors</span></h4>
+<ul>
+<li> If you have a problem when running grub-install with sysfs or procfs and it says you must run <code>modprobe efivars</code>, try <a href="../en/Unified_Extensible_Firmware_Interface.html#Switch_to_efivarfs" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface#Switch to efivarfs</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.</li>
+<li> Without <code>--target</code> or <code>--directory</code> option, grub-install cannot determine for which firmware to install. In such cases <code>grub-install</code> will print <code>source_dir does not exist. Please specify --target or --directory</code>.</li>
+<li> If after running grub-install you are told your partition does not look like an EFI partition then the partition is most likely not <code>Fat32</code>.</li>
+</ul>
+<h4><span class="mw-headline" id="Drop_to_rescue_shell">Drop to rescue shell</span></h4>
+<p>If GRUB loads but drops you into the rescue shell with no errors, it may be because of a missing or misplaced <code>grub.cfg</code>. This will happen if GRUB UEFI was installed with <code>--boot-directory</code> and <code>grub.cfg</code> is missing OR if the partition number of the boot partition changed (which is hard-coded into the <code>grubx64.efi</code> file).
+</p>
+<h4><span class="mw-headline" id="GRUB_UEFI_not_loaded">GRUB UEFI not loaded</span></h4>
+<p>An example of a working EFI:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># efibootmgr -v</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+BootCurrent: 0000
+Timeout: 3 seconds
+BootOrder: 0000,0001,0002
+Boot0000* Grub HD(1,800,32000,23532fbb-1bfa-4e46-851a-b494bfe9478c)File(\efi\grub\grub.efi)
+Boot0001* Shell HD(1,800,32000,23532fbb-1bfa-4e46-851a-b494bfe9478c)File(\EfiShell.efi)
+Boot0002* Festplatte BIOS(2,0,00)P0: SAMSUNG HD204UI
+</pre>
+<p>If the screen only goes black for a second and the next boot option is tried afterwards, according to <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=981560#p981560">this post</a>, moving GRUB to the partition root can help. The boot option has to be deleted and recreated afterwards. The entry for GRUB should look like this then:
+</p>
+<pre>Boot0000* Grub HD(1,800,32000,23532fbb-1bfa-4e46-851a-b494bfe9478c)File(\grub.efi)
+</pre>
+<h3><span class="mw-headline" id="Invalid_signature">Invalid signature</span></h3>
+<p>If trying to boot Windows results in an "invalid signature" error, e.g. after reconfiguring partitions or adding additional hard drives, (re)move GRUB's device configuration and let it reconfigure:
+</p>
+<pre># mv /boot/grub/device.map /boot/grub/device.map-old
+# grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p><code>grub-mkconfig</code> should now mention all found boot options, including Windows. If it works, remove <code>/boot/grub/device.map-old</code>.
+</p>
+<h3><span class="mw-headline" id="Boot_freezes">Boot freezes</span></h3>
+<p>If booting gets stuck without any error message after GRUB loading the kernel and the initial ramdisk, try removing the <code>add_efi_memmap</code> kernel parameter.
+</p>
+<h3><span class="mw-headline" id="Arch_not_found_from_other_OS">Arch not found from other OS</span></h3>
+<p>Some have reported that other distributions have trouble finding Arch Linux automatically with <code>os-prober</code>. If this problem arises, it has been reported that detection can be improved with the presence of <code>/etc/lsb-release</code>. This file and updating tool is available with the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lsb-release">lsb-release</a></span> in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h3><span class="mw-headline" id="Warning_when_installing_in_chroot">Warning when installing in chroot</span></h3>
+<p>When installing GRUB on a LVM system in a chroot environment (e.g. during system installation), you may receive warnings like <code>/run/lvm/lvmetad.socket: connect failed: No such file or directory</code> or <code>WARNING: failed to connect to lvmetad: No such file or directory. Falling back to internal scanning.</code> This is because <code>/run</code> is not available inside the chroot. These warnings will not prevent the system from booting, provided that everything has been done correctly, so you may continue with the installation.
+</p>
+<h3><span class="mw-headline" id="GRUB_loads_slowly">GRUB loads slowly</span></h3>
+<p>GRUB can take a long time to load when disk space is low. Check if you have sufficient free disk space on your <code>/boot</code> or <code>/</code> partition when you are having problems.
+</p>
+<h3><span class="mw-headline" id="error:_unknown_filesystem">error: unknown filesystem</span></h3>
+<p>GRUB may output <code>error: unknown filesystem</code> and refuse to boot for a few reasons. If you are certain that all <a href="../en/Persistent_block_device_naming.html#by-uuid" title="UUID" class="mw-redirect">UUIDs</a> are correct and all filesystems are valid and supported, it may be because your <a href="#GUID_Partition_Table_.28GPT.29_specific_instructions">BIOS Boot Partition</a> is located outside the first 2TB of the drive <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=195948">[3]</a>. Use a partitioning tool of your choice to ensure this partition is located fully within the first 2TB, then reinstall and reconfigure GRUB.
+</p>
+<h3><span class="mw-headline" id="grub-reboot_not_resetting">grub-reboot not resetting</span></h3>
+<p>GRUB seems to be unable to write to root BTRFS partitions <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=166131">[4]</a>. If you use grub-reboot to boot into another entry it will therefore be unable to update its on-disk environment. Either run grub-reboot from the other entry (for example when switching between various distributions) or consider a different file system. You can reset a "sticky" entry by executing <code>grub-editenv create</code> and setting <code>GRUB_DEFAULT=0</code> in your <code>/etc/default/grub</code> (don't forget <code>grub-mkconfig -o /boot/grub/grub.cfg</code>).
+</p>
+<h3><span class="mw-headline" id="Old_BTRFS_prevents_installation">Old BTRFS prevents installation</span></h3>
+<p>If a drive is formatted with BTRFS without creating a partition table (eg. /dev/sdx), then later has partition table written to, there are parts of the BTRFS format that persist. Most utilities and OS's do not see this, but GRUB will refuse to install, even with --force
+</p>
+<pre># grub-install: warning: Attempting to install GRUB to a disk with multiple partition labels. This is not supported yet..
+# grub-install: error: filesystem `btrfs' doesn't support blocklists.
+</pre>
+<p>You can zero the drive, but the easy solution that leaves your data alone is to erase the BTRFS superblock with <code>wipefs -o 0x10040 /dev/sdx</code>
+</p>
+<h3><span class="mw-headline" id="Windows_8_not_found">Windows 8 not found</span></h3>
+<p>A setting in Windows 8 called "Hiberboot", "Hybrid Boot" or "Fast Boot" can prevent the Windows partition from being mounted, so <code>grub-mkconfig</code> will not find a Windows install. Disabling Hiberboot in Windows will allow it to be added to the GRUB menu.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> Official GRUB Manual - <a rel="nofollow" class="external free" href="https://www.gnu.org/software/grub/manual/grub.html">https://www.gnu.org/software/grub/manual/grub.html</a>
+</li>
+<li> Ubuntu wiki page for GRUB - <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/Grub2">https://help.ubuntu.com/community/Grub2</a>
+</li>
+<li> GRUB wiki page describing steps to compile for UEFI systems - <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/UEFIBooting">https://help.ubuntu.com/community/UEFIBooting</a>
+</li>
+<li> Wikipedia's page on <a href="https://en.wikipedia.org/wiki/BIOS_Boot_partition" class="extiw" title="wikipedia:BIOS Boot partition">BIOS Boot partition</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://members.iinet.net/~herman546/p20/GRUB2%20Configuration%20File%20Commands.html">http://members.iinet.net/~herman546/p20/GRUB2%20Configuration%20File%20Commands.html</a> - quite complete description of how to configure GRUB</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_loaders.html" title="Category:Boot loaders">Boot loaders</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Rescached - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Rescached skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Rescached</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><i>rescached</i> is a daemon to cache internet name and address resolution in local memory when running and in a disk cache when not running.
+</p>
+<p><i>rescached</i> is not a reimplementation of a DNS server like BIND.
+The primary goal of <i>rescached</i> is only to cache DNS queries and answers to minimize unneeded traffic to the outside network. It is intended for personal systems or serving a small group of users.  
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Features"><span class="tocnumber">1</span> <span class="toctext">Features</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#How_cache_in_rescached_works"><span class="tocnumber">2</span> <span class="toctext">How cache in rescached works</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Installation"><span class="tocnumber">3</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Post-installation_configuration"><span class="tocnumber">4</span> <span class="toctext">Post-installation configuration</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Features">Features</span></h2>
+<ul>
+<li> Enable to handle requests via UDP and TCP </li>
+<li> Saving/loading cache to/from disk</li>
+<li> Load and serve addresses and hostnames in <code>/etc/hosts</code>
+</li>
+</ul>
+<h2><span class="mw-headline" id="How_cache_in_rescached_works">How cache in rescached works</span></h2>
+<p>Each query and answer data pair in the cache is enriched with statistical usage to define how the cache will be ordered in memory. The frequently queried hostnames will be at the top of the cache list, and less queried hostnames will be at the bottom of the cache list. This, obviously, results in a cache list based on user's habits (frequently accessed hosts) and speeds up resolving accordingly.
+</p>
+<pre>
++-----+------------------+
+| #   | host-name        |
++-----+------------------+
+| 529 | www.reddit.com   |
++-----+------------------+
+| 233 | www.google.com   |
++-----+------------------+
+| ... |        ...       |
++-----+------------------+
+| 1   | www.kilabit.info |
++-----+------------------+
+</pre>
+<p>The number of cache entries that rescached holds in memory depends on the value of <i>cache.max</i> in the configuration file. When the <i>cache.max</i> limit is reached, the daemon will remove all cached entries which are accessed less frequently than set in <i>cache.threshold</i>.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/rescached-git/">rescached-git</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Post-installation_configuration">Post-installation configuration</span></h2>
+<p>The default configuration enables a direct start of the daemon. 
+</p>
+<p>Rescached configuration resides in <code>/etc/rescached/rescached.cfg</code>. Select entries to change are:
+</p>
+<ul><li> Set your parent DNS server:</li></ul>
+<dl><dd> Change the value of <code>server.parent</code> based on your preferred DNS server.</dd></dl>
+<ul><li> Set maximum caches.</li></ul>
+<dl><dd> Change the value of <code>cache.max</code> and/or <code>cache.threshold</code> to match your needs.</dd></dl>
+<p>After finishing the configuration file, set your system DNS server to point to rescached:
+</p>
+<dl><dd> <pre>
+# mv /etc/resolv.conf /etc/resolv.conf.org
+# echo "nameserver 127.0.0.1" &gt; /etc/resolv.conf
+</pre>
+</dd></dl>
+<p>Finally, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and possibly <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>rescached.service</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> For more information and configuration see the manpage of rescached</li>
+<li> For non-technical explanation you can read it <a rel="nofollow" class="external text" href="http://kilabit.info/journal/2009/12/04__rescached_is_here/index.html">here</a>
+</li>
+<li> For user documentation you can read it <a rel="nofollow" class="external text" href="http://kilabit.info/projects/rescached/doc/user/index.html">here</a>
+</li>
+<li> Report bug and feature requests are preferred on the <a rel="nofollow" class="external text" href="https://github.com/shuLhan/rescached/issues">github</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Domain_Name_System.html" title="Category:Domain Name System">Domain Name System</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

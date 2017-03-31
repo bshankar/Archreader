@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Silent boot - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Silent_boot skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Silent boot</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page is for those who prefer to limit the verbosity of their system to a strict minimum, either for aesthetics or other reasons. Following this guide will remove all text from the bootup process. <a rel="nofollow" class="external text" href="http://www.youtube.com/watch?v=tuqhsqrhXk0">Video demonstration</a>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Kernel_parameters"><span class="tocnumber">1</span> <span class="toctext">Kernel parameters</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#sysctl"><span class="tocnumber">2</span> <span class="toctext">sysctl</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#startx"><span class="tocnumber">3</span> <span class="toctext">startx</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#fsck"><span class="tocnumber">4</span> <span class="toctext">fsck</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Kernel_parameters">Kernel parameters</span></h2>
+<p>Change the kernel parameters using the configuration options of your boot loader, to include the following parameters:
+</p>
+<pre>quiet vga=current
+</pre>
+<p><code>vga=current</code> is the kernel argument that avoid weird behaviours like <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/32309">FS#32309</a>.
+</p>
+<p>If you are still getting messages printed to the console, it may be dmesg sending you what it thinks are important messages. You can change the level at which these messages will be printed by using <code>quiet loglevel=&lt;level&gt;</code>, where <code>&lt;level&gt;</code> is any number between 0 and 7, where 0 is the most critical, and 7 is debug levels of printing.
+</p>
+<pre>quiet loglevel=3 vga=current
+</pre>
+<p>Note that this only seems to work if both <code>quiet</code> and <code>loglevel=&lt;level&gt;</code> are both used, and they must be in that order (quiet first). The loglevel parameter will only change that which is printed to the console, the levels of dmesg itself will not be affected and will still be available through the journal as well as the <code>dmesg</code> command. For more information, see the <code>Documentation/kernel-parameters.txt</code> file of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-docs">linux-docs</a></span> package.
+</p>
+<p>If you also want to stop systemd from printing its version number when booting, you should also append <code>udev.log-priority=3</code> to your kernel commandline (<a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd-udevd.service.html#Kernel%20command%20line">source</a>). If systemd is used in an <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a>, append <code>rd.udev.log-priority=3</code> instead.
+</p>
+<p>If you are using the <code>systemd</code> hook in the <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a>, you may get systemd messages during initramfs initialization. You can pass <code>rd.systemd.show_status=false</code> to disable them, or <code>rd.systemd.show_status=auto</code> to only suppress successful messages (so in case of errors you can still see them). Actually, <code>auto</code> is already passed to <code>systemd.show_status=auto</code> when <code>quiet</code> is used, however for some motive sometimes systemd inside initramfs does not get it. Below is the parameters that you need to pass to your kernel to get a completely clean boot with systemd in your <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a>:
+</p>
+<pre> quiet loglevel=3 rd.systemd.show_status=auto rd.udev.log-priority=3
+</pre>
+<p>Also <code>touch ~/.hushlogin</code> to remove the Last login message.
+</p>
+<h2><span class="mw-headline" id="sysctl">sysctl</span></h2>
+<p>To hide any kernel messages from the console, add or modify the <code>kernel.printk</code> line according to <a rel="nofollow" class="external autonumber" href="http://unix.stackexchange.com/a/45525/27433">[1]</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/20-quiet-printk.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">kernel.printk = 3 3 3 3</pre>
+<h2><span class="mw-headline" id="startx">startx</span></h2>
+<p>To hide <code>startx</code> messages, you could redirect its output to <code>/dev/null</code>, in your <a rel="nofollow" class="external text" href="https://github.com/kaihendry/Kai-s--HOME/blob/master/.bash_profile">.bash_profile</a> like so:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>As of Xorg 1.16 with rootless login, see <a href="../en/Xorg.html#Broken_redirection" title="Xorg">Xorg#Broken redirection</a>.</div>
+<pre>$ [[ $(fgconsole 2&gt;/dev/null) == 1 ]] &amp;&amp; exec startx -- vt1 &amp;&gt; /dev/null
+</pre>
+<p>Outstanding Issues:
+</p>
+<ul><li> <a rel="nofollow" class="external text" href="https://bugs.freedesktop.org/show_bug.cgi?id=57216">Systemd shutdowns are not quiet</a> - As of systemd v206, the <code>quiet</code> kernel command line parameter is now respected on shutdown, though it seems that if you use the <code>shutdown</code> hook of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mkinitcpio">mkinitcpio</a></span>, this function has not been set up to support that parameter.</li></ul>
+<h2><span class="mw-headline" id="fsck">fsck</span></h2>
+<p>To hide fsck messages during boot, let systemd check the root filesystem. For this, remove <i>fsck</i> from:
+</p>
+<pre>HOOKS=(...) 
+</pre>
+<p>in <code>/etc/mkinitcpio.conf</code> and then run:
+</p>
+<pre>mkinitcpio -p linux
+</pre>
+<p>Now copy the files <code>systemd-fsck-root.service</code> and <code>systemd-fsck@.service</code> located at <code>/usr/lib/systemd/system/</code> to <code>/etc/systemd/system/</code> and edit them, configuring <i>StandardOutput</i> and <i>StandardError</i> like this:
+</p>
+<pre>(...)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/systemd/systemd-fsck
+StandardOutput=null
+StandardError=journal+console
+TimeoutSec=0
+</pre>
+<p>See <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd-fsck@.service.html">this</a> for more info on the options you can pass to <code>systemd-fsck</code> - you can change how often the service will check (or not) your filesystems.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Unbound - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Unbound skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Unbound</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/DNSSEC.html" title="DNSSEC">DNSSEC</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/BIND.html" title="BIND">BIND</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/DNSCrypt.html" title="DNSCrypt">DNSCrypt</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dnsmasq.html" title="Dnsmasq">dnsmasq</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pdnsd.html" title="Pdnsd">Pdnsd</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://unbound.net/">Unbound</a> is a validating, recursive, and caching DNS resolver. According to <a href="https://en.wikipedia.org/wiki/Unbound_(DNS_Server)" class="extiw" title="wikipedia:Unbound (DNS Server)">Wikipedia:Unbound (DNS Server)</a>, "Unbound has supplanted the Berkeley Internet Name Domain (<a href="../en/BIND.html" title="BIND">BIND</a>) as the default, base-system name server in several open source projects, where it is perceived as smaller, more modern, and more secure for most applications."
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Access_control"><span class="tocnumber">2.1</span> <span class="toctext">Access control</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Root_hints"><span class="tocnumber">2.2</span> <span class="toctext">Root hints</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Local_DNS_server"><span class="tocnumber">2.3</span> <span class="toctext">Local DNS server</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#DNSSEC_validation"><span class="tocnumber">2.4</span> <span class="toctext">DNSSEC validation</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Forwarding_queries"><span class="tocnumber">2.5</span> <span class="toctext">Forwarding queries</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Starting_Unbound"><span class="tocnumber">3.1</span> <span class="toctext">Starting Unbound</span></a></li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Remotely_control_Unbound"><span class="tocnumber">3.2</span> <span class="toctext">Remotely control Unbound</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Setting_up_unbound-control"><span class="tocnumber">3.2.1</span> <span class="toctext">Setting up unbound-control</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Using_unbound-control"><span class="tocnumber">3.2.2</span> <span class="toctext">Using unbound-control</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Block_advertising"><span class="tocnumber">4.1</span> <span class="toctext">Block advertising</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Adding_an_authoritative_DNS_server"><span class="tocnumber">4.2</span> <span class="toctext">Adding an authoritative DNS server</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#WAN_facing_DNS"><span class="tocnumber">4.3</span> <span class="toctext">WAN facing DNS</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Roothints_systemd_timer"><span class="tocnumber">4.4</span> <span class="toctext">Roothints systemd timer</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Issues_concerning_num-threads"><span class="tocnumber">5.1</span> <span class="toctext">Issues concerning num-threads</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=unbound">unbound</a></span> package.
+</p>
+<p>Additionally, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=expat">expat</a></span> package is required for <a href="../en/DNSSEC.html" title="DNSSEC">DNSSEC</a> validation.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>A default configuration is already included at<code>/etc/unbound/unbound.conf</code>. Additionally, there is a commented sample configuration file with other available options located at <code>/etc/unbound/unbound.conf.example</code>. The following sections highlight different settings for the configuration file. See <code>man unbound.conf</code> for other settings and more details.
+</p>
+<p>Unless otherwise specified, any options listed in this section are to be placed under the <code>server</code> section in the configuration like so:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/unbound/unbound.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+server:
+  ...
+  <i>setting</i>: <i>value</i>
+  ...
+</pre>
+<h3><span class="mw-headline" id="Access_control">Access control</span></h3>
+<p>You can specify the interfaces to answer queries from by IP address. To listen on <i>localhost</i>, use the default setting:
+</p>
+<pre>interface: 127.0.0.1
+</pre>
+<p>To listen on all interfaces, use the following:
+</p>
+<pre>interface: 0.0.0.0
+</pre>
+<p>To control which systems can access the server by IP address, use the <code>access-control</code> option:
+</p>
+<pre>access-control: <i>subnet</i> <i>action</i>
+</pre>
+<p>For example:
+</p>
+<pre>access-control: 192.168.1.0/24 allow
+</pre>
+<p><i>action</i> can be one of <code>deny</code> (drop message), <code>refuse</code> (polite error reply), <code>allow</code> (recursive ok), or <code>allow_snoop</code> (recursive and nonrecursive ok). By default everything is refused except for localhost.
+</p>
+<h3><span class="mw-headline" id="Root_hints">Root hints</span></h3>
+<p>For querying a host that is not cached as an address the resolver needs to start at the top of the server tree and query the root servers to know where to go for the top level domain for the address being queried. Unbound comes with default builtin hints, but it is good practice to use a root-hints file since the builtin hints may become outdated. 
+</p>
+<p>First point <i>unbound</i> to the <code>root.hints</code> file:
+</p>
+<pre>root-hints: "/etc/unbound/root.hints"
+</pre>
+<p>Then, put a <i>root hints</i> file into the <i>unbound</i> configuration directory. The simplest way to do this is to run the command:
+</p>
+<pre># curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache</pre>
+<p>It is a good idea to update <code>root.hints</code> every six months or so in order to make sure the list of root servers is up to date. This can be done manually or by using <a href="../en/Systemd/Timers.html" title="Systemd/Timers">Systemd/Timers</a>. See <a href="#Roothints_systemd_timer">#Roothints systemd timer</a> for an example.
+</p>
+<h3><span class="mw-headline" id="Local_DNS_server">Local DNS server</span></h3>
+<p>If you want to use <i>unbound</i> as your local DNS server, set your nameserver to <code>127.0.0.1</code> in your <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a>. You will want to have your nameserver be <a href="../en/Resolv.conf.html#Preserve_DNS_settings" title="Resolv.conf">preserved</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>A simple way to do this is to install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openresolv">openresolv</a></span> package and uncomment the line containing <code>name_servers=127.0.0.1</code> in <code>/etc/resolvconf.conf</code>. Then run <code>resolvconf -u</code> to generate <code>/etc/resolv.conf</code>.</div>
+<p>See <a href="../en/Resolv.conf.html#Testing" title="Resolv.conf">Resolv.conf#Testing</a> on how to test your settings.
+</p>
+<p>Check specifically that the server being used is <code>127.0.0.1</code> after making permanent changes to <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a>.
+</p>
+<h3><span class="mw-headline" id="DNSSEC_validation">DNSSEC validation</span></h3>
+<p><i>unbound</i> automatically copies the root server trust key anchor file from <code>/etc/trusted-key.key</code> to <code>/etc/unbound/trusted-key.key</code>. To use DNSSEC validation, point <i>unbound</i> to this file by adding the following setting:
+</p>
+<pre>trust-anchor-file: trusted-key.key
+</pre>
+<p>Also make sure that if a general <a href="#Forwarding_queries">forward</a> to a DNS server has been set, then comment them out; otherwise, DNS queries will fail. DNSSEC validation will only be done if the DNS server being queried supports it.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Including DNSSEC checking significantly increases DNS lookup times for initial lookups. Once an address is cached locally, then the lookup is virtually instantaneous.</div>
+<p>To test if DNSSEC is working, use <i>drill</i>:
+</p>
+<pre>$ drill sigfail.verteiltesysteme.net
+$ drill sigok.verteiltesysteme.net
+</pre>
+<p>The first command should give an <code>rcode</code> of <code>SERVFAIL</code>. The second should give an <code>rcode</code> of <code>NOERROR</code>.
+</p>
+<h3><span class="mw-headline" id="Forwarding_queries">Forwarding queries</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Unbound can be used with <a href="../en/DNSCrypt.html" title="DNSCrypt">DNSCrypt</a> by setting up forwarding. See <a href="../en/DNSCrypt.html#Example:_configuration_for_Unbound" title="DNSCrypt">DNSCrypt#Example: configuration for Unbound</a>.</div>
+<p>If you have a local network which you wish to have DNS queries for and there is a local DNS server that you would like to forward queries to then you should include this line:
+</p>
+<pre>private-address: <i>local_subnet/subnet_mask</i>
+</pre>
+<p>For example:
+</p>
+<pre>private-address: 10.0.0.0/24
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can use private-address to protect against DNS Rebind attacks. Therefore you may enable RFC1918 networks (10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 169.254.0.0/16 fd00::/8 fe80::/10). Unbound may enable this feature by default in future releases.</div> 
+<p>To include a local DNS server for both forward and reverse local addresses a set of lines similar to these below is necessary with a forward and reverse lookup (choose the IP address of the server providing DNS for the local network accordingly by changing 10.0.0.1 in the lines below):
+</p>
+<pre>local-zone: "10.in-addr.arpa." transparent
+</pre>
+<p>This line above is important to get the reverse lookup to work correctly.
+</p>
+<pre>forward-zone:
+name: "mynetwork.com."
+forward-addr: 10.0.0.1
+</pre>
+<pre>forward-zone:
+name: "10.in-addr.arpa."
+forward-addr: 10.0.0.1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is a difference between forward zones and stub zones - stub zones will only work when connected to an authoritative DNS server directly. This would work for lookups from a <a href="../en/BIND.html" title="BIND">BIND</a> DNS server if it is providing authoritative DNS - but if you are referring queries to an <i>unbound</i> server in which internal lookups are forwarded on to another DNS server, then defining the referral as a stub zone in the machine here will not work. In that case it is necessary to define a forward zone as above, since forward zones can have daisy chain lookups onward to other DNS servers. i.e. forward zones can refer queries to recursive DNS servers. This distinction is important as you do not get any error messages indicating what the problem is if you use a stub zone inappropriately.</div>
+<p>You can set up the localhost forward and reverse lookups with the following lines:
+</p>
+<pre>local-zone: "localhost." static
+local-data: "localhost. 10800 IN NS localhost."
+local-data: "localhost. 10800 IN SOA localhost. nobody.invalid. 1 3600 1200 604800 10800"
+local-data: "localhost. 10800 IN A 127.0.0.1"
+local-zone: "127.in-addr.arpa." static
+local-data: "127.in-addr.arpa. 10800 IN NS localhost."
+local-data: "127.in-addr.arpa. 10800 IN SOA localhost. nobody.invalid. 2 3600 1200 604800 10800"
+local-data: "1.0.0.127.in-addr.arpa. 10800 IN PTR localhost."
+</pre>
+<p>Then to use specific servers for default forward zones that are outside of the local machine and outside of the local network (i.e. all other queries will be forwarded to them, and then cached) add this to the configuration file (and in this example the first two addresses are the fast google DNS servers):
+</p>
+<pre>forward-zone:
+  name: "."
+  forward-addr: 8.8.8.8
+  forward-addr: 8.8.4.4
+  forward-addr: 208.67.222.222
+  forward-addr: 208.67.220.220
+</pre>
+<p>This will make <i>unbound</i> use Google and OpenDNS servers as the forward zone for external lookups.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>OpenDNS strips DNSSEC records from responses. Do not use the above forward zone if you want to enable <a href="#DNSSEC_validation">#DNSSEC validation</a>.</div>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Starting_Unbound">Starting Unbound</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> the <code>unbound.service</code> systemd service.
+</p>
+<h3><span class="mw-headline" id="Remotely_control_Unbound">Remotely control Unbound</span></h3>
+<p><i>unbound</i> ships with the <code>unbound-control</code> utility which enables us to remotely administer the unbound server. It is similar to the <a href="../en/Pdnsd.html#pdnsd-ctl" title="Pdnsd">pdnsd-ctl</a> command of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pdnsd">pdnsd</a></span>.
+</p>
+<h4><span class="mw-headline" id="Setting_up_unbound-control">Setting up unbound-control</span></h4>
+<p>Before you can start using it, the following steps need to be performed:
+</p>
+<p>1) Firstly, you need to run the following command
+</p>
+<pre># unbound-control-setup
+</pre>
+<p>which will generate a self-signed certificate and private key for the server, as well as the client. These files will be created in the <code>/etc/unbound</code> directory.
+</p>
+<p>2) After that, edit <code>/etc/unbound/unbound.conf</code> and put the following contents in that. The <code>control-enable: yes</code> option is necessary, the rest can be adjusted as required.
+</p>
+<pre>remote-control:
+    # Enable remote control with unbound-control(8) here.
+    # set up the keys and certificates with unbound-control-setup.
+    control-enable: yes
+   
+    # what interfaces are listened to for remote control.
+    # give 0.0.0.0 and ::0 to listen to all interfaces.
+    control-interface: 127.0.0.1
+   
+    # port number for remote control operations.
+    control-port: 8953
+   
+    # unbound server key file.
+    server-key-file: "/etc/unbound/unbound_server.key"
+   
+    # unbound server certificate file.
+    server-cert-file: "/etc/unbound/unbound_server.pem"
+   
+    # unbound-control key file.
+    control-key-file: "/etc/unbound/unbound_control.key"
+   
+    # unbound-control certificate file.
+    control-cert-file: "/etc/unbound/unbound_control.pem"
+</pre>
+<h4><span class="mw-headline" id="Using_unbound-control">Using unbound-control</span></h4>
+<p>Some of the commands that can be used with <i>unbound-control</i> are:
+</p>
+<ul><li> print statistics without resetting them</li></ul>
+<pre> # unbound-control stats_noreset
+</pre>
+<ul><li> dump cache to stdout</li></ul>
+<pre> # unbound-control dump_cache
+</pre>
+<ul><li> flush cache and reload configuration</li></ul>
+<pre> # unbound-control reload
+</pre>
+<p>Please refer to <code>man 8 unbound-control</code> for a detailed look at the operations it supports.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Block_advertising">Block advertising</span></h3>
+<p>You can use the following file and simply include it in your unbound configuration: <a rel="nofollow" class="external text" href="https://pgl.yoyo.org/adservers/serverlist.php?hostformat=unbound&amp;showintro=0&amp;startdate%5Bday%5D=&amp;startdate%5Bmonth%5D=&amp;startdate%5Byear%5D=&amp;mimetype=plaintext">adservers</a>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/unbound/unbound.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+include: /etc/unbound/adservers
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In order to return some OK statuses on those hosts, you can change the 127.0.0.1 redirection to a server you control and have that server respond with empty 204 replies, see <a rel="nofollow" class="external text" href="http://www.shadowandy.net/2014/04/adblocking-nginx-serving-1-pixel-gif-204-content.htm">this page</a>
+</div>
+<h3><span class="mw-headline" id="Adding_an_authoritative_DNS_server">Adding an authoritative DNS server</span></h3>
+<p>For users who wish to run both a validating, recursive, caching DNS server as well as an authoritative DNS server on a single machine then it may be useful to refer to the wiki page <a href="../en/Nsd.html" title="Nsd">nsd</a> which gives an example of a configuration for such a system.  Having one server for authoritative DNS queries and a separate DNS server for the validating, recursive, caching DNS functions gives increased security over a single DNS server providing all of these functions. Many users have used bind as a single DNS server, and some help on migration from bind to the combination of running nsd and bind is provided in the <a href="../en/Nsd.html" title="Nsd">nsd</a> wiki page.
+</p>
+<h3><span class="mw-headline" id="WAN_facing_DNS">WAN facing DNS</span></h3>
+<p>It is also possible to change the configuration files and interfaces on which the server is listening so that DNS queries from machines outside of the local network can access specific machines within the LAN. This is useful for web and mail servers which are accessible from anywhere, and the same techniques can be employed as has been achieved using bind for many years, in combination with suitable port forwarding on firewall machines to forward incoming requests to the right machine.
+</p>
+<h3><span class="mw-headline" id="Roothints_systemd_timer">Roothints systemd timer</span></h3>
+<p>Here is an example systemd service and timer that update <code>root.hints</code> monthly using the method in <a href="#Root_hints">#Root hints</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/roothints.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Update root hints for unbound
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/roothints.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Run root.hints monthly
+
+[Timer]
+OnCalendar=monthly
+Persistent=true     
+ 
+[Install]
+WantedBy=timers.target</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> the <code>roothints.timer</code> systemd timer.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Issues_concerning_num-threads">Issues concerning num-threads</span></h3>
+<p>The man page for <code>unbound.conf</code> mentions:
+</p>
+<pre>     outgoing-range: &lt;number&gt;
+             Number of ports to open. This number of file  descriptors  can  be  opened  per thread.
+</pre>
+<p>and some sources suggest that the <code>num-threads</code> parameter should be set to the number of cpu cores. The sample <code>unbound.conf.example</code> file merely has:
+</p>
+<pre>       # number of threads to create. 1 disables threading.
+       # num-threads: 1
+</pre>
+<p>However it is not possible to arbitrarily increase <code>num-threads</code> above <code>1</code> without causing <i>unbound</i> to start with warnings in the logs about exceeding the number of file descriptors. In reality for most users running on small networks or on a single machine it should be unnecessary to seek performance enhancement by increasing <code>num-threads</code> above <code>1</code>. If you do wish to do so then refer to <a rel="nofollow" class="external text" href="http://www.unbound.net/documentation/howto_optimise.html">official documentation</a> and the following rule of thumb should work:
+</p>
+<dl><dd><i>Set <code>num-threads</code> equal to the number of CPU cores on the system. E.g. for 4 CPUs with 2 cores each, use 8.</i></dd></dl>
+<p>Set the <code>outgoing-range</code> to as large a value as possible, see the sections in the referred web page above on how to overcome the limit of <code>1024</code> in total. This services more clients at a time. With 1 core, try <code>950</code>. With 2 cores, try <code>450</code>. With 4 cores try <code>200</code>. The <code>num-queries-per-thread</code> is best set at half the number of the <code>outgoing-range</code>. 
+</p>
+<p>Because of the limit on <code>outgoing-range</code> thus also limits <code>num-queries-per-thread</code>, it is better to compile with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libevent">libevent</a></span>, so that there is no <code>1024</code> limit on <code>outgoing-range</code>. If you need to compile this way for a heavy duty DNS server then you will need to compile the programme from source instead of using the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=unbound">unbound</a></span> package.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Changes/Default_Local_DNS_Resolver">Fedora change to Unbound</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/jodrell/unbound-block-hosts/">Block hosts that contain advertisements</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Domain_Name_System.html" title="Category:Domain Name System">Domain Name System</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

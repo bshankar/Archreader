@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Swap - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Swap skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Swap</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Zswap.html" title="Zswap">Zswap</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Swap_on_video_ram.html" title="Swap on video ram">Swap on video ram</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fstab.html" title="Fstab">fstab</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend and hibernate" class="mw-redirect">Suspend and hibernate</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dm-crypt/Swap_encryption.html" title="Dm-crypt/Swap encryption">Dm-crypt/Swap encryption</a></li>
+</ul>
+</div>
+<p>This page provides an introduction to swap space and paging on GNU/Linux. It covers creation and activation of swap partitions and swap files.
+</p>
+<p>From <a rel="nofollow" class="external text" href="http://www.linux.com/news/software/applications/8208-all-about-linux-swap-space">All about Linux swap space</a>:
+</p>
+<dl><dd>Linux divides its physical RAM (random access memory) into chunks of memory called pages. Swapping is the process whereby a page of memory is copied to the preconfigured space on the hard disk, called swap space, to free up that page of memory. The combined sizes of the physical memory and the swap space is the amount of virtual memory available.</dd></dl>
+<p>Support for swap is provided by the Linux kernel and user-space utilities from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span> package.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Swap_space"><span class="tocnumber">1</span> <span class="toctext">Swap space</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Swap_partition"><span class="tocnumber">1.1</span> <span class="toctext">Swap partition</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Activation_by_systemd"><span class="tocnumber">1.1.1</span> <span class="toctext">Activation by systemd</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Disabling_swap"><span class="tocnumber">1.1.2</span> <span class="toctext">Disabling swap</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Swap_file"><span class="tocnumber">1.2</span> <span class="toctext">Swap file</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6">
+<a href="#Manually"><span class="tocnumber">1.2.1</span> <span class="toctext">Manually</span></a>
+<ul>
+<li class="toclevel-4 tocsection-7"><a href="#Swap_file_creation"><span class="tocnumber">1.2.1.1</span> <span class="toctext">Swap file creation</span></a></li>
+<li class="toclevel-4 tocsection-8"><a href="#Remove_swap_file"><span class="tocnumber">1.2.1.2</span> <span class="toctext">Remove swap file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-9"><a href="#systemd-swap"><span class="tocnumber">1.2.2</span> <span class="toctext">systemd-swap</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Swap_with_USB_device"><span class="tocnumber">2</span> <span class="toctext">Swap with USB device</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Swap_encryption"><span class="tocnumber">3</span> <span class="toctext">Swap encryption</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Performance_Tuning"><span class="tocnumber">4</span> <span class="toctext">Performance Tuning</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Swappiness"><span class="tocnumber">4.1</span> <span class="toctext">Swappiness</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Priority"><span class="tocnumber">4.2</span> <span class="toctext">Priority</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#Striping"><span class="tocnumber">5</span> <span class="toctext">Striping</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Swap_space">Swap space</span></h2>
+<p>Swap space will usually be a disk partition but can also be a file. Users may create a swap space during installation of Arch Linux or at any later time should it become necessary. Swap space is generally recommended for users with less than 1 GB of RAM, but becomes more a matter of personal preference on systems with gratuitous amounts of physical RAM (though it is required for suspend-to-disk support).
+</p>
+<p>To check swap status, use:
+</p>
+<pre>$ swapon --show
+</pre>
+<p>Or:
+</p>
+<pre>$ free -h
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is no performance advantage to either a contiguous swap file or a partition, both are treated the same way.</div>
+<h3><span class="mw-headline" id="Swap_partition">Swap partition</span></h3>
+<p>A swap partition can be created with most GNU/Linux <a href="../en/Partitioning.html#Partitioning_tools" title="Partitioning tools" class="mw-redirect">partitioning tools</a>. Swap partitions are typically designated as type <code>82</code>. Even though it is possible to use any partition type as swap, it is recommended to use type <code>82</code> in most cases since systemd will automatically detect it and mount it (see below).
+</p>
+<p>To set up a partition as Linux swap area, the <code>mkswap</code> command is used. For example:
+</p>
+<pre># mkswap /dev/sda2
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>All data on the specified partition will be lost.</div>
+<p>To enable the device for paging:
+</p>
+<pre># swapon /dev/sda2
+</pre>
+<p>To enable this swap partition on boot, add an entry to <a href="../en/Fstab.html" title="Fstab">fstab</a>:
+</p>
+<pre>UUID=&lt;UUID&gt; none swap defaults 0 0
+</pre>
+<p>where the &lt;UUID&gt; is taken from the command:
+</p>
+<pre>lsblk -no UUID /dev/sda2
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>UUIDs and LABELs should be favoured over the use of the device names given by the kernel as the device order could change in the future. See: <a href="../en/Fstab.html" title="Fstab">fstab</a>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> The fstab-entry is optional if the swap partition is located on a device using GPT. See the next subsection.</li>
+<li> If using an SSD with <a href="../en/Solid_State_Drives.html#TRIM" title="TRIM" class="mw-redirect">TRIM</a> support, consider using <code>defaults,discard</code> in the swap line in <a href="../en/Fstab.html" title="Fstab">fstab</a>. If activating swap manually with <i>swapon</i>, using the <code>-d</code> or <code>--discard</code> parameter achieves the same. See <span class="plainlinks archwiki-template-man" title="$ man 8 swapon"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/swapon.8.html">swapon(8)</a></span> for details.</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Enabling discard on RAID setups using mdadm will cause system lockup on boot and during runtime, if using swapon.</div> 
+<h4><span class="mw-headline" id="Activation_by_systemd">Activation by systemd</span></h4>
+<p><a href="../en/Systemd.html" title="Systemd">systemd</a> activates swap partitions based on two different mechanisms. Both are executables in <code>/usr/lib/systemd/system-generators</code>. The generators are run on start-up and create native systemd units for mounts. The first, <code>systemd-fstab-generator</code>, reads the fstab to generate units, including a unit for swap. The second, <code>systemd-gpt-auto-generator</code> inspects the root disk to generate units. It operates on GPT disks only, and can identify swap partitions by their type code <code>82</code>.
+</p>
+<p>This can be solved by one of the following options:
+</p>
+<ul>
+<li> Removing the swap entry from <code>/etc/fstab</code>
+</li>
+<li> Changing the swap partition's type code from <code>82</code> to an arbitrary type code</li>
+<li> Setting the attribute of the swap partition to "<b>63</b>: do not automount"</li>
+</ul>
+<h4><span class="mw-headline" id="Disabling_swap">Disabling swap</span></h4>
+<p>To deactivate specific swap space:
+</p>
+<pre># swapoff /dev/sda2
+</pre>
+<p>Alternatively use the <code>-a</code> switch to deactivate all swap space.
+</p>
+<p>Since swap is managed by systemd, it will be activated again on the next system startup. To disable the automatic activation of detected swap space permanently, run <code>systemctl --type swap</code> to find the responsible <i>.swap</i> unit and <a href="../en/Systemd.html#Using_units" title="Mask" class="mw-redirect">mask</a> it.
+</p>
+<h3><span class="mw-headline" id="Swap_file">Swap file</span></h3>
+<p>As an alternative to creating an entire partition, a swap file offers the ability to vary its size on-the-fly, and is more easily removed altogether. This may be especially desirable if disk space is at a premium (e.g. a modestly-sized SSD).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> does not support swap files. Failure to heed this warning may result in file system corruption. While a swap file may be used on Btrfs when mounted through a loop device, this will result in severely degraded swap performance.</div>
+<h4><span class="mw-headline" id="Manually">Manually</span></h4>
+<h5><span class="mw-headline" id="Swap_file_creation">Swap file creation</span></h5>
+<p>As root use <code>fallocate</code> to create a swap file the size of your choosing (M = Megabytes, G = Gigabytes). For example, creating a 512 MB swap file:
+</p>
+<pre># fallocate -l 512M /swapfile
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><i>fallocate</i> may cause problems with some file systems such as <a href="../en/F2FS.html" title="F2FS">F2FS</a> or <a href="../en/XFS.html" title="XFS">XFS</a>.<a rel="nofollow" class="external autonumber" href="https://bugzilla.redhat.com/show_bug.cgi?id=1129205#c3">[1]</a> As an alternative, using <i>dd</i> is more reliable, but slower:
+<pre># dd if=/dev/zero of=/swapfile bs=1M count=512</pre>
+</div>
+<p>Set the right permissions (a world-readable swap file is a huge local vulnerability)
+</p>
+<pre># chmod 600 /swapfile
+</pre>
+<p>After creating the correctly sized file, format it to swap:
+</p>
+<pre># mkswap /swapfile
+</pre>
+<p>Activate the swap file:
+</p>
+<pre># swapon /swapfile
+</pre>
+<p>Finally, edit <a href="../en/Fstab.html" title="Fstab">fstab</a> to add an entry for the swap file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/swapfile none swap defaults 0 0</pre>
+<h5><span class="mw-headline" id="Remove_swap_file">Remove swap file</span></h5>
+<p>To remove a swap file, the current swap file must be turned off.
+</p>
+<p>As root:
+</p>
+<pre># swapoff -a
+</pre>
+<p>Remove swap file:
+</p>
+<pre># rm -f /swapfile
+</pre>
+<p>Finally remove the relevant entry from <code>/etc/fstab</code>.
+</p>
+<h4><span class="mw-headline" id="systemd-swap">systemd-swap</span></h4>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-swap">systemd-swap</a></span> package. Uncomment the lines containing <code>swapf</code> in the swap file section of <code>/etc/systemd-swap.conf</code>. <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> the <code>systemd-swap</code> service.
+</p>
+<h2><span class="mw-headline" id="Swap_with_USB_device">Swap with USB device</span></h2>
+<p>Thanks to the modularity offered by Linux, we can have multiple swap partitions spread over different devices. If you have a very full hard disk, a USB device can be used as a swap partition temporarily. However, this method has some severe disadvantages:
+</p>
+<ul>
+<li> A USB device is slower than a hard disk</li>
+<li> Flash memory has a limited number of write cycles. Using it as a swap partition can kill it quickly</li>
+</ul>
+<p>To add a USB device to swap, first take a USB flash drive and partition it for swap as described in <a href="#Swap_partition">#Swap partition</a>.
+</p>
+<p>Next open <code>/etc/fstab</code> and add
+</p>
+<pre>pri=0
+</pre>
+<p>to the mount options of the <i>original</i> swap entry so that the USB swap partition will take priority over the old swap partition.
+</p>
+<p>This guide will work for other memory such as SD cards, etc.
+</p>
+<h2><span class="mw-headline" id="Swap_encryption">Swap encryption</span></h2>
+<p>See <a href="../en/Dm-crypt/Swap_encryption.html" title="Dm-crypt/Swap encryption">dm-crypt/Swap encryption</a>.
+</p>
+<h2><span class="mw-headline" id="Performance_Tuning">Performance Tuning</span></h2>
+<p>Swap values can be adjusted to help performance.
+</p>
+<h3><span class="mw-headline" id="Swappiness">Swappiness</span></h3>
+<p>The <i>swappiness</i> <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> parameter represents the kernel's preference (or avoidance) of swap space. Swappiness can have a value between 0 and 100, the default value is 60. Setting this parameter to a low value will reduce swapping from RAM, and is known to improve responsiveness on many systems.
+</p>
+<p>To check the current swappiness value:
+</p>
+<pre>$ cat /proc/sys/vm/swappiness
+</pre>
+<p>To temporarily set the swappiness value:
+</p>
+<pre># sysctl vm.swappiness=10
+</pre>
+<p>To set the swappiness value permanently, edit a <i>sysctl</i> configuration file
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/99-sysctl.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">vm.swappiness=10</pre>
+<p>To test and more on why this may work, take a look at <a rel="nofollow" class="external text" href="http://rudd-o.com/en/linux-and-free-software/tales-from-responsivenessland-why-linux-feels-slow-and-how-to-fix-that">this article</a>.
+</p>
+<p>Another <i>sysctl</i> parameter that affects swap performance is <code>vm.vfs_cache_pressure</code>, which controls the tendency of the kernel to reclaim the memory which is used for caching of VFS caches, versus pagecache and swap. Increasing this value increases the rate at which VFS caches are reclaimed<a rel="nofollow" class="external autonumber" href="http://doc.opensuse.org/documentation/leap/tuning/html/book.sle.tuning/cha.tuning.memory.html#cha.tuning.memory.vm.reclaim">[2]</a>. For more information, see the <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">Linux kernel documentation</a>.
+</p>
+<h3><span class="mw-headline" id="Priority">Priority</span></h3>
+<p>If you have more than one swap file or swap partition you should consider assigning a priority value (0 to 32767) for each swap area. The system will use swap areas of higher priority before using swap areas of lower priority. For example, if you have a faster disk (<code>/dev/sda</code>) and a slower disk (<code>/dev/sdb</code>), assign a higher priority to the swap area located on the faster device. Priorities can be assigned in fstab via the <code>pri</code> parameter:
+</p>
+<pre>/dev/sda1 none swap defaults,pri=100 0 0
+/dev/sdb2 none swap defaults,pri=10  0 0
+</pre>
+<p>Or via the <code>-p</code> (or <code>--priority</code>) parameter of swapon:
+</p>
+<pre># swapon -p 100 /dev/sda1
+</pre>
+<p>If two or more areas have the same priority, and it is the highest priority available, pages are allocated on a round-robin basis between them.
+</p>
+<h2><span class="mw-headline" id="Striping">Striping</span></h2>
+<p>There is no necessity to use <a href="../en/RAID.html" title="RAID">RAID</a> for swap performance reasons. The kernel itself can stripe swapping on several devices, if you just give them the same priority in the <code>/etc/fstab</code> file. Refer to <a rel="nofollow" class="external text" href="http://unthought.net/Software-RAID.HOWTO/Software-RAID.HOWTO-2.html#ss2.3">The Software-RAID HOWTO</a> for details.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

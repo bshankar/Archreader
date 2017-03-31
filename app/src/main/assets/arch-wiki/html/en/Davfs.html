@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Davfs - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Davfs skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Davfs</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>DAVfs</b> is a Linux file system driver that allows you to mount a WebDAV server as a disk drive. WebDAV is an extension to HTTP/1.1 that allows remote collaborative authoring of Web resources, defined in <a class="external mw-magiclink-rfc" rel="nofollow" href="//tools.ietf.org/html/rfc4918">RFC 4918</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing_DAVfs"><span class="tocnumber">1</span> <span class="toctext">Installing DAVfs</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Mounting_the_partition"><span class="tocnumber">2</span> <span class="toctext">Mounting the partition</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Mounting_as_regular_user"><span class="tocnumber">3</span> <span class="toctext">Mounting as regular user</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Creating.2Fcopying_files_not_possible"><span class="tocnumber">4.1</span> <span class="toctext">Creating/copying files not possible</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing_DAVfs">Installing DAVfs</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=davfs2">davfs2</a></span> from <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h2><span class="mw-headline" id="Mounting_the_partition">Mounting the partition</span></h2>
+<p>Examples:
+</p>
+<pre># mount.davfs http://localhost:8080/ /mnt/dav
+# mount -t davfs http://localhost:8080/ /mnt/dav
+</pre>
+<h2><span class="mw-headline" id="Mounting_as_regular_user">Mounting as regular user</span></h2>
+<p>Add yourself to network group (where username is replaced with your username):
+</p>
+<pre># usermod -a -G network username
+</pre>
+<p>Add webdav entry to /etc/fstab (again, replacing username with your actual username):
+</p>
+<pre>https://webdav.example.com /home/username/webdav davfs user,noauto,uid=username,file_mode=600,dir_mode=700 0 1
+</pre>
+<p>Create secrets file in your home:
+</p>
+<pre>$ mkdir ~/.davfs2/
+$ echo "https://webdav.example.com webdavuser webdavpassword" &gt;&gt; ~/.davfs2/secrets 
+$ chmod 0600 ~/.davfs2/secrets
+</pre>
+<p>For owncloud, the url is:
+</p>
+<pre>https://webdav.example.com/remote.php/webdav
+</pre>
+<p>For box.com, the url is:
+</p>
+<pre>https://dav.box.com/dav
+</pre>
+<p>For STACK, the url is (replace username with your username):
+</p>
+<pre>https://username.stackstorage.com/remote.php/webdav
+</pre>
+<p>If you want to mount several disks from same server, you need specify mount points of this disks instead of server address in file ~/.davfs2/secrets, remember to put the password in double quotes.
+</p>
+<pre>/home/username/disk1 webdavuser1 "webdavpassword1"
+/home/username/disk2 webdavuser1 "webdavpassword2"
+.........
+/home/username/diskN webdavuserN "webdavpasswordN" 
+</pre>
+<p>Now you should be able to mount and unmount ~/webdav:
+</p>
+<pre># mount ~/webdav
+# fusermount -u ~/webdav
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Creating.2Fcopying_files_not_possible">Creating/copying files not possible</span></h3>
+<p>If creating/copying files is not possible, while the same operations work on directories, edit <code>/etc/davfs2/davfs2.conf</code> and change the following line accordingly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/davfs2/davfs2.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[...]
+use_locks 0
+[...]
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<p><a rel="nofollow" class="external free" href="http://doc.owncloud.org/server/6.0/user_manual/files/files.html">http://doc.owncloud.org/server/6.0/user_manual/files/files.html</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Home and End keys not working - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Home_and_End_keys_not_working skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Home and End keys not working</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>A frequent problem in command line programs is that keys like Home and End do not work as expected. This is usually because the terminal emulator sends multi-character escape codes when such keys are pressed, which the running program (such as your shell) does not know how to interpret correctly. Usually this problem can be fixed by configuring the offending program to perform the correct action when receiving certain escape codes. Thus the solution varies from program to program.
+</p>
+<p>First you should check the common culprits that can affect the behavior of many programs.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#TERM"><span class="tocnumber">1</span> <span class="toctext">TERM</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Readline"><span class="tocnumber">2</span> <span class="toctext">Readline</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Terminfo"><span class="tocnumber">3</span> <span class="toctext">Terminfo</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Other_Applications"><span class="tocnumber">4</span> <span class="toctext">Other Applications</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Lynx"><span class="tocnumber">4.1</span> <span class="toctext">Lynx</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#URxvt.2FRxvt"><span class="tocnumber">4.2</span> <span class="toctext">URxvt/Rxvt</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Zsh"><span class="tocnumber">4.3</span> <span class="toctext">Zsh</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Less"><span class="tocnumber">4.4</span> <span class="toctext">Less</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="TERM">TERM</span></h2>
+<p>The <b>number one cause of broken keys</b> is overriding the TERM environment variable to something that conflicts with your shell. All modern terminals are smart enough to set their own TERM variable, so before you go delving into program configurations ensure that you are not incorrectly overriding it (for example, in your <code>~/.bashrc</code>). Again, <b>do not set TERM manually - let the terminal do it.</b>
+</p>
+<p>If you do not like the TERM value chosen by your terminal (e.g. 'xterm' when you want 'xterm-256color'), there is typically a way to configure your terminal to properly override it without changing the TERM variable.
+</p>
+<p>For xterm and urxvt, you can set it in your <a href="../en/X_resources.html" title="X resources">X resources</a>
+</p>
+<pre>XTerm*termName: xterm-256color
+...
+URxvt*termName: rxvt-unicode
+</pre>
+<p>For <a href="../en/GNU_Screen.html" title="Screen" class="mw-redirect">Screen</a>, you can set it in your ~/.screenrc:
+</p>
+<pre>term screen-256color
+</pre>
+<p>For <a href="../en/Tmux.html" title="Tmux">Tmux</a>, you can set it in your ~/.tmux.conf:
+</p>
+<pre>set -g default-terminal screen-256color
+</pre>
+<h2><span class="mw-headline" id="Readline">Readline</span></h2>
+<p>Many command line applications use the <a href="../en/Readline.html" title="Readline">Readline</a> library to read input. So properly configuring Readline can fix Home and End in many cases. Readline maintains mappings for more obscure keys in <code>/etc/inputrc</code> and <code>~/.inputrc</code> for global and per-user mappings, respectively.
+</p>
+<p>In the default <code>/etc/inputrc</code>, there are several lines that attempt to handle common Home/End escape codes:
+</p>
+<pre>"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[7~": beginning-of-line
+"\e[8~": end-of-line
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+</pre>
+<p>If your keys are not working, it could be because your particular terminal sends escape codes not in this list. First you need to find out what escape codes are being sent. To see them, you can use a Readline command called "quoted-insert" or run the command <code>showkey --scancodes</code> which outputs the value of a key verbatim. The default binding for quoted-insert is <kbd>Ctrl</kbd>+<kbd>V</kbd>.
+</p>
+<p>For example, you could give the following series of inputs in your terminal:
+</p>
+<ol>
+<li> <kbd>Ctrl</kbd>+<kbd>V</kbd>
+</li>
+<li> <kbd>Home</kbd>
+</li>
+<li> <kbd>Spacebar</kbd>
+</li>
+<li> <kbd>Ctrl</kbd>+<kbd>V</kbd>
+</li>
+<li> <kbd>End</kbd>
+</li>
+</ol>
+<p>And get as output
+</p>
+<pre>$ ^[[1~ ^[[4~
+</pre>
+<p>The <code>^[</code> indicates an escape character in your shell, so this means that your Home key has an escape code of <code>[1~</code> and you End key has an escape code of <code>[4~</code>. Since these escape codes are not listed in the default Readline config, you will need to add them:
+</p>
+<pre>"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+</pre>
+<p>Note that Readline uses <code>\e</code> to indicate an escape character.
+</p>
+<h2><span class="mw-headline" id="Terminfo">Terminfo</span></h2>
+<p>For programs that do not use Readline (e.g. ncurses), you can try editing your terminfo to change which escape codes are sent to the terminal for certain actions.
+</p>
+<p>First save your existing terminfo to a file
+</p>
+<pre>infocmp $TERM &gt;terminfo.src
+</pre>
+<p>Then edit it to change the escape codes. For example change khome and kend:
+</p>
+<pre>khome=\E[1~, kend=\E[4~,
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Ensure that no other key use the same character sequence.</div>
+<p>Then compile the new terminfo (which saves it to your <code>~/.terminfo</code> directory)
+</p>
+<pre>tic terminfo.src
+</pre>
+<p>And lastly specify the new terminfo in your shell's environment variables
+</p>
+<pre>export TERMINFO=~/.terminfo
+</pre>
+<h2><span class="mw-headline" id="Other_Applications">Other Applications</span></h2>
+<p>If the above steps do not resolve the issue, it is probably a program-specific problem rather than a system-wide one. You may have to consult the documentation for the given program on how to fix it. Below are fixes for common programs.
+</p>
+<h3><span class="mw-headline" id="Lynx">Lynx</span></h3>
+<p>You can add key binds using the same quoted-insert characters as used for <a href="#Readline">Readline</a>, but use <code>\033</code> to represent an escape character:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">lynx.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">setkey "\033[1~" HOME
+setkey "\033[4~" END</pre>
+<h3><span class="mw-headline" id="URxvt.2FRxvt">URxvt/Rxvt</span></h3>
+<p>Add escape code binds to your <a href="../en/X_resources.html" title="X resources">X resources</a> using the same escape sequence format as for <a href="#Lynx">Lynx</a>:
+</p>
+<pre>URxvt.keysym.Home: \033[1~
+URxvt.keysym.End: \033[4~
+URxvt.keysym.KP_Home: \033[1~
+URxvt.keysym.KP_End:  \033[4~</pre>
+<p>Where KP_Home and KP_End are the numpad Home and End keys. These binds might also fix programs running within URxvt e.g. Nano.
+</p>
+<p>Another solution is to add the following section to <code>/etc/inputrc</code>
+</p>
+<pre># those two are for rxvt
+"\e[7~":beginning-of-line
+"\e[8~":end-of-line
+</pre>
+<h3><span class="mw-headline" id="Zsh">Zsh</span></h3>
+<p>In short, use the terminfo database to set the correct keybind.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.zshrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">bindkey "${terminfo[khome]}" beginning-of-line
+bindkey "${terminfo[kend]}" end-of-line</pre>
+<p>See <a href="../en/Zsh.html#Key_bindings" title="Zsh">Zsh#Key bindings</a> and <a rel="nofollow" class="external text" href="http://zshwiki.org/home/zle/bindkeys#reading_terminfo">zshwiki: bindkeys</a> for more complete information.
+</p>
+<h3><span class="mw-headline" id="Less">Less</span></h3>
+<p>Create a config file using <code>lesskey</code> and the same escape codes for <a href="#Readline">Readline</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lesskey -o .less -</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#command
+\e[4~ goto-end
+\e[1~ goto-line
+</pre>
+<p>or for <a href="../en/Xterm.html" title="Xterm">xterm</a> you may have to use different escape codes
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lesskey -o .less -</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#command
+\eOF goto-end
+\eOH goto-line</pre>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Command_shells.html" title="Category:Command shells">Command shells</a></li>
+<li><a href="../en/Category:Keyboards.html" title="Category:Keyboards">Keyboards</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

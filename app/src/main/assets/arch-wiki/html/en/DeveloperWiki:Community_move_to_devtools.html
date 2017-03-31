@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Community move to devtools - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Community_move_to_devtools skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Community move to devtools</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Proposal: <b>Make [community] use the same repository system as [core] or [extra].</b>
+</p>
+<p>Result: The proposal was passed on 23 Jan 2009. The [community] repository
+has recently moved to a new server and has been moved to the SVN/devtools
+setup. Shell accounts have been created for Trusted Users. See the following
+threads for details on the transition:<br>
+<a rel="nofollow" class="external free" href="https://www.archlinux.org/pipermail/aur-general/2009-June/005359.html">https://www.archlinux.org/pipermail/aur-general/2009-June/005359.html</a><br>
+<a rel="nofollow" class="external free" href="https://www.archlinux.org/pipermail/aur-general/2009-July/005844.html">https://www.archlinux.org/pipermail/aur-general/2009-July/005844.html</a>
+</p>
+<hr>
+<p>Reference: <a rel="nofollow" class="external free" href="https://archlinux.org/pipermail/aur-general/2008-December/003325.html">https://archlinux.org/pipermail/aur-general/2008-December/003325.html</a>
+<br>The above thread contains the initial discussion on this proposal.
+</p>
+<p>For quite a while, [community] in Arch has led an almost independent
+existence, being tightly coupled with the AUR. Many improvements have
+been made in the workflow of package distribution in 'devtools' which
+are used for uploading and managing packages in the [core] and [extra]
+repositories.
+</p>
+<p>This proposal suggests that the [community] repository move to using the
+same repository system as [core] or [extra]. The benefits and detriments
+of the proposal, along with the technical steps to complete the transition
+(if the proposal were to be passed) are discussed below.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Detriments"><span class="tocnumber">1</span> <span class="toctext">Detriments</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Benefits"><span class="tocnumber">2</span> <span class="toctext">Benefits</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Technical_steps_for_the_transition"><span class="tocnumber">3</span> <span class="toctext">Technical steps for the transition</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Behind_the_scenes"><span class="tocnumber">3.1</span> <span class="toctext">Behind the scenes</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h1><span class="mw-headline" id="Detriments">Detriments</span></h1>
+<ul>
+<li> It might affect the autonomy of Trusted Users, and this is a big change from the way we've been used to.</li>
+<li> The effort to make the transition happen is not trivial.</li>
+<li> You'd lose votes for community packages.</li>
+<li> You'd lose package comments and notifications.</li>
+<li> Combining community packages with official packages will contribute a performance hit for all repos when dealing with build files.</li>
+</ul>
+<p>Note: We may still be able to keep community packages in the AUR interface.
+It will just take a bit of patching of community scripts to keep them.
+</p>
+<h1><span class="mw-headline" id="Benefits">Benefits</span></h1>
+<ul><li> There'll be fewer tools to support, since Trusted Users would then use the same tools as Arch developers, but with reduced permissions (only permission to write to the [community] repository)</li></ul>
+<ul><li> It'd be much easier to create and maintain a [community-testing] repository (or even the [testing] repository, if it's possible to cleanly separate the relevant permissions). A testing repository for [community] would be a great help in doing rebuilds.</li></ul>
+<ul><li> It'll be easier to migrate from being a Trusted User to a developer, since all the repositories would be using the same infrastructure. A simple permissions change, and they could be uploading packages to [core] or [extra].</li></ul>
+<ul><li> [community] would naturally become more decoupled from the AUR. Packages in [community] would become visible on the main Arch website, giving greater visibility to [community]. Also the search function on the website would then be able to search across all the repositories.</li></ul>
+<ul><li> The AUR code becomes greatly simplified, making code refactoring or rewrites easier.</li></ul>
+<h1><span class="mw-headline" id="Technical_steps_for_the_transition">Technical steps for the transition</span></h1>
+<p>Reference: <a rel="nofollow" class="external free" href="https://archlinux.org/pipermail/aur-general/2009-January/003460.html">https://archlinux.org/pipermail/aur-general/2009-January/003460.html</a>
+</p>
+<ul>
+<li> devtools/db-scripts have to be patched for [community]. ABS also has to be patched.</li>
+<li> Decide what's to be done on the web frontend side (AUR, main Arch site) and then do it!</li>
+<li> CVS to SVN migration. This would not be much of a problem since there would be scripts from the main repository migration lying around.</li>
+</ul>
+<h2><span class="mw-headline" id="Behind_the_scenes">Behind the scenes</span></h2>
+<ul>
+<li> Admins would now need to maintain user accounts for new TUs or when TUs leave.</li>
+<li> Quotas will probably need to be implemented for disk/cpu/ram usage, as we open gerolde up to way more user accounts in one fell swoop</li>
+</ul>
+<dl><dd> <a href="../User:Phrakture.html" title="User:Phrakture">phrakture</a> 12:50, 9 January 2009 (EST)</dd></dl>
+<p><br>
+The most important objective of this proposal is to make [community]
+use the same infrastructure (devtools, etc.) as the Arch official
+repositories [core] and [extra]. Technical details about how the
+transition is to be made (whether [community] and AUR should be totally
+decoupled, for example) need to be discussed.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Arch_development.html" title="Category:Arch development">Arch development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

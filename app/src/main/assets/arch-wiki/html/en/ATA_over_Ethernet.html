@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ATA over Ethernet - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ATA_over_Ethernet skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ATA over Ethernet</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>ATA over Ethernet (AoE) is a network protocol developed by the Brantley Coile Company, designed for simple, high-performance access of SATA storage devices over Ethernet networks. It is used to build storage area networks (SANs) with low-cost, standard technologies.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Prequisites_to_AOE"><span class="tocnumber">1</span> <span class="toctext">Prequisites to AOE</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Start_Vblade"><span class="tocnumber">2</span> <span class="toctext">Start Vblade</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Testing_Local"><span class="tocnumber">2.1</span> <span class="toctext">Testing Local</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Using_AOE"><span class="tocnumber">3</span> <span class="toctext">Using AOE</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Prequisites_to_AOE">Prequisites to AOE</span></h2>
+<p>To use AOE you need the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> packages <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vblade/">vblade</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/aoetools/">aoetools</a></span><sup><small>AUR</small></sup>.
+</p>
+<pre># ip set link eth0 up
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>AOE is working without IP Adress</div>
+<p>Create a Disk with dd:
+</p>
+<pre># dd if=/dev/zero of=vblade0 count=1 bs=1M
+</pre>
+<h2><span class="mw-headline" id="Start_Vblade">Start Vblade</span></h2>
+<pre># vblade 1 1 eth0 vblade0 
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> You can use the vbladed Daemon instead of vblade</div>
+<p>Now a Client should be able to see the ATA-Drive
+</p>
+<h3><span class="mw-headline" id="Testing_Local">Testing Local</span></h3>
+<p>To test the setup localy you have to assign vblade to lo
+</p>
+<pre># modprobe aoe
+# vblade 1 1 lo vblade0 &amp;
+# aoe-interfaces eth0
+# aoe-discover
+# aoe-stat
+     e1.1         0.001GB   eth0 up
+</pre>
+<h2><span class="mw-headline" id="Using_AOE">Using AOE</span></h2>
+<pre># modprobe aoe
+# aoe-interfaces eth0
+# aoe-discover
+# aoe-stat
+    e1.1         0.001GB   eth0 up
+</pre>
+<p><br>
+Now the device can be used as a normal device. It will also show up in fdisk!
+So first make a file system:
+</p>
+<pre># mkfs.ext4 /dev/ethered/e1.1
+# mkdir /mnt/e1.1
+# mount /dev/etherd/e1.1 /mnt/e1.1
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Storage.html" title="Category:Storage">Storage</a></li>
+<li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>tmpfs - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Tmpfs skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">tmpfs</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span><a href="https://en.wikipedia.org/wiki/Tmpfs" class="extiw" title="wikipedia:Tmpfs">tmpfs</a> is a temporary filesystem that resides in memory and/or your swap partition(s), depending on how much you fill it up. Mounting directories as tmpfs can be an effective way of speeding up accesses to their files, or to ensure that their contents are automatically cleared upon reboot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When using <a href="../en/Systemd.html" title="Systemd">systemd</a>, temporary files in tmpfs directories can be recreated at boot by using <a href="../en/Systemd.html#Temporary_files" title="Systemd">tmpfiles.d</a>.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Examples"><span class="tocnumber">2</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Disable_automatic_mount"><span class="tocnumber">3</span> <span class="toctext">Disable automatic mount</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Opening_symlinks_in_tmpfs_as_root_fails"><span class="tocnumber">4.1</span> <span class="toctext">Opening symlinks in tmpfs as root fails</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Some directories where tmpfs is commonly used are <a rel="nofollow" class="external text" href="http://www.pathname.com/fhs/2.2/fhs-3.15.html">/tmp</a>, <a rel="nofollow" class="external text" href="http://www.pathname.com/fhs/2.2/fhs-5.9.html">/var/lock</a> and <a rel="nofollow" class="external text" href="http://www.pathname.com/fhs/2.2/fhs-5.13.html">/var/run</a>. Do <b>not</b> use it on <a rel="nofollow" class="external text" href="http://www.pathname.com/fhs/2.2/fhs-5.15.html">/var/tmp</a>, because that folder is meant for temporary files that are preserved across reboots.
+</p>
+<p>Arch uses a tmpfs <code>/run</code> directory, with <code>/var/run</code> and <code>/var/lock</code> simply existing as symlinks for compatibility. It is also used for <code>/tmp</code> by the default systemd setup and does not require an entry in <a href="../en/Fstab.html" title="Fstab">fstab</a> unless a specific configuration is needed.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=glibc">glibc</a></span> 2.2 and above expects tmpfs to be mounted at <code>/dev/shm</code> for
+<a href="https://en.wikipedia.org/wiki/Shared_memory#Support_on_Unix-like_systems" class="extiw" title="wikipedia:Shared memory">POSIX shared memory</a>. Mounting tmpfs at <code>/dev/shm</code> is handled automatically by <a href="../en/Systemd.html" title="Systemd">systemd</a>, so manual configuration in <a href="../en/Fstab.html" title="Fstab">fstab</a> is no longer necessary.
+</p>
+<p>Generally, I/O intensive tasks and programs that run frequent read/write operations can benefit from using a tmpfs folder. Some applications can even receive a substantial gain by offloading some (or all) of their data onto the shared memory. For example, <a href="../en/Firefox/Profile_on_RAM.html" title="Firefox on RAM" class="mw-redirect">relocating the Firefox profile into RAM</a> shows a significant improvement in performance.
+</p>
+<h2><span class="mw-headline" id="Examples">Examples</span></h2>
+<p>By default, a tmpfs partition has its maximum size set to half your total RAM, but this can be customized. Note that the actual memory/swap consumption depends on how much you fill it up, as tmpfs partitions do not consume any memory until it is actually needed.
+</p>
+<p>To explicitly set a maximum size, in this example to override the default <code>/tmp</code> mount, use the <code>size</code> mount option:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">tmpfs   /tmp         tmpfs   nodev,nosuid,size=2G          0  0</pre>
+<p>Here is a more advanced example showing how to add tmpfs mounts for users. This is useful for websites, mysql tmp files, <code>~/.vim/</code>, and more. It's important to try and get the ideal mount options for what you are trying to accomplish. The goal is to have as secure settings as possible to prevent abuse. Limiting the size, and specifying uid and gid + mode is very secure. For more information on this subject, follow the links listed in the <a href="#See_also">#See also</a> section.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">tmpfs   /www/cache    tmpfs  rw,size=1G,nr_inodes=5k,noexec,nodev,nosuid,uid=648,gid=648,mode=1700   0  0</pre>
+<p>See the <code>mount</code> command man page for more information. One useful mount option in the man page is the <code>default</code> option. At least understand that.
+</p>
+<p>Reboot for the changes to take effect. Note that although it may be tempting to simply run <code>mount -a</code> to make the changes effective immediately, this will make any files currently residing in these directories inaccessible (this is especially problematic for running programs with lockfiles, for example). However, if all of them are empty, it should be safe to run <code>mount -a</code> instead of rebooting (or mount them individually).
+</p>
+<p>After applying changes, you may want to verify that they took effect by looking at <code>/proc/mounts</code> and using <code>findmnt</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ findmnt --target /tmp</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+TARGET SOURCE FSTYPE OPTIONS
+/tmp   tmpfs  tmpfs  rw,nosuid,nodev,relatime</pre>
+<p>The tmpfs can also be temporarily resized without the need to reboot, for example when a large compile job needs to run soon. In this case, you can run:
+</p>
+<pre># mount -o remount,size=4G,noatime /tmp
+</pre>
+<h2><span class="mw-headline" id="Disable_automatic_mount">Disable automatic mount</span></h2>
+<p>Under <a href="../en/Systemd.html" title="Systemd">systemd</a>, <code>/tmp</code> may be automatically mounted as a tmpfs even though you have no entry for that in your <code>/etc/fstab</code>.
+</p>
+<p>To disable the automatic mount, run:
+</p>
+<pre># systemctl mask tmp.mount
+</pre>
+<p>Files will no longer be stored in a tmpfs, but your block device instead.
+The <code>/tmp</code> contents will now be preserved between reboots, which you might not want.
+To regain the previous behavior and clean the <code>/tmp</code> folder automatically when restarting your machine, consider using <code>tmpfiles.d(5)</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/tmp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># see tmpfiles.d(5)
+# always enable /tmp folder cleaning
+D! /tmp 1777 root root 0
+
+# remove files in /var/tmp older than 10 days
+D /var/tmp 1777 root root 10d
+
+# namespace mountpoints (PrivateTmp=yes) are excluded from removal
+x /tmp/systemd-private-*
+x /var/tmp/systemd-private-*
+X /tmp/systemd-private-*/tmp
+X /var/tmp/systemd-private-*/tmp</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Opening_symlinks_in_tmpfs_as_root_fails">Opening symlinks in tmpfs as root fails</span></h3>
+<p>Considering <code>/tmp</code> is using tmpfs, change the current directory to <code>/tmp</code>, then create a file and create a symlink to that file in the same <code>/tmp</code> directory. If you try to open the file you created via the symlink, you will get a permission denied error. This is expected as <code>/tmp</code> <a rel="nofollow" class="external text" href="https://wiki.ubuntu.com/Security/Features#Symlink_restrictions">has the sticky bit set</a>.
+</p>
+<p>This behaviour can be controlled via <code>/proc/sys/fs/protected_symlinks</code> or simply via sysctl: <code>sysctl -w fs.protected_symlinks=0</code>. See <a href="../en/Sysctl.html#Configuration" title="Sysctl">Sysctl#Configuration</a> to make this permanent.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Changing this behaviour can lead to security issues! Disable it only if you know what you are doing.</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/filesystems/tmpfs.txt">Linux kernel documentation</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>NVIDIA/Troubleshooting - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-NVIDIA_Troubleshooting skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">NVIDIA/Troubleshooting</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/NVIDIA.html" title="NVIDIA">NVIDIA</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Wayland_.28gdm.29_crashes_after_nvidia-libgl_installation"><span class="tocnumber">1</span> <span class="toctext">Wayland (gdm) crashes after nvidia-libgl installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Corrupted_screen:_.22Six_screens.22_Problem"><span class="tocnumber">2</span> <span class="toctext">Corrupted screen: "Six screens" Problem</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#.27.2Fdev.2Fnvidia0.27_input.2Foutput_error"><span class="tocnumber">3</span> <span class="toctext">'/dev/nvidia0' input/output error</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Crashing_in_general"><span class="tocnumber">4</span> <span class="toctext">Crashing in general</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Bad_performance_after_installing_a_new_driver_version"><span class="tocnumber">5</span> <span class="toctext">Bad performance after installing a new driver version</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#CPU_spikes_with_400_series_cards"><span class="tocnumber">6</span> <span class="toctext">CPU spikes with 400 series cards</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Laptops:_X_hangs_on_login.2Fout.2C_worked_around_with_Ctrl.2BAlt.2BBackspace"><span class="tocnumber">7</span> <span class="toctext">Laptops: X hangs on login/out, worked around with Ctrl+Alt+Backspace</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#No_screens_found_on_a_laptop.2FNVIDIA_Optimus"><span class="tocnumber">8</span> <span class="toctext">No screens found on a laptop/NVIDIA Optimus</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Possible_Workaround"><span class="tocnumber">8.1</span> <span class="toctext">Possible Workaround</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Screen.28s.29_found.2C_but_none_have_a_usable_configuration"><span class="tocnumber">9</span> <span class="toctext">Screen(s) found, but none have a usable configuration</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Blackscreen_at_X_startup_.2F_Machine_poweroff_at_X_shutdown"><span class="tocnumber">10</span> <span class="toctext">Blackscreen at X startup / Machine poweroff at X shutdown</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Backlight_is_not_turning_off_in_some_occasions"><span class="tocnumber">11</span> <span class="toctext">Backlight is not turning off in some occasions</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Full_system_freeze_using_Flash"><span class="tocnumber">12</span> <span class="toctext">Full system freeze using Flash</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#Xorg_fails_to_load_or_Red_Screen_of_Death"><span class="tocnumber">13</span> <span class="toctext">Xorg fails to load or Red Screen of Death</span></a></li>
+<li class="toclevel-1 tocsection-15"><a href="#Black_screen_on_systems_with_Intel_integrated_GPU"><span class="tocnumber">14</span> <span class="toctext">Black screen on systems with Intel integrated GPU</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Black_screen_on_systems_with_VIA_integrated_GPU"><span class="tocnumber">15</span> <span class="toctext">Black screen on systems with VIA integrated GPU</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#X_fails_with_.22no_screens_found.22_with_Intel_iGPU"><span class="tocnumber">16</span> <span class="toctext">X fails with "no screens found" with Intel iGPU</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#Xorg_fails_during_boot.2C_but_otherwise_starts_fine"><span class="tocnumber">17</span> <span class="toctext">Xorg fails during boot, but otherwise starts fine</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Flash_video_players_crashes"><span class="tocnumber">18</span> <span class="toctext">Flash video players crashes</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#xrandr_BadMatch"><span class="tocnumber">19</span> <span class="toctext">xrandr BadMatch</span></a></li>
+<li class="toclevel-1 tocsection-21"><a href="#Override_EDID"><span class="tocnumber">20</span> <span class="toctext">Override EDID</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#Overclocking_with_nvidia-settings_GUI_not_working"><span class="tocnumber">21</span> <span class="toctext">Overclocking with nvidia-settings GUI not working</span></a></li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Avoid_screen_tearing"><span class="tocnumber">22</span> <span class="toctext">Avoid screen tearing</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#Avoid_screen_tearing_in_KDE_.28KWin.29"><span class="tocnumber">22.1</span> <span class="toctext">Avoid screen tearing in KDE (KWin)</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Wayland_.28gdm.29_crashes_after_nvidia-libgl_installation">Wayland (gdm) crashes after nvidia-libgl installation</span></h2>
+<p>On some Intel CPUs outdated microcode causes instability with Wayland when nvidia are installed, causing gdm to crash.
+</p>
+<p><a href="../../en/Microcode.html#Enabling_Intel_microcode_updates" title="Microcode">Updating the microcode</a> should solve this problem.
+</p>
+<h2><span class="mw-headline" id="Corrupted_screen:_.22Six_screens.22_Problem">Corrupted screen: "Six screens" Problem</span></h2>
+<p>For some users, using GeForce GT 100M's, the screen gets corrupted after X starts, divided into 6 sections with a resolution limited to 640x480.
+The same problem has been recently reported with Quadro 2000 and hi-res displays.
+</p>
+<p>To solve this problem, enable the Validation Mode <code>NoTotalSizeCheck</code> in section <code>Device</code>:
+</p>
+<pre>Section "Device"
+ ...
+ Option "ModeValidation" "NoTotalSizeCheck"
+ ...
+EndSection
+</pre>
+<h2><span class="mw-headline" id=".27.2Fdev.2Fnvidia0.27_input.2Foutput_error">'/dev/nvidia0' input/output error</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Verify that the BIOS related suggestions work and are not coincidentally set while troubleshooting. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:NVIDIA/Troubleshooting#.27.2Fdev.2Fnvidia0.27_Input.2FOutput_error..._suggested_fixes">Talk:NVIDIA/Troubleshooting#'/dev/nvidia0' Input/Output error... suggested fixes</a>)</div>
+</div>
+<p>This error can occur for several different reasons, and the most common solution given for this error is to check for group/file permissions, which in almost every case is <i>not</i> the problem. The NVIDIA documentation does not talk in detail on what you should
+do to correct this problem but there are a few things that have worked for some people. The problem can be a IRQ conflict with another device or bad routing by either the kernel or your BIOS.
+</p>
+<p>First thing to try is to remove other video devices such as video capture cards and see if the problem goes away. If there are too many video processors on the same system it can lead into the kernel being unable to start them because of memory allocation problems with the video controller. In particular on systems with low video memory this can occur even if there is only one video processor. In such case you should find out the amount of your system's video memory (e.g. with <code>lspci -v</code>) and pass allocation parameters to the kernel, e.g. for a 32-bit kernel:
+</p>
+<pre>vmalloc=384M
+</pre>
+<p>If running a 64bit kernel, a driver defect can cause the NVIDIA module to fail initializing when IOMMU is on. Turning it off in the BIOS has been confirmed to work for some users. <a rel="nofollow" class="external autonumber" href="http://www.nvnews.net/vbulletin/showthread.php?s=68bb2fabadcb53b10b286aa42d13c5bc&amp;t=159335">[1]</a><a href="../../User:Clickthem.html#nvidia_module" title="User:Clickthem">User:Clickthem#nvidia module</a>
+</p>
+<p>Another thing to try is to change your BIOS IRQ routing from <code>Operating system controlled</code> to <code>BIOS controlled</code> or the other way around. The first one can be passed as a kernel parameter:
+</p>
+<pre>PCI=biosirq
+</pre>
+<p>The <code>noacpi</code> kernel parameter has also been suggested as a solution but since it disables ACPI completely it should be used with caution. Some hardware are easily damaged by overheating.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The kernel parameters can be passed either through the kernel command line or the bootloader configuration file. See your bootloader Wiki page for more information.</div>
+<h2><span class="mw-headline" id="Crashing_in_general">Crashing in general</span></h2>
+<ul>
+<li> Try disabling <code>RenderAccel</code> in xorg.conf.</li>
+<li> If Xorg outputs an error about <code>"conflicting memory type"</code> or <code>"failed to allocate primary buffer: out of memory"</code>, or crashes with a "Signal 11" while using nvidia-96xx drivers, add <code>nopat</code> to your <a href="../../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.</li>
+<li> If the NVIDIA compiler complains about different versions of GCC between the current one and the one used for compiling the kernel, add in <code>/etc/profile</code>:</li>
+</ul>
+<pre>export IGNORE_CC_MISMATCH=1
+</pre>
+<ul><li> If Xorg is crashing , try disabling PAT. Pass the argument <code>nopat</code> to <a href="../../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.</li></ul>
+<p>More information about troubleshooting the driver can be found in the <a rel="nofollow" class="external text" href="https://forums.geforce.com/">NVIDIA forums.</a>
+</p>
+<h2><span class="mw-headline" id="Bad_performance_after_installing_a_new_driver_version">Bad performance after installing a new driver version</span></h2>
+<p>If FPS have dropped in comparison with older drivers, first check if direct rendering is turned on (glxinfo is included in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa-demos">mesa-demos</a></span>):
+</p>
+<pre>$ glxinfo | grep direct
+</pre>
+<p>If the command prints:
+</p>
+<pre>direct rendering: No
+</pre>
+<p>then that could be an indication for the sudden FPS drop.
+</p>
+<p>A possible solution could be to regress to the previously installed driver version and rebooting afterwards.
+</p>
+<h2><span class="mw-headline" id="CPU_spikes_with_400_series_cards">CPU spikes with 400 series cards</span></h2>
+<p>If you are experiencing intermittent CPU spikes with a 400 series card, it may be caused by PowerMizer constantly changing the GPU's clock frequency. Switching PowerMizer's setting from Adaptive to Performance, add the following to the <code>Device</code> section of your Xorg configuration:
+</p>
+<pre> Option "RegistryDwords" "PowerMizerEnable=0x1; PerfLevelSrc=0x3322; PowerMizerDefaultAC=0x1"
+</pre>
+<h2><span class="mw-headline" id="Laptops:_X_hangs_on_login.2Fout.2C_worked_around_with_Ctrl.2BAlt.2BBackspace">Laptops: X hangs on login/out, worked around with Ctrl+Alt+Backspace</span></h2>
+<p>If, while using the legacy NVIDIA drivers, Xorg hangs on login and logout (particularly with an odd screen split into two black and white/gray pieces), but logging in is still possible via <code>Ctrl+Alt+Backspace</code> (or whatever the new "kill X" key binding is), try adding this in <code>/etc/modprobe.d/modprobe.conf</code>:
+</p>
+<pre>options nvidia NVreg_Mobile=1
+</pre>
+<p>One user had luck with this instead, but it makes performance drop significantly for others:
+</p>
+<pre>options nvidia NVreg_DeviceFileUID=0 NVreg_DeviceFileGID=33 NVreg_DeviceFileMode=0660 NVreg_SoftEDIDs=0 NVreg_Mobile=1
+</pre>
+<p>Note that <code>NVreg_Mobile</code> needs to be changed according to the laptop:
+</p>
+<ul>
+<li> 1 for Dell laptops.</li>
+<li> 2 for non-Compal Toshiba laptops.</li>
+<li> 3 for other laptops.</li>
+<li> 4 for Compal Toshiba laptops.</li>
+<li> 5 for Gateway laptops.</li>
+</ul>
+<p>See <a rel="nofollow" class="external text" href="ftp://download.nvidia.com/XFree86/Linux-x86/355.11/README/README.txt">NVIDIA Driver's README: Appendix K</a> for more information.
+</p>
+<h2><span class="mw-headline" id="No_screens_found_on_a_laptop.2FNVIDIA_Optimus">No screens found on a laptop/NVIDIA Optimus</span></h2>
+<p>On a laptop, if the NVIDIA driver cannot find any screens, you may have an NVIDIA Optimus setup : an Intel chipset connected to the screen and the video outputs, and a NVIDIA card that does all the hard work and writes to the chipset's video memory.
+</p>
+<p>Check if <code>$ lspci | grep VGA</code>
+outputs something similar to:
+</p>
+<pre>00:02.0 VGA compatible controller: Intel Corporation Core Processor Integrated Graphics Controller (rev 02)
+01:00.0 VGA compatible controller: nVidia Corporation Device 0df4 (rev a1)
+</pre>
+<p>NVIDIA drivers now offer Optimus support since 319.12 Beta <a rel="nofollow" class="external autonumber" href="http://www.nvidia.com/object/linux-display-amd64-319.12-driver.html">[2]</a> with kernels above and including 3.9.
+</p>
+<p>Another solution is to install the <a href="../../en/Intel_graphics.html" title="Intel" class="mw-redirect">Intel</a> driver to handle the screens, then if you want 3D software you should run them through <a href="../../en/Bumblebee.html" title="Bumblebee">Bumblebee</a> to tell them to use the NVIDIA card.
+</p>
+<h3><span class="mw-headline" id="Possible_Workaround">Possible Workaround</span></h3>
+<p>Enter the BIOS and changed the default graphics setting from 'Optimus' to 'Discrete' and the install NVIDIA drivers (295.20-1 at time of writing) recognized the screens.
+</p>
+<p>Steps:
+</p>
+<ol>
+<li> Enter BIOS.</li>
+<li> Find Graphics Settings (should be in tab <i>Config &gt; Display</i>).</li>
+<li> Change 'Graphics Device' to 'Discrete Graphics' (Disables Intel integrated graphics).</li>
+<li> Change OS Detection for Nvidia Optimus to "Disabled".</li>
+<li> Save and exit.</li>
+</ol>
+<p>Tested on a Lenovo W520 with a Quadro 1000M and Nvidia Optimus
+</p>
+<h2><span class="mw-headline" id="Screen.28s.29_found.2C_but_none_have_a_usable_configuration">Screen(s) found, but none have a usable configuration</span></h2>
+<p>Sometimes NVIDIA and X have trouble finding the active screen. If your graphics card has multiple outputs try plugging your monitor into the other ones. On a laptop it may be because your graphics card has vga/tv outs. Xorg.0.log will provide more info.
+</p>
+<p>Another thing to try is adding invalid <code>"ConnectedMonitor" Option</code> to <code>Section "Device"</code>
+to force Xorg throws error and shows you how correct it.
+<a rel="nofollow" class="external text" href="ftp://download.nvidia.com/XFree86/Linux-x86/355.11/README/xconfigoptions.html">Here</a>
+more about ConnectedMonitor setting.
+</p>
+<p>After re-run X see Xorg.0.log to get valid CRT-x,DFP-x,TV-x values.
+</p>
+<p><code>nvidia-xconfig --query-gpu-info</code> could be helpful.
+</p>
+<h2><span class="mw-headline" id="Blackscreen_at_X_startup_.2F_Machine_poweroff_at_X_shutdown">Blackscreen at X startup / Machine poweroff at X shutdown</span></h2>
+<p>If you have installed an update of Nvidia and your screen stays black after launching Xorg, or if shutting down Xorg causes a machine poweroff, try the below workarounds. Alternatively, use the <a href="../../en/Nouveau.html" title="Nouveau">Nouveau</a> driver.
+</p>
+<ul><li> Use the <code>rcutree.rcu_idle_gp_delay=1</code> <a href="../../en/Kernel_parameters.html" title="Kernel parameter" class="mw-redirect">kernel parameter</a>.</li></ul>
+<ul><li> You can also try to add the <code>nvidia</code> module directly to your <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> config file.</li></ul>
+<ul><li> If the screen still stays black with <b>both</b> the <code>rcutree.rcu_idle_gp_delay=1</code> <a href="../../en/Kernel_parameters.html" title="Kernel parameter" class="mw-redirect">kernel parameter</a> and the <code>nvidia</code> module directly in the <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> config file, try re-installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia">nvidia</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-libgl">nvidia-libgl</a></span> in that order, and finally reload the driver:</li></ul>
+<pre># modprobe nvidia
+</pre>
+<h2><span class="mw-headline" id="Backlight_is_not_turning_off_in_some_occasions">Backlight is not turning off in some occasions</span></h2>
+<p>By default, DPMS should turn off backlight with the timeouts set or by running xset. However, probably due to a bug in the proprietary Nvidia drivers the result is a blank screen with no powersaving whatsoever. To workaround it, until the bug has been fixed you can use the <code>vbetool</code> as root.
+</p>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vbetool">vbetool</a></span> package.
+</p>
+<p>Turn off your screen on demand and then by pressing a random key backlight turns on again:
+</p>
+<pre>vbetool dpms off &amp;&amp; read -n1; vbetool dpms on
+</pre>
+<p>Alternatively, xrandr is able to disable and re-enable monitor outputs without requiring root.
+</p>
+<pre>xrandr --output DP-1 --off; read -n1; xrandr --output DP-1 --auto
+</pre>
+<h2><span class="mw-headline" id="Full_system_freeze_using_Flash">Full system freeze using Flash</span></h2>
+<p>If you experience occasional full system freezes (only the mouse is moving) using flashplugin
+and get:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/log/errors.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+NVRM: Xid (0000:01:00): 31, Ch 00000007, engmask 00000120, intr 10000000
+</pre>
+<p>A possible workaround is to switch off Hardware Acceleration in Flash, setting
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/adobe/mms.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EnableLinuxHWVideoDecode=0</pre>
+<p>Or, if you want to keep Hardware acceleration enabled, you may try to::
+</p>
+<pre>export VDPAU_NVIDIA_NO_OVERLAY=1
+</pre>
+<p>...before starting the browser.
+Note that this may introduce tearing.
+</p>
+<h2><span class="mw-headline" id="Xorg_fails_to_load_or_Red_Screen_of_Death">Xorg fails to load or Red Screen of Death</span></h2>
+<p>If you get a red screen and use GRUB, disable the GRUB framebuffer by editing <code>/etc/default/grub</code> and uncomment <code>GRUB_TERMINAL_OUTPUT=console</code>. For more information see <a href="../../en/GRUB/Tips_and_tricks.html#Disable_framebuffer" title="GRUB/Tips and tricks">GRUB/Tips and tricks#Disable framebuffer</a>.
+</p>
+<h2><span class="mw-headline" id="Black_screen_on_systems_with_Intel_integrated_GPU">Black screen on systems with Intel integrated GPU</span></h2>
+<p>If you have an Intel CPU with an integrated GPU (e.g. Intel HD 4000) and have installed the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia">nvidia</a></span> package, you may experience a black screen on boot, when changing virtual terminal, or when exiting an X session. This may be caused by a conflict between the graphics modules. This is solved by blacklisting the Intel GPU modules. Create the file <code>/etc/modprobe.d/blacklist.conf</code> and prevent the <i>i915</i> and <i>intel_agp</i> modules from loading on boot:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+install i915 /usr/bin/false
+install intel_agp /usr/bin/false
+</pre>
+<h2><span class="mw-headline" id="Black_screen_on_systems_with_VIA_integrated_GPU">Black screen on systems with VIA integrated GPU</span></h2>
+<p>As above, blacklisting the <i>viafb</i> module may resolve conflicts with NVIDIA drivers:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+install viafb /usr/bin/false
+</pre>
+<h2><span class="mw-headline" id="X_fails_with_.22no_screens_found.22_with_Intel_iGPU">X fails with "no screens found" with Intel iGPU</span></h2>
+<p>Like above, if you have an Intel CPU with an integrated GPU and X fails to start with 
+</p>
+<pre>[ 76.633] (EE) No devices detected.
+[ 76.633] Fatal server error:
+[ 76.633] no screens found
+</pre>
+<p>then you need to add your discrete card's BusID to your X configuration. Find it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># lspci | grep VGA</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+00:02.0 VGA compatible controller: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor Graphics Controller (rev 09)
+01:00.0 VGA compatible controller: NVIDIA Corporation GK107 [GeForce GTX 650] (rev a1)
+</pre>
+<p>then you fix it by adding it to the card's Device section in your X configuration. In my case:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    BusID          "PCI:1:0:0"
+EndSection
+</pre>
+<p>Note how <code>01:00.0</code> is written as <code>1:0:0</code>.
+</p>
+<h2><span class="mw-headline" id="Xorg_fails_during_boot.2C_but_otherwise_starts_fine">Xorg fails during boot, but otherwise starts fine</span></h2>
+<p>On very fast booting systems, systemd may attempt to start the display manager before the NVIDIA driver has fully initialized. You will see a message like the following in your logs only when Xorg runs during boot.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/log/Xorg.0.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[     1.807] (EE) NVIDIA(0): Failed to initialize the NVIDIA kernel module. Please see the
+[     1.807] (EE) NVIDIA(0):     system's kernel log for additional error messages and
+[     1.808] (EE) NVIDIA(0):     consult the NVIDIA README for details.
+[     1.808] (EE) NVIDIA(0):  *** Aborting ***</pre>
+<p>In this case you will need to establish an ordering dependency from the display manager to the DRI device. First create device units for DRI devices by creating a new udev rules file.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-systemd-dri-devices.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ACTION=="add", KERNEL=="card*", SUBSYSTEM=="drm", TAG+="systemd"</pre>
+<p>Then create dependencies from the display manager to the device(s).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/display-manager.service.d/10-wait-for-dri-devices.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Wants=dev-dri-card0.device
+After=dev-dri-card0.device</pre>
+<p>If you have additional cards needed for the desktop then list them in Wants and After seperated by spaces.
+</p>
+<h2><span class="mw-headline" id="Flash_video_players_crashes">Flash video players crashes</span></h2>
+<p>If you are getting frequent crashes of Flash video players, try to switch off Hardware Acceleration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/adobe/mms.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">EnableLinuxHWVideoDecode=0</pre>
+<p>(This problem appeared after installing the proprietary nvidia driver, and was fixed by changing this setting.)
+</p>
+<h2><span class="mw-headline" id="xrandr_BadMatch">xrandr BadMatch</span></h2>
+<p>If you are trying to configure a WQHD monitor such as DELL U2515H using <a href="../../en/Xrandr.html" title="Xrandr">xrandr</a> and <code>xrandr --addmode</code> gives you the error <code>X Error of failed request: BadMatch</code>, it might be because the proprietary NVIDIA driver clips the pixel clock maximum frequency of HDMI output to 225 MHz or lower. To set the monitor to maximum resolution you have to install <a href="../../en/Nouveau.html" title="Nouveau">nouveau</a> drivers. You can force nouveau to use a specific pixel clock frequency by setting <code>nouveau.hdmimhz=297</code> (or <code>330</code>) in your <a href="../../en/Kernel_parameters.html" title="Kernel parameters">Kernel parameters</a>.
+</p>
+<p>Alternatively, it may be that your monitor's EDID is incorrect. See <a href="#Override_EDID">#Override EDID</a>.
+</p>
+<h2><span class="mw-headline" id="Override_EDID">Override EDID</span></h2>
+<p>If your monitor is providing wrong EDID information, the nvidia-driver will pick a very small solution.
+Nvidia's driver options change, this guide refers to nvidia 346.47-11.
+</p>
+<p>Aside from manually setting modelines in the xorg config, you have to allow non-edid modes and disable edid in the device section:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-monitor.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "Monitor"
+    Identifier     "Monitor0"
+    VendorName     "Unknown"
+    ModelName      "Unknown"
+    HorizSync       30-94
+    VertRefresh     56-76
+    DisplaySize    518.4 324.0
+    Option         "DPMS"
+    # 1920x1200 59.95 Hz (CVT 2.30MA-R) hsync: 74.04 kHz; pclk: 154.00 MHz
+    Modeline "1920x1200R"  154.00  1920 1968 2000 2080  1200 1203 1209 1235 +hsync -vsync
+EndSection
+
+Section "Device"
+    Identifier     "Device0"
+    Driver         "nvidia"
+    VendorName     "NVIDIA Corporation"
+    Option         "UseEdidFreqs" "FALSE"
+    Option         "UseEDID" "FALSE"
+    Option         "ModeValidation" "AllowNonEdidModes"
+EndSection
+
+Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    SubSection     "Display"
+        Depth       24
+        Modes      "1920x1200R"
+    EndSubSection
+EndSection</pre>
+<p>Alternatively, it may be that your monitor's EDID is actually correct and the driver does not trust it. To force it to use the EDID anyway, set the <code>IgnoreEDIDChecksum</code> option for the X11 Device.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If the EDID is actually incorrect, ignoring the checksum could cause hardware damage. Only attempt this if you know for a fact that the monitor's mode is correctly detected in some case (e.g. different OS, different driver, different output).</div>
+<pre>Section "Device"
+    Identifier "Device0"
+    Driver "nvidia"
+    Option "IgnoreEDIDChecksum" "<i>displayName</i>"
+EndSection</pre>
+<p>where <code><i>displayName</i></code> is the name of the display device e.g. <code>DFP-4</code>. You can find the display device name in your Xorg log; it is <i>not</i> the same as the output name (e.g. <code>DVI-I-0</code>) that you would see in <a href="../../en/Xrandr.html" title="Xrandr">Xrandr</a> output.
+</p>
+<h2><span class="mw-headline" id="Overclocking_with_nvidia-settings_GUI_not_working">Overclocking with nvidia-settings GUI not working</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Duplication, vague "not working" (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:NVIDIA/Troubleshooting">Talk:NVIDIA/Troubleshooting#</a>)</div>
+</div>
+<p>Workaround is to use nvidia-settings CLI to query and set certain variables after enabling overclocking(as explained in <a href="../../en/NVIDIA/Tips_and_tricks.html#Enabling_overclocking" title="NVIDIA/Tips and tricks">NVIDIA/Tips and tricks#Enabling overclocking</a>. <code>man nvidia-settings</code> for more information.
+</p>
+<p>Example to query all variables:
+</p>
+<pre> nvidia-settings -q all
+</pre>
+<p>Example to set PowerMizerMode to prefer performance mode:
+</p>
+<pre> nvidia-settings -a [gpu:0]/GPUPowerMizerMode=1
+</pre>
+<p>Example to set multiple variables at once(Overclock on performance level [3] by 50Mhz, overclock MemoryTransferRate by 50Mhz, Over Voltage by 100 microvolts)
+</p>
+<pre> nvidia-setting -a GPUGraphicsClockOffset[3]=50 -a GPUMemoryTransferRateOffset[3]=50 -a GPUOverVoltageOffset=100
+</pre>
+<h2><span class="mw-headline" id="Avoid_screen_tearing">Avoid screen tearing</span></h2>
+<p>Tearing can be avoided by forcing a full composition pipeline, regardless of the compositor you are using. To test whether this option will work, type
+</p>
+<pre>nvidia-settings --assign CurrentMetaMode="nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
+</pre>
+<p>This however has been reported to reduce the performance of some OpenGL applications and may produce issues in WebGL.
+</p>
+<p>In order to make the change permanent, it must be added to the <code>"Screen"</code> section of your Xorg configuration file. When making this change, <code>TripleBuffering</code> should be enabled and <code>AllowIndirectGLXProtocol</code> should be disabled in the driver configuration as well. See example configuration below:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>MetaMode "extra attributes" in Xorg configuration files seem to be broken at the moment and might keep X from starting. Use the command line tool instead until this is fixed: <a rel="nofollow" class="external free" href="https://devtalk.nvidia.com/default/topic/950647/linux/black-screen-with-367-35/2">https://devtalk.nvidia.com/default/topic/950647/linux/black-screen-with-367-35/2</a> </div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "Screen"
+    Identifier     "Screen0"
+    Option         "metamodes" "nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
+    Option         "AllowIndirectGLXProtocol" "off"
+    Option         "TripleBuffer" "on"
+EndSection
+</pre>
+<p>If you do not have an Xorg configuration file, you can create one for your present hardware using <code>nvidia-xconfig</code> (see <a href="../../en/NVIDIA.html#Automatic_configuration" title="NVIDIA">NVIDIA#Automatic configuration</a>) and move it from <code>/etc/X11/xorg.conf</code> to the preferred location <code>/etc/X11/xorg.conf.d/20-nvidia.conf</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Many of the configuration options produced in <code>20-nvidia.conf</code> by using <code>nvidia-xconfig</code> are set automatically by the driver and are not needed. To only use this file for enabling composition pipeline, only the section <code>"Screen"</code> containing lines with values for <code>Identifier</code> and <code>Option</code> are necessary. Other sections may be removed from this file.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Multi monitor setups using different model monitors may have slightly different refresh rates. If vsync is enabled by the driver it will sync to only one of these refresh rates which can cause the appearance of screen tearing on incorrectly synced monitors. Select to sync the display device which is the primarily used monitor as others will not sync properly. This is configurable in <code>~/.nvidia-settings-rc</code> as <code>0/XVideoSyncToDisplayID=</code> or by installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-settings">nvidia-settings</a></span> and using the graphical configuration options.</div>
+<h3><span class="mw-headline" id="Avoid_screen_tearing_in_KDE_.28KWin.29">Avoid screen tearing in KDE (KWin)</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/profile.d/kwin.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+export __GL_YIELD="USLEEP"
+</pre>
+<p>Also if the above does not help, then try this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/profile.d/kwin.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+export KWIN_TRIPLE_BUFFER=1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not have both of the above enabled at the same time.</div>
+<p>If you enable triple buffering make sure to enable <code>TripleBuffering</code> for the driver itself.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf or /etc/X11/xorg.conf.d/20-nvidia.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "Device"
+    [...]
+    Option         "TripleBuffer" "True"
+    [...]
+EndSection
+</pre>
+<p>Also make sure to select OpenGL &gt;= 2.0 as rendering backend under Systemsettings &gt; Display and Monitor &gt; Compositor.
+</p>
+<p>In some cases neither of the above fixes work. A possible fix is to configure <a href="#Avoid_screen_tearing">ForceFullCompositionPipeline</a>.
+</p>
+<p>Source: <a rel="nofollow" class="external free" href="https://bugs.kde.org/show_bug.cgi?id=322060">https://bugs.kde.org/show_bug.cgi?id=322060</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../../en/Category:Graphics.html" title="Category:Graphics">Graphics</a></li>
+<li><a href="../../en/Category:X_server.html" title="Category:X server">X server</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=NVIDIA/Troubleshooting&amp;oldid=451876">https://wiki.archlinux.org/index.php?title=NVIDIA/Troubleshooting&amp;oldid=451876</a>"</li>
+					<li id="lastmod"> This page was last modified on 25 September 2016, at 12:57.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

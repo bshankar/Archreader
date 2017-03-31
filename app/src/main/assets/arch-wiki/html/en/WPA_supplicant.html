@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>WPA supplicant - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-WPA_supplicant skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">WPA supplicant</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Network_configuration.html" title="Network configuration">Network configuration</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Wireless_network_configuration.html" title="Wireless network configuration">Wireless network configuration</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/WPA2_Enterprise.html" title="WPA2 Enterprise">WPA2 Enterprise</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://hostap.epitest.fi/wpa_supplicant/">wpa_supplicant</a> is a cross-platform <a href="https://en.wikipedia.org/wiki/Supplicant_(computer)" class="extiw" title="wikipedia:Supplicant (computer)">supplicant</a> with support for WEP, WPA and WPA2 (<a href="https://en.wikipedia.org/wiki/IEEE_802.11i" class="extiw" title="wikipedia:IEEE 802.11i">IEEE 802.11i</a> / RSN (Robust Secure Network)). It is suitable for desktops, laptops and embedded systems.
+</p>
+<p><i>wpa_supplicant</i> is the IEEE 802.1X/WPA component that is used in the client stations. It implements key negotiation with a WPA authenticator and it controls the roaming and IEEE 802.11 authentication/association of the wireless driver.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Overview"><span class="tocnumber">2</span> <span class="toctext">Overview</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Connecting_with_wpa_cli"><span class="tocnumber">3</span> <span class="toctext">Connecting with wpa_cli</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Connecting_with_wpa_passphrase"><span class="tocnumber">4</span> <span class="toctext">Connecting with wpa_passphrase</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Advanced_usage"><span class="tocnumber">5</span> <span class="toctext">Advanced usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Configuration"><span class="tocnumber">5.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Connection"><span class="tocnumber">5.2</span> <span class="toctext">Connection</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Manual"><span class="tocnumber">5.2.1</span> <span class="toctext">Manual</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#At_boot_.28systemd.29"><span class="tocnumber">5.2.2</span> <span class="toctext">At boot (systemd)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#wpa_cli_action_script"><span class="tocnumber">5.3</span> <span class="toctext">wpa_cli action script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#nl80211_driver_not_supported_on_some_hardware"><span class="tocnumber">6.1</span> <span class="toctext">nl80211 driver not supported on some hardware</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Problem_with_mounted_network_shares_.28cifs.29_and_shutdown"><span class="tocnumber">6.2</span> <span class="toctext">Problem with mounted network shares (cifs) and shutdown</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Password-related_problems"><span class="tocnumber">6.3</span> <span class="toctext">Password-related problems</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span> package.
+</p>
+<p>Optionally also install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant_gui">wpa_supplicant_gui</a></span>, which provides <i>wpa_gui</i>, a graphical front-end for <i>wpa_supplicant</i>.
+</p>
+<h2><span class="mw-headline" id="Overview">Overview</span></h2>
+<p>The first step to connect to an encrypted wireless network is having <i>wpa_supplicant</i> obtain authentication from a WPA authenticator. In order to do this, <i>wpa_supplicant</i> must be configured so that it will be able to submit the correct credentials to the authenticator.
+</p>
+<p>Once the authentication is successful, it will be possible to connect to the network by normally obtaining an IP address by setting it manually with the <a href="../en/Core_utilities.html#ip" title="Core utilities">iproute2</a> suite or using some networking program, like <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a> or <a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a>, to configure an <i>interface</i> to obtain an IP address automatically via DHCP. See also the <a href="../en/Wireless_network_configuration.html#Wireless_management" title="Wireless network configuration">wireless</a> and  <a href="../en/Network_configuration.html#Configure_the_IP_address" title="Network configuration">wired</a> network configuration articles for methods and examples.
+</p>
+<h2><span class="mw-headline" id="Connecting_with_wpa_cli">Connecting with wpa_cli</span></h2>
+<p>This connection method allows scanning for the available networks, making use of <i>wpa_cli</i>, a command line tool which can be used to interactively configure <i>wpa_supplicant</i> at runtime. See <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_cli">wpa_cli(8)</a> for details.
+</p>
+<p>In order to use <i>wpa_cli</i>, a control interface must be specified for <i>wpa_supplicant</i>, and it must be given the rights to update the configuration. Do this by creating a minimal configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/wpa_supplicant/example.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ctrl_interface=/run/wpa_supplicant
+update_config=1</pre>
+<p>Now start <i>wpa_supplicant</i> with:
+</p>
+<pre># wpa_supplicant -B -i <i>interface</i> -c /etc/wpa_supplicant/example.conf
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To discover your wireless network interface name, issue the <code>ip link</code> command.</div>
+<p>At this point run:
+</p>
+<pre># wpa_cli
+</pre>
+<p>This will present an interactive prompt (<code>&gt;</code>), which has tab completion and descriptions of completed commands.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The default location of the control socket is <code>/var/run/wpa_supplicant/</code>, custom path can be set manually with the <code>-p</code> option to match the <i>wpa_supplicant</i> configuration. It is also possible to specify the interface to be configured with the <code>-i</code> option, otherwise the first found wireless interface managed by <i>wpa_supplicant</i> will be used.</div>
+<p>Use the <code>scan</code> and <code>scan_results</code> commands to see the available networks:
+</p>
+<pre>&gt; scan
+OK
+&lt;3&gt;CTRL-EVENT-SCAN-RESULTS
+&gt; scan_results
+bssid / frequency / signal level / flags / ssid
+00:00:00:00:00:00 2462 -49 [WPA2-PSK-CCMP][ESS] MYSSID
+11:11:11:11:11:11 2437 -64 [WPA2-PSK-CCMP][ESS] ANOTHERSSID
+</pre>
+<p>To associate with <code>MYSSID</code>, add the network, set the credentials and enable it:
+</p>
+<pre>&gt; add_network
+0
+&gt; set_network 0 ssid "MYSSID"
+&gt; set_network 0 psk "passphrase"
+&gt; enable_network 0
+&lt;2&gt;CTRL-EVENT-CONNECTED - Connection to 00:00:00:00:00:00 completed (reauth) [id=0 id_str=]
+</pre>
+<p>If the SSID does not have password authentication, you must explicitly configure the network as keyless by replacing the command <code>set_network 0 psk "passphrase"</code> with <code>set_network 0 key_mgmt NONE</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> Each network is indexed numerically, so the first network will have index 0.</li>
+<li> The <a href="https://en.wikipedia.org/wiki/Pre-shared_key" class="extiw" title="wikipedia:Pre-shared key">PSK</a> is computed from the <i>quoted</i> "passphrase" string, as also shown by the <a href="#Connecting_with_wpa_passphrase">wpa_passphrase</a> command. Nonetheless, you can enter the PSK directly by passing it to <code>psk</code> <i>without</i> quotes.</li>
+</ul>
+</div>
+<p>Finally save this network in the configuration file:
+</p>
+<pre>&gt; save_config
+OK
+</pre>
+<p>Once association is complete, all that is left to do is obtain an IP address as indicated in the <a href="#Overview">#Overview</a>, for example:
+</p>
+<pre># dhcpcd <i>interface</i>
+</pre>
+<h2><span class="mw-headline" id="Connecting_with_wpa_passphrase">Connecting with wpa_passphrase</span></h2>
+<p>This connection method allows quickly connecting to a network whose SSID is already known, making use of <i>wpa_passphrase</i>, a command line tool which generates the minimal configuration needed by <i>wpa_supplicant</i>. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ wpa_passphrase MYSSID passphrase</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">network={
+    ssid="MYSSID"
+    #psk="passphrase"
+    psk=59e0d07fa4c7741797a4e394f38a5c321e3bed51d54ad5fcbd3f84bc7415d73d
+}</pre>
+<p>This means that <i>wpa_supplicant</i> can be associated with <i>wpa_passphrase</i> and simply started with:
+</p>
+<pre># wpa_supplicant -B -i <i>interface</i> -c &lt;(wpa_passphrase MYSSID passphrase)
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Because of the process substitution, you <b>cannot</b> run this command with <a href="../en/Sudo.html" title="Sudo">sudo</a> - you will need a root shell. Just pre-pending <i>sudo</i> will lead to the following error: 
+<pre>Successfully initialized wpa_supplicant
+Failed to open config file '/dev/fd/63', error: No such file or directory
+Failed to read or parse configuration '/dev/fd/63'
+</pre>
+See also <a href="../en/Help:Reading.html#Regular_user_or_root" title="Help:Reading">Help:Reading#Regular user or root</a>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Use quotes, if the input contains spaces. For example: <code>"secret passphrase"</code> </li>
+<li> To discover your wireless network interface name, issue the <code>ip link</code> command. </li>
+<li> Some unusually complex passphrases may require input from a file, e.g. <code>wpa_passphrase MYSSID &lt; passphrase.txt</code>, or here strings, e.g. <code>wpa_passphrase MYSSID &lt;&lt;&lt; "passphrase"</code>.</li>
+</ul>
+</div>
+<p>Finally, you should obtain an IP address as indicated in the <a href="#Overview">#Overview</a>, for example:
+</p>
+<pre># dhcpcd <i>interface</i>
+</pre>
+<h2><span class="mw-headline" id="Advanced_usage">Advanced usage</span></h2>
+<p>For networks of varying complexity, possibly employing extensive use of <a href="https://en.wikipedia.org/wiki/Extensible_Authentication_Protocol" class="extiw" title="wikipedia:Extensible Authentication Protocol">EAP</a>, it will be useful to maintain a customised configuration file. For an overview of the configuration with examples, refer to <a rel="nofollow" class="external text" href="http://linux.die.net/man/5/wpa_supplicant.conf">wpa_supplicant.conf(5)</a>; for details on all the supported configuration parameters, refer to the example file <code>/etc/wpa_supplicant/wpa_supplicant.conf</code>. 
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>As is clear after reading <a href="#Connecting_with_wpa_passphrase">#Connecting with wpa_passphrase</a>, a basic configuration file can be generated with:
+</p>
+<pre># wpa_passphrase MYSSID passphrase &gt; /etc/wpa_supplicant/example.conf
+</pre>
+<p>This will only create a <code>network</code> section. A configuration file with some more common options may look like:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/wpa_supplicant/example.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=wheel
+update_config=1
+fast_reauth=1
+ap_scan=1
+
+network={
+    ssid="MYSSID"
+    psk=59e0d07fa4c7741797a4e394f38a5c321e3bed51d54ad5fcbd3f84bc7415d73d
+}</pre>
+<p>The passphrase can alternatively be defined in clear text by enclosing it in quotes, if the resulting security problems are not of concern:
+</p>
+<pre>network={
+    ssid="MYSSID"
+    psk="passphrase"
+}</pre>
+<p>If the network does not have a passphrase, e.g. a public Wi-Fi:
+</p>
+<pre>network={
+    ssid="MYSSID"
+    key_mgmt=NONE
+}</pre>
+<p>Further <code>network</code> blocks may be added manually, or using <i>wpa_cli</i> as illustrated in <a href="#Connecting_with_wpa_cli">#Connecting with wpa_cli</a>. In order to use <i>wpa_cli</i>, a control interface must be set with the <code>ctrl_interface</code> option. Setting <code>ctrl_interface_group=wheel</code> allows users belonging to such group to execute <i>wpa_cli</i>. This setting can be used to enable users without root access (or equivalent via sudo etc) to connect to wireless networks. Also add <code>update_config=1</code> so that changes made with <i>wpa_cli</i> to <code>example.conf</code> can be saved. Note that any user that is a member of the <code>ctrl_interface_group</code> group will be able to make changes to the file if this is turned on.
+</p>
+<p><code>fast_reauth=1</code> and <code>ap_scan=1</code> are the <i>wpa_supplicant</i> options active globally at the time of writing. Whether you need them, or other global options too for that matter, depends on the type of network to connect to. If you need other global options, simply copy them over to the file from <code>/etc/wpa_supplicant/wpa_supplicant.conf</code>. 
+</p>
+<p>Alternatively, <code>wpa_cli set</code> can be used to see options' status or set new ones. Multiple network blocks may be appended to this configuration: the supplicant will handle association to and roaming between all of them. The strongest signal defined with a network block usually is connected to by default, one may define <code>priority=</code> to influence behaviour. 
+</p>
+<p>An advantage to be mentioned in using a customized configuration file at <code>/etc/wpa_supplicant/wpa_supplicant.conf</code> is that it is used by default by <a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a>. If you do so, you might want to make a backup of the original and delete the extensive network block examples in it. Otherwise, do not be surprised if your device suddenly connects to networks defined in them. In any case, changes to new versions of the configuration file should of course be <a href="../en/Pacman/Pacnew_and_Pacsave.html" title="Pacnew and Pacsave files" class="mw-redirect">merged</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To configure a network block to a hidden wireless <i>SSID</i>, which by definition will not turn up in a regular scan, the option <code>scan_ssid=1</code> has to be defined in the network block.</div>
+<h3><span class="mw-headline" id="Connection">Connection</span></h3>
+<h4><span class="mw-headline" id="Manual">Manual</span></h4>
+<p>First start <i>wpa_supplicant</i> command, whose most commonly used arguments are:
+</p>
+<ul>
+<li> <code>-B</code> - Fork into background.</li>
+<li> <code>-c <i>filename</i></code> - Path to configuration file.</li>
+<li> <code>-i <i>interface</i></code> - Interface to listen on.</li>
+<li> <code>-D <i>driver</i></code> - Optionally specify the driver to be used. For a list of supported drivers see the output of <code>wpa_supplicant -h</code>.
+<ul>
+<li> <code>nl80211</code> is the current standard, but not all wireless chip's modules support it.</li>
+<li> <code>wext</code> is currently deprecated, but still widely supported.</li>
+</ul>
+</li>
+</ul>
+<p>See <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_supplicant">wpa_supplicant(8)</a> for the full argument list. For example:
+</p>
+<pre># wpa_supplicant -B -i <i>interface</i> -c /etc/wpa_supplicant/example.conf
+</pre>
+<p>followed by a method to obtain an ip address manually as indicated in the <a href="#Overview">#Overview</a>, for example:
+</p>
+<pre># dhcpcd <i>interface</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><i>dhcpcd</i> has a hook that can lauch <i>wpa_supplicant</i> implicitly, see <a href="../en/Dhcpcd.html#10-wpa_supplicant" title="Dhcpcd">dhcpcd#10-wpa_supplicant</a>.</div>
+<h4><span class="mw-headline" id="At_boot_.28systemd.29">At boot (systemd)</span></h4>
+<p>The <i>wpa_supplicant</i> package provides multiple <a href="../en/Systemd.html" title="Systemd">systemd</a> service files:
+</p>
+<ul>
+<li> <code>wpa_supplicant.service</code> - uses <a href="../en/D-Bus.html" title="D-Bus">D-Bus</a>, recommended for <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a> users.</li>
+<li> <code>wpa_supplicant@.service</code> - accepts the interface name as an argument and starts the <i>wpa_supplicant</i> daemon for this interface. It reads the configuration file in <code>/etc/wpa_supplicant/wpa_supplicant-<i>interface</i>.conf</code>.</li>
+<li> <code>wpa_supplicant-nl80211@.service</code> - also interface specific, but explicitly forces the <code>nl80211</code> driver (see below). The configuration file path is <code>/etc/wpa_supplicant/wpa_supplicant-nl80211-<i>interface</i>.conf</code>.</li>
+<li> <code>wpa_supplicant-wired@.service</code> - also interface specific, uses the <code>wired</code> driver. The configuration file path is <code>/etc/wpa_supplicant/wpa_supplicant-wired-<i>interface</i>.conf</code>.</li>
+</ul>
+<p>To enable wireless at boot, enable an instance of one of the above services on a particular wireless interface. For example, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>wpa_supplicant@<i>interface</i></code> systemd unit.
+</p>
+<p>Now choose and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> an instance of a service to obtain an ip address for the particular <i>interface</i> as indicated in the <a href="#Overview">#Overview</a>. For example, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>dhcpcd@<i>interface</i></code> systemd unit.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><i>dhcpcd</i> has a hook that can lauch <i>wpa_supplicant</i> implicitly, see <a href="../en/Dhcpcd.html#10-wpa_supplicant" title="Dhcpcd">dhcpcd#10-wpa_supplicant</a>.</div>
+<h3><span class="mw-headline" id="wpa_cli_action_script">wpa_cli action script</span></h3>
+<p><i>wpa_cli</i> can run in daemon mode and execute a specified script based on events from <i>wpa_supplicant</i>. Two events are supported: <code>CONNECTED</code> and <code>DISCONNECTED</code>. Some <a href="../en/Environment_variables.html" title="Environment variables">environment variables</a> are available to the script, see <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_cli">wpa_cli(8)</a> for details.
+</p>
+<p>The following example will use <a href="../en/Desktop_notifications.html" title="Desktop notifications">desktop notifications</a> to notify the user about the events:
+</p>
+<pre>
+#!/bin/bash
+
+case "$2" in
+    CONNECTED)
+        notify-send "WPA supplicant: connection established";
+        ;;
+    DISCONNECTED)
+        notify-send "WPA supplicant: connection lost";
+        ;;
+esac
+</pre>
+<p>Remember to make the script executable, then use the <code>-a</code> flag to pass the script path to <i>wpa_cli</i>:
+</p>
+<pre>$ wpa_cli -a <i>/path/to/script</i>
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Make sure that you are <b>not</b> using the default configuration file at <code>/etc/wpa_supplicant/wpa_supplicant.conf</code>, which is filled with uncommented examples that will lead to lots of random errors in practice. This is a known packaging bug of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span> package: <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/40661">FS#40661</a>.</div>
+<h3><span class="mw-headline" id="nl80211_driver_not_supported_on_some_hardware">nl80211 driver not supported on some hardware</span></h3>
+<p>On some (especially old) hardware, <i>wpa_supplicant</i> may fail with the following error:
+</p>
+<pre>Successfully initialized wpa_supplicant
+nl80211: Driver does not support authentication/association or connect commands
+wlan0: Failed to initialize driver interface
+</pre>
+<p>This indicates that the standard <code>nl80211</code> driver does not support the given hardware. The deprecated <code>wext</code> driver might still support the device:
+</p>
+<pre># wpa_supplicant -B -i wlan0 <b>-D wext</b> -c /etc/wpa_supplicant/example.conf
+</pre>
+<p>If the command works to connect, and the user wishes to use <a href="../en/Systemd.html" title="Systemd">systemd</a> to manage the wireless connection, it is necessary to <a href="../en/Systemd.html#Drop-in_files" title="Systemd">edit</a> the <code>wpa_supplicant@.service</code> unit provided by the package and modify the <code>ExecStart</code> line accordingly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/wpa_supplicant@.service.d/wext.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/bin/wpa_supplicant -c/etc/wpa_supplicant/wpa_supplicant-%I.conf -i%I <b>-Dnl80211,wext</b></pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Multiple comma separated driver wrappers in option <code>-Dnl80211,wext</code> makes <i>wpa_supplicant</i> use the first driver wrapper that is able to initialize the interface (see <span class="plainlinks archwiki-template-man" title="$ man 8 wpa_supplicant"><a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_supplicant">wpa_supplicant(8)</a></span>). This is useful when using mutiple or removable (e.g. USB) wireless devices which use different drivers.</div>
+<h3><span class="mw-headline" id="Problem_with_mounted_network_shares_.28cifs.29_and_shutdown">Problem with mounted network shares (cifs) and shutdown</span></h3>
+<p>When you use wireless to connect to network shares you might have the problem that the shutdown takes a very long time. That is because systemd runs against a 3 minute timeout. The reason is that WPA supplicant is shut down too early, i.e. before systemd tries to unmount the share(s). A <a rel="nofollow" class="external text" href="https://github.com/systemd/systemd/issues/1435">bug report</a> suggests a work-around by <a href="../en/Systemd.html#Drop-in_files" title="Systemd">editing</a> the <code>wpa_supplicant@.service</code> as follows:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/wpa_supplicant.service.d/override.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+After=dbus.service</pre>
+<h3><span class="mw-headline" id="Password-related_problems">Password-related problems</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span> may not work properly if directly passed via stdin particularly long or complex passphrases which include special characters. This may lead to errors such as <code>failed 4-way WPA handshake, PSK may be wrong</code> when launching <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span>.
+</p>
+<p>In order to solve this try using here strings <code>wpa_passphrase &lt;MYSSID&gt; &lt;&lt;&lt; "&lt;passphrase&gt;"</code> or passing a file to the <code>-c</code>  flag instead:
+</p>
+<pre>$ wpa_supplicant -i &lt;interface&gt; -c /etc/wpa_supplicant/wpa_supplicant.conf
+</pre>
+<p>In some instances it was found that storing the passphrase cleartext in the <code>psk</code> key of the <code>wpa_supplicant.conf</code> <code>network</code> block gave positive results (see <a rel="nofollow" class="external autonumber" href="http://www.linuxquestions.org/questions/linux-wireless-networking-41/wpa-4-way-handshake-failed-843394/">[1]</a>). However, this approach is rather insecure. Using <code>wpa_cli</code> to create this file instead of manually writing it gives the best results most of the time and therefore is the recommended way to proceed.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://hostap.epitest.fi/wpa_supplicant/">WPA Supplicant home</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://gist.github.com/buhman/7162560">wpa_cli usage examples</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_supplicant">wpa_supplicant(8)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linux.die.net/man/5/wpa_supplicant.conf">wpa_supplicant.conf(5)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/wpa_cli">wpa_cli(8)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://wireless.kernel.org/en/users/Documentation/wpa_supplicant">Kernel.org wpa_supplicant documentation</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Wireless_networking.html" title="Category:Wireless networking">Wireless networking</a></li>
+<li><a href="../en/Category:Network_configuration.html" title="Category:Network configuration">Network configuration</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

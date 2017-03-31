@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Linux Containers - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Linux_Containers skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Linux Containers</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/LXD.html" title="LXD">LXD</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Airvpn.html" title="AirVPN" class="mw-redirect">AirVPN</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Cgroups.html" title="Cgroups">Cgroups</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Docker.html" title="Docker">Docker</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenVPN.html" title="OpenVPN">OpenVPN</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenVPN_in_Linux_containers.html" title="OpenVPN in Linux containers">OpenVPN in Linux containers</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PeerGuardian_Linux.html" title="PeerGuardian Linux">PeerGuardian Linux</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a></li>
+</ul>
+</div>
+<p>Linux Containers (LXC) is an operating-system-level virtualization method for running multiple isolated Linux systems (containers) on a single control host (LXC host). It does not provide a virtual machine, but rather provides a virtual environment that has its own CPU, memory, block I/O, network, etc. space and the resource control mechanism. This is provided by  <a href="https://en.wikipedia.org/wiki/Linux_namespaces" class="extiw" title="wikipedia:Linux namespaces">namespaces</a> and <a href="../en/Cgroups.html" title="Cgroups">cgroups</a> features in Linux kernel on LXC host. It is similar to a chroot, but offers much more isolation.
+</p>
+<p>Alternatives for using containers are <a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a> and <a href="../en/Docker.html" title="Docker">docker</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Setup"><span class="tocnumber">1</span> <span class="toctext">Setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Required_software"><span class="tocnumber">1.1</span> <span class="toctext">Required software</span></a></li>
+<li class="toclevel-2 tocsection-3">
+<a href="#Host_network_configuration"><span class="tocnumber">1.2</span> <span class="toctext">Host network configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Example_for_a_wired_network"><span class="tocnumber">1.2.1</span> <span class="toctext">Example for a wired network</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Example_for_a_wireless_network"><span class="tocnumber">1.2.2</span> <span class="toctext">Example for a wireless network</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#Container_creation"><span class="tocnumber">1.3</span> <span class="toctext">Container creation</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Container_configuration"><span class="tocnumber">1.4</span> <span class="toctext">Container configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Basic_config_with_networking"><span class="tocnumber">1.4.1</span> <span class="toctext">Basic config with networking</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Xorg_program_considerations_.28optional.29"><span class="tocnumber">1.4.2</span> <span class="toctext">Xorg program considerations (optional)</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#OpenVPN_considerations"><span class="tocnumber">1.4.3</span> <span class="toctext">OpenVPN considerations</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Managing_Containers"><span class="tocnumber">2</span> <span class="toctext">Managing Containers</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Running_Xorg_programs"><span class="tocnumber">3</span> <span class="toctext">Running Xorg programs</span></a></li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#root_login_fails"><span class="tocnumber">4.1</span> <span class="toctext">root login fails</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#no_network-connection_with_veth_in_container_config"><span class="tocnumber">4.2</span> <span class="toctext">no network-connection with veth in container config</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setup">Setup</span></h2>
+<h3><span class="mw-headline" id="Required_software">Required software</span></h3>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lxc">lxc</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span>  packages.
+</p>
+<p>Verify that the running kernel is properly configured to run a container:
+</p>
+<pre>$ lxc-checkconfig
+</pre>
+<p>Due to security concerns, the default Arch kernel does <b>not</b> ship with the ability to run containers as an unprivileged user; therefore, it is normal to see a <b>missing</b> status for "User namespaces" when running the check.  See <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/36969">FS#36969</a> for this feature request.
+</p>
+<h3><span class="mw-headline" id="Host_network_configuration">Host network configuration</span></h3>
+<p>LXCs support different virtual network types and devices (see <a rel="nofollow" class="external text" href="https://linuxcontainers.org/lxc/manpages//man5/lxc.container.conf.5.html">lxc.container.conf(5)</a>). A bridge device on the host is required for most types of virtual networking.  The examples of creating a bridge provided below are not meant to be limiting, but illustrative. Users may use other programs to achieve the same results.  A wired and wireless example is provided below, but other setups are possible. Users are referred to the <a href="../en/Network_bridge.html" title="Network bridge">Network bridge</a> article for additional options.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Network_bridge.html" title="Network bridge">Network bridge</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Duplication; this is not a guide on Linux networking. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Linux_Containers">Talk:Linux Containers#</a>)</div>
+</div>
+<h4><span class="mw-headline" id="Example_for_a_wired_network">Example for a wired network</span></h4>
+<p>This example uses <a href="../en/Netctl.html" title="Netctl">netctl</a>: a bridge template can be found in <code>/etc/netctl/examples</code> which needs to be edited to match the host network hardware specs and IP ranges of the host network.  Below are two example bridge configs, one using a dhcp setup and the other using a static IP setup.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/lxcbridge</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Description="LXC bridge"
+Interface=br0
+Connection=bridge
+BindsToInterfaces=('eno1')
+IP=dhcp
+SkipForwardingDelay=yes</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/lxcbridge</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Description="LXC bridge"
+Interface=br0
+Connection=bridge
+BindsToInterfaces=('eno1')
+IP=static
+Address=192.168.0.2/24
+Gateway='192.168.0.1'
+DNS=('192.168.0.1')</pre>
+<p>Before attempting to start the bridge, <a href="../en/Systemd.html#Using_units" title="Disable" class="mw-redirect">disable</a> the running network interface on the host as the bridge will replace it; this depends on how the host network is configured, see <a href="../en/Network_configuration.html" title="Network configuration">Network configuration</a>.
+</p>
+<p>For users already using netctl to manage an adapter, simply switch-to it:
+</p>
+<pre># netctl switch-to lxcbridge
+# netctl enable lxcbridge
+</pre>
+<p>Verify network connectivity on the host before continuing. This can be accomplished with a simple ping:
+</p>
+<pre>$ ping -c 1 www.google.com
+</pre>
+<h4><span class="mw-headline" id="Example_for_a_wireless_network">Example for a wireless network</span></h4>
+<p>Wireless networks cannot be bridged directly; a different method must be used in this case.  First, a bridge must be created similar to the previous examples, but it should not have any interface defined to it (other than the virtual interface of the container itself, which is done automatically).  Assign a static IP address to the bridge, but do not assign a gateway.
+</p>
+<p>The host must be configured to perform NAT using <a href="../en/Iptables.html" title="Iptables">iptables</a>:
+</p>
+<pre># iptables -t nat -A POSTROUTING -o <i>wlp3s0</i> -j MASQUERADE
+</pre>
+<p>where <code><i>wlp3s0</i></code> is the name of the wireless interface.  <a href="../en/Internet_sharing.html#Enable_packet_forwarding" title="Internet sharing">Enable packet forwarding</a>, which is disabled by default.
+</p>
+<p>The remaining steps are similar, except for one thing: for the container, the gateway must be configured to be the IP address of the host (in this example, it was 192.168.0.2).  This is specified in <code>/var/lib/lxc/<i>container_name</i>/config</code> (see the following sections).
+</p>
+<h3><span class="mw-headline" id="Container_creation">Container creation</span></h3>
+<p>Select a template from <code>/usr/share/lxc/templates</code> that matches the target distro to containerize.  Users wishing to containerize non-Arch distros will need additional packages on the host depending on the target distro:
+</p>
+<ul>
+<li> Debian-based: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=debootstrap">debootstrap</a></span>
+</li>
+<li> Fedora-based: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/yum/">yum</a></span><sup><small>AUR</small></sup>
+</li>
+</ul>
+<p>Run <code>lxc-create</code> to create the container, which installs the root filesystem of the LXC to <code>/var/lib/lxc/CONTAINER_NAME/rootfs</code> by default.  Example creating an Arch Linux LXC named "playtime":
+</p>
+<pre># lxc-create -n playtime -t /usr/share/lxc/templates/lxc-archlinux
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Users may optionally install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=haveged">haveged</a></span> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>haveged.service</code> to avoid a perceived hang during the setup process while waiting for system entropy to be seeded.  Without it, the generation of private/GPG keys can add a lengthy wait to the process.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Users of <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> can append <code>-B btrfs</code> to create a Btrfs subvolume for storing containerized rootfs. This comes in handy if cloning containers with the help of <code>lxc-clone</code> command. <a href="../en/ZFS.html" title="ZFS">ZFS</a> users may use <code>-B zfs</code>, correspondingly.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>As of July 2015, creating an empty container using <code>-t none</code> does not work, see the <a rel="nofollow" class="external text" href="https://bugs.launchpad.net/bugs/1466458">bug report</a>. As a workaround one can use <code>-t /bin/true</code>.</div>
+<h3><span class="mw-headline" id="Container_configuration">Container configuration</span></h3>
+<h4><span class="mw-headline" id="Basic_config_with_networking">Basic config with networking</span></h4>
+<p>System resources to be virtualized/isolated when a process is using the container are defined in <code>/var/lib/lxc/CONTAINER_NAME/config</code>. By default, the creation process will make a minimum setup without networking support.  Below is an example config with networking:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/lib/lxc/playtime/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Template used to create this container: /usr/share/lxc/templates/lxc-archlinux
+# Parameters passed to the template:
+# For additional config options, please look at lxc.container.conf(5)
+
+## default values
+lxc.rootfs = /var/lib/lxc/playtime/rootfs
+lxc.utsname = playtime
+lxc.arch = x86_64
+lxc.include = /usr/share/lxc/config/archlinux.common.conf
+
+## network
+lxc.network.type = veth
+lxc.network.link = br0
+lxc.network.flags = up
+lxc.network.ipv4 = 192.168.0.3/24
+lxc.network.ipv4.gateway = 192.168.0.1
+lxc.network.name = eth0
+
+## mounts
+## specify shared filesystem paths in the format below
+## make sure that the mount point exists on the lxc
+#lxc.mount.entry = /mnt/data/share mnt/data none bind 0 0
+#
+# if running the same Arch linux on the same architecture it may be
+# adventitious to share the package cache directory
+#lxc.mount.entry = /var/cache/pacman/pkg var/cache/pacman/pkg none bind 0 0
+</pre>
+<h4><span class="mw-headline" id="Xorg_program_considerations_.28optional.29">Xorg program considerations (optional)</span></h4>
+<p>In order to run programs on the host's display, some bind mounts need to be defined so that the containerized programs can access the host's resources.  Add the following section to <code>/var/lib/lxc/playtime/config</code>:
+</p>
+<pre>## for xorg
+## fix overmounting see: <a rel="nofollow" class="external free" href="https://github.com/lxc/lxc/issues/434">https://github.com/lxc/lxc/issues/434</a>
+lxc.mount.entry = tmpfs tmp tmpfs defaults
+lxc.mount.entry = /dev/dri dev/dri none bind,optional,create=dir
+lxc.mount.entry = /dev/snd dev/snd none bind,optional,create=dir
+lxc.mount.entry = /tmp/.X11-unix tmp/.X11-unix none bind,optional,create=dir
+lxc.mount.entry = /dev/video0 dev/video0 none bind,optional,create=file
+</pre>
+<p>If you still get a permission denied error in your LXC guest, then you may need to call <code>xhost +</code> in your host to allow the guest to connect to the host's display server. Take note of the security concerns of opening up your display server by doing this.
+</p>
+<h4><span class="mw-headline" id="OpenVPN_considerations">OpenVPN considerations</span></h4>
+<p>Users wishing to run <a href="../en/OpenVPN.html" title="OpenVPN">OpenVPN</a> within the container should read the <a href="../en/OpenVPN_in_Linux_containers.html" title="OpenVPN in Linux containers">OpenVPN in Linux containers</a> article.
+</p>
+<h2><span class="mw-headline" id="Managing_Containers">Managing Containers</span></h2>
+<p>To list all installed LXC containers:
+</p>
+<pre># lxc-ls -f
+</pre>
+<p>Systemd can be used to <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and to <a href="../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">stop</a> LXCs via <code>lxc@CONTAINER_NAME.service</code>.  <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> <code>lxc@CONTAINER_NAME.service</code> to have it start when the host system boots.
+</p>
+<p>Users can also start/stop LXCs without systemd.
+Start a container:
+</p>
+<pre># lxc-start -n CONTAINER_NAME
+</pre>
+<p>Stop a container:
+</p>
+<pre># lxc-stop -n CONTAINER_NAME
+</pre>
+<p>To login into a container:
+</p>
+<pre># lxc-console -n CONTAINER_NAME
+</pre>
+<p>Once logged, treat the container like any other linux system, set the root password, create users, install packages, etc.
+</p>
+<p>To attach to a container:
+</p>
+<pre># lxc-attach -n CONTAINER_NAME
+</pre>
+<p>It works nearly the same as lxc-console, but you are automatically accessing root prompt inside the container, bypassing login.
+</p>
+<h2><span class="mw-headline" id="Running_Xorg_programs">Running Xorg programs</span></h2>
+<p>Either attach to or <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> into the target container and prefix the call to the program with the DISPLAY ID of the host's X session.  For most simple setups, the display is always 0.
+</p>
+<p>An example of running Firefox from the container in the host's display:
+</p>
+<pre>$ DISPLAY=:0 firefox
+</pre>
+<p>Alternatively, to avoid directly attaching to or connecting to the container, the following can be used on the host to automate the process:
+</p>
+<pre># lxc-attach -n playtime --clear-env -- sudo -u YOURUSER env DISPLAY=:0 firefox
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="root_login_fails">root login fails</span></h3>
+<p>If you get the following error when you try to login using lxc-console:
+</p>
+<pre>login: root
+Login incorrect
+</pre>
+<p>And the container's <code>journalctl</code> shows:
+</p>
+<pre>pam_securetty(login:auth): access denied: tty 'pts/0' is not secure !
+</pre>
+<p>Add <code>pts/0</code> to the list of terminal names in <code>/etc/securetty</code> on the <b>container</b> filesystem, see <a rel="nofollow" class="external autonumber" href="http://unix.stackexchange.com/questions/41840/effect-of-entries-in-etc-securetty/41939#41939">[1]</a>. You can also opt to delete <code>/etc/securetty</code> on the <b>container</b> to allow always root to login, see <a rel="nofollow" class="external autonumber" href="https://github.com/systemd/systemd/issues/852">[2]</a>.
+</p>
+<p>Alternatively, create a new user in lxc-attach and use it for logging in to the system, then switch to root.
+</p>
+<pre># lxc-attach -n playtime
+[root@playtime]# useradd -m -Gwheel newuser
+[root@playtime]# passwd newuser
+[root@playtime]# passwd root
+[root@playtime]# exit
+# lxc-console -n playtime
+[newuser@playtime]$ su
+</pre>
+<h3><span class="mw-headline" id="no_network-connection_with_veth_in_container_config">no network-connection with veth in container config</span></h3>
+<p>If you can't access your LAN or WAN with a networking interface configured as <b>veth</b> and setup through <code>/etc/lxc/<i>containername</i>/config</code>.
+If the virtual interface gets the ip assigned and should be connected to the network correctly.
+</p>
+<pre>ip addr show veth0 
+inet 192.168.1.111/24
+</pre>
+<p>You may disable all the relevant static ip formulas and try setting the ip through the booted container-os like you would normaly do.
+</p>
+<p>Example <code><i>container</i>/config</code>
+</p>
+<pre>...
+lxc.network.type = veth
+lxc.network.name = veth0
+lxc.network.flags = up
+lxc.network.link = <code>bridge</code>
+...
+</pre>
+<p>And then assign your IP through your preferred method <b>inside</b> the container, see also <a href="../en/Network_configuration.html#Configure_the_IP_address" title="Network configuration">Network configuration#Configure the IP address</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://www.stgraber.org/2013/12/20/lxc-1-0-blog-post-series/">LXC 1.0 Blog Post Series</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-lxc-containers/">LXC@developerWorks</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://docs.docker.io/en/latest/installation/archlinux/">Docker Installation on ArchLinux</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

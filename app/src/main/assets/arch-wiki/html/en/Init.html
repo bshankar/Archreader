@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Init - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Init skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Init</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Init/Rosetta.html" title="Init Rosetta" class="mw-redirect">Init Rosetta</a></li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Arch Linux only has official support for <a href="../en/Systemd.html" title="Systemd">systemd</a>. <a rel="nofollow" class="external autonumber" href="https://lists.archlinux.org/pipermail/arch-general/2015-July/039460.html">[1]</a> When using a different init system, please mention so in support requests.</div>
+<p><a href="https://en.wikipedia.org/wiki/Init" class="extiw" title="wikipedia:Init">Init</a> is the first process started during system boot. It is a a daemon process that continues running until the system is shut down. Init is the direct or indirect ancestor of all other processes, and automatically adopts all orphaned processes. It is started by the kernel using a hard-coded filename; if the kernel is unable to start it,  panic will result. Init is typically assigned process identifier 1.
+</p>
+<p>The init <i>scripts</i> (or <i>rc</i>) are launched by the init process to guarantee basic functionality on system start and shutdown. This includes (un)mounting of <a href="../en/File_systems.html" title="File system" class="mw-redirect">file systems</a> and launching of <a href="../en/Daemons.html" title="Daemons">daemons</a>. A <i>service manager</i> takes this one step further by providing active control over launched processes, or <a href="https://en.wikipedia.org/wiki/Process_Supervision" class="extiw" title="wikipedia:Process Supervision">process supervision</a>. An example is to monitor for crashes and restart processes accordingly.
+</p>
+<p>These components combine to the init <i>system</i>. Some inits include the service manager in the init process, or have init scripts in close relation to them. These inits are below referred to as <i>integrated</i>, though entries in different categories may explicitly depend on each other.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Inits_.28integrated.29"><span class="tocnumber">1</span> <span class="toctext">Inits (integrated)</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Inits"><span class="tocnumber">2</span> <span class="toctext">Inits</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Init_scripts"><span class="tocnumber">3</span> <span class="toctext">Init scripts</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Service_managers"><span class="tocnumber">4</span> <span class="toctext">Service managers</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Configuration"><span class="tocnumber">5</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Migrate_running_daemons"><span class="tocnumber">5.1</span> <span class="toctext">Migrate running daemons</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#logind"><span class="tocnumber">5.2</span> <span class="toctext">logind</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Device_permissions"><span class="tocnumber">5.2.1</span> <span class="toctext">Device permissions</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Rootless_X_.281.16.29"><span class="tocnumber">5.2.2</span> <span class="toctext">Rootless X (1.16)</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Power_management"><span class="tocnumber">5.2.3</span> <span class="toctext">Power management</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Scheduled_tasks"><span class="tocnumber">5.3</span> <span class="toctext">Scheduled tasks</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Dbus"><span class="tocnumber">5.4</span> <span class="toctext">Dbus</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Tips_and_tricks"><span class="tocnumber">6</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#systemd-nspawn"><span class="tocnumber">6.1</span> <span class="toctext">systemd-nspawn</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Inits_.28integrated.29">Inits (integrated)</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> A more updated list of init components is available at: <a rel="nofollow" class="external autonumber" href="http://without-systemd.org/wiki/index.php/Init">[2]</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Init">Talk:Init#</a>)</div>
+</div>
+<ul><li> <b><a href="../en/Systemd.html" title="Systemd">systemd</a></b> — Dependency-based init system with aggressive parallelization, process supervision using cgroups, and the ability to depend on a given mount point or dbus service.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://freedesktop.org/wiki/Software/systemd/">http://freedesktop.org/wiki/Software/systemd/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Upstart" class="extiw" title="wikipedia:Upstart">Upstart</a></b> — Event-based init system which handles starting, stopping and supervising of tasks and services.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://upstart.ubuntu.com/">http://upstart.ubuntu.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/upstart/">upstart</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/upstart">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b>initng</b> — Dependency-based init system with parallelization and asynchronous start.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://initng.sourceforge.net/trac">http://initng.sourceforge.net/trac</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/initng-git/">initng-git</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/initng-git">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b>Epoch</b> — Single-threaded init system designed for minimal footprint, compatibility and unified configuration.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://universe2.us/epoch.html">http://universe2.us/epoch.html</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/epoch-init-system/">epoch-init-system</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/epoch-init-system">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b>finit</b> — Fast and extensible init, originally based on EeePC fastinit.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/troglobit/finit">https://github.com/troglobit/finit</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/finit-arc/">finit-arc</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/finit-arc">aur-mirror</a>]</sup> / <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/finit-arc-git/">finit-arc-git</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/finit-arc-git">aur-mirror</a>]</sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Inits">Inits</span></h2>
+<ul><li> <b><a href="../en/BusyBox.html" title="BusyBox">BusyBox</a></b> — Utilities for rescue and embedded systems.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://busybox.net/">http://busybox.net/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=busybox">busybox</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/SysVinit.html" title="SysVinit">SysVinit</a></b> — Traditional System V init.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://savannah.nongnu.org/projects/sysvinit">http://savannah.nongnu.org/projects/sysvinit</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sysvinit/">sysvinit</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>ninit</b> — Fork from <a rel="nofollow" class="external text" href="http://www.fefe.de/minit/">minit</a>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://riemann.fmi.uni-sofia.bg/ninit/">http://riemann.fmi.uni-sofia.bg/ninit/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ninit/">ninit</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>sinit</b> — Simple init initially based on Rich Felker’s minimal init.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://core.suckless.org/sinit">http://core.suckless.org/sinit</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sinit/">sinit</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Init_scripts">Init scripts</span></h2>
+<ul><li> <b>initscripts-fork</b> — Maintained fork of SysVinit scripts in Arch Linux.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://bitbucket.org/TZ86/initscripts-fork/overview">https://bitbucket.org/TZ86/initscripts-fork/overview</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/initscripts-fork/">initscripts-fork</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Minirc.html" title="Minirc">minirc</a></b> — Minimal init script designed for BusyBox.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/hut/minirc/">https://github.com/hut/minirc/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/minirc-git/">minirc-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>OpenRC Arch services</b> — OpenRC service scripts compatible to Arch Linux.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/andrewgregory/openrc-arch-services">https://github.com/andrewgregory/openrc-arch-services</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/openrc-arch-services-git/">openrc-arch-services-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>spark-rc</b> — A simple rc script to kickstart your system.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://gitlab.com/fbt/spark-rc">https://gitlab.com/fbt/spark-rc</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/spark-rc/">spark-rc</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>watchman-sm-services</b> — Examples of services for watchman.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://gitlab.com/fbt/watchman-services">https://gitlab.com/fbt/watchman-services</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/watchman-sm-services-git/">watchman-sm-services-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Service_managers">Service managers</span></h2>
+<ul><li> <b>daemontools</b> — Collection of tools for managing UNIX services.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://cr.yp.to/daemontools.html">http://cr.yp.to/daemontools.html</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/daemontools/">daemontools</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Monit.html" title="Monit">Monit</a></b> — Monit is a process supervision tool for Unix and Linux. With monit, system status can be viewed directly from the command line, or via the native HTTP(S) web server.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://mmonit.com/monit/">http://mmonit.com/monit/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=monit">monit</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/OpenRC.html" title="OpenRC">OpenRC</a></b> — Dependency-based rc system that works with the system-provided init, normally SysVinit.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.gentoo.org/proj/en/base/openrc/">http://www.gentoo.org/proj/en/base/openrc/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/openrc/">openrc</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>perp</b> — Persistent process (service) supervisor and managment framework for UNIX.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://b0llix.net/perp/">http://b0llix.net/perp/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/perp/">perp</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Runit.html" title="Runit">runit</a></b> — UNIX init scheme with service supervision, a replacement for SysVinit, and other init schemes.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://smarden.org/runit/">http://smarden.org/runit/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/runit/">runit</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>s6</b> — Small suite of programs for UNIX, designed to allow service supervision in the line of daemontools and runit.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://skarnet.org/software/s6/">http://skarnet.org/software/s6/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/s6/">s6</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>watchman</b> — A not-so-simple service manager for Linux.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://gitlab.com/fbt/watchman">https://gitlab.com/fbt/watchman</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/watchman-sm/">watchman-sm</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Migrate_running_daemons">Migrate running daemons</span></h3>
+<p>To run daemons under the new init, save a list of running daemons:
+</p>
+<pre>$ systemctl list-units --state=running "*.service" &gt; daemons.list
+</pre>
+<p>then configure the <a href="#Init_scripts">#Init scripts</a> accordingly. See also <a rel="nofollow" class="external autonumber" href="http://unix.stackexchange.com/questions/175380/how-to-list-all-running-daemons">[3]</a>.
+</p>
+<p>Temporary files (<i>systemd-tmpfiles</i>), <a href="../en/Kernel_modules.html" title="Kernel modules">kernel modules</a> and <a href="../en/Sysctl.html" title="Sysctl">sysctl</a> may also need configuration.
+</p>
+<h3><span class="mw-headline" id="logind">logind</span></h3>
+<p><a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/logind/">logind</a> requires <i>systemd</i> to be the init process. <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/wiki/Software/systemd/InterfacePortabilityAndStabilityChart/">[4]</a> As such, <a href="../en/General_troubleshooting.html#Session_permissions" title="General troubleshooting">local sessions</a> and other functionality is not available.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>A standalone version of <i>logind</i> is available as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/elogind-git/">elogind-git</a></span><sup><small>AUR</small></sup> <a rel="nofollow" class="external autonumber" href="https://lists.gnu.org/archive/html/guix-devel/2015-04/msg00352.html">[5]</a>
+</div>
+<h4><span class="mw-headline" id="Device_permissions">Device permissions</span></h4>
+<p>Add users to the correct <a href="../en/Users_and_groups.html#Group_list" title="Users and groups">groups</a> for device access, and reboot. Current group membership should first be checked with <code>id <i>user</i></code>. For example:
+</p>
+<pre># usermod -a -G video,audio,power,disk,storage,optical,lp,scanner <i>user</i>
+</pre>
+<p>See <a href="../en/Polkit.html#Bypass_password_prompt" title="Policykit" class="mw-redirect">Policykit#Bypass password prompt</a> to create group rules for use with Policykit.
+</p>
+<h4><span class="mw-headline" id="Rootless_X_.281.16.29">Rootless X (1.16)</span></h4>
+<p>As <code>Xorg.wrap</code> does not check if logind is active <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=86975#c5">[6]</a>, <a href="../en/Xorg.html#Rootless_Xorg_.28v1.16.29" title="Xorg">root rights for Xorg</a> need be enabled manually:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/Xwrapper.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">needs_root_rights = yes</pre>
+<h4><span class="mw-headline" id="Power_management">Power management</span></h4>
+<p>See <a href="../en/Pm-utils.html" title="Pm-utils">pm-utils</a> and <a href="../en/Acpid.html" title="Acpid">acpid</a> to replace <a href="../en/Power_management.html#Power_management_with_systemd" title="Power management">Power management with systemd</a>.
+</p>
+<h3><span class="mw-headline" id="Scheduled_tasks">Scheduled tasks</span></h3>
+<p>Arch uses <a href="../en/Systemd.html#Timers" title="Systemd">timer</a> files instead of <a href="../en/Cron.html" title="Cron">cron</a> by default. See <a rel="nofollow" class="external text" href="https://github.com/notfoss/archlinux-cronjobs">archlinux-cronjobs</a> for basic cron jobs.
+</p>
+<h3><span class="mw-headline" id="Dbus">Dbus</span></h3>
+<p>User instances of <i>dbus-daemon</i> are launched by <a href="../en/Systemd/User.html#D-Bus" title="Systemd/User">systemd/User</a>. <a rel="nofollow" class="external autonumber" href="https://www.archlinux.org/news/d-bus-now-launches-user-buses/">[7]</a> When requring IPC between desktop applications, restore <code>30-dbus.sh</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xinit/xinitrc.d/30-dbus.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+# launches a session dbus instance
+if [ -z "${DBUS_SESSION_BUS_ADDRESS-}" ] &amp;&amp; type dbus-launch &gt;/dev/null; then
+  eval $(dbus-launch --sh-syntax --exit-with-session)
+fi</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="systemd-nspawn">systemd-nspawn</span></h3>
+<p><a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a> is a tool for systemd systems. Since Linux 2.6.19 it is however possible to run systemd on a non-systemd system by using PID namespace. For it, the kernel needs to be configured with <code>CONFIG_PID_NS</code> and <code>CONFIG_NAMESPACES</code>). 
+</p>
+<p>The PID namespace creates a new hierarchy of processes starting with PID 1. In addition to this, systemd requires a chrooted root filesystem to be mounted. Hence, you have to at least make a bind mount, because otherwise some services will fail with 
+</p>
+<pre>"Failed at step NAMESPACE spawning" due to "Invalid operation" 
+</pre>
+<p>as systemd tries to remount the root with <code>private</code> option. 
+</p>
+<p>To setup a chroot with a new PID namespace you can use jchroot.<a rel="nofollow" class="external autonumber" href="http://vincent.bernat.im/en/blog/2011-jchroot-isolation.html">[8]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/vincentbernat/jchroot">[9]</a>. 
+Make sure not to mount <code>/proc</code> inside the new root before chrooting, otherwise systemd will detect the chroot environment. You can mount it later once systemd is running.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://wiki.debian.org/Debate/initsystem">Debian init system debate</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://skarnet.org/software/s6/s6-svscan-1.html">How to run s6-svscan as process 1</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=162606&amp;p=1">Replace systemd with busybox + minirc</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.troubleshooters.com/linux/init/manjaro_experiments.htm">Experiments of Manjaro</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://busybox.net/~vda/init_vs_runsv.html">Init vs. runsv</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://felipec.wordpress.com/2013/11/04/init/">Demystifying the init system</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.darknedgy.net/technology/2015/09/05/0/">A history of modern init systems (1992-2015)</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

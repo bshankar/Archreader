@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Zswap - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Zswap skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Zswap</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Kernel_parameters.html" title="Kernel parameters">Kernel parameters</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mkinitcpio.html" title="Mkinitcpio">Mkinitcpio</a></li>
+</ul>
+</div>
+<p>"Zswap is a Linux kernel feature providing a compressed write-back cache for swapped pages. Instead of moving memory pages to a swap device when they are to be swapped out, zswap performs their compression and then stores them into a memory pool dynamically allocated inside system's RAM." - Wikipedia
+</p>
+<p>zswap is a compressed RAM cache for swap devices. Pages which would otherwise be swapped out to disk will instead be compressed and maintained in RAM until RAM is exhausted, after which the least recently used (LRU) pages will be sent to disk. This is <a href="../en/Improving_performance.html#Zram_or_zswap" title="Improving performance">in contrast to zram</a>, which is a swap device in RAM and does not require a backing swap device.
+The long and the short of it is that you need to set up a <a href="../en/Swap.html" title="Swap">Swap</a> device in order to use zswap.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Enabling_zswap"><span class="tocnumber">1</span> <span class="toctext">Enabling zswap</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Customizing_zswap"><span class="tocnumber">2</span> <span class="toctext">Customizing zswap</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Customize_the_maximum_allowed_size"><span class="tocnumber">2.1</span> <span class="toctext">Customize the maximum allowed size</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Changing_the_compression_algorithm"><span class="tocnumber">2.2</span> <span class="toctext">Changing the compression algorithm</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Enable_LZ4_compression_.28faster_than_lzo_and_deflate.2C_less_compression.29"><span class="tocnumber">2.2.1</span> <span class="toctext">Enable LZ4 compression (faster than lzo and deflate, less compression)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Enabling_zswap">Enabling zswap</span></h2>
+<p>To enable zswap at runtime, execute the following command:
+</p>
+<pre># echo 1 &gt; /sys/module/zswap/parameters/enabled
+</pre>
+<p>To enable zswap permanently, add this to your kernel boot parameters <a href="../en/Kernel_parameters.html#Configuration" title="Kernel parameters">Kernel parameters#Configuration</a>:
+</p>
+<pre>zswap.enabled=1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can use the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-swap">systemd-swap</a></span> package to enable and <a href="#Customizing_zswap">configure</a> zswap.</div>
+<h2><span class="mw-headline" id="Customizing_zswap">Customizing zswap</span></h2>
+<p>By design, zswap has relatively few customizable parameters.
+</p>
+<h3><span class="mw-headline" id="Customize_the_maximum_allowed_size">Customize the maximum allowed size</span></h3>
+<p>zswap does not use a preallocated pool of memory to hold compressed and swapped data. If you want to put a maximum bound on the percentage of memory that zswap can use, add this to your kernel boot parameters:
+</p>
+<pre>  zswap.max_pool_percent=25
+</pre>
+<p>This can also be set in <code>sysfs</code>.
+</p>
+<h3><span class="mw-headline" id="Changing_the_compression_algorithm">Changing the compression algorithm</span></h3>
+<p>zswaps compression algorithm can also be set as a kernel boot parameter:
+</p>
+<pre>  zswap.compressor=lzo #deflate #lz4
+</pre>
+<p>it can also be set at runtime by writing it to /sys/module/zswap/parameters/compressor, e.g:
+</p>
+<pre>  echo lz4 &gt; /sys/module/zswap/parameters/compressor
+</pre>
+<h4><span class="mw-headline" id="Enable_LZ4_compression_.28faster_than_lzo_and_deflate.2C_less_compression.29">Enable LZ4 compression (faster than lzo and deflate, less compression)</span></h4>
+<ol>
+<li>Add <code>lz4 lz4_compress</code> to the <a href="../en/Mkinitcpio.html#MODULES" title="Mkinitcpio">Mkinitcpio#MODULES</a> array.</li>
+<li>Rerun <code>mkinitcpio</code>.</li>
+<li>Add <code>zswap.compressor=lz4</code> to your kernel parameters.</li>
+<li>Reboot</li>
+<li>Check dmesg :</li>
+</ol>
+<pre>   $ dmesg | grep 'zswap.* compressor'
+   [    0.307223] zswap: using lz4 compressor
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/vm/zswap.txt">Zswap documentation</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://lkml.org/lkml/2013/7/17/147">zswap: How to determine whether it is compressing swap pages?</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://www.ibm.com/developerworks/community/blogs/fe313521-2e95-46f2-817d-44a4f27eba32/entry/new_linux_zswap_compression_functionality7?lang=en">IBM Developer Works Article (with benchmarks)</a>.</li>
+<li> <a rel="nofollow" class="external text" href="http://askubuntu.com/questions/471912/zram-vs-zswap-vs-zcache-ultimate-guide-when-to-use-which-one">Ask Ubuntu: zram vs. zswap vs. zcache</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=169585">Archlinux forum thread</a>.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

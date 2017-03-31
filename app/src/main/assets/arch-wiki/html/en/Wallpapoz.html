@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Wallpapoz - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Wallpapoz skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Wallpapoz</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Wallpapoz is a tool that provides dynamic wallpapers for the <a href="../en/GNOME.html" title="GNOME">GNOME</a> and <a href="../en/Xfce.html" title="Xfce">Xfce</a> desktops. Moreover different wallpapers can be used for different desktops. This article will explain how to install, configure and use Wallpapoz.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Configuration"><span class="tocnumber">1.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Start_daemon"><span class="tocnumber">1.2</span> <span class="toctext">Start daemon</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Script_to_add_all_images_from_a_folder"><span class="tocnumber">2</span> <span class="toctext">Script to add all images from a folder</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wallpapoz/">wallpapoz</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/wallpapoz">aur-mirror</a>]</sup> from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>The configuration is done using an XML file that can look like the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">.wallpapoz/wallpapoz.xml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;&lt;!DOCTYPE Wallpapoz&gt;&lt;wallpapoz interval="60" random="1" style="1" type="desktop"&gt;
+    &lt;file&gt;/path/to/picture1.jpg&lt;/file&gt;
+    &lt;file&gt;/path/to/picture2.jpg&lt;/file&gt;
+    ...
+&lt;/wallpapoz&gt;</pre>
+<p>All the settings can be configured using the Wallpapoz GUI.
+</p>
+<h3><span class="mw-headline" id="Start_daemon">Start daemon</span></h3>
+<p>In order to use the daemon that changes the pictures, it can simply be started using the terminal:
+</p>
+<pre>$ /usr/bin/daemon_wallpapoz</pre>
+<p>To start the daemon automatically with every boot, a GNOME desktop file can be written that executes the daemon everytime GNOME loads.
+</p>
+<p>Write the following lines to <code>.config/autostart/wallpapoz.desktop</code>:
+</p>
+<pre>[Desktop Entry]
+Type=Application
+Exec=/usr/bin/daemon_wallpapoz
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+Name=wallpapoz daemon
+Comment=start daemon for wallpapoz in order to change wallpaper dynamically
+</pre>
+<h2><span class="mw-headline" id="Script_to_add_all_images_from_a_folder">Script to add all images from a folder</span></h2>
+<p>The GUI is also able to add all images of a directory to the xml file. If the content of a directory changes from time to time the GUI handling is a bit suffisticated. To simplify the process of adding all images of a directory to the xml file the following script can be used:
+</p>
+<p>Copy the following lines to a new file <code>~/update-wallpapers</code>, whereas the <b>bold</b> printed parts should be specified:
+</p>
+<pre>#!/bin/bash
+# works with wallpapoz
+
+WPDIR=/home/<b>user</b>/.wallpapoz
+FOLDER=<b>/path/to/wallpaper/folder</b>
+
+WPFILE=$WPDIR/wallpapoz.xml
+WPFILENEW=$WPDIR/wallpapoz.xml.new
+
+head -n 1 $WPFILE &gt; $WPFILENEW
+i=0
+
+for file in $FOLDER/*.{jp*g,png}
+do
+  echo "    &lt;file&gt;$file&lt;/file&gt;" &gt;&gt; $WPFILENEW
+  i=$[$i + 1]
+done
+
+echo "&lt;/wallpapoz&gt;" &gt;&gt; $WPFILENEW
+
+mv $WPFILENEW $WPFILE
+
+echo "DONE: found $i files"
+</pre>
+<p>Make the file executable
+</p>
+<pre>$ chmod +x update-wallpapers</pre>
+<p>Move the file to the PATH. This can either be done by adding the file to the PATH manually or simply moving it to a directory which is already part of the PATH:
+</p>
+<pre># mv update-wallpapers /usr/bin/</pre>
+<p>Whenever a new image is added to the folder the script has to be called in order to add it to the xml file:
+</p>
+<pre>$ update-wallpapers</pre>
+<p>The script takes the first line from the old version of the xml file to keep the parameters like duration the same.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://vajrasky.wordpress.com/wallpapoz/">Project website</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Eye_candy.html" title="Category:Eye candy">Eye candy</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

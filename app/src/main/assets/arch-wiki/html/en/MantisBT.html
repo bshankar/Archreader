@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>MantisBT - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-MantisBT skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">MantisBT</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://mantisbt.org">mantisbt</a> (abbreviation for Mantis Bug Tracker) is a bug tracker written in <a rel="nofollow" class="external text" href="https://php.net">PHP</a>.
+For a list of features, visit its website.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#PHP_extensions"><span class="tocnumber">2.1</span> <span class="toctext">PHP extensions</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#TTF_fonts"><span class="tocnumber">2.2</span> <span class="toctext">TTF fonts</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Web_server"><span class="tocnumber">2.3</span> <span class="toctext">Web server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#nginx_.2B_uwsgi"><span class="tocnumber">2.3.1</span> <span class="toctext">nginx + uwsgi</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Database"><span class="tocnumber">2.4</span> <span class="toctext">Database</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Administrator"><span class="tocnumber">2.5</span> <span class="toctext">Administrator</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mantisbt/">mantisbt</a></span><sup><small>AUR</small></sup> package.
+</p>
+<p>Choose your favorite <a href="../en/Category:Web_server.html" title="Category:Web server">web server</a> and/or application server (such as <a href="../en/UWSGI.html" title="UWSGI">UWSGI</a>) for making the application available.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p><i>mantisbt</i> has a decent <a rel="nofollow" class="external text" href="https://mantisbt.org/docs/master-1.2.x/en/administration_guide/">administration guide</a>, that can be followed for setting it up.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> Currently the package has bug <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/49141">FS#49141</a> that will prevent you from being able to do the initial signup using the administrator account on a new setup. Applying the fix mentioned in the bug report fixes this issue though.</div>
+<p>All configuration is exposed in <code>/etc/webapps/mantisbt/config_inc.php</code>.
+</p>
+<ul>
+<li> Setup a compatible <a href="../en/Category:Database_management_systems.html" title="Category:Database management systems">DBMS</a> and use the 'Database Configuration' section to connect mantisbt with it.</li>
+<li> The 'Anonymous Access / Signup' section needs special attention, if you are not planning on disabling CAPTCHAs for new signups (see <a href="#PHP_extensions">#PHP extensions</a> and <a href="#TTF_fonts">#TTF fonts</a>).</li>
+<li> If you want to use <a href="https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol" class="extiw" title="wikipedia:Simple Mail Transfer Protocol">SMTP</a> you can set it up in the 'Email Configuration' section. mantisbt defaults to a phpmailer setup, which has the downside of not reaching mail servers that use <a href="../en/Postgrey.html" title="Postgrey">grey listing</a>.</li>
+</ul>
+<p>In any case, you will need to meet some requirements for <i>mantisbt</i> to work properly:
+</p>
+<h3><span class="mw-headline" id="PHP_extensions">PHP extensions</span></h3>
+<ul>
+<li> <b>mysqli</b> (if you are using <a href="../en/MySQL.html" title="MySQL">MySQL</a>/<a href="../en/MySQL.html" title="MariaDB" class="mw-redirect">MariaDB</a>)</li>
+<li> <b>gd</b> (if you plan on using <a href="https://en.wikipedia.org/wiki/CAPTCHA" class="extiw" title="wikipedia:CAPTCHA">CAPTCHA</a> for user signup)</li>
+</ul>
+<h3><span class="mw-headline" id="TTF_fonts">TTF fonts</span></h3>
+<ul>
+<li> make sure to <a href="../en/Fonts.html#Pacman" title="Fonts">install a TrueTypeFont</a>, that you would like to use for the creation of CAPTCHAs </li>
+<li> setup the paths and names of the fonts, you would like to use:</li>
+</ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/webapps/mantisbt/config_inc.php</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># trailing slash is important!
+$g_system_font_folder = '/usr/share/fonts/TTF/';
+
+# here DroidSans.ttf from the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ttf-droid">ttf-droid</a></span> is used for illustration
+$g_font_per_captcha = 'DroidSans.ttf';</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Make sure to also include the TTF path (e.g. <code>/usr/share/fonts/TTF</code>) in the <a rel="nofollow" class="external text" href="http://www.php.net/manual/en/features.safe-mode.php#ini.open-basedir">open_basedir</a> of your PHP instance!</div>
+<h3><span class="mw-headline" id="Web_server">Web server</span></h3>
+<h4><span class="mw-headline" id="nginx_.2B_uwsgi">nginx + uwsgi</span></h4>
+<p>This example shows a basic setup using a subdomain for the bug tracker, with some handson redirects.
+The below mentioned file needs of course to be sourced within <code>/etc/nginx/nginx.conf</code>.
+For a subfolder-based setup for <i>mantisbt</i>, some modifications are needed. 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+server {
+  listen 80;
+  listen [::]:80;
+  server_name bugs.mydomain.org www.mydomain.org;
+  return 301 https://bugs.mydomain.org$request_uri;
+}
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  server_name www.bugs.mydomain.org;
+  return 301 https://bugs.mydomain.org$request_uri;
+}
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  server_name bugs.mydomain.org;
+  include tls.conf;
+  root /usr/share/webapps/mantisbt;
+  access_log /var/log/nginx/access.bugs.mydomain.log;
+  error_log /var/log/nginx/error.bugs.mydomain.log;
+  include letsencrypt-challenge.conf;
+
+  location ~ ^/(admin|core|doc|lang) {
+    deny all;
+  }
+
+  location / {
+    index index.php;
+    try_files $uri $uri/ @mantisbt;
+  }
+
+  location @mantisbt {
+    include uwsgi_params;
+    uwsgi_modifier1 14;
+    uwsgi_pass unix:/run/uwsgi/mantisbt.sock;
+  }
+
+  location ~  \.php?$ {
+    include uwsgi_params;
+    uwsgi_modifier1 14;
+    uwsgi_pass unix:/run/uwsgi/mantisbt.sock;
+  }
+
+  # Deny serving files beginning with a dot, but allow letsencrypt acme-challenge
+  location ~ /\.(?!well-known/acme-challenge) {
+    access_log off;
+    log_not_found off;
+    deny all;
+  }
+}
+
+</pre>
+<p><a href="../en/UWSGI.html" title="UWSGI">UWSGI</a> can be used to achieve a resource preserving setup with dedicated PHP settings.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/uwsgi/mantisbt.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[uwsgi]
+procname-master = mantisbt
+plugins = php
+master = true
+socket = /run/uwsgi/%n.sock
+uid = http
+gid = http
+processes = 10
+cheaper = 2
+cheaper-step = 1
+idle = 600
+die-on-idle = true
+
+php-allowed-ext = .php
+php-docroot = /usr/share/webapps/mantisbt
+php-index = index.php
+php-set = date.timezone=Europe/Berlin
+php-set = open_basedir=/tmp/:/usr/share/fonts/TTF:/usr/share/webapps/mantisbt:/usr/share/webapps/mantisbt/core:/etc/webapps/mantisbt
+php-set = session.save_path=/tmp
+php-set = session.gc_maxlifetime  21600
+php-set = session.gc_divisor      500
+php-set = session.gc_probability  1
+php-set = post_max_size=64M
+php-set = upload_max_filesize=64M
+php-set = always_populate_raw_post_data=-1
+php-set = extension=curl.so
+php-set = extension=gd.so
+php-set = extension=imagick.so
+php-set = extension=intl.so
+php-set = extension=mysqli.so
+
+</pre>
+<p>If your (modified) versions of these files are in place, you should restart your <a href="../en/Nginx.html" title="Nginx">nginx</a> and <a href="../en/UWSGI.html#Starting_service" title="UWSGI">start/enable a uwsgi socket</a> for <i>mantisbt</i> <a href="../en/Systemd.html#Using_units" title="Systemd">using systemd</a>.
+</p>
+<h3><span class="mw-headline" id="Database">Database</span></h3>
+<p>After making the application available, go to <a rel="nofollow" class="external text" href="https://bugs.mydomain.org/admin/install.php">/admin/install.php</a> to setup the database. Follow the instructions on that page and let <i>mantisbt</i> generate the tables.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> You have to modify your <a href="#Web_server">#Web server</a> settings temporarily to be able to visit that page. Here this is shown according to the example of using <a href="#nginx_.2B_uwsgi">#nginx + uwsgi</a>.
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+  location ~ ^/(core|doc|lang) {
+    deny all;
+  }
+
+</pre>
+</div>
+<h3><span class="mw-headline" id="Administrator">Administrator</span></h3>
+<p>The initial account generated by <i>mantisbt</i> is called <i>administrator</i> and has the password <i>root</i>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> Make sure to change the password for the <i>administrator</i> user and set it up properly, right after logging in for the first time!</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Modify your <a href="#Web_server">#Web server</a> settings again, to make the <i>admin</i> settings unavailable again. The example of using <a href="#nginx_.2B_uwsgi">#nginx + uwsgi</a> shows you how.</div>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p><i>mantisbt</i> should be all setup now. The <i>administrator</i> user is able to create new projects and give user rights to signed up users.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://mantisbt.org">Official website</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://mantisbt.org/wiki/doku.php">Official wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://mantisbt.org/documentation.php">Official documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.mantisbt.org/bugs">Official bug tracker</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://mantisbt.org/forums/">Official forums</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://mantisbt.org/mailinglists.php">Official mailing lists</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/mantisbt">MantisBT on github</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="irc://irc.freenode.net/mantisbt">#mantisbt on freenode.net</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li>
+<li><a href="../en/Category:Development.html" title="Category:Development">Development</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

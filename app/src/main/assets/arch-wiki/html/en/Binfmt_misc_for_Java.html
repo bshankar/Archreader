@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Binfmt misc for Java - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Binfmt_misc_for_Java skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Binfmt misc for Java</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Mentions rc.local (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Binfmt_misc_for_Java">Talk:Binfmt misc for Java#</a>)</div>
+</div>
+<p>From <a href="https://en.wikipedia.org/wiki/binfmt_misc" class="extiw" title="wikipedia:binfmt misc">Wikipedia</a>:
+</p>
+<dl><dd>"<i>binfmt_misc is a capability of the Linux kernel which allows arbitrary executable file formats to be recognized and passed to certain user space applications, such as emulators and virtual machines.</i>"</dd></dl>
+<p>In plain language, this allows you to take a file such as a <a href="../en/Java.html" title="Java">Java</a> jar or <a href="../en/Mono.html" title="Mono">Mono</a> exe that you would ordinarily run via a line such as
+</p>
+<pre>java -jar /path/to/MyProgram.jar
+mono /path/to/MyProgram.exe
+</pre>
+<p>and instead run it simply with
+</p>
+<pre>MyProgram.jar
+</pre>
+<p>or
+</p>
+<pre>MyProgram.exe
+</pre>
+<p>as long as it's on the PATH.
+</p>
+<p>The information in this article is almost entirely taken from the files <b>binfmt_misc.txt</b> and <b>java.txt</b> in the <b>Documentation</b> sub-directory of the Linux kernel source tree.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Setup"><span class="tocnumber">1</span> <span class="toctext">Setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Mounting_binfmt_misc"><span class="tocnumber">1.1</span> <span class="toctext">Mounting binfmt_misc</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Registering_the_file_type_with_binfmt_misc"><span class="tocnumber">1.2</span> <span class="toctext">Registering the file type with binfmt_misc</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#The_wrapper_scripts"><span class="tocnumber">1.3</span> <span class="toctext">The wrapper scripts</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#jarwrapper"><span class="tocnumber">1.3.1</span> <span class="toctext">jarwrapper</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#javawrapper"><span class="tocnumber">1.3.2</span> <span class="toctext">javawrapper</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#javaclassname"><span class="tocnumber">1.3.3</span> <span class="toctext">javaclassname</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Testing"><span class="tocnumber">2</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Notes"><span class="tocnumber">3</span> <span class="toctext">Notes</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setup">Setup</span></h2>
+<h3><span class="mw-headline" id="Mounting_binfmt_misc">Mounting binfmt_misc</span></h3>
+<p>For an ad-hoc mount:
+</p>
+<pre>mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
+</pre>
+<p>For a persistent mount via fstab add the line:
+</p>
+<pre>none  /proc/sys/fs/binfmt_misc binfmt_misc defaults 0 0
+</pre>
+<h3><span class="mw-headline" id="Registering_the_file_type_with_binfmt_misc">Registering the file type with binfmt_misc</span></h3>
+<p>Filetype registration on Arch is handled by <b>systemd-binfmt</b>.
+</p>
+<p>Binfmt registration lines can be placed in a file in <code>/etc/binfmt.d</code>.
+</p>
+<p>The contents of the line is explained in the <b>Documentation/binfmt_misc.txt</b> file.
+</p>
+<p>The following lines will create registration files for running Java binaries without having to explicitly call the java command (you still need to have it installed). The first two work by redirecting Java class and jar files to a set of 'wrapper' scripts described in the next section. The final entry runs Java applets in the usual way.
+</p>
+<pre># binfmt_misc support for Java applications:
+echo ':Java:M::\xca\xfe\xba\xbe::/usr/local/bin/javawrapper:' &gt; /etc/binfmt.d/Java.conf
+# binfmt_misc support for executable Jar files:
+echo ':ExecutableJAR:E::jar::/usr/local/bin/jarwrapper:' &gt; /etc/binfmt.d/ExecutableJAR.conf
+# binfmt_misc support for Java Applets:
+echo ':Applet:E::html::/opt/java/bin/appletviewer:' &gt; /etc/binfmt.d/Applet.conf
+</pre>
+<p>Restart <code>systemd-binfmt</code> to register the new handlers. Registered binfmt handlers show up as files in <code>/proc/sys/fs/binfmt_misc</code>. Viewing this file should show the name of the registered wrapper script and either the magic bytes or file extension used to recognize that file type.
+</p>
+<h3><span class="mw-headline" id="The_wrapper_scripts">The wrapper scripts</span></h3>
+<h4><span class="mw-headline" id="jarwrapper">jarwrapper</span></h4>
+<pre>#!/bin/bash
+# /usr/local/bin/jarwrapper - the wrapper for binfmt_misc/jar
+
+# set path to java using JAVA_HOME if available, otherwise assume it's on the PATH
+JAVA_PATH=${JAVA_HOME:+$JAVA_HOME/jre/bin/}java
+$JAVA_PATH -jar "$@"
+</pre>
+<h4><span class="mw-headline" id="javawrapper">javawrapper</span></h4>
+<pre>#!/bin/bash
+# /usr/local/bin/javawrapper - the wrapper for binfmt_misc/java
+
+if [ -z "$1" ]; then
+	exec 1&gt;&amp;2
+	echo Usage: $0 class-file
+	exit 1
+fi
+
+CLASS=$1
+FQCLASS=`/usr/local/bin/javaclassname $1`
+FQCLASSN=`echo $FQCLASS | sed -e 's/^.*\.\([^.]*\)$/\1/'`
+FQCLASSP=`echo $FQCLASS | sed -e 's-\.-/-g' -e 's-^[^/]*$--' -e 's-/[^/]*$--'`
+
+# for example:
+# CLASS=Test.class
+# FQCLASS=foo.bar.Test
+# FQCLASSN=Test
+# FQCLASSP=foo/bar
+
+unset CLASSBASE
+
+declare -i LINKLEVEL=0
+
+while :; do
+	if [ "`basename $CLASS .class`" == "$FQCLASSN" ]; then
+		# See if this directory works straight off
+		cd -L `dirname $CLASS`
+		CLASSDIR=$PWD
+		cd $OLDPWD
+		if echo $CLASSDIR | grep -q "$FQCLASSP$"; then
+			CLASSBASE=`echo $CLASSDIR | sed -e "s.$FQCLASSP$.."`
+			break;
+		fi
+		# Try dereferencing the directory name
+		cd -P `dirname $CLASS`
+		CLASSDIR=$PWD
+		cd $OLDPWD
+		if echo $CLASSDIR | grep -q "$FQCLASSP$"; then
+			CLASSBASE=`echo $CLASSDIR | sed -e "s.$FQCLASSP$.."`
+			break;
+		fi
+		# If no other possible filename exists
+		if [ ! -L $CLASS ]; then
+			exec 1&gt;&amp;2
+			echo $0:
+			echo "  $CLASS should be in a" \
+			     "directory tree called $FQCLASSP"
+			exit 1
+		fi
+	fi
+	if [ ! -L $CLASS ]; then break; fi
+	# Go down one more level of symbolic links
+	let LINKLEVEL+=1
+	if [ $LINKLEVEL -gt 5 ]; then
+		exec 1&gt;&amp;2
+		echo $0:
+		echo "  Too many symbolic links encountered"
+		exit 1
+	fi
+	CLASS=`ls --color=no -l $CLASS | sed -e 's/^.* \([^ ]*\)$/\1/'`
+done
+
+if [ -z "$CLASSBASE" ]; then
+	if [ -z "$FQCLASSP" ]; then
+		GOODNAME=$FQCLASSN.class
+	else
+		GOODNAME=$FQCLASSP/$FQCLASSN.class
+	fi
+	exec 1&gt;&amp;2
+	echo $0:
+	echo "  $FQCLASS should be in a file called $GOODNAME"
+	exit 1
+fi
+
+if ! echo $CLASSPATH | grep -q "^\(.*:\)*$CLASSBASE\(:.*\)*"; then
+	# class is not in CLASSPATH, so prepend dir of class to CLASSPATH
+	if [ -z "${CLASSPATH}" ] ; then
+		export CLASSPATH=$CLASSBASE
+	else
+		export CLASSPATH=$CLASSBASE:$CLASSPATH
+	fi
+fi
+
+shift
+# set path to java using JAVA_HOME if available, otherwise assume it's on the PATH
+JAVA_PATH=${JAVA_HOME:+$JAVA_HOME/jre/bin/}java
+$JAVA_PATH $FQCLASS "$@"
+</pre>
+<h4><span class="mw-headline" id="javaclassname">javaclassname</span></h4>
+<p>This program is used by the <b>javawrapper</b> script above. Compile it with the command
+</p>
+<pre>gcc -O2 -o javaclassname javaclassname.c
+</pre>
+<p>and move the executable to /usr/local/bin.
+</p>
+<pre>/* javaclassname.c
+ *
+ * Extracts the class name from a Java class file; intended for use in a Java
+ * wrapper of the type supported by the binfmt_misc option in the Linux kernel.
+ *
+ * Copyright (C) 1999 Colin J. Watson &lt;cjw44@cam.ac.uk&gt;.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdarg.h&gt;
+#include &lt;sys/types.h&gt;
+
+/* From Sun's Java VM Specification, as tag entries in the constant pool. */
+
+#define CP_UTF8 1
+#define CP_INTEGER 3
+#define CP_FLOAT 4
+#define CP_LONG 5
+#define CP_DOUBLE 6
+#define CP_CLASS 7
+#define CP_STRING 8
+#define CP_FIELDREF 9
+#define CP_METHODREF 10
+#define CP_INTERFACEMETHODREF 11
+#define CP_NAMEANDTYPE 12
+
+/* Define some commonly used error messages */
+
+#define seek_error() error("%s: Cannot seek\n", program)
+#define corrupt_error() error("%s: Class file corrupt\n", program)
+#define eof_error() error("%s: Unexpected end of file\n", program)
+#define utf8_error() error("%s: Only ASCII 1-255 supported\n", program);
+
+char *program;
+
+long *pool;
+
+u_int8_t read_8(FILE *classfile);
+u_int16_t read_16(FILE *classfile);
+void skip_constant(FILE *classfile, u_int16_t *cur);
+void error(const char *format, ...);
+int main(int argc, char **argv);
+
+/* Reads in an unsigned 8-bit integer. */
+u_int8_t read_8(FILE *classfile)
+{
+	int b = fgetc(classfile);
+	if(b == EOF)
+		eof_error();
+	return (u_int8_t)b;
+}
+
+/* Reads in an unsigned 16-bit integer. */
+u_int16_t read_16(FILE *classfile)
+{
+	int b1, b2;
+	b1 = fgetc(classfile);
+	if(b1 == EOF)
+		eof_error();
+	b2 = fgetc(classfile);
+	if(b2 == EOF)
+		eof_error();
+	return (u_int16_t)((b1 &lt;&lt; 8) | b2);
+}
+
+/* Reads in a value from the constant pool. */
+void skip_constant(FILE *classfile, u_int16_t *cur)
+{
+	u_int16_t len;
+	int seekerr = 1;
+	pool[*cur] = ftell(classfile);
+	switch(read_8(classfile))
+	{
+	case CP_UTF8:
+		len = read_16(classfile);
+		seekerr = fseek(classfile, len, SEEK_CUR);
+		break;
+	case CP_CLASS:
+	case CP_STRING:
+		seekerr = fseek(classfile, 2, SEEK_CUR);
+		break;
+	case CP_INTEGER:
+	case CP_FLOAT:
+	case CP_FIELDREF:
+	case CP_METHODREF:
+	case CP_INTERFACEMETHODREF:
+	case CP_NAMEANDTYPE:
+		seekerr = fseek(classfile, 4, SEEK_CUR);
+		break;
+	case CP_LONG:
+	case CP_DOUBLE:
+		seekerr = fseek(classfile, 8, SEEK_CUR);
+		++(*cur);
+		break;
+	default:
+		corrupt_error();
+	}
+	if(seekerr)
+		seek_error();
+}
+
+void error(const char *format, ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+	exit(1);
+}
+
+int main(int argc, char **argv)
+{
+	FILE *classfile;
+	u_int16_t cp_count, i, this_class, classinfo_ptr;
+	u_int8_t length;
+
+	program = argv[0];
+
+	if(!argv[1])
+		error("%s: Missing input file\n", program);
+	classfile = fopen(argv[1], "rb");
+	if(!classfile)
+		error("%s: Error opening %s\n", program, argv[1]);
+
+	if(fseek(classfile, 8, SEEK_SET))  /* skip magic and version numbers */
+		seek_error();
+	cp_count = read_16(classfile);
+	pool = calloc(cp_count, sizeof(long));
+	if(!pool)
+		error("%s: Out of memory for constant pool\n", program);
+
+	for(i = 1; i &lt; cp_count; ++i)
+		skip_constant(classfile, &amp;i);
+	if(fseek(classfile, 2, SEEK_CUR))	/* skip access flags */
+		seek_error();
+
+	this_class = read_16(classfile);
+	if(this_class &lt; 1 || this_class &gt;= cp_count)
+		corrupt_error();
+	if(!pool[this_class] || pool[this_class] == -1)
+		corrupt_error();
+	if(fseek(classfile, pool[this_class] + 1, SEEK_SET))
+		seek_error();
+
+	classinfo_ptr = read_16(classfile);
+	if(classinfo_ptr &lt; 1 || classinfo_ptr &gt;= cp_count)
+		corrupt_error();
+	if(!pool[classinfo_ptr] || pool[classinfo_ptr] == -1)
+		corrupt_error();
+	if(fseek(classfile, pool[classinfo_ptr] + 1, SEEK_SET))
+		seek_error();
+
+	length = read_16(classfile);
+	for(i = 0; i &lt; length; ++i)
+	{
+		u_int8_t x = read_8(classfile);
+		if((x &amp; 0x80) || !x)
+		{
+			if((x &amp; 0xE0) == 0xC0)
+			{
+				u_int8_t y = read_8(classfile);
+				if((y &amp; 0xC0) == 0x80)
+				{
+					int c = ((x &amp; 0x1f) &lt;&lt; 6) + (y &amp; 0x3f);
+					if(c) putchar(c);
+					else utf8_error();
+				}
+				else utf8_error();
+			}
+			else utf8_error();
+		}
+		else if(x == '/') putchar('.');
+		else putchar(x);
+	}
+	putchar('\n');
+	free(pool);
+	fclose(classfile);
+	return 0;
+}
+</pre>
+<h2><span class="mw-headline" id="Testing">Testing</span></h2>
+<p>Create a simple <b>HelloWorld.java</b> program such as the following:
+</p>
+<pre>class HelloWorld {
+    public static void main(String args[]) {
+        System.out.println("Hello World!");
+    }
+}
+</pre>
+<p>Compile it as normal and make the <b>.class</b> file executable with the command
+</p>
+<pre>chmod +x HelloWorld.class
+</pre>
+<p>You should then be able to run it by simply entering:
+</p>
+<pre>./HelloWorld.class
+</pre>
+<h2><span class="mw-headline" id="Notes">Notes</span></h2>
+<ul>
+<li> Some of the material on <b>binfmt_misc</b> refers to it as a module but Arch builds it into the standard kernel.</li>
+<li> The setup given here works with both the Sun JRE &amp; openjdk6.</li>
+<li> <b>binfmt_misc</b> can be used for other file types as well. For example, to be able to run DOS/Windows files without having to explicitly specify the wine program, add the following registration entry:</li>
+</ul>
+<pre># binfmt_misc support for DOS / Windows applications via Wine
+echo ':DOSWin:M::MZ::/usr/bin/wine:' &gt; /proc/sys/fs/binfmt_misc/register
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Emulators.html" title="Category:Emulators">Emulators</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

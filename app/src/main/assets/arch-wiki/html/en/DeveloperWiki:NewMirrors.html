@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:NewMirrors - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_NewMirrors skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:NewMirrors</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Adding_a_new_mirror"><span class="tocnumber">1</span> <span class="toctext">Adding a new mirror</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#2-tier_mirroring_scheme"><span class="tocnumber">2</span> <span class="toctext">2-tier mirroring scheme</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#For_the_mirror_administrator"><span class="tocnumber">3</span> <span class="toctext">For the mirror administrator</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Tier_2_requirements"><span class="tocnumber">3.1</span> <span class="toctext">Tier 2 requirements</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Tier_1_requirements"><span class="tocnumber">3.2</span> <span class="toctext">Tier 1 requirements</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Create_a_feature-request"><span class="tocnumber">3.3</span> <span class="toctext">Create a feature-request</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Contact_info_and_mailing_lists"><span class="tocnumber">3.4</span> <span class="toctext">Contact info and mailing lists</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#The_Arch_Linux_side"><span class="tocnumber">4</span> <span class="toctext">The Arch Linux side</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Mirror_size"><span class="tocnumber">5</span> <span class="toctext">Mirror size</span></a></li>
+</ul>
+</div>
+
+<h3><span class="mw-headline" id="Adding_a_new_mirror">Adding a new mirror</span></h3>
+<p>This text should outline the procedure for adding a new mirror for Arch packages.
+</p>
+<h2><span class="mw-headline" id="2-tier_mirroring_scheme">2-tier mirroring scheme</span></h2>
+<p>Due to the high load and bandwidth limits Arch Linux uses 2-tier mirroring scheme.
+</p>
+<p>There are few tier 1 mirrors that sync directly from archlinux.org every hour.
+</p>
+<p>All other mirrors should sync from one of tier 1 mirrors. Syncing from archlinux.org is not allowed.
+</p>
+<h2><span class="mw-headline" id="For_the_mirror_administrator">For the mirror administrator</span></h2>
+<h4><span class="mw-headline" id="Tier_2_requirements">Tier 2 requirements</span></h4>
+<ul>
+<li> Disk-space &gt;= 60 GB</li>
+<li> Sync off a tier 1 mirror (see <a rel="nofollow" class="external free" href="https://archlinux.org/mirrors">https://archlinux.org/mirrors</a>)</li>
+<li> Sync all contents of the upstream mirror (i.e. do not sync only some repositories)</li>
+<li> Do not sync more often than every hour, but you should sync at least once a day</li>
+<li> Sync on a random minute so it is more likely the requests will be spaced out with other mirrors</li>
+<li> Use the following <a href="../en/Rsync.html" title="Rsync">rsync</a> options: <b>-rtlvH --delete-after --delay-updates --safe-links</b>
+</li>
+<li> If you ever wish to send downtime notifications to our users, please use the <a rel="nofollow" class="external text" href="https://mailman.archlinux.org/mailman/listinfo/arch-mirrors-announce">arch-mirrors-announce</a> list. You do not need to subscribe to be able to post.</li>
+<li> http support</li>
+</ul>
+<h4><span class="mw-headline" id="Tier_1_requirements">Tier 1 requirements</span></h4>
+<ul>
+<li> Tier 2 requirements</li>
+<li> Bandwidth &gt;= 100Mbit/s</li>
+<li> <a href="../en/Rsync.html" title="Rsync">rsync</a> support</li>
+<li> Proven reliability (be a tier 2 mirror for a while and have reasonable uptime, response to out-of-sync notifications etc.)</li>
+</ul>
+<p>You can use rsync directly or <a rel="nofollow" class="external text" href="https://git.server-speed.net/users/flo/bin/tree/syncrepo.sh">this script</a> as a starting point. Please note that the script tries to minimize load and bandwidth used (about 5MiB as of 2014-01-21) in case there are no changes. Feel free to remove this check if you don't sync very often or your upstream mirror does not provide the lastupdate file.
+</p>
+<h3><span class="mw-headline" id="Create_a_feature-request">Create a feature-request</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>We are not accepting new ftp mirrors.</div>
+<p>Go to <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/newtask/proj1">https://bugs.archlinux.org</a> and create a feature-request (category: mirrors) containing the following information:
+</p>
+<ul>
+<li> Mirror domain name</li>
+<li> Geographical location of the mirror (country)</li>
+<li> URLs for supported access methods (http(s), <a href="../en/Rsync.html" title="Rsync">rsync</a>) (no ftp)</li>
+<li> Your mirror's available bandwidth</li>
+<li> An administrative contact email</li>
+<li> An alternative administrative contact email (optional)</li>
+<li> (tier 1 mirrors) Rsync IPs so your server(s) can be allowed to sync off tier 0 (rsync.archlinux.org)</li>
+<li> (tier 2 mirrors) The name of tier 1 mirror you are syncing from. You can find available tier 1 mirrors <a rel="nofollow" class="external text" href="https://www.archlinux.org/mirrors/">here</a> (sort using the tier column)</li>
+</ul>
+<h3><span class="mw-headline" id="Contact_info_and_mailing_lists">Contact info and mailing lists</span></h3>
+<p>Feel free to join the <a rel="nofollow" class="external text" href="https://mailman.archlinux.org/mailman/listinfo/arch-mirrors">arch-mirrors mailing list</a> which can be used for general discussion about our mirrors. If you want to inform our users about downtime of your mirror please use the <a rel="nofollow" class="external text" href="https://lists.archlinux.org/listinfo/arch-mirrors-announce">arch-mirrors-announce</a> mailing list. You do not need to subscribe to be able to post to arch-mirrors-announce.
+</p>
+<p>If you want to reach the Arch Linux staff for questions, you can either use the arch-mirrors list, you can open a bug report on our tracker or you can send a mail to <a rel="nofollow" class="external text" href="mailto:mirrors@archlinux.org">mirrors@archlinux.org</a>.
+</p>
+<h2><span class="mw-headline" id="The_Arch_Linux_side">The Arch Linux side</span></h2>
+<ul>
+<li> Add the mirror info to the Django admin site</li>
+<li> Regenerate the rsync whitelist with the gen_rsyncd.conf.pl script - only for tier 1 mirrors, or when disabling access to a previously untiered mirror (also done by an hourly cronjob)</li>
+<li> Regenerate the pacman-mirrorlist package</li>
+</ul>
+<h2><span class="mw-headline" id="Mirror_size">Mirror size</span></h2>
+<p>To give you an impression how much space will be needed for a mirror here are some numbers (as of 2015-01-21):
+</p>
+<p>Mandatory:
+</p>
+<ul>
+<li> pool (all packages) - 41GB</li>
+<li> repositories (core, community, extra, testing, gnome-unstable, kde-unstable, multilib) - total ~200MB</li>
+</ul>
+<p>Optional:
+</p>
+<ul>
+<li> iso - 7GB (encouraged)</li>
+<li> archive - 15GB (permanently frozen)</li>
+<li> other - 9GB</li>
+<li> sources - 28GB</li>
+</ul>
+<p>Most mirrors do not sync archive, other and sources directories, but sync everything else (including temporary repositories),
+so usually you will need about 50GB reserved for Arch Linux mirror.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:DeveloperWiki.html" title="Category:DeveloperWiki">DeveloperWiki</a></li>
+<li><a href="../en/Category:Arch_development.html" title="Category:Arch development">Arch development</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

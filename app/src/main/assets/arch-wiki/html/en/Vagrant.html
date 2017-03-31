@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Vagrant - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Vagrant skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Vagrant</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Docker.html" title="Docker">Docker</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/KVM.html" title="KVM">KVM</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Libvirt.html" title="Libvirt">Libvirt</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://www.vagrantup.com">Vagrant</a> is a tool for managing and configuring virtualised development environments.
+</p>
+<p>Vagrant has a concept of 'providers', which map to the virtualisation engine and its API. The most popular and well-supported provider is Virtualbox; plugins exist for <code>libvirt</code>, <code>kvm</code>, <code>lxc</code>, <code>vmware</code> and more.
+</p>
+<p>Vagrant uses a mostly declarative <code>Vagrantfile</code> to define virtualised machines. A single Vagrantfile can define multiple machines.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Plugins"><span class="tocnumber">2</span> <span class="toctext">Plugins</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#vagrant-libvirt"><span class="tocnumber">2.1</span> <span class="toctext">vagrant-libvirt</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#vagrant-lxc"><span class="tocnumber">2.2</span> <span class="toctext">vagrant-lxc</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#vagrant-kvm_.28deprecated.29"><span class="tocnumber">2.3</span> <span class="toctext">vagrant-kvm (deprecated)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Provisioning"><span class="tocnumber">3</span> <span class="toctext">Provisioning</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Base_Boxes_for_Vagrant"><span class="tocnumber">4</span> <span class="toctext">Base Boxes for Vagrant</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#No_ping_between_host_and_vagrant_box_.28host-only_networking.29"><span class="tocnumber">5.1</span> <span class="toctext">No ping between host and vagrant box (host-only networking)</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Virtual_machine_is_not_network_accessible_from_the_Arch_host_OS"><span class="tocnumber">5.2</span> <span class="toctext">Virtual machine is not network accessible from the Arch host OS</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#.27vagrant_up.27_hangs_on_NFS_mounting_.28Mounting_NFS_shared_folders....29"><span class="tocnumber">5.3</span> <span class="toctext">'vagrant up' hangs on NFS mounting (Mounting NFS shared folders...)</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Error_starting_network_.27default.27:_internal_error:_Failed_to_initialize_a_valid_firewall_backend"><span class="tocnumber">5.4</span> <span class="toctext">Error starting network 'default': internal error: Failed to initialize a valid firewall backend</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vagrant">vagrant</a></span>.
+</p>
+<h2><span class="mw-headline" id="Plugins">Plugins</span></h2>
+<p>Vagrant <a rel="nofollow" class="external text" href="https://news.ycombinator.com/item?id=4408754">has a middleware architecture</a> providing support for powerful plugins.
+</p>
+<p>Plugins can be installed with Vagrant's built-in plugin manager. You can specify multiple plugins to install:
+</p>
+<pre>$ vagrant plugin install vagrant-vbguest vagrant-share
+</pre>
+<h3><span class="mw-headline" id="vagrant-libvirt">vagrant-libvirt</span></h3>
+<p>This plugin adds a libvirt provider to Vagrant. The gcc and make packages must be installed before this plugin can be installed,
+and <a href="../en/Libvirt.html" title="Libvirt">libvirt</a> and related packages must be installed and configured before using the libvirt provider.
+</p>
+<p>As of September 2016 (Vagrant version 1.8.5), a normal installation of this plugin fails on Arch Linux. The plugin can be successfully installed with this workaround:
+</p>
+<pre>$ CONFIGURE_ARGS='with-ldflags=-L/opt/vagrant/embedded/lib with-libvirt-include=/usr/include/libvirt with-libvirt-lib=/usr/lib' \
+  GEM_HOME=~/.vagrant.d/gems GEM_PATH=$GEM_HOME:/opt/vagrant/embedded/gems PATH=/opt/vagrant/embedded/bin:$PATH \
+  vagrant plugin install vagrant-libvirt
+</pre>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> A better workaround is already described above (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Vagrant">Talk:Vagrant#</a>)</div>
+</div>
+<p>A normal <code>vagrant up</code> fails with <code>incompatible library version</code> due to <a rel="nofollow" class="external text" href="https://github.com/vagrant-libvirt/vagrant-libvirt/issues/541">bug #541</a>. As a workaround, create and run <a rel="nofollow" class="external text" href="https://gist.github.com/robled/070e1922816bbe983623#file-reinstall-vagrant-libvirt-sh">reinstall-vagrant-libvirt.sh</a>.
+</p>
+<p>Once the plugin is installed the <code>libvirt</code> provider will be available:
+</p>
+<pre>$ vagrant up --provider=libvirt
+</pre>
+<h3><span class="mw-headline" id="vagrant-lxc">vagrant-lxc</span></h3>
+<p>First install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lxc">lxc</a></span> from the official repositories, then:
+</p>
+<pre>$ vagrant plugin install vagrant-lxc
+</pre>
+<p>Next, configure lxc and some systemd unit files per <a rel="nofollow" class="external text" href="https://github.com/fgrehm/vagrant-lxc/issues/109#issuecomment-21274392">this comment</a>. The plugin can now be used with a <code>Vagrantfile</code> like so:
+</p>
+<pre>VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure("2") do |config|
+
+    config.vm.define "main" do |config|
+        config.vm.box = 'http://bit.ly/vagrant-lxc-wheezy64-2013-10-23'
+
+        config.vm.provider :lxc do |lxc|
+            lxc.customize 'cgroup.memory.limit_in_bytes', '512M'
+        end
+
+        config.vm.provision :shell do |shell|
+            shell.path = 'provision.sh'
+        end
+    end
+end
+</pre>
+<p>The <code>provision.sh</code> file should be a shell script beside the <code>Vagrantfile</code>. Do whatever setup is appropriate; for example, to remove puppet, which is packaged in the above box:
+</p>
+<pre>rm /etc/apt/sources.list.d/puppetlabs.list
+apt-get purge -y puppet facter hiera puppet-common puppetlabs-release ruby-rgen
+</pre>
+<h3><span class="mw-headline" id="vagrant-kvm_.28deprecated.29">vagrant-kvm (deprecated)</span></h3>
+<p>This plugin supports <a href="../en/KVM.html" title="KVM">KVM</a> as the virtualisation provider.
+</p>
+<p>Vagrant installs a self-contained rainbow environment in /opt which interacts with the system Ruby and other libraries in Arch in confusing ways (<a rel="nofollow" class="external text" href="https://github.com/adrahon/vagrant-kvm/issues/14">Issue with Ruby</a>, <a rel="nofollow" class="external text" href="https://github.com/adrahon/vagrant-kvm/issues/161#issuecomment-38834996">Issue with Curl library</a>).
+</p>
+<p>Please see and follow <a rel="nofollow" class="external text" href="https://github.com/adrahon/vagrant-kvm/wiki/Install_on_ArchLinux">the complete installation guide for Arch Linux</a> at vagrant-kvm wiki.
+</p>
+<h2><span class="mw-headline" id="Provisioning">Provisioning</span></h2>
+<p><i>Provisioners</i> allow you to automatically install software, alter and automate configurations as part of the vagrant up process. The two most common provisioners are <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=puppet">puppet</a></span> from <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/chef/">chef</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/chef">aur-mirror</a>]</sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> Arch User Repository.
+</p>
+<h2><span class="mw-headline" id="Base_Boxes_for_Vagrant">Base Boxes for Vagrant</span></h2>
+<p>Here is a list of places to get all sorts of vagrant base boxes for different purposes: development, testing, or even production.
+</p>
+<ul><li> A well maintained up-to-date <a rel="nofollow" class="external text" href="https://github.com/terrywang/vagrantboxes/blob/master/archlinux-x86_64.md">Arch Linux x86_64</a> base box for Vagrant</li></ul>
+<ul><li> The same Arch Linux x86_64 base box can also be obtained via Vagrant Cloud by running: <code>vagrant init terrywang/archlinux</code>
+</li></ul>
+<ul><li> <a rel="nofollow" class="external text" href="https://vagrantcloud.com/">Vagrant Cloud</a> is HashiCorp's official site for Vagrant boxes. You can browse user-submitted boxes or upload your own. A single Vagrant Cloud box can support multiple providers with versioning.</li></ul>
+<ul><li> <a rel="nofollow" class="external text" href="http://vagrantbox.es/">vagrantbox.es</a><br>A List of vagrant base boxes. Initiated by Gareth Rushgrove <a rel="nofollow" class="external text" href="https://twitter.com/garethr">@garethr</a> hosted on Heroku using Nginx. See the story here: <a rel="nofollow" class="external text" href="http://www.morethanseven.net/2012/07/01/The-vagrantbox.es-story/">The Vagrantbox.es Story</a>.</li></ul>
+<ul><li> Opscode <a rel="nofollow" class="external text" href="https://github.com/opscode/bento">bento</a><br>We all know what bento means in Japanese, right? In this case, they are <b>NOT</b> lunch boxes <b>BUT</b> extremely useful base boxes which can be used to test cookbooks or private chef (Chef Server and Client). Distributions included: Ubuntu Server, Debian, CentOS, Fedora and FreeBSD.</li></ul>
+<ul><li> <a rel="nofollow" class="external text" href="http://puppet-vagrant-boxes.puppetlabs.com/">Puppet Labs Vagrant Boxes</a><br>Pre-rolled vagrant boxes, ready for use. Made by the folks at Puppet Labs.</li></ul>
+<ul><li> <a rel="nofollow" class="external text" href="http://cloud-images.ubuntu.com/vagrant/">Vagrant Ubuntu Cloud Images</a><br>It has been there since Jan, 2013. For some reason Canonical has NOT officially promoted it yet, may be still in beta. Remember these are vanilla images, NOT very useful without Chef or Puppet.</li></ul>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="No_ping_between_host_and_vagrant_box_.28host-only_networking.29">No ping between host and vagrant box (host-only networking)</span></h3>
+<p>Sometimes there are troubles with host-only networking not functioning. Host have no ip on vboxnet interface, host cannot ping vagrant boxes and cannot be pinged from them. This is solved by installing good old <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=net-tools">net-tools</a></span> as mentioned in <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1178607#p1178607">this thread</a> by kevin1024
+</p>
+<h3><span class="mw-headline" id="Virtual_machine_is_not_network_accessible_from_the_Arch_host_OS">Virtual machine is not network accessible from the Arch host OS</span></h3>
+<p>As of version 1.8.4, Vagrant appears to use the deprecated <code>route</code> command to configure routing to the virtual network interface which bridges to the virtual machine(s).  If <code>route</code> is not installed, you will not be able to access the virtual machine from the host OS due to the lack of suitable route.  The solution, as mentioned above, is to install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=net-tools">net-tools</a></span> package, which includes the route command.
+</p>
+<h3><span class="mw-headline" id=".27vagrant_up.27_hangs_on_NFS_mounting_.28Mounting_NFS_shared_folders....29">'vagrant up' hangs on NFS mounting (Mounting NFS shared folders...)</span></h3>
+<p>Installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=net-tools">net-tools</a></span> package may solve this problem.
+</p>
+<h3><span class="mw-headline" id="Error_starting_network_.27default.27:_internal_error:_Failed_to_initialize_a_valid_firewall_backend">Error starting network 'default': internal error: Failed to initialize a valid firewall backend</span></h3>
+<p>Most likely the firewall dependencies were not installed. <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ebtables">ebtables</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span> packages and <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> the <code>libvirtd</code> systemd service.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://docs.vagrantup.com/v2/getting-started/project_setup.html">official Vagrant documentation</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Vagrant_(software)" class="extiw" title="wikipedia:Vagrant (software)">Wikipedia:Vagrant (software)</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DAViCal - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DAViCal skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DAViCal</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Kcaldav.html" title="Kcaldav">Kcaldav</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/AgenDAV.html" title="AgenDAV">AgenDAV</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Radicale.html" title="Radicale">Radicale</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://www.davical.org/">DAViCal</a> is a server implementing the CalDAV and CardDAV protocol. It's solely a server, with minimal direct user interaction, instead relying on using CalDav clients, such as Apple's iCal.app, iOS (iPhone, iPad, iPod), Thunderbird with Sunbird, or Evolution.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Installing_pre-requisites">Installing pre-requisites</span></h3>
+<p>DAViCal is written in <a href="../en/PHP.html" title="PHP">PHP</a> and uses the <a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a> database as its backend to store the calendar information. Currently it only supports PostgreSQL, but there is work to support other databases as well. <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/davical/">davical</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=postgresql">postgresql</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php">php</a></span>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-pgsql">php-pgsql</a></span>.
+</p>
+<p>DAViCal is a web application, and therefore you need a web server set up as well. Here <a href="../en/Nginx.html" title="Nginx">Nginx</a> will be assumed, but DAViCal can run on nearly any web server (some may stop processing requests when they see the CalDAV HTTP headers, and therefore DAViCal will not be able to see them).
+</p>
+<h3><span class="mw-headline" id="Preparing_PostgreSQL">Preparing PostgreSQL</span></h3>
+<p>First of all, you should set up PostgreSQL so it can start up by following <a href="../en/PostgreSQL.html#Installing_PostgreSQL" title="PostgreSQL">this guide</a>.
+</p>
+<p>DAViCal requires two independent accounts to be set up, one for accessing the database from the web application, which will be limited in power, and another that will be used for administrating the DAViCal related tables.
+</p>
+<p>In order to do so, you will need to edit <i>/var/lib/postgres/data/pg_hba.conf</i>
+</p>
+<p>Add the following lines:
+</p>
+<pre>   local   davical         davical_app                             trust
+   local   davical         davical_dba                             trust
+</pre>
+<p>Make sure that you have a 'root' role in your database. If you don't, create it by becoming the postgres user as described on <a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a> page and execute the following:
+</p>
+<pre>$ createuser -s -U postgres --interactive
+$ Enter name of role to add: root
+</pre>
+<p>Prepare database by running create-database.sh script as root:
+</p>
+<pre># /usr/share/webapps/davical/dba/create-database.sh
+</pre>
+<p>Then run createdb as root:
+</p>
+<pre># createdb
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

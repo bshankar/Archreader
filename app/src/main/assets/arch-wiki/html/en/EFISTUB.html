@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>EFISTUB - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-EFISTUB skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">EFISTUB</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a></li>
+</ul>
+</div>
+<p>The Linux Kernel (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span>&gt;=3.3) supports EFISTUB (EFI BOOT STUB) booting. This feature allows EFI firmware to load the kernel as an EFI executable. The option is enabled by default on Arch Linux kernels or can be activated by setting <code>CONFIG_EFI_STUB=y</code> in the Kernel configuration (see <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/efi-stub.txt">The EFI Boot Stub</a> for more information).
+</p>
+<p>An EFISTUB kernel can be booted directly by a UEFI motherboard or indirectly using a <a href="../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a>. The latter is recommended if you have multiple kernel/initramfs pairs and your motherboard's UEFI boot menu is not easy to use.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Setting_up_EFISTUB"><span class="tocnumber">1</span> <span class="toctext">Setting up EFISTUB</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Alternative_ESP_Mount_Points"><span class="tocnumber">1.1</span> <span class="toctext">Alternative ESP Mount Points</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Using_systemd"><span class="tocnumber">1.1.1</span> <span class="toctext">Using systemd</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Using_incron"><span class="tocnumber">1.1.2</span> <span class="toctext">Using incron</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Using_mkinitcpio_hook"><span class="tocnumber">1.1.3</span> <span class="toctext">Using mkinitcpio hook</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Using_mkinitcpio_hook_.282.29"><span class="tocnumber">1.1.4</span> <span class="toctext">Using mkinitcpio hook (2)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Booting_EFISTUB"><span class="tocnumber">2</span> <span class="toctext">Booting EFISTUB</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Using_a_boot_manager"><span class="tocnumber">2.1</span> <span class="toctext">Using a boot manager</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Using_UEFI_Shell"><span class="tocnumber">2.2</span> <span class="toctext">Using UEFI Shell</span></a></li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Using_UEFI_directly"><span class="tocnumber">2.3</span> <span class="toctext">Using UEFI directly</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#efibootmgr"><span class="tocnumber">2.3.1</span> <span class="toctext">efibootmgr</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#UEFI_Shell"><span class="tocnumber">2.3.2</span> <span class="toctext">UEFI Shell</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setting_up_EFISTUB">Setting up EFISTUB</span></h2>
+<p>After creating the <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>, you must choose how it will be mounted. The simplest option is to mount it at <code>/boot</code> or <a href="../en/EFI_System_Partition.html#Using_bind_mount" title="EFI System Partition">bind mount</a> it to <code>/boot</code> since this allows pacman to directly update the kernel that the EFI firmware will read. If you elect for this option, continue to <a href="#Booting_EFISTUB">#Booting EFISTUB</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can keep kernel and initramfs out of ESP if you use a boot manager which has a file system driver for the partition where they reside, e.g. <a href="../en/REFInd.html" title="REFInd">rEFInd</a>.</div>
+<h3><span class="mw-headline" id="Alternative_ESP_Mount_Points">Alternative ESP Mount Points</span></h3>
+<p>If you do not mount the EFI System Partition to <code>/boot</code>, you will need to copy your boot files to its location (referred to hereafter as <code><i>esp</i></code>).
+</p>
+<pre># mkdir -p <i>esp</i>/EFI/arch
+# cp /boot/vmlinuz-linux <i>esp</i>/EFI/arch/vmlinuz-linux
+# cp /boot/initramfs-linux.img <i>esp</i>/EFI/arch/initramfs-linux.img
+# cp /boot/initramfs-linux-fallback.img <i>esp</i>/EFI/arch/initramfs-linux-fallback.img
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When using an Intel CPU, you may need to copy the <a href="../en/Microcode.html" title="Microcode">Microcode</a> to the boot-entry location.</div>
+<p>Furthermore, you will need to keep the files on the ESP up-to-date with later kernel updates. Failure to do so could result in an unbootable system. The following sections discuss several mechanisms for automating it.
+</p>
+<h4><span class="mw-headline" id="Using_systemd">Using systemd</span></h4>
+<p><a href="../en/Systemd.html" title="Systemd">Systemd</a> features event triggered tasks. In this particular case, the ability to detect a change in path is used to sync the EFISTUB kernel and initramfs files when they are updated in <code>/boot</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/efistub-update.path</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Copy EFISTUB Kernel to UEFISYS Partition
+
+[Path]
+PathChanged=/boot/initramfs-linux-fallback.img
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=system-update.target
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This watches for changes to <code>initramfs-linux-fallback.img</code> since this is the last file built by mkinitcpio. This is to avoid a potential race condition where systemd could copy older files before they are all done being built.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/efistub-update.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Copy EFISTUB Kernel to UEFISYS Partition
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/cp -f /boot/vmlinuz-linux <i>esp</i>/EFI/arch/vmlinuz-linux
+ExecStart=/usr/bin/cp -f /boot/initramfs-linux.img <i>esp</i>/EFI/arch/initramfs-linux.img
+ExecStart=/usr/bin/cp -f /boot/initramfs-linux-fallback.img <i>esp</i>/EFI/arch/initramfs-linux-fallback.img</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For <a href="../en/Secure_Boot.html" title="Secure Boot">Secure Boot</a> (with your own keys), you can set up the service to also sign the image (using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sbsigntools">sbsigntools</a></span>):
+ <pre>ExecStart=/usr/bin/sbsign --key <i>/path/to/db.key</i> --cert <i>/path/to/db.crt</i> --output <i>esp</i>/EFI/arch/vmlinuz-linux <i>esp</i>/EFI/arch/vmlinuz_linux</pre>
+</div>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>efistub-update.path</code>.
+</p>
+<h4><span class="mw-headline" id="Using_incron">Using incron</span></h4>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=incron">incron</a></span> can be used to run a script syncing the EFISTUB Kernel after kernel updates.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/efistub-update.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/usr/bin/env bash
+/usr/bin/cp -f /boot/vmlinuz-linux <i>esp</i>/EFI/arch/vmlinuz-linux
+/usr/bin/cp -f /boot/initramfs-linux.img <i>esp</i>/EFI/arch/initramfs-linux.img
+/usr/bin/cp -f /boot/initramfs-linux-fallback.img <i>esp</i>/EFI/arch/initramfs-linux-fallback.img</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The first parameter <code>/boot/initramfs-linux-fallback.img</code> is the file to watch. The second parameter <code>IN_CLOSE_WRITE</code> is the action to watch for. The third parameter <code>/usr/local/bin/efistub-update.sh</code> is the script to execute.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/incron.d/efistub-update.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/boot/initramfs-linux-fallback.img IN_CLOSE_WRITE /usr/local/bin/efistub-update.sh</pre>
+<p>In order to use this method, enable the incrond service:
+</p>
+<pre># systemctl enable incrond.service
+</pre>
+<h4><span class="mw-headline" id="Using_mkinitcpio_hook">Using mkinitcpio hook</span></h4>
+<p>Mkinitcpio can generate a hook that does not need a system level daemon to function. It spawns a background process which waits for the generation of <code>vm-linuz</code>, <code>initramfs-linux.img</code>, and <code>initramfs-linux-fallback.img</code> before copying the files.
+</p>
+<p>Add <code>efistub-update</code> to the list of hooks in <code>/etc/mkinitcpio.conf</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/initcpio/install/efistub-update</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/usr/bin/env bash
+build() {
+	/root/watch.sh &amp;
+}
+
+help() {
+	cat &lt;&lt;HELPEOF
+This hook waits for mkinitcpio to finish and copies the finished ramdisk and kernel to the ESP
+HELPEOF
+}</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/root/watch.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/usr/bin/env bash
+
+while [[ -d "/proc/$PPID" ]]; do
+	sleep 1
+done
+
+/usr/bin/cp -f /boot/vmlinuz-linux <i>esp</i>/EFI/arch/vmlinuz-linux
+/usr/bin/cp -f /boot/initramfs-linux.img <i>esp</i>/EFI/arch/initramfs-linux.img
+/usr/bin/cp -f /boot/initramfs-linux-fallback.img <i>esp</i>/EFI/arch/initramfs-linux-fallback.img
+
+echo "Synced kernel with ESP"</pre>
+<h4><span class="mw-headline" id="Using_mkinitcpio_hook_.282.29">Using mkinitcpio hook (2)</span></h4>
+<p>Another <b>alternative</b> to the above solutions, that is potentially cleaner because there are less copies and does not need a system level daemon to function. The logic is reversed, the initramfs is directly stored in the EFI partition, not copied in /boot. Then the kernel and any other additional files are copied to the ESP partition, thanks to a mkinitcpio hook.
+</p>
+<p>Edit the file <code>/etc/mkinitcpio.d/linux.preset</code> :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.d/linux.preset</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# mkinitcpio preset file for the 'linux' package
+
+# Directory to copy the kernel, the initramfs...
+ESP_DIR="/boot/efi/EFI/arch"
+
+ALL_config="/etc/mkinitcpio.conf"
+ALL_kver="/boot/vmlinuz-linux"
+
+PRESETS=('default' 'fallback')
+
+#default_config="/etc/mkinitcpio.conf"
+default_image="${ESP_DIR}/initramfs-linux.img"
+default_options="-A esp-update-linux"
+
+#fallback_config="/etc/mkinitcpio.conf"
+fallback_image="${ESP_DIR}/initramfs-linux-fallback.img"
+fallback_options="-S autodetect"
+</pre>
+<p>Then create the file <code>/usr/lib/initcpio/install/esp-update-linux</code> which need to be executable :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/initcpio/install/esp-update-linux</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Directory to copy the kernel, the initramfs...
+ESP_DIR="/boot/efi/EFI/arch"
+
+build() {
+	cp /boot/vmlinuz-linux "${ESP_DIR}/vmlinuz-linux.efi"
+	# If ucode is used uncomment this line
+	#cp /boot/intel-ucode.img "${ESP_DIR}/"
+}
+
+help() {
+	cat &lt;&lt;HELPEOF
+This hook copies the kernel to the ESP partition
+HELPEOF
+}
+</pre>
+<p>To test that, just run:
+</p>
+<pre>rm /boot/initramfs-linux-fallback.img
+rm /boot/initramfs-linux.img
+mkinitcpio -p linux
+</pre>
+<h2><span class="mw-headline" id="Booting_EFISTUB">Booting EFISTUB</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Linux Kernel EFISTUB initramfs path should be relative to the EFI System Partition's root. For example, if the initramfs is located in <code>$esp/EFI/arch/initramfs-linux.img</code>, the corresponding UEFI formatted line should be <code>initrd=/EFI/arch/initramfs-linux.img</code> or <code>initrd=\EFI\arch\initramfs-linux.img</code>. In the following examples we will assume that everything is in <code>$esp/</code>.</div>
+<h3><span class="mw-headline" id="Using_a_boot_manager">Using a boot manager</span></h3>
+<p>There are several UEFI boot managers which can provide additional options or simplify the process of UEFI booting - especially if you have multiple kernels/operating systems. See <a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a> for more information.
+</p>
+<h3><span class="mw-headline" id="Using_UEFI_Shell">Using UEFI Shell</span></h3>
+<p>It is possible to launch an EFISTUB kernel from UEFI Shell as if it is a normal UEFI application. In this case the kernel parameters are passed as normal parameters to the launched EFISTUB kernel file.
+</p>
+<pre>&gt; fs0:
+&gt; /vmlinuz-linux root=PARTUUID=3518bb68-d01e-45c9-b973-0b5d918aae96 rw initrd=/initramfs-linux.img
+</pre>
+<p>To avoid needing to remember all of your kernel parameters every time, you can save the executable command to a shell script such as <code>archlinux.nsh</code> on your UEFI System Partition, then run it with:
+</p>
+<pre>&gt; fs0:
+&gt; archlinux
+</pre>
+<h3><span class="mw-headline" id="Using_UEFI_directly">Using UEFI directly</span></h3>
+<p>UEFI is designed to remove the need for an intermediate bootloader such as <a href="../en/GRUB.html" title="GRUB">GRUB</a>. If your motherboard has a good UEFI implementation, it is possible to embed the kernel parameters within a UEFI boot entry and for the motherboard to boot Arch directly. You can use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=efibootmgr">efibootmgr</a></span> or UEFI Shell v2 to modify your motherboard's boot entries.
+</p>
+<h4><span class="mw-headline" id="efibootmgr">efibootmgr</span></h4>
+<p>The command looks like
+</p>
+<pre># efibootmgr -d <i>/dev/sdX</i> -p <i>Y</i> -c -L "Arch Linux" -l /vmlinuz-linux -u "root=<i>/dev/sdBZ</i> rw initrd=/initramfs-linux.img"
+</pre>
+<p>Where <code><i>/dev/sdX</i></code> and <code><i>Y</i></code> are the disk and partition where the ESP is located. Change the <code>root=</code> parameter to reflect your Linux root (disk UUIDs can also be used). Note that the <code>-u</code> argument in double quotes is just the list of <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>, so you may need to add additional parameters e.g. for <a href="../en/Power_management/Suspend_and_hibernate.html#Required_kernel_parameters" title="Suspend and hibernate" class="mw-redirect">suspend to disk</a> or <a href="../en/Microcode.html" title="Microcode">microcode</a>.
+</p>
+<p>It is a good idea to then run
+</p>
+<pre># efibootmgr -v
+</pre>
+<p>to verify that the resulting entry is correct.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Some kernel and <code>efibootmgr</code> version combinations might refuse to create new boot entries. This could be due to lack of free space in the NVRAM. You can try deleting any EFI dump files
+<pre># rm /sys/firmware/efi/efivars/dump-*
+</pre>
+Or, as a last resort, boot with the <code>efi_no_storage_paranoia</code> kernel parameter. You can also try to downgrade your efibootmgr install to version 0.11.0 if you have it available in your cache. This version works with Linux version 4.0.6. See the bug discussion <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/34641">FS#34641</a> for more information.</div>
+<p>To set the boot order, run:
+</p>
+<pre># efibootmgr -o XXXX,XXXX
+</pre>
+<p>where XXXX is the number that appears in the output of `efibootmgr` command against each entry.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Save the command for creating your boot entry in a shell script somewhere, which makes it easier to modify (when changing kernel parameters, for example).</div>
+<p>More info about efibootmgr at <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="UEFI" class="mw-redirect">UEFI#efibootmgr</a>. Forum post <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1090040#p1090040">https://bbs.archlinux.org/viewtopic.php?pid=1090040#p1090040</a> .
+</p>
+<h4><span class="mw-headline" id="UEFI_Shell">UEFI Shell</span></h4>
+<p>Some UEFI implementations make it difficult to modify the NVRAM successfully using efibootmgr. If efibootmgr cannot successfully create an entry, you can use the <a href="../en/Unified_Extensible_Firmware_Interface.html#bcfg" title="UEFI" class="mw-redirect">bcfg</a> command in UEFI Shell v2.
+</p>
+<p>To add an entry for your kernel, use:
+</p>
+<pre>Shell&gt; bcfg boot add <b>N</b> fs<b>V</b>:\vmlinuz-linux "Arch Linux"
+</pre>
+<p>where <code>N</code> is the priority (0 is top priority) and <code>V</code> is the volume number representing your EFI partition. If you don't know which volume number you should use, use the map command to list file systems, and the ls command to list their contents:
+</p>
+<pre>Shell&gt; map
+Shell&gt; ls fs0:
+</pre>
+<p>To add the bare minimum necessary kernel options, use:
+</p>
+<pre>Shell&gt; bcfg boot -opt <b>N</b> "root=<b>/dev/sdX#</b> rw initrd=\initramfs-linux.img"
+</pre>
+<p>where <code>N</code> is the priority number you selected in the first step, and <code>/dev/sdX#</code> represents your root partition.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_loaders.html" title="Category:Boot loaders">Boot loaders</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

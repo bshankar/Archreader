@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SCM Example Trac - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SCM_Example_Trac skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SCM Example Trac</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Not updated for over 3 years, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=trac">trac</a></span> is at 1.0.5 as of September 2015 (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SCM_Example_Trac">Talk:SCM Example Trac#</a>)</div>
+</div>
+<p>The HOWTO teaches you to setup multi-project Trac/Subversion for a private and trusted environment (ex: a development team).
+</p>
+<p>Updated for Trac 0.11
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Basic_Environment"><span class="tocnumber">1</span> <span class="toctext">Basic Environment</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Preparation"><span class="tocnumber">2</span> <span class="toctext">Preparation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Required_Packages"><span class="tocnumber">2.1</span> <span class="toctext">Required Packages</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Post-Install_Steps"><span class="tocnumber">2.2</span> <span class="toctext">Post-Install Steps</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Disable_connection_pooling"><span class="tocnumber">2.2.1</span> <span class="toctext">Disable connection pooling</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Install_webadmin_plugin"><span class="tocnumber">2.2.2</span> <span class="toctext">Install webadmin plugin</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Setup_Basic_Environment"><span class="tocnumber">3</span> <span class="toctext">Setup Basic Environment</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Set_permissions"><span class="tocnumber">3.1</span> <span class="toctext">Set permissions</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Create_User_List"><span class="tocnumber">3.2</span> <span class="toctext">Create User List</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Create_Database"><span class="tocnumber">3.3</span> <span class="toctext">Create Database</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Configure_Web_Server"><span class="tocnumber">3.4</span> <span class="toctext">Configure Web Server</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Create_Projects"><span class="tocnumber">4</span> <span class="toctext">Create Projects</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Create_Subversion_Repository"><span class="tocnumber">4.1</span> <span class="toctext">Create Subversion Repository</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Create_Trac_Project"><span class="tocnumber">4.2</span> <span class="toctext">Create Trac Project</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Modify_the_.2Fmnt.2Frpo.2Ftrac.2FMY_PROJECT.2Fconf.2Ftrac.ini_file"><span class="tocnumber">4.2.1</span> <span class="toctext">Modify the <i>/mnt/rpo/trac/MY_PROJECT/conf/trac.ini</i> file</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Basic_Environment">Basic Environment</span></h2>
+<dl>
+<dt>Network</dt>
+<dd></dd>
+<dd> URL: <a rel="nofollow" class="external free" href="http://scm.example.com">http://scm.example.com</a>
+</dd>
+<dd> Subversion URL: <a rel="nofollow" class="external free" href="http://scm.example.com/svn/MY_PROJECT">http://scm.example.com/svn/MY_PROJECT</a>
+</dd>
+<dd> Trac URL: <a rel="nofollow" class="external free" href="http://scm.example.com/trac/MY_PROJECT">http://scm.example.com/trac/MY_PROJECT</a>
+</dd>
+</dl>
+<dl>
+<dt>Database</dt>
+<dd></dd>
+<dd> PostgreSQL, with trust authentication method</dd>
+</dl>
+<dl>
+<dt>Filesystem</dt>
+<dd></dd>
+<dd> Configuration files are in <code>/mnt/rpo/conf</code>
+</dd>
+<dd> Subversion repositories is in <code>/mnt/rpo/svn</code>
+</dd>
+<dd> Trac project files is in <code>/mnt/rpo/trac</code>
+</dd>
+</dl>
+<h2><span class="mw-headline" id="Preparation">Preparation</span></h2>
+<h3><span class="mw-headline" id="Required_Packages">Required Packages</span></h3>
+<p>Install the following packages:
+</p>
+<ul>
+<li> apache</li>
+<li> mod_python (AUR package)</li>
+<li> postgresql</li>
+<li> pypgsql</li>
+<li> python2-psycopg2 / python-psycopg2 (depends on python version)</li>
+<li> setuptools</li>
+<li> subversion</li>
+<li> trac</li>
+</ul>
+<h3><span class="mw-headline" id="Post-Install_Steps">Post-Install Steps</span></h3>
+<h4><span class="mw-headline" id="Disable_connection_pooling">Disable connection pooling</span></h4>
+<p>Edit <i>/usr/lib/python2.5/site-packages/trac/db/postgres_backend.py</i>:
+</p>
+<pre> class PostgreSQLConnection
+   ......
+   poolable = False   # Change this line
+</pre>
+<h4><span class="mw-headline" id="Install_webadmin_plugin">Install webadmin plugin</span></h4>
+<p><b>This is no longer needed, starting with version 0.11 it has been</b>
+incorporated into the core system
+</p>
+<pre> svn co <a rel="nofollow" class="external free" href="http://svn.edgewall.com/repos/trac/sandbox/webadmin">http://svn.edgewall.com/repos/trac/sandbox/webadmin</a>
+ cd webadmin
+ python setup.py bdist_egg
+ easy_install -Z dist/*.egg
+</pre>
+<h2><span class="mw-headline" id="Setup_Basic_Environment">Setup Basic Environment</span></h2>
+<p>Create the directories:
+</p>
+<pre> mkdir -p /mnt/rpo/conf
+ mkdir -p /mnt/rpo/svn
+ mkdir -p /mnt/rpo/trac
+</pre>
+<h3><span class="mw-headline" id="Set_permissions">Set permissions</span></h3>
+<p>The user account under which the web server runs will require write permissions to the environment directory and all the files inside. With the web server running as user http and group http, enter:
+</p>
+<pre> chown -R http.http /mnt/rpo
+</pre>
+<h3><span class="mw-headline" id="Create_User_List">Create User List</span></h3>
+<p>Create a new list and add initial user:
+</p>
+<pre> htdigest -c /mnt/rpo/conf/svn-user svnrepos <i>FIRST_USER</i>
+</pre>
+<p>To add other users:
+</p>
+<pre> htdigest /mnt/rpo/conf/svn-user svnrepos <i>OTHER_USER</i>
+</pre>
+<p>You can edit the <i>svn-user</i> file to remove or rename users
+</p>
+<h3><span class="mw-headline" id="Create_Database">Create Database</span></h3>
+<p>Create the trac user and the database:
+</p>
+<pre> /etc/rc.d/postgresql start
+ psql -U postgres postgres
+ postgres=# CREATE USER trac;
+ postgres=# CREATE DATABASE trac OWNER = trac;
+ postgres=# \q
+</pre>
+<h3><span class="mw-headline" id="Configure_Web_Server">Configure Web Server</span></h3>
+<p>Edit <i>/etc/httpd/conf/httpd.conf</i>:
+</p>
+<pre> LoadModule dav_module              modules/mod_dav.so
+ LoadModule dav_svn_module          modules/mod_dav_svn.so
+ LoadModule python_module           modules/mod_python.so
+ 
+ # Inside some virtual host if the server is not dedicated to scm
+ DocumentRoot "/var/empty"
+ &lt;Location /&gt;
+   Require valid-user
+   AuthType Digest
+   AuthName "svnrepos"
+   AuthDigestDomain <i><a rel="nofollow" class="external free" href="http://scm.example.com/">http://scm.example.com/</a></i>
+   AuthDigestProvider file
+   AuthUserFile <i>/mnt/rpo/conf/svn-user</i>
+ &lt;/Location&gt;
+ &lt;Location /svn&gt;
+   DAV svn
+   SVNParentPath <i>/mnt/rpo/svn</i>
+   SVNPathAuthz off
+ &lt;/Location&gt;
+ &lt;Location /trac&gt;
+   SetHandler mod_python
+   PythonHandler trac.web.modpython_frontend
+   PythonOption TracEnvParentDir <i>/mnt/rpo/trac</i>
+   PythonOption TracUriRoot /trac
+ &lt;/Location&gt;
+</pre>
+<h2><span class="mw-headline" id="Create_Projects">Create Projects</span></h2>
+<p>Each project is consisted of one subversion repository and one trac project, with independent wiki and access control.
+</p>
+<h3><span class="mw-headline" id="Create_Subversion_Repository">Create Subversion Repository</span></h3>
+<p>Just execute one line:
+</p>
+<pre> svnadmin create /mnt/rpo/svn/MY_PROJECT
+</pre>
+<h3><span class="mw-headline" id="Create_Trac_Project">Create Trac Project</span></h3>
+<ul><li> Initialize project dir:</li></ul>
+<pre> trac-admin /mnt/rpo/trac/MY_PROJECT initenv
+</pre>
+<dl><dd> Database connection string: <code>postgres://trac:password@localhost/trac?schema=MY_PROJECT</code>
+<dl><dd> (each project must be given an unique schema; no need to create the schemas first)</dd></dl>
+</dd></dl>
+<ul><li> Grant admin permission to all logon users:</li></ul>
+<pre> trac-admin /mnt/rpo/trac/MY_PROJECT permission add authenticated TRAC_ADMIN
+</pre>
+<h4><span class="mw-headline" id="Modify_the_.2Fmnt.2Frpo.2Ftrac.2FMY_PROJECT.2Fconf.2Ftrac.ini_file">Modify the <i>/mnt/rpo/trac/MY_PROJECT/conf/trac.ini</i> file</span></h4>
+<ul>
+<li> Change <b>repository_type</b> to <b>svn</b>
+</li>
+<li> Change <b>repository_path</b> to <b>/mnt/rpo/svn/MY_PROJECT</b>
+</li>
+<li> Change <b>default_charset</b> to <b>utf-8</b> or other encodings.<br>
+</li>
+</ul>
+<ul><li> Allow web admin (<a rel="nofollow" class="external free" href="http://scm.example.com/trac/MY_PROJECT/admin">http://scm.example.com/trac/MY_PROJECT/admin</a>):</li></ul>
+<pre>echo -e "[components]\nwebadmin.* = enabled" &gt;&gt; /mnt/rpo/trac/MY_PROJECT/conf/trac.ini
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Version_Control_System.html" title="Category:Version Control System">Version Control System</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

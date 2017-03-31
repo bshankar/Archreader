@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Reflector - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Reflector skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Reflector</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mirrors.html" title="Mirrors">Mirrors</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman.html" title="Pacman">Pacman</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://xyne.archlinux.ca/projects/reflector/">Reflector</a> is a script which can retrieve the latest mirror list from the <a rel="nofollow" class="external text" href="https://www.archlinux.org/mirrors/status/">MirrorStatus</a> page, filter the most up-to-date mirrors, sort them by speed and overwrite the file <code>/etc/pacman.d/mirrorlist</code>. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Examples"><span class="tocnumber">2.1</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Systemd_Service"><span class="tocnumber">2.2</span> <span class="toctext">Systemd Service</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Systemd_Timer"><span class="tocnumber">2.3</span> <span class="toctext">Systemd Timer</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Pacman_Hook"><span class="tocnumber">2.3.1</span> <span class="toctext">Pacman Hook</span></a></li>
+<li class="toclevel-3 tocsection-7">
+<a href="#AUR_package"><span class="tocnumber">2.3.2</span> <span class="toctext">AUR package</span></a>
+<ul>
+<li class="toclevel-4 tocsection-8"><a href="#reflector-timer"><span class="tocnumber">2.3.2.1</span> <span class="toctext">reflector-timer</span></a></li>
+<li class="toclevel-4 tocsection-9"><a href="#reflector-timer-weekly"><span class="tocnumber">2.3.2.2</span> <span class="toctext">reflector-timer-weekly</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=reflector">reflector</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> In the following examples, <code>/etc/pacman.d/mirrorlist</code> will be overwritten. Make a backup before proceeding.</li>
+<li> Make sure the resulting <code>/etc/pacman.d/mirrorlist</code> does not contain entries that you consider untrustworthy before syncing or updating with <a href="../en/Pacman.html" title="Pacman">Pacman</a>.</li>
+</ul>
+</div>
+<p>To see all of the available commands, run the following command:
+</p>
+<pre># reflector --help
+</pre>
+<h3><span class="mw-headline" id="Examples">Examples</span></h3>
+<p>Filter the first five mirrors, sort them by download rate and overwrite the file <code>/etc/pacman.d/mirrorlist</code>:
+</p>
+<pre># reflector --verbose -l 5 --sort rate --save /etc/pacman.d/mirrorlist
+</pre>
+<p>Verbosely rate the 200 most recently synchronized HTTP servers, sort them by download rate, and overwrite the file <code>/etc/pacman.d/mirrorlist</code>:
+</p>
+<pre># reflector --verbose -l 200 -p http --sort rate --save /etc/pacman.d/mirrorlist
+</pre>
+<p>Verbosely rate the 200 most recently synchronized HTTPS servers located in the US, sort them by download rate, and overwrite the file <code>/etc/pacman.d/mirrorlist</code>:
+</p>
+<pre># reflector --verbose --country 'United States' -l 200 -p https --sort rate --save /etc/pacman.d/mirrorlist
+</pre>
+<h3><span class="mw-headline" id="Systemd_Service">Systemd Service</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/reflector.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Pacman mirrorlist update
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/reflector --protocol https --latest 30 --number 20 --sort rate --save /etc/pacman.d/mirrorlist
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">starting</a> <code>reflector.service</code> will update your mirrorlist.
+</p>
+<p>To update your mirrorlist every time your computer boots you can enable the following service definition.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/reflector.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Pacman mirrorlist update
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/reflector --protocol https --latest 30 --number 20 --sort rate --save /etc/pacman.d/mirrorlist
+
+[Install]
+RequiredBy=multi-user.target
+</pre>
+<p>Make sure you <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/">activate the appropriate services</a> so that <code>network.target</code> really reflects your network status.
+</p>
+<h3><span class="mw-headline" id="Systemd_Timer">Systemd Timer</span></h3>
+<p>If you want to run <code>reflector.service</code> on a weekly basis:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/reflector.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Run reflector weekly
+
+[Timer]
+OnCalendar=weekly
+RandomizedDelaySec=12h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+</pre>
+<p>And then just <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>reflector.timer</code>.
+</p>
+<h4><span class="mw-headline" id="Pacman_Hook">Pacman Hook</span></h4>
+<p>You can also create a pacman hook that will run <i>reflector</i> and remove the <code>.pacnew</code> file created every time <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pacman-mirrorlist">pacman-mirrorlist</a></span> gets an upgrade.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/hooks/mirrorupgrade.hook</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = pacman-mirrorlist
+
+[Action]
+Description = Updating pacman-mirrorlist with reflector and removing pacnew...
+When = PostTransaction
+Depends = reflector
+Exec = /usr/bin/bash -c "reflector --country 'United States' -l 200 --sort rate --save /etc/pacman.d/mirrorlist &amp;&amp; [[ -f /etc/pacman.d/mirrorlist.pacnew ]] &amp;&amp; rm /etc/pacman.d/mirrorlist.pacnew"
+</pre>
+<p>Make sure to substitute in your desired arguments for <i>reflector</i>.
+</p>
+<p>See <a href="../User:Allan/Pacman_Hooks.html" title="User:Allan/Pacman Hooks">User:Allan/Pacman Hooks</a> and <a href="../en/DeveloperWiki:Pacman_Hooks.html" title="DeveloperWiki:Pacman Hooks">DeveloperWiki:Pacman Hooks</a> for more info on pacman hooks.
+</p>
+<h4><span class="mw-headline" id="AUR_package">AUR package</span></h4>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/reflector-timer/">reflector-timer</a></span><sup><small>AUR</small></sup> package to run <i>reflector</i> daily, or install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/reflector-timer-weekly/">reflector-timer-weekly</a></span><sup><small>AUR</small></sup> to run it weekly.
+</p>
+<h5><span class="mw-headline" id="reflector-timer">reflector-timer</span></h5>
+<p>The default configuration is:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/reflector-timer/reflector.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+AGE=6
+COUNTRY=Germany
+LATEST=30
+NUMBER=20
+SORT=rate
+</pre>
+<p>To override this configuration, edit <code>/etc/conf.d/reflector.conf</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/conf.d/reflector.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+COUNTRY=US
+</pre>
+<p>Be sure to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>reflector.timer</code>.
+</p>
+<h5><span class="mw-headline" id="reflector-timer-weekly">reflector-timer-weekly</span></h5>
+<p>The default configuration is:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/reflector.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+--save /etc/pacman.d/mirrorlist
+--country China
+--sort rate
+</pre>
+<p>Each line (except that begins with '#') should be valid <code>reflector</code> option.
+</p>
+<p>Be sure to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>reflector.timer</code>.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_management.html" title="Category:Package management">Package management</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

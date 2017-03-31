@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>InspIRCd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-InspIRCd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">InspIRCd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> AUR package no longer available. Still references pre-systemd procedures. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:InspIRCd">Talk:InspIRCd#</a>)</div>
+</div>
+<p><a rel="nofollow" class="external text" href="http://www.inspircd.org/">InspIRCd</a> (Inspire IRC daemon) is a modular and lightweight IRC daemon written in C++. As it is one of the few IRCd projects written from scratch, it avoids a number of design flaws and speed issues that plague other more established IRCd projects with the same or less features, such as UnrealIRCd 3. It's the IRCd used by the <a rel="nofollow" class="external text" href="http://www.chatspike.net/">Chatspike IRC network</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing"><span class="tocnumber">1</span> <span class="toctext">Installing</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuring_.28mandatory.29"><span class="tocnumber">2</span> <span class="toctext">Configuring (mandatory)</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Loading_modules"><span class="tocnumber">3</span> <span class="toctext">Loading modules</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Third-party_modules"><span class="tocnumber">3.1</span> <span class="toctext">Third-party modules</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Starting.2FStopping_the_daemon"><span class="tocnumber">4</span> <span class="toctext">Starting/Stopping the daemon</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#External_links"><span class="tocnumber">5</span> <span class="toctext">External links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing">Installing</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Before you begin, check that you do not have any user or group named <code>inspired</code> as the package will create and run using this user privileges (for security reasons).</div>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/inspircd/">inspircd</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Configuring_.28mandatory.29">Configuring (mandatory)</span></h2>
+<p>This will depend a lot on your needs and system configuration so there's no default configuration. There is, however, an example (very well documented) configuration file located at <code>/etc/inspircd/inspircd.conf.example</code>. Read and edit this file carefully and when you're finished rename it to <code>inspircd.conf</code>.
+The <code>inspircd.conf</code>. file is formatted like an HTML document, which for most people is somewhat different to what they are used to. The format of an instruction within the configuration file looks like the following:
+</p>
+<pre>&lt;tagname variable="value"&gt;
+</pre>
+<p>Note that are some <code>&lt;die value="anything here"&gt;</code> lines in the example file to make sure you read the entire thing. You must remove these entries otherwise the server will not start.
+Further information is available at the <a rel="nofollow" class="external text" href="http://wiki.inspircd.org/Configuration">InspIRCd configuration</a> wiki page.
+</p>
+<h2><span class="mw-headline" id="Loading_modules">Loading modules</span></h2>
+<p>By default, InspIRCd loads no modules. As every feature outside of <a rel="nofollow" class="external text" href="http://tools.ietf.org/html/rfc1459">RFC 1459</a> is actually a module, by loading no modules your ircd really won't do anything impressive.
+You can load modules by adding for instance:
+</p>
+<pre>&lt;module name="m_silence.so"&gt;
+</pre>
+<p>This will load the m_silence module (which provides the somewhat standard SILENCE list facility). You must restart the daemon for changes to take effect.
+A list of the available modules is available at the <a rel="nofollow" class="external text" href="http://wiki.inspircd.org/modules">InspIRCd modules</a> wiki page.
+</p>
+<h3><span class="mw-headline" id="Third-party_modules">Third-party modules</span></h3>
+<p>To install a third-party module, save the <code>[module].cpp</code> within <code>[build-dir]/inspircd/src/inspircd/src/modules/</code> and continue the build process. If you have already built and installed InspIRCd and have the source files intact, compile the module with <code>./configure -modupdate; make</code> and copy to: <code>/usr/lib/inspircd/modules/</code>.
+</p>
+<h2><span class="mw-headline" id="Starting.2FStopping_the_daemon">Starting/Stopping the daemon</span></h2>
+<p>You can start and stop the InspIRCd daemon as usual by running:
+</p>
+<pre>sudo /etc/rc.d/inspircd {start|stop|restart}
+</pre>
+<p>The first start fails sometimes so try restarting until you get no errors. After this you shall have no further problems.
+The reason behind this is because of security reasons the daemon doesn't run as root as you normally would see, so the script must ensure that the user <b>irc</b> has permission to write/read the pid and log files.
+To start on boot just add (as always) [inspircd] to the [daemons] section in the <b>/etc/rc.conf file</b>.
+</p>
+<h2><span class="mw-headline" id="External_links">External links</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.inspircd.org">Inspire IRCd (website)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://wiki.inspircd.org/Main_Page">Inspire IRCd (wiki)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="irc://irc.inspircd.org/inspircd">Inspire IRCd (irc channel)</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_Relay_Chat.html" title="Category:Internet Relay Chat">Internet Relay Chat</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>UWMWiFi - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-UWMWiFi skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">UWMWiFi</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>UWMWiFi is the wireless network used by the University of Wisconsin-Milwaukee.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Netctl_setup"><span class="tocnumber">1</span> <span class="toctext">Netctl setup</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Manual_setup"><span class="tocnumber">2</span> <span class="toctext">Manual setup</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#About_identity"><span class="tocnumber">3</span> <span class="toctext">About identity</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Netctl_setup">Netctl setup</span></h2>
+<p>Still a work in progress, but this seems to function
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/UWMWiFi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Description='UWM WiFi Network'
+Interface=wlp3s0
+Connection=wireless
+Security=wpa-configsection
+IP=dhcp
+WPAConfigSection=(
+    'ssid="UWMWiFi"'
+    'key_mgmt=WPA-EAP'
+    'eap=PEAP'
+    'identity="user@uwm.edu"'
+    'password="password"'
+    'priority=1'
+)
+</pre>
+<p>Then to connect
+</p>
+<pre># netctl stop-all
+# netctl enable UWMWiFi
+# netctl start UWMWiFi
+</pre>
+<h2><span class="mw-headline" id="Manual_setup">Manual setup</span></h2>
+<p>If netctl does not work properly, try connecting manually using the iw tool and <a href="../en/WPA_supplicant.html" title="Wpa supplicant" class="mw-redirect">wpa_supplicant</a> as directed in <a href="../en/Wireless_network_configuration.html" title="Wireless network configuration">Wireless network configuration</a>. Do not forget that most of these commands need to be run with elevated permissions.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/wpa_supplicant/uwm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+network={
+ ssid="UWMWiFi"
+ key_mgmt=WPA-EAP
+ eap=PEAP
+ identity="user@uwm.edu"
+ password="password"
+
+}
+
+ctrl_interface=DIR=/run/wpa_supplicant
+
+</pre>
+<p>Get card name
+</p>
+<pre># ip link
+</pre>
+<p>Assuming your card is <i>wlan0</i>
+</p>
+<pre># ip link set wlan0 up
+# wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/uwm.conf
+# dhcpcd wlan0
+</pre>
+<p>After resuming from sleep or similar
+</p>
+<pre># dhcpcd wlan0 -k
+# dhcpcd wlan0
+</pre>
+<p>So far, this method seems more reliable.
+</p>
+<h2><span class="mw-headline" id="About_identity">About identity</span></h2>
+<p>On some parts of campus the identity field requires "@uwm.edu" and on some parts it requires only the username. For example, the in the Union connecting will fail if you include @uwm.edu, but in the EMS it will fail without it.
+</p>
+<p>This will be tested and validated in the future.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="../en/Netctl.html" title="Netctl">Netctl</a>
+</li>
+<li> <a href="../en/Wireless_network_configuration.html" title="Wireless Setup" class="mw-redirect">Wireless Setup</a>
+</li>
+<li> <a href="../en/WPA_supplicant.html" title="WPA supplicant">WPA supplicant</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://www4.uwm.edu/technology/authenticated/wifi/uwm/">http://www4.uwm.edu/technology/authenticated/wifi/uwm/</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Wireless_networking.html" title="Category:Wireless networking">Wireless networking</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

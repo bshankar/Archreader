@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Reiser4 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Reiser4 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Reiser4</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+</ul>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/Reiser4" class="extiw" title="wikipedia:Reiser4">Reiser4</a> is the successor filesystem for ReiserFS, developed from scratch by <a href="https://en.wikipedia.org/wiki/Namesys" class="extiw" title="wikipedia:Namesys">Namesys</a> and <a href="https://en.wikipedia.org/wiki/Hans_Reiser" class="extiw" title="wikipedia:Hans Reiser">Hans Reiser</a>. It is very efficient for handling small files (often used in <code>/var</code> for this purpose) and includes features such as cheap transparent compression and block suballocation. Because it is an atomic file system "your file system operations either entirely occur, or they entirely don't, and they do not corrupt due to half occurring." <a rel="nofollow" class="external text" href="http://vizzzion.org/?id=reiser4">Benchmarks</a> with other linux filesystems are also available.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Important_Notes"><span class="tocnumber">1</span> <span class="toctext">Important Notes</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Packages"><span class="tocnumber">2</span> <span class="toctext">Packages</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Moving_to_Reiser4"><span class="tocnumber">3</span> <span class="toctext">Moving to Reiser4</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Sample_system"><span class="tocnumber">3.1</span> <span class="toctext">Sample system</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Formatting"><span class="tocnumber">3.2</span> <span class="toctext">Formatting</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Copy_system"><span class="tocnumber">3.3</span> <span class="toctext">Copy system</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#.2Fetc.2Ffstab:"><span class="tocnumber">3.4</span> <span class="toctext">/etc/fstab:</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Bootloader_Examples"><span class="tocnumber">4</span> <span class="toctext">Bootloader Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#.2Fboot.2Fgrub.2Fgrub.cfg:"><span class="tocnumber">4.1</span> <span class="toctext">/boot/grub/grub.cfg:</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#.2Fetc.2Flilo.conf:"><span class="tocnumber">4.2</span> <span class="toctext">/etc/lilo.conf:</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Important_Notes">Important Notes</span></h2>
+<ul>
+<li> Reiser4 requires a patched kernel</li>
+<li> It consumes a little more CPU than other filesystems</li>
+<li> Even <a href="../en/LILO.html" title="LILO">LILO</a> as the only bootloader officially supporting Reiser4 seems to have issues with it when <code>/boot</code> is formatted as Reiser4</li>
+<li> It is still not considered stable</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In systemd219, <a href="../en/Access_Control_Lists.html" title="Access Control Lists">Access Control Lists</a> is not enabled by default on Reiser4 partition. If you put /var on such a filesystem, you will need to do so or <a href="../en/Tmpfs.html" title="Tmpfs">Tmpfs</a> will not be mounted correctly. See for details <a href="../en/Systemd.html#Troubleshooting" title="Systemd">Systemd#Troubleshooting</a>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external text" href="http://gparted.sourceforge.net/livecd.php">Gparted LiveCD</a> is a small Linux distribution booting straight into Gparted. It also supports Reiser4</div>
+<h2><span class="mw-headline" id="Packages">Packages</span></h2>
+<p>1. <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/reiser4progs/">reiser4progs</a></span><sup><small>AUR</small></sup> package
+</p>
+<p>2. You will need a reiser4 patched kernel. Patches can be found here <a rel="nofollow" class="external free" href="http://sourceforge.net/projects/reiser4/files/reiser4-for-linux-3.x/">http://sourceforge.net/projects/reiser4/files/reiser4-for-linux-3.x/</a>
+</p>
+<p>3. Bootloader <i>(Optional, only needed if you want to format your <code>/</code> (root) as <b>reiser4</b>)</i>
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Backing up your bootloader configuration file should be considered.</div>
+<p>a) <b>Recomended:</b> make a small (as mentioned above, 20-200mb) partition for <code>/boot</code> with a filesystem other than Reiser4 with <a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a>, and then copy your <code>/boot</code> folder to the partition. Update your bootloader config accordingly, eg. with <a href="../en/GRUB.html" title="Grub2" class="mw-redirect">Grub2</a> do:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p>b) If you wish to put everything including <code>/boot</code> on a Reiser4 partition you will need to use <a href="../en/LILO.html" title="LILO">LILO</a>. This is not advised, as you will probably get an error when trying to update <code>lilo.conf</code>:
+</p>
+<pre># lilo
+</pre>
+<p>4. Reboot
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The following steps are for using Reiser4 as your / (root). If you just want to use Reiser in /var (or whatever) you should modify the following instructions according to your needs.</div>
+<h2><span class="mw-headline" id="Moving_to_Reiser4">Moving to Reiser4</span></h2>
+<p>In the next steps we will copy the data from your current root partition to the new Reiser4 partitions. Make
+sure you have enough disk space on the Reiser4 partition with:
+</p>
+<pre># df -h
+</pre>
+<h3><span class="mw-headline" id="Sample_system">Sample system</span></h3>
+<pre>
+# fdisk -l
+* /dev/sda1: (10 Gb, 5 Gb free); Reiserfs /mnt/reiser4
+* /dev/sda2: (10 Gb, 10 Gb free); Reiser4 /
+* /dev/sda3: (200 Mb, 180 Mb free); ext2 /boot
+</pre>
+<h3><span class="mw-headline" id="Formatting">Formatting</span></h3>
+<p>Run the following commands:
+</p>
+<pre>
+mkfs.reiser4 /dev/sdaX
+mkdir /mnt/reiser4
+mount -t reiser4 /dev/sdaX /mnt/reiser4
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>With <b>X</b> being your partition number!</div>
+<p>It is recommended that you use the Cryptcompress plugin by formatting with the following command:
+</p>
+<pre>mkfs.reiser4 -o create=ccreg40,compress=lzo1 /dev/sda<b>X</b>
+</pre>
+<h3><span class="mw-headline" id="Copy_system">Copy system</span></h3>
+<p>Once the partition is formated, copy you current system to the new partition and create the system directories. You may either do this from Arch Linux, or <b>to make it easier</b> (so that you do not have to use makedev later), just <b>boot up with the <a rel="nofollow" class="external text" href="http://gparted.sourceforge.net/livecd.php">Gparted LiveCD</a> and mount both your new Reiser4 partition and your current root partition. Then, just copy everything over (as root) like so:</b>
+</p>
+<pre>
+cd /mnt
+mkdir oldroot
+mkdir reiser4
+mount /dev/sdaX oldroot
+mount /dev/sdaY reiser4 (the Reiser4 partition)
+cp -R -a /mnt/oldroot/* /mnt/reiser4/
+</pre>
+<p>Then, you need to mount your <code>/boot</code> partition, and if you have not already, copy <code>/boot</code> from your original root partition over to it.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is suggested to empty your /boot from the Reiser4 partition to use it as a mountpoint, which is reflected later in your fstab</div>
+<pre>
+mkdir bootpart
+mount /dev/sdaZ bootpart
+cp -R -a /mnt/oldroot/boot/* /mnt/bootpart/
+</pre>
+<p>Do not forget to edit your bootloader's config appropriately (see examples at the bottom of the article). 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In case you upgraded grub before rebooting you may need to manually install grub to your /boot partition, otherwise, things may break and prevent you from booting. In this case using a LiveCD to Chroot and would be your last hope.</div>
+<h3><span class="mw-headline" id=".2Fetc.2Ffstab:">/etc/fstab:</span></h3>
+<p>Note: If you can confirm that Reiser4 works for you, you should format the old root partition.
+</p>
+<pre>#
+# /etc/fstab: static file system information
+#
+# &lt;file system&gt;	&lt;dir&gt;	      &lt;type&gt;  &lt;options&gt;	         &lt;dump&gt;	&lt;pass&gt;
+
+/dev/sda1       /             reiser4 defaults,noatime,notail 0   1
+/dev/sda2       /mnt/oldroot  ext4    defaults                0   0
+/dev/sda3       /boot         ext2    defaults                0   1</pre>
+<h2><span class="mw-headline" id="Bootloader_Examples">Bootloader Examples</span></h2>
+<h4><span class="mw-headline" id=".2Fboot.2Fgrub.2Fgrub.cfg:">/boot/grub/grub.cfg:</span></h4>
+<pre># (0) Arch Linux
+title  Arch Linux
+set root=(hd0,msdos3)
+kernel /vmlinuz-linux root=/dev/sda3 ro noatime notail acl init=/usr/bin/bootchartd
+initrd /initramfs-linux.img
+
+# (1) Arch Linux
+title  Arch Linux Fallback
+set root=(hd0,msdos3)
+kernel /vlinuz-linux root=/dev/sda3 ro
+initrd /initramfs-linux-fallback.img</pre>
+<p>Run <code>grub-mkconfig</code> to update your config:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<h4><span class="mw-headline" id=".2Fetc.2Flilo.conf:">/etc/lilo.conf:</span></h4>
+<pre>
+#
+# /etc/lilo.conf
+#
+
+boot=/dev/hda
+# This line often fixes L40 errors on bootup
+# disk=/dev/hda bios=0x80
+
+default=Arch4
+timeout=20
+lba32
+prompt
+compact
+
+image=/boot/vmlinuz-linux
+        label=Arch4
+        root=/dev/hda5
+        append="video=vesafb:1024x768-24@56,ywrap,mtrr splash=verbose,theme:darch console=tty1 resume2=swap:/dev/hdb1"
+initrd=/boot/initramfs-linux.img
+read-only
+
+image=/boot/vmlinuz-linux
+        label=Arch
+        root=/dev/hda3
+        append="video=vesafb:1024x768-24@56,ywrap,mtrr splash=verbose,theme:darch console=tty1 resume2=swap:/dev/hdb1"
+initrd=/boot/initramfs-linux.img
+read-only
+</pre>
+<p>Run <b>lilo</b> to update your config:
+</p>
+<pre># lilo
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<ul>
+<li> Permissions: chown -R username.group &lt;userdir&gt;</li>
+<li> If you have problem with <b>su</b> command after the change of fs, you should reinstall <b>coreutils</b> package.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

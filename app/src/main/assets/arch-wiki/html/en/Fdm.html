@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>fdm - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Fdm skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">fdm</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Alpine.html" title="Alpine">Alpine</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Msmtp.html" title="Msmtp">msmtp</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mutt.html" title="Mutt">Mutt</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Postfix.html" title="Postfix">Postfix</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SSMTP.html" title="SSMTP">SSMTP</a></li>
+</ul>
+</div>
+<p><b>fdm</b> (<i>fetch and deliver mail</i>), is a simple program for delivering and filtering mail. Comparing it to other same-purposed applications shows that it has similarities with <a href="../en/Mutt.html" title="Mutt">Mutt</a>'s very focused design principles.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing"><span class="tocnumber">1</span> <span class="toctext">Installing</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuring"><span class="tocnumber">2</span> <span class="toctext">Configuring</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#mbox"><span class="tocnumber">2.1</span> <span class="toctext">mbox</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#maildir"><span class="tocnumber">2.2</span> <span class="toctext">maildir</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Final_setup"><span class="tocnumber">2.3</span> <span class="toctext">Final setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Testing"><span class="tocnumber">3</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Extended_usage"><span class="tocnumber">4</span> <span class="toctext">Extended usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Additional_filtering"><span class="tocnumber">4.1</span> <span class="toctext">Additional filtering</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Automation_with_cron"><span class="tocnumber">4.2</span> <span class="toctext">Automation with cron</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing">Installing</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=fdm">fdm</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuring">Configuring</span></h2>
+<p><i>fdm</i> supports the tried and tested mbox format along with the newer maildir specification.
+</p>
+<h3><span class="mw-headline" id="mbox">mbox</span></h3>
+<p>Alpine uses the mbox format, so we need to set up some files that we will be editing.
+</p>
+<pre>$ cd
+$ mkdir mail
+$ touch mail/INBOX .fdm.conf 
+$ chmod 600 .fdm.conf mail/INBOX
+</pre>
+<h3><span class="mw-headline" id="maildir">maildir</span></h3>
+<p>Mutt prefers a capitized mail directory, and is able to use the maildir format. If you plan on using Mutt do the following setup.
+</p>
+<pre>$ cd
+$ touch .fdm.conf; chmod 600 .fdm.conf
+$ mkdir -p Mail/INBOX/{new,cur,tmp}
+</pre>
+<h3><span class="mw-headline" id="Final_setup">Final setup</span></h3>
+<p>Edit <code>.fdm.conf</code>, and add your email accounts and basic filter rules. Use mbox or maildir, but not both.
+</p>
+<pre>## .fdm.conf
+## Accounts and rules for:
+#&gt; foo@example.com
+#&gt; bar@gmail.com
+## Last edit 21-Dec-09
+
+# Catch-all action (mbox):
+action "inbox" mbox "%h/mail/INBOX"
+# Catch-all action (maildir):
+# action "inbox" maildir "%h/Mail/INBOX"
+
+account "foo" imaps server "imap.example.com"
+	user "foo@example.com" pass "supersecret"
+
+account "bar" imaps server "imap.gmail.com"
+        user "bar@gmail.com" pass "evenmoresecret"
+
+# Match all mail and deliver using the 'inbox' action.
+match all action "inbox"
+</pre>
+<p>This will collect the mail from the listed accounts and deliver it to the INBOX folder that we made. Refer to the <code>fdm(1)</code> man page for specifics on how to connect to other types of mail servers (POP3 for example).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can also specify your login name and/or password in the <code>.netrc</code> file.</div>
+<h2><span class="mw-headline" id="Testing">Testing</span></h2>
+<p>Once you have this setup to your satisfaction, attempt to collect your mail by manually running fdm.
+</p>
+<pre>$ fdm -kv fetch
+</pre>
+<p>This will keep your mail untouched on the server incase there are errors. Look over the output to make sure everything worked as planned. Open your favorite mail reader (MUA) and make sure that you can read the mail that was just delivered. 
+</p>
+<h2><span class="mw-headline" id="Extended_usage">Extended usage</span></h2>
+<p><i>Non-essential features that add to </i>fdm'<i>s usability</i>
+</p>
+<h3><span class="mw-headline" id="Additional_filtering">Additional filtering</span></h3>
+<p>If you want to have mail from a certain account go to a specific mailbox, you could add the following lines to your fdm.conf file. From the config file above, if you wanted to filter the mail from <code><i>bar@gmail.com</i></code> into it's own folder <code><i>bar-mail</i></code>, you would add this below the existing "action" line:
+</p>
+<pre>action <i>bar-deliver</i> mbox "%h/mail/<i>bar-mail</i>"
+</pre>
+<p>Change the <code>mbox</code> to <code>maildir</code> if needed, also make sure the path is correct.
+</p>
+<p>To activate the new action, add this before the existing "match" line:
+</p>
+<pre>match account <i>bar</i> action <i>bar-deliver</i>
+</pre>
+<p>Then all mail to <code><i>bar@gmail.com</i></code> will be put into the <code><i>bar-mail</i></code> mail folder.
+</p>
+<h3><span class="mw-headline" id="Automation_with_cron">Automation with cron</span></h3>
+<p>If all went well, set up a <a href="../en/Cron.html" title="Cron">cron</a> job to check your mail regularly.
+</p>
+<pre>$ crontab -e
+*/15 * * * * fdm fetch &gt;&gt; $HOME/[Mm]ail/fdm.log
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="https://github.com/nicm/fdm">fdm's official site (github)</a></li>
+<li><a rel="nofollow" class="external text" href="https://lists.sourceforge.net/lists/listinfo/fdm-users">fdm-users mailing list</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Email_clients.html" title="Category:Email clients">Email clients</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

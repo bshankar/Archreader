@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>User-mode Linux - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-User-mode_Linux skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">User-mode Linux</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Dead project (last activity in 2007), <a href="../en/Talk:User-mode_Linux.html" title="Talk:User-mode Linux">inaccurate information</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:User-mode_Linux#Needs_work">Talk:User-mode Linux#Needs work</a>)</div>
+</div>
+<p>User-mode-Linux (UML) is a method to run Linux inside Linux as a normal process. Please check <a rel="nofollow" class="external autonumber" href="http://user-mode-linux.sourceforge.net/">[1]</a> for in-depth information what UML is and how it works.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Why_use_UML.3F"><span class="tocnumber">1</span> <span class="toctext">Why use UML?</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#HOWTO"><span class="tocnumber">2</span> <span class="toctext">HOWTO</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Setup_by_hostfs_.2B_vde2"><span class="tocnumber">2.1</span> <span class="toctext">Setup by hostfs + vde2</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Required_packages"><span class="tocnumber">2.1.1</span> <span class="toctext">Required packages</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Launch_script"><span class="tocnumber">2.1.2</span> <span class="toctext">Launch script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Setup_by_rootfs_.2B_tap"><span class="tocnumber">2.2</span> <span class="toctext">Setup by rootfs + tap</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Required_packages_2"><span class="tocnumber">2.2.1</span> <span class="toctext">Required packages</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Build_rootfs_image"><span class="tocnumber">2.2.2</span> <span class="toctext">Build rootfs image</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9"><a href="#Marionnet"><span class="tocnumber">2.3</span> <span class="toctext">Marionnet</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Why_use_UML.3F">Why use UML?</span></h2>
+<p>Running UML is a safe way to run multiple instances of (Arch-)Linux at the same time. The single processes are separated from each other, which makes it secure to run, for example, a testing instance and a production instance on the same machine. If something goes wrong inside the testing instance, it does not interfere with the host Linux or the productive instance.
+</p>
+<h2><span class="mw-headline" id="HOWTO">HOWTO</span></h2>
+<p>There are three methods:
+</p>
+<ul>
+<li> Use hostfs with vde2 network (all UMLs use same file system)</li>
+<li> Use rootfs with tap network (require build image)</li>
+<li> Use <a rel="nofollow" class="external text" href="https://www.marionnet.org/">Marionnet</a>
+</li>
+</ul>
+<p>Both methods are workable on Linux 3.4.4-3 (Jul 3 2012)
+</p>
+<h3><span class="mw-headline" id="Setup_by_hostfs_.2B_vde2">Setup by hostfs + vde2</span></h3>
+<p>Hostfs means use the host's file system in read-only mode.
+</p>
+<h4><span class="mw-headline" id="Required_packages">Required packages</span></h4>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-usermode/">linux-usermode</a></span><sup><small>AUR</small></sup>
+</li>
+<li> Utility packages: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vde2">vde2</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=screen">screen</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/start-stop-daemon/">start-stop-daemon</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rsyslog">rsyslog</a></span>
+</li>
+</ul>
+<h4><span class="mw-headline" id="Launch_script">Launch script</span></h4>
+<ul>
+<li> download <a rel="nofollow" class="external free" href="http://pastebin.com/qDE0D7Lk">http://pastebin.com/qDE0D7Lk</a> script as 2vm.bash</li>
+<li> use normal user to launch 2vm.bash (there are two VMs named as 'C1' &amp; 'C2')</li>
+<li> modify the 2vm.bash to fit your requirements</li>
+</ul>
+<h3><span class="mw-headline" id="Setup_by_rootfs_.2B_tap">Setup by rootfs + tap</span></h3>
+<h4><span class="mw-headline" id="Required_packages_2">Required packages</span></h4>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-usermode/">linux-usermode</a></span><sup><small>AUR</small></sup>
+</li>
+<li> Utility packages: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vde2">vde2</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uml_utilities_tunpatch/">uml_utilities_tunpatch</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/uml_utilities_tunpatch">aur-mirror</a>]</sup>
+</li>
+</ul>
+<h4><span class="mw-headline" id="Build_rootfs_image">Build rootfs image</span></h4>
+<p>1.) First you have to create a single, big file into which you will install Arch Linux. This command creates a single 1 GB file, only containing zeros, which should be enough for a basic Arch Linux installation.
+</p>
+<pre>dd if=/dev/zero of=rootfs bs=1MB count=1000
+</pre>
+<p>or 
+</p>
+<pre>fallocate -l 1GB ./rootfs
+</pre>
+<p>2.) After the build process you have to format the root file system image:
+</p>
+<pre>mke2fs -F rootfs
+</pre>
+<p>3.) After formatting the file, you have to mount it. Executing the following command as root does the job (you have also to load the <code>loop</code> module with <code>modprobe</code>):
+</p>
+<pre>mount -o loop rootfs /mnt
+</pre>
+<p>4.) Now the installation of the basic system may start:
+</p>
+<pre>mkdir -p /mnt/var/lib/pacman
+pacman -Sy base -r /mnt
+cd /mnt/dev
+mknod --mode=660 ubd0 b 98 0
+chown root:disk ubd0
+</pre>
+<p>5.) Before the system can be booted with user-mode-Linux, some files inside the Arch basic system have to be customised. Add this line to <code>/mnt/etc/fstab</code>:
+</p>
+<pre>/dev/ubd0 / ext2 defaults 0 0
+</pre>
+<p>6.) Now unmount the file system.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you change <i>anything</i> inside your mounted file system (e.g. <code>/mnt</code>) while it is <i>running</i>, it may lead to significant file system corruption inside your virtual machine and <i>kill</i> it!</div>
+<pre>umount /mnt
+</pre>
+<p>7.) Next step is to set up networking. Therefore, you create a so called tun device (Please visit the <a rel="nofollow" class="external text" href="http://user-mode-linux.sourceforge.net/old/UserModeLinux-HOWTO.html">UML how-to</a> for further information about tun/tap), and give it an IP address. The following lines load the necessary <code>tun</code> module, create a tun/tap device that is readable by the <code>users</code> group, and sets it up with the given IP address. For security, you should consider creating a certain UML group with read permissions for the network device.
+</p>
+<pre>modprobe tun
+ip tuntap add tap0 mode tap group users
+chown root.users /dev/net/tun
+ip addr add 192.168.0.100/24 dev tap0
+</pre>
+<p>8.) Now you can boot the image. To use the network, you have to announce the proper device to the UML kernel. (Mind that the user running the UML command needs enough rights to access the tun device!)
+</p>
+<pre>vmlinux ubd0=rootfs eth0=tuntap,,,192.168.0.100
+</pre>
+<p>The <code>,,,</code> means:
+</p>
+<pre>eth0=transport,tuntap device,MAC address,ip
+</pre>
+<p>Example:
+</p>
+<pre>eth0=tuntap,tap0,3f:2a:bb:00:00:00,192.168.0.100
+</pre>
+<p>Headless example:
+</p>
+<pre> vmlinux ubd0=rootfs eth0=tuntap,,,192.168.0.100 mem=128M con=pty
+</pre>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Marionnet">Marionnet</span></h3>
+<p>For use <a rel="nofollow" class="external text" href="https://www.marionnet.org/">Marionnet</a>, you must install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uml_utilities/">uml_utilities</a></span><sup><small>AUR</small></sup>, and see <a rel="nofollow" class="external free" href="https://bugs.launchpad.net/marionnet/+bug/1580349">https://bugs.launchpad.net/marionnet/+bug/1580349</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

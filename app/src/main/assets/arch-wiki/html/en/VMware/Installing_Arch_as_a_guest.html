@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>VMware/Installing Arch as a guest - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-VMware_Installing_Arch_as_a_guest skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">VMware/Installing Arch as a guest</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/VMware.html" title="VMware">VMware</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/VMware.html" title="VMware">VMware</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Installing_VMWare_vCLI.html" title="Installing VMWare vCLI">Installing VMWare vCLI</a></li>
+</ul>
+</div>
+<p>This article is about installing Arch Linux in a <a href="../../en/VMware.html" title="VMware">VMware</a> product, such as <a rel="nofollow" class="external text" href="http://www.vmware.com/products/player/">Player (Plus)</a>, <a rel="nofollow" class="external text" href="http://www.vmware.com/products/fusion/">Fusion</a> or <a rel="nofollow" class="external text" href="http://www.vmware.com/products/workstation/">Workstation</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#In-kernel_drivers"><span class="tocnumber">1</span> <span class="toctext">In-kernel drivers</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#VMware_Tools_versus_Open-VM-Tools"><span class="tocnumber">2</span> <span class="toctext">VMware Tools versus Open-VM-Tools</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Open-VM-Tools"><span class="tocnumber">3</span> <span class="toctext">Open-VM-Tools</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Utilities"><span class="tocnumber">3.1</span> <span class="toctext">Utilities</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Modules"><span class="tocnumber">3.2</span> <span class="toctext">Modules</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Installation"><span class="tocnumber">3.3</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Multi-User_Target"><span class="tocnumber">3.3.1</span> <span class="toctext">Multi-User Target</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Graphical_Target"><span class="tocnumber">3.3.2</span> <span class="toctext">Graphical Target</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9"><a href="#Resolution_update_on_window_resize"><span class="tocnumber">3.4</span> <span class="toctext">Resolution update on window resize</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Official_VMware_Tools"><span class="tocnumber">4</span> <span class="toctext">Official VMware Tools</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Modules_2"><span class="tocnumber">4.1</span> <span class="toctext">Modules</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Installation_.28from_guest.29"><span class="tocnumber">4.2</span> <span class="toctext">Installation (from guest)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Xorg_configuration"><span class="tocnumber">5</span> <span class="toctext">Xorg configuration</span></a></li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Tips_and_tricks"><span class="tocnumber">6</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15">
+<a href="#Shared_Folders_with_vmhgfs-fuse_utility"><span class="tocnumber">6.1</span> <span class="toctext">Shared Folders with vmhgfs-fuse utility</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#fstab"><span class="tocnumber">6.1.1</span> <span class="toctext">fstab</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#Systemd"><span class="tocnumber">6.1.2</span> <span class="toctext">Systemd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-18">
+<a href="#Legacy_Shared_Folders_with_vmhgfs_module"><span class="tocnumber">6.2</span> <span class="toctext">Legacy Shared Folders with vmhgfs module</span></a>
+<ul>
+<li class="toclevel-3 tocsection-19">
+<a href="#Enable_at_boot"><span class="tocnumber">6.2.1</span> <span class="toctext">Enable at boot</span></a>
+<ul>
+<li class="toclevel-4 tocsection-20"><a href="#fstab_2"><span class="tocnumber">6.2.1.1</span> <span class="toctext">fstab</span></a></li>
+<li class="toclevel-4 tocsection-21"><a href="#Systemd_2"><span class="tocnumber">6.2.1.2</span> <span class="toctext">Systemd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-22"><a href="#Prune_mlocate_DB"><span class="tocnumber">6.2.2</span> <span class="toctext">Prune mlocate DB</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-23">
+<a href="#3D_Acceleration"><span class="tocnumber">6.3</span> <span class="toctext">3D Acceleration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-24"><a href="#OpenGL_and_GLSL_support"><span class="tocnumber">6.3.1</span> <span class="toctext">OpenGL and GLSL support</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-25">
+<a href="#Time_synchronization"><span class="tocnumber">6.4</span> <span class="toctext">Time synchronization</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#Host_machine_as_time_source"><span class="tocnumber">6.4.1</span> <span class="toctext">Host machine as time source</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#External_server_as_time_source"><span class="tocnumber">6.4.2</span> <span class="toctext">External server as time source</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-28">
+<a href="#Performance_Tips"><span class="tocnumber">6.5</span> <span class="toctext">Performance Tips</span></a>
+<ul>
+<li class="toclevel-3 tocsection-29"><a href="#Paravirtual_SCSI_adapter"><span class="tocnumber">6.5.1</span> <span class="toctext">Paravirtual SCSI adapter</span></a></li>
+<li class="toclevel-3 tocsection-30"><a href="#Paravirtual_Network_Adapater"><span class="tocnumber">6.5.2</span> <span class="toctext">Paravirtual Network Adapater</span></a></li>
+<li class="toclevel-3 tocsection-31"><a href="#Virtual_Machine_Settings"><span class="tocnumber">6.5.3</span> <span class="toctext">Virtual Machine Settings</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33">
+<a href="#Mouse_problems"><span class="tocnumber">7.1</span> <span class="toctext">Mouse problems</span></a>
+<ul>
+<li class="toclevel-3 tocsection-34"><a href="#Missing_buttons"><span class="tocnumber">7.1.1</span> <span class="toctext">Missing buttons</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-35">
+<a href="#Boot_problems"><span class="tocnumber">7.2</span> <span class="toctext">Boot problems</span></a>
+<ul>
+<li class="toclevel-3 tocsection-36"><a href="#Slow_boot_time"><span class="tocnumber">7.2.1</span> <span class="toctext">Slow boot time</span></a></li>
+<li class="toclevel-3 tocsection-37"><a href="#Shutdown.2FReboot_hangs"><span class="tocnumber">7.2.2</span> <span class="toctext">Shutdown/Reboot hangs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-38"><a href="#Autofit_problems"><span class="tocnumber">7.3</span> <span class="toctext">Autofit problems</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Drag_and_drop.2C_copy.2Fpaste"><span class="tocnumber">7.4</span> <span class="toctext">Drag and drop, copy/paste</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#Problems_when_running_as_a_shared_VM_on_Workstation_11"><span class="tocnumber">7.5</span> <span class="toctext">Problems when running as a shared VM on Workstation 11</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#Shared_folder_not_mounted_after_system_upgrade"><span class="tocnumber">7.6</span> <span class="toctext">Shared folder not mounted after system upgrade</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="In-kernel_drivers">In-kernel drivers</span></h2>
+<ul>
+<li>
+<code>vmw_balloon</code> - The physical memory management driver. It acts like a "balloon" that can be inflated to reclaim physical pages by reserving them in the guest and invalidating them in the monitor, freeing up the underlying machine pages so they can be allocated to other guests. It can also be deflated to allow the guest to use more physical memory. Deallocated Virtual Machine memory can be reused in the host without terminating the guest.</li>
+<li>
+<code>vmw_pvscsi</code> - For VMware's Paravirtual SCSI (PVSCSI) HBA.</li>
+<li>
+<code>vmw_vmci</code> - The Virtual Machine Communication Interface. It enables high-speed communication between host and guest in a virtual environment via the VMCI virtual device.</li>
+<li>
+<code>vmwgfx</code> - For 3D acceleration. This is a KMS enabled DRM driver for the VMware SVGA2 virtual hardware.</li>
+<li>
+<code>vmxnet3</code> - For VMware's vmxnet3 virtual ethernet NIC.</li>
+<li> a fuse-based hgfs implementation has been added to <code>open-vm-tools</code> 10.0+ and is supported from kernel version 4.0+.</li>
+</ul>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The <code>vsock</code> and <code>vmw_vsock_vmci_transport</code> drivers need a better description: When are they needed?]. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:VMware/Installing_Arch_as_a_guest">Talk:VMware/Installing Arch as a guest#</a>)</div>
+</div>
+<p>These drivers are only needed if you are running Arch Linux on a hypervisor like <a rel="nofollow" class="external text" href="http://www.vmware.com/products/vsphere-hypervisor">VMware vSphere Hypervisor</a>
+</p>
+<ul>
+<li>
+<code>vsock</code> - The Virtual Socket Protocol. It is similar to the TCP/IP socket protocol, allowing communication between Virtual Machines and hypervisor or host.</li>
+<li>
+<code>vmw_vsock_vmci_transport</code> - Implements a VMCI transport for Virtual Sockets.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Arch's <a href="../../en/Udev.html" title="Udev">Udev</a> auto-detects and enables a few of these modules.  Additional modules, such as <code>vmw_balloon</code>, may need to be added to your <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">Mkinitcpio</a>'s <code>MODULES</code> list.  For example:
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"> # cat /etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+MODULES="... vmw_balloon vmw_pvscsi vsock vmw_vsock_vmci_transport ..."</pre>
+<p>Make sure to rebuild with:
+</p>
+<pre> # mkinitcpio -p linux
+</pre>
+<p>Some modules, such as the legacy <code>vmhgfs</code> shared folder module, will require additional work to manually <code>compile</code> and systemd <code>enable</code> in order to function properly.
+</p>
+</div>
+<h2><span class="mw-headline" id="VMware_Tools_versus_Open-VM-Tools">VMware Tools versus Open-VM-Tools</span></h2>
+<p>In 2007, VMware released large partitions of the <a rel="nofollow" class="external text" href="http://kb.vmware.com/kb/340">VMware Tools</a> under the LGPL as <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/open-vm-tools/">Open-VM-Tools</a>. The official Tools are not available <a rel="nofollow" class="external text" href="http://packages.vmware.com/tools/esx/latest/repos/index.html">separately</a> for Arch Linux.
+</p>
+<p>Originally, VMware Tools provided the best drivers for network and storage, combined with the functionality for other features such as time synchronization. However, for quite a while now the drivers for the network/SCSI adapter are part of the Linux kernel, and VMware Tools is only needed for extra features like Unity mode.
+</p>
+<p>Both VMware Tools and Open-VM-Tools require the installation of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-vmware">xf86-video-vmware</a></span>.
+</p>
+<h2><span class="mw-headline" id="Open-VM-Tools">Open-VM-Tools</span></h2>
+<h3><span class="mw-headline" id="Utilities">Utilities</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span> package comes namely with the following utilities:
+</p>
+<ul>
+<li> <code>vmtoolsd</code> - Service responsible for the Virtual Machine status report.</li>
+<li> <code>vmware-checkvm</code> - Tool to check whether a program is running in the guest.</li>
+<li> <code>vmware-toolbox-cmd</code> - Tool to obtain Virtual Machine information of the host.</li>
+<li> <code>vmware-user-suid-wrapper</code> - Tool to enable clipboard sharing (copy/paste) between host and guest.</li>
+<li> <code>vmware-vmblock-fuse</code> - Filesystem utility. Enables drag &amp; drop functionality between host and guest through <a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace" class="extiw" title="wikipedia:Filesystem in Userspace">FUSE</a> (Filesystem in Userspace).</li>
+<li> <code>vmware-xferlogs</code> - Dumps logging/debugging information to the Virtual Machine logfile.</li>
+<li> <code>vmhgfs-fuse</code> - Utility for mounting vmhgfs shared folders.</li>
+</ul>
+<h3><span class="mw-headline" id="Modules">Modules</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/open-vm-tools-dkms/">open-vm-tools-dkms</a></span><sup><small>AUR</small></sup> package comes with the following modules:
+</p>
+<ul>
+<li>
+<code>vmhgfs</code> - Legacy filesystem driver. Enables legacy sharing implementation between host and guest.</li>
+<li>
+<code>vmxnet</code> - for the old VMXNET network adapter.</li>
+</ul>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span> from the <a href="../../en/Official_repositories.html" title="Official repositories">official repositories</a>. If you want to use shared folders you also need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/open-vm-tools-dkms/">open-vm-tools-dkms</a></span><sup><small>AUR</small></sup> from the <a href="../../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>Open-VM-Tools reads version information from <code>/etc/arch-release</code>, which is empty:
+</p>
+<pre># cat /proc/version &gt; /etc/arch-release
+</pre>
+<h4><span class="mw-headline" id="Multi-User_Target">Multi-User Target</span></h4>
+<p>If you're booting into the <code>multi-user.target</code> then follow the steps mentioned here. If you're booting into the graphical.target then please skip this section and read the instructions for the <code>graphical.target</code>.
+</p>
+<p><a href="../../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>vmtoolsd.service</code> and enable it on boot, if desired.
+</p>
+<h4><span class="mw-headline" id="Graphical_Target">Graphical Target</span></h4>
+<p>If you are booting into a graphical environment then follow these steps to enable the VMware tools.
+</p>
+<p>Enable the <code>vmware-vmblock-fuse.service</code> Systemd service.
+</p>
+<p>If you have installed <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/open-vm-tools-dkms/">open-vm-tools-dkms</a></span><sup><small>AUR</small></sup> then you should enable the <code>dkms.service</code> Systemd service which automatically recompiles the kernel modules after a kernel update.
+</p>
+<p>Try to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtkmm">gtkmm</a></span> manually if it does not work properly.
+</p>
+<h3><span class="mw-headline" id="Resolution_update_on_window_resize">Resolution update on window resize</span></h3>
+<p><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1081629#p1081629">Start</a> <code>/usr/bin/vmware-user-suid-wrapper</code> from within X.
+</p>
+<h2><span class="mw-headline" id="Official_VMware_Tools">Official VMware Tools</span></h2>
+<h3><span class="mw-headline" id="Modules_2">Modules</span></h3>
+<ul>
+<li>
+<code>vmblock</code> - Filesystem driver. Enables drag &amp; drop functionality between host and guest (<a rel="nofollow" class="external text" href="https://www.mail-archive.com/open-vm-tools-devel@lists.sourceforge.net/msg00213.html">superseded</a> by the <code>vmware-vmblock-fuse</code> utility).</li>
+<li>
+<code>vmci</code> - High performance communication interface between host and guest.</li>
+<li>
+<code>vmmon</code> - Virtual Machine Monitor.</li>
+<li>
+<code>vmnet</code> - Networking driver.</li>
+<li>
+<code>vsock</code> - VMCI sockets.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is no module for <code>vmware-vmblock-fuse</code>, and <code>vmblock</code> has been removed from the kernel unless you disable <code>fuse</code>.  Instead, systemd services need to be <code>enabled</code> to allow these functions.  See instructions below.
+</div>
+<h3><span class="mw-headline" id="Installation_.28from_guest.29">Installation (from guest)</span></h3>
+<p>Install the dependencies: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span> (for building), <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=net-tools">net-tools</a></span> (for <code>ifconfig</code>, used by the installer) and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span> (for kernel headers).
+</p>
+<p>Then, create bogus init directories for the installer:
+</p>
+<pre># for x in {0..6}; do mkdir -p /etc/init.d/rc${x}.d; done
+</pre>
+<p>The installer can then be mounted:
+</p>
+<pre># mount /dev/cdrom /mnt
+</pre>
+<p>Extracted (e.g. to <code>/root</code>):
+</p>
+<pre># tar xf /mnt/VMwareTools*.tar.gz -C /root
+</pre>
+<p>And started:
+</p>
+<pre># perl /root/vmware-tools-distrib/vmware-install.pl
+</pre>
+<p>You can safely ignore the following build failures:
+</p>
+<ul>
+<li> VMNEXT 3 virtual network card</li>
+<li> "Warning: This script could not find mkinitrd or update-initramfs and cannot remake the initrd file!"</li>
+<li> Fuse components not found on the system.</li>
+</ul>
+<p>Enable <code>vmware-vmblock-fuse</code> systemd services:
+</p>
+<pre> # abs community/open-vm-tools
+ # cp /var/abs/community/open-vm-tools/vmware-* /usr/lib/systemd/system
+ # systemctl enable vmware-vmblock-fuse.service
+</pre>
+<p>Reboot the Virtual Machine:
+</p>
+<pre># systemctl reboot
+</pre>
+<p>Log in and start the VMware Tools:
+</p>
+<pre># /etc/init.d/rc6.d/K99vmware-tools start
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>There is also a <a rel="nofollow" class="external text" href="https://github.com/rasa/vmware-tools-patches">project</a> in GitHub trying to automate all this.</div>
+<h2><span class="mw-headline" id="Xorg_configuration">Xorg configuration</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To use Xorg in a Virtual Machine, a minimum of 32MB VGA memory is needed.</div>
+<p>Install the dependencies: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-vmware">xf86-video-vmware</a></span>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa">mesa</a></span>.
+</p>
+<p>If booting into a <code>graphical target</code> you are almost done. <code>/etc/xdg/autostart/vmware-user.desktop</code> will get started which will setup most of the things needed to work with the Virtual Machine.
+</p>
+<p>However, if booting into <code>multi-user.target</code> or using an uncommon setup (e.g. multiple monitors), then <code>vmtoolsd.service</code> needs to be <a href="../../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enabled</a>. In addition to this, edit:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/Xwrapper.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">needs_root_rights=yes</pre>
+<p>to give permission for loading drivers.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Shared_Folders_with_vmhgfs-fuse_utility">Shared Folders with <code>vmhgfs-fuse</code> utility</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This functionality is only available with <code>open-vm-tools</code> v.10.x and kernel 4.x onwards and with VMware Workstation and Fusion.</div>
+<p>Share a folder by selecting <i>Edit virtual machine settings &gt; Options &gt; Shared Folders &gt; Always enabled</i>, and creating a new share.
+</p>
+<p>You should be able to see the shared folders by running vmware-hgfsclient command:
+</p>
+<pre>$ vmware-hgfsclient
+</pre>
+<p>Now you can mount the folder:
+</p>
+<pre># mkdir &lt;shared folders root directory&gt;
+# vmhgfs-fuse -o allow_other -o auto_unmount .host:/<i>&lt;shared_folder&gt;</i> <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p>Other <code>vmhgfs-fuse</code> mount options can be viewed by using the <code>-h</code> input flag:
+</p>
+<pre># vmhgfs-fuse -h
+</pre>
+<h5><span class="mw-headline" id="fstab">fstab</span></h5>
+<p>Add a rule for each share:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+.host:/<i>&lt;shared_folder&gt;</i> <i>/home/user1/shares</i> fuse.vmhgfs-fuse defaults 0 0
+</pre>
+<p>Create and mount the Shared Folders:
+</p>
+<pre># mkdir /home/user1/shares
+# mount /home/user1/shares
+</pre>
+<h5><span class="mw-headline" id="Systemd">Systemd</span></h5>
+<p>Create the following <code>.service</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+Requires=vmware-vmblock-fuse.service
+After=vmware-vmblock-fuse.service
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=
+ExecStart=/usr/bin/vmhgfs-fuse -o allow_other -o auto_unmount .host:/<i>&lt;shared_folder&gt;</i> <i>&lt;shared folders root directory&gt;</i>
+
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Make sure the <code><i>&lt;shared folders root directory&gt;</i></code> folder exists on your system. If this folder does not exist then you have to create it as the systemd service depends on it:
+</p>
+<pre># mkdir -p <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p><a href="../../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> the <code>&lt;shared folders root directory&gt;-&lt;shared_folder&gt;.service</code> mount target.
+</p>
+<p>If you want to mount all shared folders automatically then omit <i>&lt;shared_folder&gt;</i>.
+</p>
+<h3><span class="mw-headline" id="Legacy_Shared_Folders_with_vmhgfs_module">Legacy Shared Folders with vmhgfs module</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This functionality is only available in VMware Workstation and Fusion</div>
+<p>Share a folder by selecting <i>Edit virtual machine settings &gt; Options &gt; Shared Folders &gt; Always enabled</i>, and creating a new share.
+</p>
+<p>Make sure the <code>vmhgfs</code> driver is loaded:
+</p>
+<pre># modprobe vmhgfs
+</pre>
+<p>You should be able to see the shared folders by running vmware-hgfsclient command:
+</p>
+<pre>$ vmware-hgfsclient
+</pre>
+<p>Now you can mount the folder:
+</p>
+<pre># mkdir /home/user1/shares
+# mount -n -t vmhgfs .host:/<i>&lt;shared_folder&gt;</i> /home/user1/shares
+</pre>
+<h4><span class="mw-headline" id="Enable_at_boot">Enable at boot</span></h4>
+<p>Edit your <code>mkinitcpio.conf</code> like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"> # cat /etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+MODULES="... vmhgfs"
+...</pre>
+<p>and then update your ramdisk:
+</p>
+<pre># mkinitcpio -p linux
+</pre>
+<h5><span class="mw-headline" id="fstab_2">fstab</span></h5>
+<p>Add a rule for each share:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+.host:/<i>&lt;shared_folder&gt;</i> <i>/home/user1/shares</i> vmhgfs defaults 0 0
+</pre>
+<p>Create and mount the Shared Folders:
+</p>
+<pre># mkdir /home/user1/shares
+# mount /home/user1/shares
+</pre>
+<h5><span class="mw-headline" id="Systemd_2">Systemd</span></h5>
+<p>For shared folders to be working you need to have loaded the <code>vmhgfs</code> driver. Simply create the following <code>.service</code>s:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.mount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Mount]
+What=.host:/<i>&lt;shared_folder&gt;</i>
+Where=<i>&lt;shared folders root directory&gt;</i>/<i>&lt;shared_folder&gt;</i>
+Type=vmhgfs
+Options=defaults,noatime
+
+[Install]
+WantedBy=multi-user.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>&lt;shared folders root directory&gt;</i>-<i>&lt;shared_folder&gt;</i>.automount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Load VMware shared folders
+ConditionPathExists=.host:/<i>&lt;shared_folder&gt;</i>
+ConditionVirtualization=vmware
+
+[Automount]
+Where=<i>&lt;shared folders root directory&gt;</i>/<i>&lt;shared_folder&gt;</i>
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Make sure the <code><i>&lt;shared folders root directory&gt;</i></code> folder exists on your system. If this folder does not exist then you have to create it as the systemd scripts depend on it:
+</p>
+<pre># mkdir -p <i>&lt;shared folders root directory&gt;</i>
+</pre>
+<p><a href="../../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> the <code>mnt-hgfs.automount</code> mount target.
+</p>
+<p>If you want to mount all shared folders automatically then omit <i>&lt;shared_folder&gt;</i>.
+</p>
+<h4><span class="mw-headline" id="Prune_mlocate_DB">Prune mlocate DB</span></h4>
+<p>When using <a href="../../en/Core_utilities.html#locate" title="Mlocate" class="mw-redirect">mlocate</a>, it is useless to index the shared directories in the <code>locate DB</code>. Therefore, add the directories to <code>PRUNEPATHS</code> in <code>/etc/updatedb</code>.
+</p>
+<h3><span class="mw-headline" id="3D_Acceleration">3D Acceleration</span></h3>
+<p>If not selected at guest creation time, 3D Acceleration can be enabled in: <i>Edit virtual machine settings &gt; Hardware &gt; Display &gt; Accelerate 3D graphics</i>.
+</p>
+<h4><span class="mw-headline" id="OpenGL_and_GLSL_support">OpenGL and GLSL support</span></h4>
+<p>It is possible to update OpenGL and GLSL with new kernel modules, overriding Arch-controlled versions.  
+</p>
+<p>At the time of this writing, OpenGL 3.3 and GLSL 3.30 can be supported.  See <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?id=202713">https://bbs.archlinux.org/viewtopic.php?id=202713</a> for more details.
+</p>
+<h3><span class="mw-headline" id="Time_synchronization">Time synchronization</span></h3>
+<p>Configuring time synchronization in a Virtual Machine is important; fluctuations are bound to occur more easily in a guest, compared to a physical host. This is mostly due to the CPU being shared by more than one guest.
+</p>
+<p>There are 2 options to set up time synchronization: the host or an external source.
+</p>
+<h4><span class="mw-headline" id="Host_machine_as_time_source">Host machine as time source</span></h4>
+<p>To use the host as a time source, ensure <code>vmtoolsd.service</code> is <a href="../../en/Systemd.html#Using_units" title="Start" class="mw-redirect">started</a>. Then enable the time synchronization:
+</p>
+<pre># vmware-toolbox-cmd timesync enable
+</pre>
+<p>To synchronize the guest after suspending the host:
+</p>
+<pre># hwclock --hctosys --localtime
+</pre>
+<h4><span class="mw-headline" id="External_server_as_time_source">External server as time source</span></h4>
+<p>See <a href="../../en/Time.html#Time_synchronization" title="NTP" class="mw-redirect">NTP</a>.
+</p>
+<h3><span class="mw-headline" id="Performance_Tips">Performance Tips</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../../en/VMware.html" title="VMware">VMware</a>.</b><a href="../../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Applies to all sort of VMs, particularly the last section (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:VMware/Installing_Arch_as_a_guest">Talk:VMware/Installing Arch as a guest#</a>)</div>
+</div>
+<p>You can try the followings tips to improve the performance of your virtual machine.
+</p>
+<h4><span class="mw-headline" id="Paravirtual_SCSI_adapter">Paravirtual SCSI adapter</span></h4>
+<p><a rel="nofollow" class="external text" href="http://kb.vmware.com/kb/1010398">VMware Paravirtual SCSI (PVSCSI) adapters</a> are high-performance storage adapters for VMware ESXi that can result in greater throughput and lower CPU utilization. PVSCSI adapters are best suited for environments, where hardware or applications drive a very high amount of I/O throughput.
+</p>
+<p>The SCSI adapter type <code>VMware Paravirtual</code> is available in the Virtual Machine settings.
+</p>
+<p>If you do not have these settings in your virtual machine configuration you can still use the paravirtual SCSI adapter like this:
+Make sure that the paravirtual SCSI adapter is included in your kernel image. For this you have to modify your <code>mkinitcpio.conf</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"> cat /etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"><code>...</code>
+MODULES="<code>...</code> vmw_pvscsi"
+<code>...</code></pre>
+<p>Rebuild your ramdisk:
+</p>
+<pre># mkinitcpio -p linux
+</pre>
+<p>Shutdown your virtual machine and change the SCSI adapter your <code>.vmx</code> to the following:
+</p>
+<pre>scsi0.virtualDev = "pvscsi"
+</pre>
+<h4><span class="mw-headline" id="Paravirtual_Network_Adapater">Paravirtual Network Adapater</span></h4>
+<p>VMware offers <a rel="nofollow" class="external text" href="http://kb.vmware.com/kb/1001805">multiple network adapters</a> for the guest OS.  The default adapter used is usually the <code>e1000</code> adapter, which emulates an Intel 82545EM Gigabit Ethernet NIC.  This Intel adapter is generally compatible with the built-in drivers across most operating systems, include Arch.
+</p>
+<p>For <a rel="nofollow" class="external text" href="http://rickardnobel.se/vmxnet3-vs-e1000e-and-e1000-part-1/">much more performance and additional features</a> (such as multiqueue support), the VMware native <code>vmxnet3</code> network adapter can be used.
+</p>
+<p>Arch has the <code>vmxnet3</code> kernel module available with a default install.  Once enabled in <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> (or if it is auto-detected, check by running <code>$ lsmod | grep vmxnet3</code> to see if it is loaded), shutdown and change the network adapter type in your <i>.vmx</i> file to the following:
+</p>
+<pre>ethernet0.virtualDev = "vmxnet3"
+</pre>
+<p>After changing network adapters, you will need to update your network and <a href="../../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a> settings to use the new adapter name and mac address.
+</p>
+<pre># dhcpcd <i>new_interface_name</i>
+# systemctl enable dhcpcd@<i>new_interface_name</i>.service
+</pre>
+<p>You can get the new interface name by running <code>ip link</code>
+</p>
+<h4><span class="mw-headline" id="Virtual_Machine_Settings">Virtual Machine Settings</span></h4>
+<p>These settings could help improve the responsiveness of your virtual machine by reducing disk I/O at the expense of using more host memory.  <a rel="nofollow" class="external text" href="http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&amp;cmd=displayKC&amp;externalId=1008885">Vmware's KB1008885</a> provides the following optimizations:
+</p>
+<pre>mainMem.useNamedFile = "FALSE"
+MemTrimRate = "0"
+prefvmx.useRecommendedLockedMemSize = "TRUE"
+MemAllowAutoScaleDown = "FALSE"
+sched.mem.pshare.enable = "FALSE"
+</pre>
+<ul>
+<li> <b>mainMem.useNamedFile</b>: This will only work for Windows hosts and you can use this parameter if you experience high disk activity on shutting down the virtual machine. This will prevent VMware from creating a <i>.vmem</i> file. Use <i>mainmem.backing = "swap"</i> on Linux hosts instead.</li>
+<li> <b>MemTrimRate</b>: This setting prevents that memory whichc was released by the guest is released on the host also.</li>
+<li> <b>prefvmx.useRecommendedLockedMemSize</b>: Unfortunately there does not seem to exist a proper explanation for this setting. This setting seems to prevent the host system from swapping parts of the guest memory.</li>
+<li> <b>MemAllowAutoScaleDown</b>: Prevents that VMware adjusts the memory size of the virtual machine in case it cannot allocate enough memory.</li>
+<li> <b>sched.mem.pshare.enable</b>: If several virtual machines are running simultaneously VMware will try to locate identical pages and share these between the virtual machines. This can be very I/O intensive.</li>
+</ul>
+<p>The following settings could also be set in the configuration dialog of VMware Workstation(<i>Edit -&gt; Preferences... -&gt; Memory/Priority</i>).
+</p>
+<pre>prefvmx.minVmMemPct = "100"
+mainMem.partialLazySave = "FALSE"
+mainMem.partialLazyRestore = "FALSE"
+</pre>
+<ul>
+<li> <b>prefvmx.minVmMemPct</b>: Sets amount of RAM in percent which should be reserved by the virtual machine on the host system. If you set this to a lower value it is possible to assign the virtual machine more memory than available in the host system. Be careful though in this case as this will most likely lead to excessive hard drive usage. If you have enough RAM then leave this value at 100.</li>
+<li> <b>mainMem.partialLazySave</b> and <b>mainMem.partialLazyRestore</b>: These two parameters will prevent the virtual machine from creating partial snapshots for suspends. When you use these parameters and you suspend your virtual machine it will take a little bit longer, but there should be less hard disk activity from VMware trying to store this information.</li>
+</ul>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Mouse_problems">Mouse problems</span></h3>
+<p>The following problems may occur with mouse:
+</p>
+<ul>
+<li>The automatic grab/ungrab feature will not automatically grab input when cursor enters the window</li>
+<li>Input lag</li>
+<li>Clicks are not registered in some applications</li>
+<li>Mouse cursor jumps when entering/leaving virtual machine</li>
+<li>Mouse position jumps to where it left the guest VM</li>
+</ul>
+<p>You can try to <a href="../../en/Pacman.html#Removing_packages" title="Remove" class="mw-redirect">Remove</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span> package. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-vmmouse">xf86-input-vmmouse</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span> should be sufficient for handling mouse and keyboard inputs.
+</p>
+<p>You can try to add these settings to your <code>.vmx</code> configuration file (<a rel="nofollow" class="external text" href="https://forums.mageia.org/en/viewtopic.php?f=7&amp;t=7977">Mouse position jumps to where it left the guest VM</a>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>&lt;Virtual Machine name&gt;</i>/<i>&lt;Virtual Machine name&gt;</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mouse.vusb.enable = "TRUE"
+mouse.vusb.useBasicMouse = "FALSE"
+usb.generic.allowHID = "TRUE"
+
+VMware attempts to automatically optimize mouse for gaming. If experiencing problems, disabling it is recommended: <i>Edit &gt; Preferences &gt; Input &gt; Optimize mouse for games: Never</i></pre>
+<p>Alternatively, attempting to <a rel="nofollow" class="external text" href="http://www.spinics.net/lists/xorg/msg53932.html">disable</a> the <code>catchall</code> event in <code>60-libinput.conf</code> may be needed:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/X11/xorg.conf.d/60-libinput.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#Section "InputClass"
+#        Identifier "libinput pointer catchall"
+#        MatchIsPointer "on"
+#        MatchDevicePath "/dev/input/event*"
+#        Driver "libinput"
+#EndSection
+</pre>
+<h4><span class="mw-headline" id="Missing_buttons">Missing buttons</span></h4>
+<p>If not by default, all mouse buttons should be working after adding <code><a rel="nofollow" class="external text" href="https://communities.vmware.com/thread/457313?start=15&amp;tstart=0">mouse.vusb.useBasicMouse = "FALSE"</a></code> to the <code>.vmx</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>&lt;Virtual Machine name&gt;</i>/<i>&lt;Virtual Machine name&gt;</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mouse.vusb.useBasicMouse = "FALSE"</pre>
+<h3><span class="mw-headline" id="Boot_problems">Boot problems</span></h3>
+<h4><span class="mw-headline" id="Slow_boot_time">Slow boot time</span></h4>
+<p>You may see the following errors if VMWare's memory hot-add feature is enabled.
+</p>
+<ul>
+<li>add_memory failed</li>
+<li>acpi_memory_enable_device() error</li>
+</ul>
+<p>Disable the memory hot-add feature by setting <code>mem.hotadd = "FALSE"</code> to the <code>.vmx</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>&lt;Virtual Machine name&gt;</i>/<i>&lt;Virtual Machine name&gt;</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mem.hotadd = "FALSE"</pre>
+<h4><span class="mw-headline" id="Shutdown.2FReboot_hangs">Shutdown/Reboot hangs</span></h4>
+<p>Adjust the timeout for the vmtoolsd service (defaults to 90 seconds).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmtoolsd.service.d/timeout.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+TimeoutStopSec=1</pre>
+<h3><span class="mw-headline" id="Autofit_problems">Autofit problems</span></h3>
+<p>If VMWare is stretching instead of changing the resolution even with the system service enabled, you may need to add the modules to mkinitcpio.conf.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES="vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx"</pre>
+<p>Do not forget to run:
+</p>
+<pre># mkinitcpio -p linux</pre>
+<h3><span class="mw-headline" id="Drag_and_drop.2C_copy.2Fpaste">Drag and drop, copy/paste</span></h3>
+<p>The drag-and-drop (copy/paste) feature requires both <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtkmm">gtkmm</a></span> packages to be installed in order to work.
+</p>
+<p><code>/etc/xdg/autostart/vmware-user.desktop</code> may try to start <i>vmware-user-suid-wrapper</i> properly when you log in, but there is an unspecified relationship between it and <i>gtkmm</i> that causes it to silently fail. This is documented in <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43159">FS#43159</a>.
+</p>
+<h3><span class="mw-headline" id="Problems_when_running_as_a_shared_VM_on_Workstation_11">Problems when running as a shared VM on Workstation 11</span></h3>
+<p>Workstation 11 has a bug where vmware-hostd crashes if an Arch guest is running as a shared VM and vmtoolsd is running in the guest.  A patch to open-vm-tools to work around the bug is <a rel="nofollow" class="external text" href="https://github.com/vmware/open-vm-tools/issues/31">here</a>.
+</p>
+<h3><span class="mw-headline" id="Shared_folder_not_mounted_after_system_upgrade">Shared folder not mounted after system upgrade</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Broken english (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:VMware/Installing_Arch_as_a_guest">Talk:VMware/Installing Arch as a guest#</a>)</div>
+</div>
+<p>This is probably only happens to <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=open-vm-tools">open-vm-tools</a></span>. Since the vmhgfs module belongs to <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/open-vm-tools-dkms/">open-vm-tools-dkms</a></span><sup><small>AUR</small></sup> which belongs to AUR repositiory, therefore would not get's updated automatically by the <code>pacman -Syu</code> command. Always update the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/open-vm-tools-dkms/">open-vm-tools-dkms</a></span><sup><small>AUR</small></sup> manually before the system upgrade. 
+</p>
+<p>If you happened to get in to this situation, you need to remove the automount for shared file system, upgrade and do a <code>mkinitcpio -p linux</code>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+<li><a href="../../en/Category:Hypervisors.html" title="Category:Hypervisors">Hypervisors</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=VMware/Installing_Arch_as_a_guest&amp;oldid=444376">https://wiki.archlinux.org/index.php?title=VMware/Installing_Arch_as_a_guest&amp;oldid=444376</a>"</li>
+					<li id="lastmod"> This page was last modified on 3 August 2016, at 05:12.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

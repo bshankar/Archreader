@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Wacom Tablet - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Wacom_Tablet skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Wacom Tablet</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Many <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a> issues (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Wacom_Tablet">Talk:Wacom Tablet#</a>)</div>
+</div>
+<p>This guide was started for <i>USB</i> based Wacom tablets, so much of the info in here focuses on that. Usually it is recommended to rely on <a href="../en/Xorg.html" title="Xorg">Xorg</a>'s auto-detection or to use a <b>dynamic</b> setup.
+However for an <i>internal</i> tablet device one might consider a <b>static</b> Xorg setup in case autodetection does not work.
+A static <a href="../en/Xorg.html" title="Xorg">Xorg</a> setup is usually not able to recognize your Wacom tablet when it is connected to a different <i>USB</i> port or even after unplugging and replugging it into the same port, and as such it should be considered as deprecated.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installing"><span class="tocnumber">1</span> <span class="toctext">Installing</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Check_if_kernel_drivers_needed_.28usually_not.29"><span class="tocnumber">1.1</span> <span class="toctext">Check if kernel drivers needed (usually not)</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Install_Wacom_drivers"><span class="tocnumber">1.2</span> <span class="toctext">Install Wacom drivers</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Automatic_setup"><span class="tocnumber">1.3</span> <span class="toctext">Automatic setup</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Manual_setup"><span class="tocnumber">1.4</span> <span class="toctext">Manual setup</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6">
+<a href="#Dynamic_with_udev"><span class="tocnumber">1.4.1</span> <span class="toctext">Dynamic with udev</span></a>
+<ul>
+<li class="toclevel-4 tocsection-7"><a href="#USB-devices"><span class="tocnumber">1.4.1.1</span> <span class="toctext">USB-devices</span></a></li>
+<li class="toclevel-4 tocsection-8"><a href="#Serial_devices"><span class="tocnumber">1.4.1.2</span> <span class="toctext">Serial devices</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-9"><a href="#Static_setup"><span class="tocnumber">1.4.2</span> <span class="toctext">Static setup</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Xorg_configuration"><span class="tocnumber">1.4.3</span> <span class="toctext">Xorg configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12">
+<a href="#General_concepts"><span class="tocnumber">2.1</span> <span class="toctext">General concepts</span></a>
+<ul>
+<li class="toclevel-3 tocsection-13"><a href="#Temporary_configuration"><span class="tocnumber">2.1.1</span> <span class="toctext">Temporary configuration</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Permanent_configuration"><span class="tocnumber">2.1.2</span> <span class="toctext">Permanent configuration</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Changing_orientation"><span class="tocnumber">2.1.3</span> <span class="toctext">Changing orientation</span></a></li>
+<li class="toclevel-3 tocsection-16">
+<a href="#Remapping_Buttons"><span class="tocnumber">2.1.4</span> <span class="toctext">Remapping Buttons</span></a>
+<ul>
+<li class="toclevel-4 tocsection-17"><a href="#Finding_out_the_button_IDs"><span class="tocnumber">2.1.4.1</span> <span class="toctext">Finding out the button IDs</span></a></li>
+<li class="toclevel-4 tocsection-18"><a href="#The_syntax"><span class="tocnumber">2.1.4.2</span> <span class="toctext">The syntax</span></a></li>
+<li class="toclevel-4 tocsection-19"><a href="#Some_examples"><span class="tocnumber">2.1.4.3</span> <span class="toctext">Some examples</span></a></li>
+<li class="toclevel-4 tocsection-20"><a href="#Execute_custom_commands"><span class="tocnumber">2.1.4.4</span> <span class="toctext">Execute custom commands</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-21"><a href="#LEDs"><span class="tocnumber">2.1.5</span> <span class="toctext">LEDs</span></a></li>
+<li class="toclevel-3 tocsection-22">
+<a href="#TwinView_Setup"><span class="tocnumber">2.1.6</span> <span class="toctext">TwinView Setup</span></a>
+<ul>
+<li class="toclevel-4 tocsection-23"><a href="#Temporary_TwinView_Setup"><span class="tocnumber">2.1.6.1</span> <span class="toctext">Temporary TwinView Setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-24"><a href="#Xrandr_Setup"><span class="tocnumber">2.1.7</span> <span class="toctext">Xrandr Setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-25"><a href="#Pressure_curves"><span class="tocnumber">2.2</span> <span class="toctext">Pressure curves</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Force_Proportions"><span class="tocnumber">2.3</span> <span class="toctext">Force Proportions</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Using_kcm-wacomtablet"><span class="tocnumber">2.4</span> <span class="toctext">Using kcm-wacomtablet</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-28">
+<a href="#Application-specific_configuration"><span class="tocnumber">3</span> <span class="toctext">Application-specific configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-29"><a href="#Blender"><span class="tocnumber">3.1</span> <span class="toctext">Blender</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#GIMP"><span class="tocnumber">3.2</span> <span class="toctext">GIMP</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Inkscape"><span class="tocnumber">3.3</span> <span class="toctext">Inkscape</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Krita"><span class="tocnumber">3.4</span> <span class="toctext">Krita</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#VirtualBox"><span class="tocnumber">3.5</span> <span class="toctext">VirtualBox</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Web_Browser_Plugin"><span class="tocnumber">3.6</span> <span class="toctext">Web Browser Plugin</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-35">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-36"><a href="#Unknown_device_type"><span class="tocnumber">4.1</span> <span class="toctext">Unknown device_type</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#System_freeze"><span class="tocnumber">4.2</span> <span class="toctext">System freeze</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-38"><a href="#References"><span class="tocnumber">5</span> <span class="toctext">References</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing">Installing</span></h2>
+<h3><span class="mw-headline" id="Check_if_kernel_drivers_needed_.28usually_not.29">Check if kernel drivers needed (usually not)</span></h3>
+<p>After plugging in the tablet (in case of a USB device) check <code>lsusb</code> and/or <code>dmesg | grep -i wacom</code> to see if the kernel recognizes your tablet. It should also be listed in <code>/proc/bus/input/devices</code>.
+</p>
+<p>In case it is not recognized, it might happen for new devices not to be supported by the current kernel. Sometimes the tablet has already support by a more recent driver than the one that comes with the kernel. In that case you may try to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/input-wacom-dkms/">input-wacom-dkms</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Install_Wacom_drivers">Install Wacom drivers</span></h3>
+<p>Thanks to <a rel="nofollow" class="external text" href="http://linuxwacom.sourceforge.net">The Linux Wacom Project</a>, you only need to install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-wacom">xf86-input-wacom</a></span> package, which contains everything needed to use a Wacom tablet on Linux.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is also <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xf86-input-wacom-git/">xf86-input-wacom-git</a></span><sup><small>AUR</small></sup> in AUR which provides git version of <i>xf86-input-wacom</i>, but you might encounter some troubles. For me the buttons for example did only work with the stable release, not with the git version. So it is recommended to try <i>xf86-input-wacom</i> first.</div>
+<h3><span class="mw-headline" id="Automatic_setup">Automatic setup</span></h3>
+<p>Newer versions of X should be able to automatically detect and configure your device. Before going any further, restart X so the new udev rules take effect. Test if your device was recognized completely (i.e., that both pen and eraser work, if applicable), by issuing command
+</p>
+<pre> $ xsetwacom --list devices
+</pre>
+<p>which should detect all devices with type, for example
+</p>
+<pre> Wacom Bamboo 2FG 4x5 Pen stylus 	id: 8	type: STYLUS    
+ Wacom Bamboo 2FG 4x5 Pen eraser 	id: 9	type: ERASER    
+ Wacom Bamboo 2FG 4x5 Finger touch	id: 13	type: TOUCH     
+ Wacom Bamboo 2FG 4x5 Finger pad 	id: 14	type: PAD       
+</pre>
+<p>You can also test it by opening <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gimp">gimp</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xournal">xournal</a></span> and checking the extended input devices section, or whatever tablet-related configuration is supported by the software of your choice.
+</p>
+<p>For this to work you do not need any <code>xorg.conf</code> file, any configurations are made in files in the <code>/etc/X11/xorg.conf.d/</code> folder.
+If everything is working you can skip the manual configuration and <b>proceed</b> to the configuration section to learn how to further customize your tablet.
+</p>
+<p>With the arrival of Xorg 1.8 support for HAL was dropped in favor of <a href="../en/Udev.html" title="Udev">udev</a> which might break auto-detection for some tablets as fitting udev rules might not exist yet, so you may need to write your own.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The following may now break your system. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/User_talk:Pfc#Wacom_Tablet">User talk:Pfc#Wacom Tablet</a>)</div>
+</div>
+<p>If you have installed like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libwacom">libwacom</a></span> remove those packages first. They are known to cause problems with newer version of X. <i>xf86-input-wacom</i> is the only package you need to install the X11 drivers.
+</p>
+<h3><span class="mw-headline" id="Manual_setup">Manual setup</span></h3>
+<p>A manual configuration is done in <code>/etc/X11/xorg.conf</code> or in a separate file in the <code>/etc/X11/xorg.conf.d/</code> directory.
+The Wacom tablet device is accessed using a input event interface in <code>/dev/input/</code> which is provided by the kernel driver.
+The interface number <code>event??</code> is likely to change when unplugging and replugging into the same or especially a different <i>USB</i> port.
+Therefore it is wise to not refer to the device using its concrete <code>event??</code> interface (<b>static</b> configuration) but by letting <i>udev</i> dynamically create a symbolic link to the correct <code>event</code> file (<b>dynamic</b> configuration).
+</p>
+<h4><span class="mw-headline" id="Dynamic_with_udev">Dynamic with udev</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In AUR there is wacom-udev package, which includes udev-rules-file. You might skip this part and move on to the <code>xorg.conf</code> configuration if you are using the wacom-udev package from AUR.</div>
+<p>Assuming <i>udev</i> is already installed you simply need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wacom-udev/">wacom-udev</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/wacom-udev">aur-mirror</a>]</sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h5><span class="mw-headline" id="USB-devices">USB-devices</span></h5>
+<p>After (re-)plugging in your <i>USB</i>-tablet (or at least after rebooting) some symbolic links should appear in <code>/dev/input</code> referring to your tablet device.
+</p>
+<pre> $ ls /dev/input/wacom* 
+ /dev/input/wacom  /dev/input/wacom-stylus  /dev/input/wacom-touch
+</pre>
+<p>If not, your device is likely to be not yet included in the <i>udev</i> configuration from <i>wacom-udev</i> which resides in <code>/usr/lib/udev/rules.d/10-wacom.rules</code>. It is a good idea to copy the file e.g. to <code>10-my-wacom.rules</code> before modifying it, else it might be reverted by a package upgrade.
+</p>
+<p>Add your device to the file by duplicating some line of another device and adapting <i>idVendor</i>,<i>idProduct</i> and the symlink name to your device.
+The two id's can by determined using
+</p>
+<pre>$ lsusb | grep -i wacom
+Bus 002 Device 007: ID 056a:0062 Wacom Co., Ltd
+</pre>
+<p>In this example idVendor is 056a and idProduct 0062.
+In case you have device with touch (e.g. Bamboo Pen&amp;Touch) you might need to add a second line for the touch input interface.
+For details check the linuxwacom wiki <a rel="nofollow" class="external text" href="http://sourceforge.net/apps/mediawiki/linuxwacom/index.php?title=Fixed_device_files_with_udev">Fixed device files with udev</a>.
+</p>
+<p>Save the file and reload udev's configuration profile using the command <i>udevadm control --reload-rules</i>
+Check again the content of <i>/dev/input</i> to make sure that the <i>wacom</i> symlinks appeared.
+Note that you may need to plug-in the tablet again for the device to appear.
+</p>
+<p>The files of further interest for the <i>Xorg</i> configuration are <code>/dev/input/wacom</code> and for a touch-device also <code>/dev/input/wacom_touch</code>.
+</p>
+<h5><span class="mw-headline" id="Serial_devices">Serial devices</span></h5>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wacom-udev/">wacom-udev</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/wacom-udev">aur-mirror</a>]</sup> should also include support for serial devices. Users of serial tablets might be also interested in the inputattach tool from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linuxconsole">linuxconsole</a></span> package. The inputattach command allows to bind serial device into /dev/input tree, for example with:
+</p>
+<pre> # inputattach --w8001 /dev/ttyS0
+</pre>
+<p>See <i>man inputattach</i> for help about available options.
+As for USB devices one should end up with a file <code>/dev/input/wacom</code> and proceed with the <i>Xorg</i> configuration.
+</p>
+<h4><span class="mw-headline" id="Static_setup">Static setup</span></h4>
+<p>If you insist in using a static setup just refer to your tablet in the <i>Xorg</i> configuration in the next section using the correct <code>/dev/input/event??</code> files as one can find out by looking into <code>/proc/bus/input/devices</code>.
+</p>
+<h4><span class="mw-headline" id="Xorg_configuration">Xorg configuration</span></h4>
+<p>In either case, dynamic or static setup you got now one or two files in <code>/dev/input/</code> which refer to the correct input event devices of your tablet. All that is left to do is add the relevant information to <code>/etc/X11/xorg.conf</code>, or a dedicated file under  <code>/etc/X11/xorg.conf.d/</code>.
+The exact configuration depends on your tablet's features of course. <code>xsetwacom --list devices</code> might give helpful information on what <i>InputDevice</i> sections are needed for your tablet.
+</p>
+<p>An example configuration for a <i>Volito2</i> might look like this
+</p>
+<pre>Section "InputDevice"
+    Driver        "wacom"
+    Identifier    "stylus"
+    Option        "Device"       "/dev/input/wacom"   # or the corresponding event?? for a static setup
+    Option        "Type"         "stylus"
+    Option        "USB"          "on"                 # USB ONLY
+    Option        "Mode"         "Relative"           # other option: "Absolute"
+    Option        "Vendor"       "WACOM"
+    Option        "tilt"         "on"  # add this if your tablet supports tilt
+    Option        "Threshold"    "5"   # the official linuxwacom howto advises this line
+EndSection
+Section "InputDevice"
+    Driver        "wacom"
+    Identifier    "eraser"
+    Option        "Device"       "/dev/input/wacom"   # or the corresponding event?? for a static setup
+    Option        "Type"         "eraser"
+    Option        "USB"          "on"                  # USB ONLY
+    Option        "Mode"         "Relative"            # other option: "Absolute"
+    Option        "Vendor"       "WACOM"
+    Option        "tilt"         "on"  # add this if your tablet supports tilt
+    Option        "Threshold"    "5"   # the official linuxwacom howto advises this line
+EndSection
+Section "InputDevice"
+    Driver        "wacom"
+    Identifier    "cursor"
+    Option        "Device"       "/dev/input/wacom"   # or the corresponding event?? for a static setup
+    Option        "Type"         "cursor"
+    Option        "USB"          "on"                  # USB ONLY
+    Option        "Mode"         "Relative"            # other option: "Absolute"
+    Option        "Vendor"       "WACOM"
+EndSection
+</pre>
+<p>Make sure that you also change the path (<code>"Device"</code>) to your mouse, as it will be <code>/dev/input/mouse_udev</code> now.
+</p>
+<pre>Section "InputDevice"
+    Identifier  "Mouse1"
+    Driver      "mouse"
+    Option      "CorePointer"
+    Option      "Device"             "/dev/input/mouse_udev"
+    Option      "SendCoreEvents"     "true"
+    Option      "Protocol"           "IMPS/2"
+    Option      "ZAxisMapping"       "4 5"
+    Option      "Buttons"            "5"
+EndSection
+</pre>
+<p>Add this to the <i>ServerLayout</i> section
+</p>
+<pre>InputDevice "cursor" "SendCoreEvents" 
+InputDevice "stylus" "SendCoreEvents"
+InputDevice "eraser" "SendCoreEvents"
+</pre>
+<p>And finally make sure to update the identifier of your mouse in the <i>ServerLayout</i> section – as mine went from
+</p>
+<pre>InputDevice    "Mouse0" "CorePointer"
+</pre>
+<p>to
+</p>
+<pre>InputDevice    "Mouse1" "CorePointer"
+</pre>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="General_concepts">General concepts</span></h3>
+<p>The configuration can be done in two ways temporary using the `xsetwacom` tool, which is included in <i>xf86-input-wacom</i> or permanent in <code>xorg.conf</code> or better in a extra file in <code>/etc/X11/xorg.conf.d</code>.
+The possible options are identical so it is recommended to first use `xsetwacom` for testing and later add the final config to the <i>Xorg</i> configuration files.
+</p>
+<h4><span class="mw-headline" id="Temporary_configuration">Temporary configuration</span></h4>
+<p>For the beginning it is a good idea to inspect the default configuration and all possible options using the following commands.
+</p>
+<pre> $ xsetwacom --list devices                    # list the available devices for the get/set commands
+ Wacom Bamboo 16FG 4x5 Finger touch	id: 12	type: TOUCH
+ Wacom Bamboo 16FG 4x5 Finger pad	id: 13	type: PAD       
+ Wacom Bamboo 16FG 4x5 Pen stylus	id: 17	type: STYLUS    
+ Wacom Bamboo 16FG 4x5 Pen eraser	id: 18	type: ERASER
+ $ xsetwacom --get "Wacom Bamboo 16FG 4x5" all # using the device name
+ $ xsetwacom --get 17 all                      # or equivalently use the device id
+ $ xsetwacom --list parameters                 # to get an explanation of the Options
+ $ man wacom                                   # get even more details
+</pre>
+<p><b>Caution</b>, do not use the device id when writing shell scripts to set some options as the ids might change after an hotplug.
+</p>
+<p>Options can be changed with the <code>--set</code> flag. Some useful examples are
+</p>
+<pre> $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger touch" ScrollDistance 50  # change scrolling speed
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger touch" Gesture off        # disable multitouch gestures
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger touch" Touch off          # disable touch
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can reset your temporary configuration at any time by unplugging and replugging in your tablet.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There are some configurations that can only be set up dynamically with xsetwacom. In those cases it is possible to run a script that configures the device calling xsetwacom every time the device is plugged in. See <a rel="nofollow" class="external autonumber" href="http://unix.stackexchange.com/a/290940/89955">[1]</a>. </div>
+<h4><span class="mw-headline" id="Permanent_configuration">Permanent configuration</span></h4>
+<p>To make a permanent configuration the preferred way for <i>Xorg</i>&gt;1.8 is to create a new file in <code>/etc/X11/xorg.conf.d</code>
+e.g. <code>52-wacom-options.conf</code> with the following content.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/52-wacom-options.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "InputClass"
+    Identifier "Wacom Bamboo stylus options"
+    MatchDriver "wacom"
+    MatchProduct "Pen"
+    
+    # Apply custom Options to this device below.
+    Option "Rotate" "none"
+    Option "RawSample" "20"
+    Option "PressCurve" "0,10,90,100"
+EndSection
+
+Section "InputClass"
+    Identifier "Wacom Bamboo eraser options"
+    MatchDriver "wacom"
+    MatchProduct "eraser"
+    
+    # Apply custom Options to this device below.
+    Option "Rotate" "none"
+    Option "RawSample" "20"
+    Option "PressCurve" "5,0,100,95"
+EndSection
+
+Section "InputClass"
+    Identifier "Wacom Bamboo touch options"
+    MatchDriver "wacom"
+    MatchProduct "Finger"
+    
+    # Apply custom Options to this device below.
+    Option "Rotate" "none"
+    Option "ScrollDistance" "18"
+    Option "TapTime" "220"
+EndSection
+
+Section "InputClass"
+    Identifier "Wacom Bamboo pad options"
+    MatchDriver "wacom"
+    MatchProduct "pad"
+    
+    # Apply custom Options to this device below.
+    Option "Rotate" "none"
+    
+    # Setting up buttons
+    Option "Button1" "1"
+    Option "Button2" "2"
+    Option "Button3" "3"
+    Option "Button4" "0"
+EndSection
+</pre>
+<p>The identifiers can be set arbitrarily. The option names are (except for the buttons) identical to the ones listed by <code>xsetwacom --list parameters</code> and especially also in <code>man wacom</code>. As noted in <a href="#Remapping_Buttons">#Remapping Buttons</a> the button ids seem to be different than the ones for <code>xsetwacom</code>.
+</p>
+<h4><span class="mw-headline" id="Changing_orientation">Changing orientation</span></h4>
+<p>If you want to use your tablet in a different orientation you have to tell this to the driver, else the movements do not cause the expected results.
+This is done by setting the <b>Rotate</b> option for all devices. Possible orientations are <b>none</b>,<b>cw</b>,<b>ccw</b> and <b>half</b>.
+A quick way is e.g.
+</p>
+<pre> $ for i in 12 13 17 18; do xsetwacom --set $i Rotate half; done   # remember the ids might change when hotplugging
+</pre>
+<p>or use the following script like this <code>./wacomrot.sh half</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">wacomrot.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+device="Wacom Bamboo 16FG 4x5"
+stylus="$device Pen stylus"
+eraser="$device Pen eraser"
+touch="$device Finger touch"
+pad="$device Finger pad"
+
+xsetwacom --set "$stylus" Rotate $1
+xsetwacom --set "$eraser" Rotate $1
+xsetwacom --set "$touch"  Rotate $1
+xsetwacom --set "$pad"    Rotate $1</pre>
+<h4><span class="mw-headline" id="Remapping_Buttons">Remapping Buttons</span></h4>
+<p>It is possible to remap the buttons with hotkeys.
+</p>
+<ul><li>Check <a rel="nofollow" class="external text" href="http://planetedessonges.org:8010/wakey/">Simple web-based GUI for xsetwacom</a>, supports <i>bamboo small</i> but more models may come.</li></ul>
+<h5><span class="mw-headline" id="Finding_out_the_button_IDs">Finding out the button IDs</span></h5>
+<p>Sometimes it needs some trial&amp;error to find the correct button IDs. For me they even differ for <code>xsetwacom</code> and the <code>xorg.conf</code> configuration. Very helpful tools are <code>xev</code> or <code>xbindkeys -mk</code>. An easy way to proceed is to temporarily assign keystrokes to your tablet's buttons like this:
+</p>
+<pre> $ xsetwacom --get "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 'key a'
+ $ xsetwacom --get "Wacom Bamboo 16FG 4x5 Finger pad" Button 2 'key b'
+ $ xsetwacom --get "Wacom Bamboo 16FG 4x5 Finger pad" Button 3 'key c'
+ $ # and so on
+</pre>
+<p>Then fire up <code>xev</code> from a terminal window, place your mouse cursor above the window and hit the buttons and write down the IDs.
+</p>
+<pre> $ xev | grep KeyPress -A 5
+</pre>
+<h5><span class="mw-headline" id="The_syntax">The syntax</span></h5>
+<p>The syntax of <code>xsetwacom</code> is flexible but not very well documented. The general mapping syntax (extracted from the source code) for xsetwacom 0.17.0 is the following.
+</p>
+<pre> KEYWORD [ARGS...] [KEYWORD [ARGS...] ...]
+ 
+ KEYWORD + ARGS:
+   key [+,-]KEY [[+,-]KEY ...]  where +:key down, -:key up, no prefix:down and up
+   button BUTTON [BUTTON ...]   (1=left,2=middle,3=right mouse button, 4/5 scroll mouse wheel)
+   modetoggle                   toggle absolute/relative tablet mode 
+   displaytoggle                toggle cursor movement among all displays which include individual screens
+                                plus the whole desktop for the selected tool if it is not a pad.
+                                When the tool is a pad, the function applies to all tools that are asssociated
+                                with the tablet
+ 
+ BUTTON: button ID as integer number
+ 
+ KEY: MODIFIER, SPECIALKEY or ASCIIKEY
+ MODIFIER: (each can be prefix with an <b>l</b> or an <b>r</b> for the left/right modifier (no prefix = left)
+    ctrl=ctl=control, meta, alt, shift, super, hyper
+ SPECIALKEY: f1-f35, esc=Esc, up,down,left,right, backspace=Backspace, tab, PgUp,PgDn
+ ASCIIKEY: (usual characters the key produces, e.g. a,b,c,1,2,3 etc.)
+</pre>
+<h5><span class="mw-headline" id="Some_examples">Some examples</span></h5>
+<pre> $ xsetwacom --get "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 3 # right mouse button
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key +ctrl z -ctrl"
+ $ xsetwacom --get "Wacom Bamboo 16FG 4x5 Finger pad" Button 1
+ key +Control_L +z -z -Control_L
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key +shift button 1 key -shift"
+</pre>
+<p>even little macros are possible
+</p>
+<pre> $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key +shift h -shift e l l o"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There seems to be a bug in the <i>xf86-input-wacom</i> driver version 0.17.0, at least for my <i>Wacom Bamboo Pen &amp; Touch</i>, but I guess this holds in general. It causes the keystrokes not to be overwritten correctly.
+<pre> $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key a b c" # press button 1 -&gt; abc
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key d"     # press button 1 -&gt; dbc  WRONG!
+</pre>
+<p>A simple workaround is to reset the mapping by mapping to "":
+</p>
+<pre> $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 ""          # to reset the mapping
+ $ xsetwacom --set "Wacom Bamboo 16FG 4x5 Finger pad" Button 1 "key d"     # press button 1 -&gt; d
+</pre>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you try to run a script with <code>xsetwacom</code> commands from a udev rule, you might find that it will not work, as the wacom input devices will not be ready at the time. A workaround is to add <code>sleep 1</code> at the beginning of your script.</div>
+<h5><span class="mw-headline" id="Execute_custom_commands">Execute custom commands</span></h5>
+<p>Mapping custom commands to the buttons is a little bit tricky but actually very simple. First, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xbindkeys">xbindkeys</a></span>.
+</p>
+<p>To get well defined button codes add the following to your permanent configuration file, e.g. <code>/etc/X11/xorg.conf.d/52-wacom-options.conf</code>
+in the InputClass section of your <b>pad</b> device. Map the tablet's buttons to some unused button ids.
+</p>
+<pre> # Setting up buttons (preferably choose the correct button order, so the topmost key is mapped to 10 and so on)
+ Option "Button1" "10"
+ Option "Button2" "11"
+ Option "Button3" "12"
+ Option "Button4" "13"
+</pre>
+<p>Then restart your <i>Xorg</i> server and verify the buttons using <code>xev</code> or <code>xbindkeys -mk</code>.
+</p>
+<p>Now set up your xbindkeys configuration, if you do not already have one you might want to create a default configuration
+</p>
+<pre> $ xbindkeys --defaults &gt; ~/.xbindkeysrc
+</pre>
+<p>Then add your custom key mapping to <code>~/.xbindkeysrc</code>, for example
+</p>
+<pre> "firefox"
+     m:0x10 + b:10   (mouse)
+ "xterm"
+     m:0x10 + b:11   (mouse)
+ "xdotool key ctrl-z"
+     m:0x10 + b:12   (mouse)
+ "send-notify Test "No need for escaping the quotes""
+     m:0x10 + b:13   (mouse)
+</pre>
+<h4><span class="mw-headline" id="LEDs">LEDs</span></h4>
+<p>See the <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-driver-wacom">sysfs-driver-wacom</a> documentation. To make changes without requiring root permissions you will likely want to create a <a href="../en/Udev.html" title="Udev">udev</a> rule like so:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-wacom.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Give the users group permissions to set Wacom device LEDs.
+ACTION=="add", SUBSYSTEM=="hid", DRIVERS=="wacom", RUN+="/usr/bin/sh -c 'chown :users /sys/%p/wacom_led/*'"
+</pre>
+<p>Setting the Intuos OLEDs can be done using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/i4oled/">i4oled</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/i4oled">aur-mirror</a>]</sup> from the AUR.
+</p>
+<h4><span class="mw-headline" id="TwinView_Setup">TwinView Setup</span></h4>
+<p>If you are going to use two Monitors the aspect ratio while using the Tablet might feel unnatural. In order to fix this you need to add
+</p>
+<pre>Option "TwinView" "horizontal"
+</pre>
+<p>To all of your Wacom-InputDevice entries in the <code>xorg.conf</code> file.
+You may read more about that <a rel="nofollow" class="external text" href="http://ubuntuforums.org/showthread.php?t=640898">HERE</a>
+</p>
+<h5><span class="mw-headline" id="Temporary_TwinView_Setup">Temporary TwinView Setup</span></h5>
+<p>For temporary mapping of a Wacom device to a single display <b>while preserving the aspect ratio</b>, <a rel="nofollow" class="external text" href="https://gist.github.com/Quackmatic/6c19fe907945d735c045">this script</a> may be used. This will letter-box the surface area of the device as required to ensure the input is not stretched on the display. This script may be executed in your <code>.xinitrc</code> file for it to automatically run.
+</p>
+<h4><span class="mw-headline" id="Xrandr_Setup">Xrandr Setup</span></h4>
+<p>xrandr sets two monitors as one big screen, mapping the tablet to the whole virtual screen and deforming aspect ratio.
+For a solution see this thread: <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=797617">archlinux forum</a>.
+</p>
+<p>If you just want to map the tablet to one of your screens, first find out what the screens are called
+</p>
+<pre>$ xrandr
+Screen 0: minimum 320 x 200, current 3840 x 1080, maximum 16384 x 16384
+<b>HDMI-0</b> disconnected (normal left inverted right x axis y axis)
+<b>DVI-0</b> connected 1920x1080+0+0 (normal left inverted right x axis y axis) 477mm x 268mm
+  1920x1080      60.0*+
+  1680x1050      60.0  
+  ...
+<b>VGA-0</b> connected 1920x1080+1920+0 (normal left inverted right x axis y axis) 477mm x 268mm
+  1920x1080      60.0*+
+  1680x1050      60.0  
+  ...
+</pre>
+<p>Then you need to know what is the ID of your tablet.
+</p>
+<pre>$ xsetwacom --list devices
+WALTOP International Corp. Slim Tablet stylus   id: <b>12</b>  type: STYLUS
+</pre>
+<p>In my case I want to map the tablet (ID: <b>12</b>) to the screen on the right, which is <b>VGA-0</b>. I can do that with this command
+</p>
+<pre>$ xsetwacom --set <b>12</b> MapToOutput <b>"VGA-0"</b>
+</pre>
+<p>This should immediately work, no root necessary.
+</p>
+<p>If xsetwacom replies with "Unable to find an output ..." an X11 geometry string of the form <b>WIDTHxHEIGHT+X+Y</b> can be specified instead of the screen identifier. In this example
+</p>
+<pre>$ xsetwacom --set <b>12</b> MapToOutput <b>"1920x1080+1920+0"</b>
+</pre>
+<p>should also map the tablet to the screen on the right.
+</p>
+<p>Alternatively, you can use <a rel="nofollow" class="external text" href="https://bitbucket.org/denilsonsa/small_scripts/src/3380435f92646190f860b87f566a39d0e215034c/xsetwacom_my_preferences.sh?at=default">this bash script</a> to quickly map the tablet to one of your screens (or the entire desktop) and fix the aspect ratio.
+</p>
+<h3><span class="mw-headline" id="Pressure_curves">Pressure curves</span></h3>
+<p>Use <a rel="nofollow" class="external text" href="http://linuxwacom.sourceforge.net/misc/bezier.html">Wacom Pressure Demo</a> to find P1=red (eg. 50,0), P2=purple (eg. 100,80) and Threshold=green (eg. 27) of your desired curve. The x-axis is the input pressure you apply to the pen; the y-axis is the output pressure the application is given. (<a rel="nofollow" class="external text" href="http://250kb.de/u/150207/p/FoS1SiXuZQRP.png">example curve</a>)
+</p>
+<p>You can immediately test your desired values for your device (eg. "Wacom Intuos4 6x9 stylus") with
+</p>
+<pre> xsetwacom --set "Wacom Intuos4 6x9 stylus" PressureCurve "50" "0" "100" "80"
+ xsetwacom --set "Wacom Intuos4 6x9 stylus" Threshold "27"
+</pre>
+<p>Later you can apply them in <code>/etc/X11/xorg.conf</code> as shown below or you use the above shell commands in any startup script
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+  Option        "PressCurve"    "50,0,100,80"         # Custom preference
+  Option        "Threshold"     "27"                  # sensitivity to do a "click"
+</pre>
+<h3><span class="mw-headline" id="Force_Proportions">Force Proportions</span></h3>
+<p>For standard (<b>16:9</b>) widescreen monitors with Wacom tablets it is a typical problem that your strokes are slightly more horizontally oriented than they physically were (so for example a perfectly drawn circle with the pen will turn into a horizontal ellipse in the computer) because the tablet drawing surface proportions are larger on the vertical axis by default (<b>16:10</b>) than your monitors aspect ratio and this inconsistency will subtly distort your strokes. It is possible to force the proportions of the drawing surface to match the aspect ratio of your monitor to solve this problem by cutting off the bottom of the drawing surface to accommodate for the differences in vertical resolution with the below options. This is an alternative to the "Force Proportions" option in the Windows driver settings. It is generally recommended to do this to ensure maximum accuracy of your tablet input.
+</p>
+<p>To get the tablets default values run the following command (where "device name or ID" would be for your stylus):
+</p>
+<pre>   xsetwacom --get "device name or ID" Area
+</pre>
+<p>After this you can figure out your tablet's resolution by dividing the values with the ratio <b>11.25</b> (so <b>21600/11.25=1920</b> and <b>13500/11.25=1200</b>), so to convert this to <b>1920x1080</b> (<b>16:9</b>) resolution, do <b>1080*11.25=12150</b> then to set the proportions with xsetwacom:
+</p>
+<pre>   xsetwacom --set "device name or ID" Area 0 0 21600 12150
+</pre>
+<p>Here is how to do the same in the xorg configuration file:
+</p>
+<pre>   Option "BottomX" "21600"
+   Option "BottomY" "12150"
+</pre>
+<p>(An alternative formula would would be aspect ratio multiplied by <b>1350</b>. So <b>16:9</b> is <b>16*1350=21600</b> and <b>9*1350=12150</b>)
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There is also a KeepShape option which reportedly should do this automatically but it does not seem to work, which is why we have to do it the hard way. I do not know whether these values should be kept the same or increased on a bigger resolution monitor, but I highly suspect that they should be kept the same (e.g. the values are relative to the tablet's resolution, not the monitor's resolution; the important part is that the aspect ratio is correct, not that the resolution is a match)</div>
+<h3><span class="mw-headline" id="Using_kcm-wacomtablet">Using kcm-wacomtablet</span></h3>
+<p>The KDE configuration module <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/kcm-wacomtablet/">kcm-wacomtablet</a></span><sup><small>AUR</small></sup> (or if you're on Plasma 5, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/kcm-wacomtablet-frameworks-git/">kcm-wacomtablet-frameworks-git</a></span><sup><small>AUR</small></sup>) supports easy configuration of the tablet through a graphical user interface, allowing for different profiles and proper hotplugging support. It will auto-detect the type of your tablet, and load your configuration profile automatically when the tablet is plugged in.
+</p>
+<h2><span class="mw-headline" id="Application-specific_configuration">Application-specific configuration</span></h2>
+<h3><span class="mw-headline" id="Blender">Blender</span></h3>
+<p>To enable pad buttons and extra pen buttons in blender, you can create a xsetwacom wrapper to temporarily remap buttons for your blender session.
+</p>
+<p>Provided example (for Bamboo fun) adapted to <b>Sculpt</b> mode: <a rel="nofollow" class="external text" href="http://pastebin.archlinux.fr/1887946">blender_sculpt.sh</a>
+</p>
+<p>It remaps
+</p>
+<ul>
+<li>Left tablet buttons to <b>Shift</b> and <b>Control</b> <i>(pan/tilt/zoom/smooth/invert)</i>
+</li>
+<li>Right tablet buttons to <b>F</b> <i>(brush size/strenght)</i> and <b>Control-z</b> <i>(undo)</i>
+</li>
+<li>Top pen button ton <b>m</b> <i>(mask control)</i>
+</li>
+</ul>
+<h3><span class="mw-headline" id="GIMP">GIMP</span></h3>
+<p>To enabled proper usage, and pressure sensitive painting in <a rel="nofollow" class="external text" href="http://www.gimp.org">GIMP</a>, just go to <i>Edit → Input Devices</i>. Now for each of your <i>eraser</i>, <i>stylus</i>, and <i>cursor</i> <b>devices</b>, set the <b>mode</b> to <i>Screen</i>, and remember to save.
+</p>
+<ul><li>Please take note that if present, the <i>pad</i> <b>device</b> should be kept disabled as I do not think GIMP supports such things. Alternatively, to use such features of your tablet you should map them to keyboard commands with a program such as <a rel="nofollow" class="external text" href="http://hem.bredband.net/devel/wacom/">Wacom ExpressKeys</a>.</li></ul>
+<ul><li>You should also take note that the tool selected for the <i>stylus</i> is independent to that of the <i>eraser</i>. This can actually be quite handy, as you can have the <i>eraser</i> set to be used as any tool you like.</li></ul>
+<p>For more information checkout the <i>Setting up GIMP</i> section of <a rel="nofollow" class="external text" href="http://www.gimptalk.com/forum/topic.php?t=17992&amp;start=1">GIMP Talk - Community - Install Guide: Getting Wacom Drawing Tablets To Work In Gimp</a>.
+</p>
+<p>If the above was not enough, you may want to try setting up the tablet's stylus (and eraser) as a second mouse pointer (separating it from your mouse) by using the <code>xinput create-master</code> and <code>xinput reattach</code> commands. It can help when GIMP does not start painting even if the stylus touches the tablet.
+</p>
+<h3><span class="mw-headline" id="Inkscape">Inkscape</span></h3>
+<p>As in GIMP, to do the same simply got to <i>Edit → Input Devices...</i>. Now for each of your <i>eraser</i>, <i>stylus</i>, and <i>cursor</i> <b>devices</b>, set the <b>mode</b> to <i>Screen</i>, and remember to save.
+</p>
+<h3><span class="mw-headline" id="Krita">Krita</span></h3>
+<p>If your tablet does not draw in Krita (clicks/pressure are not registered) but works in the brush selection dialog which has a small test area, try putting Krita in full-screen or canvas-only mode.
+</p>
+<p>Krita only requires that Qt is able to use your tablet to function properly. If your tablet is not working in Krita, then make sure to check it is working in Qt first. The effect of tablet pressure can then be tweaked in the painttop configuration, for example by selecting opacity, then selecting pressure from the drop down and adjusting the curve to your preference.
+</p>
+<h3><span class="mw-headline" id="VirtualBox">VirtualBox</span></h3>
+<p>First, make sure that your tablet works well under Arch. Then, download and install the last driver from <a rel="nofollow" class="external text" href="http://www.wacom.com/downloads/drivers.php">Wacom website</a> on the guest OS. Shutdown the virtual machine, go to <b>Settings &gt; USB</b>. Select <b>Add Filter From Device</b> and select your tablet (e.g. WACOM CTE-440-U V4.0-3 [0403]). Select <b>Edit Filter</b>, and change the last item <b>Remote</b> to <b>Any</b>.
+</p>
+<h3><span class="mw-headline" id="Web_Browser_Plugin">Web Browser Plugin</span></h3>
+<p>A plugin that imitates the official Wacom web plugin can be found on the AUR as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wacomwebplugin/">wacomwebplugin</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/wacomwebplugin">aur-mirror</a>]</sup>. It has been tested successfully using Chromium and Firefox.
+</p>
+<p>With this plugin it is possible to make use of online tools such as <a rel="nofollow" class="external text" href="http://sta.sh/muro/">deviantART's Muro</a>. This plugin is in early stages so as always, your mileage may vary.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>Newer tablets' drivers might not be in the kernel yet, and additional manipulations might be needed. A notable example is the newer Intuos line of tablets (Draw/Comic/Photo).
+</p>
+<h3><span class="mw-headline" id="Unknown_device_type">Unknown device_type</span></h3>
+<p>If your tablet does not get recognized by <code>xsetwacom</code> and <code>dmesg</code> complains about an unknown device_type, then you need to install a patched version of input-wacom.
+</p>
+<p>Download and install the for-4.4 branch from <a rel="nofollow" class="external text" href="http://sourceforge.net/p/linuxwacom/input-wacom/ci/jiri/for-4.4/~/tarball">SourceForge</a>.
+Your device should be recognized after you run
+</p>
+<pre> # rmmod wacom
+ # insmod /lib/modules/YOUR_KERNEL/extra/wacom.ko.gz
+</pre>
+<h3><span class="mw-headline" id="System_freeze">System freeze</span></h3>
+<p>If your system freezes when your tablet gets activated by the stylus, then you will need to <a href="../en/Patching_in_ABS.html" title="Patch" class="mw-redirect">patch</a> your kernel with the patch from <a rel="nofollow" class="external text" href="https://lkml.org/lkml/2015/11/20/690">LKML</a>.
+</p>
+<h2><span class="mw-headline" id="References">References</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="http://sourceforge.net/apps/mediawiki/linuxwacom/index.php?title=Main_Page">Linux Wacom Project Wiki</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.gimptalk.com/forum/topic.php?t=17992&amp;start=1">GIMP Talk - Community - Install Guide: Getting Wacom Drawing Tablets To Work In Gimp</a></li>
+<li><a rel="nofollow" class="external text" href="https://help.ubuntu.com/community/Wacom">Ubuntu Help: Wacom</a></li>
+<li><a rel="nofollow" class="external text" href="http://ubuntuforums.org/showthread.php?t=1038949">Ubuntu Forums - Install a LinuxWacom Kernel Driver for Tablet PC's</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Graphics_tablet.html" title="Category:Graphics tablet">Graphics tablet</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>IBM ThinkPad T21 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-IBM_ThinkPad_T21 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">IBM ThinkPad T21</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Works with no known issues.   Tested on 2008.03 and 2008.06. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Configuration"><span class="tocnumber">1</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#CPU_Frequency_Scaling"><span class="tocnumber">1.1</span> <span class="toctext">CPU Frequency Scaling</span></a></li>
+<li class="toclevel-2 tocsection-3">
+<a href="#Hotkeys"><span class="tocnumber">1.2</span> <span class="toctext">Hotkeys</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#External_VGA"><span class="tocnumber">1.2.1</span> <span class="toctext">External VGA</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#Xorg"><span class="tocnumber">1.3</span> <span class="toctext">Xorg</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">2</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:IBM_ThinkPad_T21">Talk:IBM ThinkPad T21#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="CPU_Frequency_Scaling">CPU Frequency Scaling</span></h3>
+<p>Install <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages.php?ID=43483">cpudyn</a> from the AUR.
+</p>
+<p>Add speedstep_lib, speedstep_smi, and cpufreq_userspace to MODULES array in /etc/<a href="../en/SysVinit.html" title="Rc.conf" class="mw-redirect">rc.conf</a>.
+</p>
+<pre>MODULES=(... <b>speedstep_lib speedstep_smi cpufreq_userspace</b> ...)
+</pre>
+<p>Add cpudyn to DAEMONS array in /etc/rc.conf
+</p>
+<pre>DAEMONS=(... <b>cpudyn</b> ...)
+</pre>
+<h3><span class="mw-headline" id="Hotkeys">Hotkeys</span></h3>
+<p>They work better after loading the thinkpad-acpi module, to assign the generated keycodes to their supposed functions.   You may also want to install tpb (ThinkPad Buttons) if you still have trouble.
+</p>
+<h4><span class="mw-headline" id="External_VGA">External VGA</span></h4>
+<p>For whatever reason, external VGA output (for an external monitor) was disabled.   This was fixed by doing this: 
+</p>
+<pre># echo 1 &gt; /proc/acpi/video/VID/DOS 
+</pre>
+<h3><span class="mw-headline" id="Xorg">Xorg</span></h3>
+<p>Works with driver xf86-video-savage.   However, to achieve DRI (and thus OpenGL acceleration), you will have to use 16-bit color.   The 8 MB of VRAM with the Savage GPU isn't enough to support 24 bit color, OpenGL, and 1024x768.  You must either drop color depth or resolution. 
+</p>
+<p>Here is the mentioned file, for those who do not have a working configuration yet:  
+</p>
+<pre># /etc/X11/xorg.conf (xorg X Window System server configuration file)  
+  
+Section "ServerLayout" 
+       Identifier     "X.org Configured" 
+       Screen      0  "Screen0" 0 0 
+       InputDevice    "Mouse0" "CorePointer" 
+       InputDevice    "Keyboard0" "CoreKeyboard" 
+EndSection 
+Section "Files" 
+       RgbPath      "/usr/share/X11/rgb" 
+       ModulePath   "/usr/lib/xorg/modules" 
+       FontPath     "/usr/share/fonts/misc" 
+       FontPath     "/usr/share/fonts/100dpi:unscaled" 
+       FontPath     "/usr/share/fonts/75dpi:unscaled" 
+       FontPath     "/usr/share/fonts/TTF" 
+       FontPath     "/usr/share/fonts/Type1" 
+EndSection 
+Section "Module" 
+       Load  "glx" 
+       Load  "extmod" 
+       Load  "xtrap" 
+       Load  "record" 
+       Load  "GLcore" 
+       Load  "dbe" 
+       Load  "dri" 
+       Load  "freetype" 
+EndSection 
+Section "InputDevice" 
+       Identifier  "Keyboard0" 
+       Driver      "kbd" 
+EndSection 
+Section "InputDevice" 
+       Identifier  "Mouse0" 
+       Driver      "mouse" 
+       Option      "Protocol" "auto" 
+       Option      "Device" "/dev/input/mice" 
+       Option      "ZAxisMapping" "4 5 6 7" 
+       ###To enable third trackpoint scrolling button
+       Option      "EmulateWheel" "true"
+       Option      "EmulateWheelButton" "2"
+EndSection 
+Section "Monitor" 
+       Identifier   "Monitor0" 
+       VendorName   "Monitor Vendor" 
+       ModelName    "Monitor Model" 
+EndSection 
+Section "Device" 
+       ### Available Driver options are:- 
+       ### Values: &lt;i&gt;: integer, &lt;f&gt;: float, &lt;bool&gt;: "True"/"False", 
+       ### &lt;string&gt;: "String", &lt;freq&gt;: "&lt;f&gt; Hz/kHz/MHz" 
+       ### [arg]: arg optional 
+       #Option     "NoAccel"                   # [&lt;bool&gt;] 
+       #Option     "AccelMethod"               # &lt;str&gt; 
+       #Option     "HWCursor"                  # [&lt;bool&gt;] 
+       #Option     "SWCursor"                  # [&lt;bool&gt;] 
+       #Option     "ShadowFB"                  # [&lt;bool&gt;] 
+       #Option     "Rotate"                    # [&lt;str&gt;] 
+       #Option     "UseBIOS"                   # [&lt;bool&gt;] 
+       #Option     "LCDClock"                  # &lt;freq&gt; 
+       #Option     "ShadowStatus"              # [&lt;bool&gt;] 
+       #Option     "CrtOnly"                   # [&lt;bool&gt;] 
+       #Option     "TvOn"                      # [&lt;bool&gt;] 
+       #Option     "PAL"                       # [&lt;bool&gt;] 
+       #Option     "ForceInit"                 # [&lt;bool&gt;] 
+       #Option     "Overlay"                   # [&lt;str&gt;] 
+       #Option     "TransparencyKey"           # [&lt;str&gt;] 
+       #Option     "ForceInit"                 # [&lt;bool&gt;] 
+       #Option     "DisableXVMC"               # [&lt;bool&gt;] 
+       #Option     "DisableTile"               # [&lt;bool&gt;] 
+       #Option     "DisableCOB"                # [&lt;bool&gt;] 
+       #Option     "BCIforXv"                  # [&lt;bool&gt;] 
+       #Option     "DVI"                       # [&lt;bool&gt;] 
+       #Option     "IgnoreEDID"                # [&lt;bool&gt;] 
+       #Option     "BusType"                   # [&lt;str&gt;] 
+       #Option     "DmaType"                   # [&lt;str&gt;] 
+       #Option     "DmaMode"                   # [&lt;str&gt;] 
+       #Option     "AGPMode"                   # &lt;i&gt; 
+       #Option     "AGPSize"                   # &lt;i&gt; 
+       #Option     "DRI"                       # [&lt;bool&gt;] 
+       Identifier  "Card0" 
+       Driver      "savage" 
+       VendorName  "S3 Inc." 
+       BoardName   "86C270-294 Savage/IX-MV" 
+       BusID       "PCI:1:0:0" 
+EndSection 
+Section "Screen" 
+       Identifier "Screen0" 
+       Device     "Card0" 
+       Monitor    "Monitor0" 
+       DefaultDepth 16 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     1 
+       EndSubSection 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     4 
+       EndSubSection 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     8 
+       EndSubSection 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     15 
+       EndSubSection 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     16 
+       EndSubSection 
+       SubSection "Display" 
+               Viewport   0 0 
+               Depth     24 
+       EndSubSection 
+EndSection
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.thinkwiki.org/wiki/Category:T21">Thinkwiki</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:IBM.html" title="Category:IBM">IBM</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

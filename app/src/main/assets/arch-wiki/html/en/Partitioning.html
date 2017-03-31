@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Partitioning - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Partitioning skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Partitioning</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fdisk.html" title="Fdisk">fdisk</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GNU_Parted.html" title="Parted" class="mw-redirect">parted</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fstab.html" title="Fstab">fstab</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/LVM.html" title="LVM">LVM</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Swap.html" title="Swap">Swap</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a></li>
+</ul>
+</div>
+<p><a href="https://en.wikipedia.org/wiki/Disk_partitioning" class="extiw" title="w:Disk partitioning">Partitioning</a> a hard drive divides the available space into sections that can be accessed independently. An entire drive may be allocated to a single partition, or multiple ones for cases such as dual-booting, maintaining a <a href="../en/Swap.html" title="Swap">swap</a> partition, or to logically separate data such as audio and video files.
+</p>
+<p>The required information is stored in a <a href="#Partition_table">#Partition table</a> scheme such as MBR or GPT.
+</p>
+<p>Partition tables are created and modified using one of many <a href="#Partitioning_tools">#Partitioning tools</a> which must be compatible to the chosen scheme of partitioning table. Available tools include <a href="../en/Fdisk.html" title="Fdisk">fdisk</a> and <a href="../en/GNU_Parted.html" title="Parted" class="mw-redirect">parted</a>.
+</p>
+<p>Once created, a partition must be formatted with an appropriate <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a> (<i>swap</i> excepted) before data can be written to it.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Partition_table"><span class="tocnumber">1</span> <span class="toctext">Partition table</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Master_Boot_Record"><span class="tocnumber">1.1</span> <span class="toctext">Master Boot Record</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Master_Boot_Record_.28partition_table.29"><span class="tocnumber">1.1.1</span> <span class="toctext">Master Boot Record (partition table)</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Master_Boot_Record_.28bootstrap_code.29"><span class="tocnumber">1.1.2</span> <span class="toctext">Master Boot Record (bootstrap code)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#GUID_Partition_Table"><span class="tocnumber">1.2</span> <span class="toctext">GUID Partition Table</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Choosing_between_GPT_and_MBR"><span class="tocnumber">1.3</span> <span class="toctext">Choosing between GPT and MBR</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Partitionless_disk"><span class="tocnumber">1.4</span> <span class="toctext">Partitionless disk</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Btrfs_partitioning"><span class="tocnumber">1.4.1</span> <span class="toctext">Btrfs partitioning</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Partition_scheme"><span class="tocnumber">2</span> <span class="toctext">Partition scheme</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Single_root_partition"><span class="tocnumber">2.1</span> <span class="toctext">Single root partition</span></a></li>
+<li class="toclevel-2 tocsection-11">
+<a href="#Discrete_partitions"><span class="tocnumber">2.2</span> <span class="toctext">Discrete partitions</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#.2F"><span class="tocnumber">2.2.1</span> <span class="toctext">/</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#.2Fboot"><span class="tocnumber">2.2.2</span> <span class="toctext">/boot</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#.2Fhome"><span class="tocnumber">2.2.3</span> <span class="toctext">/home</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#.2Fvar"><span class="tocnumber">2.2.4</span> <span class="toctext">/var</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#.2Fdata"><span class="tocnumber">2.2.5</span> <span class="toctext">/data</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#.2Ftmp"><span class="tocnumber">2.2.6</span> <span class="toctext">/tmp</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Swap"><span class="tocnumber">2.2.7</span> <span class="toctext">Swap</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19">
+<a href="#Example_layouts"><span class="tocnumber">2.3</span> <span class="toctext">Example layouts</span></a>
+<ul>
+<li class="toclevel-3 tocsection-20"><a href="#UEFI.2FGPT_example_layout"><span class="tocnumber">2.3.1</span> <span class="toctext">UEFI/GPT example layout</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#MBR.2FBIOS_example_layout"><span class="tocnumber">2.3.2</span> <span class="toctext">MBR/BIOS example layout</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#UEFI_separate_.2Fhome_example_layout"><span class="tocnumber">2.3.3</span> <span class="toctext">UEFI separate /home example layout</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Partitioning_tools"><span class="tocnumber">3</span> <span class="toctext">Partitioning tools</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#fdisk.2Fgdisk"><span class="tocnumber">3.1</span> <span class="toctext">fdisk/gdisk</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#GNU_Parted"><span class="tocnumber">3.2</span> <span class="toctext">GNU Parted</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#partitionmanager"><span class="tocnumber">3.3</span> <span class="toctext">partitionmanager</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-27">
+<a href="#Partition_alignment"><span class="tocnumber">4</span> <span class="toctext">Partition alignment</span></a>
+<ul>
+<li class="toclevel-2 tocsection-28"><a href="#Hard_disk_drives"><span class="tocnumber">4.1</span> <span class="toctext">Hard disk drives</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Solid_state_drives"><span class="tocnumber">4.2</span> <span class="toctext">Solid state drives</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#Verify_alignment"><span class="tocnumber">4.3</span> <span class="toctext">Verify alignment</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-31">
+<a href="#Tips_and_tricks"><span class="tocnumber">5</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-32"><a href="#GPT_Kernel_Support"><span class="tocnumber">5.1</span> <span class="toctext">GPT Kernel Support</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-33"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Partition_table">Partition table</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To print/list existing tables (of a specific device), run <code>parted <i>/dev/sda</i> print</code> or <code>fdisk -l <i>/dev/sda</i></code>, where <code><i>/dev/sda</i></code> is a device name.</div>
+<p>There are two main types of partition table available: Master Boot Record (MBR), and GUID Partition Table (GPT). These are described below along with a discussion on how to choose between the two. A third, less common alternative is using a partitionless disk, which is also discussed.
+</p>
+<h3><span class="mw-headline" id="Master_Boot_Record">Master Boot Record</span></h3>
+<p>The <a href="https://en.wikipedia.org/wiki/Master_boot_record" class="extiw" title="wikipedia:Master boot record">Master Boot Record</a> (MBR) is the first 512 bytes of a storage device. It contains an operating system bootloader and the storage device's partition table. It plays an important role in the <a href="../en/Arch_boot_process.html" title="Boot process" class="mw-redirect">boot process</a> under <a href="https://en.wikipedia.org/wiki/BIOS" class="extiw" title="wikipedia:BIOS">BIOS</a> systems. See <a href="https://en.wikipedia.org/wiki/Master_boot_record#Disk_partitioning" class="extiw" title="wikipedia:Master boot record">Wikipedia:Master boot record#Disk partitioning</a> for the MBR structure.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The MBR is not located in a partition; it is located at the first sector of the device (physical offset 0), preceding the first partition. (The boot sector present on a partitionless device or within an individual partition is called a <a href="https://en.wikipedia.org/wiki/Volume_boot_record" class="extiw" title="w:Volume boot record">Volume boot record</a> instead.)</div>
+<h4><span class="mw-headline" id="Master_Boot_Record_.28partition_table.29">Master Boot Record (partition table)</span></h4>
+<p>There are 3 types of partitions in the MBR scheme:
+</p>
+<ul>
+<li> Primary</li>
+<li> Extended
+<ul><li> Logical</li></ul>
+</li>
+</ul>
+<p><b>Primary</b> partitions can be bootable and are limited to four partitions per disk or RAID volume. If the MBR partition table requires more than four partitions, then one of the primary partitions needs to be replaced by an <b>extended</b> partition containing <b>logical</b> partitions within it. 
+</p>
+<p>Extended partitions can be thought of as containers for logical partitions. A hard disk can contain no more than one extended partition. The extended partition is also counted as a primary partition so if the disk has an extended partition, only three additional primary partitions are possible (i.e. three primary partitions and one extended partition). The number of logical partitions residing in an extended partition is unlimited. A system that dual boots with Windows will require for Windows to reside in a primary partition.
+</p>
+<p>The customary numbering scheme is to create primary partitions <i>sda1</i> through <i>sda3</i> followed by an extended partition <i>sda4</i>. The logical partitions on <i>sda4</i> are numbered <i>sda5</i>, <i>sda6</i>, etc.
+</p>
+<h4><span class="mw-headline" id="Master_Boot_Record_.28bootstrap_code.29">Master Boot Record (bootstrap code)</span></h4>
+<p>The first 446 bytes of MBR are <b>bootstrap code area</b>. On BIOS systems it usually contains the first stage of the boot loader.
+</p>
+<h3><span class="mw-headline" id="GUID_Partition_Table">GUID Partition Table</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/GUID_Partition_Table" class="extiw" title="wikipedia:GUID Partition Table">GUID Partition Table</a> (GPT) is a partitioning scheme that is part of the <a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a> specification; it uses <a href="https://en.wikipedia.org/wiki/Globally_unique_identifier" class="extiw" title="wikipedia:Globally unique identifier">globally unique identifiers</a> (GUIDs), or UUIDs in linux world, to define partitions and <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs" class="extiw" title="wikipedia:GUID Partition Table">partition types</a>. It is designed to succeed the <a href="#Master_Boot_Record">#Master Boot Record</a> partitioning scheme method.
+</p>
+<h3><span class="mw-headline" id="Choosing_between_GPT_and_MBR">Choosing between GPT and MBR</span></h3>
+<p>GUID Partition Table (GPT) is an alternative, contemporary, partitioning style; it is intended to replace the old Master Boot Record (MBR) system. GPT has several advantages over MBR which has quirks dating back to MS-DOS times. With the recent developments to the formatting tools <i>fdisk</i> (MBR) and <i>gdisk</i> (GPT), it is equally easy to get good dependability and performance for GPT or MBR. 
+</p>
+<p>Some points to consider when choosing: 
+</p>
+<ul>
+<li> To dual-boot with Windows (both 32-bit and 64-bit) using Legacy BIOS, the MBR scheme is required.</li>
+<li> To dual-boot Windows 64-bit using <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> mode instead of BIOS, the GPT scheme is required.</li>
+<li> If you are installing on older hardware, especially on old laptops, consider choosing MBR because its BIOS might not support GPT.</li>
+<li> If you are partitioning a disk of 2 TiB or larger, you need to use GPT.</li>
+<li> It is recommended to always use GPT for <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> boot, as some UEFI implementations do not support booting to the MBR while in UEFI mode.</li>
+<li> If none of the above apply, choose freely between GPT and MBR. Since GPT is more modern, it is recommended in this case.</li>
+</ul>
+<p>Some advantages of GPT over MBR are:
+</p>
+<ul>
+<li> Provides a unique disk GUID and unique <a href="../en/Persistent_block_device_naming.html#by-partuuid" title="Persistent block device naming">partition GUID</a> (<code>PARTUUID</code>) for each partition - A good filesystem-independent way of referencing partitions and disks.</li>
+<li> Provides a filesystem-independent <a href="../en/Persistent_block_device_naming.html#by-partlabel" title="Persistent block device naming">partition name</a> (<code>PARTLABEL</code>).</li>
+<li> Arbitrary number of partitions - depends on space allocated for the partition table - No need for extended and logical partitions. By default the GPT table contains space for defining 128 partitions. However if you want to define more partitions, you can allocate more space to the partition table (currently only <i>gdisk</i> is known to support this feature).</li>
+<li> Uses 64-bit LBA for storing Sector numbers - maximum addressable disk size is 2 ZiB. MBR is limited to addressing 2 TiB of space per drive.</li>
+<li> Stores a backup header and partition table at the end of the disk that aids in <a href="../en/Fdisk.html#Recover_GPT_header" title="Fdisk">recovery</a> in case the primary ones are damaged.</li>
+<li> CRC32 checksums to detect errors and corruption of the header and partition table.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For GRUB to boot from a GPT-partitioned disk on a BIOS-based system, a <a href="../en/GRUB.html#GUID_Partition_Table_.28GPT.29_specific_instructions" title="GRUB">BIOS boot partition</a> is required. Please note that this partition is unrelated to the <code>/boot</code> mountpoint, and will be used by GRUB directly. Do not create a filesystem on it, and do not mount it.</div>
+<p>The section on <a href="#Partitioning_tools">#Partitioning tools</a> contains a table indicating which tools are available for creating and modifying GPT and MBR tables.
+</p>
+<h3><span class="mw-headline" id="Partitionless_disk">Partitionless disk</span></h3>
+<p>Partitionless disk (a.k.a. superfloppy) refers to using a storage device without using a partition table, having one file system occupying the whole storage device.
+</p>
+<h4><span class="mw-headline" id="Btrfs_partitioning">Btrfs partitioning</span></h4>
+<p><a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> can occupy an entire data storage device and replace the <a href="#Master_Boot_Record">MBR</a> or <a href="#GUID_Partition_Table">GPT</a> partitioning schemes. See the <a href="../en/Btrfs.html#Partitionless_Btrfs_disk" title="Btrfs">Btrfs#Partitionless Btrfs disk</a> instructions for details.
+</p>
+<h2><span class="mw-headline" id="Partition_scheme">Partition scheme</span></h2>
+<p>There are no strict rules for partitioning a hard drive, although one may follow the general guidance given below. A disk partitioning scheme is determined by various issues such as desired flexibility, speed, security, as well as the limitations imposed by available disk space. It is essentially personal preference. If you would like to dual boot Arch Linux and a Windows operating system please see <a href="../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">Dual boot with Windows</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> systems require an <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>.</li>
+<li> BIOS systems that are partitioned with <a href="#GUID_Partition_Table">GPT</a> require a <a href="../en/GRUB.html#GUID_Partition_Table_.28GPT.29_specific_instructions" title="GRUB">BIOS boot partition</a> if <a href="../en/GRUB.html" title="GRUB">GRUB</a> is used as the bootloader.</li>
+<li> If using <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a>, subvolumes can be treated as partitions. See the <a href="../en/Btrfs.html#Mounting_subvolumes" title="Btrfs">Btrfs#Mounting subvolumes</a> section.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Single_root_partition">Single root partition</span></h3>
+<p>This scheme is the simplest and should be enough for most use cases. A <a href="../en/Swap.html#Swap_file" title="Swapfile" class="mw-redirect">swapfile</a> can be created and easily resized as needed. It usually makes sense to start by considering a single <code>/</code> partition and then separate out others based on specific use cases like RAID, encryption, a shared media partition, etc.
+</p>
+<h3><span class="mw-headline" id="Discrete_partitions">Discrete partitions</span></h3>
+<p>Separating out a path as a partition allows for the choice of a different filesystem and mount options. In some cases like a media partition, they can also be shared between operating systems.
+</p>
+<p>Below are some example layouts that can be used when partitioning, and the following subsections detail a few of the directories which can be placed on their own separate partition and then <a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">mounted</a> at mount points under <code>/</code>. See <span class="plainlinks archwiki-template-man" title="$ man 7 file-hierarchy"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man7/file-hierarchy.7.html">file-hierarchy(7)</a></span> for a full description of the contents of these directories.
+</p>
+<h4><span class="mw-headline" id=".2F">/</span></h4>
+<p>The root directory is the top of the hierarchy, the point where the primary filesystem is mounted and from which all other filesystems stem. All files and directories appear under the root directory <code>/</code>, even if they are stored on different physical devices. The contents of the root filesystem must be adequate to boot, restore, recover, and/or repair the system. Therefore, certain directories under <code>/</code> are not candidates for separate partitions.
+</p>
+<p>The <code>/</code> partition or root partition is necessary and it is the most important. The other partitions can be replaced by it.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Directories essential for booting (except for <code>/boot</code>) <b>must</b> be on the same partition as <code>/</code> or mounted in early userspace by the <a href="../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a>. These essential directories are: <code>/etc</code> and <code>/usr</code> <a rel="nofollow" class="external autonumber" href="http://freedesktop.org/wiki/Software/systemd/separate-usr-is-broken">[1]</a>.</div>
+<p><code>/</code> traditionally contains the <code>/usr</code> directory, which can grow significantly depending upon how much software is installed. 15–20 GB should be sufficient for most users with modern hard disks. If you plan to store a swap file here, you might need a larger partition size.
+</p>
+<h4><span class="mw-headline" id=".2Fboot">/boot</span></h4>
+<p>The <code>/boot</code> directory contains the kernel and ramdisk images as well as the bootloader configuration file and bootloader stages. It also stores data that is used before the kernel begins executing user-space programs. <code>/boot</code> is not required for normal system operation, but only during boot and kernel upgrades (when regenerating the initial ramdisk).
+</p>
+<p>A separate <code>/boot</code> partition is needed if installing a software RAID0 (stripe) system.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is recommended to mount <a href="../en/EFI_System_Partition.html" title="ESP" class="mw-redirect">ESP</a> to <code>/boot</code> if booting using UEFI boot loaders that do not contain drivers for other filesystems. Such loaders are for example <a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a> and <a href="../en/Systemd-boot.html" title="Systemd-boot">systemd-boot</a>.</div>
+<p>A suggested size for <code>/boot</code> is 200 MiB unless using <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a>, in which case greater than 512 MiB is needed.
+</p>
+<h4><span class="mw-headline" id=".2Fhome">/home</span></h4>
+<p>The <code>/home</code> directory contains user-specific configuration files, caches, application data and media files.
+</p>
+<p>Separating out <code>/home</code> allows <code>/</code> to be re-partitioned separately, but note that you can still reinstall Arch with <code>/home</code> untouched even if it is not separate—the other top-level directories just need to be removed, and then pacstrap can be run.
+</p>
+<p>You should not share home directories between users on different distributions, because they use incompatible software versions and patches. Instead, consider sharing a media partition or at least using different home directories on the same <code>/home</code> partition. The size of this partition varies.
+</p>
+<h4><span class="mw-headline" id=".2Fvar">/var</span></h4>
+<p>The <code>/var</code> directory stores variable data such as spool directories and files, administrative and logging data, <a href="../en/Pacman.html" title="Pacman">pacman</a>'s cache, the <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> tree, etc. It is used, for example, for caching and logging, and hence frequently read or written. Keeping it in a separate partition avoids running out of disk space due to flunky logs, etc.
+</p>
+<p>It exists to make it possible to mount <code>/usr</code> as read-only. Everything that historically went into <code>/usr</code> that is written to during system operation (as opposed to installation and software maintenance) must reside under <code>/var</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>/var</code> contains many small files. The choice of file system type should consider this fact if a separate partition is used.</div>
+<p><code>/var</code> will contain, among other data, the <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> tree and the <a href="../en/Pacman.html" title="Pacman">pacman</a> cache. Retaining these packages is helpful in case a package upgrade causes instability, requiring a <a href="../en/Downgrading_packages.html" title="Downgrade" class="mw-redirect">downgrade</a> to an older, archived package. The pacman cache in particular will grow as the system is expanded and updated, but it can be safely cleared if space becomes an issue. 8–12 GB on a desktop system should be sufficient for <code>/var</code>, depending on how much software will be installed.
+</p>
+<h4><span class="mw-headline" id=".2Fdata">/data</span></h4>
+<p>One can consider mounting a "data" partition to cover various files to be shared by all users. Using the <code>/home</code> partition for this purpose is fine as well. The size of this partition varies.
+</p>
+<h4><span class="mw-headline" id=".2Ftmp">/tmp</span></h4>
+<p>This is already a separate partition by default, by virtue of being mounted as <i>tmpfs</i> by systemd; therefore, there is no need to create a partition for it.
+</p>
+<h4><span class="mw-headline" id="Swap">Swap</span></h4>
+<p>A <a href="../en/Swap.html" title="Swap">swap</a> partition provides memory that can be used as virtual RAM. A <a href="../en/Swap.html#Swap_file" title="Swap file" class="mw-redirect">swap file</a> should be considered too, as they don't have any performance overhead compared to a partition but are much easier to resize as needed. A swap partition can <i>potentially</i> be shared between operating systems, but not if hibernation is used.
+</p>
+<p>Historically, the general rule for swap partition size was to allocate twice the amount of physical RAM. As computers have gained ever larger memory capacities, this rule is outdated. For example, on average desktop machines with up to 512MB RAM, the 2x rule is usually adequate; if a sufficient amount of RAM (more than 1024MB) is available, it may be possible to have a smaller swap partition. See <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend and hibernate" class="mw-redirect">Suspend and hibernate</a> to hibernate into a swap partition or file.
+</p>
+<h3><span class="mw-headline" id="Example_layouts">Example layouts</span></h3>
+<h4><span class="mw-headline" id="UEFI.2FGPT_example_layout">UEFI/GPT example layout</span></h4>
+<table class="wikitable">
+<tr>
+<th> Mount point
+</th>
+<th> Partition
+</th>
+<th> <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs" class="extiw" title="w:GUID Partition Table">Partition type (GUID)</a>
+</th>
+<th> Bootable flag
+</th>
+<th> Suggested size
+</th>
+</tr>
+<tr>
+<td> /boot
+</td>
+<td> /dev/sd<b>x</b>1
+</td>
+<td> <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>
+</td>
+<td> Yes
+</td>
+<td> 260–512 MiB
+</td>
+</tr>
+<tr>
+<td> [SWAP]
+</td>
+<td> /dev/sd<b>x</b>2
+</td>
+<td> Linux <a href="../en/Swap.html" title="Swap">swap</a>
+</td>
+<td> No
+</td>
+<td> More than 512 MiB
+</td>
+</tr>
+<tr>
+<td> /
+</td>
+<td> /dev/sd<b>x</b>3
+</td>
+<td> Linux
+</td>
+<td> No
+</td>
+<td> Remainder of the device
+</td>
+</tr>
+</table>
+<h4><span class="mw-headline" id="MBR.2FBIOS_example_layout">MBR/BIOS example layout</span></h4>
+<table class="wikitable">
+<tr>
+<th> Mount point
+</th>
+<th> Partition
+</th>
+<th> <a href="https://en.wikipedia.org/wiki/Partition_type" class="extiw" title="w:Partition type">Partition type</a>
+</th>
+<th> Bootable flag
+</th>
+<th> Suggested size
+</th>
+</tr>
+<tr>
+<td> [SWAP]
+</td>
+<td> /dev/sd<b>x</b>1
+</td>
+<td> Linux <a href="../en/Swap.html" title="Swap">swap</a>
+</td>
+<td> No
+</td>
+<td> More than 512 MiB
+</td>
+</tr>
+<tr>
+<td> /
+</td>
+<td> /dev/sd<b>x</b>2
+</td>
+<td> Linux
+</td>
+<td> Yes
+</td>
+<td> Remainder of the device
+</td>
+</tr>
+</table>
+<h4><span class="mw-headline" id="UEFI_separate_.2Fhome_example_layout">UEFI separate /home example layout</span></h4>
+<table class="wikitable">
+<tr>
+<th> Mount point
+</th>
+<th> Partition
+</th>
+<th> <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs" class="extiw" title="w:GUID Partition Table">Partition type (GUID)</a>
+</th>
+<th> Bootable flag
+</th>
+<th> Suggested size
+</th>
+</tr>
+<tr>
+<td> /boot
+</td>
+<td> /dev/sd<b>x</b>1
+</td>
+<td> <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>
+</td>
+<td> Yes
+</td>
+<td> More than 512 MiB
+</td>
+</tr>
+<tr>
+<td> /
+</td>
+<td> /dev/sd<b>x</b>2
+</td>
+<td> Linux
+</td>
+<td> No
+</td>
+<td> 15 - 20 GiB
+</td>
+</tr>
+<tr>
+<td> [SWAP]
+</td>
+<td> /dev/sd<b>x</b>3
+</td>
+<td> Linux <a href="../en/Swap.html" title="Swap">swap</a>
+</td>
+<td> No
+</td>
+<td> More than 512 MiB
+</td>
+</tr>
+<tr>
+<td> /home
+</td>
+<td> /dev/sd<b>x</b>4
+</td>
+<td> Linux
+</td>
+<td> No
+</td>
+<td> Remainder of the device
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Partitioning_tools">Partitioning tools</span></h2>
+<p>The following programs are used to create and/or manipulate device partition tables and partitions. See the linked articles for the exact commands to be used.
+</p>
+<p>This table will help you to choose utility for your needs:
+</p>
+<table class="wikitable">
+<tr>
+<th>
+</th>
+<th> MBR
+</th>
+<th> GPT
+</th>
+</tr>
+<tr>
+<th> Dialog
+</th>
+<td> fdisk <br> parted
+</td>
+<td> fdisk <br> gdisk <br> parted
+</td>
+</tr>
+<tr>
+<th> Pseudo-graphics
+</th>
+<td> cfdisk
+</td>
+<td> cfdisk <br> cgdisk
+</td>
+</tr>
+<tr>
+<th> Non-interactive
+</th>
+<td> sfdisk <br> parted
+</td>
+<td> sfdisk <br> sgdisk <br> parted
+</td>
+</tr>
+<tr>
+<th> Graphical
+</th>
+<td> GParted <br> partitionmanager
+</td>
+<td> GParted <br> partitionmanager
+</td>
+</tr>
+</table>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>To partition devices, use a partitioning tool compatible to the chosen type of partition table. Incompatible tools may result in the destruction of that table, along with existing partitions or data.</div>
+<h3><span class="mw-headline" id="fdisk.2Fgdisk">fdisk/gdisk</span></h3>
+<p>These group of tools fall under <i>fdisk</i> or <i>gdisk</i> and are described in the <a href="../en/Fdisk.html" title="Fdisk">fdisk</a> article.
+</p>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Fdisk">fdisk</a></b> — Dialog-driven program for creation and manipulation of partition tables.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.kernel.org/pub/linux/utils/util-linux/">https://www.kernel.org/pub/linux/utils/util-linux/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Cfdisk" class="mw-redirect">cfdisk</a></b> — Curses-based variant of fdisk.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.kernel.org/pub/linux/utils/util-linux/">https://www.kernel.org/pub/linux/utils/util-linux/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Sfdisk" class="mw-redirect">sfdisk</a></b> — Scriptable variant of fdisk.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.kernel.org/pub/linux/utils/util-linux/">https://www.kernel.org/pub/linux/utils/util-linux/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Gdisk" class="mw-redirect">gdisk</a></b> — <a href="#GUID_Partition_Table">GPT</a> alternative to fdisk.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.rodsbooks.com/gdisk/">http://www.rodsbooks.com/gdisk/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Cgdisk" class="mw-redirect">cgdisk</a></b> — Curses-based variant of gdisk.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.rodsbooks.com/gdisk/">http://www.rodsbooks.com/gdisk/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/Fdisk.html" title="Sgdisk" class="mw-redirect">sgdisk</a></b> — Scriptable variant of gdisk.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html">http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span>
+</dd></dl>
+<h3><span class="mw-headline" id="GNU_Parted">GNU Parted</span></h3>
+<p>These group of tools are described in the <a href="../en/GNU_Parted.html" title="GNU Parted">GNU Parted</a> article.
+</p>
+<ul><li>
+<b><a href="../en/GNU_Parted.html" title="GNU Parted">GNU Parted</a></b> — Terminal partitioning tool.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.gnu.org/software/parted/parted.html">https://www.gnu.org/software/parted/parted.html</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=parted">parted</a></span>
+</dd></dl>
+<ul><li>
+<b><a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a></b> — Graphical tool written in GTK.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://gparted.sourceforge.net/">http://gparted.sourceforge.net/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gparted">gparted</a></span>
+</dd></dl>
+<h3><span class="mw-headline" id="partitionmanager">partitionmanager</span></h3>
+<ul><li>
+<b>Partitionmanager</b> — Graphical tool written in Qt.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://sourceforge.net/projects/partitionman/">http://sourceforge.net/projects/partitionman/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=partitionmanager">partitionmanager</a></span>
+</dd></dl>
+<h2><span class="mw-headline" id="Partition_alignment">Partition alignment</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a><b>This section is being considered for removal.</b><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Gets a little technical to just say that fdisk/parted handle it automatically. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Partitioning">Talk:Partitioning#</a>)</div>
+</div>
+<p>Proper partition alignment is essential for optimal performance and longevity. This is due to the <a href="https://en.wikipedia.org/wiki/Block_(data_storage)" class="extiw" title="wikipedia:Block (data storage)">block</a> nature of every I/O operation on the hardware level as well as file system level. The key to alignment is partitioning to (at least) the given <i>block size</i>, which depends on the used hardware. If the partitions are not aligned to begin at multiples of the <i>block size</i>, aligning the file system is a pointless exercise because everything is skewed by the start offset of the partition.
+</p>
+<h3><span class="mw-headline" id="Hard_disk_drives">Hard disk drives</span></h3>
+<p>Historically, hard drives were addressed by indicating the <i>cylinder</i>, the <i>head</i>, and the <i>sector</i> at which data was to be read or written (also known as <a href="https://en.wikipedia.org/wiki/Cylinder-head-sector" class="extiw" title="wikipedia:Cylinder-head-sector">CHS addressing</a>). These represented the radial position (cylinder), the axial position (drive head: platter and side), and the azimuth (sector) of the data respectively. Nowadays, with <a href="https://en.wikipedia.org/wiki/Logical_block_addressing" class="extiw" title="wikipedia:Logical block addressing">logical block addressing</a>, the entire hard drive is addressed as one continuous stream of data and the term <a href="https://en.wikipedia.org/wiki/Disk_sector" class="extiw" title="wikipedia:Disk sector">sector</a> designates the smallest addressable unit.
+</p>
+<p>The standard <i>sector size</i> is 512B, but modern high-capacity hard drives use greater value, commonly 4KiB. Using values greater than 512B is referred to as the <a href="../en/Advanced_Format.html" title="Advanced Format">Advanced Format</a>.
+</p>
+<h3><span class="mw-headline" id="Solid_state_drives">Solid state drives</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The EBS should be the same as the value reported by <code>/sys/class/block/sd<i>X</i>/queue/discard_granularity</code>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Partitioning">Talk:Partitioning#</a>)</div>
+</div>
+<p>Solid state drives are based on <a href="https://en.wikipedia.org/wiki/Flash_memory" class="extiw" title="wikipedia:Flash memory">flash memory</a>, and thus differ significantly from hard drives. While reading remains possible in a random access fashion, erasure (hence rewriting and random writing) is possible only by <a href="https://en.wikipedia.org/wiki/Flash_memory#Block_erasure" class="extiw" title="wikipedia:Flash memory">whole blocks</a>. Additionally, the <i>erase block size</i> (EBS) are significantly greater than regular <i>block size</i>, for example 128KiB vs. 4KiB, so it is necessary to align to multiples of EBS. Some <a href="../en/Solid_State_Drives/NVMe.html" title="NVMe" class="mw-redirect">NVMe</a> drives should be aligned to 4KiB, but not all. To find the sector size of your SSD, see <a href="../en/Advanced_Format.html#How_to_determine_if_HDD_employ_a_4k_sector" title="Advanced Format">Advanced Format#How to determine if HDD employ a 4k sector</a>.
+</p>
+<h3><span class="mw-headline" id="Verify_alignment">Verify alignment</span></h3>
+<p><a href="../en/Fdisk.html" title="Fdisk">fdisk/gdisk</a> and <a href="../en/GNU_Parted.html#Alignment" title="Parted" class="mw-redirect">parted</a> handle alignment automatically.
+</p>
+<p>See <a href="../en/GNU_Parted.html#Check_alignment" title="GNU Parted">GNU Parted#Check alignment</a>.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h4><span class="mw-headline" id="GPT_Kernel_Support">GPT Kernel Support</span></h4>
+<p>The <code>CONFIG_EFI_PARTITION</code> option in the kernel config enables GPT support in the kernel (despite the name, EFI PARTITION). This option must be built in the kernel and not compiled as a loadable module. This option is required even if GPT disks are used only for data storage and not for booting. This option is enabled by default in Arch's <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-lts">linux-lts</a></span> kernels in the [core] repo. In case of a custom kernel, enable this option by doing <code>CONFIG_EFI_PARTITION=y</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/Disk_partitioning" class="extiw" title="wikipedia:Disk partitioning">Wikipedia:Disk partitioning</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Binary_prefix" class="extiw" title="wikipedia:Binary prefix">Wikipedia:Binary prefix</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://thestarman.pcministry.com/asm/mbr/DiskTerms.htm">Understanding Disk Drive Terminology</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://kb.iu.edu/data/aijw.html">What is a Master Boot Record (MBR)?</a>
+</li>
+<li> Rod Smith's page on <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/gdisk/whatsgpt.html">What's a GPT?</a> and <a rel="nofollow" class="external text" href="http://rodsbooks.com/gdisk/booting.html">Booting OSes from GPT</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-gpt/index.html?ca=dgr-lnxw07GPT-Storagedth-lx&amp;S_TACT=105AGY83&amp;S_CMP=grlnxw07">Make the most of large drives with GPT and Linux - IBM Developer Works</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.microsoft.com/whdc/device/storage/GPT_FAQ.mspx">Microsoft's Windows and GPT FAQ</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.thomas-krenn.com/en/wiki/Partition_Alignment">Partition Alignment</a> (with examples)</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+<li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Sections_flagged_with_Template:Remove.html" title="Category:Sections flagged with Template:Remove">Sections flagged with Template:Remove</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

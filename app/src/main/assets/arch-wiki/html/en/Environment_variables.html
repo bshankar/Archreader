@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Environment variables - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Environment_variables skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Environment variables</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Default_applications.html" title="Default applications">Default applications</a></li>
+</ul>
+</div>
+<p>An environment variable is a named object that contains data used by one or more applications. In simple terms, it is a variable with a name and a value. The value of an environmental variable can for example be the location of all executable files in the file system, the default editor that should be used, or the system locale settings. Users new to Linux may often find this way of managing settings a bit unmanageable. However, environment variables provide a simple way to share configuration settings between multiple applications and processes in Linux.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Utilities"><span class="tocnumber">1</span> <span class="toctext">Utilities</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Defining_variables"><span class="tocnumber">2</span> <span class="toctext">Defining variables</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Globally"><span class="tocnumber">2.1</span> <span class="toctext">Globally</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Per_user"><span class="tocnumber">2.2</span> <span class="toctext">Per user</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Graphical_applications"><span class="tocnumber">2.2.1</span> <span class="toctext">Graphical applications</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#Per_session"><span class="tocnumber">2.3</span> <span class="toctext">Per session</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Examples"><span class="tocnumber">3</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Using_pam_env"><span class="tocnumber">3.1</span> <span class="toctext">Using pam_env</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Utilities">Utilities</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=coreutils">coreutils</a></span> package contains the programs <i>printenv</i> and <i>env</i>. To list the current environmental variables with values: 
+</p>
+<pre>$ printenv
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some environment variables are user-specific. Check by comparing the outputs of <i>printenv</i> as an unprivileged user and as <i>root</i>.</div>
+<p>The <code>env</code> utility can be used to run a command under a modified environment. The following example will launch <i>xterm</i> with the environment variable <code>EDITOR</code> set to <code>vim</code>. This will not affect the global environment variable <code>EDITOR</code>.
+</p>
+<pre>$ env EDITOR=vim xterm
+</pre>
+<p>The <a href="../en/Bash.html" title="Bash">Bash</a> builtin <i>set</i> allows you to change the values of shell options and set the positional parameters, or to display the names and values of shell variables. For more information, see the <i>set</i> documentation: <a rel="nofollow" class="external autonumber" href="http://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin">[1]</a>.
+</p>
+<p>Each process stores their environment in the <code>/proc/$PID/environ</code> file. This file contained each key value pair delimited by a nul character (<code>\x0</code>). A more human readable format can be obtained with <a href="../en/Core_utilities.html#sed" title="Sed" class="mw-redirect">sed</a>, e.g. <code>sed 's:\x0:\n:g' /proc/$PID/environ</code>.
+</p>
+<h2><span class="mw-headline" id="Defining_variables">Defining variables</span></h2>
+<h3><span class="mw-headline" id="Globally">Globally</span></h3>
+<p>Most Linux distributions tell you to change or add environment variable definitions in <code>/etc/profile</code> or other locations. Keep in mind that there are also package-specific configuration files containing variable settings such as <code>/etc/locale.conf</code>. Be sure to maintain and manage the environment variables and pay attention to the numerous files that can contain environment variables. In principle, any shell script can be used for initializing environmental variables, but following traditional UNIX conventions, these statements should be only be present in some particular files. 
+</p>
+<p>The following files should be used for defining global environment variables on your system: <code>/etc/profile</code>, <code>/etc/bash.bashrc</code> and <code>/etc/environment</code>. Each of these files has different limitations, so you should carefully select the appropriate one for your purposes.
+</p>
+<ul>
+<li>
+<code>/etc/profile</code> initializes variables for login shells <i>only</i>. It does, however, run scripts and can be used by all <a href="https://en.wikipedia.org/wiki/Bourne_shell" class="extiw" title="wikipedia:Bourne shell">Bourne shell</a> compatible shells.</li>
+<li>
+<code>/etc/bash.bashrc</code> initializes variables for interactive shells <i>only</i>. It also runs scripts but (as its name implies) is Bash specific.</li>
+<li>
+<code>/etc/environment</code> is used by the PAM-env module and is agnostic to login/non-login, interactive/non-interactive and also Bash/non-Bash, so scripting or glob expansion cannot be used. The file only accepts <code><i>variable=value</i></code> pairs.</li>
+</ul>
+<p>In this example, we add <code>~/bin</code> directory to the <code>PATH</code> for respective user. To do this, just put this in your preferred global environment variable config file (<code>/etc/profile</code> or <code>/etc/bash.bashrc</code>):
+</p>
+<pre>
+# If user ID is greater than or equal to 1000 &amp; if ~/bin exists and is a directory &amp; if ~/bin is not already in your $PATH
+# then export ~/bin to your $PATH.
+if [[ $UID -ge 1000 &amp;&amp; -d $HOME/bin &amp;&amp; -z $(echo $PATH | grep -o $HOME/bin) ]]
+then
+    export PATH=$HOME/bin:${PATH}
+fi
+</pre>
+<h3><span class="mw-headline" id="Per_user">Per user</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The dbus daemon and the user instance of systemd do not inherit any of the environment variables set in places like .bashrc etc. This means that, for example, dbus activated programs like Gnome Files will not use them by default. See <a href="../en/Systemd/User.html#Environment_variables" title="Systemd/User">Systemd/User#Environment variables</a>.</div>
+<p>You do not always want to define an environment variable globally. For instance, you might want to add <code>/home/my_user/bin</code> to the <code>PATH</code> variable but do not want all other users on your system to have that in their <code>PATH</code> too. Local environment variables can be defined in many different files:
+</p>
+<ol>
+<li> Configuration files of your shell, for example <a href="../en/Bash.html#Configuration_files" title="Bash">Bash#Configuration files</a> or <a href="../en/Zsh.html#Startup.2FShutdown_files" title="Zsh">Zsh#Startup/Shutdown files</a>.</li>
+<li> <code>~/.profile</code> is used by many shells as fallback, see <a href="https://en.wikipedia.org/wiki/Unix_shell#Configuration_files" class="extiw" title="wikipedia:Unix shell">wikipedia:Unix shell#Configuration files</a>.</li>
+<li> <code>~/.pam_environment</code> is the user specific equivalent of <code>/etc/environment</code>, used by PAM-env module. See <code>pam_env(8)</code> and <code>pam_env.conf(5)</code> for details.</li>
+</ol>
+<p>To add a directory to the <code>PATH</code> for local usage, put following in <code>~/.bash_profile</code>:
+</p>
+<pre>export PATH="${PATH}:/home/my_user/bin"
+</pre>
+<p>To update the variable, re-login or <i>source</i> the file: <code>$ source ~/.bash_profile</code>.
+</p>
+<h4><span class="mw-headline" id="Graphical_applications">Graphical applications</span></h4>
+<p>To set environment variables for GUI applications, you can put your variables in <a href="../en/Xinit.html" title="Xinitrc" class="mw-redirect">xinitrc</a> (or <a href="../en/Xprofile.html" title="Xprofile">xprofile</a> when using a <a href="../en/Display_manager.html" title="Display manager">display manager</a>), for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export PATH="${PATH}:~/scripts"
+export GUIVAR=value</pre>
+<h3><span class="mw-headline" id="Per_session">Per session</span></h3>
+<p>Sometimes even stricter definitions are required. One might want to temporarily run executables from a specific directory created without having to type the absolute path to each one, or editing <code>~/.bash_profile</code> for the short time needed to run them.
+</p>
+<p>In this case, you can define the <code>PATH</code> variable in your current session, combined with the <i>export</i> command. As long as you do not log out, the <code>PATH</code> variable will be using the temporary settings. To add a session-specific directory to <code>PATH</code>, issue:
+</p>
+<pre>$ export PATH="${PATH}:/home/my_user/tmp/usr/bin"
+</pre>
+<h2><span class="mw-headline" id="Examples">Examples</span></h2>
+<p>The following section lists a number of common environment variables used by a Linux system and describes their values.
+</p>
+<ul><li>
+<code>DE</code> indicates the <i>D</i>esktop <i>E</i>nvironment being used. <a href="../en/Default_applications.html" title="Xdg-open" class="mw-redirect">xdg-open</a> will use it to choose more user-friendly file-opener application that desktop environment provides. Some packages need to be installed to use this feature. For <a href="../en/GNOME.html" title="GNOME">GNOME</a>, that would be <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libgnome">libgnome</a></span>; for <a href="../en/Xfce.html" title="Xfce">Xfce</a> this is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=exo">exo</a></span>. Recognised values of <code>DE</code> variable are: <code>gnome</code>, <code>kde</code>, <code>xfce</code>, <code>lxde</code> and <code>mate</code>.</li></ul>
+<dl><dd>The <code>DE</code> environment variable needs to be exported before starting the window manager. For example:</dd></dl>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export DE="xfce"
+exec openbox</pre>
+<dl><dd>This will make <i>xdg-open</i> use the more user-friendly <i>exo-open</i>, because it assumes it is running inside Xfce. Use <i>exo-preferred-applications</i> for configuring.</dd></dl>
+<ul><li>
+<code>DESKTOP_SESSION</code> is similar to <code>DE</code>, but used in <a href="../en/LXDE.html" title="LXDE">LXDE</a> desktop enviroment: when <code>DESKTOP_SESSION</code> is set to <code>LXDE</code>, <i>xdg-open</i> will use <i>pcmanfm</i> file associations.</li></ul>
+<ul><li>
+<code>PATH</code> contains a colon-separated list of directories in which your system looks for executable files. When a regular command (e.g., <i>ls</i>, <i>rc-update</i> or <i>ic|emerge</i>) is interpreted by the shell (e.g., <i>bash</i> or <i>zsh</i>), the shell looks for an executable file with the same name as your command in the listed directories, and executes it. To run executables that are not listed in <code>PATH</code>, the absoute path to the executable must be given: <code>/bin/ls</code>.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is advised not to include the current working directory (<code>.</code>) into your <code>PATH</code> for security reasons, as it may trick the user to execute vicious commands.</div>
+<ul><li>
+<code>HOME</code> contains the path to the home directory of the current user. This variable can be used by applications to associate configuration files and such like with the user running it.</li></ul>
+<ul><li>
+<code>PWD</code> contains the path to your working directory.</li></ul>
+<ul><li>
+<code>OLDPWD</code> contains the path to your previous working directory, that is, the value of <code>PWD</code> before last <i>cd</i> was executed.</li></ul>
+<ul><li>
+<code>SHELL</code> contains the path to the user's <a rel="nofollow" class="external text" href="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap08.html#tag_08_03">preferred shell</a>. Note that this is not necessarily the shell that is currently running, although <a href="../en/Bash.html" title="Bash">Bash</a> sets this variable on startup.</li></ul>
+<ul><li>
+<code>TERM</code> contains the type of the running terminal, e.g. <code>xterm-256color</code>. It is used by programs running in the terminal that wish to use terminal-specific capabilities.</li></ul>
+<ul><li>
+<code>PAGER</code> contains command to run the program used to list the contents of files, e.g., <code>/bin/less</code>.</li></ul>
+<ul><li>
+<code>EDITOR</code> contains the command to run the lightweight program used for editing files, e.g., <code>/usr/bin/nano</code>. For example, you can write an interactive switch between <i>gedit</i> under <a href="../en/Xorg.html" title="X" class="mw-redirect">X</a> or <i>nano</i> in this example):</li></ul>
+<pre>export EDITOR="$(if [[ -n $DISPLAY ]]; then echo 'gedit'; else echo 'nano'; fi)"
+</pre>
+<ul><li>
+<code>VISUAL</code> contains command to run the full-fledged editor that is used for more demanding tasks, such as editing mail (e.g., <code>vi</code>, <a href="../en/Vim.html" title="Vim">vim</a>, <a href="../en/Emacs.html" title="Emacs">emacs</a> etc).</li></ul>
+<ul><li>
+<code>MAIL</code> contains the location of incoming email. The traditional setting is <code>/var/spool/mail/$LOGNAME</code>.</li></ul>
+<ul><li>
+<code>BROWSER</code> contains the path to the web browser. Helpful to set in an interactive shell configuration file so that it may be dynamically altered depending on the availability of a graphic environment, such as <a href="../en/Xorg.html" title="X" class="mw-redirect">X</a>:</li></ul>
+<pre>if [ -n "$DISPLAY" ]; then
+    export BROWSER=firefox
+else 
+    export BROWSER=links
+fi
+</pre>
+<ul><li>
+<code>ftp_proxy and http_proxy</code> contains FTP and HTTP proxy server, respectively:</li></ul>
+<pre>ftp_proxy="ftp://192.168.0.1:21"
+http_proxy="http://192.168.0.1:80"
+</pre>
+<ul><li>
+<code>MANPATH</code> contains a colon-separated list of directories in which <i>man</i> searches for the man pages.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In <code>/etc/profile</code>, there is a comment that states "Man is much better than us at figuring this out", so this variable should generally be left as default, i.e. <code>/usr/share/man:/usr/local/share/man</code>
+</div>
+<ul><li>
+<code>INFODIR</code>	contains a colon-separated list of directories in which the info command searches for the info pages, e.g., <code>/usr/share/info:/usr/local/share/info</code>
+</li></ul>
+<ul><li>
+<code>TZ</code> can be used to to set a time zone different to the system zone for a user. The zones listed in <code>/usr/share/zoneinfo/</code> can be used as reference, for example <code>TZ="/usr/share/zoneinfo/Pacific/Fiji"</code>
+</li></ul>
+<h3><span class="mw-headline" id="Using_pam_env">Using pam_env</span></h3>
+<p>Using <code>/etc/environment</code> and <code>~/.pam_environment</code> can be a little tricky, and the man pages (<code>pam_env(8)</code> and <code>pam_env.conf(5)</code>) are not particularly clear. So, here's an example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.pam_environment</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LANG             DEFAULT=en_US.UTF-8
+LC_ALL           DEFAULT=${LANG}
+
+XDG_CONFIG_HOME  DEFAULT=@{HOME}/.config
+#XDG_CONFIG_HOME=@{HOME}/.config                    # is **not** valid see below
+XDG_DATA_HOME    DEFAULT=@{HOME}/.local/share
+ 
+# you can even use recently defined variables
+RCRC             DEFAULT=${XDG_CONFIG_HOME}/rcrc
+BROWSER=firefox
+#BROWSER         DEFAULT=firefox # same as above
+EDITOR=vim</pre>
+<p>In <code>~/.pam_environment</code> there are two ways to set environmental variables:
+</p>
+<pre>VARIABLE=VALUE
+</pre>
+<p>and
+</p>
+<pre>VARIABLE [DEFAULT=[value]] [OVERRIDE=[value]]
+</pre>
+<p>The first one <b>doesn't allow</b> the use of <code> ${VARIABLES} </code>, while the second does. <code> @{HOME} </code> is a special variable that expands what is defined in <code>/etc/passwd</code> (same goes with <code> @{SHELL} </code>). After defining a <code>VARIABLE</code>, you can recall it with <code> ${VARIABLE} </code>. Note that curly braces and the dollar sign are needed (<code> ${} </code>) when invoking the previously defined variable.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> This file is read before everything, even <code> ~/.{,bash_,z}profile </code> and <code> ~/.zshenv </code>. </div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://wiki.gentoo.org/wiki/Handbook:X86/Working/EnvVar">Gentoo Linux Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://help.ubuntu.com/community/EnvironmentVariables">Ubuntu Community Wiki - Environment Variables</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

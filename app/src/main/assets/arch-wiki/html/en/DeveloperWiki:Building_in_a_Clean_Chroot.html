@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Building in a Clean Chroot - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Building_in_a_Clean_Chroot skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Building in a Clean Chroot</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Why"><span class="tocnumber">2</span> <span class="toctext">Why</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Convenience_Way"><span class="tocnumber">3</span> <span class="toctext">Convenience Way</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Classic_Way"><span class="tocnumber">4</span> <span class="toctext">Classic Way</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5">
+<a href="#Setting_Up_A_Chroot"><span class="tocnumber">4.1</span> <span class="toctext">Setting Up A Chroot</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Custom_pacman.conf"><span class="tocnumber">4.1.1</span> <span class="toctext">Custom pacman.conf</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Building_in_the_Chroot"><span class="tocnumber">4.2</span> <span class="toctext">Building in the Chroot</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Manual_package_installation"><span class="tocnumber">4.3</span> <span class="toctext">Manual package installation</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Installation_after_building"><span class="tocnumber">4.4</span> <span class="toctext">Installation after building</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Handling_Major_Rebuilds"><span class="tocnumber">5</span> <span class="toctext">Handling Major Rebuilds</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>This article is part of the <a href="../en/DeveloperWiki.html" title="DeveloperWiki">DeveloperWiki</a>.
+</p>
+<h2><span class="mw-headline" id="Why">Why</span></h2>
+<p>Building in a clean chroot prevents missing dependencies in packages, whether due to unwanted linking or packages missing in the depends array in the PKGBUILD.  It also allows users to build a package for the stable repositories (core, extra, community) while having packages from [testing] installed.
+</p>
+<h2><span class="mw-headline" id="Convenience_Way">Convenience Way</span></h2>
+<p>To quickly build a package in a clean chroot without any further tinkering, one can use the helper scripts from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=devtools">devtools</a></span> package.
+</p>
+<p>These helper scripts should be called in the same directory where the PKGBUILD is, just like with makepkg. For instance, <code>extra-i686-build</code> automatically sets up a chroot from a clean chroot matrix in <code>/var/lib/archbuild</code>, updates it, and builds a package for the extra repository. For multilib builds there is just <code>multilib-build</code> without an architecture. Consult the table below for information on which script to use when building for a specific repository and architecture.
+</p>
+<p>The <code>-c</code> parameter resets the chroot matrix, which can be useful in case of breakage. It is not needed for building in a clean chroot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>[core] is omitted because those packages are required to go through [testing] first before landing in [core].</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If the objective is to build a [core] package for your own local usage, it may be desirable to use the stable repositories instead of the testing. In this case you may simply use the extra build scripts.</div>
+<table class="wikitable">
+<tr>
+<th> Target repository </th>
+<th> Architecture </th>
+<th> Build script to use </th>
+<th> Pacman configuration file used
+</th>
+</tr>
+<tr>
+<td> extra / community </td>
+<td> i686 </td>
+<td> extra-i686-build </td>
+<td> /usr/share/devtools/pacman-extra.conf
+</td>
+</tr>
+<tr>
+<td> extra / community </td>
+<td> x86_64 </td>
+<td> extra-x86_64-build </td>
+<td> /usr/share/devtools/pacman-extra.conf
+</td>
+</tr>
+<tr>
+<td> testing / community-testing </td>
+<td> i686 </td>
+<td> testing-i686-build </td>
+<td> /usr/share/devtools/pacman-testing.conf
+</td>
+</tr>
+<tr>
+<td> testing / community-testing </td>
+<td> x86_64 </td>
+<td> testing-x86_64-build </td>
+<td> /usr/share/devtools/pacman-testing.conf
+</td>
+</tr>
+<tr>
+<td> staging / community-staging </td>
+<td> i686 </td>
+<td> staging-i686-build </td>
+<td> /usr/share/devtools/pacman-staging.conf
+</td>
+</tr>
+<tr>
+<td> staging / community-staging </td>
+<td> x86_64 </td>
+<td> staging-x86_64-build </td>
+<td> /usr/share/devtools/pacman-staging.conf
+</td>
+</tr>
+<tr>
+<td> multilib </td>
+<td> x86_64 </td>
+<td> multilib-build </td>
+<td> /usr/share/devtools/pacman-multilib.conf
+</td>
+</tr>
+<tr>
+<td> multilib-testing </td>
+<td> x86_64 </td>
+<td> multilib-testing-build </td>
+<td> /usr/share/devtools/pacman-multilib-testing.conf
+</td>
+</tr>
+<tr>
+<td> multilib-staging </td>
+<td> x86_64 </td>
+<td> multilib-staging-build </td>
+<td> /usr/share/devtools/pacman-multilib-staging.conf
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Classic_Way">Classic Way</span></h2>
+<h3><span class="mw-headline" id="Setting_Up_A_Chroot">Setting Up A Chroot</span></h3>
+<p>The devtools package provides tools for creating and building within clean chroots. Install it if not done already:
+</p>
+<pre># pacman -S devtools
+</pre>
+<p>To make a clean chroot, create a directory in which the chroot will reside.  For example, <code>$HOME/chroot</code>.
+</p>
+<pre>$ mkdir ~/chroot
+</pre>
+<p>Define the <code>CHROOT</code> variable:
+</p>
+<pre>$ CHROOT=$HOME/chroot
+</pre>
+<p>Now create the chroot (the sub directory <code>root</code> is required because the <code>$CHROOT</code> directory will get other sub directories for clean working copies):
+</p>
+<pre># mkarchroot $CHROOT/root base-devel
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>One can also define the <code>CHROOT</code> variable in <code>$HOME/.bashrc</code> using the export command if the location is to be repeatedly used. </div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>On <a href="../en/Btrfs.html" title="Btrfs">btrfs</a> disks, the chroot is created as a subvolume, so you have to remove it by removing the subvolume with <code># btrfs subvolume delete $CHROOT/root</code>. </div>
+<p>Edit <code>~/.makepkg.conf</code> to set the packager name and any makeflags.  Also adjust the <a href="../en/Pacman.html#Repositories_and_mirrors" title="Pacman">mirrorlist</a> in <code>$CHROOT/root/etc/pacman.d/mirrorlist</code> and enable the <a href="../en/Official_repositories.html#testing" title="Testing" class="mw-redirect">testing</a> repository in <code>$CHROOT/root/etc/pacman.conf</code>, if desired.
+</p>
+<h4><span class="mw-headline" id="Custom_pacman.conf">Custom pacman.conf</span></h4>
+<p>Alternatively, provide a custom <code>pacman.conf</code> and <code>makepkg.conf</code> with the following:
+</p>
+<pre># mkarchroot -C &lt;pacman.conf&gt; -M &lt;makepkg.conf&gt; $CHROOT/root base-devel
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+Using a custom <code>pacman.conf</code> or <code>makepkg.conf</code> during the initial creation of clean chroot can result in unintended custom adjustments to the chroot environment. <i>Use with caution.</i>
+</div>
+<h3><span class="mw-headline" id="Building_in_the_Chroot">Building in the Chroot</span></h3>
+<p>Firstly, make sure the chroot is up to date with:
+</p>
+<pre># arch-nspawn $CHROOT/root pacman -Syu
+</pre>
+<p>Then, to build a package in the chroot, run the following from the dir containing the PKGBUILD:
+</p>
+<pre>$ makechrootpkg -c -r $CHROOT
+</pre>
+<p>Passing the -c flag to makechrootpkg ensures that the working chroot (named <code>$CHROOT/$USERNAME</code>) is cleaned before building starts.
+</p>
+<h3><span class="mw-headline" id="Manual_package_installation">Manual package installation</span></h3>
+<p>Packages can be installed manually to the working chroot by using:
+</p>
+<pre># makechrootpkg -r $CHROOT -I package-1.0-1-i686.pkg.tar.xz
+</pre>
+<p>If done from a directory that contains a PKGBUILD, the package will then be built. Avoid being in such a directory if you want to just install the package.
+</p>
+<h3><span class="mw-headline" id="Installation_after_building">Installation after building</span></h3>
+<p>Tell makechrootpkg to simply install a package to the rw layer of the chroot after building by passing the -i arg. Unrecognized args get passed to makepkg, so this calls `makepkg` with the -i arg.
+</p>
+<pre># makechrootpkg -r $CHROOT -- -i
+</pre>
+<h2><span class="mw-headline" id="Handling_Major_Rebuilds">Handling Major Rebuilds</span></h2>
+<p>The cleanest way to handle a major rebuild is to use the [staging] repositories. Build the first package against [extra] and push it to [staging]. Then rebuild all following packages against [staging] and push them there.
+</p>
+<p>If you can't use [staging], you can build against custom packages using a command like this:
+</p>
+<pre># extra-x86_64-build -- -I ~/packages/foobar/foobar-2-1-any.pkg.tar.xz
+</pre>
+<p>You can specify more than one package to be installed using multiple -I arguments.
+</p>
+<p>A simpler, but dirtier way to handle a major rebuild is to install all built packages in the chroot, never cleaning it. Build the first package using:
+</p>
+<pre># extra-x86_64-build
+</pre>
+<p>And build all following packages using:
+</p>
+<pre># makechrootpkg -n -r /var/lib/archbuild/extra-x86_64
+</pre>
+<p>Running namcap (the -n argument) implies installing the package in the chroot. *-build also does this by default.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki.html" title="Category:DeveloperWiki">DeveloperWiki</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>HP Pavilion g6-2103ax - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-HP_Pavilion_g6-2103ax skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">HP Pavilion g6-2103ax</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>(This is a work-in-progress. I recently bought one of these laptops, and this article will attempt to explain what I did to dual-boot Arch with the HP Factory installed Windows 7.)
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Hardware"><span class="tocnumber">1</span> <span class="toctext">Hardware</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Notes_about_factory_settings"><span class="tocnumber">2</span> <span class="toctext">Notes about factory settings</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Dual_booting_with_Arch"><span class="tocnumber">3</span> <span class="toctext">Dual booting with Arch</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Configuring_Windows"><span class="tocnumber">3.1</span> <span class="toctext">Configuring Windows</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Partitioning"><span class="tocnumber">3.2</span> <span class="toctext">Partitioning</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Install"><span class="tocnumber">3.3</span> <span class="toctext">Install</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Notes_on_configuration"><span class="tocnumber">3.4</span> <span class="toctext">Notes on configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Arch-only_install"><span class="tocnumber">4</span> <span class="toctext">Arch-only install</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Hardware">Hardware</span></h2>
+<p>The g6-2103ax is a 2012 model 15.6” laptop, with the AMD A6 processor and a dedicated graphics card.
+</p>
+<dl>
+<dt>CPU</dt>
+<dd> AMD A6-4400M APU with Radeon graphics</dd>
+<dd> 2.7 GHz, 1 MiB second-level cache</dd>
+<dt>GPU</dt>
+<dd> Internal: AMD Radeon HD 7520G, 800Mhz, 512MB  </dd>
+<dd> Dedicated: AMD Radeon HD 7670M, 800Mhz, 512MB </dd>
+<dt>Memory</dt>
+<dd> 4 GiB DDR3, 1600 MHz</dd>
+<dt>Display</dt>
+<dd> 15.6” LED</dd>
+<dt>Multimedia</dt>
+<dd> HP CDDVDW SN-208BB CD/DVD writer</dd>
+<dd> Sound: ???</dd>
+<dt>Networking</dt>
+<dd> Wireless: Atheros AR9485 wireless adaptor</dd>
+<dd> Ethernet: Realtek RTL8101E/RTL8102E PCI Express fast ethernet controller</dd>
+<dt>Storage</dt>
+<dd> Seagate ST500LM012 HN0M5, 500GB (465GiB)</dd>
+<dd> Factory partitions are SYSTEM, WINDOWS C, HP_RECOVERY, and HP_TOOLS</dd>
+<dt>External ports</dt>
+<dd> 3× USB-3</dd>
+<dd> SD card reader</dd>
+<dd> 1× HDMI</dd>
+<dd> 1× VGA-compatible </dd>
+</dl>
+<h2><span class="mw-headline" id="Notes_about_factory_settings">Notes about factory settings</span></h2>
+<p>The factory install comes with Windows 7 Professional, set up to occupy the majority of the hard drive, with three other utility partitions. As the disk is formatted with the MBR partitioning style, it is impossible to create space to dual boot another operating system without removing one of these utility partitions first. The hardware is UEFI-enabled, but HP uses some BIOS/UEFI trickery to make the system boot in BIOS mode. At present, this cannot be changed, and I couldn’t get any UEFI bootloaders to boot at all. 
+</p>
+<ul>
+<li> The <code>SYSTEM</code> contains files essential for Windows to boot. Altering this partition <b>will</b> render Windows unbootable.</li>
+<li> The <code>HP_RECOVERY</code> partition contains a factory reset program that will restore the computer to its initial state. HP no longer provide disks for this purpose, but they can be ordered or made using the HP Recovery utilities preinstalled.</li>
+<li> The <code>HP_TOOLS</code> partition contains some system diagnostic tools by HP. These are EFI applications only accessible at pre-boot time by hitting <code>Esc</code> before the bootloader starts.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>HP is rather vague on whether modifying the partitions voids the warranty. I was able to request recovery disks under warranty after messing up the partition table, but they may not repair a damaged computer sent in unless it was in the factory state.</div>
+<h2><span class="mw-headline" id="Dual_booting_with_Arch">Dual booting with Arch</span></h2>
+<p>These are the steps I followed to dual-boot Arch and Windows 7. 
+</p>
+<h3><span class="mw-headline" id="Configuring_Windows">Configuring Windows</span></h3>
+<p>If you wish to create the Windows recovery disks, use the HP Recovery Tools to build these. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>These disks will reset the computer to its initial factory state, wiping <b>all</b> data on the hard drive.</div>
+<p>The HP Recovery Tools program includes an option to delete the recovery partition. Though they don’t recommend this, it’s safe to perform and is the only way to make room for Arch that will allow a painless dual-boot.
+</p>
+<p>Use the Windows disk management tools to shrink <code>C:</code> drive to the desired size. If the tool refuses to shrink beyond so-called immovable files, it can be coerced by temporarily disabling the Page File and removing Windows Restore Points. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Using third-party tools to resize the Windows partition may render Windows unbootable.</div>
+<p>Once you’ve created the desired amount of free space, boot the Arch ISO installer. Select the 64-bit install, and <code>Tab</code> to modify the kernel boot parameters. <b>Always</b> append <code>radeon.modeset=0</code> to disable <a href="../en/Kernel_mode_setting.html" title="KMS" class="mw-redirect">KMS</a>, or you’ll be left with a blank screen, as neither the <a href="../en/ATI.html" title="ATI">open-source drivers</a> or the <a href="../en/AMD_Catalyst.html" title="ATI Catalyst" class="mw-redirect">ATI Catalyst</a> drivers support KMS on this laptop (at present).
+</p>
+<h3><span class="mw-headline" id="Partitioning">Partitioning</span></h3>
+<p>When <a href="../en/Partitioning.html" title="Partitioning">partitioning</a>, make sure to align partitions properly for optimum performance. Do not modify the <code>SYSTEM</code>, Windows, or <code>HP_TOOLS</code> partitions; instead, create an extended partition filling up all of the free space left by shrinking <code>C:\</code> drive. That way you can have a separate <code>/boot</code> partition. I used <a href="../en/LVM.html" title="LVM">LVM</a> to contain the rest of my partitions, and did not bother with encryption using <a href="../en/Dm-crypt.html" title="LUKS" class="mw-redirect">LUKS</a>. 
+</p>
+<h3><span class="mw-headline" id="Install">Install</span></h3>
+<p>Install Arch as per <a href="../en/Installation_guide.html" title="Installation guide">the official guide</a>. 
+</p>
+<h3><span class="mw-headline" id="Notes_on_configuration">Notes on configuration</span></h3>
+<p>I couldn’t get the system to boot using the <a href="../en/ATI.html" title="ATI">open-source drivers</a>, and I’ve had no issues with the latest <a href="../en/AMD_Catalyst.html" title="ATI Catalyst" class="mw-redirect">ATI Catalyst</a> driver. You will need to append <code>nomodeset</code> and <code>vga=0</code> to your kernel options in your bootloader configs, otherwise the console will be dark, and resuming from suspend may not work properly. I haven’t been able to get suspend-to-disk (hibernate) to work, as it just reports an error from <b>fglrx</b>, so your mileage in that regard may vary.
+</p>
+<h2><span class="mw-headline" id="Arch-only_install">Arch-only install</span></h2>
+<p>If you want to remove Windows 7 and opt for a pure Arch install, I’d recommend retaining the <code>HP_TOOLS</code> partition as it provides options for installing BIOS updates, as well as thorough hardware tests.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:HP.html" title="Category:HP">HP</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

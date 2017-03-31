@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>fstab - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Fstab skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">fstab</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">Mount</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Tmpfs.html" title="Tmpfs">tmpfs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Swap.html" title="Swap">swap</a></li>
+</ul>
+</div>
+<p>The <span class="plainlinks archwiki-template-man" title="$ man 5 fstab"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/fstab.5.html">fstab(5)</a></span> file can be used to define how disk partitions, various other block devices, or remote filesystems should be mounted into the filesystem.
+</p>
+<p>Each filesystem is described in a separate line. These definitions will be converted into <a href="../en/Systemd.html" title="Systemd">systemd</a> mount units dynamically at boot, and when the configuration of the system manager is reloaded. The default setup will automatically <a href="../en/Fsck.html" title="Fsck">fsck</a> and mount filesystems before starting services that need them to be mounted. For example, systemd automatically makes sure that remote filesystem mounts like <a href="../en/NFS.html" title="NFS">NFS</a> or <a href="../en/Samba.html" title="Samba">Samba</a> are only started after the network has been set up. Therefore, local and remote filesystem mounts specified in <code>/etc/fstab</code> should work out of the box. See <span class="plainlinks archwiki-template-man" title="$ man 5 systemd.mount"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/systemd.mount.5.html">systemd.mount(5)</a></span> for details.
+</p>
+<p>The <code>mount</code> command will use fstab, if just one of either directory or device is given, to fill in the value for the other parameter. When doing so, mount options which are listed in fstab will also be used.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Identifying_filesystems"><span class="tocnumber">2</span> <span class="toctext">Identifying filesystems</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Kernel_name_descriptors"><span class="tocnumber">2.1</span> <span class="toctext">Kernel name descriptors</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Labels"><span class="tocnumber">2.2</span> <span class="toctext">Labels</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#UUIDs"><span class="tocnumber">2.3</span> <span class="toctext">UUIDs</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#GPT_labels"><span class="tocnumber">2.4</span> <span class="toctext">GPT labels</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#GPT_UUIDs"><span class="tocnumber">2.5</span> <span class="toctext">GPT UUIDs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Automount_with_systemd"><span class="tocnumber">3.1</span> <span class="toctext">Automount with systemd</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#External_devices"><span class="tocnumber">3.2</span> <span class="toctext">External devices</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Filepath_spaces"><span class="tocnumber">3.3</span> <span class="toctext">Filepath spaces</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#atime_options"><span class="tocnumber">3.4</span> <span class="toctext">atime options</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Writing_to_FAT32_as_Normal_User"><span class="tocnumber">3.5</span> <span class="toctext">Writing to FAT32 as Normal User</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Remounting_the_root_partition"><span class="tocnumber">3.6</span> <span class="toctext">Remounting the root partition</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#bind_mounts"><span class="tocnumber">3.7</span> <span class="toctext">bind mounts</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>A simple <code>/etc/fstab</code>, using kernel name descriptors:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;             &lt;dir&gt;         &lt;type&gt;    &lt;options&gt;             &lt;dump&gt; &lt;fsck&gt;
+/dev/sda1              /             ext4      defaults,noatime      0      1
+/dev/sda2              none          swap      defaults              0      0
+/dev/sda3              /home         ext4      defaults,noatime      0      2</pre>
+<ul>
+<li> <code>&lt;device&gt;</code> describes the block special device or remote filesystem to be mounted; see <a href="#Identifying_filesystems">#Identifying_filesystems</a>.</li>
+<li> <code>&lt;dir&gt;</code> describes the <a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">mount</a> directory, <code>&lt;type&gt;</code> the <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a> type, and <code>&lt;options&gt;</code> the associated mount options; see <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/mount.8.html#FILESYSTEM-INDEPENDENT_MOUNT%20OPTIONS">mount(8)</a></span>.</li>
+<li> <code>&lt;dump&gt;</code> is checked by the <span class="plainlinks archwiki-template-man" title="$ man 8 dump"><a rel="nofollow" class="external text" href="http://linux.die.net/man/8/dump">dump(8)</a></span> utility.</li>
+<li> <code>&lt;fsck&gt;</code> sets the order for filesystem checks at boot time; see <span class="plainlinks archwiki-template-man" title="$ man 8 fsck"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/fsck.8.html">fsck(8)</a></span>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The <code>auto</code> type lets the mount command guess what type of file system is used. This is useful for optical media (CD/DVD).</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If the root file system is <a href="../en/Btrfs.html" title="Btrfs">btrfs</a>, the fsck order should be set to <code>0</code> instead of <code>1</code>.</div>
+<p>All specified devices within <code>/etc/fstab</code> will be automatcially mounted on startup and when the <code>-a</code> flag is used with <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/mount.8.html">mount(8)</a></span> unless the <code>noauto</code> option is specified. Devices that are listed and not present will result in an error unless the <code>nofail</code> option is used.
+</p>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 5 fstab"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/fstab.5.html#DESCRIPTION">fstab(5)</a></span> for details.
+</p>
+<h2><span class="mw-headline" id="Identifying_filesystems">Identifying filesystems</span></h2>
+<p>There are different ways to identify filesystems that will be mounted in <code>/etc/fstab</code>: kernel name descriptor, label or UUID, and GPT labels and UUID for GPT disks. UUID must be privileged over kernel name descriptors and labels. See <a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a> for more explanations. It is recommended to read that article first before continuing with this article.
+</p>
+<p>In this section, we will describe how to mount filesystems using all the mount methods available via examples. The output of the commands <code>lsblk -f</code> and <code>blkid</code> used in the following examples are available in the article <a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a>.
+</p>
+<p>To use kernel name descriptors, use /dev/sd<i>xy</i> in the first colun. 
+</p>
+<h3><span class="mw-headline" id="Kernel_name_descriptors">Kernel name descriptors</span></h3>
+<p>Run <code>lsblk -f</code> to list the partitions and prefix the values in the <i>NAME</i> column with <code>/dev/</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;      &lt;dir&gt; &lt;type&gt; &lt;options&gt;                                                                                            &lt;dump&gt; &lt;fsck&gt;
+/dev/sda1       /boot vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      2
+/dev/sda2       /     ext4   rw,relatime,discard,data=ordered                                                                     0      1
+/dev/sda3       /home ext4   rw,relatime,discard,data=ordered                                                                     0      2
+/dev/sda4       none  swap   defaults                                                                                             0      0
+</pre>
+<h3><span class="mw-headline" id="Labels">Labels</span></h3>
+<p>Run <code>lsblk -f</code> to list the partitions, and prefix the values in the <i>LABEL</i> column with <code>LABEL=</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;      &lt;dir&gt; &lt;type&gt; &lt;options&gt;                                                                                            &lt;dump&gt; &lt;fsck&gt;
+LABEL=EFI       /boot vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      2
+LABEL=SYSTEM    /     ext4   rw,relatime,discard,data=ordered                                                                     0      1
+LABEL=DATA      /home ext4   rw,relatime,discard,data=ordered                                                                     0      2
+LABEL=SWAP      none  swap   defaults                                                                                             0      0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If any of your fields contains spaces, see <a href="#Filepath_spaces">#Filepath spaces</a>.</div>
+<h3><span class="mw-headline" id="UUIDs">UUIDs</span></h3>
+<p>Run <code>lsblk -f</code> to list the partitions, and prefix the values in the <i>UUID</i> column with <code>UUID=</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;                                &lt;dir&gt; &lt;type&gt; &lt;options&gt;                                                                                            &lt;dump&gt; &lt;fsck&gt;
+UUID=CBB6-24F2                            /boot vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      2
+UUID=0a3407de-014b-458b-b5c1-848e92a327a3 /     ext4   rw,relatime,discard,data=ordered                                                                     0      1
+UUID=b411dc99-f0a0-4c87-9e05-184977be8539 /home ext4   rw,relatime,discard,data=ordered                                                                     0      2
+UUID=f9fe0b69-a280-415d-a03a-a32752370dee none  swap   defaults                                                                                             0      0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you would like to return just the UUID of a specific partition:
+ $ lsblk -no UUID /dev/sda2</div>
+<h3><span class="mw-headline" id="GPT_labels">GPT labels</span></h3>
+<p>Run <code>blkid</code> to list the partitions, and use the <i>PARTLABEL</i> values without the quotes:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;                           &lt;dir&gt; &lt;type&gt; &lt;options&gt;                                                                                            &lt;dump&gt; &lt;fsck&gt;
+PARTLABEL=EFI\040SYSTEM\040PARTITION /boot vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      2
+PARTLABEL=GNU/LINUX                  /     ext4   rw,relatime,discard,data=ordered                                                                     0      1
+PARTLABEL=HOME                       /home ext4   rw,relatime,discard,data=ordered                                                                     0      2
+PARTLABEL=SWAP                       none  swap   defaults                                                                                             0      0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If any of your fields contains spaces, see <a href="#Filepath_spaces">#Filepath spaces</a>.</div>
+<h3><span class="mw-headline" id="GPT_UUIDs">GPT UUIDs</span></h3>
+<p>Run <code>blkid</code> to list the partitions, and use the <i>PARTUUID</i> values without the quotes:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# &lt;device&gt;                                    &lt;dir&gt; &lt;type&gt; &lt;options&gt;                                                                                            &lt;dump&gt; &lt;fsck&gt;
+PARTUUID=d0d0d110-0a71-4ed6-936a-304969ea36af /boot vfat   rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro 0      2
+PARTUUID=98a81274-10f7-40db-872a-03df048df366 /     ext4   rw,relatime,discard,data=ordered                                                                     0      1
+PARTUUID=7280201c-fc5d-40f2-a9b2-466611d3d49e /home ext4   rw,relatime,discard,data=ordered                                                                     0      2
+PARTUUID=039b6c1c-7553-4455-9537-1befbc9fbc5b none  swap   defaults                                                                                             0      0
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Automount_with_systemd">Automount with systemd</span></h3>
+<p>If you have a large <code>/home</code> partition, it might be better to allow services that do not depend on <code>/home</code> to start while <code>/home</code> is checked by <i>fsck</i>. This can be achieved by adding the following options to the <code>/etc/fstab</code> entry of your <code>/home</code> partition:
+</p>
+<pre>noauto,x-systemd.automount
+</pre>
+<p>This will fsck and mount <code>/home</code> when it is first accessed, and the kernel will buffer all file access to <code>/home</code> until it is ready.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This will make your <code>/home</code> filesystem type <code>autofs</code>, which is ignored by <a href="../en/Core_utilities.html#locate" title="Mlocate" class="mw-redirect">mlocate</a> by default. The speedup of automounting <code>/home</code> may not be more than a second or two, depending on your system, so this trick may not be worth it.</div>
+<p>The same applies to remote filesystem mounts. If you want them to be mounted only upon access, you will need to use the <code>noauto,x-systemd.automount</code> parameters. In addition, you can use the <code>x-systemd.device-timeout=#</code> option to specify a timeout in case the network resource is not available.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you intend to use the <code>exec</code> flag with automount, you should remove the <code>user</code> flag for it to work properly as found in the course of a <a rel="nofollow" class="external text" href="https://bugzilla.redhat.com/show_bug.cgi?id=769636">Fedora Bug Report</a>
+</div>
+<p>If you have encrypted filesystems with keyfiles, you can also add the <code>noauto</code> parameter to the corresponding entries in <code>/etc/crypttab</code>. <i>systemd</i> will then not open the encrypted device on boot, but instead wait until it is actually accessed and then automatically open it with the specified keyfile before mounting it. This might save a few seconds on boot if you are using an encrypted RAID device for example, because systemd does not have to wait for the device to become available. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+data /dev/md0 /root/key noauto</pre>
+<p>You may also specify an idle timeout for a mount with the <code>x-systemd.idle-timeout</code> flag.  For example:
+</p>
+<pre>noauto,x-systemd.automount,x-systemd.idle-timeout=1min
+</pre>
+<p>This will make systemd unmount the mount after it has been idle for 1 minute.
+</p>
+<h3><span class="mw-headline" id="External_devices">External devices</span></h3>
+<p>External devices that are to be mounted when present but ignored if absent may require the <code>nofail</code> option. This prevents errors being reported at boot. For example: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sdg1        /media/backup    jfs    defaults,nofail,x-systemd.device-timeout=1    0  2</pre>
+<p>The <code>nofail</code> option is best combined with the <code>x-systemd.device-timeout</code> option. This is because the default device timeout is 90 seconds, so a disconnected external device with only <code>nofail</code> will make your boot take 90 seconds longer, unless you reconfigure the timeout as shown. Make sure not to set the timeout to 0, as this translates to infinite timeout.
+</p>
+<p>If your external device requires another systemd unit to be loaded (for example the network for a network share) you can use <code>x-systemd.requires=x</code> combined with <code>x-systemd.automount</code>to postpone automounting until after the unit is available. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">//host/share        /net/share        cifs        noauto,nofail,x-systemd.automount,x-systemd.requires=network-online.target,x-systemd.device-timeout=10,workgroup=workgroup,credentials=/foo/credentials        0 0</pre>
+<h3><span class="mw-headline" id="Filepath_spaces">Filepath spaces</span></h3>
+<p>Since spaces are used in <code>fstab</code> to delimit fields, if any field (<i>PARTLABEL</i>, <i>LABEL</i> or the mount point) contains spaces, these spaces must be replaced by escape characters <code>\</code> followed by the 3 digit octal code <code>040</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">UUID=47FA-4071     /home/username/Camera<font color="grey">\040</font>Pictures   vfat  defaults,noatime       0  0
+/dev/sda7          /media/100<font color="grey">\040</font>GB<font color="grey">\040</font>(Storage)       ext4  defaults,noatime,user  0  2</pre>
+<h3><span class="mw-headline" id="atime_options">atime options</span></h3>
+<p>Below atime options can impact drive performance.
+</p>
+<ul><li> The <code>strictatime</code> option updates the access time of the files every time they are accessed. This is more purposeful when Linux is used for servers; it does not have much value for desktop use. The drawback about the <code>strictatime</code> option is that even reading a file from the page cache (reading from memory instead of the drive) will still result in a write!</li></ul>
+<ul><li> The <code>noatime</code> option fully disables writing file access times to the drive every time you read a file. This works well for almost all applications, except for those that need to know if a file has been read since the last time it was modified. The write time information to a file will continue to be updated anytime the file is written to with this option enabled.</li></ul>
+<ul><li> The <code>nodiratime</code> option disables the writing of file access times only for directories while other files still get access times written.</li></ul>
+<dl><dd> <div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>noatime</code> implies <code>nodiratime</code>. <a rel="nofollow" class="external text" href="http://lwn.net/Articles/244941/">You do not need to specify both</a>.</div>
+</dd></dl>
+<ul><li> <code>relatime</code> updates the access time only if the previous access time was earlier than the current modify or change time. In addition, since Linux 2.6.30, the access time is always updated if the previous access time was more than 24 hours old. This option is used when the <code>defaults</code> option, <code>atime</code> option (which means to use the kernel default, which is <code>relatime</code>; see <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/mount.8.html">mount(8)</a></span> and <a href="https://en.wikipedia.org/wiki/Stat_(system_call)#Criticism_of_atime" class="extiw" title="wikipedia:Stat (system call)">wikipedia:Stat (system call)#Criticism of atime</a>) or no options at all are specified.</li></ul>
+<p>When using <a href="../en/Mutt.html" title="Mutt">Mutt</a> or other applications that need to know if a file has been read since the last time it was modified, the <code>noatime</code> option should not be used; using the <code>relatime</code> option is acceptable and still provides a performance improvement.
+</p>
+<p>Since kernel 4.0 there is another related option:
+</p>
+<ul><li> <code>lazytime</code> reduces writes to disk by maintaining changes to inode timestamps (access, modification and creation times) only in memory. The on-disk timestamps are updated only when either (1) the file inode needs to be updated for some change unrelated to file timestamps, (2) a sync to disk occurs, (3) an undeleted inode is evicted from memory or (4) if more than 24 hours passed since the the last time the in-memory copy was written to disk.</li></ul>
+<dl><dd> <div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>In the event of a system crash, the access and modification times on disk might be out of date by up to 24 hours.</div>
+</dd></dl>
+<p>Note that the <code>lazytime</code> option works <b>in combination</b> with the aforementioned <code>*atime</code> options, not as an alternative. That is <code>relatime</code> by default, but can be even <code>strictatime</code> with the same or less cost of disk writes as the plain <code>relatime</code> option.
+</p>
+<h3><span class="mw-headline" id="Writing_to_FAT32_as_Normal_User">Writing to FAT32 as Normal User</span></h3>
+<p>To write on a FAT32 partition, you must make a few changes to your <code>/etc/fstab</code> file.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sdxY    /mnt/some_folder  vfat   <b>user</b>,rw,umask=000              0  0</pre>
+<p>The <code>user</code> flag means that any user (even non-root) can mount and unmount the partition <code>/dev/sdX</code>. <code>rw</code> gives read-write access; 
+<code>umask</code> option removes selected rights - for example <code>umask=111</code> remove executable rights. The problem is that this entry removes executable rights from directories too, so we must correct it by <code>dmask=000</code>. See also <a href="../en/Umask.html" title="Umask">Umask</a>.
+</p>
+<p>Without these options, all files will be executable. You can use the option <code>showexec</code> instead of the umask and dmask options, which shows all Windows executables (com, exe, bat) in executable colours.
+</p>
+<p>For example, if your FAT32 partition is on <code>/dev/sda9</code>, and you wish to mount it to <code>/mnt/fat32</code>, then you would use:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sda9    /mnt/fat32        vfat   <b>user</b>,rw,umask=111,dmask=000    0  0</pre>
+<p>Now, any user can mount it with:
+</p>
+<pre>$ mount /mnt/fat32
+</pre>
+<p>And unmount it with:
+</p>
+<pre>$ umount /mnt/fat32
+</pre>
+<h3><span class="mw-headline" id="Remounting_the_root_partition">Remounting the root partition</span></h3>
+<p>If for some reason the root partition has been improperly mounted read only, remount the root partition with read-write access with the following command:
+</p>
+<pre># mount -o remount,rw /
+</pre>
+<h3><span class="mw-headline" id="bind_mounts">bind mounts</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> unfinished section (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Fstab">Talk:Fstab#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Binding a directory to a different location is not recognised by almost any program, so for instance careless commands like <code>rm -r *</code> will also erase any content from the original location. So softlinks should be the preferable way in most cases. If you need permission to a directory on a Btrfs and softlinks are not sufficient its <a href="../en/Btrfs.html#Subvolumes" title="Btrfs">subvolumes</a> faciliate extended capabilities like mount options compared to bind mounting</div>
+<p>Sometimes programs or users cannot access one specific directory due to insufficient permissions. One feasable possibility to give the program access to this directory is bind mounting it to a location the program can access. If a program has permission to access directory bar but not to directory foo, under some circumstances the access can be granted without any permission hassle by adding an entry to <code>/etc/fstab</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/&lt;path to foo&gt;         /&lt;path to bar&gt;     none     bind     0 0</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.kernel.org/pub/linux/docs/lanana/device-list/devices-2.6.txt">Full device listing including block device</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.pathname.com/fhs/2.2/index.html">Filesystem Hierarchy Standard</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.askapache.com/web-hosting/super-speed-secrets.html">30x Faster Web-Site Speed</a> (Detailed tmpfs)</li>
+<li> <a href="../en/Samba.html#Add_Share_to_.2Fetc.2Ffstab" title="Samba">Adding Samba shares to /etc/fstab</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

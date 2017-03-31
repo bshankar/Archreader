@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Cobalt strike - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Cobalt_strike skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Cobalt strike</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Cobalt_strike">Talk:Cobalt strike#</a>)</div>
+</div>
+<p>Cobalt Strike is penetration testing software that executes targeted attacks and replicates advanced threats.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Requirements"><span class="tocnumber">1</span> <span class="toctext">Requirements</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Dependencies"><span class="tocnumber">2</span> <span class="toctext">Dependencies</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#setting_up_postgres"><span class="tocnumber">3</span> <span class="toctext">setting up postgres</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Enable_required_services"><span class="tocnumber">4</span> <span class="toctext">Enable required services</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Requirements">Requirements</span></h2>
+<ul>
+<li> metasploit</li>
+<li> postgresql</li>
+<li> database.yml # can set via MSF_DATABASE_CONFIG env</li>
+</ul>
+<h2><span class="mw-headline" id="Dependencies">Dependencies</span></h2>
+<p>sudo pacman -S postgresql metasploit
+</p>
+<h2><span class="mw-headline" id="setting_up_postgres">setting up postgres</span></h2>
+<p>passwd postgress # set password<br>
+su - postgres -c "initdb -D '/var/lib/postgres/data'" # create db, some people recommended the appending the "--locale en_US.UTF-8 " flag
+</p>
+<h2><span class="mw-headline" id="Enable_required_services">Enable required services</span></h2>
+<pre>sudo systemctl start postgresql
+./msfconsole # should be enough to start metasploit service listening on 127.0.0.1:55553
+</pre>
+<pre># copy sample yml database file for MSF_DATABASE_CONFIG env
+cp /usr/share/metasploit/config/database.yml.example  /usr/share/metasploit/config/database.yml 
+</pre>
+<pre>#
+# you should change the default creds in the database.yml
+# ~/.msf4/ ... database.yml is not there.
+#
+</pre>
+<pre>msfrpcd -a 127.0.0.1 -U [user] -P [pass] -S -f # instead of msfcli?
+</pre>
+<pre># run cobaltstrike
+sudo MSF_DATABASE_CONFIG=/usr/share/metasploit/config/database.yml ./cobaltstrike
+</pre>
+<pre>#
+# use same user/pass combo to connect to cobalt strike server as you did for msfrpcd 
+#
+</pre>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<ul>
+<li> if stuck at "progress" popup that says "login failed, your creds may not be correct (make sure they're the same as the msfrpcd creds)<br>
+</li>
+<li> is /usr/share/metasploit/config/database.yml derived from metasploit? or is it unique?</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

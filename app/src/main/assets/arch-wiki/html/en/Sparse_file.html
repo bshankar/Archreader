@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Sparse file - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Sparse_file skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Sparse file</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This article contains information regarding sparse files, their creation, maintenance, and expansion.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Sparse_Files"><span class="tocnumber">1</span> <span class="toctext">Sparse Files</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#What_is_a_sparse_file.3F"><span class="tocnumber">1.1</span> <span class="toctext">What is a sparse file?</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Advantages"><span class="tocnumber">1.2</span> <span class="toctext">Advantages</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Disadvantages"><span class="tocnumber">1.3</span> <span class="toctext">Disadvantages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Creating_sparse_files"><span class="tocnumber">2</span> <span class="toctext">Creating sparse files</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Formatting_the_file_with_a_filesystem"><span class="tocnumber">2.1</span> <span class="toctext">Formatting the file with a filesystem</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Mounting_the_file_at_boot"><span class="tocnumber">2.2</span> <span class="toctext">Mounting the file at boot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Copying_the_sparse_file"><span class="tocnumber">3</span> <span class="toctext">Copying the sparse file</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Copying_with_.60cp.27"><span class="tocnumber">3.1</span> <span class="toctext">Copying with `cp'</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Archiving_with_.60tar.27"><span class="tocnumber">3.2</span> <span class="toctext">Archiving with `tar'</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Resizing_the_sparse_file"><span class="tocnumber">4</span> <span class="toctext">Resizing the sparse file</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Growing_the_file"><span class="tocnumber">4.1</span> <span class="toctext">Growing the file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Sources"><span class="tocnumber">5</span> <span class="toctext">Sources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Sparse_Files">Sparse Files</span></h2>
+<h3><span class="mw-headline" id="What_is_a_sparse_file.3F">What is a sparse file?</span></h3>
+<p>According to <a href="https://en.wikipedia.org/wiki/Sparse_file" class="extiw" title="wikipedia:Sparse file">Wikipedia</a>, in computer science, a sparse file is a type of computer file that attempts to use file system space more efficiently when blocks allocated to the file are mostly empty. This is achieved by writing brief information (metadata) representing the empty blocks to disk instead of the actual "empty" space which makes up the block, using less disk space (i.e. sparse files contain blocks of zeros whose existance is recorded, but have no space allocated on disk). The full block size is written to disk as the actual size only when the block contains "real" (non-empty) data.
+</p>
+<p>When reading sparse files, the file system transparently converts metadata representing empty blocks into "real" blocks filled with zero bytes at runtime. The application is unaware of this conversion.
+</p>
+<p>Most modern file systems support sparse files, including most Unix variants and NTFS, but notably not Apple's HFS+. Sparse files are commonly used for disk images, database snapshots, log files and in scientific applications.
+</p>
+<h3><span class="mw-headline" id="Advantages">Advantages</span></h3>
+<p>The advantage of sparse files is that storage is only allocated when actually needed: disk space is saved, and large files can be created even if there is insufficient free space on the file system.
+</p>
+<h3><span class="mw-headline" id="Disadvantages">Disadvantages</span></h3>
+<p>Disadvantages are that sparse files may become fragmented; file system free space reports may be misleading; filling up file systems containing sparse files can have unexpected effects; and copying a sparse file with a program that does not explicitly support them may copy the entire, uncompressed size of the file, including the sparse, mostly zero sections which are not on disk -- losing the benefits of the sparse property in the file.
+</p>
+<h2><span class="mw-headline" id="Creating_sparse_files">Creating sparse files</span></h2>
+<p>The <i>truncate</i> utility can create sparse files. This command creates a 512 MiB sparse file:
+</p>
+<pre>$ truncate -s 512M file.img
+</pre>
+<p>The <i>dd</i> utility can also be used, for example:
+</p>
+<pre>$ dd if=/dev/zero of=file.img bs=1 count=0 seek=512M
+0+0 records in
+0+0 records out
+0 bytes (0 B) copied, 2.4934e-05 s, 0.0 kB/s
+</pre>
+<p>Sparse files have different <i>apparent file sizes</i> (the maximum size to which they may expand) and <i>actual file sizes</i> (how much space is allocated for data on disk).  To check the file's <i>apparent size</i>, just run:
+</p>
+<pre>$ du -h --apparent-size file.img
+512M    file.img
+</pre>
+<p>and, to check the <i>actual size</i> of the file on disk:
+</p>
+<pre>$ du -h file.img
+0       file.img
+</pre>
+<p>As you can see, although the apparent size of the file is 512 MiB, its "actual" size is really zero—that's because due to the nature and beauty of sparse files, it will "expand" arbitrarily to minimize the space required to store its contents.
+</p>
+<h3><span class="mw-headline" id="Formatting_the_file_with_a_filesystem">Formatting the file with a filesystem</span></h3>
+<p>Now that we've created the sparse file, it's time to format it with a filesystem; for this example, I will use ReiserFS:
+</p>
+<pre># mkfs.reiserfs -f -q file.img
+mkfs.reiserfs 3.6.21 (2009 www.namesys.com)
+</pre>
+<p>We can now check its size to see how the filesystem has affected it:
+</p>
+<pre># du -h --apparent-size file.img
+512M    file.img
+
+# du -h file.img
+33M     file.img
+</pre>
+<p>As you may have expected, formatting it with the filesystem has increased its actual size, but left its apparent size the same.  Now we can create a directory which we will use to mount our file:
+</p>
+<pre># mkdir folder
+
+# mount -o loop file.img folder
+</pre>
+<p>Tada! We now have both a file and a folder into which we may store <i>almost</i> 512 MiB worth of information!
+</p>
+<h3><span class="mw-headline" id="Mounting_the_file_at_boot">Mounting the file at boot</span></h3>
+<p>Having created a sparse file, you may wish to mount it automatically at boot; the best way I can suggest to do this is to add a simple entry to your `/etc/fstab', as follows:
+</p>
+<pre>/path/to/file.img  /path/to/folder  reiserfs  loop,defaults  0  0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Be sure to include the `loop' option -- otherwise, it will not mount!!!</div>
+<h2><span class="mw-headline" id="Copying_the_sparse_file">Copying the sparse file</span></h2>
+<h3><span class="mw-headline" id="Copying_with_.60cp.27">Copying with `cp'</span></h3>
+<p>Normally, `cp' is good at detecting whether a file is sparse, so it suffices to run:
+</p>
+<pre>cp file.img new_file.img
+</pre>
+<p>...and new_file.img will be sparse. However, cp does have a --sparse=WHEN option. This is especially useful if a sparse-file has somehow become non-sparse (i.e. the empty blocks have been written out to disk in full). Disk space can be recovered by doing:
+</p>
+<pre>cp --sparse=always new_file.img recovered_file.img
+</pre>
+<h3><span class="mw-headline" id="Archiving_with_.60tar.27">Archiving with `tar'</span></h3>
+<p>One day, you may decide to back up your well-loved sparse file, and choose the `tar' utility for that very purpose; however, you soon realize you have a problem:
+</p>
+<pre># du -h file.img
+33M     file.img
+
+# tar -cf file.tar file.img
+
+# du -h file.tar
+513M    file.tar
+</pre>
+<p>Apparently, even though the current size of the sparse file is only 33 MB, compressing it with tar created an archive of the <b>ENTIRE SIZE OF THE FILE!</b>  Luckily for you, though, tar has a `--sparse' (`-S') flag, that when used in conjunction with the `--create' (`-c') operation, tests all files for sparseness while archiving. If tar finds a file to be sparse, it uses a sparse representation of the file in the archive.  This is useful when archiving files, such as dbm files, likely to contain many nulls, and dramatically decreases the amount of space needed to store such an archive.
+</p>
+<pre># tar -Scf file.tar file.img
+
+# du -h file.tar
+12K     file.tar
+</pre>
+<p>Problem solved.
+</p>
+<h2><span class="mw-headline" id="Resizing_the_sparse_file">Resizing the sparse file</span></h2>
+<p>Before we resize the file, let's populate it with a couple small files for testing purposes:
+</p>
+<pre># for f in {1..5}; do touch folder/file${f}; done
+
+# ls folder/
+file1  file2  file3  file4  file5
+</pre>
+<p>Now, let's add some content to one of the files:
+</p>
+<pre># echo "This is a test to see if it works..." &gt;&gt; folder/file1
+
+# cat folder/file1
+This is a test to see if it works...
+</pre>
+<h3><span class="mw-headline" id="Growing_the_file">Growing the file</span></h3>
+<p>Should you ever need to grow the file, you may do the following:
+</p>
+<pre># umount folder
+
+# dd if=/dev/zero of=file.img bs=1 count=0 seek=1G
+0+0 records in
+0+0 records out
+0 bytes (0 B) copied, 2.2978e-05 s, 0.0 kB/s
+</pre>
+<p>This will increase its size to 1 Gb, and leave its information intact.  Next, we need to increase the size of its filesystem:
+</p>
+<pre># resize_reiserfs file.img
+resize_reiserfs 3.6.21 (2009 www.namesys.com)
+
+ReiserFS report:
+blocksize             4096
+block count           262144 (131072)
+free blocks           253925 (122857)
+bitmap block count    8 (4)
+
+Syncing..done
+
+
+resize_reiserfs: Resizing finished successfully.
+</pre>
+<p>...and, remount it:
+</p>
+<pre># mount -o loop file.img folder
+</pre>
+<p>Checking its size gives us:
+</p>
+<pre># du -h --apparent-size file.img
+1.0G    file.img
+
+# du -h file.img
+33M     file.img
+</pre>
+<p>...and to check for consistency:
+</p>
+<pre># df -h folder
+Filesystem            Size  Used Avail Use% Mounted on
+/tmp/file.img         1.0G   33M  992M   4% /tmp/folder
+</pre>
+<pre># ls folder
+file1  file2  file3  file4  file5
+
+# cat folder/file1
+This is a test to see if it works...
+</pre>
+<p>Seeing its contents are still intact, we are good to go!  It's amazing!
+</p>
+<h2><span class="mw-headline" id="Sources">Sources</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/Sparse_file" class="extiw" title="wikipedia:Sparse file">wikipedia:Sparse_file</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://www.apl.jhu.edu/Misc/Unix-info/tar/tar_85.html">http://www.apl.jhu.edu/Misc/Unix-info/tar/tar_85.html</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Pacman Hooks - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Pacman_Hooks skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Pacman Hooks</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Hooks.21"><span class="tocnumber">1</span> <span class="toctext">Hooks!</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#systemd-tmpfiles"><span class="tocnumber">1.1</span> <span class="toctext">systemd-tmpfiles</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#systemd-sysusers"><span class="tocnumber">1.2</span> <span class="toctext">systemd-sysusers</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#udevadm_hwdb.2C_systemd-hwdb"><span class="tocnumber">1.3</span> <span class="toctext">udevadm hwdb, systemd-hwdb</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#fc-cache"><span class="tocnumber">1.4</span> <span class="toctext">fc-cache</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#TBD"><span class="tocnumber">2</span> <span class="toctext">TBD</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Implemented"><span class="tocnumber">3</span> <span class="toctext">Implemented</span></a></li>
+</ul>
+</div>
+
+<h1><span class="mw-headline" id="Hooks.21">Hooks!</span></h1>
+<h2><span class="mw-headline" id="systemd-tmpfiles">systemd-tmpfiles</span></h2>
+<p>Used by 52 packages
+</p>
+<p>Proposed hook (systemd)
+</p>
+<pre>[Trigger]
+Type = File
+Operation = Install
+Operation = Upgrade
+Target = usr/lib/tmpfiles.d/*.conf
+
+[Action]
+Description = Creating temporary files...
+When = PostTransaction
+Exec = /bin/sh -c 'while read -r f; do /usr/bin/systemd-tmpfiles --create "/$f"; done'
+NeedsTargets
+</pre>
+<h2><span class="mw-headline" id="systemd-sysusers">systemd-sysusers</span></h2>
+<p>Used by 29 packages
+</p>
+<p>Proposed hook (systemd)
+</p>
+<pre>[Trigger]
+Type = File
+Operation = Install
+Operation = Upgrade
+Target = usr/lib/sysusers.d/*.conf
+
+[Action]
+Description = Updating system user accounts...
+When = PostTransaction
+Exec = /bin/sh -c 'while read -r f; do /usr/bin/systemd-sysusers "/$f" ; done'
+NeedsTargets
+</pre>
+<h2><span class="mw-headline" id="udevadm_hwdb.2C_systemd-hwdb">udevadm hwdb, systemd-hwdb</span></h2>
+<p>Used by 5 packages
+</p>
+<p>This SHOULD be run with --usr, resulting in /usr/lib/udev/hwdb.bin instead of /etc/udev/hwdb.bin.
+</p>
+<p>Although the latter database overrides the former, this would not be a problem since systemd-hwdb-update.service will update /etc/udev/hwdb.bin at boot if /etc/udev/hwdb.bin exists OR /usr/lib/udev/hwdb.bin does not exist OR /etc/udev/hwdb.d is not empty.
+</p>
+<p>However, this service is also gated on ConditionNeedsUpdate=/etc, which passes if /usr has a newer mtime than /etc/.updated. Unfortunately, ConditionNeedsUpdate (used in quite a few services!) is broken for us since pacman will not update the mtime of directories that already exist, such as /usr.
+</p>
+<p>Proposed hook (systemd)
+</p>
+<pre>[Trigger]
+Type = File
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = usr/lib/udev/hwdb.d/*.hwdb
+
+[Action]
+Description = Updating udev hardware database...
+When = PostTransaction
+Exec = /usr/bin/systemd-hwdb update
+</pre>
+<h2><span class="mw-headline" id="fc-cache">fc-cache</span></h2>
+<p>Used by 53 packages
+</p>
+<p>Proposed hook (fontconfig)
+</p>
+<pre>[Trigger]
+Type = File
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = usr/share/fonts/*
+
+[Action]
+Description = Updating fontconfig cache...
+When = PostTransaction
+Exec = /usr/bin/fc-cache -s
+</pre>
+<h1><span class="mw-headline" id="TBD">TBD</span></h1>
+<ul>
+<li> mkfontscale, mkfontdir (58 packages)</li>
+<li> gdk-pixbuf-query-loaders (6 packages)</li>
+<li> gtk-query-immodules-2.0 (7 packages)  </li>
+<li> gtk-query-immodules-3.0 (7 packages)</li>
+</ul>
+<h1><span class="mw-headline" id="Implemented">Implemented</span></h1>
+<ul>
+<li> update-desktop-database</li>
+<li> update-mime-database</li>
+<li> update-appstream-index</li>
+<li> install-info</li>
+<li> glib-compile-schemas</li>
+<li> gtk-update-icon-cache, xdg-icon-resource</li>
+<li> gconfpkg</li>
+<li> gio-querymodules</li>
+<li> gdk-pixbuf-query-loaders</li>
+<li> gtk-query-immodules-2.0</li>
+<li> gtk-query-immodules-3.0</li>
+<li> mktexlsr</li>
+<li> update-ca-trust</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki.html" title="Category:DeveloperWiki">DeveloperWiki</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

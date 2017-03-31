@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PRIME - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PRIME skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PRIME</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>PRIME is a technology used to manage hybrid graphics found on recent laptops (<a href="../en/NVIDIA_Optimus.html" title="NVIDIA Optimus">Optimus for NVIDIA</a>, AMD Dynamic Switchable Graphics for Radeon).
+<b>PRIME GPU offloading</b> and <b>Reverse PRIME</b> is an attempt to support muxless hybrid graphics in the Linux kernel.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Open_Source_Drivers"><span class="tocnumber">1.1</span> <span class="toctext">Open Source Drivers</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Closed_Source_Drivers"><span class="tocnumber">1.2</span> <span class="toctext">Closed Source Drivers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#PRIME_GPU_offloading"><span class="tocnumber">2</span> <span class="toctext">PRIME GPU offloading</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Reverse_PRIME"><span class="tocnumber">3</span> <span class="toctext">Reverse PRIME</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Discrete_Card_as_Primary_GPU"><span class="tocnumber">3.1</span> <span class="toctext">Discrete Card as Primary GPU</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#XRandR_specifies_only_1_output_provider"><span class="tocnumber">4.1</span> <span class="toctext">XRandR specifies only 1 output provider</span></a></li>
+<li class="toclevel-2 tocsection-9">
+<a href="#When_an_application_is_rendered_with_the_discrete_card.2C_it_only_renders_a_black_screen"><span class="tocnumber">4.2</span> <span class="toctext">When an application is rendered with the discrete card, it only renders a black screen</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Black_screen_with_GL-based_compositors"><span class="tocnumber">4.2.1</span> <span class="toctext">Black screen with GL-based compositors</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Kernel_crash.2Foops_when_using_PRIME_and_switching_windows.2Fworkspaces"><span class="tocnumber">4.3</span> <span class="toctext">Kernel crash/oops when using PRIME and switching windows/workspaces</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Glitches.2FGhosting_synchronization_problem_on_second_monitor_when_using_reverse_PRIME"><span class="tocnumber">4.4</span> <span class="toctext">Glitches/Ghosting synchronization problem on second monitor when using reverse PRIME</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Open_Source_Drivers">Open Source Drivers</span></h3>
+<p>Remove any closed-source graphic drivers and replace them with the open source equivalent:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-nouveau">xf86-video-nouveau</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-ati">xf86-video-ati</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-amdgpu">xf86-video-amdgpu</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span>
+</li>
+</ul>
+<p>Reboot and check the list of attached graphic drivers:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xrandr --listproviders</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Providers: number : 2
+Provider 0: id: 0x7d cap: 0xb, Source Output, Sink Output, Sink Offload crtcs: 3 outputs: 4 associated providers: 1 name:Intel
+Provider 1: id: 0x56 cap: 0xf, Source Output, Sink Output, Source Offload, Sink Offload crtcs: 6 outputs: 1 associated providers: 1 name:radeon
+</pre>
+<p>We can see that there are two graphic cards: Intel, the integrated card (id 0x7d), and Radeon, the discrete card (id 0x56), which should be used for GPU-intensive applications. 
+</p>
+<p>By default the Intel card is always used:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ glxinfo | grep "OpenGL renderer"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+OpenGL renderer string: Mesa DRI Intel(R) Ivybridge Mobile
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Sometimes, the displayed provider is <code>"HAINAN @ pci:0000:03:00.0"</code>, not <code>radeon</code>. In this case you should use <code>"HAINAN @ pci:0000:03:00.0"</code> as the provider in the next command.</div>
+<h3><span class="mw-headline" id="Closed_Source_Drivers">Closed Source Drivers</span></h3>
+<p><a rel="nofollow" class="external text" href="http://us.download.nvidia.com/XFree86/Linux-x86/364.15/README/randr14.html">Nvidia's documentation for their 364.15 Linux driver</a> gives similar information to the <a href="#Discrete_Card_as_Primary_GPU">#Discrete Card as Primary GPU</a> section of this article.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Add article about support and setup of non-Nvidia closed-source graphic drivers for PRIME (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PRIME">Talk:PRIME#</a>)</div>
+</div>
+<h2><span class="mw-headline" id="PRIME_GPU_offloading">PRIME GPU offloading</span></h2>
+<p>GPU-intensive applications should be rendered on the more powerful discrete card. The command <code>xrandr --setprovideroffloadsink provider sink</code> can be used to make a render offload provider send its output to the sink provider (the provider which has a display connected). The provider and sink identifiers can be numeric (0x7d, 0x56) or a case-sensitive name (Intel, radeon).
+</p>
+<p>Example:
+</p>
+<pre>$ xrandr --setprovideroffloadsink radeon Intel
+</pre>
+<p>You may also use provider index instead of provider name:
+</p>
+<pre>$ xrandr --setprovideroffloadsink 1 0
+</pre>
+<p>Now, you can use your discrete card for the applications who need it the most (for example games, 3D modellers...) by prepending the <code>DRI_PRIME=1</code> environment variable:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ DRI_PRIME=1 glxinfo | grep "OpenGL renderer"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+OpenGL renderer string: Gallium 0.4 on AMD TURKS
+</pre>
+<p>Other applications will still use the less power-hungry integrated card. These settings are lost once the X server restarts, you may want to make a script and auto-run it at the startup of your desktop environment (alternatively, put it in <code>/etc/X11/xinit/xinitrc.d/</code>). This may reduce your battery life and increase heat though.
+</p>
+<h2><span class="mw-headline" id="Reverse_PRIME">Reverse PRIME</span></h2>
+<p>If the second GPU has outputs that are not accessible by the primary GPU, you can use <b>Reverse PRIME</b> to make use of them. This will involve using the primary GPU to render the images, and then pass them off to the secondary GPU.
+</p>
+<p>In the scenario above, you would do
+</p>
+<pre>$ xrandr --setprovideroutputsource radeon Intel
+</pre>
+<p>When this is done, the discrete card's outputs should be available in xrandr, and you could do something like:
+</p>
+<pre>$ xrandr --output HDMI-1 --auto --above LVDS1
+</pre>
+<h3><span class="mw-headline" id="Discrete_Card_as_Primary_GPU">Discrete Card as Primary GPU</span></h3>
+<p>Imagine following scenario: The LVDS1 (internal laptop screen) and VGA outputs are both only accessible through the integrated Intel GPU. The HDMI and Display Port outputs are attached to the discrete NVIDIA card. It is possible to use all four outputs by making use of the <b>Reverse PRIME</b> technology as described above. However the performance might be slow, because all the rendering for all outputs is done by the integrated Intel card. To improve this situation it is possible to do the rendering by the discrete NVIDIA card, which then copies the framebuffers for the LVDS1 and VGA outputs to the Intel card.
+</p>
+<p>Create the following Xorg configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/10-gpu.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Discrete Card as Primary GPU
+
+Section "ServerLayout"
+    Identifier "layout"
+    Screen 0 "nouveau"
+    Inactive "intel"
+EndSection
+
+Section "Device"
+    Identifier  "nouveau"
+    Driver      "nouveau"
+    BusID       "PCI:x:x:x" # Sample: "PCI:1:0:0"
+EndSection
+
+Section "Screen"
+    Identifier "nouveau"
+    Device "nouveau"
+EndSection
+
+Section "Device"
+    Identifier  "intel"
+    Driver      "intel"
+    BusID       "PCI:x:x:x"  # Sample: "PCI:0:2:0"
+EndSection
+
+Section "Screen"
+    Identifier "intel"
+    Device "intel"
+EndSection
+</pre>
+<p>Restart Xorg. The discrete NVIDIA card should be used now. The HDMI and Display Port outputs are the main outputs. The LVDS1 and VGA outputs are off. To enable them run:
+</p>
+<pre>$ xrandr --setprovideroutputsource Intel nouveau
+</pre>
+<p>The discrete card's outputs should be available now in xrandr.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> No sources to motivate the workarounds in this section (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PRIME">Talk:PRIME#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="XRandR_specifies_only_1_output_provider">XRandR specifies only 1 output provider</span></h3>
+<p>Delete/move /etc/X11/xorg.conf file and any other files relating to GPUs in /etc/X11/xorg.conf.d/. Restart the X server after this change.
+</p>
+<p>If the video driver is blacklisted in <code>/etc/modprobe.d/</code>, load the module and restart X. This may be the case if you use the bbswitch module for Nvidia GPUs.
+</p>
+<p>Since kernel version 3.19.0 the nouveau kernel module cannot be loaded under certain circumstances. Dmesg will throw an error with <code>invalid rom content</code>. The bug as has been patched, but hasn't yet reached mainline. <a rel="nofollow" class="external text" href="https://bugs.freedesktop.org/show_bug.cgi?id=89047">Freedesktop Bug Thread</a> In the meantime, applying the patches to a custom kernel before compiling seems to be the only fix.
+</p>
+<h3><span class="mw-headline" id="When_an_application_is_rendered_with_the_discrete_card.2C_it_only_renders_a_black_screen">When an application is rendered with the discrete card, it only renders a black screen</span></h3>
+<p>In some cases PRIME needs a composition manager to properly work. If your window manager doesn’t do compositing, you can use <a href="../en/Xcompmgr.html" title="Xcompmgr">xcompmgr</a> on top of it.
+</p>
+<p>If you use Xfce, you can go to Menu-&gt;Settings-&gt;Window Manager Tweaks-&gt;Compositor and enable compositing, then try again your application. 
+</p>
+<h4><span class="mw-headline" id="Black_screen_with_GL-based_compositors">Black screen with GL-based compositors</span></h4>
+<p>Currently there are issues with GL-based compositors and PRIME offloading. While Xrender-based compositors (xcompmgr, xfwm, compton's default backend, cairo-compmgr, and a few others) will work without issue, GL-based compositors (Mutter/muffin, Compiz, compton with GLX backend, Kwin's OpenGL backend, etc) will initially show a black screen, as if there was no compositor running. While you can force an image to appear by resizing the offloaded window, this is not a practical solution as it will not work for things such as full screen Wine applications. This means that desktop environments such as GNOME3 and Cinnamon have issues with using PRIME offloading.
+</p>
+<p>Additionally if you are using an Intel IGP you might be able to fix the GL Compositing issue by running the IGP as UXA instead of SNA, however this may cause issues with the offloading process (ie, xrandr --listproviders may not list the discrete GPU).
+</p>
+<p>For details see <a rel="nofollow" class="external text" href="https://bugs.freedesktop.org/show_bug.cgi?id=69101">FDO Bug #69101.</a>
+</p>
+<p>One other way to approach this issue is by enabling DRI3 in the Intel driver. See the below issue for a sample config.
+</p>
+<h3><span class="mw-headline" id="Kernel_crash.2Foops_when_using_PRIME_and_switching_windows.2Fworkspaces">Kernel crash/oops when using PRIME and switching windows/workspaces</span></h3>
+<p>Note: this has been tested on a system with Intel+AMD
+</p>
+<p>Using DRI3 WITH a config file for the integrated card seems to fix this issue. 
+</p>
+<p>To enable DRI3, you need to create a config for the integrated card adding the DRI3 option:
+</p>
+<pre>Section "Device"
+    Identifier "Intel Graphics"
+    Driver "intel"
+    Option "DRI" "3"
+EndSection
+</pre>
+<p>After this you can use DRI_PRIME=1 WITHOUT having to run <code>xrandr --setprovideroffloadsink radeon Intel</code> as DRI3 will take care of the offloading.
+</p>
+<h3><span class="mw-headline" id="Glitches.2FGhosting_synchronization_problem_on_second_monitor_when_using_reverse_PRIME">Glitches/Ghosting synchronization problem on second monitor when using reverse PRIME</span></h3>
+<p>This problem can affect users when not using a <a href="../en/Xorg.html#Composite" title="Composite manager" class="mw-redirect">composite manager</a>, such as with <a href="../en/I3.html" title="I3">i3</a>. <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=75579">[1]</a>
+</p>
+<p>If you experience this problem under Gnome, then a possible fix is to set some environment variables in <code>/etc/environment</code> <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=177925">[2]</a>
+</p>
+<pre>CLUTTER_PAINT=disable-clipped-redraws:disable-culling
+CLUTTER_VBLANK=True
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://wiki.freedesktop.org/nouveau/Optimus/">Nouveau Optimus</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Graphics.html" title="Category:Graphics">Graphics</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Munin - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Munin skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Munin</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>From the <a rel="nofollow" class="external text" href="http://munin-monitoring.org/">project web page</a>:
+</p>
+<dl><dd>
+<i>Munin</i> the monitoring tool surveys all your computers and remembers what it saw. It presents all the information in graphs through a web interface. Its emphasis is on plug and play capabilities. After completing a installation a high number of monitoring plugins will be playing with no more effort.</dd></dl>
+<dl><dd>Using Munin you can easily monitor the performance of your computers, networks, SANs, applications, weather measurements and whatever comes to mind. It makes it easy to determine "what's different today" when a performance problem crops up. It makes it easy to see how you're doing capacity-wise on any resources.</dd></dl>
+<dl><dd>Munin uses the excellent <a rel="nofollow" class="external text" href="http://oss.oetiker.ch/rrdtool/">RRDTool</a> (written by Tobi Oetiker) and the framework is written in Perl, while plugins may be written in any language. Munin has a master/node architecture in which the master connects to all the nodes at regular intervals and asks them for data. It then stores the data in RRD files, and (if needed) updates the graphs. One of the main goals has been ease of creating new plugins (graphs). <a rel="nofollow" class="external autonumber" href="http://munin-monitoring.org/">[1]</a>
+</dd></dl>
+<p>Simply put, Munin allows you to make graphs about system statistics. You can check out University of Oslo's <a rel="nofollow" class="external text" href="http://munin.ping.uio.no/">Munin install</a> to see some examples of what it can do.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#munin_and_munin-node"><span class="tocnumber">1.1</span> <span class="toctext">munin and munin-node</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#Munin_Master"><span class="tocnumber">2.1</span> <span class="toctext">Munin Master</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Directories"><span class="tocnumber">2.1.1</span> <span class="toctext">Directories</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Cron"><span class="tocnumber">2.1.2</span> <span class="toctext">Cron</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#systemd_timer"><span class="tocnumber">2.1.3</span> <span class="toctext">systemd timer</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Permissions"><span class="tocnumber">2.1.4</span> <span class="toctext">Permissions</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Testing"><span class="tocnumber">2.1.5</span> <span class="toctext">Testing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Munin_Node"><span class="tocnumber">2.2</span> <span class="toctext">Munin Node</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Daemon"><span class="tocnumber">2.2.1</span> <span class="toctext">Daemon</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#IPv6"><span class="tocnumber">2.2.2</span> <span class="toctext">IPv6</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Customization"><span class="tocnumber">2.2.3</span> <span class="toctext">Customization</span></a></li>
+<li class="toclevel-3 tocsection-14">
+<a href="#Plugins"><span class="tocnumber">2.2.4</span> <span class="toctext">Plugins</span></a>
+<ul>
+<li class="toclevel-4 tocsection-15"><a href="#Adding"><span class="tocnumber">2.2.4.1</span> <span class="toctext">Adding</span></a></li>
+<li class="toclevel-4 tocsection-16"><a href="#Additional_Plugins"><span class="tocnumber">2.2.4.2</span> <span class="toctext">Additional Plugins</span></a></li>
+<li class="toclevel-4 tocsection-17"><a href="#Removing"><span class="tocnumber">2.2.4.3</span> <span class="toctext">Removing</span></a></li>
+<li class="toclevel-4 tocsection-18"><a href="#Debugging"><span class="tocnumber">2.2.4.4</span> <span class="toctext">Debugging</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-19"><a href="#Permissions_2"><span class="tocnumber">2.2.5</span> <span class="toctext">Permissions</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Web_Server_.28Optional.29"><span class="tocnumber">3</span> <span class="toctext">Web Server (Optional)</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21">
+<a href="#Apache"><span class="tocnumber">3.1</span> <span class="toctext">Apache</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#Apache_VirtualHost_examples"><span class="tocnumber">3.1.1</span> <span class="toctext">Apache VirtualHost examples</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Basic_static_html"><span class="tocnumber">3.1.2</span> <span class="toctext">Basic static html</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Static_html_with_DynaZoom_feature"><span class="tocnumber">3.1.3</span> <span class="toctext">Static html with DynaZoom feature</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#Full_dynamic"><span class="tocnumber">3.1.4</span> <span class="toctext">Full dynamic</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-26">
+<a href="#Nginx"><span class="tocnumber">3.2</span> <span class="toctext">Nginx</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#Munin_2.0.x"><span class="tocnumber">3.2.1</span> <span class="toctext">Munin 2.0.x</span></a></li>
+<li class="toclevel-3 tocsection-28"><a href="#Munin_2.1.x"><span class="tocnumber">3.2.2</span> <span class="toctext">Munin 2.1.x</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-29">
+<a href="#Tips_and_Tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and Tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-30"><a href="#MySQL"><span class="tocnumber">4.1</span> <span class="toctext">MySQL</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#S.M.A.R.T."><span class="tocnumber">4.2</span> <span class="toctext">S.M.A.R.T.</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#lm_sensors"><span class="tocnumber">4.3</span> <span class="toctext">lm_sensors</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><i>Munin</i> relies on a client-server model. The client is <i>munin-node</i>, and the server is <i>munin</i> (referred as to "munin-master" in the documentation).
+</p>
+<p>You will only need to install <i>munin</i> on a single machine, but <i>munin-node</i> will need to be installed on all machines you wish to monitor. The <i>munin-node</i> can also be installed together with <i>munin</i> on the master so the the master machine can monitor itself. Further documentation may be found on the <a rel="nofollow" class="external text" href="http://munin-monitoring.org/wiki/Documentation">Munin documentation wiki</a>.
+</p>
+<h3><span class="mw-headline" id="munin_and_munin-node">munin and munin-node</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=munin">munin</a></span> (munin master) and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=munin-node">munin-node</a></span> packages.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Munin_Master">Munin Master</span></h3>
+<h4><span class="mw-headline" id="Directories">Directories</span></h4>
+<p>Create a directory where the <i>munin-master</i> will write the generated HTML and graph images. The munin user must have write permission to this directory.
+</p>
+<p>The following example uses <code>/srv/http/munin</code>, so the generated output can be viewed at <a rel="nofollow" class="external free" href="http://localhost/munin/">http://localhost/munin/</a>, provided that a web server is installed and running:
+</p>
+<pre># mkdir /srv/http/munin
+# chown munin:munin /srv/http/munin
+</pre>
+<p>Uncomment the <code>htmldir</code> entry in <code>/etc/munin/munin.conf</code> and change it to the directory created in the previous step:
+</p>
+<pre>htmldir /srv/http/munin
+</pre>
+<h4><span class="mw-headline" id="Cron">Cron</span></h4>
+<p>Run the following to have Munin collect data and update the generated HTML and graph images every 5 minutes:
+</p>
+<pre># crontab /etc/munin/munin-cron-entry -u munin
+</pre>
+<p>Configure the email server to send mails to the <i>munin</i> user. If using postfix, add the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/postfix/aliases</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+munin:    root
+</pre>
+<p>And run:
+</p>
+<pre># newaliases
+</pre>
+<h4><span class="mw-headline" id="systemd_timer">systemd timer</span></h4>
+<p>Instead of a cron job a systemd timer can be used.
+</p>
+<p>This needs a service unit configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/munin-cron.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Survey monitored computers
+After=network.target
+
+[Service]
+User=munin
+ExecStart=/usr/bin/munin-cron</pre>
+<p>And a timer unit configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/munin-cron.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Survey monitored computers every five minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Now, reload systemd configuration, enable and start <code>munin-cron.timer</code>
+</p>
+<pre># systemctl daemon-reload
+# systemctl enable --now munin-cron.timer
+
+</pre>
+<p>and verify that everything is working:
+</p>
+<pre># journalctl --unit munin-cron.service
+# less /var/log/munin/munin-update.log
+</pre>
+<p><br>
+</p>
+<h4><span class="mw-headline" id="Permissions">Permissions</span></h4>
+<p>When <code>graph_strategy cgi</code> is enabled in <code>/etc/munin/munin.conf</code> ensure the directory <code>/var/lib/munin/cgi-tmp</code> is owned by user and group <code>munin</code> so that the <code>/usr/share/munin/cgi/munin-cgi-graph</code> script is able to write the png files to this directory.
+</p>
+<pre># chown munin: /var/lib/munin/cgi-tmp
+</pre>
+<h4><span class="mw-headline" id="Testing">Testing</span></h4>
+<p>Once <code>munin-cron</code> is configured to run Munin will be ready to start generating graphs. Ensure the <code>munin-node.service</code> is running on each of the nodes. It may be useful to jump ahead to the Munin Node section and return here once the node are up and running.
+</p>
+<p>Change to the <code>munin</code> user with the following <code>su</code> command,  the <code>-s</code>/<code>--shell</code> option is for specifiying the shell (in this case bash).
+This needs to be done from root shell, since the <code>munin</code> user doesn't have a password:
+</p>
+<pre># su -s /bin/bash munin
+</pre>
+<p>By runnning the <code>munin-cron</code> command manually it will trigger the generation of HTML and graph images immediately without having to wait for the next cron run:
+</p>
+<pre>munin&gt; munin-cron
+</pre>
+<p>If the munin logging is configured, the logs are usually found in <code>/var/log/munin/</code>. Watching the <code>munin-update.log</code> log in a seperate terminal after running the <code>munin-cron</code> command can be helpful in diagnosing issues.
+</p>
+<pre># tail -f /var/log/munin/munin-update.log
+</pre>
+<p>And finally test the interface by pointing your browser to the output directory or <a rel="nofollow" class="external free" href="http://localhost/munin/">http://localhost/munin/</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It might take a while for the graphs to have data, so be patient. Wait for about 30 minutes to an hour.</div>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Munin_Node">Munin Node</span></h3>
+<h4><span class="mw-headline" id="Daemon">Daemon</span></h4>
+<p>On the nodes, start and enable <code>munin-node</code>.
+</p>
+<pre># systemctl enable --now munin-node
+</pre>
+<h4><span class="mw-headline" id="IPv6">IPv6</span></h4>
+<p>For IPv6 support on <i>munin-node</i>, using:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/munin/munin-node.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+host :::1
+</pre>
+<p>Install:
+</p>
+<ul>
+<li><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-socket6">perl-socket6</a></span></li>
+<li><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-io-socket-inet6">perl-io-socket-inet6</a></span></li>
+</ul>
+<p><br>
+</p>
+<h4><span class="mw-headline" id="Customization">Customization</span></h4>
+<p>Before running munin, you might want to setup the hostname of your system. In <code>/etc/munin/munin.conf</code>, the default hostname is <code>myhostname</code>. This can be altered to any preferred hostname. The hostname will be used to group and name the <code>.rrd</code> files in <code>/var/lib/munin</code> and further, used to group the html files and graphs in your selected <i>munin-master</i> directory.
+</p>
+<h4><span class="mw-headline" id="Plugins">Plugins</span></h4>
+<p>Run <code>munin-node-configure</code> with the <code>--suggest</code> option to have Munin suggest plugins it thinks will work on your installation:
+</p>
+<pre># munin-node-configure --suggest
+</pre>
+<p>If there is a suggestion for a plugin you want to use, follow that suggestion and run the command again. When you are satisfied with the plugins suggested by <code>munin-node-configure</code>, run it with the <code>--shell</code> option to have the plugins configured:
+</p>
+<pre># munin-node-configure --shell | sh
+</pre>
+<p><br>
+</p>
+<h5><span class="mw-headline" id="Adding">Adding</span></h5>
+<p>Basically all plugins are added in the following manner (although there are exceptions, review each plugin!):
+</p>
+<p>Download a plugin, then copy or move it to <code>/usr/lib/munin/plugins</code>:
+</p>
+<pre># cp <i>plugin</i> /usr/lib/munin/plugins/
+</pre>
+<p>Then link the plugin to <code>/etc/munin/plugins</code>:
+</p>
+<pre># ln -s /usr/lib/munin/plugins/<i>plugin</i> /etc/munin/plugins/
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some plugins - known as wildcard plugins - can be used with multiple devices at once by linking them with different names. These plugins end with an underscore and are linked as <code>&lt;plugin&gt;_&lt;device&gt;</code> to be used on <code>&lt;device&gt;</code>. See the <code>if_</code> plugin for an example.</div>
+<p>Now test your plugin. You do not need to use the full path to the plugin, <code>munin-run</code> should be able to figure it out:
+</p>
+<pre># munin-run <i>plugin</i>
+</pre>
+<p>And <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>munin-node.servce</code>. Finally, refresh the web page.
+</p>
+<h5><span class="mw-headline" id="Additional_Plugins">Additional Plugins</span></h5>
+<p>There are many Munin plugins out there just waiting to be installed. The <a rel="nofollow" class="external text" href="http://muninexchange.projects.linpro.no/">MuninExchange</a> is an excellent place to start looking, and if you cannot find a plugin that does what you want it is easy to write your own. Have a look at <a rel="nofollow" class="external text" href="http://munin-monitoring.org/wiki/HowToWritePlugins">HowToWritePlugins</a> at the Munin documentation wiki to learn how.
+</p>
+<h5><span class="mw-headline" id="Removing">Removing</span></h5>
+<p>If you want to remove a plugin, simply delete the linked file in <code>/etc/munin/plugins</code> - there is no need to remove the plugin from <code>/usr/lib/munin/plugins</code>.
+</p>
+<pre># rm /etc/munin/plugins/<i>plugin</i>
+</pre>
+<h5><span class="mw-headline" id="Debugging">Debugging</span></h5>
+<p>If you come across a plugin that is not working as expected (for example giving you no output at all) it might be interesting to run it directly. Fortunately there is a way to do this. Following the instructions until here, you will for example notice, that the plugin <code>apache_accesses</code> gives no output at all, when enabled. In order to run the plugin directly:
+</p>
+<pre># munin-run apache_accesses
+</pre>
+<p>The following error:
+</p>
+<pre>LWP::UserAgent not found at /etc/munin/plugins/apache_accesses line 86.
+</pre>
+<p>indicates that a <a href="/index.php?title=Perl&amp;action=edit&amp;redlink=1" class="new" title="Perl (page does not exist)">perl</a> function could not be found. To resolve the problem, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the missing library, in this case, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-libwww">perl-libwww</a></span>.
+</p>
+<h4><span class="mw-headline" id="Permissions_2">Permissions</span></h4>
+<p>Because many plugins read log files, it is useful to <a href="../en/Users_and_groups.html#Example_adding_a_user" title="Users and groups">add</a> <code>munin</code> user into <code>log</code> group:
+</p>
+<pre># usermod -a -G log munin
+</pre>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Web_Server_.28Optional.29">Web Server (Optional)</span></h2>
+<p>This guide sets up Munin to generate static HTML and graph images and write them in a directory of your choosing. You can view these generated files locally with any web browser. If you want to view the generated files from a remote machine, then you will need to install and configure one of the following web servers:
+</p>
+<ul>
+<li><a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a></li>
+<li><a href="../en/Lighttpd.html" title="Lighttpd">Lighttpd</a></li>
+<li><a href="../en/Nginx.html" title="Nginx">Nginx</a></li>
+</ul>
+<p>Or one of the other servers found in the <a href="../en/Category:Web_server.html" title="Category:Web server">web server</a> category.
+</p>
+<h3><span class="mw-headline" id="Apache">Apache</span></h3>
+<h4><span class="mw-headline" id="Apache_VirtualHost_examples">Apache VirtualHost examples</span></h4>
+<p>Based on information found here:
+</p>
+<ul>
+<li> <a rel="nofollow" class="external free" href="http://guide.munin-monitoring.org/en/stable-2.0/example/webserver/apache-virtualhost.html">http://guide.munin-monitoring.org/en/stable-2.0/example/webserver/apache-virtualhost.html</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://munin-monitoring.org/wiki/MuninConfigurationMasterCGI">http://munin-monitoring.org/wiki/MuninConfigurationMasterCGI</a>
+</li>
+</ul>
+<p>In the next major release of Munin, things will be much simpler. Check it out:
+</p>
+<ul><li> <a rel="nofollow" class="external free" href="http://guide.munin-monitoring.org/en/latest/example/webserver/apache-virtualhost.html">http://guide.munin-monitoring.org/en/latest/example/webserver/apache-virtualhost.html</a>
+</li></ul>
+<h4><span class="mw-headline" id="Basic_static_html">Basic static html</span></h4>
+<pre>&lt;VirtualHost *:80&gt;
+    ServerName localhost
+    ServerAdmin  root@localhost
+
+    DocumentRoot /srv/http/munin
+
+    ErrorLog /var/log/httpd/munin-error.log
+    CustomLog /var/log/httpd/munin-access.log combined
+&lt;/VirtualHost&gt;
+</pre>
+<h4><span class="mw-headline" id="Static_html_with_DynaZoom_feature">Static html with DynaZoom feature</span></h4>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-cgi-fast">perl-cgi-fast</a></span>.
+</p>
+<p>You must enable one of these:
+</p>
+<ul>
+<li> <b>mod_cgid</b> (or <b>mod_cgi</b> if using mpm_prefork_module) by uncommenting the line in httpd.conf.</li>
+<li> Or install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mod_fcgid">mod_fcgid</a></span> and add "<b>LoadModule mod_fcgid modules/mod_fcgid.so</b>" in httpd.conf.</li>
+</ul>
+<pre>&lt;VirtualHost *:80&gt;
+    ServerName localhost
+    ServerAdmin  root@localhost
+
+    DocumentRoot /srv/http/munin
+
+    ErrorLog /var/log/httpd/munin-error.log
+    CustomLog /var/log/httpd/munin-access.log combined
+
+    # Rewrites
+    RewriteEngine On
+
+    # Images
+    RewriteRule ^/munin-cgi(.*) /usr/share/munin/cgi/$1 [L] 
+
+    # Ensure we can run (fast)cgi scripts
+    &lt;Directory "/usr/share/munin/cgi"&gt;
+        Require all granted
+        Options +ExecCGI
+        &lt;IfModule mod_fcgid.c&gt;
+            SetHandler fcgid-script
+        &lt;/IfModule&gt;
+        &lt;IfModule !mod_fcgid.c&gt;
+            SetHandler cgi-script
+        &lt;/IfModule&gt;
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<h4><span class="mw-headline" id="Full_dynamic">Full dynamic</span></h4>
+<p>Use this VirtualHost if you want to set <b>html_strategy</b> and <b>graph_strategy</b> to "<b>cgi</b>". Page loads will take longer because all the HTML and PNG files will be dynamically generated, but the munin-cron run will take less time because it will not execute munin-html and munin-graph. This feature may become necessary for you if your master polls many nodes and the munin-cron risks taking more than 5 minutes.
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-cgi-fast">perl-cgi-fast</a></span>.
+</p>
+<p>You must enable one of these:
+</p>
+<ul>
+<li> <b>mod_cgid</b> (or <b>mod_cgi</b> if using mpm_prefork_module) by uncommenting the line in httpd.conf.</li>
+<li> Or install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mod_fcgid">mod_fcgid</a></span> and add "<b>LoadModule mod_fcgid modules/mod_fcgid.so</b>" in httpd.conf.</li>
+</ul>
+<pre>&lt;VirtualHost *:80&gt;
+    ServerName localhost
+    ServerAdmin  root@localhost
+
+    DocumentRoot /srv/http/munin
+
+    ErrorLog /var/log/httpd/munin-error.log
+    CustomLog /var/log/httpd/munin-access.log combined
+
+
+    # Rewrites
+    RewriteEngine On
+
+    # Static content in /static
+    RewriteRule ^/favicon.ico /etc/munin/static/favicon.ico [L] 
+    RewriteRule ^/static/(.*) /etc/munin/static/$1          [L] 
+
+    # HTML
+    RewriteCond %{REQUEST_URI} .html$ [or]
+    RewriteCond %{REQUEST_URI} =/
+    RewriteRule ^/(.*)          /usr/share/munin/cgi/munin-cgi-html/$1 [L] 
+
+    # Images
+    RewriteRule ^/munin-cgi(.*) /usr/share/munin/cgi/$1 [L] 
+
+    &lt;Directory "/etc/munin/static"&gt;
+        Require all granted
+    &lt;/Directory&gt;
+
+    # Ensure we can run (fast)cgi scripts
+    &lt;Directory "/usr/share/munin/cgi"&gt;
+        Require all granted
+        Options +ExecCGI
+        &lt;IfModule mod_fcgid.c&gt;
+            SetHandler fcgid-script
+        &lt;/IfModule&gt;
+        &lt;IfModule !mod_fcgid.c&gt;
+            SetHandler cgi-script
+        &lt;/IfModule&gt;
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<h3><span class="mw-headline" id="Nginx">Nginx</span></h3>
+<h4><span class="mw-headline" id="Munin_2.0.x">Munin 2.0.x</span></h4>
+<p>This example Nginx setup is based on a Munin 2.0.x <code>munin</code> master installation. It requires FastCGI and uses the <code>html_strategy cgi</code> and <code>graph_strategy cgi</code> in the <code>munin.conf</code> configuration.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nginx">nginx</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-cgi-fast">perl-cgi-fast</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-html-template-expr">perl-html-template-expr</a></span> packages on the Munin-Master.
+</p>
+<p>As we will be using the <i>cgi</i> strategy the systemd socket files need to be enabled. So the <code>/run/munin/fcgi-graph.sock</code> and <code>/run/munin/fcgi-html.sock</code> sockets are created for the Nginx FastCGI configuration to hook into.
+</p>
+<pre># systemctl enable --now munin-graph.socket
+# systemctl enable --now munin-html.socket
+</pre>
+<p>Create the munin vhost configuration file
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/sites-available/munin</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+server {
+    server_name yourhost.example.com;
+    listen 80;
+    access_log /var/log/nginx/munin-access.log;
+    error_log /var/log/nginx/munin-error.log info;
+    location ^~ /munin-cgi/munin-cgi-graph/ {
+        fastcgi_split_path_info ^(/munin-cgi/munin-cgi-graph)(.*);
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_pass unix:/run/munin/fcgi-graph.sock;
+        include fastcgi_params;
+    }
+    location /munin/static/ {
+        alias /etc/munin/static/;
+    }
+    location /munin/ {
+        fastcgi_split_path_info ^(/munin)(.*);
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_pass unix:/run/munin/fcgi-html.sock;
+        include fastcgi_params;
+    }
+}
+</pre>
+<p>Then restart the webserver
+</p>
+<pre># systemctl restart nginx
+</pre>
+<p>If all goes well, point your browser to your host <b><a rel="nofollow" class="external free" href="http://yourhost.example.com/munin/">http://yourhost.example.com/munin/</a></b> and you should see the Munin Overview page.
+</p>
+<h4><span class="mw-headline" id="Munin_2.1.x">Munin 2.1.x</span></h4>
+<p>Although Munin 2.1.x versions are not yet available in the Arch repository. It is worth mentioning that the 2.1.x series will no longer use FastCGI and will be replaced with <a rel="nofollow" class="external text" href="http://guide.munin-monitoring.org/en/latest/reference/munin-httpd.html#munin-httpd">munin-httpd</a>
+This <a rel="nofollow" class="external text" href="http://guide.munin-monitoring.org/en/latest/example/webserver/nginx.html">page</a> already contains an example configuration.
+</p>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Tips_and_Tricks">Tips and Tricks</span></h2>
+<h3><span class="mw-headline" id="MySQL">MySQL</span></h3>
+<p>The MySQL plugin has extra dependencies available in the AUR: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-dbi">perl-dbi</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/perl-cache-cache/">perl-cache-cache</a></span><sup><small>AUR</small></sup>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/perl-ipc-sharelite/">perl-ipc-sharelite</a></span><sup><small>AUR</small></sup>
+</p>
+<p>Additionally it is recommended to access the database through a separate <a href="../en/MySQL.html" title="MySQL">MySQL</a> user. To make another user via the following MySQL commands:
+</p>
+<pre>MariaDB&gt; CREATE USER 'muninuser'@'localhost' IDENTIFIED BY 'muninpassword';
+MariaDB&gt; GRANT SUPER,PROCESS ON *.* TO 'muninuser'@'localhost';
+MariaDB&gt; GRANT SELECT ON mysql.* TO 'muninuser'@'localhost';
+MariaDB&gt; FLUSH PRIVILEGES; </pre>
+<p>To configure Munin to use this new user, create:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/munin/plugin-conf.d/mysql_</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[mysql_*]
+     env.mysqlconnection DBI:mysql:mysql;host=127.0.0.1;port=3306
+     env.mysqluser muninuser
+     env.mysqlpassword muninpassword</pre>
+<h3><span class="mw-headline" id="S.M.A.R.T.">S.M.A.R.T.</span></h3>
+<p>To enable monitoring of S.M.A.R.T. data, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smartmontools">smartmontools</a></span> package, and use:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/munin/plugin-conf.d/munin-node</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[smart_*]
+    user root
+    group disk</pre>
+Then create the appropriate symlink for each disk to be monitored. As an example for <code>sda</code>: <pre># ln -s /usr/lib/munin/plugins/smart_ /etc/munin/plugins/smart_<b>sda</b></pre>
+<h3><span class="mw-headline" id="lm_sensors">lm_sensors</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lm_sensors">lm_sensors</a></span> and configure according to <a href="../en/Lm_sensors.html#Setup" title="Lm sensors">lm_sensors#Setup</a>. Assuming all goes correctly, create some symlinks:
+</p>
+<pre># ln -s /usr/lib/munin/plugins/sensors_ /etc/munin/plugins/sensors_fan 
+# ln -s /usr/lib/munin/plugins/sensors_ /etc/munin/plugins/sensors_temp
+# ln -s /usr/lib/munin/plugins/sensors_ /etc/munin/plugins/sensors_volt</pre>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Status_monitoring_and_notification.html" title="Category:Status monitoring and notification">Status monitoring and notification</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

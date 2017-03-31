@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Multiboot USB drive - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Multiboot_USB_drive skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Multiboot USB drive</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GRUB.html" title="GRUB">GRUB</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Syslinux.html" title="Syslinux">Syslinux</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Archiso.html" title="Archiso">Archiso</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a><b>This article or section is a candidate for moving to <a href="/index.php?title=Multiboot_disk_images&amp;action=edit&amp;redlink=1" class="new" title="Multiboot disk images (page does not exist)">Multiboot disk images</a>.</b><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> See discussion (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Multiboot_USB_drive#Scope_and_title">Talk:Multiboot USB drive#Scope and title</a>)</div>
+</div>
+<p>A multiboot USB flash drive allows booting multiple ISO files from a single device. The ISO files can be copied to the device and booted directly without unpacking them first. There are multiple methods available, but they may not work for all ISO images.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Using_GRUB_and_loopback_devices"><span class="tocnumber">1</span> <span class="toctext">Using GRUB and loopback devices</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Preparation"><span class="tocnumber">1.1</span> <span class="toctext">Preparation</span></a></li>
+<li class="toclevel-2 tocsection-3">
+<a href="#Installing_GRUB"><span class="tocnumber">1.2</span> <span class="toctext">Installing GRUB</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Simple_installation"><span class="tocnumber">1.2.1</span> <span class="toctext">Simple installation</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Hybrid_UEFI_GPT_.2B_BIOS_GPT.2FMBR_boot"><span class="tocnumber">1.2.2</span> <span class="toctext">Hybrid UEFI GPT + BIOS GPT/MBR boot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Configuring_GRUB"><span class="tocnumber">1.3</span> <span class="toctext">Configuring GRUB</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Using_a_template"><span class="tocnumber">1.3.1</span> <span class="toctext">Using a template</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Manual_configuration"><span class="tocnumber">1.3.2</span> <span class="toctext">Manual configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9">
+<a href="#Boot_entries"><span class="tocnumber">1.4</span> <span class="toctext">Boot entries</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Alpine_Linux"><span class="tocnumber">1.4.1</span> <span class="toctext">Alpine Linux</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Alt_Linux"><span class="tocnumber">1.4.2</span> <span class="toctext">Alt Linux</span></a></li>
+<li class="toclevel-3 tocsection-12">
+<a href="#Arch_Linux"><span class="tocnumber">1.4.3</span> <span class="toctext">Arch Linux</span></a>
+<ul>
+<li class="toclevel-4 tocsection-13"><a href="#monthly_release"><span class="tocnumber">1.4.3.1</span> <span class="toctext">monthly release</span></a></li>
+<li class="toclevel-4 tocsection-14"><a href="#archboot"><span class="tocnumber">1.4.3.2</span> <span class="toctext">archboot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-15">
+<a href="#CentOS"><span class="tocnumber">1.4.4</span> <span class="toctext">CentOS</span></a>
+<ul>
+<li class="toclevel-4 tocsection-16"><a href="#Stock_installation_medium"><span class="tocnumber">1.4.4.1</span> <span class="toctext">Stock installation medium</span></a></li>
+<li class="toclevel-4 tocsection-17"><a href="#Desktop_live_medium"><span class="tocnumber">1.4.4.2</span> <span class="toctext">Desktop live medium</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-18"><a href="#Clonezilla_Live"><span class="tocnumber">1.4.5</span> <span class="toctext">Clonezilla Live</span></a></li>
+<li class="toclevel-3 tocsection-19">
+<a href="#Debian"><span class="tocnumber">1.4.6</span> <span class="toctext">Debian</span></a>
+<ul>
+<li class="toclevel-4 tocsection-20"><a href="#Stock_install_medium"><span class="tocnumber">1.4.6.1</span> <span class="toctext">Stock install medium</span></a></li>
+<li class="toclevel-4 tocsection-21"><a href="#Live_install_medium"><span class="tocnumber">1.4.6.2</span> <span class="toctext">Live install medium</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-22"><a href="#Elementary_OS"><span class="tocnumber">1.4.7</span> <span class="toctext">Elementary OS</span></a></li>
+<li class="toclevel-3 tocsection-23">
+<a href="#Fedora"><span class="tocnumber">1.4.8</span> <span class="toctext">Fedora</span></a>
+<ul>
+<li class="toclevel-4 tocsection-24"><a href="#Stock_installation_medium_2"><span class="tocnumber">1.4.8.1</span> <span class="toctext">Stock installation medium</span></a></li>
+<li class="toclevel-4 tocsection-25"><a href="#Workstation_live_medium"><span class="tocnumber">1.4.8.2</span> <span class="toctext">Workstation live medium</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-26">
+<a href="#Gentoo"><span class="tocnumber">1.4.9</span> <span class="toctext">Gentoo</span></a>
+<ul>
+<li class="toclevel-4 tocsection-27"><a href="#Desktop_LiveDVD"><span class="tocnumber">1.4.9.1</span> <span class="toctext">Desktop LiveDVD</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-28"><a href="#GParted_Live"><span class="tocnumber">1.4.10</span> <span class="toctext">GParted Live</span></a></li>
+<li class="toclevel-3 tocsection-29"><a href="#Kali_Linux"><span class="tocnumber">1.4.11</span> <span class="toctext">Kali Linux</span></a></li>
+<li class="toclevel-3 tocsection-30"><a href="#Knoppix"><span class="tocnumber">1.4.12</span> <span class="toctext">Knoppix</span></a></li>
+<li class="toclevel-3 tocsection-31"><a href="#Linux_Mint"><span class="tocnumber">1.4.13</span> <span class="toctext">Linux Mint</span></a></li>
+<li class="toclevel-3 tocsection-32">
+<a href="#openSUSE"><span class="tocnumber">1.4.14</span> <span class="toctext">openSUSE</span></a>
+<ul>
+<li class="toclevel-4 tocsection-33"><a href="#Stock_installation_medium_3"><span class="tocnumber">1.4.14.1</span> <span class="toctext">Stock installation medium</span></a></li>
+<li class="toclevel-4 tocsection-34"><a href="#Desktop_Live_medium_2"><span class="tocnumber">1.4.14.2</span> <span class="toctext">Desktop Live medium</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-35"><a href="#Parabola_GNU.2FLinux-libre"><span class="tocnumber">1.4.15</span> <span class="toctext">Parabola GNU/Linux-libre</span></a></li>
+<li class="toclevel-3 tocsection-36"><a href="#Sabayon"><span class="tocnumber">1.4.16</span> <span class="toctext">Sabayon</span></a></li>
+<li class="toclevel-3 tocsection-37"><a href="#Slackware_Linux"><span class="tocnumber">1.4.17</span> <span class="toctext">Slackware Linux</span></a></li>
+<li class="toclevel-3 tocsection-38"><a href="#SystemRescueCD"><span class="tocnumber">1.4.18</span> <span class="toctext">SystemRescueCD</span></a></li>
+<li class="toclevel-3 tocsection-39"><a href="#Slitaz"><span class="tocnumber">1.4.19</span> <span class="toctext">Slitaz</span></a></li>
+<li class="toclevel-3 tocsection-40"><a href="#Slax"><span class="tocnumber">1.4.20</span> <span class="toctext">Slax</span></a></li>
+<li class="toclevel-3 tocsection-41"><a href="#Tails"><span class="tocnumber">1.4.21</span> <span class="toctext">Tails</span></a></li>
+<li class="toclevel-3 tocsection-42"><a href="#Ubuntu"><span class="tocnumber">1.4.22</span> <span class="toctext">Ubuntu</span></a></li>
+<li class="toclevel-3 tocsection-43"><a href="#Xubuntu_.2832_bit.29"><span class="tocnumber">1.4.23</span> <span class="toctext">Xubuntu (32 bit)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-44"><a href="#Chainloading_Windows"><span class="tocnumber">2</span> <span class="toctext">Chainloading Windows</span></a></li>
+<li class="toclevel-1 tocsection-45">
+<a href="#Using_Syslinux_and_memdisk"><span class="tocnumber">3</span> <span class="toctext">Using Syslinux and memdisk</span></a>
+<ul>
+<li class="toclevel-2 tocsection-46"><a href="#Preparation_2"><span class="tocnumber">3.1</span> <span class="toctext">Preparation</span></a></li>
+<li class="toclevel-2 tocsection-47"><a href="#Install_the_memdisk_module"><span class="tocnumber">3.2</span> <span class="toctext">Install the memdisk module</span></a></li>
+<li class="toclevel-2 tocsection-48"><a href="#Configuration"><span class="tocnumber">3.3</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-49"><a href="#Caveat_for_32-bit_systems"><span class="tocnumber">3.4</span> <span class="toctext">Caveat for 32-bit systems</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-50"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Using_GRUB_and_loopback_devices">Using GRUB and loopback devices</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> multiple <a href="../en/Help:Style.html" title="Help:Style">style</a> issues (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Multiboot_USB_drive">Talk:Multiboot USB drive#</a>)</div>
+</div>
+<p>advantages:
+</p>
+<ul>
+<li> only a single partition required</li>
+<li> all ISO files are found in one directory</li>
+<li> adding and removing ISO files is simple</li>
+</ul>
+<p>disadvantages:
+</p>
+<ul>
+<li> not all ISO images are compatible</li>
+<li> the original boot menu for the ISO file is not shown</li>
+<li> it can be difficult to find a working boot entry</li>
+</ul>
+<h3><span class="mw-headline" id="Preparation">Preparation</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> How much extra space is needed for the bootloader? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Multiboot_USB_drive">Talk:Multiboot USB drive#</a>)</div>
+</div>
+<p>Create at least one partition and a filesystem supported by <a href="../en/GRUB.html" title="GRUB">GRUB</a> on the USB drive. See <a href="../en/Partitioning.html" title="Partitioning">Partitioning</a> and <a href="../en/File_systems.html#Create_a_file_system" title="File systems">File systems#Create a file system</a>. Choose the size based on the total size of the ISO files that you want to store on the drive, and plan for extra space for the bootloader.
+</p>
+<h3><span class="mw-headline" id="Installing_GRUB">Installing GRUB</span></h3>
+<h4><span class="mw-headline" id="Simple_installation">Simple installation</span></h4>
+<p>Mount the filesystem located on the USB drive:
+</p>
+<pre># mount /dev/sdXY /mnt
+</pre>
+<p>Create the directory /boot:
+</p>
+<pre># mkdir /mnt/boot
+</pre>
+<p>Install grub on the USB drive:
+</p>
+<pre># grub-install --target=i386-pc --recheck --boot-directory=/mnt/boot /dev/sdX
+</pre>
+<p>In case you want to boot ISOs in UEFI mode, you have to install grub for the UEFI target:
+</p>
+<pre># grub-install --target x86_64-efi --efi-directory /mnt --boot-directory=/mnt/boot --removable
+</pre>
+<p>For UEFI, the partition has to be the first one in an MBR partition table and formatted with FAT32.
+</p>
+<h4><span class="mw-headline" id="Hybrid_UEFI_GPT_.2B_BIOS_GPT.2FMBR_boot">Hybrid UEFI GPT + BIOS GPT/MBR boot</span></h4>
+<p>This configuration is useful for creating an universal USB key, bootable everywhere.
+First of all you must create a <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> partition table on your device. You need at least 3 partitions:
+</p>
+<ol>
+<li> A BIOS boot partition (type EF02)</li>
+<li> An EFI System partition (type EF00 with a <a href="../en/EFI_System_Partition.html#Format_the_partition" title="EFI System Partition">FAT32 filesystem</a>)</li>
+<li> Your data partition (use a filesystem supported by <a href="../en/GRUB.html" title="GRUB">GRUB</a>)</li>
+</ol>
+<p>The BIOS boot partition must be sized 1 MB, while the EFI System partition can be at least as small as 50 MB. The data partition can take up the rest of the space of your drive.
+</p>
+<p>Next you must create a hybrid MBR partition table, as setting the boot flag on the protective MBR partition might not be enough.
+</p>
+<p>Hybrid MBR partition table creation example using gdisk:
+</p>
+<pre>
+$ gdisk /dev/sdX
+
+Command (? for help): r
+Recovery/transformation command (? for help): h
+Type from one to three GPT partition numbers, separated by spaces, to be added to the hybrid MBR, in sequence: 1 2 3
+Place EFI GPT (0xEE) partition first in MBR (good for GRUB)? (Y/N): N
+
+Creating entry for GPT partition #1 (MBR partition #2)
+Enter an MBR hex code (default EF): 
+Set the bootable flag? (Y/N): N
+
+Creating entry for GPT partition #2 (MBR partition #3)
+Enter an MBR hex code (default EF): 
+Set the bootable flag? (Y/N): N
+
+Creating entry for GPT partition #3 (MBR partition #4)
+Enter an MBR hex code (default 83): 
+Set the bootable flag? (Y/N): Y
+
+Recovery/transformation command (? for help): x
+Expert command (? for help): h
+Expert command (? for help): w
+
+Final checks complete. About to write GPT data. THIS WILL OVERWRITE EXISTING
+PARTITIONS!!
+
+Do you want to proceed? (Y/N): Y
+</pre>
+<p>You can now install GRUB to support both EFI + GPT and BIOS + GPT/MBR. The GRUB configuration (--boot-directory) can be kept in the same place.
+</p>
+<p>First, you need to mount the EFI System partition and the data partition of your USB drive. Then, you can install GRUB for EFI with:
+</p>
+<pre>$ grub-install --target=x86_64-efi --efi-directory=/EFI_MOUNTPOINT --boot-directory=/DATA_MOUNTPOINT/boot --removable --recheck
+</pre>
+<p>And for BIOS with:
+</p>
+<pre>$ grub-install --target=i386-pc --boot-directory=/DATA_MOUNTPOINT/boot --recheck /dev/sdX
+</pre>
+<p>As an additional fallback, you can also install GRUB on your MBR-bootable data partition:
+</p>
+<pre>$ grub-install --target=i386-pc --boot-directory=/DATA_MOUNTPOINT/boot --recheck /dev/sdX3
+</pre>
+<h3><span class="mw-headline" id="Configuring_GRUB">Configuring GRUB</span></h3>
+<h4><span class="mw-headline" id="Using_a_template">Using a template</span></h4>
+<p>There are some git projects which provide some pre-existing GRUB configuration files, and a nice generic grub.cfg which can be used to load the other boot entries on demand, showing them only if the specified ISO files - or folders containing them - are present on the drive.
+</p>
+<p>Multiboot USB: <a rel="nofollow" class="external free" href="https://github.com/aguslr/multibootusb">https://github.com/aguslr/multibootusb</a>
+</p>
+<p>GLIM (GRUB2 Live ISO Multiboot): <a rel="nofollow" class="external free" href="https://github.com/thias/glim">https://github.com/thias/glim</a>
+</p>
+<h4><span class="mw-headline" id="Manual_configuration">Manual configuration</span></h4>
+<p>For the purpose of multiboot USB drive it is easier to edit <code>grub.cfg</code> by hand instead of generating it. Alternatively, make the following changes in <code>/etc/grub.d/40_custom</code> or <code>/mnt/boot/grub/custom.cfg</code> and generate <code>/mnt/boot/grub/grub.cfg</code> using <a href="../en/GRUB.html#Generate_the_main_configuration_file" title="GRUB">grub-mkconfig</a>.
+</p>
+<p>As it is recommend to use a <a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">persistent name</a> instead of <code>/dev/sd<i>xY</i></code> to identify the partition on the USB drive where the image files are located, define a variable for convenience to hold the value. If the ISO images are on the same partition as grub, use the following to read the UUID at boot time:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using UUID)
+probe -u $root --set=rootuuid
+set imgdevpath="/dev/disk/by-uuid/$rootuuid"</pre>
+<p>Or specify the UUID explicitly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using UUID)
+set imgdevpath="/dev/disk/by-uuid/<i>UUID_value</i>"</pre>
+<p>Alternatively, use the device label instead of UUID:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/mnt/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># path to the partition holding ISO images (using labels)
+set imgdevpath="/dev/disk/by-label/<i>label_value</i>"</pre>
+<p>The necessary UUID or label can be found using <code>lsblk -f</code>. Do not use the same label as the Arch ISO for the USB device, otherwise the boot process will fail.
+</p>
+<p>To complete the configuration, a boot entry for each ISO image has to be added below this header, see the next section for examples.
+</p>
+<h3><span class="mw-headline" id="Boot_entries">Boot entries</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a><b>This section is being considered for removal.</b><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Besides the actual Arch entry, this is unrelated content to Arch (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Multiboot_USB_drive#Scope_and_title">Talk:Multiboot_USB_drive#Scope_and_title</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The only boxes used should be code blocks, otherwise the section will be unreadable. Anything else should be plain text. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Multiboot_USB_drive">Talk:Multiboot USB drive#</a>)</div>
+</div>
+<p>It is assumed that the ISO images are stored in the <code>boot/iso/</code> directory on the same filesystem where GRUB is installed. Otherwise it would be necessary to prefix the path to ISO file with device identification when using the <code>loopback</code> command, for example <code>loopback loop <b>(hd1,2)</b>$isofile</code>. As this identification of devices is not <a href="../en/Persistent_block_device_naming.html" title="Persistent block device naming">persistent</a>, it is not used in the examples in this section.
+</p>
+<p>One can use persistent block device naming like this:
+</p>
+<pre># define globally (i.e outside any menuentry)
+insmod search_fs_uuid
+search --no-floppy --set=<b>isopart</b> --fs-uuid d6de9100-1981-11e5-9fb9-74867a652f05         # your iso fs uuid here
+# later use inside each menuentry instead
+loopback loop <b>($isopart)</b>$isofile</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> For a list of kernel parameters, see <a rel="nofollow" class="external free" href="https://www.kernel.org/doc/Documentation/kernel-parameters.txt">https://www.kernel.org/doc/Documentation/kernel-parameters.txt</a> (still incomplete)</div>
+<h4><span class="mw-headline" id="Alpine_Linux">Alpine Linux</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to boot into a 32-bit system, replace <code>x86_64</code> with <code>x86</code>.</div>
+<ul>
+<li> Initramfs framework: ???</li>
+<li> Live framework: ???</li>
+<li> Init system: <a rel="nofollow" class="external text" href="http://wiki.alpinelinux.org/wiki/Alpine_Linux_Init_System">OpenRC</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry '[loopback]alpine x86_64' {
+        set isofile='/boot/iso/alpine-3.3.3-x86_64.iso'
+        loopback loop $isofile
+        set root=loop
+        linux /boot/vmlinuz-grsec modloop=/boot/modloop-grsec modules=loop,squashfs,sd-mod,usb-storage quiet
+        initrd /boot/initramfs-grsec
+}</pre>
+<h4><span class="mw-headline" id="Alt_Linux">Alt Linux</span></h4>
+<ul>
+<li> Initramfs framework: ???</li>
+<li> Live framework: ???</li>
+<li> Init system: ???</li>
+</ul>
+<pre>menuentry "[loopback]altlinux-7.0.5-simply-x86_64-install-dvd5.iso" {
+        set gfxpayload=keep
+	insmod gzio
+	insmod part_msdos
+	insmod ext2
+	insmod xfs
+        set bootpart=uuid:df46d821-e7f9-4e35-bbd2-728bdce8d89a
+        set isodir=/boot/iso
+        set isofile=altlinux-7.0.5-simply-x86_64-install-dvd5.iso
+        loopback loop (${root})${isodir}/${isofile}
+        linux (loop)/syslinux/alt0/vmlinuz automatic=method:disk,${bootpart},directory:${isodir}/${isofile} ramdisk_size=183210 changedisk lang=ru_RU splash noeject xdriver=auto quiet=1 showopts
+        initrd (loop)/syslinux/alt0/full.cz
+}</pre>
+<h4><span class="mw-headline" id="Arch_Linux">Arch Linux</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to boot into a 32-bit system, replace <code>x86_64</code> with <code>i686</code>.</div>
+<h5><span class="mw-headline" id="monthly_release">monthly release</span></h5>
+<ul>
+<li> Initramfs framework: <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/mkinitcpio.git/tree/man/mkinitcpio.8.txt#n212">[1]</a>)</li>
+<li> Live framework: <a href="../en/Archiso.html" title="Archiso">archiso</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/archiso.git/tree/docs/README.bootparams">[2]</a>)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[3]</a>)</li>
+</ul>
+<pre>menuentry '[loopback]archlinux-2014.12.01-dual.iso' {
+	set isofile='/boot/iso/archlinux-2014.12.01-dual.iso'
+	loopback loop $isofile
+	linux (loop)/arch/boot/<b>x86_64</b>/vmlinuz archisodevice=/dev/loop0 img_dev=$imgdevpath img_loop=$isofile earlymodules=loop
+	initrd (loop)/arch/boot/<b>x86_64</b>/archiso.img
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As of archiso v23 (monthly release 2015.10.01), the parameter <code>archisodevice=/dev/loop0</code> is no longer necessary when boot using GRUB and loopback devices.</div>
+<h5><span class="mw-headline" id="archboot">archboot</span></h5>
+<ul>
+<li> Initramfs framework: <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/mkinitcpio.git/tree/man/mkinitcpio.8.txt#n212">[4]</a>)</li>
+<li> Live framework: <a href="../en/Archboot.html" title="Archboot">archboot</a> (cmdline: none? <i>RFD</i>)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[5]</a>)</li>
+</ul>
+<pre>menuentry '[loopback]archlinux-2014.11-1-archboot' {
+	set isofile='/boot/iso/archlinux-2014.11-1-archboot.iso'
+	loopback loop $isofile
+	linux (loop)/boot/vmlinuz_<b>x86_64</b> iso_loop_dev=$imgdevpath iso_loop_path=$isofile
+	initrd (loop)/boot/initramfs_<b>x86_64</b>.img
+}</pre>
+<h4><span class="mw-headline" id="CentOS">CentOS</span></h4>
+<h5><span class="mw-headline" id="Stock_installation_medium">Stock installation medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Dracut">Dracut</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/boot/dracut/dracut.git/tree/dracut.cmdline.7.asc">[6]</a>)</li>
+<li> Installation program: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Anaconda">Anaconda</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://github.com/rhinstaller/anaconda/blob/master/docs/boot-options.rst">[7]</a>)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[8]</a>)</li>
+</ul>
+<pre>menuentry "[loopback]CentOS-7.0-1406-x86_64-<b>DVD</b>" {
+	set isofile='/boot/iso/CentOS-7.0-1406-x86_64-<b>DVD</b>.iso'
+	loopback loop $isofile
+	linux (loop)/isolinux/vmlinuz noeject inst.stage2=hd:<b>/dev/sdb2</b>:/$isofile
+	initrd (loop)/isolinux/initrd.img
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The boot parameter of second stage install image location <code>/dev/sdb2</code> which is used by Anaconda, is similar to <a href="../en/Fstab.html" title="Fstab">fstab</a>'s first field (fs_spec), could be replaced with one of:
+<ul>
+<li> <code>/dev/sd<i><b>xY</b></i></code>
+</li>
+<li> <code>LABEL=MYUSBSTICK</code>
+</li>
+<li> <code>UUID=00000000-0000-0000-0000-0000deadbeef</code>
+</li>
+</ul>
+<p>For example,  <code>linux (loop)/isolinux/vmlinuz noeject inst.stage2=hd:<b>LABEL=MYUSBSTICK</b>:/$isofile</code>.
+</p>
+When using some special disk label (e.g. GPT), it's also possible to use <code>PARTUUID=</code> and/or <code>PARTLABEL=</code>.</div>
+<h5><span class="mw-headline" id="Desktop_live_medium">Desktop live medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Dracut">Dracut</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/boot/dracut/dracut.git/tree/dracut.cmdline.7.asc">[9]</a>)</li>
+<li> Live framework: fedora <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/FedoraLiveCD">livecd-tools</a> (cmdline: none)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[10]</a>)</li>
+</ul>
+<pre>menuentry '[loopback]CentOS-7.0-1406-x86_64-GnomeLive' {
+	set isofile='/boot/iso/CentOS-7.0-1406-x86_64-GnomeLive.iso'
+	loopback loop $isofile
+	linux (loop)/isolinux/vmlinuz0 root=live:CDLABEL=CentOS-7-live-GNOME-x86_64 iso-scan/filename=$isofile rd.live.image
+	initrd (loop)/isolinux/initrd0.img
+}</pre>
+<h4><span class="mw-headline" id="Clonezilla_Live">Clonezilla Live</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Since 2014.01.05<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/archiso.git/commit/?id=5cd02c704046cdb6974f6b10f0cac366eeebec0e">[11]</a>, the Arch Linux monthly release contains clonezilla.</div>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://anonscm.debian.org/cgit/kernel/initramfs-tools.git/">initramfs-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Live framework: <a rel="nofollow" class="external text" href="http://live.debian.net/">Debian Live</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://manpages.debian.org/cgi-bin/man.cgi?query=live-boot&amp;apropos=0&amp;sektion=7&amp;manpath=Debian+unstable+sid&amp;format=html&amp;locale=en">[12]</a>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/sysvinit">sysvinit</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry "[loopback]clonezilla-live-2.2.3-25-amd64" {
+	set isofile="/boot/iso/clonezilla-live-2.2.3-25-amd64.iso"
+	loopback loop $isofile
+	linux (loop)/live/vmlinuz findiso=$isofile boot=live union=overlay username=user config
+	initrd (loop)/live/initrd.img
+}</pre>
+<h4><span class="mw-headline" id="Debian">Debian</span></h4>
+<h5><span class="mw-headline" id="Stock_install_medium">Stock install medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://anonscm.debian.org/cgit/kernel/initramfs-tools.git/">initramfs-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Installation program: <a rel="nofollow" class="external text" href="https://wiki.debian.org/DebianInstaller#Development">debian-installer</a> (cmdline: <i>exists but missing online documentation</i>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/sysvinit">sysvinit</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To install debian from any stock install medium on a non-optical medium (e.g. usb stick, HDD), it's necessary to use a different initramfs instead of the default one on the installation medium which is located at <code>(loop)/install.amd/initrd.gz</code>. If you boot with the default one, the installer will unable to find or mount the proper iso image for installation.
+Please download the initramfs for hard disk installation from <a rel="nofollow" class="external text" href="https://mirrors.kernel.org/debian/dists/stable/main/installer-amd64/current/images/hd-media/initrd.gz">an official mirror site</a>, put it in the same directory with the image file and give it a suitable name (<code>debian-7.8.0-amd64-DVD-1.hdd.initrd.gz</code> in this example).</div>
+<pre>menuentry '[loopback]debian-7.8.0-amd64-DVD-1' {
+	set isofile='/boot/iso/debian-7.8.0-amd64-DVD-1.iso'
+	set initrdfile='/boot/iso/debian-7.8.0-amd64-DVD-1.hdd.initrd.gz'
+	loopback loop $isofile
+	linux (loop)/install.amd/vmlinuz vga=791 iso-scan/ask_second_pass=true iso-scan/filename=$isofile
+	initrd $initrdfile
+}</pre>
+<h5><span class="mw-headline" id="Live_install_medium">Live install medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://anonscm.debian.org/cgit/kernel/initramfs-tools.git/">initramfs-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Live framework: <a rel="nofollow" class="external text" href="http://live.debian.net/">Debian Live</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://manpages.debian.org/cgi-bin/man.cgi?query=live-boot&amp;apropos=0&amp;sektion=7&amp;manpath=Debian+unstable+sid&amp;format=html&amp;locale=en">[13]</a>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/sysvinit">sysvinit</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry '[loopback]debian-live-7.8.0-amd64-xfce-desktop' {
+	set isofile='/boot/iso/debian-live-7.8.0-amd64-xfce-desktop.iso'
+	loopback loop $isofile
+	linux (loop)/live/vmlinuz boot=live config fromiso=<b>/dev/sdb2</b>/$isofile
+	initrd (loop)/live/initrd.img
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It's also OK to use <code>findiso=$isofile</code> instead of the longer <code>fromiso=/dev/disk/by-.../.../$isofile</code>. Anyway, using <code>fromiso=</code> instead of <code>findiso=</code> may speed up the initialization progress because it avoids unnecessary mounting.</div>
+<h4><span class="mw-headline" id="Elementary_OS">Elementary OS</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: upstart (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry '[loopback]elementaryos-freya-amd64.20150411' {
+	set isofile='/boot/iso/elementaryos-freya-amd64.20150411.iso'
+	loopback loop $isofile
+	linux (loop)/casper/vmlinuz boot=casper iso-scan/filename=$isofile locale=<b>en_US.UTF-8</b>
+	initrd (loop)/casper/initrd.lz
+}</pre>
+<h4><span class="mw-headline" id="Fedora">Fedora</span></h4>
+<h5><span class="mw-headline" id="Stock_installation_medium_2">Stock installation medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Dracut">Dracut</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/boot/dracut/dracut.git/tree/dracut.cmdline.7.asc">[14]</a>)</li>
+<li> Installation program: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Anaconda">Anaconda</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://github.com/rhinstaller/anaconda/blob/master/docs/boot-options.rst">[15]</a>)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[16]</a>)</li>
+</ul>
+<pre>menuentry '[loopback]Fedora-Workstation-netinst-x86_64-24-1.2' {
+	set isofile='/boot/iso/Fedora-Workstation-netinst-x86_64-24-1.2.iso'
+	loopback loop $isofile
+	linux (loop)/isolinux/vmlinuz inst.stage2=hd:LABEL=Fedora-WS-dvd-x86_64-24 iso-scan/filename=$isofile quiet
+	initrd (loop)/isolinux/initrd.img
+}</pre>
+<h5><span class="mw-headline" id="Workstation_live_medium">Workstation live medium</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Dracut">Dracut</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/boot/dracut/dracut.git/tree/dracut.cmdline.7.asc">[17]</a>)</li>
+<li> Live framework: fedora <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/FedoraLiveCD">livecd-tools</a> (cmdline: none)</li>
+<li> Init system: <a href="../en/Systemd.html" title="Systemd">systemd</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://www.freedesktop.org/software/systemd/man/kernel-command-line.html">[18]</a>)</li>
+</ul>
+<pre>menuentry '[loopback]Fedora-Workstation-Live-x86_64-24-1.2' {
+	set isofile='/boot/iso/Fedora-Workstation-Live-x86_64-24-1.2.iso'
+	loopback loop $isofile
+	linux (loop)/isolinux/vmlinuz root=live:CDLABEL=Fedora-WS-Live-24-1-2 iso-scan/filename=$isofile rd.live.image quiet
+	initrd (loop)/isolinux/initrd.img
+}</pre>
+<h4><span class="mw-headline" id="Gentoo">Gentoo</span></h4>
+<h5><span class="mw-headline" id="Desktop_LiveDVD">Desktop LiveDVD</span></h5>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://wiki.gentoo.org/wiki/Genkernel">genkernel</a> (cmdline: <a rel="nofollow" class="external autonumber" href="https://gitweb.gentoo.org/proj/genkernel.git/tree/doc/genkernel.8.txt#n393">[19]</a>)</li>
+<li> Live framework: <a rel="nofollow" class="external text" href="https://gitweb.gentoo.org/proj/livecd-tools.git/">livecd-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://wiki.gentoo.org/wiki/Project:OpenRC">OpenRC</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry "[loopback]livedvd-amd64-multilib-20160514" {
+	set isofile="/boot/iso/livedvd-amd64-multilib-20160514.iso"
+	loopback loop $isofile
+	linux (loop)/isolinux/gentoo root=/dev/ram0 init=/linuxrc aufs looptype=squashfs loop=/image.squashfs cdroot isoboot=$isofile vga=<b>791</b> splash=silent,theme:default console=tty0
+	initrd (loop)/isolinux/gentoo.xz 
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>This should also works for minimal medium.</div>
+<h4><span class="mw-headline" id="GParted_Live">GParted Live</span></h4>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://anonscm.debian.org/cgit/kernel/initramfs-tools.git/">initramfs-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Live framework: <a rel="nofollow" class="external text" href="http://live.debian.net/">Debian Live</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://manpages.debian.org/cgi-bin/man.cgi?query=live-boot&amp;apropos=0&amp;sektion=7&amp;manpath=Debian+unstable+sid&amp;format=html&amp;locale=en">[20]</a>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/sysvinit">sysvinit</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry "[loopback]gparted-live-0.22.0-2-<b>amd64</b>" {
+	set isofile="/boot/iso/gparted-live-0.22.0-2-<b>amd64</b>.iso"
+	loopback loop $isofile
+	linux (loop)/live/vmlinuz boot=live union=overlay username=user config components quiet noswap noeject toram=filesystem.squashfs ip=  nosplash findiso=$isofile
+	initrd (loop)/live/initrd.img
+}</pre>
+<h4><span class="mw-headline" id="Kali_Linux">Kali Linux</span></h4>
+<ul>
+<li> Initramfs framework: <a rel="nofollow" class="external text" href="https://anonscm.debian.org/cgit/kernel/initramfs-tools.git/">initramfs-tools</a> (cmdline: <i>RFD</i>)</li>
+<li> Live framework: <a rel="nofollow" class="external text" href="http://live.debian.net/">Debian Live</a> (cmdline: <a rel="nofollow" class="external autonumber" href="http://manpages.debian.org/cgi-bin/man.cgi?query=live-boot&amp;apropos=0&amp;sektion=7&amp;manpath=Debian+unstable+sid&amp;format=html&amp;locale=en">[21]</a>)</li>
+<li> Init system: <a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/sysvinit">sysvinit</a> (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry "[loopback]kali-linux-1.0.7-<b>amd64</b>" {
+	set isofile='/boot/iso/kali-linux-1.0.7-<b>amd64</b>.iso'
+	loopback loop $isofile
+	linux (loop)/live/vmlinuz boot=live findiso=$isofile noconfig=sudo username=root hostname=kali
+	initrd (loop)/live/initrd.img
+}</pre>
+<h4><span class="mw-headline" id="Knoppix">Knoppix</span></h4>
+<ul>
+<li> Initramfs framework: <i>Unknown</i>
+</li>
+<li> Live framework: <i>Unknown</i>
+</li>
+<li> Init system: <i>Unknown</i>
+</li>
+</ul>
+<pre>menuentry "[loopback]KNOPPIX_V7.4.2DVD-2014-09-28-EN" {
+        set isofile="/boot/iso/KNOPPIX_V7.4.2DVD-2014-09-28-EN.iso"
+        loopback loop $isofile
+        linux (loop)/boot/isolinux/linux bootfrom=/mnt-iso/$isofile acpi=off keyboard=us lang=us
+        initrd (loop)/boot/isolinux/minirt.gz
+}</pre>
+<h4><span class="mw-headline" id="Linux_Mint">Linux Mint</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<pre>menuentry "Linux Mint 17.2 Cinnamon LTS RC (x64)" {
+    set iso=/boot/iso/linuxmint-17.2-cinnamon-64bit.iso
+    loopback loop $iso
+    linux (loop)/casper/vmlinuz boot=casper iso-scan/filename=$iso noeject noprompt 
+    initrd (loop)/casper/initrd.lz
+}</pre>
+<h4><span class="mw-headline" id="openSUSE">openSUSE</span></h4>
+<h5><span class="mw-headline" id="Stock_installation_medium_3">Stock installation medium</span></h5>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: Kiwi? <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<pre>menuentry '[loopback]openSUSE-13.1-DVD-x86_64' {
+	set isofile='/boot/iso/openSUSE-13.1-DVD-x86_64.iso'
+	loopback loop $isofile
+	linux (loop)/boot/x86_64/loader/linux install=hd:$isofile
+	initrd (loop)/boot/x86_64/loader/initrd
+}</pre>
+<h5><span class="mw-headline" id="Desktop_Live_medium_2">Desktop Live medium</span></h5>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: Kiwi? <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<pre>menuentry '[loopback]openSUSE-13.1-KDE-Live-x86_64' {
+	set isofile='/boot/iso/openSUSE-13.1-KDE-Live-x86_64.iso'
+	loopback loop $isofile
+	linux (loop)/boot/x86_64/loader/linux isofrom_device=$imgdevpath isofrom_system=$isofile LANG=<b>en_US.UTF-8</b>
+	initrd (loop)/boot/x86_64/loader/initrd
+}</pre>
+<h4><span class="mw-headline" id="Parabola_GNU.2FLinux-libre">Parabola GNU/Linux-libre</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to boot into a 32-bit system, replace <code>x86_64</code> with <code>i686</code>.</div>
+<pre>menuentry '[loopback]parabola-2015.07.01-dual.iso' {
+	set isofile='/boot/iso/parabola-2015.07.01-dual.iso'
+	loopback loop $isofile
+	linux (loop)/parabola/boot/<b>x86_64</b>/vmlinuz parabolaisolabel=PARA_<b>201507</b> img_dev=$imgdevpath img_loop=$isofile earlymodules=loop
+	initrd (loop)/parabola/boot/<b>x86_64</b>/parabolaiso.img
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> The label string after <code>parabolaisolabel=</code> needs to be edited when a newer release is used.</div>
+<h4><span class="mw-headline" id="Sabayon">Sabayon</span></h4>
+<ul>
+<li> Initramfs framework: genkernel? <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: openrc? <i>RFD</i>
+</li>
+</ul>
+<pre>menuentry '[loopback]Sabayon_Linux_14.05_amd64_KDE' {
+	set isofile='/boot/iso/Sabayon_Linux_14.05_amd64_KDE.iso'
+	loopback loop $isofile
+	linux (loop)/boot/sabayon root=/dev/ram0 aufs cdroot locale=<b>en_US</b> loop=/livecd.squashfs looptype=squashfs isoboot=$isofile
+	initrd (loop)/boot/sabayon.igz
+}</pre>
+<h4><span class="mw-headline" id="Slackware_Linux">Slackware Linux</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<pre>menuentry '[loopback]slackware64-14.1-install-dvd' {
+	set isofile='/boot/iso/slackware64-14.1-install-dvd.iso'
+	loopback loop $isofile
+	linux (loop)/kernels/huge.s/bzImage printk.time=0
+	initrd (loop)/isolinux/initrd.img
+}</pre>
+<h4><span class="mw-headline" id="SystemRescueCD">SystemRescueCD</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Replace <code>64</code> with <code>32</code> if you want to boot into a 32-bit system.</div>
+<pre>menuentry '[loopback]systemrescuecd-x86-4.5.2' {
+	set isofile='/boot/iso/systemrescuecd-x86-4.5.2.iso'
+	loopback loop $isofile
+	linux (loop)/isolinux/rescue<b>64</b> isoloop=$isofile
+	initrd (loop)/isolinux/initram.igz
+}</pre>
+<h4><span class="mw-headline" id="Slitaz">Slitaz</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework: <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<p>First, download slitaz iso, then extract somewhere (in this case, /live/slitaz-4.0 on /dev/sda3)
+</p>
+<pre>menuentry 'slitaz-4.0 core' {
+	set dir='/live/slitaz-4.0'
+	set root=(hd0,msdos3)
+	set lang='pt_BR'
+	set kmap='br-abnt2'
+	linux ($root)/$dir/bzImage lang=$lang kmap=$kmap rw root=/dev/null vga=normal autologin
+	initrd ($root)/$dir/rootfs4.gz ($root)/$dir/rootfs3.gz ($root)/$dir/rootfs2.gz ($root)/$dir/rootfs1.gz
+}</pre>
+<h4><span class="mw-headline" id="Slax">Slax</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework: <i>RFD</i>
+</li>
+<li> Init system: <i>RFD</i>
+</li>
+</ul>
+<p>First, download Slax zip (for USB), then extract somewhere (in this case, /live/slax on /dev/sda3)
+</p>
+<pre>menuentry 'slax' {
+	set dir=/live/slax
+	set root=(hd0,msdos3)
+	linux $dir/boot/vmlinuz from=$dir vga=normal load_ramdisk=1 prompt_ramdisk=0 printk.time=0 slax.flags=perch,xmode
+	initrd $dir/boot/initrfs.img
+}</pre>
+<h4><span class="mw-headline" id="Tails">Tails</span></h4>
+<ul>
+<li> Initramfs framework: <i>Unknown</i>
+</li>
+<li> Live framework: <i>Unknown</i>
+</li>
+<li> Init system: <i>Unknown</i>
+</li>
+</ul>
+<p>Simply download and verify integrity of the Tails iso.
+</p>
+<pre>menuentry "[loopback]tails-i386-1.5.iso" {
+    set isofile='/boot/iso/tails-i386-1.5.iso'
+    loopback loop $isofile
+    linux (loop)/live/vmlinuz2 boot=live config findiso=${isofile} live-media=removable apparmor=1 security=apparmor nopersistent noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 noautologin module=Tails
+    initrd (loop)/live/initrd2.img
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Emergency memory erasure does not seem to work when booting this way.</div>
+<p>Remove the <code>live-media=removable</code> option if the iso file is not on removable media.
+</p>
+<h4><span class="mw-headline" id="Ubuntu">Ubuntu</span></h4>
+<ul>
+<li> Initramfs framework: <i>RFD</i>
+</li>
+<li> Live framework or installation program: <i>RFD</i>
+</li>
+<li> Init system: upstart (cmdline: <i>RFD</i>)</li>
+</ul>
+<pre>menuentry '[loopback]ubuntu-14.04.1-desktop-amd64' {
+	set isofile='/boot/iso/ubuntu-14.04.1-desktop-amd64.iso'
+	loopback loop $isofile
+	linux (loop)/casper/vmlinuz.efi boot=casper iso-scan/filename=$isofile locale=<b>en_US.UTF-8</b>
+	initrd (loop)/casper/initrd.lz
+}</pre>
+<h4><span class="mw-headline" id="Xubuntu_.2832_bit.29">Xubuntu (32 bit)</span></h4>
+<pre>menuentry '[loopback]Xubuntu-16.04-desktop-i386' {
+	set isofile='/boot/iso/xubuntu-16.04-desktop-i386.iso'
+	loopback loop $isofile
+	linux	(loop)/casper/vmlinuz  file=/cdrom/preseed/xubuntu.seed boot=casper iso-scan/filename=$isofile quiet splash ---
+	initrd	(loop)/casper/initrd.lz
+}</pre>
+<h2><span class="mw-headline" id="Chainloading_Windows">Chainloading Windows</span></h2>
+<p>It can be very difficult to loopback a Windows install disc. One simple solution that allows you to install a variety of platforms from a USB drive with a single, unified partition is to start with a working, bootable Windows USB drive, and to replace its bootloader with GRUB.
+</p>
+<p>Before installing GRUB, rename or move the Windows bootloader. It should be the default <i>.efi</i> executable - located at <code><i>(USB)</i>/efi/boot/bootx64.efi</code> for a 64-bit system. Install GRUB in its place, and ensure that it is now the default executable.
+</p>
+<p>You can then chainload the renamed Windows bootloader from GRUB, and also configure GRUB to loopback <i>.iso</i> files as described above.
+</p>
+<pre>menuentry '[chain]en_windows_8.1_professional_x64' {
+	insmod chain
+        chainloader /efi/boot/bootx64.efi.windows
+}</pre>
+<h2><span class="mw-headline" id="Using_Syslinux_and_memdisk">Using Syslinux and memdisk</span></h2>
+<p>Using the <a rel="nofollow" class="external text" href="http://www.syslinux.org/wiki/index.php/MEMDISK">memdisk</a> module, the ISO image is loaded into memory, and its bootloader is loaded. Make sure that the system that will boot this USB drive has sufficient amount of memory for the image file and running operating system.
+</p>
+<h3><span class="mw-headline" id="Preparation_2">Preparation</span></h3>
+<p>Make sure that the USB drive is properly <a href="../en/Partitioning.html" title="Partitioning">partitioned</a> and that there is a partition with <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a> supported by Syslinux, for example fat32 or ext4. Then install Syslinux to this partition, see <a href="../en/Syslinux.html#Installation" title="Syslinux">Syslinux#Installation</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<h3><span class="mw-headline" id="Install_the_memdisk_module">Install the memdisk module</span></h3>
+<p>The memdisk module was not installed during Syslinux installation, it has to be installed manually. Mount the partition where Syslinux is installed to <code>/mnt/</code> and copy the memdisk module to the same directory where Syslinux is installed:
+</p>
+<pre># cp /usr/lib/syslinux/bios/memdisk /mnt/boot/syslinux/
+</pre>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>After copying the ISO files on the USB drive, edit the <a href="../en/Syslinux.html#Configuration" title="Syslinux">Syslinux configuration file</a> and create menu entries for the ISO images. The basic entry looks like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">boot/syslinux/syslinux.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+LABEL <i>some_label</i>
+    LINUX memdisk
+    INITRD <i>/path/to/image.iso</i>
+    APPEND iso
+</pre>
+<p>See <a rel="nofollow" class="external text" href="http://www.syslinux.org/wiki/index.php/MEMDISK">memdisk on Syslinux wiki</a> for more configuration options.
+</p>
+<h3><span class="mw-headline" id="Caveat_for_32-bit_systems">Caveat for 32-bit systems</span></h3>
+<p>When booting a 32-bit system from an image larger than 128MiB, it is necessary to increase the maximum memory usage of vmalloc. This is done by adding <code>vmalloc=<i>value</i>M</code> to the kernel parameters, where <code><i>value</i></code> is larger than the size of the ISO image in MiB.<a rel="nofollow" class="external autonumber" href="http://www.syslinux.org/wiki/index.php/MEMDISK#-_memdiskfind_in_combination_with_phram_and_mtdblock">[22]</a>
+</p>
+<p>For example when booting the 32-bit system from the <a rel="nofollow" class="external text" href="https://www.archlinux.org/download/">Arch installation ISO</a>, press the <code>Tab</code> key over the <code>Boot Arch Linux (i686)</code> entry and add <code>vmalloc=768M</code> at the end. Skipping this step will result in the following error during boot:
+</p>
+<pre>modprobe: ERROR: could not insert 'phram': Input/output error
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> GRUB:
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/Grub2/ISOBoot/Examples">https://help.ubuntu.com/community/Grub2/ISOBoot/Examples</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/Grub2/ISOBoot">https://help.ubuntu.com/community/Grub2/ISOBoot</a>
+</li>
+</ul>
+</li>
+<li> Syslinux:
+<ul><li> <a rel="nofollow" class="external text" href="http://www.syslinux.org/wiki/index.php/Boot_an_Iso_image">Boot an ISO image</a>
+</li></ul>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Move.html" title="Category:Pages or sections flagged with Template:Move">Pages or sections flagged with Template:Move</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Sections_flagged_with_Template:Remove.html" title="Category:Sections flagged with Template:Remove">Sections flagged with Template:Remove</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

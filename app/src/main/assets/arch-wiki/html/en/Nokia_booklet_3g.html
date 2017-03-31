@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Nokia booklet 3g - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Nokia_booklet_3g skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Nokia booklet 3g</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The Nokia Booklet 3G is a small, light and nice Netbook with some interesting features:
+</p>
+<ul>
+<li> Aluminium frame.</li>
+<li> 12h theoretical battery life (actually 8 to 10h of real use in Linux with low screen brightness, which is still nice).</li>
+<li> 1280x720 screen resolution, much better than the normal on other netbooks (1024x600).</li>
+<li> 3G modem, working well with Linux, so you can get connected everywhere.</li>
+<li> GPS</li>
+<li> HDMI output.</li>
+<li> No fans, no noise, moderate hot.</li>
+<li> Bluetooth and wifi integrated.</li>
+</ul>
+<p>Most of the hardware of the Booklet if fairly compatible with Arch Linux out of the box.
+The worst part is always the Intel GMA500 graphics card, with good support for 2D acceleration (general experience is smooth and good), but a total lack of 3D and video acceleration, and some problems with HDMI output and suspend.
+</p>
+<p>Probably the second bad thing is the hard disk speed, but there are some tricks we can do with Arch to improve it.
+</p>
+<p>The volume of the speakers are just incredible low (even at maximum volume). It is recommended to use headphones, both wired and <a href="../en/Bluetooth_headset.html" title="Bluetooth headset">Bluetooth</a> works.
+</p>
+<p><br>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Install"><span class="tocnumber">1</span> <span class="toctext">Install</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Graphics_Card"><span class="tocnumber">2</span> <span class="toctext">Graphics Card</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Hard_Disk"><span class="tocnumber">3</span> <span class="toctext">Hard Disk</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#3G_Modem"><span class="tocnumber">4</span> <span class="toctext">3G Modem</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Software"><span class="tocnumber">5</span> <span class="toctext">Software</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Links"><span class="tocnumber">6</span> <span class="toctext">Links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Install">Install</span></h2>
+<p>The <a href="../en/Installation_guide.html" title="Installation" class="mw-redirect">installation</a> is fairly standard using a pendrive.
+</p>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Graphics_Card">Graphics Card</span></h2>
+<p>See <a href="../en/Intel_GMA_500.html" title="Poulsbo" class="mw-redirect">Poulsbo</a> for configuration and options (including brightness control).
+</p>
+<p>HDMI out only works with <code>modesetting</code> driver (which is the newer one).
+</p>
+<h2><span class="mw-headline" id="Hard_Disk">Hard Disk</span></h2>
+<p>The hard disk is stoping the spin very soon, causing a very bad usage experience, specially with firefox (which access the HD very ofen). There is  a solution for this using <a href="../en/Hdparm.html" title="Hdparm">hdparm</a>:
+</p>
+<p><code># pacman -S hdparm</code>
+</p>
+<p>Now edit <code>/etc/rc.local</code> and add:
+</p>
+<p><code>hdparm -a 512 -B 255 -S 241 /dev/sda</code>
+</p>
+<p>Run the command yourself to see the effect inmediatly. Se <code>hdparm</code> man page to see possible values, specially for <code>-S</code> option.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> This may cause a slight decrese in battery life.</div>
+<h2><span class="mw-headline" id="3G_Modem">3G Modem</span></h2>
+<p>The modem is working correctly with full speed (7.2mps) and good reception, and the recommended way to manage it is using <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a>, because you probably will need to connect or reconnect several times along the day. Also, <code>nm-applet</code> indicates the signal strength in its icon.
+</p>
+<p>But sometimes it may stop working correctly, needing a full reboot. This is due to corruption in the BIOS.
+</p>
+<p>To avoid this, edit <code>/etc/default/grub</code> and add <code>memory_corruption_check_size=256K</code> to <code>GRUB_CMDLINE_LINUX</code> variable. (Don't forget to update grub with <code>grub-mkconfig -o /boot/grub/grub.cfg</code>).
+</p>
+<h2><span class="mw-headline" id="Software">Software</span></h2>
+<p>Software recommended for this machine is the same recommended for most netbooks:
+</p>
+<ul>
+<li> <a href="../en/Xfce.html" title="Xfce4" class="mw-redirect">xfce4</a> as a general desktop system is good.</li>
+<li> <a href="../en/Wmii.html" title="Wmii">wmii</a> or <a href="../en/Awesome.html" title="Awesome">awesome</a> are very nice for managing windows. You can combine them both with xfce4 or run alone.</li>
+<li> <a href="../en/GNOME.html" title="GNOME">GNOME</a> or <a href="../en/KDE.html" title="KDE">KDE</a> can run, but not smoothly with 3D effects, so it is better to avoid composition.</li>
+<li> <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a> is the best to manage the modem and the wifi. Specially, nm-applet can show 3G signal strength in real time.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/firestarter/">firestarter</a></span><sup><small>AUR</small></sup> is a very good firewall because it can start and stop when you use the modem, and can share connection by wifi.</li>
+<li> <a href="../en/Chromium.html" title="Chromium">Chromium</a> is preferred over <a href="../en/Firefox.html" title="Firefox">firefox</a> because it feels much faster on Atom procesors.</li>
+</ul>
+<p>In general, try to keep simple and avoid bogus applications. Remember that you're running a 1Gb-RAM system with no 3D acceleration with an Atom processor.
+</p>
+<h2><span class="mw-headline" id="Links">Links</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://rant.gulbrandsen.priv.no/hardware/linux-nokia-booklet">Linux on the Nokia booklet 3g</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.nokia.com/us-en/support/product/nokia-booklet-3g/">Nokia official support</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Nokia.html" title="Category:Nokia">Nokia</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

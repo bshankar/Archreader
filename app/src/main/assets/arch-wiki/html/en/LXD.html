@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>LXD - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-LXD skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">LXD</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b><a rel="nofollow" class="external text" href="https://linuxcontainers.org/lxd/">LXD</a></b> is a container "hypervisor" and a new user experience for <a href="../en/Linux_Containers.html" title="Linux Containers">Linux Containers</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Setup"><span class="tocnumber">1</span> <span class="toctext">Setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Required_software"><span class="tocnumber">1.1</span> <span class="toctext">Required software</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Sub.7Bu.2Cg.7Did_configuration"><span class="tocnumber">1.2</span> <span class="toctext">Sub{u,g}id configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Accessing_LXD_as_a_unprivileged_user"><span class="tocnumber">1.3</span> <span class="toctext">Accessing LXD as a unprivileged user</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#LXD_Networking"><span class="tocnumber">1.4</span> <span class="toctext">LXD Networking</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Example_network_configuration"><span class="tocnumber">1.4.1</span> <span class="toctext">Example network configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Basic_usage"><span class="tocnumber">2</span> <span class="toctext">Basic usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#First_steps"><span class="tocnumber">2.1</span> <span class="toctext">First steps</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Advance_usage"><span class="tocnumber">3</span> <span class="toctext">Advance usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Modify_processes_and_files_limit"><span class="tocnumber">3.1</span> <span class="toctext">Modify processes and files limit</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Launching_container_without_CONFIG_USER_NS"><span class="tocnumber">4.1</span> <span class="toctext">Launching container without CONFIG_USER_NS</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setup">Setup</span></h2>
+<h3><span class="mw-headline" id="Required_software">Required software</span></h3>
+<p>Install <a href="../en/Linux_Containers.html" title="LXC" class="mw-redirect">LXC</a> and the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lxd/">lxd</a></span><sup><small>AUR</small></sup> package, then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>lxd.service</code>.
+</p>
+<p>Verify that the running kernel is properly configured to run a container:
+</p>
+<pre>$ lxc-checkconfig
+</pre>
+<p>Due to security concerns, the default Arch kernel does <b>not</b> ship with the ability to run containers as an unprivileged user. LXD however needs this ability to run. You can either build a kernel yourself that has <code>CONFIG_USER_NS</code> enabled, or use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-userns/">linux-userns</a></span><sup><small>AUR</small></sup> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lts-userns/">linux-lts-userns</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You still be able to run containers without CONFIG_USER_NS kernel feature. See: <a href="#Launching_container_without_CONFIG_USER_NS">#Launching container without CONFIG_USER_NS</a>
+</div>
+<h3><span class="mw-headline" id="Sub.7Bu.2Cg.7Did_configuration">Sub{u,g}id configuration</span></h3>
+<p>You will need sub{u,g}ids for root, so that LXD can create the unprivileged containers:
+</p>
+<pre>$ echo "root:1000000:65536" | sudo tee -a /etc/subuid /etc/subgid
+</pre>
+<h3><span class="mw-headline" id="Accessing_LXD_as_a_unprivileged_user">Accessing LXD as a unprivileged user</span></h3>
+<p>By default the LXD daemon allows users in the <code>lxd</code> group access, so add your user to the group:
+</p>
+<pre>$ usermod -a -G lxd &lt;user&gt;
+</pre>
+<h3><span class="mw-headline" id="LXD_Networking">LXD Networking</span></h3>
+<p>LXD uses LXC's networking capabilities. By default it connects containers to the <code>lxcbr0</code> network device. Refer to the LXC documentation on <a href="../en/Linux_Containers.html#Host_network_configuration" title="Linux Containers">network configuration</a> to set up a bridge for your containers.
+</p>
+<p>If you want to use a different interface than <code>lxcbr0</code> edit the default using the lxc command line tool:
+</p>
+<pre>$ lxc profile edit default
+</pre>
+<p>An editor will open with a config file that by default contains:
+</p>
+<pre>name: default
+config: {}
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: lxcbr0
+    type: nic
+</pre>
+<p>You can set the <code>parent</code> parameter to whichever bridge you want LXD to attach the containers to by default.
+</p>
+<h4><span class="mw-headline" id="Example_network_configuration">Example network configuration</span></h4>
+<p>Thanks to @jpic, the LXD package now provides some example networking configuration in <code>/usr/share/lxd/</code>. To use this configuration run the following commands:
+</p>
+<pre>$ ln -s /usr/share/lxd/dnsmasq-lxd.conf /etc/dnsmasq-lxd.conf
+$ ln -s /usr/share/lxd/systemd/system/dnsmasq@lxd.service /etc/systemd/system/dnsmasq@lxd.service 
+$ ln -s /usr/share/lxd/netctl/lxd  /etc/netctl/lxd
+$ ln -s /usr/share/lxd/dbus-1/system.d/dnsmasq-lxd.conf /etc/dbus-1/system.d/dnsmasq-lxd.conf
+</pre>
+<p>If you use <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a>, also symlink the following file:
+</p>
+<pre>$ ln -s /usr/share/lxd/NetworkManager/dnsmasq.d/lxd.conf /etc/NetworkManager/dnsmasq.d/lxd.conf
+</pre>
+<p>Change <code>parent: lxcbr0</code> to <code>parent: lxd</code>:
+</p>
+<pre>$ lxc profile edit default
+</pre>
+<p>Finally, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>dnsmasq@lxd.service</code> and <code>netctl@lxd.service</code>.
+</p>
+<p>If you encounter issue with the provided example configuration, or have suggestions to improve it, please leave a comment on the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lxd/">lxd</a></span><sup><small>AUR</small></sup> page.
+</p>
+<h2><span class="mw-headline" id="Basic_usage">Basic usage</span></h2>
+<h3><span class="mw-headline" id="First_steps">First steps</span></h3>
+<p>LXD has two parts, the daemon (the lxd binary), and the client (the lxc binary). Now that the daemon is all configured and running, you can create a container:
+</p>
+<pre>$ lxc launch ubuntu:14.04
+</pre>
+<p>Alternatively, you can also use a remote LXD host as a source of images. One comes pre-configured in LXD, called "images" (images.linuxcontainers.org)
+</p>
+<pre>$ lxc launch images:centos/7/amd64 centos
+</pre>
+<h2><span class="mw-headline" id="Advance_usage">Advance usage</span></h2>
+<h3><span class="mw-headline" id="Modify_processes_and_files_limit">Modify processes and files limit</span></h3>
+<p>You may want to increase file descriptor limit or max user processes limit, since default file descriptor limit is 1024 on Archlinux
+</p>
+<pre>$ sudo systemctl edit lxd
+</pre>
+<p>And config as follow:
+</p>
+<pre>[Service]
+LimitNOFILE=infinity
+LimitNPROC=infinity
+TasksMax=infinity
+</pre>
+<p>Then restart lxd
+</p>
+<pre>$ sudo systemctl restart lxd
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Launching_container_without_CONFIG_USER_NS">Launching container without CONFIG_USER_NS</span></h3>
+<p>For launching images you must provide <code>security.privileged=true</code> during image creation:
+</p>
+<pre>$ lxc launch ubuntu:16.04 test_ubuntu -c security.privileged=true
+</pre>
+<p>Or for already existed image you may edit config:
+</p>
+<pre>$ lxc config edit test_ubuntu
+</pre>
+<pre>name: test_ubuntu
+profiles:
+- default
+config:
+  ...
+  security.privileged: "true"
+  ...
+devices:
+  root:
+    path: /
+    type: disk
+ephemeral: false
+</pre>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://linuxcontainers.org/lxd/">The official LXD homepage</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/lxc/lxd">The LXD GitHub page</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

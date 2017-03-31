@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SSH keys - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SSH_keys skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SSH keys</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>SSH keys serve as a means of identifying yourself to an SSH server using <a href="https://en.wikipedia.org/wiki/Public-key_cryptography" class="extiw" title="wikipedia:Public-key cryptography">public-key cryptography</a> and <a href="https://en.wikipedia.org/wiki/Challenge-response_authentication" class="extiw" title="wikipedia:Challenge-response authentication">challenge-response authentication</a>.  One immediate advantage this method has over traditional password authentication is that you can be authenticated by the server without ever having to send your password over the network.  Anyone eavesdropping on your connection will not be able to intercept and crack your password because it is never actually transmitted.  Additionally, using SSH keys for authentication virtually eliminates the risk posed by brute-force password attacks by drastically reducing the chances of the attacker correctly guessing the proper credentials.
+</p>
+<p>As well as offering additional security, SSH key authentication can be more convenient than the more traditional password authentication.  When used with a program known as an SSH agent, SSH keys can allow you to connect to a server, or multiple servers, without having to remember or enter your password for each system.
+</p>
+<p>SSH keys are not without their drawbacks and may not be appropriate for all environments, but in many circumstances they can offer some strong advantages.  A general understanding of how SSH keys work will help you decide how and when to use them to meet your needs.  
+</p>
+<p>This article assumes you already have a basic understanding of the <a href="../en/Secure_Shell.html" title="Secure Shell">Secure Shell</a> protocol and have <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span> package.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Background"><span class="tocnumber">1</span> <span class="toctext">Background</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Generating_an_SSH_key_pair"><span class="tocnumber">2</span> <span class="toctext">Generating an SSH key pair</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Choosing_the_type_of_encryption"><span class="tocnumber">2.1</span> <span class="toctext">Choosing the type of encryption</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#RSA"><span class="tocnumber">2.1.1</span> <span class="toctext">RSA</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#ECDSA"><span class="tocnumber">2.1.2</span> <span class="toctext">ECDSA</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Ed25519"><span class="tocnumber">2.1.3</span> <span class="toctext">Ed25519</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Choosing_the_key_location_and_passphrase"><span class="tocnumber">2.2</span> <span class="toctext">Choosing the key location and passphrase</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Changing_the_private_key.27s_passphrase_without_changing_the_key"><span class="tocnumber">2.2.1</span> <span class="toctext">Changing the private key's passphrase without changing the key</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Managing_multiple_keys"><span class="tocnumber">2.2.2</span> <span class="toctext">Managing multiple keys</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Copying_the_public_key_to_the_remote_server"><span class="tocnumber">3</span> <span class="toctext">Copying the public key to the remote server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Simple_method"><span class="tocnumber">3.1</span> <span class="toctext">Simple method</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Manual_method"><span class="tocnumber">3.2</span> <span class="toctext">Manual method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#SSH_agents"><span class="tocnumber">4</span> <span class="toctext">SSH agents</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14">
+<a href="#ssh-agent"><span class="tocnumber">4.1</span> <span class="toctext">ssh-agent</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Start_ssh-agent_with_systemd_user"><span class="tocnumber">4.1.1</span> <span class="toctext">Start ssh-agent with systemd user</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#ssh-agent_as_a_wrapper_program"><span class="tocnumber">4.1.2</span> <span class="toctext">ssh-agent as a wrapper program</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-17"><a href="#GnuPG_Agent"><span class="tocnumber">4.2</span> <span class="toctext">GnuPG Agent</span></a></li>
+<li class="toclevel-2 tocsection-18">
+<a href="#Keychain"><span class="tocnumber">4.3</span> <span class="toctext">Keychain</span></a>
+<ul>
+<li class="toclevel-3 tocsection-19"><a href="#Installation"><span class="tocnumber">4.3.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-3 tocsection-20"><a href="#Configuration"><span class="tocnumber">4.3.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#Tips"><span class="tocnumber">4.3.3</span> <span class="toctext">Tips</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-22">
+<a href="#envoy"><span class="tocnumber">4.4</span> <span class="toctext">envoy</span></a>
+<ul>
+<li class="toclevel-3 tocsection-23"><a href="#envoy_with_key_passphrases_stored_in_kwallet"><span class="tocnumber">4.4.1</span> <span class="toctext">envoy with key passphrases stored in kwallet</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-24">
+<a href="#x11-ssh-askpass"><span class="tocnumber">4.5</span> <span class="toctext">x11-ssh-askpass</span></a>
+<ul>
+<li class="toclevel-3 tocsection-25"><a href="#Calling_x11-ssh-askpass_with_ssh-add"><span class="tocnumber">4.5.1</span> <span class="toctext">Calling x11-ssh-askpass with ssh-add</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#Theming"><span class="tocnumber">4.5.2</span> <span class="toctext">Theming</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#Alternative_passphrase_dialogs"><span class="tocnumber">4.5.3</span> <span class="toctext">Alternative passphrase dialogs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-28">
+<a href="#pam_ssh"><span class="tocnumber">4.6</span> <span class="toctext">pam_ssh</span></a>
+<ul>
+<li class="toclevel-3 tocsection-29"><a href="#Using_a_different_password_to_unlock_the_SSH_key"><span class="tocnumber">4.6.1</span> <span class="toctext">Using a different password to unlock the SSH key</span></a></li>
+<li class="toclevel-3 tocsection-30"><a href="#Known_issues_with_pam_ssh"><span class="tocnumber">4.6.2</span> <span class="toctext">Known issues with pam_ssh</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-31"><a href="#GNOME_Keyring"><span class="tocnumber">4.7</span> <span class="toctext">GNOME Keyring</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Store_SSH_keys_with_Kwallet"><span class="tocnumber">4.8</span> <span class="toctext">Store SSH keys with Kwallet</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#KeePass2_with_KeeAgent_plugin"><span class="tocnumber">4.9</span> <span class="toctext">KeePass2 with KeeAgent plugin</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-34">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-35"><a href="#Key_ignored_by_the_server"><span class="tocnumber">5.1</span> <span class="toctext">Key ignored by the server</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-36"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Background">Background</span></h2>
+<p>SSH keys are always generated in pairs with one known as the private key and the other as the public key.  The private key is known only to you and it should be safely guarded.   By contrast, the public key can be shared freely with any SSH server to which you wish to connect.
+</p>
+<p>If an SSH server has your public key on file and sees you requesting a connection, it uses your public key to construct and send you a challenge.  This challenge is an encrypted message and it must be met with the appropriate response before the server will grant you access.  What makes this coded message particularly secure is that it can only be understood by the private key holder.  While the public key can be used to encrypt the message, it cannot be used to decrypt that very same message.  Only you, the holder of the private key, will be able to correctly understand the challenge and produce the proper response.
+</p>
+<p>This challenge-response phase happens behind the scenes and is invisible to the user.  As long as you hold the private key, which is typically stored in the <code>~/.ssh/</code> directory, your SSH client should be able to reply with the appropriate response to the server.
+</p>
+<p>A private key is a guarded secret and as such it is advisable to store it on disk in an encrypted form.  When the encrypted private key is required, a passphrase must first be entered in order to decrypt it.  While this might superficially appear as though you are providing a login password to the SSH server, the passphrase is only used to decrypt the private key on the local system.  The passphrase is not transmitted over the network.
+</p>
+<h2><span class="mw-headline" id="Generating_an_SSH_key_pair">Generating an SSH key pair</span></h2>
+<p>An SSH key pair can be generated by running the <code>ssh-keygen</code> command, defaulting to 2048-bit RSA (and SHA256) which the <span class="plainlinks archwiki-template-man" title="$ man 1 ssh-keygen"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ssh-keygen.1.html">ssh-keygen(1)</a></span> man page says is "<i>generally considered sufficient</i>" and should be compatible with virtually all clients and servers:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh-keygen
+</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Generating public/private rsa key pair.
+Enter file in which to save the key (/home/&lt;username&gt;/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/&lt;username&gt;/.ssh/id_rsa.
+Your public key has been saved in /home/&lt;username&gt;/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:gGJtSsV8BM+7w018d39Ji57F8iO6c0N2GZq3/RY2NhI username@hostname
+The key's randomart image is:
++---[RSA 2048]----+
+|   ooo.          |
+|   oo+.          |
+|  + +.+          |
+| o +   +     E . |
+|  .   . S . . =.o|
+|     . + . . B+@o|
+|      + .   oo*=O|
+|       .   ..+=o+|
+|           o=ooo+|
++----[SHA256]-----+</pre>
+<p>The <a rel="nofollow" class="external text" href="http://www.cs.berkeley.edu/~dawnsong/papers/randomart.pdf">randomart image</a> was <a rel="nofollow" class="external text" href="http://www.openssh.com/txt/release-5.1">introduced in OpenSSH 5.1</a> as an easier means of visually identifying the key fingerprint.
+</p>
+<p>You can also add an optional comment field to the public key with the <code>-C</code> switch, to more easily identify it in places such as <code>~/.ssh/known_hosts</code>, <code>~/.ssh/authorized_keys</code> and <code>ssh-add -L</code> output. For example:
+</p>
+<pre>$ ssh-keygen -C "$(whoami)@$(hostname)-$(date -I)"
+</pre>
+<p>will add a comment saying which user created the key on which machine and when.
+</p>
+<p>The <code>-o</code> switch can also be used to save the private key in the new OpenSSH format, which has increased resistance to brute-force password cracking (but is not supported by versions of OpenSSH prior to 6.5). Use the <code>-a</code> switch to specify the number of KDF rounds. According to <span class="plainlinks archwiki-template-man" title="$ man 1 ssh-keygen"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ssh-keygen.1.html">ssh-keygen(1)</a></span>, Ed25519 keys always use the new private key format.
+</p>
+<h3><span class="mw-headline" id="Choosing_the_type_of_encryption">Choosing the type of encryption</span></h3>
+<p>OpenSSH supports several key exchange algorithms which can be divided in two groups depending on the mathematical properties they exploit:
+</p>
+<ol>
+<li> <a href="https://en.wikipedia.org/wiki/Digital_Signature_Algorithm" class="extiw" title="wikipedia:Digital Signature Algorithm">DSA</a> and <a href="https://en.wikipedia.org/wiki/RSA_(cryptosystem)" class="extiw" title="wikipedia:RSA (cryptosystem)">RSA</a>, which rely on the <a href="https://en.wikipedia.org/wiki/Integer_factorization#Difficulty_and_complexity" class="extiw" title="wikipedia:Integer factorization">practical difficulty</a> of factoring the product of two large prime numbers,</li>
+<li> <a href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm" class="extiw" title="wikipedia:Elliptic Curve Digital Signature Algorithm">ECDSA</a> and <a href="https://en.wikipedia.org/wiki/Curve25519" class="extiw" title="wikipedia:Curve25519">Ed25519</a>, which rely on the elliptic curve  <a href="https://en.wikipedia.org/wiki/Discrete_logarithm" class="extiw" title="wikipedia:Discrete logarithm">discrete logarithm</a> problem. (<a rel="nofollow" class="external text" href="https://www.certicom.com/index.php/52-the-elliptic-curve-discrete-logarithm-problem">example</a>)</li>
+</ol>
+<p><a rel="nofollow" class="external text" href="https://blog.cloudflare.com/a-relatively-easy-to-understand-primer-on-elliptic-curve-cryptography/">Elliptic curve cryptography</a> (ECC) algorithms are a <a href="https://en.wikipedia.org/wiki/Elliptic_curve_cryptography#History" class="extiw" title="wikipedia:Elliptic curve cryptography">more recent addition</a> to public key cryptosystems. One of their main advantages is their ability to provide <a href="https://en.wikipedia.org/wiki/Elliptic_curve_cryptography#Rationale" class="extiw" title="wikipedia:Elliptic curve cryptography">the same level of security with smaller keys</a>, which makes for less computationally intensive operations (<i>i.e.</i> faster key creation, encryption and decryption) and reduced storage and transmission requirements.
+</p>
+<p>OpenSSH 7.0 <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/openssh-70p1-deprecates-ssh-dss-keys/">deprecated and disabled support for DSA keys</a> due to discovered vulnerabilities, therefore the choice of <a href="https://en.wikipedia.org/wiki/cryptosystem" class="extiw" title="wikipedia:cryptosystem">cryptosystem</a> lies within RSA or one of the two types of ECC.
+</p>
+<p><a href="#RSA">#RSA</a> keys will give you the greatest portability, while <a href="#Ed25519">#Ed25519</a> will give you the best security but requires recent versions of client &amp; server<a rel="nofollow" class="external autonumber" href="https://www.gentoo.org/support/news-items/2015-08-13-openssh-weak-keys.html">[1]</a>. <a href="#ECDSA">#ECDSA</a> is likely more compatible than Ed25519 (though still less than RSA), but suspicions exist about its security (see below).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> As of July 10, 2015, <a href="../en/GNOME/Keyring.html" title="GNOME Keyring" class="mw-redirect">GNOME Keyring</a> does not handle ECDSA<a rel="nofollow" class="external autonumber" href="https://bugzilla.gnome.org/show_bug.cgi?id=641082">[2]</a> and Ed25519<a rel="nofollow" class="external autonumber" href="https://bugzilla.gnome.org/show_bug.cgi?id=723274">[3]</a> keys. Users will have to turn to other <a href="#SSH_agents">SSH agents</a> or stick to RSA keys.</li>
+<li> These keys are used only to authenticate you; choosing stronger keys will not increase CPU load when transferring data over SSH.</li>
+</ul>
+</div>
+<h4><span class="mw-headline" id="RSA">RSA</span></h4>
+<p><code>ssh-keygen</code> defaults to RSA therefore there is no need to specify it with the <code>-t</code> option. It provides the best compatibility of all algorithms but requires the key size to be larger to provide sufficient security.
+</p>
+<p>Minimum key size is 1024 bits, default is 2048 (see <span class="plainlinks archwiki-template-man" title="$ man 1 ssh-keygen"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ssh-keygen.1.html">ssh-keygen(1)</a></span>) and maximum is 16384:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh-keygen -b 32768</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+key bits exceeds maximum 16384</pre>
+<p>If you wish to generate a stronger RSA key pair (<i>e.g.</i> to guard against cutting-edge or unknown attacks and more sophisticated attackers), simply specify the <code>-b</code> option with a higher bit value than the default:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh-keygen -b 4096
+</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Generating public/private rsa key pair.
+Enter file in which to save the key (/home/&lt;username&gt;/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/&lt;username&gt;/.ssh/id_rsa.
+Your public key has been saved in /home/&lt;username&gt;/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:+Pqo84NC+vAQQ9lUV0z+/zPHsyCe8oZpy6hLkIa7qfk &lt;username&gt;@&lt;hostname&gt;
+The key's randomart image is:
++---[RSA 4096]----+
+|   ... .+o       |
+|  +   . ..       |
+| o .     .       |
+|. . .  .  .      |
+|o. +  . S  .     |
+| o+ .  .    .    |
+|o+   o  . o. o . |
+|.=+ + .oo=..o o+o|
+|+=E..**+oo=+   o*|
++----[SHA256]-----+</pre>
+<p>Be aware though that there are diminishing returns in using longer keys.<a rel="nofollow" class="external autonumber" href="https://security.stackexchange.com/a/25377">[4]</a><a rel="nofollow" class="external autonumber" href="https://www.gnupg.org/faq/gnupg-faq.html#no_default_of_rsa4096">[5]</a> The GnuPG FAQ reads: "<i>If you need more security than RSA-2048 offers, the way to go would be to switch to elliptical curve cryptography — not to continue using RSA</i>".<a rel="nofollow" class="external autonumber" href="https://www.gnupg.org/faq/gnupg-faq.html#please_use_ecc">[6]</a>
+</p>
+<p>On the other hand, the latest iteration of the <a rel="nofollow" class="external text" href="https://www.nsa.gov/ia/programs/suiteb_cryptography/index.shtml">NSA Fact Sheet Suite B Cryptography</a> suggests a minimum 3072-bit modulus for RSA while "<i>[preparing] for the upcoming quantum resistant algorithm transition</i>".<a rel="nofollow" class="external autonumber" href="http://www.keylength.com/en/6/">[7]</a>
+</p>
+<h4><span class="mw-headline" id="ECDSA">ECDSA</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The Windows SSH client PuTTY does not support ECDSA as of March 2016. One needs a PuTTY development snapshot to connect to a server that uses only ECDSA keys.<a rel="nofollow" class="external autonumber" href="http://www.chiark.greenend.org.uk/~sgtatham/putty/wishlist/">[8]</a>
+</div>
+<p>The Elliptic Curve Digital Signature Algorithm (ECDSA) was introduced as the preferred algorithm for authentication <a rel="nofollow" class="external text" href="http://www.openssh.com/txt/release-5.7">in OpenSSH 5.7</a>. Some vendors also disable the required implementations due to potential patent issues.
+</p>
+<p>There are two sorts of concerns with it:
+</p>
+<ol>
+<li> <i>Political concerns</i>, the trustworthiness of NIST-produced curves <a rel="nofollow" class="external text" href="https://crypto.stackexchange.com/questions/10263/should-we-trust-the-nist-recommended-ecc-parameters">being questioned</a> after revelations that the NSA willingly inserts backdoors into softwares, hardware components and published standards were made; well-known cryptographers <a rel="nofollow" class="external text" href="https://www.schneier.com/blog/archives/2013/09/the_nsa_is_brea.html#c1675929">have</a> <a rel="nofollow" class="external text" href="http://safecurves.cr.yp.to/rigid.html">expressed</a> <a rel="nofollow" class="external text" href="https://www.hyperelliptic.org/tanja/vortraege/20130531.pdf">doubts</a> about how the NIST curves were designed, and voluntary tainting has already <a rel="nofollow" class="external text" href="https://www.schneier.com/blog/archives/2007/11/the_strange_sto.html">been</a> <a rel="nofollow" class="external text" href="http://www.scientificamerican.com/article/nsa-nist-encryption-scandal/">proved</a> in the past.</li>
+<li> <i>Technical concerns</i>, about the <a rel="nofollow" class="external text" href="http://blog.cr.yp.to/20140323-ecdsa.html">difficulty to properly implement the standard</a> and the <a rel="nofollow" class="external text" href="http://www.gossamer-threads.com/lists/openssh/dev/57162#57162">slowness and design flaws</a> which reduce security in insufficiently precautious implementations. </li>
+</ol>
+<p>Both of those concerns are best summarized in <a rel="nofollow" class="external text" href="https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt#n4">libssh curve25519 introduction</a>. Although the political concerns are still subject to debate, there is a <a rel="nofollow" class="external text" href="https://news.ycombinator.com/item?id=7597653">clear consensus</a> that <a href="#Ed25519">#Ed25519</a> is technically superior and should therefore be preferred.
+</p>
+<h4><span class="mw-headline" id="Ed25519">Ed25519</span></h4>
+<p><a rel="nofollow" class="external text" href="http://ed25519.cr.yp.to/">Ed25519</a> was introduced in <a rel="nofollow" class="external text" href="http://www.openssh.com/txt/release-6.5">OpenSSH 6.5</a>: "<i>Ed25519 is an elliptic curve signature scheme that offers better security than ECDSA and DSA and good performance</i>". Its main strengths are its speed, its constant-time run time (and resistance against side-channel attacks), and its lack of nebulous hard-coded constants.<a rel="nofollow" class="external autonumber" href="https://git.libssh.org/projects/libssh.git/tree/doc/curve25519-sha256@libssh.org.txt">[9]</a> See also <a rel="nofollow" class="external text" href="https://blog.mozilla.org/warner/2011/11/29/ed25519-keys/">this blog post</a> by a Mozilla developer on how it works.
+</p>
+<p>It is already implemented in <a href="https://en.wikipedia.org/wiki/Curve25519#Popularity" class="extiw" title="wikipedia:Curve25519">many applications and libraries</a> and is the <a rel="nofollow" class="external text" href="https://www.libssh.org/2013/11/03/openssh-introduces-curve25519-sha256libssh-org-key-exchange/">default key exchange algorithm</a> (which is different from key <i>signature</i>) in OpenSSH.
+</p>
+<p>Ed25519 key pairs can be generated with:
+</p>
+<pre>$ ssh-keygen -t ed25519
+</pre>
+<p>There is no need to set the key size, as all Ed25519 keys are 256 bits. Also, they rely on a <a rel="nofollow" class="external text" href="http://www.gossamer-threads.com/lists/openssh/dev/57162#57162">new key format</a> which "<i>uses a bcrypt-based key derivation function that makes brute-force attacks against stolen private keys far slower</i>".
+</p>
+<p>For those reasons, compatibility with older versions of OpenSSH or <a href="../en/Secure_Shell.html#Other_SSH_clients_and_servers" title="Ssh" class="mw-redirect">other SSH clients and servers</a> may prove troublesome.
+</p>
+<h3><span class="mw-headline" id="Choosing_the_key_location_and_passphrase">Choosing the key location and passphrase</span></h3>
+<p>Upon issuing the <code>ssh-keygen</code> command, you will be prompted for the desired name and location of your private key.  By default, keys are stored in the <code>~/.ssh/</code> directory and named according to the type of encryption used.  You are advised to accept the default name and location in order for later code examples in this article to work properly.
+</p>
+<p>When prompted for a passphrase, choose something that will be hard to guess if you have the security of your private key in mind.  A longer, more random password will generally be stronger and harder to crack should it fall into the wrong hands.
+</p>
+<p>It is also possible to create your private key without a passphrase.  While this can be convenient, you need to be aware of the associated risks.  Without a passphrase, your private key will be stored on disk in an unencrypted form.  Anyone who gains access to your private key file will then be able to assume your identity on any SSH server to which you connect using key-based authentication.  Furthermore, without a passphrase, you must also trust the root user, as he can bypass file permissions and will be able to access your unencrypted private key file at any time.
+</p>
+<h4><span class="mw-headline" id="Changing_the_private_key.27s_passphrase_without_changing_the_key">Changing the private key's passphrase without changing the key</span></h4>
+<p>If the originally chosen SSH key passphrase is undesirable or must be changed, one can use the <code>ssh-keygen</code> command to change the passphrase without changing the actual key.
+</p>
+<p>To change the passphrase for the private RSA key, run the following command:
+</p>
+<pre>$ ssh-keygen -f ~/.ssh/id_rsa -p
+</pre>
+<h4><span class="mw-headline" id="Managing_multiple_keys">Managing multiple keys</span></h4>
+<p>It is possible —although <a rel="nofollow" class="external text" href="http://security.stackexchange.com/questions/10963/whats-the-common-pragmatic-strategy-for-managing-key-pairs">not considered best practice</a>— to use the same SSH key pair for multiple hosts.
+</p>
+<p>On the other hand, it is rather easy to maintain distinct keys for multiple hosts by using the <code>IdentityFile</code> directive in your openSSH config file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.ssh/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Host SERVER1
+   IdentitiesOnly yes
+   IdentityFile ~/.ssh/id_rsa_SERVER1
+
+Host SERVER2
+   IdentitiesOnly yes
+   IdentityFile ~/.ssh/id_ed25519_SERVER2
+</pre>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 5 ssh_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/ssh_config.5.html">ssh_config(5)</a></span> for full description of these options.
+</p>
+<h2><span class="mw-headline" id="Copying_the_public_key_to_the_remote_server">Copying the public key to the remote server</span></h2>
+<p>Once you have generated a key pair, you will need to copy the public key to the remote server so that it will use SSH key authentication.  The public key file shares the same name as the private key except that it is appended with a <code>.pub</code> extension.  Note that the private key is not shared and remains on the local machine.
+</p>
+<h3><span class="mw-headline" id="Simple_method">Simple method</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method might fail if the remote server uses a non-<code>sh</code> shell such as <code>tcsh</code> as default and uses OpenSSH older than 6.6.1p1. See <a rel="nofollow" class="external text" href="https://bugzilla.redhat.com/show_bug.cgi?id=1045191">this bug report</a>.</div>
+<p>If your key file is <code>~/.ssh/id_rsa.pub</code> you can simply enter the following command.
+</p>
+<pre>$ ssh-copy-id remote-server.org
+</pre>
+<p>If your username differs on remote machine, be sure to prepend the username followed by <code>@</code> to the server name.
+</p>
+<pre>$ ssh-copy-id username@remote-server.org
+</pre>
+<p>If your public key filename is anything other than the default of <code>~/.ssh/id_rsa.pub</code> you will get an error stating <code>/usr/bin/ssh-copy-id: ERROR: No identities found</code>. In this case, you must explicitly provide the location of the public key.
+</p>
+<pre>$ ssh-copy-id -i ~/.ssh/id_ed25519.pub username@remote-server.org
+</pre>
+<p>If the ssh server is listening on a port other than default of 22, be sure to include it within the host argument.
+</p>
+<pre>$ ssh-copy-id -i ~/.ssh/id_ed25519.pub -p 221 username@remote-server.org
+</pre>
+<h3><span class="mw-headline" id="Manual_method">Manual method</span></h3>
+<p>By default, for OpenSSH, the public key needs to be concatenated with <code>~/.ssh/authorized_keys</code>.  Begin by copying the public key to the remote server.
+</p>
+<pre>$ scp ~/.ssh/id_ecdsa.pub username@remote-server.org:
+</pre>
+<p>The above example copies the public key (<code>id_ecdsa.pub</code>) to your home directory on the remote server via <code>scp</code>.  Do not forget to include the <code>:</code> at the end of the server address.  Also note that the name of your public key may differ from the example given.
+</p>
+<p>On the remote server, you will need to create the <code>~/.ssh</code> directory if it does not yet exist and append your public key to the <code>authorized_keys</code> file.
+</p>
+<pre>$ ssh username@remote-server.org
+username@remote-server.org's password:
+$ mkdir ~/.ssh
+$ chmod 700 ~/.ssh
+$ cat ~/id_ecdsa.pub &gt;&gt; ~/.ssh/authorized_keys
+$ rm ~/id_ecdsa.pub
+$ chmod 600 ~/.ssh/authorized_keys
+</pre>
+<p>The last two commands remove the public key file from the server and set the permissions on the <code>authorized_keys</code> file such that it is only readable and writable by you, the owner.
+</p>
+<h2><span class="mw-headline" id="SSH_agents">SSH agents</span></h2>
+<p>If your private key is encrypted with a passphrase, this passphrase must be entered every time you attempt to connect to an SSH server using public-key authentication.  Each individual invocation of <code>ssh</code> or <code>scp</code> will need the passphrase in order to decrypt your private key before authentication can proceed.
+</p>
+<p>An SSH agent is a program which caches your decrypted private keys and provides them to SSH client programs on your behalf.  In this arrangement, you must only provide your passphrase once, when adding your private key to the agent's cache.   This facility can be of great convenience when making frequent SSH connections.
+</p>
+<p>An agent is typically configured to run automatically upon login and persist for the duration of your login session.  A variety of agents, front-ends, and configurations exist to achieve this effect.  This section provides an overview of a number of different solutions which can be adapted to meet your specific needs.
+</p>
+<h3><span class="mw-headline" id="ssh-agent">ssh-agent</span></h3>
+<p><code>ssh-agent</code> is the default agent included with OpenSSH.  It can be used directly or serve as the back-end to a few of the front-end solutions mentioned later in this section.  When <code>ssh-agent</code> is run, it forks to background and prints necessary environment variables. E.g.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh-agent</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SSH_AUTH_SOCK=/tmp/ssh-vEGjCM2147/agent.2147; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=2148; export SSH_AGENT_PID;
+echo Agent pid 2148;</pre>
+<p>To make use of these variables, run the command through the <code>eval</code> command.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ eval $(ssh-agent)</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Agent pid 2157
+</pre>
+<p>Once <code>ssh-agent</code> is running, you will need to add your private key to its cache:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh-add ~/.ssh/id_ecdsa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Enter passphrase for /home/user/.ssh/id_ecdsa:
+Identity added: /home/user/.ssh/id_ecdsa (/home/user/.ssh/id_ecdsa)
+</pre>
+<p>If your private key is encrypted, <code>ssh-add</code> will prompt you to enter your passphrase.  Once your private key has been successfully added to the agent you will be able to make SSH connections without having to enter your passphrase.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To make all <code>ssh</code> clients, including <code>git</code> store keys in the agent on first use, add the configuration setting <code>AddKeysToAgent yes</code> to <code>~/.ssh/config</code>. Other possible values are <code>confirm</code>, <code>ask</code> and <code>no</code> (default).</div>
+<p>In order to start the agent automatically and make sure that only one <code>ssh-agent</code> process runs at a time, add the following to your <code>~/.bashrc</code>:
+</p>
+<pre>
+if ! pgrep -u $USER ssh-agent &gt; /dev/null; then
+    ssh-agent &gt; ~/.ssh-agent-thing
+fi
+if [[ "$SSH_AGENT_PID" == "" ]]; then
+    eval $(&lt;~/.ssh-agent-thing)
+fi
+</pre>
+<p>This will run a <code>ssh-agent</code> process if there is not one already, and save the output thereof. If there is one running already, we retrieve the cached <code>ssh-agent</code> output and evaluate it which will set the necessary environment variables.
+</p>
+<p>There also exist a number of front-ends to <code>ssh-agent</code> and alternative agents described later in this section which avoid this problem.
+</p>
+<h4><span class="mw-headline" id="Start_ssh-agent_with_systemd_user">Start ssh-agent with systemd user</span></h4>
+<p>It is possible to use the <a href="../en/Systemd/User.html" title="Systemd/User">systemd/User</a> facilities to start the agent.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/ssh-agent.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=SSH key agent
+
+[Service]
+Type=forking
+Environment=SSH_AUTH_SOCK=%t/ssh-agent.socket
+ExecStart=/usr/bin/ssh-agent -a $SSH_AUTH_SOCK
+
+[Install]
+WantedBy=<i>default</i>.target
+</pre>
+<p>Add <code>export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"</code> to your shell's startup file, for example <code>.bash_profile</code> for <a href="../en/Bash.html" title="Bash">Bash</a>. Then <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> or <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the service.
+</p>
+<h4><span class="mw-headline" id="ssh-agent_as_a_wrapper_program">ssh-agent as a wrapper program</span></h4>
+<p>An alternative way to start ssh-agent (with, say, each X session) is described in <a rel="nofollow" class="external text" href="http://upc.lbl.gov/docs/user/sshagent.shtml">this ssh-agent tutorial by UC Berkeley Labs</a>. A basic use case is if you normally begin X with the <code>startx</code> command, you can instead prefix it with <code>ssh-agent</code> like so:
+</p>
+<pre>$ ssh-agent startx
+</pre>
+<p>And so you do not even need to think about it you can put an alias in your <code>.bash_aliases</code> file or equivalent:
+</p>
+<pre>alias startx='ssh-agent startx'
+</pre>
+<p>Doing it this way avoids the problem of having extraneous <code>ssh-agent</code> instances floating around between login sessions. Exactly one instance will live and die with the entire X session.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can also add <code>eval $(ssh-agent)</code> to <code>~/.xinitrc</code>.</div>
+<p>See <a href="#Calling_x11-ssh-askpass_with_ssh-add">the below notes on using x11-ssh-askpass with ssh-add</a> for an idea on how to immediately add your key to the agent.
+</p>
+<h3><span class="mw-headline" id="GnuPG_Agent">GnuPG Agent</span></h3>
+<p>The <a href="../en/GnuPG.html#gpg-agent" title="GnuPG">gpg-agent</a> has OpenSSH agent emulation. See <a href="../en/GnuPG.html#SSH_agent" title="GnuPG">GnuPG#SSH agent</a> for necessary configuration.
+</p>
+<h3><span class="mw-headline" id="Keychain">Keychain</span></h3>
+<p><a rel="nofollow" class="external text" href="http://www.funtoo.org/Keychain">Keychain</a> is a program designed to help you easily manage your SSH keys with minimal user interaction. It is implemented as a shell script which drives both <i>ssh-agent</i> and <i>ssh-add</i>. A notable feature of Keychain is that it can maintain a single <i>ssh-agent</i> process across multiple login sessions. This means that you only need to enter your passphrase once each time your local machine is booted.
+</p>
+<h4><span class="mw-headline" id="Installation">Installation</span></h4>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=keychain">keychain</a></span> package available from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h4><span class="mw-headline" id="Configuration">Configuration</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>As of 2015-09-26, the <code>-Q, --quick</code> option has the unexpected side-effect of making <i>keychain</i> switch to a newly-spawned <i>ssh-agent</i> upon relogin (at least on systems using <a href="../en/GNOME.html" title="GNOME">GNOME</a>), forcing you to re-add all the previously registered keys.</div>
+<p>Add a line similar to the following to your <a href="../en/Command-line_shell.html" title="Shell" class="mw-redirect">shell</a> configuration file, <i>e.g.</i> if using <a href="../en/Bash.html" title="Bash">Bash</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+eval $(keychain --eval --quiet id_ed25519 id_rsa ~/.keys/my_custom_key)
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>~/.bashrc</code> is used instead of the upstream suggested <code>~/.bash_profile</code> because on Arch it is sourced by both login and non-login shells, making it suitable for textual and graphical environments alike. See <a href="../en/Bash.html#Invocation" title="Bash">Bash#Invocation</a> for more information on the difference between those.</div>
+<p>In the above example,
+</p>
+<ul>
+<li> the <code>--eval</code> switch outputs lines to be evaluated by the opening <code>eval</code> command; this sets the necessary environments variables for SSH client to be able to find your agent.</li>
+<li> <code>--quiet</code> will limit output to warnings, errors, and user prompts.</li>
+</ul>
+<p>Multiple keys can be specified on the command line, as shown in the example. By default keychain will look for key pairs in the <code>~/.ssh/</code> directory, but absolute path can be used for keys in non-standard location. You may also use the <code>--confhost</code> option to inform keychain to look in <code>~/.ssh/config</code> for <code>IdentityFile</code> settings defined for particular hosts, and use these paths to locate keys.
+</p>
+<p>See <code>keychain --help</code> or <code>man keychain</code> for details on setting <i>keychain</i> for other shells.
+</p>
+<p>To test Keychain, simply open a new terminal emulator or log out and back in your session. It should prompt you for the passphrase of the specified private key(s) (if applicable), either using the program set in <code>$SSH_ASKPASS</code> or on the terminal.
+</p>
+<p>Because Keychain reuses the same <i>ssh-agent</i> process on successive logins, you should not have to enter your passphrase the next time you log in or open a new terminal. You will only be prompted for your passphrase once each time the machine is rebooted.
+</p>
+<h4><span class="mw-headline" id="Tips">Tips</span></h4>
+<ul><li> <i>keychain</i> expects public key files to exist in the same directory as their private counterparts, with a <code>.pub</code> extension. If the private key is a symlink, the public key can be found alongside the symlink or in the same directory as the symlink target (this capability requires the <code>readlink</code> command to be available on the system).</li></ul>
+<ul><li>to disable the graphical prompt and always enter your passphrase on the terminal, use the <code>--nogui</code> option. This allows to copy-paste long passphrases from a password manager for example.</li></ul>
+<ul><li>if you do not want to be immediately prompted for unlocking the keys but rather wait until they are needed, use the <code>--noask</code> option.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Keychain is able to manage <a href="../en/GnuPG.html" title="GPG" class="mw-redirect">GPG</a> keys in the same fashion. By default it attempts to start <i>ssh-agent</i> only, but you can modify this behavior using the <code>--agents</code> option, <i>e.g.</i> <code>--agents ssh,gpg</code>. See <code>man keychain</code>.</div>
+<h3><span class="mw-headline" id="envoy">envoy</span></h3>
+<p>An alternative to keychain is <a rel="nofollow" class="external text" href="https://github.com/vodik/envoy">envoy</a>. Envoy is available as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=envoy">envoy</a></span> , or the Git version as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/envoy-git/">envoy-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<p>After installing it, set up the envoy socket by <a href="../en/Systemd.html#Using_units" title="Enabling" class="mw-redirect">enabling</a> <code>envoy@ssh-agent.socket</code>.
+</p>
+<p>And add to your shell's rc file:
+</p>
+<pre>envoy -t ssh-agent -a <i>ssh_key</i>
+source &lt;(envoy -p)
+</pre>
+<p>If this syntax for sourcing causes errors (in mksh, for example), you can replace it with:
+</p>
+<pre>envoy -t ssh-agent -a <i>ssh_key</i>
+eval "$(envoy -p)"
+</pre>
+<p>If the key is <code>~/.ssh/id_rsa</code>, <code>~/.ssh/id_dsa</code>, <code>~/.ssh/id_ecdsa</code>, or <code>~/.ssh/identity</code>, the <code>-a <i>ssh_key</i></code> parameter is not needed.
+</p>
+<h4><span class="mw-headline" id="envoy_with_key_passphrases_stored_in_kwallet">envoy with key passphrases stored in kwallet</span></h4>
+<p>If you have long passphrases for your SSH keys, remembering them can be a pain. So let us tell kwallet to store them!
+Along with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=envoy">envoy</a></span>, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ksshaskpass">ksshaskpass</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kwalletmanager">kwalletmanager</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>. Next, enable the envoy socket in systemd (see above).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As of April 30, 2015, if after installation <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ksshaskpass">ksshaskpass</a></span> keeps asking for access to your wallet even after having submitted the password, you might have <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=192862">this</a> problem. The proposed solution is to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ksshaskpass4/">ksshaskpass4</a></span><sup><small>AUR</small></sup>, though this might break your login.</div>
+<p>First, you will add this script to <code>~/.kde4/Autostart/ssh-agent.sh</code>:
+</p>
+<pre>#!/bin/sh
+envoy -t ssh-agent -a <i>ssh_key</i>
+</pre>
+<p>Then, make sure the script is executable by running: <code>chmod +x ~/.kde4/Autostart/ssh-agent.sh</code>
+</p>
+<p>And add this to <code>~/.kde4/env/ssh-agent.sh</code>:
+</p>
+<pre>#!/bin/sh
+eval $(envoy -p)
+</pre>
+<p>When you log into KDE, it will execute the <code>ssh-agent.sh</code> script. This will call <i>ksshaskpass</i>, which will prompt you for your kwallet password when envoy calls <i>ssh-agent</i>.
+</p>
+<h3><span class="mw-headline" id="x11-ssh-askpass">x11-ssh-askpass</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=x11-ssh-askpass">x11-ssh-askpass</a></span> package provides a graphical dialog for entering your passhrase when running an X session. <i>x11-ssh-askpass</i> depends only on the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libx11">libx11</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libxt">libxt</a></span> libraries, and the appearance of <i>x11-ssh-askpass</i> is customizable. While it can be invoked by the <i>ssh-add</i> program, which will then load your decrypted keys into <a href="#ssh-agent">ssh-agent</a>, the following instructions will, instead, configure <i>x11-ssh-askpass</i> to be invoked by the aforementioned <a href="#Keychain">Keychain</a> script.
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=keychain">keychain</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=x11-ssh-askpass">x11-ssh-askpass</a></span>, both available in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>Edit your <code>~/.xinitrc</code> file to include the following lines, replacing the name and location of your private key if necessary. Be sure to place these commands <b>before</b> the line which invokes your window manager.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.xinitrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+keychain ~/.ssh/id_ecdsa
+[ -f ~/.keychain/$HOSTNAME-sh ] &amp;&amp; . ~/.keychain/$HOSTNAME-sh 2&gt;/dev/null
+[ -f ~/.keychain/$HOSTNAME-sh-gpg ] &amp;&amp; . ~/.keychain/$HOSTNAME-sh-gpg 2&gt;/dev/null
+...
+exec openbox-session</pre>
+<p>In the above example, the first line invokes <i>keychain</i> and passes the name and location of your private key. If this is not the first time <i>keychain</i> was invoked, the following two lines load the contents of <code>$HOSTNAME-sh</code> and <code>$HOSTNAME-sh-gpg</code>, if they exist. These files store the environment variables of the previous instance of <i>keychain</i>.
+</p>
+<h4><span class="mw-headline" id="Calling_x11-ssh-askpass_with_ssh-add">Calling x11-ssh-askpass with ssh-add</span></h4>
+<p>The <i>ssh-add</i> manual page specifies that, in addition to needing the <code>DISPLAY</code> variable defined, you also need <code>SSH_ASKPASS</code> set to the name of your askpass program (in this case <i>x11-ssh-askpass</i>). It bears keeping in mind that the default Arch Linux installation places the <i>x11-ssh-askpass</i> binary in <code>/usr/lib/ssh/</code>, which will not be in most people's <code>PATH</code>. This is a little annoying, not only when declaring the <code>SSH_ASKPASS</code> variable, but also when theming. You have to specify the full path everywhere. Both inconveniences can be solved simultaneously by symlinking:
+</p>
+<pre>$ ln -sv /usr/lib/ssh/x11-ssh-askpass ~/bin/ssh-askpass
+</pre>
+<p>This is assuming that <code>~/bin</code> is in your <code>PATH</code>. So now in your <code>.xinitrc</code>, before calling your window manager, one just needs to export the <code>SSH_ASKPASS</code> environment variable:
+</p>
+<pre>$ export SSH_ASKPASS=ssh-askpass
+</pre>
+<p>and your <a href="../en/X_resources.html" title="X resources">X resources</a> will contain something like:
+</p>
+<pre>ssh-askpass*background: #000000
+</pre>
+<p>Doing it this way works well with <a href="#ssh-agent_as_a_wrapper_program">the above method on using <i>ssh-agent</i> as a wrapper program</a>. You start X with <code>ssh-agent startx</code> and then add <i>ssh-add</i> to your window manager's list of start-up programs.
+</p>
+<h4><span class="mw-headline" id="Theming">Theming</span></h4>
+<p>The appearance of the <i>x11-ssh-askpass</i> dialog can be customized by setting its associated <a href="../en/X_resources.html" title="X resources">X resources</a>. The <i>x11-ssh-askpass</i> <a rel="nofollow" class="external text" href="http://www.jmknoble.net/software/x11-ssh-askpass/">home page</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2015-04-01]</sup> presents some <a rel="nofollow" class="external text" href="http://www.jmknoble.net/software/x11-ssh-askpass/screenshots.html">example themes</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2015-04-01]</sup>. See the <i>x11-ssh-askpass</i> manual page for full details.
+</p>
+<h4><span class="mw-headline" id="Alternative_passphrase_dialogs">Alternative passphrase dialogs</span></h4>
+<p>There are other passphrase dialog programs which can be used instead of <i>x11-ssh-askpass</i>. The following list provides some alternative solutions.
+</p>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ksshaskpass">ksshaskpass</a></span> is available in the official repositories. It is dependent on <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kdelibs">kdelibs</a></span> and is suitable for the <a href="../en/KDE.html" title="KDE">KDE</a> Desktop Environment.</li></ul>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh-askpass">openssh-askpass</a></span> depends on the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qt4">qt4</a></span> libraries and is available from the official repositories.</li></ul>
+<h3><span class="mw-headline" id="pam_ssh">pam_ssh</span></h3>
+<p>The <a rel="nofollow" class="external text" href="http://pam-ssh.sourceforge.net/">pam_ssh</a> project exists to provide a <a href="../en/PAM.html" title="Pluggable Authentication Module" class="mw-redirect">Pluggable Authentication Module</a> (PAM) for SSH private keys.  This module can provide single sign-on behavior for your SSH connections.  On login, your SSH private key passphrase can be entered in place of, or in addition to, your traditional system password.  Once you have been authenticated, the pam_ssh module spawns ssh-agent to store your decrypted private key for the duration of the session.
+</p>
+<p>To enable single sign-on behavior at the tty login prompt, install the unofficial <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pam_ssh/">pam_ssh</a></span><sup><small>AUR</small></sup> package. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>pam_ssh 2.0 now requires that all private keys used in the authentication process be located under <code>~/.ssh/login-keys.d/</code>.</div>
+<p>Create a symlink to your private key file and place it in <code>~/.ssh/login-keys.d/</code>.  Replace the <code>id_rsa</code> in the example below with the name of your own private key file.
+</p>
+<pre>$ mkdir ~/.ssh/login-keys.d/
+$ cd ~/.ssh/login-keys.d/
+$ ln -s ../id_rsa
+</pre>
+<p>Edit the <code>/etc/pam.d/login</code> configuration file to include the text highlighted in bold in the example below.  The order in which these lines appear is significiant and can affect login behavior.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Misconfiguring PAM can leave the system in a state where all users become locked out.  Before making any changes, you should have an understanding of how PAM configuration works as well as a backup means of accessing the PAM configuration files, such as an Arch Live CD, in case you become locked out and need to revert any changes.  An IBM developerWorks <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-pam/index.html">article</a> is available which explains PAM configuration in further detail.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/login</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+
+auth       required     pam_securetty.so
+auth       requisite    pam_nologin.so
+auth       include      system-local-login
+<b>auth       optional     pam_ssh.so        try_first_pass</b>
+account    include      system-local-login
+session    include      system-local-login
+<b>session    optional     pam_ssh.so</b></pre>
+<p>In the above example, login authentication initially proceeds as it normally would, with the user being prompted to enter his user password.  The additional <code>auth</code> authentication rule added to the end of the authentication stack then instructs the pam_ssh module to try to decrypt any private keys found in the <code>~/.ssh/login-keys.d</code> directory.  The <code>try_first_pass</code> option is passed to the pam_ssh module, instructing it to first try to decrypt any SSH private keys using the previously entered user password.  If the user's private key passphrase and user password are the same, this should succeed and the user will not be prompted to enter the same password twice.  In the case where the user's private key passphrase user password differ, the pam_ssh module will prompt the user to enter the SSH passphrase after the user password has been entered.  The <code>optional</code> control value ensures that users without an SSH private key are still able to log in.  In this way, the use of pam_ssh will be transparent to users without an SSH private key.
+</p>
+<p>If you use another means of logging in, such as an X11 display manager like <a href="../en/SLiM.html" title="SLiM">SLiM</a> or <a href="../en/XDM.html" title="XDM">XDM</a> and you would like it to provide similar functionality, you must edit its associated PAM configuration file in a similar fashion.  Packages providing support for PAM typically place a default configuration file in the <code>/etc/pam.d/</code> directory.
+</p>
+<p>Further details on how to use pam_ssh and a list of its options can be found in the pam_ssh man page.
+</p>
+<h4><span class="mw-headline" id="Using_a_different_password_to_unlock_the_SSH_key">Using a different password to unlock the SSH key</span></h4>
+<p>If you want to unlock the SSH keys or not depending on whether you use your key's passphrase or the (different!) login password, you can modify <code>/etc/pam.d/system-auth</code> to
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+
+<b>auth      [success=1 new_authtok_reqd=1 ignore=ignore default=ignore]  pam_unix.so     try_first_pass nullok</b>
+<b>auth      required  pam_ssh.so      use_first_pass</b>
+auth      optional  pam_permit.so
+auth      required  pam_env.so
+
+account   required  pam_unix.so
+account   optional  pam_permit.so
+account   required  pam_time.so
+
+password  required  pam_unix.so     try_first_pass nullok sha512 shadow
+password  optional  pam_permit.so
+
+session   required  pam_limits.so
+session   required  pam_unix.so
+session   optional  pam_permit.so
+<b>session   optional  pam_ssh.so</b></pre>
+<p>For an explanation, see <a rel="nofollow" class="external text" href="http://unix.stackexchange.com/a/239486/863">here</a>.
+</p>
+<h4><span class="mw-headline" id="Known_issues_with_pam_ssh">Known issues with pam_ssh</span></h4>
+<p>Work on the pam_ssh project is infrequent and the documentation provided is sparse.  You should be aware of some of its limitations which are not mentioned in the package itself.
+</p>
+<ul><li> Versions of pam_ssh prior to version 2.0 do not support SSH keys employing the newer option of ECDSA (elliptic curve) cryptography.  If you are using earlier versions of pam_ssh you must use either RSA or DSA keys.</li></ul>
+<ul><li> The <code>ssh-agent</code> process spawned by pam_ssh does not persist between user logins.  If you like to keep a <a href="../en/GNU_Screen.html" title="GNU Screen">GNU Screen</a> session active between logins you may notice when reattaching to your screen session that it can no longer communicate with ssh-agent.  This is because the GNU Screen environment and those of its children will still reference the instance of ssh-agent which existed when GNU Screen was invoked but was subsequently killed in a previous logout.  The <a href="#Keychain">Keychain</a> front-end avoids this problem by keeping the ssh-agent process alive between logins.</li></ul>
+<h3><span class="mw-headline" id="GNOME_Keyring">GNOME Keyring</span></h3>
+<p>If you use the <a href="../en/GNOME.html" title="GNOME">GNOME</a> desktop, the <a href="../en/GNOME/Keyring.html" title="GNOME Keyring" class="mw-redirect">GNOME Keyring</a> tool can be used as an SSH agent. See the <a href="../en/GNOME/Keyring.html" title="GNOME Keyring" class="mw-redirect">GNOME Keyring</a> article for further details.
+</p>
+<h3><span class="mw-headline" id="Store_SSH_keys_with_Kwallet">Store SSH keys with Kwallet</span></h3>
+<p>For instructions on how to use kwallet to store your SSH keys, see <a href="../en/KDE_Wallet.html#Using_the_KDE_Wallet_to_store_ssh_keys" title="KDE Wallet">KDE Wallet#Using the KDE Wallet to store ssh keys</a>.
+</p>
+<h3><span class="mw-headline" id="KeePass2_with_KeeAgent_plugin">KeePass2 with KeeAgent plugin</span></h3>
+<p><a rel="nofollow" class="external text" href="http://lechnology.com/software/keeagent/">KeeAgent</a> is a plugin for <a href="../en/KeePass.html" title="KeePass">KeePass</a> that allows SSH keys stored in a KeePass database to be used for SSH authentication by other programs.
+</p>
+<ul>
+<li> Supports both PuTTY and OpenSSH private key formats.</li>
+<li> Works with native SSH agent on Linux/Mac and with PuTTY on Windows.</li>
+</ul>
+<p>See <a href="../en/KeePass.html#Plugin_Installation" title="KeePass">KeePass#Plugin Installation</a> or <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/keepass-plugin-keeagent/">keepass-plugin-keeagent</a></span><sup><small>AUR</small></sup> package. There is also the beta version, where new features appear first, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/keepass-plugin-keeagent-beta/">keepass-plugin-keeagent-beta</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Key_ignored_by_the_server">Key ignored by the server</span></h3>
+<p>If it appears that the SSH server is ignoring your keys, ensure that you have the proper permissions set on all relevant files.<br>
+For the local machine:
+</p>
+<pre>$ chmod 700 ~/
+$ chmod 700 ~/.ssh
+$ chmod 600 ~/.ssh/id_ecdsa
+</pre>
+<p>For the remote machine:
+</p>
+<pre>$ chmod 700 ~/
+$ chmod 700 ~/.ssh
+$ chmod 600 ~/.ssh/authorized_keys
+</pre>
+<p>If that does not solve the problem you may try temporarily setting <code>StrictModes</code> to <code>no</code> in <code>sshd_config</code>. If authentication with StrictModes off is successful, it is likely an issue with file permissions persists.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Do not forget to set <code>StrictModes</code> to <code>yes</code> for added security.</div>
+<p>Make sure the remote machine supports the type of keys you are using. Try using RSA or DSA keys instead <a href="#Generating_an_SSH_key_pair">#Generating an SSH key pair</a>
+</p>
+<pre>Some servers do not support ECDSA keys. 
+</pre>
+<p>Failing this, run the sshd in debug mode and monitor the output while connecting:
+</p>
+<pre># /usr/bin/sshd -d
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-keyc.html">OpenSSH key management, Part 1</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/linux/library/l-keyc2/">OpenSSH key management, Part 2</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/library/l-keyc3/">OpenSSH key management, Part 3</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://kimmo.suominen.com/docs/ssh/">Getting started with SSH</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.openssh.com/txt/release-5.7">OpenSSH 5.7 Release Notes</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://stribika.github.io/2015/01/04/secure-secure-shell.html">Secure Secure Shell</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Secure_Shell.html" title="Category:Secure Shell">Secure Shell</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

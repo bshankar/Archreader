@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Power management/Suspend and hibernate - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Power_management_Suspend_and_hibernate skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Power management/Suspend and hibernate</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Power_management.html" title="Power management">Power management</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Uswsusp.html" title="Uswsusp">Uswsusp</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Systemd.html" title="Systemd">systemd</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Pm-utils.html" title="Pm-utils">pm-utils</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Hibernate-script.html" title="Hibernate-script">hibernate-script</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Power_management.html" title="Power management">Power management</a></li>
+</ul>
+</div>
+<p>Currently there are three methods of suspending available: <b>suspend to RAM</b> (usually called just <b>suspend</b>), <b>suspend to disk</b> (usually known as <b>hibernate</b>), and <b>hybrid suspend</b> (sometimes aptly called <b>suspend to both</b>):
+</p>
+<ul><li> <b>Suspend to RAM</b> method cuts power to most parts of the machine aside from the RAM, which is required to restore the machine's state. Because of the large power savings, it is advisable for laptops to automatically enter this mode when the computer is running on batteries and the lid is closed (or the user is inactive for some time).</li></ul>
+<ul><li> <b>Suspend to disk</b> method saves the machine's state into <a href="../../en/Swap.html" title="Swap space" class="mw-redirect">swap space</a> and completely powers off the machine. When the machine is powered on, the state is restored. Until then, there is zero power consumption.</li></ul>
+<ul><li> <b>Suspend to both</b> method saves the machine's state into swap space, but does not power off the machine. Instead, it invokes usual suspend to RAM. Therefore, if the battery is not depleted, the system can resume from RAM. If the battery is depleted, the system can be resumed from disk, which is much slower than resuming from RAM, but the machine's state has not been lost.</li></ul>
+<p>There are multiple low level interfaces (backends) providing basic functionality, and some high level interfaces providing tweaks to handle problematic hardware drivers/kernel modules (e.g. video card re-initialization).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Low_level_interfaces"><span class="tocnumber">1</span> <span class="toctext">Low level interfaces</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#kernel_.28swsusp.29"><span class="tocnumber">1.1</span> <span class="toctext">kernel (swsusp)</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#uswsusp"><span class="tocnumber">1.2</span> <span class="toctext">uswsusp</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#tuxonice"><span class="tocnumber">1.3</span> <span class="toctext">tuxonice</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#High_level_interfaces"><span class="tocnumber">2</span> <span class="toctext">High level interfaces</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#systemd"><span class="tocnumber">2.1</span> <span class="toctext">systemd</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#pm-utils"><span class="tocnumber">2.2</span> <span class="toctext">pm-utils</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Hibernation"><span class="tocnumber">3</span> <span class="toctext">Hibernation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#About_swap_partition.2Ffile_size"><span class="tocnumber">3.1</span> <span class="toctext">About swap partition/file size</span></a></li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Required_kernel_parameters"><span class="tocnumber">3.2</span> <span class="toctext">Required kernel parameters</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Hibernation_into_swap_file"><span class="tocnumber">3.2.1</span> <span class="toctext">Hibernation into swap file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Configure_the_initramfs"><span class="tocnumber">3.3</span> <span class="toctext">Configure the initramfs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#ACPI_OS_NAME"><span class="tocnumber">4.1</span> <span class="toctext">ACPI_OS_NAME</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#VAIO_Users"><span class="tocnumber">4.2</span> <span class="toctext">VAIO Users</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Suspend.2Fhibernate_doesn.27t_work.2C_or_not_consistently"><span class="tocnumber">4.3</span> <span class="toctext">Suspend/hibernate doesn't work, or not consistently</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Wake-on-LAN"><span class="tocnumber">4.4</span> <span class="toctext">Wake-on-LAN</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Instantaneous_wakeups_from_suspend"><span class="tocnumber">4.5</span> <span class="toctext">Instantaneous wakeups from suspend</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Low_level_interfaces">Low level interfaces</span></h2>
+<p>Though these interfaces can be used directly, it is advisable to use some of <a href="#High_level_interfaces">high level interfaces</a> to suspend/hibernate. Using low level interfaces directly is significantly faster than using any high level interface, since running all the pre- and post-suspend hooks takes time, but hooks can properly set hardware clock, restore wireless etc.
+</p>
+<h3><span class="mw-headline" id="kernel_.28swsusp.29">kernel (swsusp)</span></h3>
+<p>The most straightforward approach is to directly inform the in-kernel software suspend code (swsusp) to enter a suspended state; the exact method and state depends on the level of hardware support. On modern kernels, writing appropriate strings to <code>/sys/power/state</code> is the primary mechanism to trigger this suspend.
+</p>
+<p>See <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/power/states.txt">kernel documentation</a> for details.
+</p>
+<h3><span class="mw-headline" id="uswsusp">uswsusp</span></h3>
+<p>The uswsusp ('Userspace Software Suspend') is a wrapper around the kernel's suspend-to-RAM mechanism, which performs some graphics adapter manipulations from userspace before suspending and after resuming.
+</p>
+<p>See main article <a href="../../en/Uswsusp.html" title="Uswsusp">Uswsusp</a>.
+</p>
+<h3><span class="mw-headline" id="tuxonice">tuxonice</span></h3>
+<p>TuxOnIce is a fork of the kernel implementation of suspend/hibernate that provides kernel patches to improve the default implementation. It requires a custom kernel to achieve this purpose.
+</p>
+<p>See main article <a href="../../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a>.
+</p>
+<h2><span class="mw-headline" id="High_level_interfaces">High level interfaces</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The end goal of these packages is to provide binaries/scripts that can be invoked to perform suspend/hibernate. Actually hooking them up to power buttons or menu clicks or laptop lid events is usually left to other tools. To automatically suspend/hibernate on certain power events, such as laptop lid close or battery depletion percentage, you may want to look into running <a href="../../en/Acpid.html" title="Acpid">Acpid</a>.</div>
+<h3><span class="mw-headline" id="systemd">systemd</span></h3>
+<p><a href="../../en/Systemd.html" title="Systemd">systemd</a> provides native commands for suspend, hibernate and a hybrid suspend, see <a href="../../en/Power_management.html#Power_management_with_systemd" title="Power management">Power management#Power management with systemd</a> for details. This is the default interface used in Arch Linux.
+</p>
+<p>See <a href="../../en/Power_management.html#Sleep_hooks" title="Power management">Power management#Sleep hooks</a> for additional information on configuring suspend/hibernate hooks. Also see <code>man systemctl</code>, <code>man systemd-sleep</code>, and <code>man systemd.special</code>.
+</p>
+<h3><span class="mw-headline" id="pm-utils">pm-utils</span></h3>
+<p>pm-utils is a set of shell scripts that encapsulate the backend's suspend/hibernate functionality. It comes with a set of pre- and post-suspend tweaks and various hooks to customize the process.
+</p>
+<p>See main article <a href="../../en/Pm-utils.html" title="Pm-utils">pm-utils</a>.
+</p>
+<h2><span class="mw-headline" id="Hibernation">Hibernation</span></h2>
+<p>In order to use hibernation, you need to create a <a href="../../en/Swap.html" title="Swap">swap</a> partition or file. You will need to point the kernel to your swap using the <code>resume=</code> kernel parameter, which is configured via the boot loader. You will also need to <a href="#Configure_the_initramfs">configure the initramfs</a>. This tells the kernel to attempt resuming from the specified swap in early userspace. These three steps are described in detail below.
+</p>
+<h3><span class="mw-headline" id="About_swap_partition.2Ffile_size">About swap partition/file size</span></h3>
+<p>Even if your swap partition is smaller than RAM, you still have a big chance of hibernating successfully. According to <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/power/interface.txt">kernel documentation</a>:
+</p>
+<dl><dd> <i><code>/sys/power/image_size</code> controls the size of the image created by the suspend-to-disk mechanism. It can be written a string representing a non-negative integer that will be used as an upper limit of the image size, in bytes. The suspend-to-disk mechanism will do its best to ensure the image size will not exceed that number. However, if this turns out to be impossible, it will try to suspend anyway using the smallest image possible. In particular, if "0" is written to this file, the suspend image will be as small as possible. Reading from this file will display the current image size limit, which is set to 2/5 of available RAM by default.</i>
+</dd></dl>
+<p>You may either decrease the value of <code>/sys/power/image_size</code> to make the suspend image as small as possible (for small swap partitions), or increase it to possibly speed up the hibernation process.
+</p>
+<h3><span class="mw-headline" id="Required_kernel_parameters">Required kernel parameters</span></h3>
+<p>The kernel parameter <code>resume=<i>swap_partition</i></code> has to be used. Either the name the kernel assigns to the partition or its <a href="../../en/Persistent_block_device_naming.html#by-uuid" title="UUID" class="mw-redirect">UUID</a> can be used as <code><i>swap_partition</i></code>. For example:
+</p>
+<ul>
+<li> <code>resume=/dev/sda1</code>
+</li>
+<li> <code>resume=UUID=4209c845-f495-4c43-8a03-5363dd433153</code>
+</li>
+<li> <code>resume=/dev/mapper/archVolumeGroup-archLogicVolume</code> -- example if using LVM</li>
+</ul>
+<p>Generally, the naming method used for the <code>resume</code> parameter should be the same as used for the <code>root</code> parameter.
+</p>
+<p>The configuration depends on the used <a href="../../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a>, refer to <a href="../../en/Kernel_parameters.html" title="Kernel parameters">Kernel parameters</a> for details.
+</p>
+<h4><span class="mw-headline" id="Hibernation_into_swap_file">Hibernation into swap file</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><a href="../../en/Btrfs.html#Swap_file" title="Btrfs">Btrfs</a> does not support swap files. Failure to heed this warning may result in file system corruption. While a swap file may be used on Btrfs when mounted through a loop device, this will result in severely degraded swap performance.</div>
+<p>Using a swap file instead of a swap partition requires an additional kernel parameter <code>resume_offset=<i>swap_file_offset</i></code>.
+</p>
+<p>The value of <code><i>swap_file_offset</i></code> can be obtained by running <code>filefrag -v <i>swap_file</i></code>, the output is in a table format and the required value is located in the first row of the <code>physical_offset</code> column. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># filefrag -v /swapfile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Filesystem type is: ef53
+File size of /swapfile is 4294967296 (1048576 blocks of 4096 bytes)
+ ext:     logical_offset:        physical_offset: length:   expected: flags:
+   0:        0..       0:      38912..     38912:      1:            
+   1:        1..   22527:      38913..     61439:  22527:             unwritten
+   2:    22528..   53247:     899072..    929791:  30720:      61440: unwritten
+...
+</pre>
+<p>In the example the value of <code><i>swap_file_offset</i></code> is the first <code>38912</code> with the two periods.
+</p>
+<p>The value of <code><i>swap_file_offset</i></code> can also be obtained by running <code>swap-offset <i>swap_file</i></code>. The <i>swap-offset</i> binary is provided by package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uswsusp-git/">uswsusp-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> The <code>resume</code> kernel parameter specifies the device of the partition that contains the swap file, not swap file itself! The parameter <code>resume_offset</code> informs the system where the swap file starts on the resume device. Before the first hibernation a reboot is required for them to be active.</li>
+<li> If using <a href="../../en/Uswsusp.html" title="Uswsusp">uswsusp</a>, then these two parameters have to be provided in <code>/etc/suspend.conf</code> via the keys <code>resume device</code> and <code>resume offset</code>. No reboot is required in this case.</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You might want to decrease the <a href="../../en/Swap.html#Swappiness" title="Swap">Swap#Swappiness</a> for your swapfile if the only purpose is to be able to hibernate and not expand RAM.</div>
+<h3><span class="mw-headline" id="Configure_the_initramfs">Configure the initramfs</span></h3>
+<ul><li> When an <a href="../../en/Mkinitcpio.html" title="Initramfs" class="mw-redirect">initramfs</a> with the <code>base</code> hook is used, which is the default, the <code>resume</code> hook is required in <code>/etc/mkinitcpio.conf</code>. Whether by label or by UUID, the swap partition is referred to with a udev device node, so the <code>resume</code> hook must go <i>after</i> the <code>udev</code> hook. This example was made starting from the default hook configuration:</li></ul>
+<dl><dd><pre>HOOKS="base udev <b>resume</b> autodetect modconf block filesystems keyboard fsck"</pre></dd></dl>
+<dl><dd>Remember to <a href="../../en/Mkinitcpio.html#Image_creation_and_activation" title="Mkinitcpio">rebuild the initramfs</a> for these changes to take effect.</dd></dl>
+<dl><dd><div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a href="../../en/LVM.html" title="LVM">LVM</a> users should add the <code>resume</code> hook after <code>lvm2</code>.</div></dd></dl>
+<ul><li> When an initramfs with the <code>systemd</code> hook is used, a resume mechanism is already provided, and no further hooks need to be added.</li></ul>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="ACPI_OS_NAME">ACPI_OS_NAME</span></h3>
+<p>You might want to tweak your <b>DSDT table</b> to make it work. See <a href="../../en/DSDT.html" title="DSDT">DSDT</a> article
+</p>
+<h3><span class="mw-headline" id="VAIO_Users">VAIO Users</span></h3>
+<p>Add acpi_sleep=nonvs kernel flag to your loader, and you are done!
+</p>
+<h3><span class="mw-headline" id="Suspend.2Fhibernate_doesn.27t_work.2C_or_not_consistently">Suspend/hibernate doesn't work, or not consistently</span></h3>
+<p>There have been many reports about the screen going black without easily viewable errors or the ability to do anything when going into and coming back from suspend and/or hibernate. These problems have been seen on both laptops and desktops. This is not an official solution, but switching to an older kernel, especially the LTS-kernel, will probably fix this.
+</p>
+<p>Sometimes the screen goes black due to device initialization from within the initramfs. Removing any modules you might have in <a href="../../en/Mkinitcpio.html#MODULES" title="Mkinitcpio">Mkinitcpio#MODULES</a> and rebuilding the initramfs, can possibly solve this issue, specially graphics drivers for <a href="../../en/Kernel_mode_setting.html#Early_KMS_start" title="Kernel mode setting">early KMS</a>. Initializing such devices before resuming can cause inconsistencies that prevents the system resuming from hibernation. This does not affect resuming from RAM. Also, check this <a rel="nofollow" class="external text" href="https://01.org/blogs/rzhang/2015/best-practice-debug-linux-suspend/hibernate-issues">article</a> for the best practices to debug suspend/hibernate issues.
+</p>
+<h3><span class="mw-headline" id="Wake-on-LAN">Wake-on-LAN</span></h3>
+<p>If <a href="../../en/Wake-on-LAN.html" title="Wake-on-LAN">Wake-on-LAN</a> is active, the network interface card will consume power even if the computer is hibernated.
+</p>
+<h3><span class="mw-headline" id="Instantaneous_wakeups_from_suspend">Instantaneous wakeups from suspend</span></h3>
+<p>For some Intel Haswell systems with the LynxPoint and LynxPoint-LP chipset, instantaneous wakeups after suspend are reported. They are linked to erroneous BIOS ACPI implementations and how the <code>xhci_hcd</code> module interprets it during boot. As a work-around reported affected systems are added to a blacklist (named <code>XHCI_SPURIOUS_WAKEUP</code>) by the kernel case-by-case.<a rel="nofollow" class="external autonumber" href="https://bugzilla.kernel.org/show_bug.cgi?id=66171#c6">[1]</a> 
+</p>
+<p>Instantaneous resume may happen, for example, if a USB device is plugged during suspend and ACPI wakeup triggers are enabled. A viable work-around for such a system, if it is not on the blacklist yet, is to disable the wakeup triggers. An example to disable wakeup through USB is described as follows.<a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?pid=1575617">[2]</a> 
+</p>
+<p>To view the current configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/acpi/wakeup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Device  S-state   Status   Sysfs node
+...
+EHC1      S3    *enabled  pci:0000:00:1d.0
+EHC2      S3    *enabled  pci:0000:00:1a.0
+XHC       S3    *enabled  pci:0000:00:14.0
+...
+</pre>
+<p>The relevant devices are <code>EHC1</code>, <code>EHC1</code> and <code>XHC</code> (for USB 3.0). To toggle their state you have to echo the device name to the file as root.
+</p>
+<pre># echo EHC1 &gt; /proc/acpi/wakeup
+# echo EHC2 &gt; /proc/acpi/wakeup
+# echo XHC &gt; /proc/acpi/wakeup
+</pre>
+<p>This should result in suspension working again. However, this settings are only temporary and would have to be set at every reboot. To automate this take a look at <a href="../../en/Systemd.html#Writing_unit_files" title="Systemd">systemd#Writing unit files</a>. See <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1575617#p1575617">BBS thread</a> for a possible solution and more information.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Power_management/Suspend_and_hibernate&amp;oldid=449305">https://wiki.archlinux.org/index.php?title=Power_management/Suspend_and_hibernate&amp;oldid=449305</a>"</li>
+					<li id="lastmod"> This page was last modified on 4 September 2016, at 10:40.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

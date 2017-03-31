@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Google Authenticator - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Google_Authenticator skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Google Authenticator</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://github.com/google/google-authenticator">Google Authenticator</a> provides a two-step authentication procedure using one-time passcodes (OTP). The OTP generator application is available for iOS, Android and Blackberry. Similar to <a href="../en/S/KEY_Authentication.html" title="S/KEY Authentication">S/KEY Authentication</a> the authentication mechanism integrates into the Linux <a href="../en/PAM.html" title="PAM">PAM</a> system. This guide shows the installation and configuration of this mechanism.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Setting_up_the_PAM"><span class="tocnumber">2</span> <span class="toctext">Setting up the PAM</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Generating_a_secret_key_file"><span class="tocnumber">3</span> <span class="toctext">Generating a secret key file</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Setting_up_your_OTP-generator"><span class="tocnumber">4</span> <span class="toctext">Setting up your OTP-generator</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Testing"><span class="tocnumber">5</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Desktop_logins"><span class="tocnumber">6</span> <span class="toctext">Desktop logins</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libpam-google-authenticator/">libpam-google-authenticator</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. Development version is also available with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/google-authenticator-libpam-git/">google-authenticator-libpam-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Setting_up_the_PAM">Setting up the PAM</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you do all configuration via SSH do not close the session before you tested that everything is working, else you may lock yourself out. Furthermore consider generating the key file before activating the PAM.</div>
+<p>Usually one demands two-pass authentication only for remote login. The corresponding PAM configuration file is <code>/etc/pam.d/sshd</code>. In case you want to use Google Authenticator globally you would need to change <code>/etc/pam.d/system-auth</code>, however, in this case proceed with extreme caution to not lock yourself out.
+In this guide we proceed with editing <code>/etc/pam.d/sshd</code> which is most safely (but not necessarily) done in a local session.
+</p>
+<p>To enter both, your unix password and your OTP, add <code>pam_google_authenticator.so</code> above the system-remote-login lines to <code>/etc/pam.d/sshd</code>:
+</p>
+<pre> <b>auth            required        pam_google_authenticator.so</b>
+ auth            include         system-remote-login
+ account         include         system-remote-login
+ password        include         system-remote-login
+ session         include         system-remote-login
+</pre>
+<p>This will ask for the OTP before prompting for your Unix password. Changing the order of the two modules will reverse this order.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Only users that have generated a secret key file (see below) will be allowed to log in using SSH.</div>
+<p>To allow login with either the OTP or your Unix password use:
+</p>
+<pre> auth            <b>sufficient</b>      pam_google_authenticator.so
+</pre>
+<p>Enable challenge-response authentication in <code>/etc/ssh/<b>sshd_config</b></code>:
+</p>
+<pre> ChallengeResponseAuthentication yes
+</pre>
+<p>Finally, <a href="../en/Systemd.html#Using_units" title="Reload" class="mw-redirect">reload</a> the <code>sshd</code> service.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>OpenSSH will ignore all of this if you are authenticating with a SSH-key pair and have <a href="../en/Secure_Shell.html#Force_public_key_authentication" title="Secure Shell">disabled password logins</a>. However, as of OpenSSH 6.2, you can add <code>AuthenticationMethods</code> to allow both: two-factor and key-based authentication. See <a href="../en/Secure_Shell.html#Two-factor_authentication_and_public_keys" title="Secure Shell">Secure Shell#Two-factor authentication and public keys</a>.</div>
+<h2><span class="mw-headline" id="Generating_a_secret_key_file">Generating a secret key file</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qrencode">qrencode</a></span> to generate a scannable QR. Scan the QR with the authenticator app to automatically configure the key.</div>
+<p>Every user who wants to use two-pass authentication needs to generate a secret key file in his home folder.
+This can very easily be done using <i>google-authenticator</i>: 
+</p>
+<pre>   $ google-authenticator
+   Do you want authentication tokens to be time-based (y/n) y
+   &lt;Here you will see generated QR code&gt;
+   Your new secret key is: ZVZG5UZU4D7MY4DH
+   Your verification code is 269371
+   Your emergency scratch codes are:
+     70058954
+     97277505
+     99684896
+     56514332
+     82717798
+   
+   Do you want me to update your "/home/username/.google_authenticator" file (y/n) y
+   
+   Do you want to disallow multiple uses of the same authentication
+   token? This restricts you to one login about every 30s, but it increases
+   your chances to notice or even prevent man-in-the-middle attacks (y/n) y
+   
+   By default, tokens are good for 30 seconds and in order to compensate for
+   possible time-skew between the client and the server, we allow an extra
+   token before and after the current time. If you experience problems with poor
+   time synchronization, you can increase the window from its default
+   size of 1:30min to about 4min. Do you want to do so (y/n) n
+   
+   If the computer that you are logging into is not hardened against brute-force
+   login attempts, you can enable rate-limiting for the authentication module.
+   By default, this limits attackers to no more than 3 login attempts every 30s.
+   Do you want to enable rate-limiting (y/n) y
+</pre>
+<p>It is recommended to <b>store the emergency scratch codes safely</b> (print them out and keep them in a safe location) as they are your only way to log in (via SSH) when you lost your mobile phone (i.e. your OTP-generator). They are also stored in <code>~/.google_authenticator</code>, so you can look them up any time as long as you are logged in.
+</p>
+<h2><span class="mw-headline" id="Setting_up_your_OTP-generator">Setting up your OTP-generator</span></h2>
+<p>Install generator application on your mobile phone from <a rel="nofollow" class="external text" href="http://m.google.com/authenticator">Android market</a> (e.g. <a rel="nofollow" class="external text" href="https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp">FreeOTP</a>) or from <a rel="nofollow" class="external text" href="https://f-droid.org/repository/browse/?fdfilter=google&amp;fdid=com.google.android.apps.authenticator2">F-Droid</a>.
+In the applications menu click the corresponding button to create a new account and either scan the QR code from the URL you were told when generating the secret key file, or enter the secret key (in the example above 'ZVZG5UZU4D7MY4DH') manually.
+</p>
+<p>Now you should see a new passcode token being generated every 30 seconds on your phone.
+</p>
+<h2><span class="mw-headline" id="Testing">Testing</span></h2>
+<p>SSH to your host from another machine and/or from another terminal window:
+</p>
+<pre> $ ssh hostname
+ login as: &lt;username&gt;
+ Verification code: &lt;generated/backup-code&gt;
+ Password: &lt;password&gt;
+ $
+</pre>
+<h2><span class="mw-headline" id="Desktop_logins">Desktop logins</span></h2>
+<p>The Google Authenticator PAM plugin can also be used for console logins and with GDM. Just add the following to <code>/etc/pam.d/login</code> or the <code>/etc/pam.d/gdm-password</code> file:
+</p>
+<pre>   auth required pam_google_authenticator.so
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Secure_Shell.html" title="Category:Secure Shell">Secure Shell</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Carddavmate - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Carddavmate skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Carddavmate</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Carddavmate">Talk:Carddavmate#</a>)</div>
+</div>
+<p><a rel="nofollow" class="external text" href="http://www.inf-it.com/">Carddavmate</a> is a carddav client that runs in a web browser using javascript. It is useful when you have a carddav server and want to access the contacts on this server with only a web browser.
+</p>
+<p>This guide shows you how to install carddavmate to use with davical
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Password_Protection"><span class="tocnumber">2.1</span> <span class="toctext">Password Protection</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Carddav_server"><span class="tocnumber">2.2</span> <span class="toctext">Carddav server</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Apache"><span class="tocnumber">2.3</span> <span class="toctext">Apache</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Testing"><span class="tocnumber">2.4</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Security"><span class="tocnumber">2.5</span> <span class="toctext">Security</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Troubleshooting"><span class="tocnumber">3</span> <span class="toctext">Troubleshooting</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/carddavmate/">carddavmate</a></span><sup><small>AUR</small></sup> package.
+</p>
+<p>After that, <code>config.js</code> needs to be configured, as well as <code>httpd-carddavmate.conf</code>. Then, <code>httpd-carddavmate.conf</code> needs to be included in the <a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a> configuration, and Apache needs to be restarted.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Password_Protection">Password Protection</span></h3>
+<p>Password protection is implemented using apache's <code>htpasswd</code> facility. The relevant file that includes the authentification credentials is at <code>/srv/http/carddavmate/htpasswd</code>.
+</p>
+<p>You may delete the file or remove the "test" account by deleting the line from the file.
+</p>
+<p>To add your own user, run:
+</p>
+<pre># htpasswd /srv/http/carddavmate/htpasswd
+</pre>
+<p>add <code>-c</code> after <i>htpasswd</i> if you deleted the <code>htpasswd</code> file.
+</p>
+<h3><span class="mw-headline" id="Carddav_server">Carddav server</span></h3>
+<p>Add the carddav server to your config by editing <code>/srv/http/carddavmate/config.js</code>, for example:
+</p>
+<pre>var globalSettings=[{href: '<a rel="nofollow" class="external free" href="https://carddav.example.com:443/caldav.php/joe/'">https://carddav.example.com:443/caldav.php/joe/'</a>, userAuth: {userName: 'joe', userPassword: 'secret', serverPassword: false}, timeOut: 14000}];
+</pre>
+<p>A better example, without insecure user clear passwords:
+</p>
+<pre>var globalSettings=[{href: '<a rel="nofollow" class="external free" href="https://carddav.example.com:443/caldav.php/USER'%7D">https://carddav.example.com:443/caldav.php/USER'}</a>];
+</pre>
+<h3><span class="mw-headline" id="Apache">Apache</span></h3>
+<p>To "serve" the <code>/srv/http/carddavmate</code> directory properly, include <code>/etc/httpd/conf/extra/httpd-carddavmate.conf</code> in your apache configuration. To do this, add the following line to <code>/etc/httpd/conf/httpd.conf</code>:
+</p>
+<pre>Include conf/extra/httpd-carddavmate.conf
+</pre>
+<p>Also, edit <code>httpd-carddavmate.conf</code> to reflect the url where carddavmate is installed, for example:
+</p>
+<pre>Header always set Access-Control-Allow-Origin "<a rel="nofollow" class="external free" href="https://carddavmate.example.com">https://carddavmate.example.com</a>"
+</pre>
+<p>Save this file and <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> Apache with <code>httpd.service</code>.
+</p>
+<h3><span class="mw-headline" id="Testing">Testing</span></h3>
+<p>To test your installation, browse to <code><a rel="nofollow" class="external free" href="https://127.0.0.1/carddavmate">https://127.0.0.1/carddavmate</a></code> and see if your carddav data shows up.
+</p>
+<h3><span class="mw-headline" id="Security">Security</span></h3>
+<p>Since the client is a javascript program that runs in your browser, the username/password that is configured in <code>config.js</code> on the server is also in the browser and can be easily seen. To avoid issues, clear your browser cache to delete the compromising files after you are done.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>Troubleshooting is best done using chrome's built-in javascript console.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

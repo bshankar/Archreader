@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Ext4 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Ext4 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Ext4</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_systems.html" title="File systems">File systems</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Ext3.html" title="Ext3">Ext3</a></li>
+</ul>
+</div>
+<p>From <a rel="nofollow" class="external text" href="http://kernelnewbies.org/Ext4">Ext4 - Linux Kernel Newbies</a>:
+</p>
+<dl><dd>Ext4 is the evolution of the most used Linux filesystem, Ext3. In many ways, Ext4 is a deeper improvement over Ext3 than Ext3 was over Ext2. Ext3 was mostly about adding journaling to Ext2, but Ext4 modifies important data structures of the filesystem such as the ones destined to store the file data. The result is a filesystem with an improved design, better performance, reliability, and features.</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Create_a_new_ext4_filesystem"><span class="tocnumber">1</span> <span class="toctext">Create a new ext4 filesystem</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Bytes-per-inode_ratio"><span class="tocnumber">1.1</span> <span class="toctext">Bytes-per-inode ratio</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Reserved_blocks"><span class="tocnumber">1.2</span> <span class="toctext">Reserved blocks</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Migrating_from_ext2.2Fext3_to_ext4"><span class="tocnumber">2</span> <span class="toctext">Migrating from ext2/ext3 to ext4</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5">
+<a href="#Mounting_ext2.2Fext3_partitions_as_ext4_without_converting"><span class="tocnumber">2.1</span> <span class="toctext">Mounting ext2/ext3 partitions as ext4 without converting</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Rationale"><span class="tocnumber">2.1.1</span> <span class="toctext">Rationale</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Procedure"><span class="tocnumber">2.1.2</span> <span class="toctext">Procedure</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Converting_ext2.2Fext3_partitions_to_ext4"><span class="tocnumber">2.2</span> <span class="toctext">Converting ext2/ext3 partitions to ext4</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Rationale_2"><span class="tocnumber">2.2.1</span> <span class="toctext">Rationale</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Procedure_2"><span class="tocnumber">2.2.2</span> <span class="toctext">Procedure</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Using_ext4_file-based_encryption"><span class="tocnumber">3</span> <span class="toctext">Using ext4 file-based encryption</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#E4rat"><span class="tocnumber">4.1</span> <span class="toctext">E4rat</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Barriers_and_performance"><span class="tocnumber">4.2</span> <span class="toctext">Barriers and performance</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Enabling_metadata_checksums"><span class="tocnumber">5</span> <span class="toctext">Enabling metadata checksums</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#New_filesystem"><span class="tocnumber">5.1</span> <span class="toctext">New filesystem</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Existing_filesystem"><span class="tocnumber">5.2</span> <span class="toctext">Existing filesystem</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Impact_on_performance"><span class="tocnumber">5.3</span> <span class="toctext">Impact on performance</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Create_a_new_ext4_filesystem">Create a new ext4 filesystem</span></h2>
+<p>To format a partition do:
+</p>
+<pre># mkfs.ext4 /dev/<i>partition</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See the mkfs.ext4 <a href="../en/Man_page.html" title="Man page">man page</a> for more options; edit <code>/etc/mke2fs.conf</code> to view/configure default options.</div>
+<h3><span class="mw-headline" id="Bytes-per-inode_ratio">Bytes-per-inode ratio</span></h3>
+<p>From <code>man mkfs.ext4</code>:
+</p>
+<dl><dd>
+<i><b>mke2fs</b> creates an inode for every </i>bytes-per-inode<i> bytes of space on the disk. The larger the </i>bytes-per-inode<i> ratio, the fewer inodes will be created.</i>
+</dd></dl>
+<p>Creating a new file, directory, symlink etc. requires at least one free <a href="https://en.wikipedia.org/wiki/Inode" class="extiw" title="wikipedia:Inode">inode</a>. If the inode count is too low, no file can be created on the filesystem even though there is still space left on it. 
+</p>
+<p>Because it is not possible to change either the bytes-per-inode ratio or the inode count after the filesystem is created, <code>mkfs.ext4</code> uses by default a rather low ratio of one inode every 16384 bytes (16 Kb) to avoid this situation.
+</p>
+<p>However, for partitions with size in the hundreds or thousands of GB and average file size in the megabyte range, this usually results in a much too large inode number because the number of files created never reaches the number of inodes.
+</p>
+<p>This results in a waste of disk space, because all those unused inodes each take up 256 bytes on the filesystem (this is also set in <code>/etc/mke2fs.conf</code> but should not be changed). 256 * several millions = quite a few gigabytes wasted in unused inodes.
+</p>
+<p>This situation can be evaluated by comparing the <code>{I}Use%</code> figures provided by <code>df</code> and <code>df -i</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ df -h /home</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Filesystem              Size    Used   Avail  <b>Use%</b>   Mounted on
+/dev/mapper/lvm-home    115G    56G    59G    <b>49%</b>    /home</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ df -hi /home</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Filesystem              Inodes  IUsed  IFree  <b>IUse%</b>  Mounted on
+/dev/mapper/lvm-home    1.8M    1.1K   1.8M   <b>1%</b>     /home</pre>
+<p>To specify a different bytes-per-inode ratio, you can use the <code>-T <i>usage-type</i></code> option which hints at the expected usage of the filesystem using types defined in <code>/etc/mke2fs.conf</code>. Among those types are the bigger <code>largefile</code> and <code>largefile4</code> which offer more relevant ratios of one inode every 1 MiB and 4 MiB respectively. It can be used as such:
+</p>
+<pre># mkfs.ext4 -T largefile /dev/<i>device</i>
+</pre>
+<p>The bytes-per-inode ratio can also be set directly via the <code>-i</code> option: <i>e.g.</i> use <code>-i 2097152</code> for a 2 MiB ratio and  <code>-i 6291456</code> for a 6 MiB ratio.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Conversely, if you are setting up a partition dedicated to host millions of small files like emails or newsgroup items, you can use smaller <i>usage-type</i> values such as <code>news</code> (one inode for every 4096 bytes) or <code>small</code> (same plus smaller inode and block sizes).</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you make a heavy use of symbolic links, make sure to keep the inode count high enough with a low bytes-per-inode ratio, because while not taking more space every new symbolic link consumes one new inode and therefore the filesystem may run out of them quickly.</div>
+<h3><span class="mw-headline" id="Reserved_blocks">Reserved blocks</span></h3>
+<p>By default, 5% of the filesystem blocks will be reserved for the super-user, to avoid fragmentation and "<i>allow root-owned daemons to continue to function correctly after non-privileged processes are prevented from writing to the filesystem</i>" (from <code>man mkfs.ext4</code>).
+</p>
+<p>For modern high-capacity disks, this is higher than necessary if the partition is used as a long-term archive or not crucial to system operations (like <code>/home</code>). See <a rel="nofollow" class="external text" href="http://www.redhat.com/archives/ext3-users/2009-January/msg00026.html">this email</a> for the opinion of ext4 developer Ted Ts'o on reserved blocks.
+</p>
+<p>It is generally safe to reduce the percentage of reserved blocks to free up disk space when the partition is either:
+</p>
+<ul>
+<li> Very large (for example &gt; 50G)</li>
+<li> Used as long-term archive, i.e., where files will not be deleted and created very often</li>
+</ul>
+<p>The <code>-m</code> option of ext4-related utilities allows to specify the percentage of reserved blocks.
+</p>
+<p>To totally prevent reserving blocks upon filesystem creation, use:
+</p>
+<pre># mkfs.ext4 -m 0 /dev/<i>device</i>
+</pre>
+<p>To reduce it to 1% afterwards, use:
+</p>
+<pre># tune2fs -m 1 /dev/<i>device</i>
+</pre>
+<p>You can use <code>findmnt(8)</code> to find the device name:
+</p>
+<pre>$ findmnt <i>/the/mount/point</i>
+</pre>
+<h2><span class="mw-headline" id="Migrating_from_ext2.2Fext3_to_ext4">Migrating from ext2/ext3 to ext4</span></h2>
+<h3><span class="mw-headline" id="Mounting_ext2.2Fext3_partitions_as_ext4_without_converting">Mounting ext2/ext3 partitions as ext4 without converting</span></h3>
+<h4><span class="mw-headline" id="Rationale">Rationale</span></h4>
+<p>A compromise between fully converting to ext4 and simply remaining with ext2/ext3 is to mount the partitions as ext4.
+</p>
+<p><b>Pros:</b>
+</p>
+<ul>
+<li> Compatibility (the filesystem can continue to be mounted as ext3) – This allows users to still read the filesystem from other operating systems without ext4 support (e.g. Windows with ext2/ext3 drivers)</li>
+<li> Improved performance (though not as much as a fully-converted ext4 partition).<a rel="nofollow" class="external autonumber" href="http://kernelnewbies.org/Ext4">[1]</a> <a rel="nofollow" class="external autonumber" href="http://events.linuxfoundation.org/slides/2010/linuxcon_japan/linuxcon_jp2010_fujita.pdf">[2]</a> </li>
+</ul>
+<p><b>Cons:</b>
+</p>
+<ul><li> Fewer features of ext4 are used (only those that do not change the disk format such as multiblock allocation and delayed allocation)</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Except for the relative novelty of ext4 (which can be seen as a risk), <b>there is no major drawback to this technique</b>.</div>
+<h4><span class="mw-headline" id="Procedure">Procedure</span></h4>
+<ol>
+<li> Edit <code>/etc/fstab</code> and change the 'type' from ext2/ext3 to ext4 for any partitions you would like to mount as ext4.</li>
+<li> Re-mount the affected partitions.</li>
+</ol>
+<h3><span class="mw-headline" id="Converting_ext2.2Fext3_partitions_to_ext4">Converting ext2/ext3 partitions to ext4</span></h3>
+<h4><span class="mw-headline" id="Rationale_2">Rationale</span></h4>
+<p>To experience the benefits of ext4, an irreversible conversion process must be completed.
+</p>
+<p><b>Pros:</b>
+</p>
+<ul><li> Improved performance and new features.<a rel="nofollow" class="external autonumber" href="http://kernelnewbies.org/Ext4">[3]</a> <a rel="nofollow" class="external autonumber" href="http://events.linuxfoundation.org/slides/2010/linuxcon_japan/linuxcon_jp2010_fujita.pdf">[4]</a> </li></ul>
+<p><b>Cons:</b>
+</p>
+<ul>
+<li> Partitions that contain mostly static files, such as a <code>/boot</code> partition, may not benefit from the new features. Also, adding a journal (which is implied by moving a ext2 partition to ext3/4) always incurs performance overhead. </li>
+<li> Irreversible (ext4 partitions cannot be 'downgraded' to ext2/ext3. It is, however, backwards compatible until extent and other unique options are enabled)</li>
+</ul>
+<h4><span class="mw-headline" id="Procedure_2">Procedure</span></h4>
+<p>These instructions were adapted from <a rel="nofollow" class="external text" href="http://ext4.wiki.kernel.org/index.php/Ext4_Howto">Kernel documentation</a> and an <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=61602">BBS thread</a>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> If you convert the system's root filesystem, ensure that the 'fallback' initramfs is available at reboot. Alternatively, add <code>ext4</code> according to <a href="../en/Mkinitcpio.html#MODULES" title="Mkinitcpio">Mkinitcpio#MODULES</a> and re-create the 'default' initial ramdisk with <code>mkinitcpio -p linux</code> before starting.</li>
+<li> If you decide to convert a separate <code>/boot</code> partition, ensure the <a href="../en/Bootloader.html" title="Bootloader" class="mw-redirect">bootloader</a> supports booting from ext4.</li>
+</ul>
+</div>
+<p>In the following steps <code>/dev/sdxX</code> denotes the path to the partition to be converted, such as <code>/dev/sda1</code>. 
+</p>
+<ol>
+<li> <b><a href="../en/Synchronization_and_backup_programs.html" title="Backup programs" class="mw-redirect">BACK-UP!</a></b> Back-up all data on any ext3 partitions that are to be converted to ext4. A useful package, especially for root partitions, is <a rel="nofollow" class="external text" href="http://clonezilla.org">Clonezilla</a>.</li>
+<li> Edit <code>/etc/fstab</code> and change the 'type' from ext3 to ext4 for any partitions that are to be converted to ext4.</li>
+<li> Boot the live medium (if necessary). The conversion process with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span> must be done when the drive is not mounted. If converting a root partition, the simplest way to achieve this is to boot from some other live medium.</li>
+<li> Ensure the partition is <b>NOT</b> mounted</li>
+<li> If you want to convert a ext2 partition, the first conversion step is to add a <a href="../en/File_systems.html#Journaling" title="File systems">journal</a> by running <code>tune2fs -j /dev/sdxX</code> as root; making it a ext3 partition.  </li>
+<li> Run <code>tune2fs -O extent,uninit_bg,dir_index /dev/sdxX</code> as root. This command converts the ext3 filesystem to ext4 (irreversibly). </li>
+<li> Run <code>fsck -f /dev/sdxX</code> as root. 
+<ul><li> The user <b>must <i>fsck</i></b> the filesystem, or it <b>will be unreadable</b>! This <i>fsck</i> run is needed to return the filesystem to a consistent state. It <b>will</b> find checksum errors in the group descriptors - this <b>is</b> expected. The <code>-f</code> option asks <i>fsck</i> to force checking even if the file system seems clean. The <code>-p</code> option may be used on top to 'automatically repair' (otherwise, the user will be asked for input for each error). </li></ul>
+</li>
+<li> Recommended: mount the partition and run <code>e4defrag -c -v /dev/sdxX</code> as root.
+<ul><li> Even though the filesystem is now converted to ext4, all files that have been written before the conversion do not yet take advantage of the extent option of ext4, which will improve large file performance and reduce fragmentation and filesystem check time. In order to fully take advantage of ext4, all files would have to be rewritten on disk. Use <i>e4defrag</i> to take care of this problem.</li></ul>
+</li>
+<li> Reboot Arch Linux!</li>
+</ol>
+<h2><span class="mw-headline" id="Using_ext4_file-based_encryption">Using ext4 file-based encryption</span></h2>
+<p>Since Linux 4.1, ext4 supports file-based encryption.  In a directory tree marked for encryption, file contents, filenames, and symbolic link targets are all encrypted.  Encryption keys are stored in the kernel keyring.  See also <a rel="nofollow" class="external text" href="http://blog.quarkslab.com/a-glimpse-of-ext4-filesystem-level-encryption.html">Quarkslab's blog</a> entry with a write-up of the feature, an overview of the implementation state, and practical test results with kernel 4.1.
+</p>
+<p>First, you will need a kernel with <code>CONFIG_EXT4_ENCRYPTION</code> enabled. Since the Arch default <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> does not yet have this option enabled, you will need to compile your own kernel.
+</p>
+<p>Second, update <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=e2fsprogs">e2fsprogs</a></span> to at least version 1.43.
+</p>
+<p>Third, enable the encryption feature flag on your filesystem:
+</p>
+<pre># tune2fs -O encrypt /dev/sdb
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Once the encryption feature flag is enabled, kernels older than 4.1 will be unable to mount the filesystem.</div>
+<p>Next, make a directory to encrypt:
+</p>
+<pre># mkdir /encrypted
+</pre>
+<p>Note that encryption can only be applied to an empty directory.  The encryption setting (or "encryption policy") is inherited by new files and subdirectories.  Encrypting existing files is not yet supported.
+</p>
+<p>Now generate and add a new key to your keyring.  This step must be repeated every time you flush your keyring (reboot):
+</p>
+<pre># e4crypt add_key
+Enter passphrase (echo disabled): 
+Added key with descriptor [f88747555a6115f5]
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you forget your passphrase, there will be no way to decrypt your files!  It also isn't yet possible to change a passphrase after you've set it.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To help prevent <a href="https://en.wikipedia.org/wiki/Dictionary_attack" class="extiw" title="wikipedia:Dictionary attack">dictionary attacks</a> on your passphrase, a random <a href="https://en.wikipedia.org/wiki/Salt_(cryptography)" class="extiw" title="wikipedia:Salt (cryptography)">salt</a> is automatically generated and stored in the ext4 filesystem superblock.  Both the passphrase <i>and</i> the salt are used to derive the actual encryption key.  As a consequence of this, if you have multiple ext4 filesystems with encryption enabled mounted, then <code>e4crypt add_key</code> will actually add multiple keys, one per filesystem.  Although any key can be used on any filesystem, it would be wise to only use, on a given filesystem, keys using that filesystem's salt.  Otherwise, you risk being unable to decrypt files on filesystem A if filesystem B is unmounted.  Alternatively, you can use the <code>-S</code> option to <code>e4crypt add_key</code> to specify a salt yourself.</div>
+<p>Now you know the descriptor for your key.  Make sure the key is in your session keyring:
+</p>
+<pre># keyctl show
+Session Keyring
+1021618178 --alswrv   1000  1000  keyring: _ses
+ 176349519 --alsw-v   1000  1000   \_ logon: ext4:f88747555a6115f5
+</pre>
+<p>Almost done. Now set an encryption policy on the directory (assign the key to it):
+</p>
+<pre># e4crypt set_policy f88747555a6115f5 /encrypted
+</pre>
+<p>That is all. If you try accessing the directory without adding the key into your keyring, filenames and their contents will be seen as encrypted gibberish.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="E4rat">E4rat</span></h3>
+<p><a href="../en/E4rat.html" title="E4rat">E4rat</a> is a preload application designed for the ext4 filesystem. It monitors files opened during boot, optimizes their placement on the partition to improve access time, and preloads them at the very beginning of the boot process. <a href="../en/E4rat.html" title="E4rat">E4rat</a> does not offer improvements with <a href="../en/Solid_State_Drives.html" title="SSD" class="mw-redirect">SSDs</a>, whose access time is negligible compared to hard disks.
+</p>
+<h3><span class="mw-headline" id="Barriers_and_performance">Barriers and performance</span></h3>
+<p>Since kernel 2.6.30, ext4 performance has decreased due to changes that serve to improve data integrity.<a rel="nofollow" class="external autonumber" href="http://www.phoronix.com/scan.php?page=article&amp;item=ext4_then_now&amp;num=1">[5]</a>
+</p>
+<dl><dd>Most file systems (XFS, ext3, ext4, reiserfs) send write barriers to disk after fsync or during transaction commits. Write barriers enforce proper ordering of writes, making volatile disk write caches safe to use (at some performance penalty). If your disks are battery-backed in one way or another, disabling barriers may safely improve performance.</dd></dl>
+<dl><dd>Sending write barriers can be disabled using the <code>barrier=0</code> mount option (for ext3, ext4, and reiserfs), or using the <code>nobarrier</code> mount option (for XFS).</dd></dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Disabling barriers when disks cannot guarantee caches are properly written in case of power failure can lead to severe file system corruption and data loss.</div>
+<p>To turn barriers off add the option <code>barrier=0</code> to the desired filesystem. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sda5    /    ext4    noatime,barrier=0    0    1</pre>
+<h2><span class="mw-headline" id="Enabling_metadata_checksums">Enabling metadata checksums</span></h2>
+<p>In both cases of enabling metadata checksums for new and existing filesystems, you will need to load some kernel modules.
+</p>
+<p>If your CPU supports SSE 4.2, make sure the <code>crc32c_intel</code> kernel module is loaded in order to enable the hardware accelerated CRC32C algorithm. If not you will need to load the <code>crc32c_generic</code> module.
+</p>
+<p>If this is the root file-system your <code>crc32c_</code> module might need to be added to <code>/etc/mkinitcpio.conf</code>:
+</p>
+<pre>   MODULES="... crc32c_intel crc32c_generic"
+</pre>
+<p>And then regenerate the initramfs. See <a href="../en/Mkinitcpio.html#Image_creation_and_activation" title="Mkinitcpio">Mkinitcpio#Image creation and activation</a>.
+</p>
+<p>After this, you are ready to enable support for metadata checksums as described in the following two sections. In both cases the file system must not be mounted.
+</p>
+<p>More about metadata checksums can be read on the <a rel="nofollow" class="external text" href="https://ext4.wiki.kernel.org/index.php/Ext4_Metadata_Checksums">ext4 wiki</a>.
+</p>
+<h3><span class="mw-headline" id="New_filesystem">New filesystem</span></h3>
+<p>To enable support for ext4 metadata checksums on a new file system make sure that you have <code>e2fsprogs 1.43</code> or newer and simply do a:
+</p>
+<pre># mkfs.ext4 <i>/dev/path/to/disk</i>
+</pre>
+<p>The <code>metadata_csum</code> and <code>64bit</code> options will be enabled by default. 
+</p>
+<p>The file-system can then be mounted as usual.
+</p>
+<h3><span class="mw-headline" id="Existing_filesystem">Existing filesystem</span></h3>
+<p>To enable support on an existing ext4 file system do the following.
+</p>
+<p>This needs to be done with the partition unmounted, so if you want to convert the root, you'll need to run off an USB live distro.
+</p>
+<p>First the partition needs to be checked and optimized using:
+</p>
+<pre># e2fsck -Df <i>/dev/path/to/disk</i>  
+</pre>
+<p>Then the file-system needs to be converted to 64bit:
+</p>
+<pre># resize2fs -b <i>/dev/path/to/disk</i> 
+</pre>
+<p>Finally checksums can be added
+</p>
+<pre># tune2fs -O metadata_csum <i>/dev/path/to/disk</i>
+</pre>
+<p>The file-system can then be mounted as usual.
+</p>
+<p>You can check whether the features were successfully enabled by running:
+</p>
+<pre># dumpe2fs <i>/dev/path/to/disk</i>
+</pre>
+<h3><span class="mw-headline" id="Impact_on_performance">Impact on performance</span></h3>
+<p>Keep in mind that the intel module consistently performs 10x faster than the generic one, peaking at 20x faster as can be seen in <a rel="nofollow" class="external text" href="https://ext4.wiki.kernel.org/index.php/Ext4_Metadata_Checksums#Benchmarking">this benchmark</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://ext4.wiki.kernel.org/">Official Ext4 wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout">Ext4 Disk Layout</a> described in its wiki</li>
+<li> <a rel="nofollow" class="external text" href="http://lwn.net/Articles/639427/">Ext4 Encryption</a> LWN article</li>
+<li> Kernel commits for ext4 encryption <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=6162e4b0bedeb3dac2ba0a5e1b1f56db107d97ec">[6]</a> <a rel="nofollow" class="external autonumber" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=8663da2c0919896788321cd8a0016af08588c656">[7]</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://e2fsprogs.sourceforge.net/e2fsprogs-release.html">e2fsprogs Changelog</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://ext4.wiki.kernel.org/index.php/Ext4_Metadata_Checksums">Ext4 Metadata Checksums</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

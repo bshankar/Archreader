@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>su - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Su skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">su</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Users_and_groups.html" title="Users and groups">Users and groups</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Sudo.html" title="Sudo">sudo</a></li>
+</ul>
+</div>
+<p>The <b>su</b> command (<b>s</b>ubstitute <b>u</b>ser) is used to assume the identity of another user on the system, normally root. This saves having to logout and log back in as the user you want to be.  Instead, you may login as another user <b>during</b> your session by starting a sort of "sub-session", and then logout back to your own session when done.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Security"><span class="tocnumber">3</span> <span class="toctext">Security</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Login_shell"><span class="tocnumber">4.1</span> <span class="toctext">Login shell</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#su_and_wheel"><span class="tocnumber">4.2</span> <span class="toctext">su and wheel</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>su is part of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span> package, which is installed by default in Arch as member of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>To assume the login of another user, pass the username that you want to become to su, as in:
+</p>
+<pre># su <i>username</i>
+</pre>
+<p>You will be prompted for the password of the user you are attempting to become.
+</p>
+<p>If no username is passed, su assumes the root user, and the password for which you are prompted will be that of root.
+</p>
+<h2><span class="mw-headline" id="Security">Security</span></h2>
+<p>From a security perspective, it is arguably better to set up and use <a href="../en/Sudo.html" title="Sudo">sudo</a> instead of su. The sudo system will prompt you for your own password – or no password at all, if configured in such a way – rather than that of the target user (the user account you are attempting to use). This way you do not have to share passwords between users, and if you ever need to stop a user having root access (or access to any other account, for that matter), you do not have to change the root password, which is an inconvenience to everyone else; you only need to revoke that user's sudo access.
+</p>
+<p>If sudo has been configured to allow the user to run root's shell, the user can run <code>sudo -s</code> or <code>sudo -i</code> to mimic <code>su</code> or <code>su -</code>, respectively, and supply his own password or no password rather than root's password.  Similarly, <code>sudo -u john -i</code> mimics <code>su - john</code> if you are allowed to run john's shell.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Login_shell">Login shell</span></h3>
+<p>The default behavior of su is to remain within the current directory and to maintain the environmental variables of the original user (rather than switch to those of the new user).
+</p>
+<p>Note the following important contrasting considerations:
+</p>
+<ul><li> It sometimes can be advantageous for a system administrator to use the shell account of an ordinary user rather than its own. In particular, occasionally the most efficient way to solve a user's problem is to log into that user's account in order to reproduce or debug the problem.</li></ul>
+<ul><li> However, in many situations it is not desirable, or it can even be dangerous, for the root user to be operating from an ordinary user's shell account and with that account's environmental variables rather than from its own. While inadvertently using an ordinary user's shell account, root could install a program or make other changes to the system that would not have the same result as if they were made while using the root account. For instance, a program could be installed that could give the ordinary user power to accidentally damage the system or gain unauthorized access to certain data.</li></ul>
+<p>Thus, it is advisable that administrative users, as well as any other users that are authorized to use su (and it is suggested that there be very few, if any) acquire the habit of always following the su command with a space and then a hyphen. The hyphen has two effects: 
+</p>
+<ol>
+<li> switches from the current directory to the home directory of the new user (e.g., to <code>/root</code> in the case of the root user) by <i>logging in</i> as that user</li>
+<li> changes the environmental variables to those of the new user as dictated by their <code>~/.bashrc</code>. That is, if the first argument to su is a hyphen, the current directory and environment will be changed to what would be expected if the new user had actually logged on to a new session (rather than just taking over an existing session).</li>
+</ol>
+<p>Thus, administrators should generally use su as follows:
+</p>
+<pre>$ su -
+</pre>
+<p>An identical result is produced by adding the username root:
+</p>
+<pre>$ su - root
+</pre>
+<p>Likewise, the same can be done for any other user (e.g. for a user named archie):
+</p>
+<pre># su - archie
+</pre>
+<p>You may wish to add an alias to <code>~/.bashrc</code> for this:
+</p>
+<pre>alias su="su -"
+</pre>
+<h3><span class="mw-headline" id="su_and_wheel">su and wheel</span></h3>
+<p>BSD su allows only members of the "wheel" <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a> to assume root's identity by default. This is not the default behavior of GNU su, but this behavior can be mimicked using <a href="../en/PAM.html" title="PAM">PAM</a>. Uncomment the appropriate line in <code>/etc/pam.d/su</code> and <code>/etc/pam.d/su-l</code>:
+</p>
+<pre>auth required pam_wheel.so use_uid
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

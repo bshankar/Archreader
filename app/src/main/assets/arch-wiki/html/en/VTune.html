@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>VTune - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-VTune skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">VTune</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><br>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Linux_4.0"><span class="tocnumber">1</span> <span class="toctext">Linux 4.0</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#VTune_Amplifier_XE_2013"><span class="tocnumber">2</span> <span class="toctext">VTune Amplifier XE 2013</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Missing_asm.2Fsystem.h"><span class="tocnumber">2.1</span> <span class="toctext">Missing asm/system.h</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Implicit_declaration_of_this_cpu_read"><span class="tocnumber">2.2</span> <span class="toctext">Implicit declaration of this_cpu_read</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#kmap_atomic_and_kunmap_atomic_deprecated"><span class="tocnumber">2.3</span> <span class="toctext">kmap_atomic and kunmap_atomic deprecated</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#VTune_Amplifier_XE_2011"><span class="tocnumber">3</span> <span class="toctext">VTune Amplifier XE 2011</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Installing_VTune"><span class="tocnumber">3.1</span> <span class="toctext">Installing VTune</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#VTune_9.1"><span class="tocnumber">4</span> <span class="toctext">VTune 9.1</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Installing_VTune_2"><span class="tocnumber">4.1</span> <span class="toctext">Installing VTune</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Installing_driver"><span class="tocnumber">4.2</span> <span class="toctext">Installing driver</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Linux_4.0">Linux 4.0</span></h2>
+<p>VTune 2015 currently does not work with Linux 4.0, due to changes in the kernel that prevent the sepdk module from building.  You need VTune 2016 which was released in August 2015.
+</p>
+<h2><span class="mw-headline" id="VTune_Amplifier_XE_2013">VTune Amplifier XE 2013</span></h2>
+<p>Follow the instructions for 2011. If you see errors while building the driver, 
+it may be because intel is using deprecated functionality subsections. In the following 
+sections, lines beginning with "-" indicates code that should be removed, lines beginning 
+with "+" should be added.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The following steps should not be need as of update5.</div>
+<h3><span class="mw-headline" id="Missing_asm.2Fsystem.h">Missing asm/system.h</span></h3>
+<p>Edit lwpmudrv.c as follows:
+</p>
+<pre>-#include &lt;asm/system.h&gt;
++#include &lt;linux/version.h&gt;
+</pre>
+<h3><span class="mw-headline" id="Implicit_declaration_of_this_cpu_read">Implicit declaration of this_cpu_read</span></h3>
+<p>Edit eventmux.c as follows:
+</p>
+<pre>+#include &lt;linux/percpu.h&gt;
+</pre>
+<h3><span class="mw-headline" id="kmap_atomic_and_kunmap_atomic_deprecated">kmap_atomic and kunmap_atomic deprecated</span></h3>
+<p>Edit vtssp/user_vm.c as follows:
+</p>
+<pre>-this-&gt;m_maddr = kmap_atomic(this-&gt;m_page, in_nmi() ? KM_NMI : KM_IRQ0);
++this-&gt;m_maddr = kmap_atomic(this-&gt;m_page);
+-kunmap_atomic(this-&gt;m_maddr, in_nmi() ? KM_NMI : KM_IRQ0);
++kunmap_atomic(this-&gt;m_maddr);
+</pre>
+<h2><span class="mw-headline" id="VTune_Amplifier_XE_2011">VTune Amplifier XE 2011</span></h2>
+<p>Starting with update 7 of the VTune Amplifier XE 2011, you can now use it on Linux 3.x and hence on Archlinux, even though the latter is not officially supported. See also: <a rel="nofollow" class="external text" href="http://software.intel.com/en-us/forums/showthread.php?t=102037&amp;p=1#171754">VTune on Archlinux</a>
+</p>
+<h3><span class="mw-headline" id="Installing_VTune">Installing VTune</span></h3>
+<p>Using the following HOWTO you "install" VTune locally and can run it. Vtune requires a kernel module for all functionality. Nevertheless, VTune in user mode is very powerful and comes with lots of possibilities for profiling. Have fun!
+</p>
+<p>Preparation:
+</p>
+<ul>
+<li> download VTune Amplifier XE 2011 (there is a <a rel="nofollow" class="external text" href="https://software.intel.com/en-us/qualify-for-free-software">free version</a> for non-commercial use on linux)</li>
+<li> unpack the tarball</li>
+<li> install libpng12 from AUR</li>
+<li> install libjpeg6 from AUR</li>
+<li> install rpmextract from extra repo</li>
+<li> install linux-headers from core</li>
+<li> if using a custom kernel, ensure that your kernel is compiled with the following options:
+<ul>
+<li> CONFIG_MODULES=y</li>
+<li> CONFIG_MODULE_UNLOAD=y</li>
+<li> CONFIG_SMP=y</li>
+<li> CONFIG_KPROBES=y</li>
+<li> CONFIG_PROFILING=y</li>
+<li> CONFIG_OPROFILE=y</li>
+</ul>
+</li>
+</ul>
+<p>Now to "install" vtune:
+</p>
+<pre>cd vtune_amplifier_xe_2011_update7
+find -name "*.rpm" -exec rpmextract.sh {} \;
+</pre>
+<p>Kernel module:
+</p>
+<ul>
+<li> Create the group vtune and add yourself.</li>
+<li> Build and load the driver in /opt/intel/vtune_amplifier_xe_2011/sepdk/src/</li>
+</ul>
+<pre>./build-driver
+./insmod-sep3 -g vtune
+</pre>
+<ul><li> Add your license file to /opt/intel/licenses/</li></ul>
+<p>You can now start vtune:
+</p>
+<pre>./opt/intel/vtune_amplifier_xe_2011/bin64/amplxe-gui
+</pre>
+<p>For ease-of-use I suggest you move the ./opt/intel/vtune_amplifier_xe_2011 to your homefolder or similar and add a symlink to the amplxe-gui binary to one of your PATH folders or similar.
+</p>
+<h2><span class="mw-headline" id="VTune_9.1">VTune 9.1</span></h2>
+<p>Installing Intel VTune 9.1 on Arch Linux
+</p>
+<h3><span class="mw-headline" id="Installing_VTune_2">Installing VTune</span></h3>
+<ul>
+<li> download VTune</li>
+<li> download <a rel="nofollow" class="external text" href="http://archlinux-stuff.googlecode.com/files/vtune-linux-9.1-arch.patch.gz">patch</a>
+</li>
+<li> unpack VTune and patch its scripts</li>
+<li> install rpm from <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages.php?ID=24605">AUR/rpm4</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2014-12-30]</sup>
+</li>
+<li> do rpm --initdb</li>
+<li> run VTune installer</li>
+</ul>
+<h3><span class="mw-headline" id="Installing_driver">Installing driver</span></h3>
+<p>(VTune does not work on my 2.6.31 kernel, so you may be need to install kernel26-lts)
+</p>
+<ul>
+<li> download driver <a rel="nofollow" class="external text" href="http://archlinux-stuff.googlecode.com/files/vtune-linux-9.1-driver.patch.gz">patch</a>
+</li>
+<li> copy the driver sources from /opt/intel/vtune/vdk/src to a new directory and patch them.</li>
+<li> do ./configure and make
+<ul><li> if your build fails with 'the frame size of 1140 bytes is larger than 1024 bytes', append -Wframe-larger-than=2048 to EXTRA_CFLAGS in Makefile</li></ul>
+</li>
+<li> cp vtune_drv*.ko /lib/modules/misc/vtune_drv.ko # copy the module to the kernel modules directory</li>
+<li> depmod -AeF /boot/System.map26 #rebuild module maps and resolve symbols</li>
+<li> modprobe vtune_drv #activate the module
+<ul><li> As of kernel 2.6.31 there was an api change, find_task_by_pid_ns() cannot be found. The only recourse is to downgrade your kernel to 2.6.30 or to wait for Intel to update the driver source code. If someone has a patch that resolves the issue you can post it here.</li></ul>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Development.html" title="Category:Development">Development</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

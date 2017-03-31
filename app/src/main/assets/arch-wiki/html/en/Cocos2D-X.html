@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Cocos2D-X - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Cocos2D-X skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Cocos2D-X</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Cocos2D-X is a high-performance cross platform 2D/3D game engine that supports multiple platforms such as iOS, Android, WinXP/7/8, WP8, BlackBerry, MeeGo, Marmelade, WebOS, Mac OS X. This page will focus entirely on properly configuring this package for initial usage. For other documentation, click <a href="#See_also">here</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#PATH_Environment_Variable"><span class="tocnumber">2.1</span> <span class="toctext">PATH Environment Variable</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Python_Scripts_Workaround"><span class="tocnumber">2.2</span> <span class="toctext">Python Scripts Workaround</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Disable_sending_usage_data"><span class="tocnumber">2.3</span> <span class="toctext">Disable sending usage data</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Cross_Compiling_for_Android"><span class="tocnumber">2.4</span> <span class="toctext">Cross Compiling for Android</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Updating_SDKBOX"><span class="tocnumber">2.5</span> <span class="toctext">Updating SDKBOX</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cocos2d-x-src/">cocos2d-x-src</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="PATH_Environment_Variable">PATH Environment Variable</span></h3>
+<p>After installation, add <code>/opt/cocos2d-x/tools/cocos2d-console/bin</code>, and <code>/opt/cocos2d-x/tools/cocos2d-console/plugins/plugin_package</code> to your <b>PATH</b> environment variable mostly to run the <code>cocos</code> python2 script to create projects, and also run <code>sdkbox</code> respectively. Add the following to your respective shell configuration file (<b>~/.bashprofile</b>, <b>~/.zshenv</b>, etc):
+</p>
+<pre>export PATH=/opt/cocos2d-x/tools/cocos2d-console/bin:/opt/cocos2d-x/tools/cocos2d-console/plugins/plugin_package:${PATH}
+</pre>
+<h3><span class="mw-headline" id="Python_Scripts_Workaround">Python Scripts Workaround</span></h3>
+<p>Since some Cocos2D-X scripts use <code>python2</code> instead of <code>python3</code>, like <code>sdkbox</code>, simply calling <code>python2 foo.pyc</code> will not suffice since other modules will be called with "env python" which could point to python3. To fix this, read <a href="../en/Python.html#Dealing_with_version_problem_in_build_scripts" title="Python">here</a>. Don't forget to add <code>/usr/local/bin</code>, or whichever directory the workaround shell script is installed at, before <code>/usr/bin</code> in your PATH environment variable. The following should suffice:
+</p>
+<pre>export PATH=/usr/local/bin:${PATH}
+</pre>
+<p>Here's an example shell script workaround:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/python</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+script=$(readlink -f -- "$1")
+case "$script" in (/opt/cocos2d-x/*|/path/to/project1/*|/path/to/project2/*|/path/to/project3/*)
+    exec python2 "$@"
+esac
+
+exec python3 "$@"
+</pre>
+<h3><span class="mw-headline" id="Disable_sending_usage_data">Disable sending usage data</span></h3>
+<p>Sending the usage data can be disabled setting <code>enable_stat</code> to <code>false</code> in <code>/opt/cocos2d-x/tools/cocos2d-console/bin/cocos2d.ini</code>:
+</p>
+<pre># sed -e 's/enable_stat=.*/enable_stat=false/g' -i /opt/cocos2d-x/tools/cocos2d-console/bin/cocos2d.ini
+</pre>
+<h3><span class="mw-headline" id="Cross_Compiling_for_Android">Cross Compiling for Android</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/android-ndk/">android-ndk</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/android-sdk/">android-sdk</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/android-sdk-platform-tools/">android-sdk-platform-tools</a></span><sup><small>AUR</small></sup>, and also add the following to your shell configuration file:
+</p>
+<pre>export NDK_ROOT=/opt/android-ndk
+export ANDROID_SDK_ROOT=/opt/android-sdk
+export ANT_ROOT=/usr/bin
+</pre>
+<p>The <code>android</code> tool should suffice to fetch the SDK platform for a certain android version, however there are also packages in the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a> such as <code>android-platform</code> for downloading these SDK platforms.
+</p>
+<h3><span class="mw-headline" id="Updating_SDKBOX">Updating SDKBOX</span></h3>
+<p>Cocos2D-X comes with a tool called <code>sdkbox</code> for integrating third party software development kits into projects easily. To update this tool, you must have read/write/execute access to <code>/opt/cocos2d-x/tools/cocos2d-console/plugins/plugin_package</code> and the following files in that directory: <code>sdkbox</code>, <code>sdkbox.bat</code>, <code>sdkbox.pyc</code>
+</p>
+<p>For a single-user configuration, executing the following will suffice:
+</p>
+<pre># chown $USER:$USER /opt/cocos2d-x/tools/cocos2d-console/plugins/plugin_package/{,sdkbox,sdkbox.bat,sdkbox.pyc}
+$ sdkbox update
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.cocos2d-x.org/programmersguide/">Official Programmers Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://cocos.sonarlearning.co.uk/">Cocos2D-X Developer Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.cocos2d-x.org/wiki/Reference">Official API Referenece Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://discuss.cocos2d-x.org/t/how-to-set-full-screen-on-android-4-4/10278/3">Enabling Immersive Mode for Android</a> - See <b>Cookiebit'</b>s answer.</li>
+<li> <a rel="nofollow" class="external text" href="http://discuss.cocos2d-x.org/t/cocos3-8-tutorial-rendertexture-blur/13622">Texture Rendering + Blur Tutorial</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://particle2dx.com/">Particle2DX</a> - Cocos2D-X Particle Generator</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Gaming.html" title="Category:Gaming">Gaming</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

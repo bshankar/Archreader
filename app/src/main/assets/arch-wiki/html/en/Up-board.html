@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Up-board - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Up-board skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Up-board</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The <a rel="nofollow" class="external text" href="http://up-board.org">up-board</a> is a Intel based SOC.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Sound"><span class="tocnumber">2</span> <span class="toctext">Sound</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Compilation"><span class="tocnumber">2.1</span> <span class="toctext">Compilation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Manual"><span class="tocnumber">2.1.1</span> <span class="toctext">Manual</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Arch_Build_System"><span class="tocnumber">2.1.2</span> <span class="toctext">Arch Build System</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The up-board features a <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> only setup (no BIOS emulation). You may experience issues trying to use a GPT partition scheme, if that's the case use MBR and install <a href="../en/GRUB.html" title="GRUB">GRUB</a> to use as a bootloader.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The installation disk for the up-board is <code>/dev/mmcblk0</code>.</div>
+<h2><span class="mw-headline" id="Sound">Sound</span></h2>
+<p>As of August 2016, the mainline kernel does not support sound through HDMI for cherry trail based devices like the up-board. There are plans on adding support to the mainline kernel as noted <a rel="nofollow" class="external text" href="https://bugzilla.kernel.org/show_bug.cgi?id=113971#c6">here</a>, but in the mean time if you wish to have sound you will need to patch your kernel. The package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ct/">linux-ct</a></span><sup><small>AUR</small></sup> is available on the AUR, or alternatively you can follow the instructions below to generate and apply the patch yourself.
+</p>
+<h3><span class="mw-headline" id="Compilation">Compilation</span></h3>
+<p>Without any optimisations, compilation on the up-board takes around 5-6 hours. Setting your <code>MAKEFLAGS</code> beforehand will drastically improve the compilation time. If you're using the ABS the <a href="../en/Makepkg.html" title="Makepkg">makepkg</a> page has information on how to set the variable in there.
+</p>
+<h4><span class="mw-headline" id="Manual">Manual</span></h4>
+<ul><li> Download a copy of the patched kernel from <a rel="nofollow" class="external text" href="https://github.com/plbossart/sound/archive/byt-cht-hdmi-v4.7.tar.gz">here</a> and the latest kernel sources from <a rel="nofollow" class="external free" href="http://www.kernel.org">http://www.kernel.org</a>.</li></ul>
+<ul><li> Once you've extracted the archive, you will need to remove the inline reference in one of the header files. You can do this with sed like so: </li></ul>
+<pre>$ sed -i 's/inline//g' sound-byt-cht-hdmi-v4.7/sound/hdmi_audio/intel_mid_hdmi_audio.h
+</pre>
+<ul><li> Next you'll need to create a patch for the 2 folders that have been changed, <code>sound/</code> and <code>drivers/gpu/drm/i915</code>:</li></ul>
+<pre>$ diff -ENwbur {linux-4.7.2,sound-byt-cht-hdmi-v4.7}/drivers/gpu/drm/i915 &gt;&gt; cherry.patch
+$ diff -ENwbur {linux-4.7.2,sound-byt-cht-hdmi-v4.7}/sound &gt;&gt; cherry.patch
+</pre>
+<ul><li> Once the patch has been created you can move it into the kernel sources directory and run:</li></ul>
+<pre>$ patch -p1 &lt; cherry.patch
+</pre>
+<ul><li> Lastly, you'll need to make sure that <code>CONFIG_SUPPORT_HDMI=y</code> option is in the <code>.config</code>.</li></ul>
+<h4><span class="mw-headline" id="Arch_Build_System">Arch Build System</span></h4>
+<p>If you wish to build the kernel using the ABS, follow the steps provided in <a href="../en/Kernels/Arch_Build_System.html" title="Kernels/Arch Build System">Kernels/Arch Build System</a>. Remember to add the patch to the prepare function and run <i>updpkgsums</i> to update the checksum for the changed config file.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Other_hardware.html" title="Category:Other hardware">Other hardware</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

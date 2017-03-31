@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>RuTorrent - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-RuTorrent skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">RuTorrent</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Rutorrent_with_lighttpd.html" title="Rutorrent with lighttpd">Rutorrent with lighttpd</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Same topic. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Rutorrent_with_lighttpd#Merge">Talk:Rutorrent with lighttpd#Merge</a>)</div>
+</div>
+<p><b><a rel="nofollow" class="external text" href="https://github.com/Novik/ruTorrent">ruTorrent</a></b> is a web interface to <a href="../en/RTorrent.html" title="RTorrent">rTorrent</a> (a console based BitTorrent client). It uses rTorrent's built-in XML-RPC server to communicate with it.
+</p>
+<p>It is lightweight, highly extensible, and is designed to look similar to uTorrent.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Web_Server_Configuration"><span class="tocnumber">2</span> <span class="toctext">Web Server Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Apache"><span class="tocnumber">2.1</span> <span class="toctext">Apache</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Nginx"><span class="tocnumber">2.2</span> <span class="toctext">Nginx</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Nginx_.28manual_installation.29"><span class="tocnumber">2.3</span> <span class="toctext">Nginx (manual installation)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#ruTorrent_Configuration"><span class="tocnumber">3</span> <span class="toctext">ruTorrent Configuration</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_Also"><span class="tocnumber">4</span> <span class="toctext">See Also</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#External_Links"><span class="tocnumber">5</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/rutorrent/">rutorrent</a></span><sup><small>AUR</small></sup> from the AUR. If you want to use the development version install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/rutorrent-git/">rutorrent-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Web_Server_Configuration">Web Server Configuration</span></h2>
+<h3><span class="mw-headline" id="Apache">Apache</span></h3>
+<p>Install and configure Apache with PHP according to the <a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a> page.
+</p>
+<ul><li> Edit the <i>open_basedir</i> value in /etc/php/php.ini to include:</li></ul>
+<pre>/etc/webapps/rutorrent/conf/:/usr/share/webapps/rutorrent/php/:/usr/share/webapps/rutorrent/
+</pre>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mod_scgi/">mod_scgi</a></span><sup><small>AUR</small></sup> from the AUR.
+</p>
+<ul><li> Load the SCGI module in <code>/etc/httpd/conf/httpd.conf</code>:</li></ul>
+<pre>LoadModule scgi_module modules/mod_scgi.so
+</pre>
+<ul><li> Enable the rTorrent XMLRPC interface: <a href="../en/RTorrent.html#XMLRPC_interface" title="RTorrent">rTorrent#XMLRPC interface</a>
+</li></ul>
+<ul><li> Enable SCGI on the port you chose for rTorrent by adding this to <code>/etc/httpd/conf/httpd.conf</code>:</li></ul>
+<pre>SCGIMount /RPC2 127.0.0.1:5000
+</pre>
+<ul><li> Lastly, add the ruTorrent folder to <code>/etc/httpd/conf/httpd.conf</code> with something similar to this anywhere after the inital <i>&lt;/Directory&gt;</i>:</li></ul>
+<pre>&lt;IfModule alias_module&gt;
+  Alias /rutorrent /usr/share/webapps/rutorrent
+  &lt;Directory "/usr/share/webapps/rutorrent"&gt;
+    Order allow,deny
+    Allow from all
+  &lt;/Directory&gt;
+&lt;/IfModule&gt;
+</pre>
+<p>For Apache 2.4 the access control would be:
+</p>
+<pre>&lt;IfModule alias_module&gt;
+  Alias /rutorrent /usr/share/webapps/rutorrent
+  &lt;Directory "/usr/share/webapps/rutorrent"&gt;
+    Require all granted
+  &lt;/Directory&gt;
+&lt;/IfModule&gt;
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You should enable authentication through Apache if your site is public.</div>
+<h3><span class="mw-headline" id="Nginx">Nginx</span></h3>
+<ul><li> Create a link from your web root to rutorrent</li></ul>
+<pre>ln -s /usr/share/webapps/rutorrent/ /usr/share/nginx/html/rutorrent
+</pre>
+<ul><li> Edit the <i>open_basedir</i> value in /etc/php/php.ini to include:</li></ul>
+<pre>/etc/webapps/rutorrent/conf/:/usr/share/webapps/rutorrent/php/:/usr/share/webapps/rutorrent/
+</pre>
+<ul><li> Enable the rTorrent XMLRPC interface: <a href="../en/RTorrent.html#XMLRPC_interface" title="RTorrent">rTorrent#XMLRPC interface</a>
+</li></ul>
+<ul><li> Add following location to your nginx configuration:</li></ul>
+<pre>           location /RPC2 {
+               include scgi_params;
+               scgi_pass localhost:5000;
+           }
+</pre>
+<ul><li> Restart nginx:</li></ul>
+<pre># systemctl restart nginx
+</pre>
+<ul><li> You can now access ruTorrent at <a rel="nofollow" class="external free" href="http://127.0.0.1/rutorrent">http://127.0.0.1/rutorrent</a>
+</li></ul>
+<h3><span class="mw-headline" id="Nginx_.28manual_installation.29">Nginx (manual installation)</span></h3>
+<ul><li> Install nginx, php-fpm, rtorrent</li></ul>
+<ul><li> Download and unpack <a rel="nofollow" class="external text" href="https://github.com/Novik/ruTorrent">rutorrent</a>:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">tree -L 2 /usr/share/nginx/html/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/usr/share/nginx/html/
+├── 50x.html
+├── index.html
+└── rutorrent
+    ├── conf
+    ├── css
+    ├── images
+    ├── index.html
+    ├── js
+    ├── lang
+    ├── LICENSE.md
+    ├── php
+    ├── plugins
+    ├── README.md
+    └── share
+</pre>
+<ul><li> Modify premissions:</li></ul>
+<pre>sudo chmod 0777 /usr/share/nginx/html/rutorrent/share/{settings,torrents,users}
+</pre>
+<ul><li> Make necessary changes to rtorrent and nginx:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.rtorrent.rc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+scgi_port = localhost:5000
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+worker_processes  1;
+events {
+    worker_connections  1024;
+}
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    server {
+        listen       80;
+        server_name  localhost;
+        root /usr/share/nginx/html;
+        location / {
+            index  index.html index.htm;
+        }
+        location ~ \.php$ {
+            fastcgi_pass   unix:/run/php-fpm/php-fpm.sock;
+            fastcgi_index  index.php;
+            include        fastcgi.conf;
+        }
+        location /RPC2 {
+            include scgi_params;
+            scgi_pass localhost:5000;
+        }
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+}
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><i>open_basedir</i> is unset by default and does not have to be changed.</div>
+<ul><li> Start necessary services:</li></ul>
+<pre>sudo systemctl start php-fpm nginx
+</pre>
+<ul>
+<li> Consider using <a href="../en/RTorrent.html#systemd_service_file_with_tmux_or_screen" title="RTorrent">rtorrent with tmux</a>
+</li>
+<li> Navigate to <a rel="nofollow" class="external free" href="http://localhost/rutorrent/">http://localhost/rutorrent/</a>
+</li>
+</ul>
+<h2><span class="mw-headline" id="ruTorrent_Configuration">ruTorrent Configuration</span></h2>
+<p>See upstream wiki <a rel="nofollow" class="external text" href="https://github.com/Novik/ruTorrent/wiki/Config">here</a>. By default the configuration files are symlinked to  <code>/etc/webapps/rutorrent/conf</code>.
+</p>
+<h2><span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul>
+<li> <a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a>
+</li>
+<li> <a href="../en/RTorrent.html" title="RTorrent">RTorrent</a>
+</li>
+</ul>
+<h2><span class="mw-headline" id="External_Links">External Links</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://github.com/Novik/ruTorrent/wiki">https://github.com/Novik/ruTorrent/wiki</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://httpd.apache.org/docs/2.2/configuring.html">http://httpd.apache.org/docs/2.2/configuring.html</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

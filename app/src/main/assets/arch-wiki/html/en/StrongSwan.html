@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>strongSwan - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-StrongSwan skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">strongSwan</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Openswan_L2TP/IPsec_VPN_client_setup.html" title="Openswan L2TP/IPsec VPN client setup">Openswan L2TP/IPsec VPN client setup</a></li>
+</ul>
+</div>
+<p>IPSec is an encryption and authentication standard that can be used to build secure Virtual Private Networks (VPNs).
+</p>
+<p>It is natively supported by the Linux kernel, but configuration of encryption keys is left to the user. The <a href="https://en.wikipedia.org/wiki/Internet_Key_Exchange" class="extiw" title="wikipedia:Internet Key Exchange">IKE</a> protocols are therefore used in IPSec VPNs to automatically negotiate key exchanges securely using a variety of means, including certificates, pre-shared keys or both.
+</p>
+<p>They are typically implemented in userspace daemons on the server side. <a rel="nofollow" class="external text" href="https://strongswan.org/">strongSwan</a> is an IKE daemon with full support for
+IKEv1 and IKEv2. It is natively supported by most modern clients, including Linux, Windows 7, Apple iOS, Mac OSX, FreeBSD and BlackBerry OS.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Certificates"><span class="tocnumber">2</span> <span class="toctext">Certificates</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Certificate_Authority"><span class="tocnumber">2.1</span> <span class="toctext">Certificate Authority</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Host_Certificate"><span class="tocnumber">2.2</span> <span class="toctext">Host Certificate</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Client_Certificate"><span class="tocnumber">2.3</span> <span class="toctext">Client Certificate</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#VPN_Variants"><span class="tocnumber">3</span> <span class="toctext">VPN Variants</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#IPSec_in_tunnel_mode"><span class="tocnumber">3.1</span> <span class="toctext">IPSec in tunnel mode</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#IPSec_in_transport_mode"><span class="tocnumber">3.2</span> <span class="toctext">IPSec in transport mode</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#IPSec.2FL2TP"><span class="tocnumber">3.3</span> <span class="toctext">IPSec/L2TP</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Secrets"><span class="tocnumber">4</span> <span class="toctext">Secrets</span></a></li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Networking"><span class="tocnumber">5</span> <span class="toctext">Networking</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Running_Strongswan_in_a_Container"><span class="tocnumber">5.1</span> <span class="toctext">Running Strongswan in a Container</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>First, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/strongswan/">strongswan</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Certificates">Certificates</span></h2>
+<p>The first step is to generate the X.509 certificates, including a certificate
+authority (CA), a server certificate, and at least one client certificate.
+</p>
+<h3><span class="mw-headline" id="Certificate_Authority">Certificate Authority</span></h3>
+<p>Let us start by creating a self-signed root CA certificate:
+</p>
+<pre>$ cd /etc/ipsec.d/
+$ ipsec pki --gen --type rsa --size 4096 \
+	   --outform pem \
+	   &gt; private/strongswanKey.pem
+$ chmod 600 private/strongswanKey.pem
+$ ipsec pki --self --ca --lifetime 3650 \
+	   --in private/strongswanKey.pem --type rsa \
+	   --dn "C=CH, O=strongSwan, CN=strongSwan Root CA" \
+	   --outform pem \
+    &gt; cacerts/strongswanCert.pem
+</pre>
+<p>The result is a 4096 bit RSA private key <code>strongswanKey.pem</code> (line 4) and
+a self-signed CA certificate <code>strongswanCert.pem</code> (line 10) with a
+validity of 10 years (3650 days). The files are stored in PEM encoded format.
+</p>
+<p>You can change the Distinguished Name (DN) to more relevant values for country
+(C), organization (O), and common name (CN), but you do not have to.
+</p>
+<p>To list the properties of your newly generated certificate, type in the
+following command:
+</p>
+<pre>$ ipsec pki --print --in cacerts/strongswanCert.pem
+</pre>
+<p>Output:
+</p>
+<pre>cert:      X509
+subject:  "C=CH, O=strongSwan, CN=strongSwan Root CA"
+issuer:   "C=CH, O=strongSwan, CN=strongSwan Root CA"
+validity:  not before Nov 22 11:55:41 2013, ok
+           not after  Nov 20 11:55:41 2023, ok (expires in 3649 days)
+serial:    65:39:93:df:a0:f8:40:03
+flags:     CA CRLSign self-signed
+authkeyId: 45:30:11:da:a4:0e:0b:0a:a3:41:a5:81:41:ab:d8:04:7a:40:6c:c0
+subjkeyId: 45:30:11:da:a4:0e:0b:0a:a3:41:a5:81:41:ab:d8:04:7a:40:6c:c0
+pubkey:    RSA 4096 bits
+keyid:     dc:15:91:95:04:07:a5:13:69:5f:77:65:26:d7:02:3f:60:ec:73:c8
+subjkey:   45:30:11:da:a4:0e:0b:0a:a3:41:a5:81:41:ab:d8:04:7a:40:6c:c0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The private key <code>/etc/ipsec.d/private/strongswanKey.pem</code> of the CA should be moved somewhere safe, possibly to a special signing host without access to the Internet. Theft of this master signing key would completely compromise your public key infrastructure.</div>
+<h3><span class="mw-headline" id="Host_Certificate">Host Certificate</span></h3>
+<p>This certificate will be used to authenticate the VPN server. Run the following
+commands:
+</p>
+<pre>$ cd /etc/ipsec.d/
+$ ipsec pki --gen --type rsa --size 2048 \
+  	--outform pem \
+  	&gt; private/vpnHostKey.pem
+$ chmod 600 private/vpnHostKey.pem
+$ ipsec pki --pub --in private/vpnHostKey.pem --type rsa | \
+	 ipsec pki --issue --lifetime 730 \
+	  --cacert cacerts/strongswanCert.pem \
+	  --cakey private/strongswanKey.pem \
+	  --dn "C=CH, O=strongSwan, CN=vpn.example.com" \
+	  --san vpn.example.com \
+	  --flag serverAuth --flag ikeIntermediate \
+	  --outform pem &gt; certs/vpnHostCert.pem
+</pre>
+<p>The result is a 2048 bit RSA private key <code>vpnHostKey.pem</code> (line 4). In
+line 6 we extract its public key and pipe it over to issue
+<code>vpnHostCert.pem</code> (line 13), a host certificate signed by your CA. The
+certificate has a validity of two years (730 days). It identifies the VPN host
+by its Fully Qualified Domain Name (FQDN) (here: <code>vpn.example.com</code>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The domain name or IP address of your VPN server, which is later entered in the client's connection properties, MUST be contained either in the subject Distinguished Name (here in CN, line 10) and/or in a subject Alternative Name (line11), but preferably in both. Make sure both times to replace vpn.example.com with your VPN's hostname – or else the connection between client and server will fail!</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are going to use the built-in VPN client of Windows 7, you MUST add the <code>serverAuth</code> extended key usage flag to your host certificate as shown above, or the client will refuse to connect.
+<p>In addition, OS X 10.7.3 or older requires the <code>ikeIntermediate</code> flag, which we also added here.
+</p>
+Since the addition of these two flags probably will not hurt anyone, you should make sure you keep them there.</div>
+<p>Let us take a look at the properties of our newly generated certificate.
+</p>
+<pre>$ ipsec pki --print --in certs/vpnHostCert.pem
+</pre>
+<p>Output:
+</p>
+<pre>cert:      X509
+subject:  "C=CH, O=strongSwan, CN=vpn.example.com"
+issuer:   "C=CH, O=strongSwan, CN=strongSwan Root CA"
+validity:  not before Nov 22 21:16:51 2013, ok
+           not after  Nov 22 21:16:51 2015, ok (expires in 729 days)
+serial:    0c:05:d7:d5:57:0e:d9:48
+altNames:  vpn.zeitgeist.se
+flags:     serverAuth iKEIntermediate 
+authkeyId: 9b:57:35:fb:cd:9e:2d:20:37:1d:61:4c:e7:c4:5b:5e:dc:64:ad:fc
+subjkeyId: 5f:12:c2:06:ee:2b:1e:cc:5f:78:54:ff:f0:f3:7b:a0:2b:c0:b4:d6
+pubkey:    RSA 2048 bits
+keyid:     6f:a7:99:60:27:27:09:96:02:c1:b9:d9:7d:c1:b0:10:e3:e1:d5:45
+subjkey:   5f:12:c2:06:ee:2b:1e:cc:5f:78:54:ff:f0:f3:7b:a0:2b:c0:b4:d6
+</pre>
+<h3><span class="mw-headline" id="Client_Certificate">Client Certificate</span></h3>
+<p>Any client will require a personal certificate in order to use the VPN. The
+process is analogous to generating a host certificate, except that we identify
+a client certificate by the client's e-mail address rather than a hostname.
+</p>
+<pre>$ cd /etc/ipsec.d/
+$ ipsec pki --gen --type rsa --size 2048 \
+	  --outform pem \
+	  &gt; private/ClientKey.pem
+$ chmod 600 private/ClientKey.pem
+$ ipsec pki --pub --in private/ClientKey.pem --type rsa | \
+	 ipsec pki --issue --lifetime 730 \
+	  --cacert cacerts/strongswanCert.pem \
+	  --cakey private/strongswanKey.pem \
+	  --dn "C=CH, O=strongSwan, CN=myself@example.com" \
+	  --san myself@example.com \
+	  --outform pem &gt; certs/ClientCert.pem
+$ openssl pkcs12 -export -inkey private/ClientKey.pem \
+	  -in certs/ClientCert.pem -name "My own VPN client certificate" \
+	  -certfile cacerts/strongswanCert.pem \
+	  -caname "strongSwan Root CA" \
+	  -out Client.p12
+</pre>
+<p>The result is a 2048 bit RSA private key <code>ClientKey.pem</code> (line 4). In line
+6 we extract its public key and pipe it over to issue <code>ClientCert.pem</code>
+(line 12), the first client certificate signed by your CA. The certificate has
+a validity of two years (730 days) and identifies the client by his e-mail
+address (here: <code>myself@example.com</code>). The last command bundles all needed
+certificates and keys into a PKCS#12 file with a passphrase, which is the most
+convenient format for clients.
+</p>
+<h2><span class="mw-headline" id="VPN_Variants">VPN Variants</span></h2>
+<p>The easiest configuration to get running with is IPSec in tunnel mode, described below.
+</p>
+<h3><span class="mw-headline" id="IPSec_in_tunnel_mode">IPSec in tunnel mode</span></h3>
+<p>VPN configuration can be found in <code>/etc/ipsec.conf</code>. The following
+contains the necessary options to build a basic, functional VPN server:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ipsec.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># ipsec.conf - strongSwan IPsec configuration file
+config setup
+
+  # By default only one client can connect at the same time with an identical
+  # certificate and/or password combination. Enable this option to disable
+  # this behavior.
+  # uniqueids=never
+
+  # Slightly more verbose logging. Very useful for debugging.
+  charondebug="cfg 2, dmn 2, ike 2, net 2"
+
+# Default configuration options, used below if an option is not specified.
+# See: https://wiki.strongswan.org/projects/strongswan/wiki/ConnSection
+conn %default
+
+  # Use IKEv2 by default
+  keyexchange=ikev2
+
+  # Prefer modern cipher suites that allow PFS (Perfect Forward Secrecy)
+  ike=aes128-sha256-ecp256,aes256-sha384-ecp384,aes128-sha256-modp2048,aes128-sha1-modp2048,aes256-sha384-modp4096,aes256-sha256-modp4096,aes256-sha1-modp4096,aes128-sha256-modp1536,aes128-sha1-modp1536,aes256-sha384-modp2048,aes256-sha256-modp2048,aes256-sha1-modp2048,aes128-sha256-modp1024,aes128-sha1-modp1024,aes256-sha384-modp1536,aes256-sha256-modp1536,aes256-sha1-modp1536,aes256-sha384-modp1024,aes256-sha256-modp1024,aes256-sha1-modp1024!
+  esp=aes128gcm16-ecp256,aes256gcm16-ecp384,aes128-sha256-ecp256,aes256-sha384-ecp384,aes128-sha256-modp2048,aes128-sha1-modp2048,aes256-sha384-modp4096,aes256-sha256-modp4096,aes256-sha1-modp4096,aes128-sha256-modp1536,aes128-sha1-modp1536,aes256-sha384-modp2048,aes256-sha256-modp2048,aes256-sha1-modp2048,aes128-sha256-modp1024,aes128-sha1-modp1024,aes256-sha384-modp1536,aes256-sha256-modp1536,aes256-sha1-modp1536,aes256-sha384-modp1024,aes256-sha256-modp1024,aes256-sha1-modp1024,aes128gcm16,aes256gcm16,aes128-sha256,aes128-sha1,aes256-sha384,aes256-sha256,aes256-sha1!
+
+  # Dead Peer Discovery
+  dpdaction=clear
+  dpddelay=300s
+
+  # Do not renegotiate a connection if it is about to expire
+  rekey=no
+
+  # Server side
+  left=%any
+  leftsubnet=0.0.0.0/0
+  leftcert=vpnHostCert.pem
+
+  # Client side
+  right=%any
+  rightdns=8.8.8.8,8.8.4.4
+  rightsourceip=%dhcp
+
+# IKEv2: Newer version of the IKE protocol
+conn IPSec-IKEv2
+  keyexchange=ikev2
+  auto=add
+
+# IKEv2-EAP
+conn IPSec-IKEv2-EAP
+  also="IPSec-IKEv2"
+  rightauth=eap-mschapv2
+  rightsendcert=never
+  eap_identity=%any
+
+# IKEv1 (Cisco-compatible version)
+conn CiscoIPSec
+  keyexchange=ikev1
+  # forceencaps=yes
+  rightauth=pubkey
+  rightauth2=xauth
+  auto=add
+</pre>
+<h3><span class="mw-headline" id="IPSec_in_transport_mode">IPSec in transport mode</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Need to better explain the differences, advantages and inconvenients, then write a tutorial. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:StrongSwan">Talk:StrongSwan#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="IPSec.2FL2TP">IPSec/L2TP</span></h3>
+<p>The <a href="../en/Openswan_L2TP/IPsec_VPN_client_setup.html" title="L2TP/IPsec VPN client setup" class="mw-redirect">L2TP/IPsec VPN client setup</a> page describes how to setup a client to connect to an IPSec/L2TP server. This variant of an IPSec VPN has the advantage of allowing to tunnel non-IP packets, contrary to pure IPSec, but at the expense of having to run an additional L2TP daemon.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Need to better explain the differences, advantages and inconvenients, then write a tutorial. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:StrongSwan">Talk:StrongSwan#</a>)</div>
+</div>
+<h2><span class="mw-headline" id="Secrets">Secrets</span></h2>
+<p>strongSwan needs to know which clients are allowed to connect to the VPN. This
+is configured in the <code>/etc/ipsec.secrets</code> file, like the following
+example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ipsec.secrets</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># This file holds shared secrets or RSA private keys for authentication.
+
+# RSA private key for this host, authenticating it to any other host
+# which knows the public part.  Suitable public keys, for ipsec.conf, DNS,
+# or configuration of other implementations, can be extracted conveniently
+# with "ipsec showhostkey".
+
+: RSA ClientKey.pem
+user1 : EAP "topsecretpassword"
+user2 : XAUTH "evenmoretopsecretpassword"
+</pre>
+<p>Whenever you edit /etc/ipsec.secrets while strongSwan is running, you must
+reload the file:
+</p>
+<pre>$ ipsec rereadsecrets
+</pre>
+<h2><span class="mw-headline" id="Networking">Networking</span></h2>
+<p>You’re almost done setting up your server. There are a few things left to make
+your VPN server properly route the VPN tunnel:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysctl.d/10-net-forward.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# VPN
+net.ipv4.ip_forward = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+</pre>
+<p>The VPN configuration above automatically assigns an IP address to the client
+using DHCP, so you need to have a working DHCP server. If the server is running
+on the same host as strongSwan, you may need to edit
+<code>/etc/strongswan.d/charon/dhcp.conf</code> like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/strongswan.d/charon/dhcp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">dhcp {
+ force_server_address = yes
+ server = 192.168.0.255
+}
+</pre>
+<p>You may also need to allow the following protocols in your firewall:
+</p>
+<ul>
+<li> ESP (Encrypted Secure Payload): Standard IPSec traffic</li>
+<li> UDP 4500: IPSec traffic in "NAT Traversal" mode</li>
+<li> UDP 500: Key exchanges (IKE)</li>
+</ul>
+<p>Finally, you can <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>strongswan</code> service.
+</p>
+<h3><span class="mw-headline" id="Running_Strongswan_in_a_Container">Running Strongswan in a Container</span></h3>
+<p>For running <code>strongswan</code> in a container like <a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a> you need the following service file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/systemd-nspawn@.service.d/override.conf}</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Service]
+ExecStart=
+ExecStart=/usr/bin/systemd-nspawn --quiet --keep-unit --boot --link-journal=try-guest --settings=override --machine=%I --capability=CAP_NET_ADMIN --network-veth 
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Need to explain at least ip xfrm and common issues (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:StrongSwan">Talk:StrongSwan#</a>)</div>
+</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://www.zeitgeist.se/2013/11/22/strongswan-howto-create-your-own-vpn/">strongSwan 5: How to create your own VPN</a> — The source used to write the initial revision of this article, with permission from the original author.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtual_Private_Network.html" title="Category:Virtual Private Network">Virtual Private Network</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

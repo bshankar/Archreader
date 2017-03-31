@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Cloud-init - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Cloud-init skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Cloud-init</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Cloud-init is a package that contains utilities for early initialization of cloud instances. It is needed in arch linux images that are built with the intention of being launched in cloud like <a href="../en/OpenStack.html" title="OpenStack">OpenStack</a>, <a href="../en/Arch_Linux_AMIs_for_Amazon_Web_Services.html" title="AWS" class="mw-redirect">AWS</a> etc.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Default_user_configuration"><span class="tocnumber">2.1</span> <span class="toctext">Default user configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Disable_login_as_root"><span class="tocnumber">2.2</span> <span class="toctext">Disable login as root</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Configuring_data_sources"><span class="tocnumber">2.3</span> <span class="toctext">Configuring data sources</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Other_sections_in_cloud.cfg"><span class="tocnumber">3</span> <span class="toctext">Other sections in cloud.cfg</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Systemd_integration"><span class="tocnumber">4</span> <span class="toctext">Systemd integration</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cloud-init">cloud-init</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>In order to make an Arch image cloud ready, a few steps have to be followed:
+</p>
+<ul>
+<li> Create a default user. You can login to your instance as this user. We will create and use a user called <code>arch</code>.</li>
+<li> Install sudo and add the default user to sudo group. This can be used later to execute commands as privileged user.</li>
+<li> Enable password less sudo for the default user.</li>
+<li> Configure cloud-init to pull instance metadata to configure the instance. This includes but not limited to:
+<ul>
+<li> Setting up the instance <code>hostname</code>
+</li>
+<li> Configuring instance's <code>resolv.conf</code>
+</li>
+<li> Configuring <code>~/.ssh/authorized_keys</code> file for the default user </li>
+</ul>
+</li>
+</ul>
+<p>The cloud-init's main configuration file is <code>/etc/cloud/cloud.cfg</code>. Optionally the user can place <code>*.cfg</code> files in <code>/etc/cloud/cloud.cfg.d</code> to be loaded.
+</p>
+<h3><span class="mw-headline" id="Default_user_configuration">Default user configuration</span></h3>
+<p>As of February 2016, the default <code>/etc/cloud/cloud.cfg</code> shipped with the package has not been adapted to Arch, and still states that the distro is Ubuntu, therefore it requires editing.
+</p>
+<p>Edit <code>/etc/cloud/cloud.cfg</code> to have the following contents:
+</p>
+<pre>users:
+  - default
+</pre>
+<p>This tells cloud-init to use the user configured under <code>system_info</code> &gt; <code>default_user</code> as the default user:
+</p>
+<pre>system_info:
+   distro: arch
+   default_user:
+     name: arch 
+     lock_passwd: true
+     gecos: Arch
+     groups: [adm, audio, cdrom, dialout, dip, floppy, netdev, plugdev, sudo, video]
+     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+     shell: /bin/bash
+</pre>
+<p>Under <code>system_info</code> we specify the distro as "arch". This will instruct cloud-init to use <code>arch.py</code> module for configuration. Further we specify that:
+</p>
+<ul>
+<li> the default user's name would be <code>arch</code>
+</li>
+<li> the default user is password locked, which means you can not login to the instance without the ssh keys configured during boot</li>
+<li> the default user should be added to the groups <code>adm</code>, <code>audio</code>, <code>cdrom</code>, <code>dialout</code>, <code>dip</code>, <code>floppy</code>, <code>netdev</code>, <code>plugdev</code>, <code>sudo</code>, <code>video</code>
+</li>
+<li> the default user is allow passwordless sudo usage</li>
+<li> the default user's shell is <code>/bin/bash</code>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Disable_login_as_root">Disable login as root</span></h3>
+<p>To do this you can specify in <code>/etc/cloud/cloud.cfg</code>:
+</p>
+<pre>disable_root: true
+</pre>
+<p>You may also delete the root user password:
+</p>
+<pre># passwd -d root
+</pre>
+<p>Do not perform this step unless you are sure the configuration in previous section works. Otherwise you might be completely locked out of your instance.
+</p>
+<h3><span class="mw-headline" id="Configuring_data_sources">Configuring data sources</span></h3>
+<p>Data Sources define how the instance metadata is pulled during boot. This depends on what cloud (OpenStack, AWS, OpenNebula etc.) you are running your instance on. Under the hood this translates to a corresponding module which implement a few methods defined in a common interface. Edit your <code>/etc/cloud/cloud.cfg</code> to have the below contents:
+</p>
+<pre>datasource_list: [ NoCloud, ConfigDrive, OpenNebula, Azure, AltCloud, OVF, MAAS, GCE, OpenStack, CloudSigma, Ec2, CloudStack, None ]
+</pre>
+<p>This instructs cloud-init what modules to load while trying to download instance metadata. Optionally further configuration parameters may be passed specific to each datasource as below:
+</p>
+<pre>
+datasource:
+  OpenStack:
+    metadata_urls: [ 'http://169.254.169.254:80' ]
+    dsmode: net
+</pre>
+<p>The above configuration tells OpenStack datasource to use the url <code>http://169.254.169.254:80</code> to download metadata and to run after network initialization, both of which are the default behaviour and may be omitted.
+</p>
+<h2><span class="mw-headline" id="Other_sections_in_cloud.cfg">Other sections in cloud.cfg</span></h2>
+<p><code>cloud.cfg</code> defines several other sections which includes but not limited to <code>cloud_init_modules</code>, <code>cloud_config_modules</code> and <code>cloud_final_modules</code> that define the modules that would be run at various stages during instance initialization. These modules are loaded dynamically from the path <code>/usr/lib/python2.7/site-packages/cloudinit/config/</code> and run at boot time. The user may define their own modules and configure them to be called during every boot like say to:
+</p>
+<ul>
+<li> perform disk resize</li>
+<li> perform package update</li>
+</ul>
+<p>etc.
+</p>
+<p>The various modules declare to cloud-init which distros they have been verified for. Even if you specify that you want to run them, they will refuse to run unless the distro specified in <code>cloud.cfg</code> is one of the verified distros for the given module. If you want to run a module on Arch anyway that does not specify <code>arch</code>, add the module to the <code>unverified_modules:</code> section in <code>cloud.cfg</code>, e.g.:
+</p>
+<pre>unverified_modules: ['ssh-import-id']
+</pre>
+<h2><span class="mw-headline" id="Systemd_integration">Systemd integration</span></h2>
+<p>Package cloud-init provides 4 systemd services, and a systemd target, whose dependencies are constructed in a way that they are activated in the sequence listed:
+</p>
+<ul>
+<li> <code>cloud-init-local.service</code>. Only requires the filesystems to be up. Executes <code>cloud-init init --local</code>
+</li>
+<li> <code>cloud-init.service</code>. Requires the network to be up. Executes <code>cloud-init init</code>
+</li>
+<li> <code>cloud-config.target</code>. Corresponds to the cloud-config upstart event "to inform third parties that cloud-config is available"</li>
+<li> <code>cloud-config.service</code>. Executes <code>cloud-init modules --mode=config</code>
+</li>
+<li> <code>cloud-final.service</code>. Executes <code>cloud-init modules --mode=final</code>
+</li>
+</ul>
+<p>The <a href="../en/Arch_Linux_AMIs_for_Amazon_Web_Services.html" title="Arch Linux AMIs for Amazon Web Services">Uplink Labs EC2 images</a> have all of them enabled, although that appears to be overkill due to the dependencies.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li>
+<li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

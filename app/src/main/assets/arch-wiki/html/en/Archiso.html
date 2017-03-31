@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Archiso - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Archiso skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Archiso</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Remastering_the_Install_ISO.html" title="Remastering the Install ISO">Remastering the Install ISO</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PXE.html" title="Archiso as pxe server" class="mw-redirect">Archiso as pxe server</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Archboot.html" title="Archboot">Archboot</a></li>
+</ul>
+</div>
+<p><b>Archiso</b> is a small set of bash scripts capable of building fully functional Arch Linux live CD/DVD/USB images. It is the same tool used to generate the official images, but since it is a very generic tool, it can be used to generate anything from rescue systems, install disks, to special interest live CD/DVD/USB systems, and who knows what else. Simply put, if it involves Arch on a shiny coaster, it can do it. The heart and soul of Archiso is <i>mkarchiso</i>. All of its options are documented in its usage output, so its direct usage will not be covered here. Instead, this wiki article will act as a guide for rolling your own live media in no time!
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Setup"><span class="tocnumber">1</span> <span class="toctext">Setup</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configure_the_live_medium"><span class="tocnumber">2</span> <span class="toctext">Configure the live medium</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Installing_packages"><span class="tocnumber">2.1</span> <span class="toctext">Installing packages</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Custom_local_repository"><span class="tocnumber">2.1.1</span> <span class="toctext">Custom local repository</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Avoid_installation_of_packages_belonging_to_base_group"><span class="tocnumber">2.1.2</span> <span class="toctext">Avoid installation of packages belonging to base group</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Installing_packages_from_multilib"><span class="tocnumber">2.1.3</span> <span class="toctext">Installing packages from multilib</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Adding_files_to_image"><span class="tocnumber">2.2</span> <span class="toctext">Adding files to image</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Boot_Loader"><span class="tocnumber">2.3</span> <span class="toctext">Boot Loader</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Login_manager"><span class="tocnumber">2.4</span> <span class="toctext">Login manager</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Changing_Automatic_Login"><span class="tocnumber">2.5</span> <span class="toctext">Changing Automatic Login</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Build_the_ISO"><span class="tocnumber">3</span> <span class="toctext">Build the ISO</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Rebuild_the_ISO"><span class="tocnumber">3.1</span> <span class="toctext">Rebuild the ISO</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Using_the_ISO"><span class="tocnumber">4</span> <span class="toctext">Using the ISO</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#CD"><span class="tocnumber">4.1</span> <span class="toctext">CD</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#USB"><span class="tocnumber">4.2</span> <span class="toctext">USB</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#GRUB"><span class="tocnumber">4.3</span> <span class="toctext">GRUB</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#grub4dos"><span class="tocnumber">4.4</span> <span class="toctext">grub4dos</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Installation_without_Internet_access"><span class="tocnumber">5</span> <span class="toctext">Installation without Internet access</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Install_the_archiso_to_the_new_root"><span class="tocnumber">5.1</span> <span class="toctext">Install the archiso to the new root</span></a></li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Chroot_and_configure_the_base_system"><span class="tocnumber">5.2</span> <span class="toctext">Chroot and configure the base system</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#Restore_the_configuration_of_journald"><span class="tocnumber">5.2.1</span> <span class="toctext">Restore the configuration of journald</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Remove_special_udev_rule"><span class="tocnumber">5.2.2</span> <span class="toctext">Remove special udev rule</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Disable_and_remove_the_services_created_by_archiso"><span class="tocnumber">5.2.3</span> <span class="toctext">Disable and remove the services created by archiso</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Remove_special_scripts_of_the_Live_environment"><span class="tocnumber">5.2.4</span> <span class="toctext">Remove special scripts of the Live environment</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#Configure_the_system"><span class="tocnumber">5.2.5</span> <span class="toctext">Configure the system</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-26">
+<a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a>
+<ul>
+<li class="toclevel-2 tocsection-27"><a href="#Documentation_and_tutorials"><span class="tocnumber">6.1</span> <span class="toctext">Documentation and tutorials</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Example_customization_template"><span class="tocnumber">6.2</span> <span class="toctext">Example customization template</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setup">Setup</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> To use Archiso you must be running on a x86_64 platform. <a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/archiso.git/tree/docs/README.build#n67">[1]</a>
+</li>
+<li> It is recommended to act as root in all the following steps. If not, it is very likely to have problems with false permissions later.</li>
+</ul>
+</div>
+<p>Before you begin, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=archiso">archiso</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/archiso-git/">archiso-git</a></span><sup><small>AUR</small></sup> package.
+</p>
+<p>Archiso comes with two "profiles": <i>releng</i> and <i>baseline</i>.
+</p>
+<ul>
+<li> If you wish to create a fully customised live version of Arch Linux, pre-installed with all your favourite programs and configurations, use <i>releng</i>.</li>
+<li> If you just want to create the most basic live medium, with no pre-installed packages and a minimalistic configuration, use <i>baseline</i>.</li>
+</ul>
+<p>Now, copy the profile of your choice to a directory where you can make adjustments and build it (we will use <code>~/archlive</code>). Execute the following, replacing <code><b>profile</b></code> with either <code>releng</code> or <code>baseline</code>.
+</p>
+<pre># cp -r /usr/share/archiso/configs/<b>profile</b>/* ~/archlive
+</pre>
+<ul>
+<li> If you are using the <code>releng</code> profile to make a fully customised image, then you can proceed onto <a href="#Configure_the_live_medium">#Configure the live medium</a>.</li>
+<li> If you are using the <code>baseline</code> profile to create a bare image, then you will not be needing to do any customisations and can proceed onto <a href="#Build_the_ISO">#Build the ISO</a>.</li>
+</ul>
+<h2><span class="mw-headline" id="Configure_the_live_medium">Configure the live medium</span></h2>
+<p>This section details configuring the image you will be creating, allowing you to define the packages and configurations you want your live image to contain.
+</p>
+<p>Inside the <code>~/archlive</code> directory there are a number of files and directories; we are only concerned with a few of these, mainly: 
+</p>
+<ul>
+<li> <code>packages.*</code> - this is where you list, line by line, the packages you want to have installed, and</li>
+<li> the <code>airootfs</code> directory - this directory acts as an overlay and it is where you make all the customisations.</li>
+</ul>
+<p>Generally, every administrative task that you would normally do after a fresh install except for package installation can be scripted into <code>~/archlive/airootfs/root/customize_airootfs.sh</code>. It has to be written from the perspective of the new environment, so <code>/</code> in the script means the root of the live-iso which is created.
+</p>
+<h3><span class="mw-headline" id="Installing_packages">Installing packages</span></h3>
+<p>You will want to create a list of packages you want installed on your live CD system. A file full of package names, one-per-line, is the format for this. This is <i>great</i> for special interest live CDs, just specify packages you want in packages.both and bake the image.
+The <code>packages.i686</code> and <code>packages.x86_64</code> files allow you to install software on just 32-bit or 64-bit, respectively.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you want to use a <a href="../en/Window_manager.html" title="Window manager">window manager</a> in the Live CD then you must add the necessary and correct <a href="../en/Xorg.html#Driver_installation" title="Video drivers" class="mw-redirect">video drivers</a>, or the WM may freeze on loading.</div>
+<h4><span class="mw-headline" id="Custom_local_repository">Custom local repository</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Pacman/Tips_and_tricks.html#Custom_local_repository" title="Pacman tips" class="mw-redirect">Pacman tips#Custom local repository</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Move the general information (e.g. repo tree) into the main article. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Archiso">Talk:Archiso#</a>)</div>
+</div>
+<p>You can also <a href="../en/Pacman/Tips_and_tricks.html#Custom_local_repository" title="Custom local repository" class="mw-redirect">create a custom local repository</a> for the purpose of preparing custom packages or packages from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>/<a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a>. When doing so with packages for both architectures, you should follow a certain directory order to not run into problems.
+</p>
+<p>For instance:
+</p>
+<ul><li>
+<code>~/customrepo</code>
+<ul>
+<li>
+<code>~/customrepo/x86_64</code>
+<ul>
+<li><code>~/customrepo/x86_64/foo-x86_64.pkg.tar.xz</code></li>
+<li><code>~/customrepo/x86_64/customrepo.db.tar.gz</code></li>
+<li>
+<code>~/customrepo/x86_64/customrepo.db</code> (symlink created by <code>repo-add</code>)</li>
+</ul>
+</li>
+<li>
+<code>~/customrepo/i686</code>
+<ul>
+<li><code>~/customrepo/i686/foo-i686.pkg.tar.xz</code></li>
+<li><code>~/customrepo/i686/customrepo.db.tar.gz</code></li>
+<li>
+<code>~/customrepo/i686/customrepo.db</code> (symlink created by <code>repo-add</code>)</li>
+</ul>
+</li>
+</ul>
+</li></ul>
+<p>You can then add your repository by putting the following into <code>~/archlive/pacman.conf</code>, above the other repository entries (for top priority):
+</p>
+<pre># custom repository
+[customrepo]
+SigLevel = Optional TrustAll
+Server = file:///home/<b>user</b>/customrepo/$arch
+</pre>
+<p>So, the build scripts just look for the appropriate packages.
+</p>
+<p>If this is not the case you will be running into error messages similar to this:
+</p>
+<pre>error: failed to prepare transaction (package architecture is not valid)
+:: package foo-i686 does not have a valid architecture
+</pre>
+<h4><span class="mw-headline" id="Avoid_installation_of_packages_belonging_to_base_group">Avoid installation of packages belonging to base group</span></h4>
+<p>By default, <code>/usr/bin/mkarchiso</code>, a script which is used by <code>~/archlive/build.sh</code>, calls one of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span> named <code>pacstrap</code> without the <code>-i</code> flag, which causes <a href="../en/Pacman.html" title="Pacman">Pacman</a> to not wait for user input during the installation process.
+</p>
+<p>When blacklisting base group packages by adding them to the <code>IgnorePkg</code> line in <code>~/archlive/pacman.conf</code>, <a href="../en/Pacman.html" title="Pacman">Pacman</a> asks if they still should be installed, which means they will when user input is bypassed. To get rid of these packages there are several options:
+</p>
+<ul><li> <b>Dirty</b>: Add the <code>-i</code> flag to each line calling <code>pacstrap</code> in <code>/usr/bin/mkarchiso</code>.</li></ul>
+<ul><li> <b>Clean</b>: Create a copy of <code>/usr/bin/mkarchiso</code> in which you add the flag and adapt <code>~/archlive/build.sh</code> so that it calls the modified version of the mkarchiso script.</li></ul>
+<ul><li> <b>Advanced</b>: Create a function for <code>~/archlive/build.sh</code> which explicitly removes the packages after the base installation. This would leave you the comfort of not having to type enter so much during the installation process.</li></ul>
+<h4><span class="mw-headline" id="Installing_packages_from_multilib">Installing packages from multilib</span></h4>
+<p>To install packages from the <a href="../en/Multilib.html" title="Multilib">multilib</a> repository you have to create two pacman configuration files: one for x86_64 and one for i686. Copy <code>pacman.conf</code> to <code>pacmanx86_64.conf</code> and <code>pacmani686.conf</code>. Uncomment the following lines to enable <i>multilib</i> in <code>pacmanx86_64.conf</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pacmanx86_64.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[multilib]
+SigLevel = PackageRequired
+Include = /etc/pacman.d/mirrorlist</pre>
+<p>Then edit <code>build.sh</code> with an editor. Replace the following lines:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">build.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+run_once make_pacman_conf
+
+# Do all stuff for each airootfs
+for arch in i686 x86_64; do
+    run_once make_basefs
+    run_once make_packages
+done
+
+run_once make_packages_efi
+
+for arch in i686 x86_64; do
+    run_once make_setup_mkinitcpio
+    run_once make_customize_airootfs
+done
+</pre>
+<p>with:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">build.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+cp -v releng/pacmanx86_64.conf releng/pacman.conf
+run_once make_pacman_conf
+
+# Do all stuff for each airootfs
+for arch in x86_64; do
+    run_once make_basefs
+    run_once make_packages
+    run_once make_packages_efi
+    run_once make_setup_mkinitcpio
+    run_once make_customize_airootfs
+done
+
+echo make_pacman_conf i686
+cp -v releng/pacmani686.conf releng/pacman.conf
+cp -v releng/pacmani686.conf ${work_dir}/pacman.conf
+
+
+for arch in i686; do
+    run_once make_basefs
+    run_once make_packages
+    run_once make_packages_efi
+    run_once make_setup_mkinitcpio
+    run_once make_customize_airootfs
+done
+</pre>
+<p>In this way packages for x86_64 and i686 will be installed with their own pacman configuration file.
+</p>
+<h3><span class="mw-headline" id="Adding_files_to_image">Adding files to image</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You must be root to do this, do not change the ownership of any of the files you copy over, <b>everything</b> within the airootfs directory must be root owned. Proper ownerships will be sorted out shortly.</div>
+<p>The airootfs directory acts as an overlay, think of it as root directory '/' on your current system, so any files you place within this directory will be copied over on boot-up.
+</p>
+<p>So if you have a set of iptables scripts on your current system you want to be used on you live image, copy them over as such:
+</p>
+<pre># cp -r /etc/iptables ~/archlive/airootfs/etc
+</pre>
+<p>Placing files in the users home directory is a little different. Do not place them within <code>airootfs/home</code>, but instead create a skel directory within <code>airootfs/</code> and place them there. We will then add the relevant commands to the <code>customize_airootfs.sh</code> which we are going to use to copy them over on boot and sort out the permissions.
+</p>
+<p>First, create the skel directory:
+</p>
+<pre># mkdir ~/archlive/airootfs/etc/skel
+</pre>
+<p>Now copy the 'home' files to the skel directory, e.g for <code>.bashrc</code>:
+</p>
+<pre># cp ~/.bashrc ~/archlive/airootfs/etc/skel/
+</pre>
+<p>When <code>~/archlive/airootfs/root/customize_airootfs.sh</code> is executed and a new user is created, the files from the skel directory will automatically be copied over to the new home folder, permissions set right.
+</p>
+<p>Similarly, some care is required for special configuration file that reside somewhere down the hierarchy. As an example the <code>/etc/X11/xinit/xinitrc</code> configuration file resides on a path that might be overwritten by installing a package. To place the configuration file one should put into the custom <code>xinitrc</code> in <code>~/archlive/airootfs/etc/skel/</code> and then modify <code>customize_airootfs.sh</code> to move it appropriately.
+</p>
+<h3><span class="mw-headline" id="Boot_Loader">Boot Loader</span></h3>
+<p>The default file should work fine, so you should not need to touch it.
+</p>
+<p>Due to the modular nature of isolinux, you are able to use lots of addons since all *.c32 files are copied and available to you. Take a look at the <a rel="nofollow" class="external text" href="http://syslinux.zytor.com/wiki/index.php/SYSLINUX">official syslinux site</a> and the <a rel="nofollow" class="external text" href="https://projects.archlinux.org/archiso.git/tree/configs/syslinux-iso/boot-files">archiso git repo</a>. Using said addons, it is possible to make visually attractive and complex menus. See <a rel="nofollow" class="external text" href="http://syslinux.zytor.com/wiki/index.php/Comboot/menu.c32">here</a>.
+</p>
+<h3><span class="mw-headline" id="Login_manager">Login manager</span></h3>
+<p>Starting X at boot is done by enabling your login manager's <a href="../en/Systemd.html" title="Systemd">systemd</a> service. If you know which .service file needs a softlink: Great. If not, you can easily find out in case you are using the same program on the system you build your iso on. Just use:
+</p>
+<pre>$ ls -l /etc/systemd/system/display-manager.service
+</pre>
+<p>Now create the same softlink in <code>~/archlive/airootfs/etc/systemd/system</code>. For LXDM:
+</p>
+<pre># ln -s /usr/lib/systemd/system/lxdm.service ~/archlive/airootfs/etc/systemd/system/display-manager.service
+</pre>
+<p>This will enable LXDM at system start on your live system.
+</p>
+<p>Alternatively you can just enable the service in <code>airootfs/root/customize_airootfs.sh</code> along with other services that are enabled there.
+</p>
+<p><br>
+If you want the graphical environment to actually start automatically during boot make sure to edit <code>airootfs/root/customize_airootfs.sh</code> and replace 
+</p>
+<pre>systemctl set-default multi-user.target
+</pre>
+<p>with
+</p>
+<pre>systemctl set-default graphical.target
+</pre>
+<h3><span class="mw-headline" id="Changing_Automatic_Login">Changing Automatic Login</span></h3>
+<p>The configuration for getty's automatic login is located under <code>airootfs/etc/systemd/system/getty@tty1.service.d/autologin.conf</code>.
+</p>
+<p>You can modify this file to change the auto login user:
+</p>
+<pre>[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin <b>isouser</b> --noclear %I 38400 linux
+</pre>
+<p>Or remove it altogether to disable auto login.
+</p>
+<h2><span class="mw-headline" id="Build_the_ISO">Build the ISO</span></h2>
+<p>Now you are ready to turn your files into the .iso which you can then burn to CD or USB:
+</p>
+<p>First create the <code>out/</code> directory,
+</p>
+<pre># mkdir ~/archlive/out/
+</pre>
+<p>then inside <code>~/archlive</code>, execute:
+</p>
+<pre># ./build.sh -v
+</pre>
+<p>The script will now download and install the packages you specified to <code>work/*/airootfs</code>, create the kernel and init images, apply your customizations and finally build the iso into <code>out/</code>.
+</p>
+<h3><span class="mw-headline" id="Rebuild_the_ISO">Rebuild the ISO</span></h3>
+<p>Rebuilding the iso after modifications is not officially supported. However, it is easily possible by applying two steps. First you have to remove lock files in the work directory:
+</p>
+<pre># rm -v work/build.make_*
+</pre>
+<p>Furthermore it is required to edit the script <code>airootfs/root/customize_airootfs.sh</code>, and add an id command in the beginning of the <code>useradd</code> line as shown here. Otherwise the rebuild stops at this point because the user that is to be added already exists <a rel="nofollow" class="external autonumber" href="https://bugs.archlinux.org/task/41865">[2]</a>.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> typo? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Archiso">Talk:Archiso#</a>)</div>
+</div>
+<pre>! id arch &amp;&amp; useradd -m -p "" -g users -G "adm,audio,floppy,log,network,rfkill,scanner,storage,optical,power,wheel" -s /usr/bin/zsh arch
+</pre>
+<p>Also remove persistent data such as created users or symlinks such as <code>/etc/sudoers</code>.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Report more data that needs to be removed or reset. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Archiso">Talk:Archiso#</a>)</div>
+</div>
+<h2><span class="mw-headline" id="Using_the_ISO">Using the ISO</span></h2>
+<h3><span class="mw-headline" id="CD">CD</span></h3>
+<p>Just burn the iso to a CD. You can follow <a href="../en/Optical_disc_drive.html#Burning" title="Optical disc drive">Optical disc drive#Burning</a> as you wish.
+</p>
+<h3><span class="mw-headline" id="USB">USB</span></h3>
+<p>See <a href="../en/USB_flash_installation_media.html" title="USB flash installation media">USB flash installation media</a>.
+</p>
+<h3><span class="mw-headline" id="GRUB">GRUB</span></h3>
+<p>See <a href="../en/Multiboot_USB_drive.html#Arch_Linux" title="Multiboot USB drive">Multiboot USB drive#Arch Linux</a>.
+</p>
+<h3><span class="mw-headline" id="grub4dos">grub4dos</span></h3>
+<p>Grub4dos is a utility that can be used to create multiboot USBs, able to boot multiple linux distros from the same USB stick.
+</p>
+<p>To boot the generated system on a USB with grub4dos already installed, loop mount the ISO and copy the entire <code>/arch</code> directory to the <b>root of the USB</b>.
+Then edit the <code>menu.lst</code> file from the grub4dos (it must be on the USB root) and add these lines:
+</p>
+<pre>
+title Archlinux x86_64
+kernel /arch/boot/x86_64/vmlinuz archisolabel=&lt;your usb label&gt;
+initrd /arch/boot/x86_64/archiso.img
+</pre>
+<p>Change the <code>x86_64</code> part as necessary and put your <b>real</b> usb label there.
+</p>
+<h2><span class="mw-headline" id="Installation_without_Internet_access">Installation without Internet access</span></h2>
+<p>If you wish to install the archiso (e.g. <a rel="nofollow" class="external text" href="https://www.archlinux.org/download/">the offical monthly release</a>) as it is without an Internet connection, or, if you do not want to download the packages you want again:
+</p>
+<p>First, follow the <a href="../en/Installation_guide.html" title="Installation guide">Installation guide</a>, skipping the <a href="../en/Installation_guide.html#Connect_to_the_Internet" title="Installation guide">Installation guide#Connect to the Internet</a> section, until the <a href="../en/Installation_guide.html#Install_the_base_packages" title="Installation guide">Installation guide#Install the base packages</a> step.
+</p>
+<h3><span class="mw-headline" id="Install_the_archiso_to_the_new_root">Install the archiso to the new root</span></h3>
+<p>Instead of installing the packages with <code>pacstrap</code> (which would try to download from the remote repositories), copy <i>everything</i> in the live environment to the new root:
+</p>
+<pre># time cp -ax / /mnt
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The option (<code>-x</code>) excludes some special directories, as they should not be copied to the new root.</div>
+<p>Then, copy the kernel image to the new root, in order to keep the integrity of the new system:
+</p>
+<pre># cp -vaT /run/archiso/bootmnt/arch/boot/$(uname -m)/vmlinuz /mnt/boot/vmlinuz-linux
+</pre>
+<p>After that, generate a fstab as described in <a href="../en/Installation_guide.html#Fstab" title="Installation guide">Installation guide#Fstab</a>.
+</p>
+<h3><span class="mw-headline" id="Chroot_and_configure_the_base_system">Chroot and configure the base system</span></h3>
+<p>Next, chroot into your newly installed system:
+</p>
+<pre># arch-chroot /mnt /bin/bash
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Before performing the other <a href="../en/Installation_guide.html#Configure_the_system" title="Installation guide">Installation guide#Configure the system</a> steps (e.g. locale, keymap, etc.), it is necessary to get rid of the trace of the Live environment (in other words, the customization of archiso which does not fit a non-Live environment).</div>
+<h4><span class="mw-headline" id="Restore_the_configuration_of_journald">Restore the configuration of journald</span></h4>
+<p><a rel="nofollow" class="external text" href="https://projects.archlinux.org/archiso.git/tree/configs/releng/airootfs/root/customize_airootfs.sh#n19">This customization of archiso</a> will lead to storing the system journal in RAM, it means that the journal will not available after reboot:
+</p>
+<pre># sed -i 's/Storage=volatile/#Storage=auto/' /etc/systemd/journald.conf
+</pre>
+<h4><span class="mw-headline" id="Remove_special_udev_rule">Remove special udev rule</span></h4>
+<p><a rel="nofollow" class="external text" href="https://projects.archlinux.org/archiso.git/tree/configs/releng/airootfs/etc/udev/rules.d/81-dhcpcd.rules">This rule of udev</a> starts the dhcpcd automatically if there are any wired network interfaces.
+</p>
+<pre># rm /etc/udev/rules.d/81-dhcpcd.rules
+</pre>
+<h4><span class="mw-headline" id="Disable_and_remove_the_services_created_by_archiso">Disable and remove the services created by archiso</span></h4>
+<p>Some service files are created for the Live environment, please disable the services and remove the file as they are unnecessary for the new system:
+</p>
+<pre># systemctl disable pacman-init.service choose-mirror.service
+# rm -r /etc/systemd/system/{choose-mirror.service,pacman-init.service,etc-pacman.d-gnupg.mount,getty@tty1.service.d}
+# rm /etc/systemd/scripts/choose-mirror
+</pre>
+<h4><span class="mw-headline" id="Remove_special_scripts_of_the_Live_environment">Remove special scripts of the Live environment</span></h4>
+<p>There are some scripts installed in the live system by archiso scripts, which are unnecessary for the new system:
+</p>
+<pre># rm /etc/systemd/system/getty@tty1.service.d/autologin.conf
+# rm /root/{.automated_script.sh,.zlogin}
+# rm /etc/mkinitcpio-archiso.conf
+# rm -r /etc/initcpio
+</pre>
+<h4><span class="mw-headline" id="Configure_the_system">Configure the system</span></h4>
+<p>Now you can follow the skipped steps of the <a href="../en/Installation_guide.html#Configure_the_system" title="Installation guide">Installation guide#Configure the system</a> section (setting a locale, timezone, hostname, etc.) and finish the installation by creating an initial ramdisk as described in <a href="../en/Installation_guide.html#Initramfs" title="Installation guide">Installation guide#Initramfs</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<h3><span class="mw-headline" id="Documentation_and_tutorials">Documentation and tutorials</span></h3>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://projects.archlinux.org/archiso.git">Archiso project page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://projects.archlinux.org/archiso.git/tree/docs">Offical documentation</a>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Example_customization_template">Example customization template</span></h3>
+<ul><li> <a rel="nofollow" class="external text" href="http://didjix.blogspot.com/">A live DJ distribution powered by ArchLinux and built with Archiso</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Live_Arch_systems.html" title="Category:Live Arch systems">Live Arch systems</a></li>
+<li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

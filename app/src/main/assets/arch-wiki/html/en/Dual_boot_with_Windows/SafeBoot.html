@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dual boot with Windows/SafeBoot - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dual_boot_with_Windows_SafeBoot skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dual boot with Windows/SafeBoot</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">Dual boot with Windows</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> grub legacy, kernel26, etc. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dual_boot_with_Windows/SafeBoot">Talk:Dual boot with Windows/SafeBoot#</a>)</div>
+</div>
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">Dual boot with Windows</a></li>
+</ul>
+</div>
+<p>This is a discussion about how to create a dual boot setup with Windows when whole disk <a rel="nofollow" class="external text" href="http://www.mcafee.com/us/products/data-protection/endpoint-encryption.aspx">SafeBoot</a> (now called <a rel="nofollow" class="external text" href="http://www.mcafee.com/us/products/data-protection/endpoint-encryption.aspx">McAfee Endpoint Encryption</a>) encryption is employed. This may be the case particularly if one is issued a company laptop that comes pre-installed with Windows and is encrypted. While one can wipe the drive and install a) Linux alone or b) Linux and an unencrypted version of Windows, some sacrifices and risks may exist. For example, company patches and updates may no longer work properly, IT policies may be violated, data is no longer protected, and, if Linux alone is installed, the capability to share files, access company specific intranet applets, and other limitations may be experienced.
+</p>
+<p>This article will explain one method for creating a dual boot setup while leaving the company-installed encryption and operating system intact and fully functional.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This author only has experience with Windows 7 and an account created in the Administrator group. It is unknown whether this works with other versions of Windows or with reduced user privileges.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Why_is_a_solution_needed.3F"><span class="tocnumber">1</span> <span class="toctext">Why is a solution needed?</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Alternatives_Considered"><span class="tocnumber">2</span> <span class="toctext">Alternatives Considered</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#The_Method_Proposed"><span class="tocnumber">3</span> <span class="toctext">The Method Proposed</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Step_by_Step_Walkthrough"><span class="tocnumber">4</span> <span class="toctext">Step by Step Walkthrough</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Defragment_the_Windows_Partition"><span class="tocnumber">4.1</span> <span class="toctext">Defragment the Windows Partition</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Shrink_the_Windows_Partition"><span class="tocnumber">4.2</span> <span class="toctext">Shrink the Windows Partition</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Edit_the_Partition_Table"><span class="tocnumber">4.3</span> <span class="toctext">Edit the Partition Table</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Add_an_Option_to_Boot_Linux"><span class="tocnumber">4.4</span> <span class="toctext">Add an Option to Boot Linux</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Backup_the_SafeBoot_MBR"><span class="tocnumber">4.5</span> <span class="toctext">Backup the SafeBoot MBR</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Install_Linux"><span class="tocnumber">4.6</span> <span class="toctext">Install Linux</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Test_Configuration"><span class="tocnumber">4.7</span> <span class="toctext">Test Configuration</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Create_a_Shared_TrueCrypt_Volume"><span class="tocnumber">4.8</span> <span class="toctext">Create a Shared TrueCrypt Volume</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#Summary"><span class="tocnumber">5</span> <span class="toctext">Summary</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-15"><a href="#Additional_Resources"><span class="tocnumber">7</span> <span class="toctext">Additional Resources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Why_is_a_solution_needed.3F">Why is a solution needed?</span></h2>
+<p>The situation of a fully encrypted system is a difficult one because even the MBR is encrypted and SafeBoot uses its encrypted bootloader to load the real partition table and load Windows. Thus, if one attempts to simply partition the disk with [c]fdisk, writing the partition table will render one's system unbootable. Likewise, even if there <i>is</i> a free partition, a) one isn't able to update the partition table with the correct type (which is necessary), b) one can't install the bootloader (e.g. grub) to the MBR, and c) even if one installs the bootloader to the partition instead of the MBR, there is no way to make the system aware that such a bootloader exists via the partition table. It is quite a difficult situation to work with.
+</p>
+<p>Some are content with using live distributions or running Linux from a flash drive; the primary author of this article found such methods frustrating and limiting. There is also quite a lot of discussion about how to get around this situation, <a rel="nofollow" class="external autonumber" href="http://ubuntuforums.org/showthread.php?t=1039401">[1]</a> <a rel="nofollow" class="external autonumber" href="http://blog.nixpanic.net/2008/06/starting-safeboot-with-grub.html">[2]</a> <a rel="nofollow" class="external autonumber" href="http://mbrfde.blogspot.com/2008/11/dual-boot-ubuntu-with-safeboot-fde_19.html">[3]</a> and thus an article seemed relevant after a firsthand experience and success.
+</p>
+<h2><span class="mw-headline" id="Alternatives_Considered">Alternatives Considered</span></h2>
+<p>The primary author of this article has experience with only one successful method, but considered several, including:
+</p>
+<ul>
+<li> Trying to create a "live clone" (full system backup while Windows was running) in order to possess a decrypted copy of the OS, wiping the drive, and then reinstalling the OS to a partition encrypted with an opensource encryption system. This may prevent company patches from operating successfully and may violate policies if a company mandates a particular encryption method.</li>
+<li> Trying to use dd to simply block-copy everything from one disk onto an external drive, wipe the internal drive and re-partition, and then dd the external drive back to the internal, and dd a backup of the SafeBoot MBR back to the internal drive. This seems a bit risky, and also requires that one have another hard drive at least as big as the original encrypted partition.</li>
+<li> While not really a solution in the dual-boot category, simply running Linux inside of a virtualization program is a perfectly reasonable solution. It is by far the simplest. The primary author simply doesn't like the idea and wanted a fully dual-boot setup, however he does have VirtualBox setup in Windows to avoid excessive reboots if Windows usage is needed heavily for any particular task.</li>
+</ul>
+<h2><span class="mw-headline" id="The_Method_Proposed">The Method Proposed</span></h2>
+<p>In brief, the successful setup used by this author is as follows:
+</p>
+<ul>
+<li> Use Windows 7 build in partition editor to partition the drive
+<ul>
+<li> <b>Partition 1:</b> Windows</li>
+<li> <b>Partition 2:</b> Linux /boot</li>
+<li> <b>Partition 3:</b> Linux /</li>
+<li> <b>Partition 4:</b> TrueCrypt device for shared files</li>
+</ul>
+</li>
+<li> Use <a rel="nofollow" class="external text" href="http://partitionwizard.com/">Partition Wizard HomeEdition</a> to tweak some things</li>
+<li> Use <a rel="nofollow" class="external text" href="http://neosmart.net/dl.php?id=1">EasyBCD</a> to add an entry for Arch Linux at boot time</li>
+<li> Install Arch using <a href="../../en/Dm-crypt.html" title="System Encryption with LUKS" class="mw-redirect">System Encryption with LUKS</a>
+</li>
+<li> Configure grub</li>
+<li> Reboot and hold breath</li>
+<li> Install TrueCrypt on both OSs and create a TrueCrypt volume</li>
+</ul>
+<h2><span class="mw-headline" id="Step_by_Step_Walkthrough">Step by Step Walkthrough</span></h2>
+<h3><span class="mw-headline" id="Defragment_the_Windows_Partition">Defragment the Windows Partition</span></h3>
+<p>If the issued computer is encrypted with SafeBoot, it will likely contain one primary partition where Windows is installed. We need to shrink this partition in order to make space for Linux. To shrink this partition as much as possible, defragmenting is helpful. Windows 7 comes with a built in defragmenting utility, available through the control panel. Open this program and defrag on the primary drive (probably called C:\). Do this several times, if desired.
+</p>
+<p>It may be helpful to use an additional program as well. Wikipedia has a <a href="https://en.wikipedia.org/wiki/List_of_defragmentation_software" class="extiw" title="wikipedia:List of defragmentation software">list of various options</a>. The author of this article used <a rel="nofollow" class="external text" href="http://www.auslogics.com/en/software/disk-defrag/">Auslogics Disk Defrag</a>, which worked well and had the ability to view what specific files were unmovable. Such files will hinder the minimum size possible to shrink the volume in the next step.
+</p>
+<ul>
+<li> Screenshot of Auslogic Disk Defrag: <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/XJnZx.png">[4]</a>
+</li>
+<li> Screenshot showing an unmovable file related to SafeBoot: <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/fzfOe.png">[5]</a> (click any gray, unmovable square to see details)</li>
+</ul>
+<p>For some other options for maximizing the amount one can shrink a Windows partition, see <a rel="nofollow" class="external text" href="http://www.howtogeek.com/howto/windows-vista/working-around-windows-vistas-shrink-volume-inadequacy-problems/">this article</a>. While it is written for Windows Vista, it contains some applicable suggestions for Windows 7 as well. The author of this article disabled system restore temporarily and was able to shrink the partition another 6 GB.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> <b>After shrinking the partition in the next step, you should undo any system-critical adjustments you made during this step. In other words, re-enable system recovery, paging file, etc.</b>
+</div>
+<h3><span class="mw-headline" id="Shrink_the_Windows_Partition">Shrink the Windows Partition</span></h3>
+<p>Once defragmenting is complete, open the control panel and either search for "partition" or navigate to System and Security &gt; Administrative Tools &gt; Create and Format Hard Disk Partitions. This will open Windows 7's built-in partition editor as shown in <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/33WpH.png">[6]</a>. Right click on the Windows 7 partition and choose "Shrink Volume." This will open a dialog prompting you for the amount you want to shrink the volume. The dialog will also inform you of the maximum amount possible to shrink the volume. Shrink the volume by the desired size, or, if unmovable files prevent you from shrinking it as much as you'd like, just shrink it as much as possible. For a more picture-filled walkthrough, see <a rel="nofollow" class="external text" href="http://www.howtogeek.com/howto/windows-vista/resize-a-partition-for-free-in-windows-vista/">this article</a>
+</p>
+<p>When this step completes, the Windows partition will be smaller and the rest of the partition will be denoted as "Unallocated space." Right click the unallocated section and choose "New Simple Volume." Windows will walk you through the steps necessary to create a new volume. Repeat these steps for the desired number of partitions. On possible setup would be like so:
+</p>
+<ul>
+<li> Windows 7 (C:\): size will be whatever it was set to in this step</li>
+<li> Linux boot: 64 MB. This is necessary if one wants an encrypted Linux partition</li>
+<li> Linux \: If only the OS will be installed to this partition, perhaps make it ~30-50GB depending on your application needs</li>
+<li> TrueCrypt partition: for shared files between Windows and Linux. Make it take the rest of the unallocated space.</li>
+</ul>
+<p>For each of these drives, the format doesn't really matter because they'll all be reformatted. Choose FAT or NTFS and let Windows create the volumes. For a walkthrough on adding volumes from unallocated space, see <a rel="nofollow" class="external text" href="http://techblissonline.com/resize-or-create-disk-partition/">this article</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> if the fourth partition added is surrounded by green and denoted as an extended partition, do not worry. Windows 7 does this automatically and we will fix it in the next step.</div>
+<h3><span class="mw-headline" id="Edit_the_Partition_Table">Edit the Partition Table</span></h3>
+<p>It is now necessary to edit the partition table so that it shows the Linux partitions as actual Linux partitions rather than FAT or NTFS (whatever was created in the last step). Since we can't use fdisk to write the partition table, we'll use a tool in Windows itself. This author used <a rel="nofollow" class="external text" href="http://partitionwizard.com/">MiniTool Partition Wizard Home Edition</a>, a free partition tool recommended highly by <a rel="nofollow" class="external text" href="http://download.cnet.com/Partition-Wizard-Home-Edition/3000-2094_4-10962200.html">CNET</a>. Open the program and right click on a partition that will contain a Linux filesystem. Choose "Change partition type ID" from the drop down menu. Choose the manual ID entry option and set the type to <code>0x83</code>, as shown in <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/YN4yH.png">[7]</a>. Repeat this with any other partitions that will be formatted with Linux filesystems. For a walkthrough on this step, see <a rel="nofollow" class="external text" href="http://www.fanhow.com/knowhow:Change_Partition_Type_ID_in_Windows_7_46298757">this article</a>.
+</p>
+<p>Lastly, if a fourth partition was created in the previous step, click it, and then go to the Disk menu and choose "Convert dynamic disk to basic disk." This will change the extended partition to a simple one. For a walkthrough on this, see <a rel="nofollow" class="external text" href="http://www.partitionwizard.com/help/convert-dynamic-disk-to-basic-disk.html">this article</a>.
+</p>
+<p>When finished, click the "Apply" button in the upper left of the main window.
+</p>
+<h3><span class="mw-headline" id="Add_an_Option_to_Boot_Linux">Add an Option to Boot Linux</span></h3>
+<p>Next, we're going to add a Linux option to the Windows boot options using a free program called <a rel="nofollow" class="external text" href="http://neosmart.net/dl.php?id=1">EasyBCD</a>. Theoretically, this should be possible using Windows 7's built in program, bcdedit, as shown in <a rel="nofollow" class="external autonumber" href="http://www.windows7home.net/how-to-use-bcdedit-in-windows-7/">[8]</a>. The author had difficulty attempting this due to privilege errors, and was successful with EasyBCD and thus never retried with bcdedit. Open EasyBCD and click "Add New Entry" on the left. Choose the Linux/BSD tab and set the bootloader type (Grub (legacy)) for Arch and partition. Make sure that if you are going to have a dedicated boot partition that you point EasyBCD to that partition, <i>not</i> the one that will contain the root filesystem. A screenshot of these settings may be found in <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/YE79o.png">[9]</a>.
+</p>
+<p>Next view the entry by clicking "View Settings," and make sure everything looks appropriate. For a legacy grub setting pointing toward the second partition on the disk, the boot entry should look like <a rel="nofollow" class="external autonumber" href="http://i.imgur.com/5zri9.png">[10]</a>.
+</p>
+<h3><span class="mw-headline" id="Backup_the_SafeBoot_MBR">Backup the SafeBoot MBR</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> It is <b>highly</b> recommended that one make a backup of the SafeBoot MBR before proceeding. If anything accidentally happens to it, you can restore it and will have a functioning system. Without a backup, if you use [c]fdisk and write the partition table to the MBR, or install Grub to the MBR, <i>you will lose the ability to ever, ever, ever get back to your Windows installation.</i>
+</div>
+<p>To back up the SafeBoot MBR, boot into a live Linux CD and have a flash drive inserted:
+</p>
+<pre># mount /dev/sdb1 /mnt (or whatever the desired flash drive address is)
+# dd if=/dev/sda of=/mnt/safeboot.mbr bs=512 count=1
+# umount /dev/sdb1
+</pre>
+<p>If anything happens while installing Arch and you wipe the SafeBoot MBR, you can restore it by reversing the process. Again, boot into a Live CD and insert the flash drive:
+</p>
+<pre># mount /dev/sdb1 /mnt
+# dd if=/mnt/safeboot.mbr of=/dev/sda bs=512 count=1
+# umount /dev/sdb1
+</pre>
+<p>Now reboot and things should be as they were.
+</p>
+<h3><span class="mw-headline" id="Install_Linux">Install Linux</span></h3>
+<p>With all of these steps completed, reboot into an Arch Install CD. See the <a href="../../en/Installation_guide.html" title="Installation guide">Installation guide</a> if you are unsure about how to install Arch. For an encrypted system, follow the directions covered aptly at <a href="../../en/Dm-crypt.html" title="System Encryption with LUKS" class="mw-redirect">System Encryption with LUKS</a>. Regardless of what method you use for installation, <b>do not install the bootloader to the MBR.</b> Once you finish installing and configuring files, follow these steps:
+</p>
+<ul><li> Mount your boot partition if it's not already mounted</li></ul>
+<ul><li><ul><li> If you installed manually or know you do not have a filesystem on your boot partition yet, make one</li></ul></li></ul>
+<pre># mkfs.ext2 /dev/sda2
+</pre>
+<ul><li><ul><li> Then mount the partition</li></ul></li></ul>
+<pre># mount /dev/sda2 /mnt/boot
+</pre>
+<ul><li> Verify that grub files are present</li></ul>
+<pre># ls /mnt/boot/grub/
+</pre>
+<ul><li><ul>
+<li> If files like stage1 and the like are present, proceed</li>
+<li> If not, make the directory /mnt/boot/grub (if necessary) and copy the necessary files to the grub folder</li>
+</ul></li></ul>
+<pre># mkdir /mnt/boot/grub
+# cp -a /usr/lib/grub/i386-pc/* /mnt/boot/grub/
+</pre>
+<ul><li> Get ready to chroot into the installed system</li></ul>
+<pre># mount -t proc /proc /mnt/proc
+# mount -t sysfs /sys /mnt/sys
+# mount -o bind /dev /mnt/dev
+</pre>
+<ul><li> Chroot into /mnt</li></ul>
+<pre># chroot /mnt
+</pre>
+<ul><li> Now run grub</li></ul>
+<pre># grub
+# root (hd0,1)
+# setup (hd0,1)
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> The above example assumes that /boot is on /dev/sda2, which is the second partition on the drive. Since grub starts from 0, this corresponds to (hd0, 1) or first disk (hd0), second partition (,1). See the <a href="../../en/GRUB.html" title="GRUB">GRUB</a> article for more information.</div>
+<ul><li> Depending on the process you took, it's not a bad idea to re-install the kernel26 package if /boot wans't properly mounted during the installation of the base package. Sync pacman from the chroot environment and then reinstall the kernel26 package:</li></ul>
+<pre># pacman -Sy
+# pacman -S kernel26
+</pre>
+<ul><li> If using system encryption, be sure to add <code>encrypt</code> to /etc/mkinitcpio and regenerate the initramfs with</li></ul>
+<pre># mkinitcpio
+</pre>
+<p>See <a href="../../en/Dm-crypt.html#Configure_System" title="System Encryption with LUKS" class="mw-redirect">System Encryption with LUKS#Configure System</a><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for more details.
+</p>
+<ul><li> Finally, if /boot/grub/menu.lst does not exist, copy and edit it:</li></ul>
+<pre># exit (get out of the chroot)
+# cp /boot/grub/menu.lst /mnt/boot/grub/
+# nano /mnt/boot/grub/menu.lst
+</pre>
+<p>Edit the entry according to <a href="../../en/GRUB.html#Dual_booting_with_GNU.2FLinux" title="GRUB">GRUB#Dual booting with GNU.2FLinux</a><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> (don't forget to add the required extra options if using an encrypted system. See <a href="../../en/Dm-crypt.html#Install_Bootloader" title="System Encryption with LUKS" class="mw-redirect">System Encryption with LUKS#Install Bootloader</a><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for more details).
+</p>
+<h3><span class="mw-headline" id="Test_Configuration">Test Configuration</span></h3>
+<p>When satisfied, exit the installer and reboot. Be sure to press any necessary keys to tell the computer to boot from the hard drive if the Arch CD is still in the optical bay; many computers default to booting from media, if present. Windows should now present you with an option to boot either Windows or Linux. Select Linux. If all goes well, you should see the grub boot menu and can select your new installation of Arch to boot. If you get a grub prompt, do not fret: you may still be able to boot. Try entering the grub commands manually:
+</p>
+<pre>grub &gt; root (hd0,1)
+grub &gt; kernel /vmlinuz26 root=/dev/mapper/map-name cryptdevice=/dev/sda3:map-name ro
+grub &gt; initrd /kernel26.img
+grub &gt; boot
+</pre>
+<p>It this works, then the issue exists in the EasyBCD entry we made earlier. If it doesn't grub may not have been installed to the right location.
+</p>
+<h3><span class="mw-headline" id="Create_a_Shared_TrueCrypt_Volume">Create a Shared TrueCrypt Volume</span></h3>
+<p>Once your Arch system is setup as desired, TrueCrypt may be used to create a shared device or file for sharing files between Windows and Linux. See the <a href="../../en/TrueCrypt.html" title="TrueCrypt">TrueCrypt</a> article for details. This author created a TrueCrypt volume from Arch, formatted to FAT and then re-formatted to NTFS. Following using the GUI to create the volume, these steps were taken:
+</p>
+<pre># pacman -S ntfs-3g
+# truecrypt --filesystem=none --slot=1 /dev/sda4
+# mkfs.ntfs /dev/mapper/truecrypt1
+</pre>
+<p>After this process completes, /dev/mapper/truecrypt1 will be properly formatted and can be mounted to a mountpoint for use:
+</p>
+<pre># mount /dev/mapper/truecrypt1 /mnt
+</pre>
+<p>NTFS does not use Linux permissions and attributes, so it may be helpful to pass options like the following:
+</p>
+<pre># mount -o ntfs-3g uid=1000,gid=100,fmask=113,noatime /dev/mapper/truecrypt1 /mnt
+</pre>
+<p>See <a href="../../en/NTFS-3G.html" title="NTFS-3G">NTFS-3G</a> for more information.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>TrueCrypt includes its own ability to both map and mount an encrypted file or device in one step, however as of version 7.0a (current Arch version as of 4/19/2011), some have reported problems with NTFS formatted devices and mounting. This author has found that the two-step process outlined above (first, using <code>truecrypt --filesystem=none --slot=1 /dev/sda4</code>, and then the system's mount command, <code>mount /dev/mapper/truecrypt1 /mnt</code>) works reliably. The bug report <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/23184">FS#23184</a> contains more details.</div>
+<p>Finally, reboot into Windows, install TrueCrypt, and attempt to mount the device. Once verified that both OSs can mount the volume, begin adding any files that one desires to share between OSs.
+</p>
+<h2><span class="mw-headline" id="Summary">Summary</span></h2>
+<p>If all of the above goes smoothly, one should have a dual-booting, fully encrypted system (if Linux was installed using the LUKS/dm-crypt method) with the exception of a Linu /boot partition. In addition, both Window and Linux can share files via the TrueCrypt volume. The process seems to be advantageous to other methods in that it does not require juggling of the SafeBoot mbr, using dd or other tools to clone the drive and then clone it back after partitioning, does not require extra external hard drives for such cloning, leaves any company-installed components alone (with the exception of shrinking their footprint), and yet maintains a high level of system security.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<ul>
+<li> If one encounters a grub shell but can boot if manually entering the proper commands, reboot into Windows and verify the EasyBCD settings mentioned above. Verify that the bootloader type was correct (grub legacy vs. grub2 vs. others) and that the drive was correct. The drive chosen should be that containing Linux /boot, <b>not</b> the main Linux OS root partition.</li>
+<li> <b>Do not</b> attempt to install grub to the root Linux partition, as this will wipe the LUKS/dm-crypt header and render the partition unusable unless you have a backup of the header. In other words, be very careful when issuing the command <code>grub &gt; setup (hd0,<b>X</b>)</code> and make sure that X is the boot partition, <b>not</b> the encrypted root partition.</li>
+<li> If trying to install grub and one sees an error about an unknown filesystem or partition type and the code <code>0x7</code>, you've either pointed grub to the wrong place (wrong partition number), or did not successfully change the partition type ID. 0x7 is the identifier for NTFS. Reboot back into Windows, open the Partition Wizard discussed above, and manually change the type to <code>0x83</code>. Then reboot and attempt to install grub again. After issuing <code>grub &gt; root (hd0,1)</code>, grub should report back <code>Filesystem type is ext2fs, partition type 0x83</code>. This is what you want.</li>
+</ul>
+<h2><span class="mw-headline" id="Additional_Resources">Additional Resources</span></h2>
+<ul><li> Tools
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.partitionwizard.com/">MiniTool Partition Wizard Home Edition</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.auslogics.com/en/software/disk-defrag/">Auslogic Disk Defragmenter</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://neosmart.net/dl.php?id=1">NeoSmart EasyBCD</a>
+</li>
+</ul>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+<li><a href="../../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Dual_boot_with_Windows/SafeBoot&amp;oldid=444870">https://wiki.archlinux.org/index.php?title=Dual_boot_with_Windows/SafeBoot&amp;oldid=444870</a>"</li>
+					<li id="lastmod"> This page was last modified on 6 August 2016, at 12:39.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

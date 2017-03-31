@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Managing the Master Key - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Managing_the_Master_Key skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Managing the Master Key</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Prepare_your_Smartcard"><span class="tocnumber">1</span> <span class="toctext">Prepare your Smartcard</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Creating_the_master_key"><span class="tocnumber">2</span> <span class="toctext">Creating the master key</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Signing_the_master_key"><span class="tocnumber">3</span> <span class="toctext">Signing the master key</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Signing_your_own_packager_key"><span class="tocnumber">4</span> <span class="toctext">Signing your own packager key</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Revoking_a_master_key"><span class="tocnumber">5</span> <span class="toctext">Revoking a master key</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Signing_developer_keys"><span class="tocnumber">6</span> <span class="toctext">Signing developer keys</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Revoking_developer_keys"><span class="tocnumber">7</span> <span class="toctext">Revoking developer keys</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Open_questions"><span class="tocnumber">8</span> <span class="toctext">Open questions</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#External_documentation"><span class="tocnumber">9</span> <span class="toctext">External documentation</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Prepare_your_Smartcard">Prepare your Smartcard</span></h2>
+<p>Install the <code>ccid</code> package and start the <code>pcscd</code> daemon. Insert your smartcard reader and check the output of <code>gpg --card-status</code>
+</p>
+<h2><span class="mw-headline" id="Creating_the_master_key">Creating the master key</span></h2>
+<p>Run <code>gpg --card-edit</code>. Type in <code>admin</code> to enabled administration functions. All available commands can now be listed by issuing the <code>help</code> command. Use the <code>name</code> and <code>sex</code> commands to set some unimportant meta data.
+</p>
+<p>To create a new key pair just type in <code>generate</code>. Create a <code>3072 Bits</code> key that does not expire and enter your data according to this example:
+</p>
+<pre>
+Real name: Pierre Schmitz
+Email address: pierre@master-key.archlinux.org
+Comment: Arch Linux Master Key
+</pre>
+<p>Confirm that your USER-ID looks like <code>"Pierre Schmitz (Arch Linux Master Key) &lt;pierre@master-key.archlinux.org&gt;"</code>. Generating the key will take some time. Note that the encryption key will be reduced to 1024 Bits.
+</p>
+<p>If you created a backup of your key during creation you should secure it on an offline device and remove the key from your hard drive. E.g. use shred:
+</p>
+<pre>shred -u /home/pierre/.gnupg/sk_8DFDBF1F86872C2F.gpg</pre>
+<p>Now create a revoke key:
+</p>
+<pre>gpg -o master-key-revoke.asc --gen-revoke 6AC6A4C2</pre>
+<p>Choose no reason (0) if you are asked for one. Make sure to save this key on a secure and offline device (e.g. print it or use a thumb drive).
+</p>
+<h2><span class="mw-headline" id="Signing_the_master_key">Signing the master key</span></h2>
+<p>Sign the master key using your packager key. For example using the master key id:
+</p>
+<pre>gpg --sign-key 6AC6A4C2</pre>
+<p>Double check you are using the right keys here!
+</p>
+<p>Upload your master key now using:
+</p>
+<pre>gpg --send-keys 6AC6A4C2</pre>
+<p>You may also want to create a copy of your public key to publish elsewhere:
+</p>
+<pre>gpg --export --armor 6AC6A4C2 &gt; pierre@master-key.archlinux.org.asc</pre>
+<h2><span class="mw-headline" id="Signing_your_own_packager_key">Signing your own packager key</span></h2>
+<p>As you should trust yourself the most, just go ahead and sign your own packager key:
+</p>
+<pre>gpg --sign-key -u 6AC6A4C2 9741E8AC</pre>
+<p>Note that in this example your master key id is first and your packager key id last.
+</p>
+<p>Upload your public key using:
+</p>
+<pre>gpg --send-keys 9741E8AC</pre>
+<h2><span class="mw-headline" id="Revoking_a_master_key">Revoking a master key</span></h2>
+<h2><span class="mw-headline" id="Signing_developer_keys">Signing developer keys</span></h2>
+<h2><span class="mw-headline" id="Revoking_developer_keys">Revoking developer keys</span></h2>
+<h2><span class="mw-headline" id="Open_questions">Open questions</span></h2>
+<ul><li> Using the smartcard generates following errors without any apparent effect:</li></ul>
+<pre>libusb couldn't open USB device /dev/bus/usb/001/006: Permission denied.
+libusb requires write access to USB device nodes.</pre>
+<p>Cause: gnupg has an internal <i>ccid</i> driver. This driver accesses the USB device node directly, without going through pcscd. However, gnupg's internal driver does not support the Gemalto USB reader anyway, so this message can be ignored.
+</p>
+<ul><li> udev/packaging issue:</li></ul>
+<pre>udevd[273]: specified group 'pcscd' unknown</pre>
+<p>This is unproblematic: the pcscd daemon runs as root.
+</p>
+<ul>
+<li> Should we advice to create a backup during key creation or rather not?</li>
+<li> Is the passphrase only used for the backup key?</li>
+</ul>
+<p>Yes.
+</p>
+<ul><li> Is the public key also stored on the card?</li></ul>
+<p>It probably is, but there is no apparent way to obtain it. Export it to some keyserver quickly.
+</p>
+<ul><li> How should the <code>url</code> configuration be set?</li></ul>
+<p>A string pointing to a URL that stores your pubkey.
+</p>
+<ul><li> What is the impact of setting <code>forcesig</code>?</li></ul>
+<p>If you enable <i>forcesig</i>, you must enter the PIN for each single signature. This is recommended.
+</p>
+<h2><span class="mw-headline" id="External_documentation">External documentation</span></h2>
+<p><a rel="nofollow" class="external free" href="http://wiki.debian.org/Smartcards/OpenPGP">http://wiki.debian.org/Smartcards/OpenPGP</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki.html" title="Category:DeveloperWiki">DeveloperWiki</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

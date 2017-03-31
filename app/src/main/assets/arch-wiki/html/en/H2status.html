@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>H2status - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-H2status skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">H2status</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/h2status/">h2status</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/h2status">aur-mirror</a>]</sup> is a trivial (about 60 LOC) bash wrapper to i3status that nevertheless allows
+to conveniently:
+</p>
+<ul>
+<li> Write custom modules in bash to add full-fledged json entries to the status bar.</li>
+<li> Write mouse event handlers in bash with access to the full set of event parameters as bash variables.</li>
+<li> Arbitrarily transform the final output to change formatting, order of entries, etc.</li>
+<li> Compute and cache expensive status entries asynchronously, updating them only at desired frequencies.</li>
+</ul>
+<p>Besides reading the documentation below it is recommended that you take a look at the code in <a rel="nofollow" class="external autonumber" href="https://gist.github.com/memeplex/8115385">[1]</a> as it can be more eloquent than the following wording.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Configuration"><span class="tocnumber">1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Store"><span class="tocnumber">2</span> <span class="toctext">Store</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#CLI"><span class="tocnumber">3</span> <span class="toctext">CLI</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Examples"><span class="tocnumber">4</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Check_gmail_folders"><span class="tocnumber">4.1</span> <span class="toctext">Check gmail folders</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Switch_keyboard_layout"><span class="tocnumber">4.2</span> <span class="toctext">Switch keyboard layout</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Application_launchers"><span class="tocnumber">4.3</span> <span class="toctext">Application launchers</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Dynamic_icons"><span class="tocnumber">4.4</span> <span class="toctext">Dynamic icons</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Dependencies"><span class="tocnumber">5</span> <span class="toctext">Dependencies</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>The configuration is done in ~/.h2statusrc by (optionally) defining the following bash functions:
+</p>
+<p>1. <code>status() -&gt; json</code>
+</p>
+<p>This outputs the status entries to be concatenated to the beginning of the original i3status output.  As a convenience for outputting json status entries, the function <code>entry(module,text[,other])</code> is provided. For example:
+</p>
+<pre> function status {
+   ...
+   entry random $RANDOM '"color":"$00FF00"'
+   ...
+ }
+</pre>
+<p>2. <code>on_event()</code>
+</p>
+<p>This handles mouse events. The execution environment of this function is augmented with the variables <code>name, instance, button, x, y</code> described at the end of <a rel="nofollow" class="external autonumber" href="http://i3wm.org/docs/i3bar-protocol.html">[2]</a>.
+</p>
+<p>3. <code>transform(json) -&gt; json</code>
+</p>
+<p>This is intended for simple sed style hackish manipulations that change order and format of the final json line to be consumed by i3bar. Use it as a last resort.
+</p>
+<p>An example configuration is provided in /usr/share/h2status/h2statusrc (you can also browse it online at <a rel="nofollow" class="external autonumber" href="https://gist.github.com/memeplex/8115385">[3]</a>). Use this as a template to write your own stuff.
+</p>
+<h2><span class="mw-headline" id="Store">Store</span></h2>
+<p>h2status allows for module status storage and retrieval in a concurrent-safe way through the file system. The purpose of this is two-folded:
+</p>
+<ul>
+<li> To implement a basic IPC mechanism that supports communication with external scripts that need to update the status.</li>
+<li> To implement a basic cache mechanism that supports asynchronous status updating.</li>
+</ul>
+<p>The interface to the store consists of three functions:
+</p>
+<p>1. <code>write_status(module,value)</code>
+</p>
+<p>2. <code>read_status(module) -&gt; value</code>
+</p>
+<p>3. <code>cached_status(module,interval,command) -&gt; value</code>
+</p>
+<p>The first two are self-explanatory but the third one requires some motivation and explanation. i3status implements a simple model of status updating: each time an update event happens (every n seconds or after receiving an USR1 signal) the entire status line is recomputed. This is fine for fast/cheap status computations but makes it difficult to integrate relatively long/expensive computations that could delay the update for a perceptible amount of time or overload the cpu when frequently called. To support this kind of status computations while keeping i3status as h2status workhorse, <code>cached_status()</code> implements a basic cache mechanism that allows to asynchronously update status values. For example, if you want to check the folders "inbox" and "work" in your IMAP account every 60 seconds you could add this line to <code>status()</code>:
+</p>
+<pre> function status {
+   ...
+   entry mail "Mail: $(cached_status mail 60 'checkmail inbox work')"
+   ...
+ }
+</pre>
+<p>Here <code>mail</code> is the module name, <code>60</code> is the update interval and <code>checkmail inbox work</code> is the command implementing the update logic which would be evaluated in background every 60 seconds (this is not exactly true, as the cache is only read/updated at points in time when i3status itself gets updated, according to the interval setting in i3status configuration).
+</p>
+<p>Then, if you wanted to force an update by clicking on the mail status entry, you could also implement an event handler like this one:
+</p>
+<pre> function on_event {
+   case $name in
+   ...
+   mail) [[ $button == 1 ]] &amp;&amp; write_status mail "$(checkmail inbox work)" ;;
+   ...
+   esac
+ }
+</pre>
+<h2><span class="mw-headline" id="CLI">CLI</span></h2>
+<p>Most of the status computing and updating logic is implemented inside 13status and h2status, but sometimes you need an external script to force a status update or to write some specific value to the status store. To support these cases, h2status provides an elementary command line interface consisting of two commands:
+</p>
+<p>1. <code>h2status update</code>
+</p>
+<p>This calls <code>update()</code>, which immediately updates the status line (similar to, and based upon, <code>pkill -USR1 i3status</code>).
+</p>
+<p>2. <code>h2status write &lt;module&gt; &lt;value&gt;</code>
+</p>
+<p>This calls <code>write_status()</code> passing <code>&lt;module&gt;</code> and <code>&lt;value&gt;</code> as arguments. After writing the new value to the store the status line is updated, but this is just what <code>write_status()</code> always does.
+</p>
+<p>Of course, both <code>update()</code> and <code>write_status()</code> can also be directly called as functions from inside h2status. The usual use case is to invoke these functions when reacting to click events in <code>on_event()</code>.
+</p>
+<h2><span class="mw-headline" id="Examples">Examples</span></h2>
+<h3><span class="mw-headline" id="Check_gmail_folders">Check gmail folders</span></h3>
+<p>This will check gmail folders <code>MAIL_INBOXES</code> for unread messages every <code>MAIL_INTERVAL</code> seconds using the external script <code>checkmail</code>. A version of this script that works with firefox cookies database is given here <a rel="nofollow" class="external autonumber" href="https://gist.github.com/memeplex/8117142">[4]</a>.
+</p>
+<pre> MAIL_INTERVAL=60
+ MAIL_INBOXES=("" livra jampp)
+ function status {
+   local unread_list=$(cached_status mail $MAIL_INTERVAL 'checkmail "${MAIL_INBOXES[@]}"')
+   local -i total_unread=$((${unread_list// /+}))
+   ((total_unread)) &amp;&amp; entry mail "Mail: $unread_list" '"color":"$00FF00"'
+ }
+</pre>
+<h3><span class="mw-headline" id="Switch_keyboard_layout">Switch keyboard layout</span></h3>
+<p>The following makes for a nice solution to keyboard layout switching between multiple languages. Left-button clicking on the keyboard status entry switches to the default (first) layout. Right-button clicking iterates over all configured layouts. The layouts are configured in ~/.xinitrc using setxkbmap, v.g. <code>setxkbmap "us,es,fr"</code>. You must install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xkblayout-state/">xkblayout-state</a></span><sup><small>AUR</small></sup> from the AUR.
+</p>
+<pre> function status {
+   entry lang $(xkblayout-state print "%s")
+ }
+</pre>
+<pre> function on_event {
+   case $name in
+   lang)   [[ $button == 1 ]] &amp;&amp; xkblayout-state set 0 || xkblayout-state set +1; update ;;
+   esac
+ }
+</pre>
+<h3><span class="mw-headline" id="Application_launchers">Application launchers</span></h3>
+<p>Just:
+</p>
+<ul>
+<li> Add a status entry consisting only of an iconic font glyph (read this <a href="../en/I3.html#Iconic_fonts_in_the_status_bar" title="I3">I3#Iconic fonts in the status bar</a> if you do not know what I'm talking about), and</li>
+<li> Add a handler to <code>on_event()</code> in order to launch the application when the icon is clicked upon. Remember to launch it in background to avoid blocking the event cycle.</li>
+</ul>
+<h3><span class="mw-headline" id="Dynamic_icons">Dynamic icons</span></h3>
+<p>You can show different iconic font glyphs (read this <a href="../en/I3.html#Iconic_fonts_in_the_status_bar" title="I3">I3#Iconic fonts in the status bar</a> if you do not know what I'm talking about) according to the current status of some modules. For example, different battery icons corresponding to different charge levels or different volume icons corresponding to different volume levels. Just write your own transformation hook and add it to the <code>transform()</code> function in ~/.h2statusrc.
+</p>
+<h2><span class="mw-headline" id="Dependencies">Dependencies</span></h2>
+<p>flock (in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=util-linux">util-linux</a></span>) for safe concurrent cache read/write.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=i3status">i3status</a></span> configured with output_format="i3bar".
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Tiling_WMs.html" title="Category:Tiling WMs">Tiling WMs</a></li>
+<li><a href="../en/Category:Dynamic_WMs.html" title="Category:Dynamic WMs">Dynamic WMs</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

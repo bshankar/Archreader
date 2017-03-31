@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>TeamSpeak - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-TeamSpeak skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">TeamSpeak</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>From <a href="https://en.wikipedia.org/wiki/TeamSpeak" class="extiw" title="wikipedia:TeamSpeak">Wikipedia:TeamSpeak</a>:
+</p>
+<dl><dd>TeamSpeak is proprietary Voice over IP software that allows computer users to speak on a chat channel with fellow computer users, much like a telephone conference call.</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Client"><span class="tocnumber">1.1</span> <span class="toctext">Client</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Server"><span class="tocnumber">1.2</span> <span class="toctext">Server</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Server_configuration_and_startup"><span class="tocnumber">2</span> <span class="toctext">Server configuration and startup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Configuration"><span class="tocnumber">2.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#First_startup"><span class="tocnumber">2.2</span> <span class="toctext">First startup</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Regular_startup"><span class="tocnumber">2.3</span> <span class="toctext">Regular startup</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Re-Initialising_Teamspeak"><span class="tocnumber">2.4</span> <span class="toctext">Re-Initialising Teamspeak</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Client">Client</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=teamspeak3">teamspeak3</a></span> package.
+</p>
+<h3><span class="mw-headline" id="Server">Server</span></h3>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/teamspeak3-server/">teamspeak3-server</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Server_configuration_and_startup">Server configuration and startup</span></h2>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<ul><li> You can configure the TeamSpeak server. If you are using <a href="../en/Systemd.html" title="Systemd">systemd</a> please check <code>/usr/share/doc/teamspeak3-server/doc/server_quickstart.txt</code> for all available command line parameters.</li></ul>
+<ul><li> If you possess a license file please copy it to <code>/var/lib/teamspeak3-server/licensekey.dat</code>.</li></ul>
+<h3><span class="mw-headline" id="First_startup">First startup</span></h3>
+<p>With the first startup TeamSpeak creates the SQLite database at <code>/var/lib/teamspeak3-server/ts3server.sqlitedb</code> and starts logging its standard output in files in: <code>/var/log/teamspeak3-server/</code>. Teamspeak also creates the first ServerQuery administration account (the superuser) and the first virtual server including a privilege key for the server administrator of this virtual server. The privilege key is only displayed once on standard output.
+</p>
+<ul><li> <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> the <code>teamspeak3-server</code> service.</li></ul>
+<ul><li> To find the privilege key:</li></ul>
+<pre>$ systemctl status teamspeak3-server
+</pre>
+<ul><li> Scan the output for the privilege key:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">Example output:</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+● teamspeak3-server.service - TeamSpeak3 Server
+   Loaded: loaded (/usr/lib/systemd/system/teamspeak3-server.service; enabled; vendor preset: disabled)
+   Active: active (running) since Sat 2015-09-05 23:34:42 BST; 49min ago
+ Main PID: 20126 (teamspeak3-serv)
+   CGroup: /system.slice/teamspeak3-server.service
+           └─20126 /usr/bin/teamspeak3-server logpath=/var/log/teamspeak3-server/ dbsqlpath=/usr/share/teamspeak3-server/sql/
+
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: serveradmin rights for your virtualserver. please
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: also check the doc/privilegekey_guide.txt for details.
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: token=lcUEBG5YVxnhzPcS5hAmOkW1Zb6KbTZbkntbPFca                                                     
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: ------------------------------------------------------------------
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: 2015-09-05 22:34:45.322567|INFO    |CIDRManager   |   | updated query_ip_whitelist ips: 127.0.0.1,
+Sep 05 23:34:45 Your-Hostname teamspeak3-server[20126]: 2015-09-05 22:34:45.323806|INFO    |Query         |   | listening on 0.0.0.0:10011
+Sep 05 23:34:53 Your-Hostname systemd[1]: Started TeamSpeak3 Server.
+</pre>
+<ul><li> The privilege key is what token is equal to.</li></ul>
+<ul><li> Alternatively, you can navigate to the logs directory for teamspeak3-server and read the output log directly. (This is a persistent file and will still have the first startup output here even if you have restarted the server):</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> You have to be have either be logged in as root or as the teamspeak user to access this directory!</div>
+<pre>$ cd /var/log/teamspeak3-server
+$ cat ts3server_*.log
+</pre>
+<p>Open up a Teamspeak 3 client, connect to the server and copy and paste the privilege key into the client popup.
+</p>
+<h3><span class="mw-headline" id="Regular_startup">Regular startup</span></h3>
+<p>Simply <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>teamspeak3-server</code> service.
+</p>
+<h3><span class="mw-headline" id="Re-Initialising_Teamspeak">Re-Initialising Teamspeak</span></h3>
+<p>If you have used the initial privilege key and have lost server permissions (e.g. your teamspeak 3 client with superadmin rights was uninstalled) you will have to start from scratch.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>These steps delete your current configured TeamSpeak servers, your users, permissions and all settings.</div>
+<ul><li> <a href="../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">Stop</a> the <code>teamspeak3-server</code> service.</li></ul>
+<ul><li> Remove <code>/var/lib/teamspeak3-server/ts3server.sqlitedb</code>:</li></ul>
+<pre>$ rm /var/lib/teamspeak3-server/ts3server.sqlitedb
+</pre>
+<ul><li> Clear <code>/var/log/teamspeak3-server/</code>:</li></ul>
+<pre>$ rm /var/log/teamspeak3-server/*.log
+</pre>
+<ul><li> Now follow the same instructions for a first time setup.</li></ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.teamspeak.com/?page=literature">Official documentation</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Telephony_and_voice.html" title="Category:Telephony and voice">Telephony and voice</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

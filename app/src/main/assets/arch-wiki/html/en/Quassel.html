@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Quassel - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Quassel skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Quassel</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Quassel (sometimes referred to as Quassel IRC) is a cross-platform IRC client introduced in 2008. It is dual-licensed under GPLv2 and GPLv3, while most graphical data is licensed under the LGPL and provided by the <a rel="nofollow" class="external text" href="http://www.oxygen-icons.org/">Oxygen Team</a>. The client part of Quassel uses the Qt framework for its user interface.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Structure"><span class="tocnumber">1</span> <span class="toctext">Structure</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Basic_usage"><span class="tocnumber">2.1</span> <span class="toctext">Basic usage</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Setting_up_multiple_clients_to_connect_through_the_same_core"><span class="tocnumber">2.2</span> <span class="toctext">Setting up multiple clients to connect through the same core</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Adding_users"><span class="tocnumber">3</span> <span class="toctext">Adding users</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Structure">Structure</span></h2>
+<p>Quassel is split up into two parts by a server-client model; a client and a core. There is also a monolithic version of the official client that does not require a core. The core(server) is the application that actually does the communication with IRC networks, while the client(s) only communicates with the core. This gives the user a flexibility of having the same instance to IRC networks on different clients (e.g. mobile, desktop at the same time).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Arch Linux used to have two packages, where quassel-monolighic was part of quassel-client, this was fixed in <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/39756">FS#39756</a> but if you used to run the monolithic version, you might run into problems after the update. You could try by just installing quassel-monolithic or if that does not help see troubleshooting below.</div>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Basic_usage">Basic usage</span></h3>
+<p>Just install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=quassel-monolithic">quassel-monolithic</a></span> package if you only want to use Quassel from a single computer.
+</p>
+<h3><span class="mw-headline" id="Setting_up_multiple_clients_to_connect_through_the_same_core">Setting up multiple clients to connect through the same core</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=quassel-core">quassel-core</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=quassel-client">quassel-client</a></span>.
+</p>
+<p>Generate a certificate (this will be valid for 1 years, after which it needs to be reissued, just change the -days to another value if you so desire):
+</p>
+<pre># openssl req -x509 -nodes -days 365 -newkey rsa:4096 -keyout /var/lib/quassel/quasselCert.pem -out /var/lib/quassel/quasselCert.pem</pre>
+<p>As this is a self-signed certificate, you can type whatever you want in the fields.
+</p>
+<p>Open port 4242 in your <a href="../en/Firewalls.html" title="Firewall" class="mw-redirect">firewall</a>.
+</p>
+<p>Start core by <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">starting</a> <code>quassel.service</code>.
+</p>
+<p>Start the client and connect to core:
+</p>
+<pre>$ quasselclient
+</pre>
+<p>Accept your self-created certificate.
+</p>
+<p>Now set up your IRC-servers and IRC-nicknames on the core.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As this is the first time you connected to the core, you should see a wizard where you can set up the first user-account. If you do not get this wizard, your settings might be messed up, see troubleshooting below.</div>
+<p>Once it all works, you can <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>quassel.service</code> to start automatically on system boot.
+</p>
+<h2><span class="mw-headline" id="Adding_users">Adding users</span></h2>
+<p>If you want additional users to be able to use the same core, run this command to create them:
+</p>
+<pre>$ sudo -u quassel quasselcore --configdir=/var/lib/quassel --add-user
+</pre>
+<p>It will then prompt you for a new account's username and password.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>If you were previously using quassel-monolithic, your settings might be messed up.
+Close quasselcore.
+Move your settings database to a backup copy:
+</p>
+<pre>$ mv ~/.config/quassel-irc.org/quassel-storage.sqlite ~/.config/quassel-irc.org/quassel-storage.sqlite.bak
+</pre>
+<p>Then start quasselcore again and connect from your client, you should now get the wizard to show, however, all settings will have to be re-entered.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://bugs.quassel-irc.org/projects/quassel-irc/wiki">QuasselWiki</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_Relay_Chat.html" title="Category:Internet Relay Chat">Internet Relay Chat</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

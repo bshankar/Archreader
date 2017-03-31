@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ASUS G55VW - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ASUS_G55VW skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ASUS G55VW</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page contains instructions, tips, pointers, and links for installing and configuring Arch Linux on the ASUS G55VW ROG Laptop
+</p>
+<p><br>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Bootloader"><span class="tocnumber">1</span> <span class="toctext">Bootloader</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Boot_on_usb"><span class="tocnumber">1.1</span> <span class="toctext">Boot on usb</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Set_up_UEFI_boot"><span class="tocnumber">1.2</span> <span class="toctext">Set up UEFI boot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Graphics_Drivers"><span class="tocnumber">2</span> <span class="toctext">Graphics Drivers</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Screen_Backlight"><span class="tocnumber">3</span> <span class="toctext">Screen Backlight</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Other_Keys"><span class="tocnumber">4</span> <span class="toctext">Other Keys</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#keyboard_backlight_script"><span class="tocnumber">4.1</span> <span class="toctext">keyboard backlight script</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Bootloader">Bootloader</span></h2>
+<h3><span class="mw-headline" id="Boot_on_usb">Boot on usb</span></h3>
+<p>Press <code>Escape</code> to get the boot menu. If usb bootable device is not listed, enter configuration menu and directly press <code>F10</code> to save. Press <code>Escape</code> again on reboot : this time USB bootable device should appears in the menu.
+</p>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Set_up_UEFI_boot">Set up UEFI boot</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is recommended to read the <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a>, <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> and <a href="../en/UEFI_Bootloaders.html" title="UEFI Bootloaders" class="mw-redirect">UEFI Bootloaders</a> pages before following those instructions.</div>
+<p><br>
+It is possible to use <a href="../en/UEFI_Bootloaders.html#Setting_up_EFISTUB" title="UEFI Bootloaders" class="mw-redirect">UEFISTUB</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> in-kernel bootloader, if you wish. We present here the <a href="../en/GRUB.html" title="GRUB2" class="mw-redirect">GRUB2</a> way. We assume <code>x86_64</code> version of Arch Linux.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> UX31A firmware is <code>x86_64</code>, so it makes it compulsory to use <code>x86_64</code> kernel to be able to dual boot with Windows in UEFI mode </div>
+<p>In the original partition setup:
+</p>
+<p>first partition: UEFI boot fat32 partition, should be mounted on <code>/boot/efi</code> in Arch.
+</p>
+<p>second partition:  <a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a>
+</p>
+<p><br>
+Step 0 (optional): install <a rel="nofollow" class="external text" href="https://edk2.svn.sourceforge.net/svnroot/edk2/trunk/edk2/ShellBinPkg/UefiShell/X64/Shell.efi">x86_64 UEFI Shell 2.0 (Beta)</a>:
+</p>
+<p>See <a href="../en/Unified_Extensible_Firmware_Interface.html#UEFI_Shell" title="UEFI" class="mw-redirect">UEFI#UEFI Shell</a>. Can be useful during install, especially it allows to manually boot using <a href="../en/UEFI_Bootloaders.html#Setting_up_EFISTUB" title="UEFI Bootloaders" class="mw-redirect">UEFISTUB</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<p>Step 1: granted you can boot into your install through install disk, grub1 or via a liveusb and a chroot:
+</p>
+<pre># pacman -S grub-efi-x86_64
+</pre>
+<p>Follow <a href="../en/GRUB.html#UEFI_systems" title="GRUB2" class="mw-redirect">GRUB2#UEFI systems</a>.
+</p>
+<p>Optional: add some power optimisation kernel parameters. In <code>/etc/default/grub</code> file:
+</p>
+<pre>GRUB_CMDLINE_LINUX_DEFAULT="quiet add_efi_memmap i915.i915_enable_rc6=1 drm.vblankoffdelay=1 i915.semaphores=1"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> concerning kernel parameter <code> pcie_aspm=force</code>, I'm unsure: Ubuntu wiki recommends it, but UX31E Arch wiki says it should not be used.</div>
+<p>Reinstall grub2 :
+</p>
+<pre>grub-mkconfig -o /path/to/grub.cfg
+</pre>
+<p>Step 2: it is not yet possible to finish install by <a href="../en/Unified_Extensible_Firmware_Interface.html#Create_GRUB2_entry_in_the_Firmware_Boot_Manager" title="UEFI" class="mw-redirect">creating GRUB2 entry in the Firmware Boot Manager</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> since it is required to boot in UEFI mode to be able to use <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="Unified Extensible Firmware Interface">efibootmgr</a>. The tricks is to do:
+</p>
+<pre># cp /boot/efi/EFI/arch_grub/grubx64.efi /boot/efi/shellx64.efi
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> temporary move <code>shellx64.efi</code> if necessary </div>
+<pre># reboot
+</pre>
+<p>Press <code>F2</code> on reboot and choose "Launch EFI shell from filesystem device". It should trigger grub2 and boot into arch if grub2 is correctly set up. You should now be able to <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="Unified Extensible Firmware Interface">use efibootmgr to add grub entry to firmware</a>.
+</p>
+<h2><span class="mw-headline" id="Graphics_Drivers">Graphics Drivers</span></h2>
+<p>See <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a>.
+</p>
+<h2><span class="mw-headline" id="Screen_Backlight">Screen Backlight</span></h2>
+<p>Using the nvidia drivers provided in the extra repo screen the backlight-adjust keys(<code>Fn+F5</code>, <code>Fn+F6</code>) do not work. To get around this, you need to grab ({aur|nvidiabl-git}). Once you have installed that package, you can map your keys to the script.
+</p>
+<h2><span class="mw-headline" id="Other_Keys">Other Keys</span></h2>
+<p>It is also possible to use <a href="../en/Dynamic_Kernel_Module_Support.html" title="Dynamic Kernel Module Support">Dynamic Kernel Module Support</a> (DKMS) (package in community), to avoid compiling the whole kernel:
+</p>
+<p>1 get the archive at <a rel="nofollow" class="external free" href="http://ubuntuforums.org/showthread.php?p=12054636#post12054636">http://ubuntuforums.org/showthread.php?p=12054636#post12054636</a> (ubuntu forums account + minimum of 50 posts required) or <a rel="nofollow" class="external free" href="http://markmail.org/message/idvl6s27r26xzorb">http://markmail.org/message/idvl6s27r26xzorb</a> (no account required)
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> there is perhaps more suitable place to get the asus-wmi kernel module sources, the patch and the dkms conf file</div>
+<p>2 extract the archive, and then extract the .deb and get the sources inside (asus-wmi.c is already patched with above patch):
+</p>
+<pre> # cp -a usr/src/asus-wmi-0.2 /usr/src/
+ # cd /usr/src/
+ # dkms add -m asus-wmi -v 0.2
+ # dkms built -m asus-wmi -v 0.2 -k 3.4.6-1-ARCH
+ # dkms status
+ # dkms install -m asus-wmi -v 0.2 -k 3.4.6-1-ARCH
+ # dkms status
+</pre>
+<p>replace <code>3.4.6-1-ARCH</code> by your output for <code>uname -r</code>
+</p>
+<p>3 There is still a problem since dkms doesn't gzip the kernel module and archlinux does (see <code>$ modinfo asus-wmi</code>):
+</p>
+<pre># cd /lib/modules/3.4.6-1-ARCH/kernel/drivers/platform/x86/
+# mv asus-wmi.ko.gz asus-wmi.ko.gz.save
+# gzip asus-wmi.ko
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> there is probably a cleaner way to do that with dkms</div>
+<p>4 After reboot, <code>xev</code> should display events for <code>Fn</code> keys. And keyboard backlight can be trigger by:
+</p>
+<pre># echo 0 &gt;&gt; /sys/class/leds/asus\:\:kbd_backlight/brightness
+# echo 3 &gt;&gt; /sys/class/leds/asus\:\:kbd_backlight/brightness
+</pre>
+<h3><span class="mw-headline" id="keyboard_backlight_script">keyboard backlight script</span></h3>
+<p>In the same style that for screen backlight. As root, create the file <code>/usr/local/share/kbd_backlight</code>:
+</p>
+<pre>#!/bin/bash
+
+path="/sys/class/leds/asus::kbd_backlight"
+#path="/sys/class/leds/asus\:\:kbd_backlight"
+
+# max should be 3
+max=$(cat ${path}/max_brightness)
+# step: represent the difference between previous and next brightness
+step=1
+previous=$(cat ${path}/brightness)
+
+function commit {
+	if [[ $1 = [0-9]* ]]
+	then 
+		if [[ $1 -gt $max ]]
+		then 
+			next=$max
+		elif [[ $1 -lt 0 ]]
+		then 
+			next=0
+		else 
+			next=$1
+		fi
+		echo $next &gt;&gt; ${path}/brightness
+		exit 0
+	else 
+		exit 1
+	fi
+}
+
+case "$1" in
+ up)
+     commit $(($previous + $step))
+  ;;
+ down)
+     commit $(($previous - $step))
+  ;;
+ max)
+	 commit $max
+  ;;
+ on)
+	 $0 max
+  ;;
+ off)
+	 commit 0
+  ;;
+ show)
+	 echo $previous
+  ;;
+ night)
+	 commit 1 
+	 ;;
+ allowusers)
+	 # Allow members of users group to change brightness
+	 sudo chgrp users ${path}/brightness
+	 sudo chmod g+w ${path}/brightness
+  ;;
+ disallowusers)
+	 # Allow members of users group to change brightness
+	 sudo chgrp root ${path}/brightness
+	 sudo chmod g-w ${path}/brightness
+  ;;
+ *)
+	 commit	$1
+esac
+
+exit 0
+</pre>
+<p>Allow file to be executed :
+</p>
+<pre># chmod +x /usr/local/share/kbd_backlight
+</pre>
+<p>Allow users to change brightness at each boot :
+</p>
+<pre># echo "/bin/bash /usr/local/share/kbd_backlight allowusers" &gt;&gt; /etc/rc.local
+</pre>
+<p>Adding to <code>.zshrc</code> or <code>.bashrc</code> :
+</p>
+<pre>alias -g "kbd_backlight"="/bin/bash /usr/local/share/kbd_backlight"
+</pre>
+<p>allows to easy toggle backlight in terminal :
+</p>
+<pre>$ kbd_backlight up
+$ kbd_backlight down
+$ kbd_backlight max
+$ kbd_backlight off
+$ kbd_backlight night
+$ kbd_backlight 2
+$ kbd_backlight show
+</pre>
+<p>And finally, add some convenient keyboard shortcuts <a href="../en/Extra_keyboard_keys_in_Xorg.html" title="Extra keyboard keys in Xorg">by the method of your choice</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:ASUS.html" title="Category:ASUS">ASUS</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

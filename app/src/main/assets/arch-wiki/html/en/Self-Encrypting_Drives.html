@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Self-Encrypting Drives - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Self-Encrypting_Drives skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Self-Encrypting Drives</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Hardware-based full-disk encryption (FDE) is now available from many hard disk drive (HDD) vendors, becoming increasingly common especially for solid-state drives (SSD). The term "Self-Encrypting Drive" (SED) is now common when referring to HDDs / SSDs with built-in full-disk encryption (FDE).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Overview"><span class="tocnumber">1</span> <span class="toctext">Overview</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Key_management_technical_implementation"><span class="tocnumber">1.1</span> <span class="toctext">Key management technical implementation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Advantages"><span class="tocnumber">1.2</span> <span class="toctext">Advantages</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Disadvantages"><span class="tocnumber">1.3</span> <span class="toctext">Disadvantages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Linux_support"><span class="tocnumber">2</span> <span class="toctext">Linux support</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Encrypting_the_root_.28boot.29_drive"><span class="tocnumber">3</span> <span class="toctext">Encrypting the root (boot) drive</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Download_.28or_create.29_the_pre-boot_authorization_.28PBA.29_image"><span class="tocnumber">3.1</span> <span class="toctext">Download (or create) the pre-boot authorization (PBA) image</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Test_the_PBA_on_your_machine_.28optional.29"><span class="tocnumber">3.2</span> <span class="toctext">Test the PBA on your machine (optional)</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Prepare_and_test_the_rescue_image_.28optional.29"><span class="tocnumber">3.3</span> <span class="toctext">Prepare and test the rescue image (optional)</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Set_up_the_drive"><span class="tocnumber">3.4</span> <span class="toctext">Set up the drive</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Enable_locking"><span class="tocnumber">3.5</span> <span class="toctext">Enable locking</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Disable_locking"><span class="tocnumber">3.6</span> <span class="toctext">Disable locking</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Re-enable_locking_and_the_PBA"><span class="tocnumber">3.7</span> <span class="toctext">Re-enable locking and the PBA</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14"><a href="#Encrypting_a_non-root_drive"><span class="tocnumber">4</span> <span class="toctext">Encrypting a non-root drive</span></a></li>
+<li class="toclevel-1 tocsection-15"><a href="#Changing_the_passphrase"><span class="tocnumber">5</span> <span class="toctext">Changing the passphrase</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Secure_disk_erasure"><span class="tocnumber">6</span> <span class="toctext">Secure disk erasure</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#BIOS_based_ATA-password"><span class="tocnumber">7</span> <span class="toctext">BIOS based ATA-password</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Overview">Overview</span></h2>
+<p>Many modern SED FDE are made by HDD/SSD vendors which adher to the <a rel="nofollow" class="external text" href="http://www.trustedcomputinggroup.org/files/resource_files/FF80CE7D-1A4B-B294-D060AD8807BF9453/TCG_Storage-Opal_SSC_v2.01_rev1.00.pdf">OPAL 2.0</a> and <a rel="nofollow" class="external text" href="http://www.trustedcomputinggroup.org/files/resource_files/FFAE13C6-1A4B-B294-D0D8D885F9F4FB67/TCG_Storage-SSC_Enterprise-v1.01_r1.00.pdf">Enterprise</a> standards developed by the Trusted Computing Group (TCG). Enterprise SAS versions of the TCG standard are called "TCG Enterprise" drives. The hardware manufactured according to the standards is <a rel="nofollow" class="external text" href="http://www.wave.com/self-encrypting-drive-compatibility-list">labelled</a> accordingly. 
+</p>
+<p>Unlocking (for runtime decryption) of the drive takes place via either a software, pre-boot authentication environment or with a <a href="#BIOS_based_ATA-password">#BIOS based ATA-password</a> on power up.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>"Encryption" in the context of this page refers to hardware-based encryption. See <a href="../en/Disk_encryption.html#Block_device_encryption" title="Disk encryption">Disk encryption#Block device encryption</a> and <a href="../en/Disk_encryption.html#Stacked_filesystem_encryption" title="Disk encryption">Disk encryption#Stacked filesystem encryption</a> for software-based encryption.</div>
+<p>Refer to the <a href="#Advantages">#Advantages</a> and <a href="#Disadvantages">#Disadvantages</a> sections to better understand and decide if hardware-based FDE is what you want.
+</p>
+<h3><span class="mw-headline" id="Key_management_technical_implementation">Key management technical implementation</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>This section is important to understand the core concepts behind effective key management, and secure erasure of the disk.</div>
+<p>Key management takes place within the disk controller and encryption keys are usually 128 or 256 bit Advanced Encryption Standard (AES).
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The Opal standards are full of acronyms. The sedutil refers to them in the <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki/FAQ">FAQ</a> and <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki/Command-Syntax">command syntax</a>. It would be useful to name the important acronyms (e.g. SID, MSID, locking SP, admin SP) in this section, because they are intrincic to the key-management defined per standard. (See also <a href="https://en.wikipedia.org/wiki/Key_escrow" class="extiw" title="w:Key escrow">w:Key escrow</a>). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Self-Encrypting_Drives">Talk:Self-Encrypting Drives#</a>)</div>
+</div>
+<p>SEDs' adhering to the TGS OPAL 2.0 standard specification (almost all modern SEDs) implement key management via an Authentication Key (AK), and a 2nd-level Data Encryption Key (DEK). The DEK is the key against which the data is actually encrypted/decrypeted. The AK is the user-facing 1st-level password/passphrase which decrypts the DEK (which in-turn decrypts the data). This approach has specific advantages:
+</p>
+<ul>
+<li> Allows the user to change the passphrase <i>without</i> losing the existing encrypted data on the disk
+<ul><li> This improves security, as it is fast and easy to respond to security threats and revoke a compromised passphrase</li></ul>
+</li>
+<li> Facilitates near-instant and cryptographically secure full disk erasure.</li>
+</ul>
+<p>For those who are familiar; this concept is similar to the LUKS key management layer often used in a <a href="../en/Dm-crypt.html" title="Dm-crypt">dm-crypt</a> deployment. Using LUKS, the user can effectively have up to 8 different key-files / passphrases to decrypt the <i>encryption key</i>, which in turn decrypts the underlying data. This approach allows the user to revoke / change these key-files / passphrases as required <i>without</i> needing to re-encrypt the data, as the 2nd-level encryption key <i>is unchanged</i> (itself being re-encrypted by the new passphrase).
+</p>
+<p>In fact, in drives featuring FDE, data is <i>always</i> encrypted with the DEK when stored to disk, even if there is no password set (e.g. a new drive). Manufacturers do this to make it easier for users who are not able to, or do not wish to enable the SEDs' security features. This can be thought of as all drives by default having a zero-length password that transparently encrypts/decrypts the data <i>always</i> (similar to how passwordless ssh keys provide (somewhat) secure access without user intervention).
+</p>
+<p><i>The key point to note</i> is that if at a later stage a user wishes to <i>"enable"</i> encryption, they can configure the passphrase (AK), which will then be used to encrypt the <i>existing</i> DEK (thus prompting for passphrase beforing decrypting the DEK in future). However, as the existing DEK <i>will not</i> be changed / regenerated; this in effect locks the drive, while preserving the existing encrypted data on the disk.
+</p>
+<h3><span class="mw-headline" id="Advantages">Advantages</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The "increased security" advantage is debunked in the paper linked in the below section; undefined term: "data-at-rest" (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Self-Encrypting_Drives">Talk:Self-Encrypting Drives#</a>)</div>
+</div>
+<ul>
+<li> Easier to setup (compared to software-based encryption)</li>
+<li> Notably transparent to the user, except for initial bootup authentication</li>
+<li> Data-at-Rest protection</li>
+<li> Increased performance (cpu is freed up from encryption/decryption calculations)</li>
+<li> Increased security due to reduced attack vectors (the main cpu &amp; memory are eliminated as possible attack targets)</li>
+<li> Optimally fast and <a href="#Secure_disk_erasure">#Secure disk erasure</a> (sanitation) (regardless of disk size)</li>
+<li> Protection from alternative boot methods due to the possibility to encrypt the MBR, rendering the drive inaccessible before pre-boot authentication</li>
+</ul>
+<h3><span class="mw-headline" id="Disadvantages">Disadvantages</span></h3>
+<ul><li> Constant-power exploits</li></ul>
+<dl><dd>Typical self-encrypting drives, once unlocked, will remain unlocked as long as power is provided. This vulnerability can be exploited by means of altering the environment external to the drive, without cutting power, in effect keeping the drive in an unlocked state. For example, it has been shown (by researchers at Universiy of Erlangen-Nuremberg) that it is possible to reboot the computer into an attacker-controlled operating system without cutting power to the drive. The researchers have also demonstrated moving the drive to another computer without cutting power.<a rel="nofollow" class="external autonumber" href="https://www1.cs.fau.de/sed">[1]</a>
+</dd></dl>
+<ul><li> Key-in-memory exploits</li></ul>
+<dl><dd>When the system is powered down into S3 ("sleep") mode, the drive is powered down, but the drive keeps access to the encryption key in its internal memory (NVRAM) to allow for a resume ("wake"). This is necessary because for system booted with an arbitrary operating system there is no standard mechanism to prompt the user to re-enter the pre-boot decryption passphrase again. An attacker (with physical access to the drive) can leverage this to access the drive. Taking together known exploits the researchers summarize "we were able to break hardware-based FDE on eleven [of twelve] of those systems provided they were running or in standby mode".<a rel="nofollow" class="external autonumber" href="https://www1.cs.fau.de/sed">[2]</a> Note, however, S3 ("sleep") is <b>not</b> currently supported by sedutil (the current available toolset for managing a TGS OPAL 2.0 SED via Linux)</dd></dl>
+<ul><li> Compromised firmware</li></ul>
+<dl><dd>The firmware of the drive may be compromised (backdoor) and data sent to it thus potentially compromised (decryptable by the malicious third party in question, provided access to physical drive is achievable). However, if data is encrypted by the operating system (e.g. dm-crypt), the encryption key is unknown to the compromised drive, thus circumventing this attack vector entirely.</dd></dl>
+<h2><span class="mw-headline" id="Linux_support">Linux support</span></h2>
+<p><i>msed</i> and <i>OpalTool</i>, the two known Open Source code bases available for SED support on Linux, have both been retired, and their development efforts officially merged to form <i><a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil">sedutil</a></i>, under the umbrella of The <a rel="nofollow" class="external text" href="https://www.drivetrust.com">Drive Trust Alliance (DTA)</a>. <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil">sedutil</a> is "<i>an Open Source (GPLv3) effort to make Self Encrypting Drive technology freely available to everyone.</i>"
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sedutil/">sedutil</a></span><sup><small>AUR</small></sup> package, which contains the <i>sedutil-cli</i> tool, and helper scripts to create a custom pre-boot authorization (PBA) image based off the <i>current</i> OS in use (e.g. for setting a custom console keymap).  Alternatively, you can install <i>sedutil</i> solely for acquiring the <i>sedutil-cli</i> toolset, but download and use the <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/exec/blob/master/LINUXPBARelease.img.gz?raw=true">precompiled PBA image (for BIOS)</a> provided by the TGS.  If you are using a UEFI machine, you must download <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/exec/blob/master/UEFI64_Release.img.gz?raw=true">this 64-bit UEFI PBA instead</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>UEFI support currently requires that Secure Boot be turned off.</div>
+<p><code>libata.allow_tpm</code> <b>must</b> be set to <code>1</code> (true) in order to use sedutil. Either add <code>libata.allow_tpm=1</code> to the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>, or by setting <code>/sys/module/libata/parameters/allow_tpm</code> to <code>1</code> on a running system.
+</p>
+<h2><span class="mw-headline" id="Encrypting_the_root_.28boot.29_drive">Encrypting the root (boot) drive</span></h2>
+<p>These instructions assume you have the <i>sedutil-cli</i> tool installed (via the <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sedutil">AUR</a>, or by other means)
+</p>
+<h3><span class="mw-headline" id="Download_.28or_create.29_the_pre-boot_authorization_.28PBA.29_image">Download (or create) the pre-boot authorization (PBA) image</span></h3>
+<p>Download the pre-boot authorization (PBA) image for a <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/exec/blob/master/LINUXPBARelease.img.gz?raw=true">BIOS</a> or <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/exec/blob/master/UEFI64_Release.img.gz?raw=true">64bit UEFI</a> machine.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>UEFI support currently requires that Secure Boot be turned off.</div>
+<h3><span class="mw-headline" id="Test_the_PBA_on_your_machine_.28optional.29">Test the PBA on your machine (optional)</span></h3>
+<p>Refer to the <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki/Test-the-PBA">official docs</a>.
+</p>
+<h3><span class="mw-headline" id="Prepare_and_test_the_rescue_image_.28optional.29">Prepare and test the rescue image (optional)</span></h3>
+<p>Refer to the <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki/Test-the-Rescue-system">official docs</a>.
+</p>
+<h3><span class="mw-headline" id="Set_up_the_drive">Set up the drive</span></h3>
+<p>Decompress the PBA (if required):
+</p>
+<pre>$ gunzip pba.img.gz
+</pre>
+<p>Use the output of <code>lsblk --fs</code> to help identify the correct drive.
+</p>
+<pre># sedutil-cli --initialsetup &lt;password&gt; &lt;drive&gt;
+# sedutil-cli --loadPBAimage &lt;password&gt; &lt;pba_file&gt; &lt;drive&gt;
+# sedutil-cli --setMBREnable on &lt;password&gt; &lt;drive&gt;
+</pre>
+<h3><span class="mw-headline" id="Enable_locking">Enable locking</span></h3>
+<pre># sedutil-cli --enableLockingRange 0 &lt;password&gt; &lt;drive&gt;
+</pre>
+<p>Power off the computer to lock the drive.
+</p>
+<p>When the computer is next powered on, the PBA should ask for your password; then unlock the drive and chain-load the decrypted OS.
+</p>
+<h3><span class="mw-headline" id="Disable_locking">Disable locking</span></h3>
+<p>If you want to turn off Locking and the PBA:
+</p>
+<pre># sedutil-cli --disableLockingRange 0 &lt;password&gt; &lt;drive&gt;
+# sedutil-cli --setMBREnable off &lt;password&gt; &lt;drive&gt;
+</pre>
+<h3><span class="mw-headline" id="Re-enable_locking_and_the_PBA">Re-enable locking and the PBA</span></h3>
+<p>You can later re-enable locking and the PBA using this command sequence
+</p>
+<pre># sedutil-cli --enableLockingRange 0 &lt;password&gt; &lt;drive&gt;
+# sedutil-cli --setMBRDone on &lt;password&gt; &lt;drive&gt;
+# sedutil-cli --setMBREnable on &lt;password&gt; &lt;drive&gt;
+</pre>
+<h2><span class="mw-headline" id="Encrypting_a_non-root_drive">Encrypting a non-root drive</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> undefined term: non-root drive (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Self-Encrypting_Drives">Talk:Self-Encrypting Drives#</a>)</div>
+</div>
+<p>A non-root drive does not require loading a PBA. So, activating the encryption is as simple as running:
+</p>
+<pre># sedutil-cli --initialsetup &lt;password&gt; &lt;drive&gt;
+</pre>
+<h2><span class="mw-headline" id="Changing_the_passphrase">Changing the passphrase</span></h2>
+<p>Changing the passphrase does <i>not</i> lose existing data on the drive, and does not require re-encryption of data.
+</p>
+<pre># sedutil-cli --setSIDPwd &lt;password&gt; &lt;newpassword&gt; &lt;device&gt;
+# sedutil-cli --setAdmin1Pwd &lt;password&gt; &lt;newpassword&gt; &lt;device&gt;
+</pre>
+<p>Read the <a href="#Key_management_technical_implementation">#Key management technical implementation</a> section above to learn about how this is implemented securely within the drive, and why it is possible to change the passphrase <i>without</i> losing the existing encrypted data on the drive.
+</p>
+<h2><span class="mw-headline" id="Secure_disk_erasure">Secure disk erasure</span></h2>
+<p>Whole disk erasure is very fast, and remarkably simple for a SED. Simply passing a cryptographic disk erasure (or crypto erase) command (after providing the correct authentication credentials) will have the drive self-generate a new random encryption key (DEK) internally. This will permanently discard the old key, thus rendering the encrypted data irrevocably un-decryptable. The drive will now be in a 'new drive' state.
+</p>
+<p>Read the <a href="#Key_management_technical_implementation">#Key management technical implementation</a> section above to learn more about how this is implemented securely within the drive.
+</p>
+<h2><span class="mw-headline" id="BIOS_based_ATA-password">BIOS based ATA-password</span></h2>
+<p>Previous to the industry's TGS OPAL 2.0 standard initiative, the relevant <a href="https://en.wikipedia.org/wiki/Parallel_ATA#ATA_standards_versions.2C_transfer_rates.2C_and_features" class="extiw" title="w:Parallel ATA">ATA</a> standard defined an "ATA Security feature Set" for SED FDE. This relies on the PC (not SSD/HDD) BIOS to feature an unlocking mechanism utilizing the BIOS to setup the user's encryption password/passphrase. This legacy BIOS-based (ATA) method was considered more unreliable to setup and prone to error with regard to interoperability between PC vendors.<a rel="nofollow" class="external autonumber" href="http://www.t13.org/documents/UploadedDocuments/docs2006/e05179r4-ACS-SecurityClarifications.pdf">[3]</a> Typical errors include, for example, inabilities to unlock a device once it is plugged into a system from a different hardware vendor. Hence, the availability of BIOS support for the legacy password mechanism decreases in availability, particularly for consumer hardware. 
+</p>
+<p>See <a href="../en/Solid_State_Drives.html#Tips_for_SSD_security" title="Solid State Drives">Solid State Drives#Tips for SSD security</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for more information.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil">sedutil (github)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki">sedutil official docs</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/Drive-Trust-Alliance/sedutil/wiki/Command-Syntax">sedutil-cli commands usage</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Hardware-based_full_disk_encryption#Hard_disk_drive_FDE" class="extiw" title="wikipedia:Hardware-based full disk encryption">Wikipedia article on hardware-based FDE</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Storage.html" title="Category:Storage">Storage</a></li>
+<li><a href="../en/Category:Encryption.html" title="Category:Encryption">Encryption</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>XDG Base Directory support - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-XDG_Base_Directory_support skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">XDG Base Directory support</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dotfiles.html" title="Dotfiles">dotfiles</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/XDG_user_directories.html" title="Xdg user directories" class="mw-redirect">Xdg user directories</a></li>
+</ul>
+</div>
+<p>This article exists to catalog the growing set of software using the <a rel="nofollow" class="external text" href="http://standards.freedesktop.org/basedir-spec/latest/">XDG Base Directory Specification</a> introduced in 2003.  This is here to demonstrate the viability of this specification by listing commonly found dotfiles and their support status.  For those not currently supporting the Base Directory Specification, workarounds will be demonstrated to emulate it instead.
+</p>
+<p>The workarounds will be limited to anything not involving patching the source, executing code stored in <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variables</a> or compile-time options.  The rationale for this is that configurations should be portable across systems and having compile-time options prevent that.
+</p>
+<p>Hopefully this will provide a source of information about exactly what certain kinds of dotfiles are and where they come from.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#The_XDG_Base_Directory_specification"><span class="tocnumber">1</span> <span class="toctext">The XDG Base Directory specification</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#User_directories"><span class="tocnumber">1.1</span> <span class="toctext">User directories</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#System_directories"><span class="tocnumber">1.2</span> <span class="toctext">System directories</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Exceptions"><span class="tocnumber">2</span> <span class="toctext">Exceptions</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Contributing"><span class="tocnumber">3</span> <span class="toctext">Contributing</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Supported"><span class="tocnumber">4</span> <span class="toctext">Supported</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Partial"><span class="tocnumber">5</span> <span class="toctext">Partial</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Hardcoded"><span class="tocnumber">6</span> <span class="toctext">Hardcoded</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Library_and_language_support"><span class="tocnumber">7</span> <span class="toctext">Library and language support</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="The_XDG_Base_Directory_specification">The XDG Base Directory specification</span></h2>
+<p>Please read the <a rel="nofollow" class="external text" href="http://standards.freedesktop.org/basedir-spec/latest/">full specification</a>. This section will attempt to break down the essence of what it tries to achieve.
+</p>
+<p>Only <code>XDG_RUNTIME_DIR</code> is set by default through <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/pam_systemd.html">pam_systemd</a>. It is up to the user to explicitly <a href="../en/Environment_variables.html#Defining_variables" title="Define" class="mw-redirect">define</a> the other variables, using absolute paths that point to existing directories; see <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/31204">FS#31204</a> and <a rel="nofollow" class="external autonumber" href="https://lists.archlinux.org/pipermail/arch-general/2013-February/032980.html">[1]</a>.
+</p>
+<h3><span class="mw-headline" id="User_directories">User directories</span></h3>
+<ul><li> <code>XDG_CONFIG_HOME</code>
+<ul>
+<li> Where user-specific configurations should be written (analogous to <code>/etc</code>).</li>
+<li> Should default to <code>$HOME/.config</code>.</li>
+</ul>
+</li></ul>
+<ul><li> <code>XDG_CACHE_HOME</code>
+<ul>
+<li> Where user-specific non-essential (cached) data should be written (analogous to <code>/var/cache</code>).</li>
+<li> Should default to <code>$HOME/.cache</code>.</li>
+</ul>
+</li></ul>
+<ul><li> <code>XDG_DATA_HOME</code>
+<ul>
+<li> Where user-specific data files should be written (analogous to <code>/usr/share</code>).</li>
+<li> Should default to <code>$HOME/.local/share</code>.</li>
+</ul>
+</li></ul>
+<ul><li> <code>XDG_RUNTIME_DIR</code>
+<ul>
+<li> Used for non-essential, user-specific data files such as sockets, named pipes, etc.</li>
+<li> Not required to have a default value; warnings should be issued if not set or equivalents provided.</li>
+<li> Must be owned by the user with an access mode of <code>0700</code>.</li>
+<li> Filesystem fully featured by standards of OS.</li>
+<li> Must be on the local filesystem.</li>
+<li> May be subject to periodic cleanup.</li>
+<li> Modified every 6 hours or set sticky bit if persistence is desired.</li>
+<li> Can only exist for the duration of the user's login.</li>
+<li> Should not store large files as it may be mounted as a tmpfs.</li>
+</ul>
+</li></ul>
+<h3><span class="mw-headline" id="System_directories">System directories</span></h3>
+<ul><li> <code>XDG_DATA_DIRS</code>
+<ul>
+<li> List of directories seperated by <code>:</code> (analogous to <code>PATH</code>).</li>
+<li> Should default to <code>/usr/local/share:/usr/share</code>.</li>
+</ul>
+</li></ul>
+<ul><li> <code>XDG_CONFIG_DIRS</code>
+<ul>
+<li> List of directories seperated by <code>:</code> (analogous to <code>PATH</code>).</li>
+<li> Should default to <code>/etc/xdg</code>.</li>
+</ul>
+</li></ul>
+<h2><span class="mw-headline" id="Exceptions">Exceptions</span></h2>
+<p>These directories and files are unlikely to ever change, there is far too much historical baggage and most tools written expect these files and directories to exist in these locations.
+</p>
+<p>While some of these tools are still in active development and maintainence, the developers are unwilling to accommodate for the necessary changes due to the aforementioned reasons.
+</p>
+<dl>
+<dt> <code>~/.ssh</code>
+</dt>
+<dd> Assumed to be present by many ssh daemons and clients such as DropBear and OpenSSH. <a rel="nofollow" class="external text" href="https://bugzilla.mindrot.org/show_bug.cgi?id=2050">OpenSSH Bug 2050</a>
+</dd>
+</dl>
+<dl>
+<dt> <code>~/.pki</code>
+</dt>
+<dd> Part of Mozilla's <a rel="nofollow" class="external text" href="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS">NSS Project</a>.</dd>
+</dl>
+<dl>
+<dt> <code>~/.netrc</code>
+</dt>
+<dd> Like <code>~/.ssh</code>, many programs expect this file to be here.  These include projects like curl (<code>CURLOPT_NETRC_FILE</code>), ftp (<code>NETRC</code>), s-nail (<code>NETRC</code>), etc.  While some of them offer alternative configurable locations, many do not such as w3m, wget and lftp.</dd>
+</dl>
+<dl>
+<dt> <code>~/.profile</code>
+</dt>
+<dd> Used by the various shells and display managers, this file is expected to be here much like <code>~/.netrc</code>.</dd>
+</dl>
+<h2><span class="mw-headline" id="Contributing">Contributing</span></h2>
+<p>When contributing make sure to use the correct section.
+</p>
+<p>Nothing should require code evaluation (such as <a href="../en/Vim.html" title="Vim">vim</a> and <code>VIMINIT</code>), patches or compile-time options to gain support and anything which does must be deemed hardcoded.  Additionally if the process is too error prone or difficult, such as <a rel="nofollow" class="external text" href="https://www.haskell.org/cabal/">Haskell's cabal</a> or eclipse, they should also be considered as hardcoded.
+</p>
+<ul><li> The first column should be the project name, ideally the command name if it is not ambigious, linked to their website or an appropriate internal wiki article.</li></ul>
+<ul><li> The second column is for any legacy files and directories the project had, this is done so people can find them even if they are no longer read.</li></ul>
+<ul><li> In the third, try to find the commit or version a project switched to XDG Base Directory or any open discussions and include them in the next two columns.</li></ul>
+<ul><li> Finally the fourth should include any appropriate workarounds or solutions for unsupported projects.  Be terse, this article assumes intelligence and good charity from the reader.  If something is unclear then feel free to expend some explanation to clarify it.</li></ul>
+<p>Lastly, and this goes without saying, please verify that your solution is correct and functional.
+</p>
+<h2><span class="mw-headline" id="Supported">Supported</span></h2>
+<table class="wikitable sortable" style="width: 100%">
+<tr>
+<th> Application
+</th>
+<th> Legacy Path
+</th>
+<th> Supported Since
+</th>
+<th> Discussion
+</th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Antimicro/antimicro/">antimicro</a>
+</td>
+<td> <code>~/.antimicro</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Antimicro/antimicro/commit/edba864">edba864</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/Antimicro/antimicro/issues/5">[2]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/tatsuhiro-t/aria2/">aria2</a>
+</td>
+<td> <code>~/.aria2</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/tatsuhiro-t/aria2/commit/8bc1d37">8bc1d37</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/tatsuhiro-t/aria2/issues/27">[3]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://beets.radbox.org/">beets</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.blender.org/">blender</a>
+</td>
+<td> <code>~/.blender</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://git.blender.org/gitweb/gitweb.cgi/blender.git/commit/4293f473">4293f473</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://developer.blender.org/T28943">[4]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/falconindy/burp">burp</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/falconindy/burp/commit/f2388e9">f2388e9</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Chromium.html" title="Chromium">chromium</a>
+</td>
+<td> <code>~/.chromium</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://src.chromium.org/viewvc/chrome?revision=23057&amp;view=revision">23057</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://groups.google.com/forum/#!topic/chromium-dev/QekVQxF3nho">[5]</a> <a rel="nofollow" class="external autonumber" href="https://code.google.com/p/chromium/issues/detail?id=16976">[6]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://citra-emu.org/">citra</a>
+</td>
+<td> <code>~/.citra-emu</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/citra-emu/citra/commit/f7c3193fec">f7c3193fec</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/citra-emu/citra/pull/575">[7]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/falconindy/cower">cower</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/falconindy/cower/commit/8b70805">8b70805</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://wiki.gnome.org/Apps/DFeet">d-feet</a>
+</td>
+<td> <code>~/.d-feet</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://git.gnome.org/browse/d-feet/commit/?id==7f6104b">7f6104b</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://wiki.gnome.org/dconf">dconf</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Dolphin_emulator.html" title="Dolphin emulator">dolphin-emu</a>
+</td>
+<td> <code>~/.dolphin-emu</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/dolphin-emu/dolphin/commit/a498c68">a498c68</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/dolphin-emu/dolphin/pull/2304">[8]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.knopwob.org/dunst/index.html">dunst</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/knopwob/dunst/commit/78b6e2b1">78b6e2b1</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/knopwob/dunst/issues/22">[9]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Dwb.html" title="Dwb">dwb</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Fish.html" title="Fish">fish</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Font_configuration.html#Fontconfig_configuration" title="Fontconfig" class="mw-redirect">fontconfig</a>
+</td>
+<td> <code>~/.fontconfig</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/fontconfig/commit/?id=8c255fb1">8c255fb1</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://fontforge.github.io/">fontforge</a>
+</td>
+<td> <code>~/.FontForge</code> <code>~/.PfaEdit</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/fontforge/fontforge/commit/e4c2cc7432">e4c2cc7432</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/fontforge/fontforge/issues/847">[10]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/fontforge/fontforge/issues/991">[11]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Font_configuration.html#Fontconfig_configuration" title="Fontconfig" class="mw-redirect">fontconfig</a>
+</td>
+<td> <code>~/.fonts</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> Use <code>"$XDG_DATA_HOME"/fonts</code> instead.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.freerdp.com/">freerdp</a>
+</td>
+<td> <code>~/.freerdp</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/FreeRDP/FreeRDP/commit/edf6e7258d">edf6e7258d</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://projects.gnome.org/gconf">gconf</a>
+</td>
+<td> <code>~/.gconf</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://git.gnome.org/browse/gconf/commit/?id=fc28caa7">fc28caa7</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzilla.gnome.org/show_bug.cgi?id=674803">[12]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Git.html" title="Git">git</a>
+</td>
+<td> <code>~/.gitconfig</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/git/git/commit/0d94427e">0d94427e</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://gstreamer.freedesktop.org/">gstreamer-1.0</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/gstreamer/gstreamer/commit/?id=4e36f93924cf">4e36f93924cf</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzilla.gnome.org/show_bug.cgi?id=518597">[13]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GTK+.html" title="Gtk" class="mw-redirect">gtk3</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://hisham.hm/htop/">htop</a>
+</td>
+<td> <code>~/.htoprc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/hishamhm/htop/commit/93233a67">93233a67</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/I3.html" title="I3">i3</a>
+</td>
+<td> <code>~/.i3</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://code.stapelberg.de/git/i3/commit/?id=7c130fb54">7c130fb54</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://i3wm.org/i3status/">i3status</a>
+</td>
+<td> <code>~/.i3status.conf</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://code.stapelberg.de/git/i3status/commit/?id=c3f7fc4994">c3f7fc4994</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.imagemagick.org/script/index.php">imagemagick</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Inkscape.html" title="Inkscape">inkscape</a>
+</td>
+<td> <code>~/.inkscape</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://wiki.inkscape.org/wiki/index.php/Release_notes/0.47#Preferences">0.47</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.launchpad.net/inkscape/+bug/199720">[14]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://lftp.yar.ru/">lftp</a>
+</td>
+<td> <code>~/.lftp</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/lavv17/lftp/commit/21dc400">21dc400</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://www.mail-archive.com/lftp@uniyar.ac.ru/msg04301.html">[15]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Sude-/lgogdownloader/">lgogdownloader</a>
+</td>
+<td> <code>~/.gogdownloader</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Sude-/lgogdownloader/commit/d430af63d000">d430af63d000</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/Sude-/lgogdownloader/issues/4">[16]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/LibreOffice.html" title="LibreOffice">LibreOffice</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://cgit.freedesktop.org/libreoffice/ure/commit/?id=a6f56f70a4930d3f71bd9c9b90fdd0ba20e4da5f">a6f56f70</a> <a rel="nofollow" class="external text" href="https://cgit.freedesktop.org/libreoffice/bootstrap/commit/?id=25bd2eec77ed774a37d1cddd0d72312e23d5e9fd">25bd2eec</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.documentfoundation.org/show_bug.cgi?id=32263">[17]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Livestreamer.html" title="Livestreamer">livestreamer</a>
+</td>
+<td> <code>~/.livestreamerrc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/chrippa/livestreamer/commit/ea805917">ea805917</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/chrippa/livestreamer/pull/106">[18]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Llpp.html" title="Llpp">llpp</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://repo.or.cz/w/llpp.git/commit/3ab86f0cb">3ab86f0cb</a>
+</td>
+<td>
+</td>
+<td> Currently llpp places the configuration directly under <code>XDG_CONFIG_HOME</code> instead of creating a directory.
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Midnight_Commander.html" title="Mc" class="mw-redirect">mc</a>
+</td>
+<td> <code>~/.mc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://www.midnight-commander.org/changeset/1b9957058">1b9957058</a> <a rel="nofollow" class="external text" href="https://www.midnight-commander.org/changeset/0b7115647">0b7115647</a> <a rel="nofollow" class="external text" href="https://www.midnight-commander.org/changeset/ce401d797">ce401d797</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://www.midnight-commander.org/ticket/1851">[19]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/mintty/mintty">mintty</a>
+</td>
+<td> <code>~/.minttyrc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/mintty/mintty/commit/cff1bd8f">cff1bd8f</a> v2.3.7.
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/mintty/mintty/issues/525">[20]</a>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://milkytracker.org/">milkytracker</a>
+</td>
+<td> <code>~/.milkytracker_config</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Deltafire/MilkyTracker/commit/eb487c55">eb487c55</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/Deltafire/MilkyTracker/issues/12">[21]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Music_Player_Daemon.html" title="Mpd" class="mw-redirect">mpd</a>
+</td>
+<td> <code>~/.mpdconf</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://git.musicpd.org/cgit/master/mpd.git/commit/?id=87b73284">87b73284</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Mpv.html" title="Mpv">mpv</a>
+</td>
+<td> <code>~/.mpv</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/mpv-player/mpv/commit/cb250d490">cb250d490</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/mpv-player/mpv/pull/864">[22]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://mypaint.intilinux.com/">mypaint</a>
+</td>
+<td> <code>~/.mypaint</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/mypaint/mypaint/commit/cf723b74cd">cf723b74cd</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Ncmpcpp.html" title="Ncmpcpp">ncmpcpp</a>
+</td>
+<td> <code>~/.ncmpcpp</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/arybczak/ncmpcpp/commit/38d9f811de888e512b0115f551a9679eab4607f9">38d9f811</a> <a rel="nofollow" class="external text" href="https://github.com/arybczak/ncmpcpp/commit/27cd86e0638bba3a7a78e44ac40dc98a58d1d90d">27cd86e0</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/arybczak/ncmpcpp/issues/79">[23]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/arybczak/ncmpcpp/issues/110">[24]</a>
+</td>
+<td> <code>ncmpcpp_directory</code> should be set to avoid an <code>error.log</code> file in <code>~/.ncmpcpp</code>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://neovim.io/">neovim</a>
+</td>
+<td> <code>~/.nvim</code> <code>~/.nvimlog</code> <code>~/.nviminfo</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/neovim/neovim/commit/1ca5646bb">1ca5646bb</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/neovim/neovim/issues/78">[25]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/neovim/neovim/pull/3198">[26]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Newsbeuter.html" title="Newsbeuter">newsbeuter</a>
+</td>
+<td> <code>~/.newsbeuter</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/akrennmair/newsbeuter/commit/3c57824c5">3c57824c5</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/akrennmair/newsbeuter/pull/39">[27]</a>
+</td>
+<td> It is required to create both <code>"$XDG_DATA_HOME"/newsbeuter</code> and <code>"$XDG_CONFIG_HOME"/newsbeuter</code> <a rel="nofollow" class="external autonumber" href="http://newsbeuter.org/doc/newsbeuter.html#_xdg_base_directory_support">[28]</a>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/OfflineIMAP.html" title="OfflineIMAP">OfflineIMAP</a>
+</td>
+<td> <code>~/.offlineimaprc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/OfflineIMAP/offlineimap/commit/5150de5">5150de5</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/OfflineIMAP/offlineimap/issues/32">[29]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://bitbucket.org/opentyrian/opentyrian/wiki/Home">opentyrian</a>
+</td>
+<td> <code>~/.opentyrian</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://bitbucket.org/opentyrian/opentyrian/commits/8d45ff2">8d45ff2</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://web.archive.org/web/20140815181350/http://code.google.com/p/opentyrian/issues/detail?id=125">[30]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://pcsx2.net/">pcsx2</a>
+</td>
+<td> <code>~/.pcsx2</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/PCSX2/pcsx2/commit/87f1e8f77">87f1e8f77</a> <a rel="nofollow" class="external text" href="https://github.com/PCSX2/pcsx2/commit/a9020c606">a9020c606</a> <a rel="nofollow" class="external text" href="https://github.com/PCSX2/pcsx2/commit/3b22f0fb0">3b22f0fb0</a> <a rel="nofollow" class="external text" href="https://github.com/PCSX2/pcsx2/commit/0a012aec2">0a012aec2</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/PCSX2/pcsx2/issues/352">[31]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/PCSX2/pcsx2/issues/381">[32]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.ppsspp.org/">ppsspp</a>
+</td>
+<td> <code>~/.ppsspp</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/hrydgard/ppsspp/commit/132fe47c7d">132fe47c7d</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/hrydgard/ppsspp/issues/4623">[33]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Cloudef/orbment/">orbment</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Pacman.html" title="Pacman">pacman</a>
+</td>
+<td> <code>~/.makepkg.conf</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://projects.archlinux.org/pacman.git/commit/?id=80eca94c8">80eca94c8</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://mailman.archlinux.org/pipermail/pacman-dev/2014-July/019178.html">[34]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/PulseAudio.html" title="PulseAudio">PulseAudio</a>
+</td>
+<td> <code>~/.pulse</code> <code>~/.pulse-cookie</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/pulseaudio/pulseaudio/commit/?id=59a8618dcd9">59a8618dcd9</a> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/pulseaudio/pulseaudio/commit/?id=87ae8307057">87ae8307057</a> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/pulseaudio/pulseaudio/commit/?id=9ab510a6921">9ab510a6921</a> <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/pulseaudio/pulseaudio/commit/?id=4c195bcc9d5">4c195bcc9d5</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzilla.redhat.com/show_bug.cgi?id=845607">[35]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://pyroom.org/index.html">pyroom</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Qutebrowser.html" title="Qutebrowser">qutebrowser</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Qtile.html" title="Qtile">qtile</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/qtile/qtile/commit/fd8686e5b4e4fa20bb82039ed8a83768434585ec">fd8686e</a> <a rel="nofollow" class="external text" href="https://github.com/qtile/qtile/commit/66d704bce83f631b3326f10a1bc9fc22f8e6a6fd">66d704b</a> <a rel="nofollow" class="external text" href="https://github.com/qtile/qtile/commit/51cff019917b87bda696b381493f969ceb6cc350">51cff01</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/qtile/qtile/pull/835">[36]</a>
+</td>
+<td> Some optional bar widgets can create files and directories in non-compliant paths, but most often these are still configurable.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.libretro.com/">retroarch</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://rr-project.org/">rr</a>
+</td>
+<td> <code>~/.rr</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/mozilla/rr/commit/02e7d41e">02e7d41e</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/mozilla/rr/issues/1455">[37]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Surfraw.html" title="Surfraw">surfraw</a>
+</td>
+<td> <code>~/.surfraw.conf</code> <code>~/.surfraw.bookmarks</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://anonscm.debian.org/cgit/surfraw/surfraw.git/commit/?id=3e4591d8">3e4591d8</a> <a rel="nofollow" class="external text" href="http://anonscm.debian.org/cgit/surfraw/surfraw.git/commit/?id=bd8c427d">bd8c427d</a> <a rel="nofollow" class="external text" href="http://anonscm.debian.org/cgit/surfraw/surfraw.git/commit/?id=f57fc718">f57fc718</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/SirCmpwn/sway">sway</a>
+</td>
+<td> <code>~/.sway/config</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/SirCmpwn/sway/commit/614393c09">614393c09</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/SirCmpwn/sway/issues/5">[38]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Systemd.html" title="Systemd">systemd</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Termite.html" title="Termite">termite</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Transmission.html" title="Transmission">transmission</a>
+</td>
+<td> <code>~/.transmission</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://trac.transmissionbt.com/changeset/5517">5517</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://trac.transmissionbt.com/ticket/684">[39]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.kernel.org/pub/linux/utils/util-linux/">util-linux</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://git.kernel.org/cgit/utils/util-linux/util-linux.git/commit/?id=570b32100">570b32100</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://fanglingsu.github.io/vimb/">vimb</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/VLC_media_player.html" title="VLC media player">VLC media player</a>
+</td>
+<td> <code>~/.vlcrc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://git.videolan.org/?p=vlc.git;a=commit;h=16f32e1500887c0dcd33cb06ad71759a81a52878">16f32e15</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://trac.videolan.org/vlc/ticket/1267">[40]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Wireshark.html" title="Wireshark">wireshark</a>
+</td>
+<td> <code>~/.wireshark</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://code.wireshark.org/review/gitweb?p=wireshark.git;a=commit;h=b0b53fa5937aa7ba258427ca0f3581dba725230d">b0b53fa5</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/derat/xsettingsd">xsettingsd</a>
+</td>
+<td> <code>~/.xsettingsd</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/derat/xsettingsd/commit/b4999f5e9e99224caf97d09f25ee731774ecd7be">4ecd7be</a>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.warsow.gg/">warsow</a>
+</td>
+<td> <code>~/.warsow-2.x</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/Qfusion/qfusion/commit/98ece3f">98ece3f</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/Qfusion/qfusion/issues/298">[41]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/UZBL-Browser.html" title="Uzbl" class="mw-redirect">uzbl</a>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/uzbl/uzbl/pull/150">[42]</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/uzbl/uzbl/commit/c6fd63a">c6fd63a</a>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Partial">Partial</span></h2>
+<table class="wikitable sortable" style="width: 100%">
+<tr>
+<th> Application
+</th>
+<th> Legacy Path
+</th>
+<th> Supported Since
+</th>
+<th> Discussion
+</th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://abook.sourceforge.net/">abook</a>
+</td>
+<td> <code>~/.abook</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ abook --config "$XDG_CONFIG_HOME"/abook/abookrc \
+<p>--datafile "$XDG_CACHE_HOME"/abook/addressbook</p></code>
+
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Atom.html" title="Atom">Atom</a>
+</td>
+<td> <code>~/.atom</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export ATOM_HOME="$XDG_DATA_HOME"/atom</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://aspell.net/">aspell</a>
+</td>
+<td> <code>~/.aspell.conf</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://crates.io/">cargo</a>
+</td>
+<td> <code>~/.cargo</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/rust-lang/cargo/pull/148">[43]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/rust-lang/cargo/issues/1734">[44]</a>
+</td>
+<td> <code>$ export CARGO_HOME="$XDG_DATA_HOME"/cargo</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Ccache.html" title="Ccache">ccache</a>
+</td>
+<td> <code>~/.ccache</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export CCACHE_DIR="$XDG_CACHE_HOME"/ccache</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Conky.html" title="Conky">conky</a>
+</td>
+<td> <code>~/.conkyrc</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/brndnmtthws/conky/commit/00481ee9a97025e8e2acd7303d080af1948f7980">00481ee</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/brndnmtthws/conky/issues/144">[45]</a>
+</td>
+<td> <code>$ conky --config="$XDG_CONFIG_HOME"/conky/conkyrc</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.dungeoncrawl.org/">crawl</a>
+</td>
+<td> <code>~/.crawl</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export CRAWL_DIR="$XDG_DATA_HOME"/crawl/ # Trailing '/' is required.</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/PHP.html#Composer" title="PHP">composer</a>
+</td>
+<td> <code>~/.composer</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export COMPOSER_HOME="$XDG_CONFIG_HOME"/composer
+<p>$ export COMPOSER_CACHE_DIR="$XDG_CACHE_HOME"/composer</p></code>
+
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.gnu.org/software/coreutils/">coreutils</a>
+</td>
+<td> <code>~/.dircolors</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ source "$(dircolors "$XDG_CONFIG_HOME"/dircolors)"</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/dict/">dict</a>
+</td>
+<td> <code>~/.dictrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ dict -c "$XDG_CONFIG_HOME"/dict/dictrc</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/ELinks.html" title="ELinks">ELinks</a>
+</td>
+<td> <code>~/.elinks</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export ELINKS_CONFDIR="$XDG_CONFIG_HOME"/elinks</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://kripken.github.io/emscripten-site/">emscripten</a>
+</td>
+<td> <code>~/.emscripten</code> <code>~/.emscripten_sanity</code> <code>~/.emscripten_ports</code> <code>~/.emscripten_cache__last_clear</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/kripken/emscripten/issues/3624">3624</a>
+</td>
+<td> <code>$ export EM_CONFIG="$XDG_CONFIG_HOME"/emscripten/config</code>
+<p><code>$ export EM_CACHE="$XDG_CACHE_HOME"/emscripten/cache</code>
+<code>$ export EM_PORTS="$XDG_DATA_HOME"/emscripten/cache</code>
+<code>$ emcc --em-config "$XDG_CONFIG_HOME"/emscripten/config --em-cache "$XDG_CACHE_HOME"/emscripten/cache</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/PulseAudio.html" title="PulseAudio">PulseAudio</a>
+</td>
+<td> <code>~/.esd_auth</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> Very likely generated by the <code>module-esound-protocol-unix.so</code> module.  It can be configured to use a different location but it makes much more sense to just comment out this module in <code>/etc/pulse/default.pa</code> or <code>"$XDG_CONFIG_HOME"/pulse/default.pa</code>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.gnu.org/software/gdb/">gdb</a>
+</td>
+<td> <code>~/.gdbinit</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ gdb -nh -x "$XDG_CONFIG_HOME"/gdb/init</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GIMP.html" title="GIMP">GIMP</a>
+</td>
+<td> <code>~/.gimp-2.8</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://git.gnome.org/browse/gimp/commit/?id=60e0cfe">60e0cfe</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzilla.gnome.org/show_bug.cgi?id=166643">[46]</a> <a rel="nofollow" class="external autonumber" href="https://mail.gnome.org/archives/gimp-developer-list/2012-October/msg00028.html">[47]</a>
+</td>
+<td> <code>$ export GIMP2_DIRECTORY="$XDG_CONFIG_HOME"/gimp</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://guichaz.free.fr/gliv/">gliv</a>
+</td>
+<td> <code>~/.glivrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ gliv --glivrc="$XDG_CONFIG_HOME"/gliv/glivrc</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GnuPG.html" title="GPG" class="mw-redirect">gpg</a>
+</td>
+<td> <code>~/.gnupg</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export GNUPGHOME="$XDG_CONFIG_HOME"/gnupg</code>
+<p><code>$ gpg2 --homedir "$XDG_CONFIG_HOME"/gnupg</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GTK+.html" title="Gtk" class="mw-redirect">gtk2</a>
+</td>
+<td> <code>~/.gtkrc-2.0</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GTK+.html" title="Gtk" class="mw-redirect">gtk</a>
+</td>
+<td> <code>~/.gtkrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://httpie.org">httpie</a>
+</td>
+<td> <code>~/.httpie</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/jakubroztocil/httpie/issues/145">[48]</a>
+</td>
+<td> <code>$ export HTTPIE_CONFIG_DIR="$XDG_CONFIG_HOME"/httpie</code>
+</td>
+</tr>
+
+<tr>
+<td> <a href="../en/Irssi.html" title="Irssi">irssi</a>
+</td>
+<td> <code>~/.irssi</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/irssi/irssi/pull/511">[49]</a>
+</td>
+<td> <code>irssi --config="$XDG_CONFIG_HOME"/irssi/config --home="$XDG_DATA_HOME"/irssi</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://ipython.org">ipython</a>/<a rel="nofollow" class="external text" href="http://jupyter.org">jupyter</a>
+</td>
+<td> <code>~/.ipython</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export IPYTHONDIR="$XDG_CONFIG_HOME"/jupyter</code>
+<p><code>$ export JUPYTER_CONFIG_DIR="$XDG_CONFIG_HOME"/jupyter</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://isync.sourceforge.net">isync</a>
+</td>
+<td> <code>~/.mbsyncrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ mbsync -c "$XDG_CONFIG_HOME"/isync/mbsyncrc</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="ftp://www.x.org/pub/xorg/current/doc/libICE/ice.html">libice</a>
+</td>
+<td> <code>~/.ICEauthority</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export ICEAUTHORITY="$XDG_RUNTIME_DIR"/X11/iceauthority</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.greenwoodsoftware.com/less/">less</a>
+</td>
+<td> <code>~/.lesshst</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export LESSHISTFILE="$XDG_CACHE_HOME"/less/history</code> (It is required to create the <code>"$XDG_CACHE_HOME"/less</code> directory manually.)
+<p><code>$ export LESSHISTFILE=-</code> can be used to disable this feature.
+</p>
+<p><code>$ export LESSKEY="$XDG_CONFIG_HOME"/less/lesskey</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.videolan.org/developers/libdvdcss.html">libdvdcss</a>
+</td>
+<td> <code>~/.dvdcss</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://mailman.videolan.org/pipermail/libdvdcss-devel/2014-August/001022.html">[50]</a>
+</td>
+<td> <code>$ export DVDCSS_CACHE="$XDG_DATA_HOME"/dvdcss</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://ltrace.org/">ltrace</a>
+</td>
+<td> <code>~/.ltrace.conf</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ ltrace -F "$XDG_CONFIG_HOME"/ltrace/ltrace.conf</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.wolfram.com/mathematica/">Mathematica</a>
+</td>
+<td> <code>~/.Mathematica</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export MATHEMATICA_USERBASE="$XDG_CONFIG_HOME"/mathematica</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://mednafen.sourceforge.net/">mednafen</a>
+</td>
+<td> <code>~/.mednafen</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export MEDNAFEN_HOME="$XDG_CONFIG_HOME"/mednafen</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Moc.html" title="Moc">moc</a>
+</td>
+<td> <code>~/.moc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ mocp -M "$XDG_CONFIG_HOME"/moc</code>
+<p><code>$ mocp -O MOCDir="$XDG_CONFIG_HOME"/moc</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/MPlayer.html" title="MPlayer">MPlayer</a>
+</td>
+<td> <code>~/.mplayer</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export MPLAYER_HOME="$XDG_CONFIG_HOME"/mplayer</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Mutt.html" title="Mutt">mutt</a>
+</td>
+<td> <code>~/.mutt</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://dev.mutt.org/trac/ticket/3207">[51]</a>
+</td>
+<td> <code>$ mutt -F "$XDG_CONFIG_HOME"/mutt/muttrc</code>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">muttrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+set header_cache = $XDG_CACHE_HOME/mutt/headers
+set message_cachedir = $XDG_DATA_HOME/mutt/messages
+set mailcap_path = $XDG_CONFIG_HOME/mutt/mailcap
+set record = $XDG_DATA_HOME/mutt/record/sent
+</pre>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Notmuch.html" title="Notmuch">notmuch</a>
+</td>
+<td> <code>~/.notmuch-config</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://notmuchmail.org/pipermail/notmuch/2011/007007.html">[52]</a>
+</td>
+<td> <code>$ export NOTMUCH_CONFIG="$XDG_CONFIG_HOME"/notmuch/notmuchrc</code>
+<p><code>$ export NMBGIT="$XDG_DATA_HOME"/notmuch/nmbug</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ncurses">ncurses</a></span>
+</td>
+<td> <code>~/.terminfo</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export TERMINFO="$XDG_DATA_HOME"/terminfo # Precludes system path searching.</code>
+<p><code>$ export TERMINFO_DIRS="$XDG_DATA_HOME"/terminfo:/usr/share/terminfo</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=npm">npm</a></span>
+</td>
+<td> <code>~/.npm</code> <code>~/.npmrc</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/npm/npm/issues/6675">[53]</a>
+</td>
+<td> <code>$ export NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc</code>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">npmrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">cache=$XDG_CACHE_HOME/npm
+prefix=$XDG_DATA_HOME/npm</pre>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a>, <a href="../en/GPGPU.html#CUDA" title="CUDA" class="mw-redirect">CUDA</a>
+</td>
+<td> <code>~/.nv</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export __GL_SHADER_DISK_CACHE_PATH="$XDG_CACHE_HOME"/nv</code>
+<p><code>$ export CUDA_CACHE_PATH="$XDG_CACHE_HOME"/nv</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.openscad.org/">openscad</a>
+</td>
+<td> <code>~/.OpenSCAD</code>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://github.com/openscad/openscad/commit/7c3077b0f">7c3077b0f</a>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/openscad/openscad/issues/125">[54]</a>
+</td>
+<td> Does not fully honour XDG Base Directory Specification, see <a rel="nofollow" class="external autonumber" href="https://github.com/openscad/openscad/issues/373">[55]</a>
+<p>Currently it <a rel="nofollow" class="external text" href="https://github.com/openscad/openscad/blob/master/src/PlatformUtils-posix.cc#L20">hard-codes</a> <code>~/.local/share</code>.
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://pypi.python.org/pypi/setuptools">python-setuptools</a>
+</td>
+<td> <code>~/.python-eggs</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export PYTHON_EGG_CACHE="$XDG_CACHE_HOME"/python-eggs</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html">readline</a>
+</td>
+<td> <code>~/.inputrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export INPUTRC="$XDG_CONFIG_HOME"/readline/inputrc</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://utopia.knoware.nl/~hlub/uck/rlwrap/">rlwrap</a>
+</td>
+<td> <code>~/.*_history</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/hanslub42/rlwrap/issues/25">[56]</a>
+</td>
+<td> <code>$ export RLWRAP_HOME="$XDG_DATA_HOME"/rlwrap</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/GNU_Screen.html" title="Screen" class="mw-redirect">screen</a>
+</td>
+<td> <code>~/.screenrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export SCREENRC="$XDG_CONFIG_HOME"/screen/screenrc</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.stackage.org/">stack</a>
+</td>
+<td> <code>~/.stack</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/commercialhaskell/stack/issues/342">[57]</a>
+</td>
+<td> <code>$ export STACK_ROOT="$XDG_DATA_HOME"/stack</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Subversion.html" title="Subversion">subversion</a>
+</td>
+<td> <code>~/.subversion</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://mail-archives.apache.org/mod_mbox/subversion-users/201204.mbox/%3c4F8FBCC6.4080205@ritsuka.org%3e">[58]</a><a rel="nofollow" class="external autonumber" href="http://mail-archives.apache.org/mod_mbox/subversion-dev/201509.mbox/%3c20150917222954.GA20331@teapot%3e">[59]</a>
+</td>
+<td> <code>$ svn --config-dir "$XDG_CONFIG_HOME"/subversion</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://jonas.nitro.dk/tig/">tig</a>
+</td>
+<td> <code>~/.tigrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export TIGRC_USER="$XDG_CONFIG_HOME"/tig/tigrc</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Tmux.html" title="Tmux">tmux</a>
+</td>
+<td> <code>~/.tmux.conf</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://comments.gmane.org/gmane.comp.terminal-emulators.tmux.user/6013">[60]</a> <a rel="nofollow" class="external autonumber" href="http://sourceforge.net/p/tmux/mailman/message/30619546/">[61]</a>
+</td>
+<td> <code>$ tmux -f "$XDG_CONFIG_HOME"/tmux/tmux.conf</code>
+<p><code>$ export TMUX_TMPDIR="$XDG_RUNTIME_DIR"/tmux</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Rxvt-unicode/Tips_and_tricks.html#Daemon-client" title="Rxvt-unicode/Tips and tricks">urxvtd</a>
+</td>
+<td> <code>~/.urxvt/urxvtd-hostname</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export RXVT_SOCKET="$XDG_RUNTIME_DIR"/urxvt/urxvt-"$(hostname)"</code>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/WeeChat.html" title="WeeChat">WeeChat</a>
+</td>
+<td> <code>~/.weechat</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://savannah.nongnu.org/task/?10934">[62]</a>
+</td>
+<td> <code>$ export WEECHAT_HOME="$XDG_CONFIG_HOME"/weechat</code>
+<p><code>$ weechat -d "$XDG_CONFIG_HOME"/weechat</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Wine.html" title="Wine">wine</a>
+</td>
+<td> <code>~/.wine</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.winehq.org/show_bug.cgi?id=20888">[63]</a>
+</td>
+<td> <code>$ export WINEPREFIX="$XDG_DATA_HOME"/wine</code>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xauth">xorg-xauth</a></span>
+</td>
+<td> <code>~/.Xauthority</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export XAUTHORITY="$XDG_RUNTIME_DIR"/X11/xauthority</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.x.org/wiki/">libx11</a>
+</td>
+<td> <code>~/.XCompose</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export XCOMPOSEFILE="$XDG_CONFIG_HOME"/X11/xcompose</code>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xinit">xorg-xinit</a></span>
+</td>
+<td> <code>~/.xinitrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export XINITRC="$XDG_CONFIG_HOME"/X11/xinitrc</code>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xrdb">xorg-xrdb</a></span>
+</td>
+<td> <code>~/.Xresources</code> <code>~/.Xdefaults</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> Ultimately you <a rel="nofollow" class="external text" href="http://superuser.com/questions/243914/xresources-or-xdefaults">should be</a> using <code>Xresources</code> and since these resources are loaded via <code>xrdb</code> you can specify a path such as <code>xrdb -load ~/.config/X11/xresources</code>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/bengardner/uncrustify">uncrustify</a>
+</td>
+<td> <code>~/.uncrustify.cfg</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export UNCRUSTIFY_CONFIG="$XDG_CONFIG_HOME"/uncrustify/uncrustify.cfg</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.vergenet.net/~conrad/software/xsel/">xsel</a>
+</td>
+<td> <code>~/.xsel.log</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/kfish/xsel/issues/10">[64]</a>
+</td>
+<td> <code>$ xsel --logfile "$XDG_CACHE_HOME"/xsel/xsel.log</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/cisco/ChezScheme">ChezScheme</a>
+</td>
+<td> <code>~/.chezscheme_history</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ petite --eehistory "$XDG_DATA_HOME"/chezscheme/history</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/NVIDIA/nvidia-settings">nvidia-settings</a>
+</td>
+<td> <code>~/.nvidia-settings-rc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings</code>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/get-iplayer/get_iplayer">get_iplayer</a>
+</td>
+<td> <code>~/.get_iplayer</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> <code>$ export GETIPLAYERUSERPREFS="$XDG_DATA_HOME"/get_iplayer</code>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Hardcoded">Hardcoded</span></h2>
+<table class="wikitable sortable" style="width: 100%">
+<tr>
+<th> Application
+</th>
+<th> Legacy Path
+</th>
+<th> Supported Since
+</th>
+<th> Discussion
+</th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://directory.apache.org/studio/">Apache Directory Studio</a>
+</td>
+<td> <code>~/.ApacheDirectoryStudio</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/AMule.html" title="AMule">AMule</a>
+</td>
+<td> <code>~/.aMule</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Bash.html" title="Bash">bash</a>
+</td>
+<td> <code>~/.bashrc</code> <code>~/.bash_history</code> <code>~/.bash_profile</code> <code>~/.bash_login</code> <code>~/.bash_logout</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://savannah.gnu.org/support/?108134">[65]</a>
+</td>
+<td>
+<ul>
+<li> A specified <code>bashrc</code> can be sourced from <code>/etc/bashrc</code>
+</li>
+<li> <code>export HISTFILE="$XDG_DATA_HOME"/bash/history</code>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.haskell.org/cabal/">cabal</a>
+</td>
+<td> <code>~/.cabal</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/haskell/cabal/issues/680">[66]</a>
+</td>
+<td> See discussion for potential workarounds.  It is not very easy or straightforward but may be possible to emulate Base Directory compliance.
+</td>
+</tr>
+<tr>
+<td> <a href="../en/CUPS.html" title="CUPS">CUPS</a>
+</td>
+<td> <code>~/.cups</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://www.cups.org/str.php?L4243">[67]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/D-Bus.html" title="Dbus" class="mw-redirect">dbus</a>
+</td>
+<td> <code>~/.dbus</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=35887">[68]</a>
+</td>
+<td> This should be avoidable with kdbus [citation needed].
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Eclipse.html" title="Eclipse">eclipse</a>
+</td>
+<td> <code>~/.eclipse</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=200809">[69]</a>
+</td>
+<td> Option <code>-Dosgi.configuration.area=@user.home/.config/..</code> overrides but must be added to <code>"$ECLIPSE_HOME"/eclipse.ini"</code> rather than command line which means you must have write access to <code>$ECLIPSE_HOME</code>. (Arch Linux hard-codes <code>$ECLIPSE_HOME</code> in <code>/usr/bin/eclipse</code>)
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.gnu.org/software/emacs/">emacs</a>
+</td>
+<td> <code>~/.emacs</code> <code>~/.emacs.d</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://debbugs.gnu.org/cgi/bugreport.cgi?bug=583">[70]</a>
+</td>
+<td> It's possible to set <code>HOME</code>, but it has unexpected side effects.  So far the most promising approach is modifying another Emacs environment variable to alter the load path and author your own site file which can manually load up your init file, but it changes the load process significantly.
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Firefox.html" title="Firefox">firefox</a>
+</td>
+<td> <code>~/.mozilla</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzil.la/259356">[71]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.gnu.org/software/parallel/">GNU parallel</a>
+</td>
+<td> <code>~/.parallel</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://gstreamer.freedesktop.org/documentation/gstreamer010.html">gstreamer-0.10</a>
+</td>
+<td> <code>~/.gstreamer-0.10</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> Use <a rel="nofollow" class="external text" href="http://gstreamer.freedesktop.org/">gstreamer-1.0</a> instead.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.idris-lang.org/">idris</a>
+</td>
+<td> <code>~/.idris</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://julialang.org/">julia</a>
+</td>
+<td> <code>~/.juliarc.jl</code> <code>~/.julia_history</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/JuliaLang/julia/issues/4630">[72]</a> <a rel="nofollow" class="external autonumber" href="https://github.com/JuliaLang/julia/issues/10016">[73]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://lldb.llvm.org/">lldb</a>
+</td>
+<td> <code>~/.lldb</code> <code>~/.lldbinit</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.mathomatic.org/">mathomatic</a>
+</td>
+<td> <code>~/.mathomaticrc</code> <code>~/.matho_history</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> History can be moved by using <code>rlwrap mathomatic -r</code> with the <code>RLWRAP_HOME</code> environment set appropriately.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.milkytracker.org/">milkytracker</a>
+</td>
+<td> <code>~/.milkytracker_config</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/Deltafire/MilkyTracker/issues/12">[74]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.mongodb.org/">mongodb</a>
+</td>
+<td> <code>~/.mongorc.js</code> <code>~/.dbshell</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://jira.mongodb.org/browse/DOCS-5652?jql=text%20~%20%22.mongorc.js%22">[75]</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="http://stackoverflow.com/a/22349050/4200039">This Stack Overflow</a> thread suggests a partial workaround using command-line switch <code>--norc</code>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.musicpd.org/clients/ncmpc/">ncmpc</a>
+</td>
+<td> <code>~/.ncmpc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.palemoon.org/">palemoon</a>
+</td>
+<td> <code>~/.moonchild productions</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://forum.palemoon.org/viewtopic.php?f=5&amp;t=9639">[76]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://perf.wiki.kernel.org/index.php/Main_Page">perf</a>
+</td>
+<td> <code>~/.debug</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>Hardcoded in <a rel="nofollow" class="external text" href="https://github.com/torvalds/linux/blob/master/tools/perf/util/config.c#L18">tools/perf/util/config.c:18</a>.
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Python.html" title="Python">python</a>
+</td>
+<td> <code>~/.python_history</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> All history from interactive sessions is saved to <code>~/.python_history</code> by default since <a rel="nofollow" class="external text" href="https://bugs.python.org/issue5845">version 3.4</a>, custom path can still be set the same way as in older versions (see <a rel="nofollow" class="external text" href="https://docs.python.org/3/library/readline.html?highlight=readline#example">this example</a>).
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=procps-ng">procps-ng</a></span>
+</td>
+<td> <code>~/.toprc</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugzilla.redhat.com/show_bug.cgi?id=1155265">[77]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Spectrwm.html" title="Spectrwm">spectrwm</a>
+</td>
+<td> <code>~/.spectrwm</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/SQLite.html" title="SQLite">SQLite</a>
+</td>
+<td> <code>~/.sqlite_history</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://unix.stackexchange.com/questions/306890/change-location-of-sqlite-history-file">[78]</a><a rel="nofollow" class="external autonumber" href="http://sqlite.1065341.n5.nabble.com/Customizing-the-location-of-the-sqlite-history-td87055.html">[79]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Vim.html" title="Vim">vim</a>
+</td>
+<td> <code>~/.vim</code> <code>~/.vimrc</code> <code>~/.viminfo</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> Since <a rel="nofollow" class="external text" href="https://github.com/vim/vim/commit/6a459902592e2a4ba68">7.3.1178</a> vim will search for <code>~/.vim/vimrc</code> if <code>~/.vimrc</code> is not found.
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vim/vimrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+set undodir=~/.cache/vim/undo " vim will not create this directory.
+set directory=~/.cache/vim/swap " vim will not create this directory.
+set backupdir=~/.cache/vim/backup " vim will not create this directory.
+set viminfo+=n~/.cache/vim/viminfo
+</pre>
+<ul><li> <a rel="nofollow" class="external free" href="https://tlvince.com/vim-respect-xdg">https://tlvince.com/vim-respect-xdg</a>
+</li></ul>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.vimperator.org/">vimperator</a>
+</td>
+<td> <code>~/.vimperatorrc</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://www.mozdev.org/pipermail/vimperator/2009-October/004848.html">[80]</a>
+</td>
+<td> <code>$ export VIMPERATOR_INIT=":source $XDG_CONFIG_HOME/vimperator/vimperatorrc"</code>
+<p><code>$ export VIMPERATOR_RUNTIME="$XDG_CONFIG_HOME"/vimperator</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://w1.fi/">wpa_cli</a>
+</td>
+<td> <code>~/.wpa_cli_history</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xdg-utils">xdg-utils</a></span>
+</td>
+<td> <code>~/.gnome</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td> For some reason the script <code>xdg-desktop-menu</code> hard-codes <code>gnome_user_dir="$HOME/.gnome/apps"</code>.  This is used by <a href="../en/Chromium.html" title="Chromium">chromium</a> amoung others.
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Xmonad.html" title="Xmonad">xmonad</a>
+</td>
+<td> <code>~/.xmonad</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://code.google.com/p/xmonad/issues/detail?id=484">[81]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://opensource.conformal.com/wiki/xombrero">xombrero</a>
+</td>
+<td> <code>~/.xombrero</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="https://github.com/conformal/xombrero/issues/74">[82]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Zsh.html" title="Zsh">zsh</a>
+</td>
+<td> <code>~/.zshrc</code> <code>~/.zprofile</code> <code>~/.zshenv</code> <code>~/.zlogin</code> <code>~/.zlogout</code> <code>~/.histfile</code>
+</td>
+<td>
+</td>
+<td> <a rel="nofollow" class="external autonumber" href="http://www.zsh.org/mla/workers/2013/msg00692.html">[83]</a>
+</td>
+<td> Consider exporting <code>ZDOTDIR=$HOME/.config/zsh</code> in <code>~/.zshenv</code> (this is hardcoded due to the bootstrap problem).  You could also add this to <code>/etc/zsh/zshenv</code> and avoid the need for any dotfiles in your <code>HOME</code>.  Doing this however requires root privilege which may not be viable and is system-wide.
+<p><code>export HISTFILE="$XDG_DATA_HOME"/zsh/history</code>
+</p>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://racket-lang.org/">racket</a>
+</td>
+<td> <code>~/.racketrc</code>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Library_and_language_support">Library and language support</span></h2>
+<dl>
+<dt> C</dt>
+<dd> <a rel="nofollow" class="external text" href="https://github.com/Cloudef/chck/tree/master/chck/xdg">C99: Cloudef's simple implementation</a>.</dd>
+</dl>
+<dl>
+<dt> Haskell</dt>
+<dd> Officially in <a rel="nofollow" class="external text" href="https://hackage.haskell.org/package/directory">directory</a> since 1.2.3.0 <a rel="nofollow" class="external text" href="https://github.com/haskell/directory/commit/ab9d0810ce">ab9d0810ce</a>.</dd>
+<dd> <a rel="nofollow" class="external text" href="https://hackage.haskell.org/package/xdg-basedir">xdg-basedir</a>
+</dd>
+</dl>
+<dl>
+<dt> Perl</dt>
+<dd> <a rel="nofollow" class="external text" href="http://search.cpan.org/dist/File-BaseDir/lib/File/BaseDir.pm">File-BaseDir</a>
+</dd>
+<dd> <a rel="nofollow" class="external text" href="https://github.com/Aerdan/perl-file-xdg">perl-file-xdg</a>
+</dd>
+</dl>
+<dl>
+<dt> Python</dt>
+<dd> <a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Software/pyxdg/">pyxdg</a>
+</dd>
+</dl>
+<dl>
+<dt> Vala</dt>
+<dd> Builtin support via <a rel="nofollow" class="external text" href="http://valadoc.org/#!api=glib-2.0/GLib.Environment">GLib.Environment</a>.</dd>
+<dd> See <code>get_user_cache_dir</code>, <code>get_user_data_dir</code>, <code>get_user_config_dir</code>, etc.</dd>
+</dl>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://plus.google.com/+RobPikeTheHuman/posts/R58WgWwN9jp">Rob Pike: "Dotfiles" being hidden is a UNIXv2 mistake</a>.</li>
+<li> <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd-path.html">systemd-path(1)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/file-hierarchy.html">file-hierarchy(7)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/grawity/dotfiles/blob/master/.dotfiles.notes">Grawity's notes on dotfiles</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/grawity/dotfiles/blob/master/.environ.notes">Grawity's notes on environment variables</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://ploum.net/207-modify-your-application-to-use-xdg-folders/">ploum.net: Modify Your Application to use XDG Folders</a>.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Dotfiles.html" title="Category:Dotfiles">Dotfiles</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

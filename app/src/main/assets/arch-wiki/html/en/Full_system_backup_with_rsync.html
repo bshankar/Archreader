@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Full system backup with rsync - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Full_system_backup_with_rsync skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Full system backup with rsync</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Synchronization_and_backup_programs.html" title="Synchronization and backup programs">Synchronization and backup programs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Rsync.html" title="Rsync">rsync</a></li>
+</ul>
+</div>
+<p>This article is about using <a href="../en/Rsync.html" title="Rsync">rsync</a> to transfer a copy of the entire <code>/</code> tree, excluding a few selected folders. This approach is considered to be better than <a href="../en/Disk_cloning.html" title="Disk cloning">disk cloning</a> with <code>dd</code> since it allows for a different size, partition table and filesystem to be used, and better than copying with <code>cp -a</code> as well, because it allows greater control over file permissions, attributes, <a href="../en/Access_Control_Lists.html" title="Access Control Lists">Access Control Lists</a> and <a href="../en/File_permissions_and_attributes.html#Extended_attributes" title="Extended attributes" class="mw-redirect">extended attributes</a>.
+</p>
+<p>All aforementioned methods will work even while the system is running, but files changed during the transfer may or may not be transferred, which can cause undefined behavior of some programs using the transferred files.
+</p>
+<p>This approach works well for migrating an existing installation to a new hard drive or <a href="../en/Solid_State_Drives.html" title="SSD" class="mw-redirect">SSD</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#With_a_single_command"><span class="tocnumber">1</span> <span class="toctext">With a single command</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Boot_requirements"><span class="tocnumber">2</span> <span class="toctext">Boot requirements</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Update_the_fstab"><span class="tocnumber">2.1</span> <span class="toctext">Update the fstab</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Update_the_bootloader.27s_configuration_file"><span class="tocnumber">2.2</span> <span class="toctext">Update the bootloader's configuration file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#First_boot"><span class="tocnumber">3</span> <span class="toctext">First boot</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="With_a_single_command">With a single command</span></h2>
+<p>This command depends on brace expansion available in both the <a rel="nofollow" class="external text" href="https://www.gnu.org/software/bash/manual/html_node/Brace-Expansion.html">bash</a> and <a rel="nofollow" class="external text" href="http://zsh.sourceforge.net/Doc/Release/Expansion.html#Brace-Expansion">zsh</a> shells. When using a different <a href="../en/Command-line_shell.html" title="Shell" class="mw-redirect">shell</a>, <code>--exclude</code> patterns should be repeated manually.
+</p>
+<pre># rsync -aAXv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} / <i>/path/to/backup/folder</i>
+</pre>
+<p>By using the <code>-aAX</code> set of options, the files are transferred in archive mode which ensures that symbolic links, devices, permissions,  ownerships, modification times, <a href="../en/Access_Control_Lists.html" title="ACL" class="mw-redirect">ACLs</a>, and extended attributes are preserved, assuming that the target <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a> supports the feature.
+</p>
+<p>The <code>--exclude</code> option causes files that match the given patterns to be excluded. The contents of <code>/dev</code>, <code>/proc</code>, <code>/sys</code>, <code>/tmp</code>, and <code>/run</code> are excluded in the above command, because they are populated at boot, although the folders themselves are <i>not</i> created. <code>/lost+found</code> is filesystem-specific. Quoting the exclude patterns will avoid expansion by the <a href="../en/Command-line_shell.html" title="Shell" class="mw-redirect">shell</a>, which is necessary, for example, when backing up over <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a>. Ending the excluded paths with <code>*</code> ensures that the directories themselves are created if they do not already exist.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you plan on backing up your system somewhere other than <code>/mnt</code> or <code>/media</code>, do not forget to add it to the list of exclude patterns to avoid an infinite loop.</li>
+<li> If there are any bind mounts in the system, they should be excluded as well so that the bind mounted contents is copied only once.</li>
+<li> If you use a <a href="../en/Swap.html#Swap_file" title="Swap file" class="mw-redirect">swap file</a>, make sure to exclude it as well.</li>
+<li> Consider if you want to backup the <code>/home/</code> folder. If it contains your data it might be considerably larger than the system. Otherwise consider excluding unimportant subdirectories such as  <code>/home/*/.thumbnails/*</code>, <code>/home/*/.cache/mozilla/*</code>, <code>/home/*/.cache/chromium/*</code>, and <code>/home/*/.local/share/Trash/*</code>, depending on software installed on the system. If <a href="../en/File_manager_functionality.html#Mounting" title="GVFS" class="mw-redirect">GVFS</a> is installed, <code>/home/*/.gvfs</code> must be excluded to prevent rsync errors.</li>
+</ul>
+</div>
+<p>You may want to include additional <a href="../en/Rsync.html" title="Rsync">rsync</a> options, such as the following. See <span class="plainlinks archwiki-template-man" title="$ man 1 rsync"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/rsync.1.html">rsync(1)</a></span> for the full list.
+</p>
+<ul>
+<li> If you use many hard links, consider adding the <code>-H</code> option, which is turned off by default due to its memory expense; however, it should be no problem on most modern machines. Many hard links reside under the <code>/usr/</code> directory.</li>
+<li> You may want to add rsync's <code>--delete</code> option if you are running this multiple times to the same backup folder. In this case make sure that the source path does not end with <code>/*</code>, or this option will only have effect on the files inside the subdirectories of the source directory, but it will have no effect on the files residing directly inside the source directory.</li>
+<li> If you use any sparse files, such as virtual disks, <a href="../en/Docker.html" title="Docker">Docker</a> images and similar, you should add the <code>-S</code> option.</li>
+<li> The <code>--numeric-ids</code> option will disable mapping of user and group names; instead, numeric group and user IDs will be transfered. This is useful when backing up over <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> or when using a live system to backup different system disk.</li>
+<li> Choosing <code>--info=progress2</code> option instead of <code>-v</code> will show the overall progress info and transfer speed instead of the list of files being transferred.</li>
+</ul>
+<p>If you wish to restore the backup, use the same rsync command that was executed but with the source and destination reversed.
+</p>
+<h2><span class="mw-headline" id="Boot_requirements">Boot requirements</span></h2>
+<p>Having a bootable backup can be useful in case the filesystem becomes corrupt or if an update breaks the system. The backup can also be used as a test bed for updates, with the <i>testing</i> repo enabled, etc. If you transferred the system to a different partition or drive and you want to boot it, the process is as simple as updating the backup's <code>/etc/fstab</code> and your bootloader's configuration file.
+</p>
+<p>This section assumes that you backed up the system to another drive or partition, that your current bootloader is working fine, and that you want to boot from the backup as well.
+</p>
+<h3><span class="mw-headline" id="Update_the_fstab">Update the fstab</span></h3>
+<p>Without rebooting, edit the backup's <a href="../en/Fstab.html" title="Fstab">fstab</a> by commenting out or removing any existing entries. Add one entry for the partition containing the backup like the example here:
+</p>
+<pre>/dev/sda<i>X</i>    /             <i>ext4</i>      defaults                 0   1
+</pre>
+<p>Remember to use the proper device name and filesystem type.
+</p>
+<h3><span class="mw-headline" id="Update_the_bootloader.27s_configuration_file">Update the bootloader's configuration file</span></h3>
+<p>For <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a>, all you need to do is duplicate the current entry, except pointing to a different drive or partition.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Instead of editing <code>syslinux.cfg</code>, you can also temporarily edit the menu during boot. When the menu shows up, press the <code>Tab</code> key and change the relevant entries. Partitions are counted from one, drives are counted from zero.</div>
+<p>For <a href="../en/GRUB.html" title="GRUB">GRUB</a>, it is recommended that you automatically <a href="../en/GRUB.html#Generate_the_main_configuration_file" title="GRUB">re-generate the main configuration file</a>.
+</p>
+<p>Also verify the new menu entry in <code>/boot/grub/grub.cfg</code>. Make sure the UUID is matching the new partition, otherwise it could still boot the old system. Find the UUID of a partition as follows:
+</p>
+<pre># lsblk -no NAME,UUID /dev/sdb3
+</pre>
+<p>where you substitute the desired partition for /dev/sdb3. To list the UUIDs of partitions grub thinks it can boot, use grep:
+</p>
+<pre># grep UUID= /boot/grub/grub.cfg
+</pre>
+<h2><span class="mw-headline" id="First_boot">First boot</span></h2>
+<p>Reboot the computer and select the right entry in the bootloader. This will load the system for the first time. All peripherals should be detected and the empty folders in <code>/</code> will be populated.
+</p>
+<p>Now you can re-edit <code>/etc/fstab</code> to add the previously removed partitions and mount points.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://blog.pointsoftware.ch/index.php/howto-local-and-remote-snapshot-backup-using-rsync-with-hard-links/">Howto – local and remote snapshot backup using rsync with hard links</a> Includes file deduplication with hard-links, MD5 integrity signature, 'chattr' protection, filter rules, disk quota, retention policy with exponential distribution (backups rotation while saving more recent backups than older)</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

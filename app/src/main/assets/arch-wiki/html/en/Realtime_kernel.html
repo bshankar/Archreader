@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Realtime kernel - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Realtime_kernel skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Realtime kernel</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This is a work in progress (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Realtime_kernel">Talk:Realtime kernel#</a>)</div>
+</div>
+<p>This article describes the Linux kernel realtime patch set, and how to configure, test, and troubleshoot realtime kernels.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#What_is_realtime"><span class="tocnumber">1</span> <span class="toctext">What is realtime</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#How_does_the_realtime_patch_work"><span class="tocnumber">2</span> <span class="toctext">How does the realtime patch work</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Installation"><span class="tocnumber">3</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Scheduling_latency"><span class="tocnumber">4</span> <span class="toctext">Scheduling latency</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Latency_testing_utilities"><span class="tocnumber">5</span> <span class="toctext">Latency testing utilities</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#cyclictest"><span class="tocnumber">5.1</span> <span class="toctext">cyclictest</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#hackbench"><span class="tocnumber">5.2</span> <span class="toctext">hackbench</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#hwlatdetect"><span class="tocnumber">5.3</span> <span class="toctext">hwlatdetect</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Configuration"><span class="tocnumber">6</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Tips_and_Tricks"><span class="tocnumber">7</span> <span class="toctext">Tips and Tricks</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Troubleshooting"><span class="tocnumber">8</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Known_issues"><span class="tocnumber">9</span> <span class="toctext">Known issues</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="What_is_realtime">What is realtime</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/Real-time_computing" class="extiw" title="wikipedia:Real-time computing">Realtime</a> applications have operational deadlines between some triggering event and the application's response to that event. To meet these operational deadlines, programmers use realtime operating systems (RTOS) on which the maximum response time can be calculated or measured reliably for the given application and environment.
+A typical RTOS uses priorities. The highest priority task wanting the CPU always gets the CPU within a fixed amount of time after the event waking the task has taken place. On such an RTOS the <a href="https://en.wikipedia.org/wiki/Latency_(engineering)" class="extiw" title="wikipedia:Latency (engineering)">latency</a> of a task only depends on the tasks running at equal or higher priorities, all other tasks can be ignored. On a normal OS (such as normal Linux) the latencies depend on everything running on the system, which of course makes it much harder to be convinced that the deadlines will be met every time on a reasonably complicated system. This is because <a href="https://en.wikipedia.org/wiki/Preemption_(computing)" class="extiw" title="wikipedia:Preemption (computing)">preemption</a> can be switched off for an unknown amount of time. The high priority task wanting to run can thus be delayed for an unknown amount of time by low priority tasks running with preemption switched off.
+</p>
+<h2><span class="mw-headline" id="How_does_the_realtime_patch_work">How does the realtime patch work</span></h2>
+<p>The RT-Preempt patch converts Linux into a fully preemptible kernel. This is done through:
+</p>
+<ul>
+<li> Making in-kernel locking-primitives (using <a href="https://en.wikipedia.org/wiki/Spinlock" class="extiw" title="wikipedia:Spinlock">spinlocks</a>) preemptible though reimplementation with rtmutexes.</li>
+<li> <a href="https://en.wikipedia.org/wiki/Critical_section" class="extiw" title="wikipedia:Critical section">Critical sections</a> protected by i.e. spinlock_t and rwlock_t are now preemptible. The creation of non-preemptible sections (in kernel) is still possible with raw_spinlock_t (same APIs like spinlock_t).</li>
+<li> Implementing <a href="https://en.wikipedia.org/wiki/Priority_inheritance" class="extiw" title="wikipedia:Priority inheritance">priority inheritance</a> for in-kernel spinlocks and <a href="https://en.wikipedia.org/wiki/Semaphore_(programming)" class="extiw" title="wikipedia:Semaphore (programming)">semaphores</a>.</li>
+<li> Converting interrupt handlers into preemptible kernel threads: The RT-Preempt patch treats soft interrupt handlers in kernel thread context, which is represented by a task_struct like a common user space process. However it is also possible to register an IRQ in kernel context.</li>
+<li> Converting the old Linux timer API into separate infrastructures for high resolution kernel timers plus one for timeouts, leading to user space POSIX timers with high resolution.</li>
+</ul>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>There are many -rt patched kernels available from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. The main two are <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-rt/">linux-rt</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-rt-lts/">linux-rt-lts</a></span><sup><small>AUR</small></sup>. Both have a configuration based on the main <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> kernel package, linux-rt follows the development branch of the -rt patch, while linux-rt-lts tracks a stable branch of the rt patchset.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Don't forget to add the newly installed kernel to your boot manager.</div>
+<h2><span class="mw-headline" id="Scheduling_latency">Scheduling latency</span></h2>
+<p>In the context of the scheduler, latency is the time that passes from the occurrence of an event until the handling of said event.  Often the delay from the firing of an interrupt until the interrupt handler starts running, but could also be from the expiration of a timer, etc.
+</p>
+<p>Latency of itself is natural, there is always some latency, it becomes problematic when it exceeds the deadline given by your application's restraints.  If it's less than the deadline, it's a success, if it's bigger, it's a failure.
+</p>
+<p>There can be many varied causes for high scheduling latencies, Some worth mentioning (in no particular order) are: a misconfigured system, bad hardware, badly programmed kernel modules, CPU power management, faulty hardware timers, <a href="https://en.wikipedia.org/wiki/System_Management_Mode#Entering_SMM" class="extiw" title="wikipedia:System Management Mode">SMIs</a>, <a href="https://en.wikipedia.org/wiki/Simultaneous_multithreading" class="extiw" title="wikipedia:Simultaneous multithreading">SMT</a>, etc.
+</p>
+<p>When trying to determine the system's maximum scheduling latency, the system needs to be put under load.  A busy system will in general experience bigger latencies than an idle one.  It would be recommendable to run tests for a long time and under different natural and  artificial load conditions.  It would also be recommendable to stress all sub systems that would be in use on the production system, like disk and net io, usb, the graphics sub system, etc.
+</p>
+<h2><span class="mw-headline" id="Latency_testing_utilities">Latency testing utilities</span></h2>
+<p>There are several tools available to check kernel scheduling latencies, and to track down the causes of latency spikes. One set of tools comes in a package called <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/rt-tests/">rt-tests</a></span><sup><small>AUR</small></sup> (also available from <a href="../en/Unofficial_user_repositories.html#archaudio" title="Unofficial user repositories">archaudio-production</a>).
+</p>
+<h3><span class="mw-headline" id="cyclictest">cyclictest</span></h3>
+<p>One of the programs in rt-tests is called cyclictest, which can be used to verify the  maximum scheduling latency, and for tracking down the causes of latency spikes. cyclictest works by measuring the time between the expiration of a timer a thread sets and when the thread starts running again.
+</p>
+<p>Here is the result of a typical test run:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># cyclictest --smp -p98 -m</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# /dev/cpu_dma_latency set to 0us
+policy: fifo: loadavg: 239.09 220.49 134.53 142/1304 23799          
+
+T: 0 (23124) P:98 I:1000 C: 645663 Min:      2 Act:    4 Avg:    4 Max:      23
+T: 1 (23125) P:98 I:1500 C: 430429 Min:      2 Act:    5 Avg:    3 Max:      23
+T: 2 (23126) P:98 I:2000 C: 322819 Min:      2 Act:    4 Avg:    3 Max:      15
+T: 3 (23127) P:98 I:2500 C: 258247 Min:      2 Act:    5 Avg:    4 Max:      32
+^C</pre>
+<p>It shows a four CPU core system running one thread (SCHED_FIFO) per core at priority 98, with memory locked, the system is also under a high load due to running hackbench in a separate terminal.  What is most interesting is the max schedling latency detected, in this case 32 usecs on core 3.
+</p>
+<p><a rel="nofollow" class="external text" href="http://man.cx/cyclictest(8)">cyclictest(8)</a> man page.
+</p>
+<h3><span class="mw-headline" id="hackbench">hackbench</span></h3>
+<p>An idle kernel will tend to show much lower scheduling latencies, it's essential to put some load on it to get a realistic result. This can be done with another utility in the rt-tests package called hackbench. It works by creating multiple pairs of threads or processes, that pass data between themselves either over sockets or pipes. To make it run longer add the -l parameter: <code>hackbench -l 1000000</code>.
+</p>
+<p><a rel="nofollow" class="external text" href="http://man.cx/hackbench(8)">hackbench(8)</a> man page.
+</p>
+<h3><span class="mw-headline" id="hwlatdetect">hwlatdetect</span></h3>
+<p>hwlatdetect can be used to detect SMIs taking an inordinate time, thus introducing latency by blocking normal kernel execution.  It consists of a kernel module (present in both linux-rt and linux-rt-lts), and a python script to launch the process and report the results back to the user. To check if the system uses NMIs run the following command:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep NMI /proc/interrupts</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"> 
+NMI:       3335       3336       3335       3335   Non-maskable interrupts</pre>
+<p>The hwlatdetect kernel module works by turning everything running on the CPUs off through the stop_machine() call.  It then polls the TSC (Time Stamp Counter) looking for gaps in the generated data stream.  Any gaps indicates that it was interrupted by a NMI, as they are the only possible mechanism (apart from a broken TSC implementation). To run the program for 120 secs, with  a detection threshold of 15 usecs, execute the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># hwlatdetect --duration=120 --threshold=15</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+hwlatdetect:  test duration 120 seconds
+   parameters:
+        Latency threshold: 15us
+        Sample window:     1000000us
+        Sample width:      500000us
+     Non-sampling period:  500000us
+        Output File:       None
+
+Starting test
+test finished
+Max Latency: 21us
+Samples recorded: 16
+Samples exceeding threshold: 16
+1408928107.0286324723   18      17
+.
+.
+1408928180.0296881126   15      21
+.
+.
+1408928212.0300332889   18      18</pre>
+<p>The result shows 16 NMIs detected that exceeded the 15 usecs threshold specified, the maximum latency detected was 21 usecs.
+</p>
+<p><a rel="nofollow" class="external text" href="http://man.cx/hwlatdetect">hwlatdetect(8)</a> man page.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h2><span class="mw-headline" id="Tips_and_Tricks">Tips and Tricks</span></h2>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h2><span class="mw-headline" id="Known_issues">Known issues</span></h2>
+<ul>
+<li> bcache support is disabled due to how it uses locks.</li>
+<li> A problem with the powernow-k8 module causing a hang at boot on some AMD CPUs.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

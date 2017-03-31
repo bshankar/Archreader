@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>nftables - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Nftables skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">nftables</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> As of October, 2015: while nftables has been around for a while, few people seem to have practical experience using it. The documentation often leaves questions open. If you'd like to pioneer, help out and document how you got it to work. The best place to ask questions is the <a rel="nofollow" class="external text" href="http://netfilter.org/mailinglists.html#ml-user">Netfilter mailing list</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Nftables">Talk:Nftables#</a>)</div>
+</div>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Firewalls.html" title="Firewalls">Firewalls</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Iptables.html" title="Iptables">iptables</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://netfilter.org/projects/nftables/">nftables</a> is a netfilter project that aims to replace the existing ip-, ip6-, arp-, and ebtables framework. It provides a new packet filtering framework, a new user-space utility (nft), and a compatibility layer for ip- and ip6tables. It uses the existing hooks, connection tracking system, user-space queueing component, and logging subsystem of netfilter.
+</p>
+<p>It consists of three main components: a kernel implementation, the libnl netlink communication and the nftables user-space front-end.
+The kernel provides a netlink configuration interface, as well as run-time rule-set evaluation, libnl contains the low-level functions for communicating with the kernel, and the nftables front-end is what the user interacts with via nft.
+</p>
+<p>You can also visit the <a rel="nofollow" class="external text" href="https://wiki.nftables.org/wiki-nftables/index.php/Main_Page">official nftables wiki page</a> for more information.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Basic_Implementation"><span class="tocnumber">2</span> <span class="toctext">Basic Implementation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Load_the_basic_default_ruleset"><span class="tocnumber">2.1</span> <span class="toctext">Load the basic default ruleset</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#nft"><span class="tocnumber">3</span> <span class="toctext">nft</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Tables"><span class="tocnumber">4</span> <span class="toctext">Tables</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Family"><span class="tocnumber">4.1</span> <span class="toctext">Family</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Listing"><span class="tocnumber">4.2</span> <span class="toctext">Listing</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Creation"><span class="tocnumber">4.3</span> <span class="toctext">Creation</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Deletion"><span class="tocnumber">4.4</span> <span class="toctext">Deletion</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Chains"><span class="tocnumber">5</span> <span class="toctext">Chains</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Listing_2"><span class="tocnumber">5.1</span> <span class="toctext">Listing</span></a></li>
+<li class="toclevel-2 tocsection-12">
+<a href="#Creation_2"><span class="tocnumber">5.2</span> <span class="toctext">Creation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-13">
+<a href="#Properties"><span class="tocnumber">5.2.1</span> <span class="toctext">Properties</span></a>
+<ul>
+<li class="toclevel-4 tocsection-14"><a href="#Types"><span class="tocnumber">5.2.1.1</span> <span class="toctext">Types</span></a></li>
+<li class="toclevel-4 tocsection-15"><a href="#Hooks"><span class="tocnumber">5.2.1.2</span> <span class="toctext">Hooks</span></a></li>
+<li class="toclevel-4 tocsection-16"><a href="#Priorities"><span class="tocnumber">5.2.1.3</span> <span class="toctext">Priorities</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-17"><a href="#Editing"><span class="tocnumber">5.3</span> <span class="toctext">Editing</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Deletion_2"><span class="tocnumber">5.4</span> <span class="toctext">Deletion</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19">
+<a href="#Rules"><span class="tocnumber">6</span> <span class="toctext">Rules</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#Listing_3"><span class="tocnumber">6.1</span> <span class="toctext">Listing</span></a></li>
+<li class="toclevel-2 tocsection-21">
+<a href="#Creation_3"><span class="tocnumber">6.2</span> <span class="toctext">Creation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#Matches"><span class="tocnumber">6.2.1</span> <span class="toctext">Matches</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Jumps"><span class="tocnumber">6.2.2</span> <span class="toctext">Jumps</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-24">
+<a href="#Insertion"><span class="tocnumber">6.3</span> <span class="toctext">Insertion</span></a>
+<ul>
+<li class="toclevel-3 tocsection-25"><a href="#Prepended"><span class="tocnumber">6.3.1</span> <span class="toctext">Prepended</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#At_a_given_position"><span class="tocnumber">6.3.2</span> <span class="toctext">At a given position</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-27"><a href="#Deletion_3"><span class="tocnumber">6.4</span> <span class="toctext">Deletion</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Atomic_Reloading"><span class="tocnumber">6.5</span> <span class="toctext">Atomic Reloading</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-29"><a href="#File_Definitions"><span class="tocnumber">7</span> <span class="toctext">File Definitions</span></a></li>
+<li class="toclevel-1 tocsection-30"><a href="#Getting_Started"><span class="tocnumber">8</span> <span class="toctext">Getting Started</span></a></li>
+<li class="toclevel-1 tocsection-31">
+<a href="#Samples"><span class="tocnumber">9</span> <span class="toctext">Samples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-32"><a href="#Simple_IP.2FIPv6_Firewall"><span class="tocnumber">9.1</span> <span class="toctext">Simple IP/IPv6 Firewall</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#Limit_rate_IP.2FIPv6_Firewall"><span class="tocnumber">9.2</span> <span class="toctext">Limit rate IP/IPv6 Firewall</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Jump"><span class="tocnumber">9.3</span> <span class="toctext">Jump</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-35">
+<a href="#Practical_examples"><span class="tocnumber">10</span> <span class="toctext">Practical examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-36"><a href="#Different_rules_for_different_interfaces"><span class="tocnumber">10.1</span> <span class="toctext">Different rules for different interfaces</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Masquerading"><span class="tocnumber">10.2</span> <span class="toctext">Masquerading</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-38"><a href="#Logging_to_Syslog"><span class="tocnumber">11</span> <span class="toctext">Logging to Syslog</span></a></li>
+<li class="toclevel-1 tocsection-39"><a href="#See_also"><span class="tocnumber">12</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The Linux kernel supports nftables since version 3.13 but running the latest kernel is recommended. You will only need to install the userland utilities, which are provided by the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nftables">nftables</a></span> or the git-version <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nftables-git/">nftables-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Basic_Implementation">Basic Implementation</span></h2>
+<p>Like other firewalls, nftables makes a distinction between temporary rules made in the commandline and permanent ones loaded from or saved to a file.
+The default file is <code>/etc/nftables.conf</code> which already contains a simple ipv4/ipv6 firewall table named "inet filter".
+</p>
+<h3><span class="mw-headline" id="Load_the_basic_default_ruleset">Load the basic default ruleset</span></h3>
+<p>To use it <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">start/enable</a> the <code>nftables.service</code>.
+</p>
+<p>You can check the ruleset with
+</p>
+<pre># nft list ruleset
+</pre>
+<p>If it returns the inet filter table setup, you're good to go for basic desktop internet usage.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may have to create <code>/etc/modules-load.d/nftables.conf</code> with all of the nftables related modules you require as entries for the systemd service to work correctly. You can get a list of modules using this command: <pre>$ lsmod | grep '^nf'</pre>
+Otherwise, you could end up with the dreaded <code>Error: Could not process rule: No such file or directory</code> error.</div>
+<h2><span class="mw-headline" id="nft">nft</span></h2>
+<p>nftables' user-space utility <code>nft</code> now performs most of the rule-set evaluation before handing rule-sets to the kernel. Because of this, nftables provides no default tables or chains; although, a user can emulate an iptables-like setup.
+</p>
+<p>It works in a fashion similar to ifconfig or iproute2. The commands are a long, structured sequence rather than using argument switches like in iptables. For example:
+</p>
+<pre>nft add rule ip6 filter input ip6 saddr ::1 accept
+</pre>
+<p><code>add</code> is the command. <code>rule</code> is a subcommand of <code>add</code>. <code>ip6</code> is an argument of <code>rule</code>, telling it to use the ip6 family. <code>filter</code> and <code>input</code> are arguments of <code>rule</code> specifying the table and chain to use, respectively. The rest that follows is a rule definition, which includes matches (<code>ip</code>), their parameters (<code>saddr</code>), parameter arguments (<code>::1</code>), and jumps (<code>accept</code>).
+</p>
+<p>The following is an incomplete list of the commands available in nft:
+</p>
+<pre>
+list
+  tables [family]
+  table [family] &lt;name&gt;
+  chain [family] &lt;table&gt; &lt;name&gt;
+
+add
+  table [family] &lt;name&gt;
+  chain [family] &lt;table&gt; &lt;name&gt; [chain definitions]
+  rule [family] &lt;table&gt; &lt;chain&gt; &lt;rule definition&gt;
+
+table [family] &lt;name&gt; (shortcut for `add table`)
+
+insert
+  rule [family] &lt;table&gt; &lt;chain&gt; &lt;rule definition&gt;
+
+delete
+  table [family] &lt;name&gt;
+  chain [family] &lt;table&gt; &lt;name&gt;
+  rule [family] &lt;table&gt; &lt;handle&gt;
+
+flush
+  table [family] &lt;name&gt;
+  chain [family] &lt;table&gt; &lt;name&gt;
+</pre>
+<p><code>family</code> is optional, see <a href="#Family">section on family</a> below.
+</p>
+<h2><span class="mw-headline" id="Tables">Tables</span></h2>
+<p>The purpose of tables is to hold chains. Unlike tables in iptables, there are no built-in tables in nftables. How many tables one uses, or their naming, is largely a matter of style and personal preference. However, each table has a (network) family and only applies to packets of this family. Tables can have one of five families specified, which unifies the various iptables utilities into one:
+</p>
+<table class="wikitable">
+<tr>
+<th> nftables family </th>
+<th> iptables utility
+</th>
+</tr>
+<tr>
+<td> ip </td>
+<td> iptables
+</td>
+</tr>
+<tr>
+<td> ip6 </td>
+<td> ip6tables
+</td>
+</tr>
+<tr>
+<td> inet </td>
+<td> iptables and ip6tables
+</td>
+</tr>
+<tr>
+<td> arp </td>
+<td> arptables
+</td>
+</tr>
+<tr>
+<td> bridge </td>
+<td> ebtables
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Family">Family</span></h3>
+<p><code>ip</code> (i.e. IPv4) is the default family and will be used if family is not specified.
+</p>
+<p>IPv6 is specified as <code>ip6</code>.
+</p>
+<p>To create one rule that applies to both IPv4 and IPv6, use <code>inet</code>. This requires Linux &gt;=3.15. <code>inet</code> allows for the unification of the <code>ip</code> and <code>ip6</code> families to make defining rules for both easier.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>inet</code> does not work for <code>nat</code>-type chains, only for <code>filter</code>-type chains. (<a rel="nofollow" class="external text" href="http://www.spinics.net/lists/netfilter/msg56411.html">source</a>)</div>
+<h3><span class="mw-headline" id="Listing">Listing</span></h3>
+<p>You can list the current tables in a family with the <code>nft list</code> command.
+</p>
+<pre># nft list tables
+# nft list tables ip6
+</pre>
+<p>You can list a full table definition by specifying a table name:
+</p>
+<pre># nft list table <i>foo</i>
+# nft list table <i>ip6 foo</i>
+</pre>
+<h3><span class="mw-headline" id="Creation">Creation</span></h3>
+<p>Tables can be added via two commands — one just being a shortcut for the other. Here is an example of how to add an ip table called foo and an ip6 table called foo:
+</p>
+<pre># nft add table <i>foo</i>
+# nft table <i>ip6 foo</i>
+</pre>
+<p>You can have two tables with the same name as long as they are in different families.
+</p>
+<h3><span class="mw-headline" id="Deletion">Deletion</span></h3>
+<p>Tables can only be deleted if there are no chains in them.
+</p>
+<pre># nft delete table <i>foo</i>
+# nft delete table <i>ip6 foo</i>
+</pre>
+<h2><span class="mw-headline" id="Chains">Chains</span></h2>
+<p>The purpose of chains is to hold rules. Unlike chains in iptables, there are no built-in chains in nftables. This means that if no chain uses any types or hooks in the netfilter framework, packets that would flow through those chains will not be touched by nftables, unlike iptables.
+</p>
+<h3><span class="mw-headline" id="Listing_2">Listing</span></h3>
+<p>The <code>nft list table foo</code> command will list all the chains in the foo table. You can also list rules from an individual chain.
+</p>
+<pre># nft list chain <i>foo</i> <i>bar</i>
+# nft list chain <i>ip6 foo bar</i>
+</pre>
+<p>These commands will list the <code>bar</code> chains in the ip and ip6 <code>foo</code> tables.
+</p>
+<h3><span class="mw-headline" id="Creation_2">Creation</span></h3>
+<p>Chains can be added when a table is created in a file definition or one at time via the <code>nft add chain</code> command.
+</p>
+<pre># nft add chain <i>foo</i> <i>bar</i>
+# nft add chain <i>ip6 foo bar</i>
+</pre>
+<p>These commands will add a chain called <code>bar</code> to the ip and ip6 <code>foo</code> tables.
+</p>
+<h4><span class="mw-headline" id="Properties">Properties</span></h4>
+<p>Because nftables has no built-in chains, it allows chains to access certain features of the netfilter framework.
+</p>
+<pre># nft add chain filter input \{ type filter hook input priority 0\; \}
+</pre>
+<p>This command tells nftables to add a chain called <code>input</code> to the <code>filter</code> table and defines its type, hook, and priority. These properties essentially replace the built-in tables and chains in iptables.
+</p>
+<h5><span class="mw-headline" id="Types">Types</span></h5>
+<p>There are three types a chain can have and they correspond to the tables used in iptables:
+</p>
+<ul>
+<li>filter</li>
+<li>nat</li>
+<li>route  (mangle)</li>
+</ul>
+<h5><span class="mw-headline" id="Hooks">Hooks</span></h5>
+<p>There are six hooks a chain can use and all except ingress correspond to chains used in iptables:
+</p>
+<ul>
+<li> ingress</li>
+<li> input</li>
+<li> output</li>
+<li> forward</li>
+<li> prerouting</li>
+<li> postrouting</li>
+</ul>
+<p>The ingress hook is an alternative to the existing <code>tc</code> utility.
+</p>
+<h5><span class="mw-headline" id="Priorities">Priorities</span></h5>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Priorities do not currently appear to have any effect on which chain sees packets first.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since the priority seems to be an unsigned integer, negative priorities will be converted into very high priorities.</div>
+<p>Priorities tell nftables which chains packets should pass through first. They are integers, and the higher the integer, the higher the priority.
+</p>
+<h3><span class="mw-headline" id="Editing">Editing</span></h3>
+<p>To edit a chain, simply call it by its name and define the rules you want to change.
+</p>
+<pre># nft chain &lt;table&gt; &lt;family&gt; &lt;chain&gt; { [ type &lt;type&gt; hook &lt;hook&gt; device &lt;device&gt; priority &lt;priority&gt; \; policy &lt;policy&gt; \; ] }
+</pre>
+<p>If for example, you just want to change the input chain policy of the default table from "accept" to "drop"
+</p>
+<pre># nft chain inet filter input { policy drop \; }
+</pre>
+<h3><span class="mw-headline" id="Deletion_2">Deletion</span></h3>
+<p>Chains can only be deleted if there are no rules in them.
+</p>
+<pre># nft delete chain <i>foo bar</i>
+# nft delete chain <i>ip6 foo bar</i>
+</pre>
+<p>These commands delete the <code>bar</code> chains from the ip and ip6 <code>foo</code> tables.
+</p>
+<h2><span class="mw-headline" id="Rules">Rules</span></h2>
+<p>The purpose of rules is to identify packets (match) and carry out tasks (jump). Like in iptables, there are various matches and jumps available, though not all of them are feature-complete in nftables.
+</p>
+<h3><span class="mw-headline" id="Listing_3">Listing</span></h3>
+<p>You can list the current rules in a table with the <code>nft list</code> command, using the same method as listing a table. You can also list rules from an individual chain.
+</p>
+<pre># nft list chain <i>foo bar</i>
+# nft list chain <i>ip6 foo bar</i>
+</pre>
+<p>These commands will list the rules in the <code>bar</code> chains in the ip and ip6 <code>foo</code> tables.
+</p>
+<h3><span class="mw-headline" id="Creation_3">Creation</span></h3>
+<p>Rules can be added when a table is created in a file definition or one at time via the <code>nft add rule</code> command.
+</p>
+<pre># nft add rule foo bar ip saddr 127.0.0.1 accept
+# nft add rule ip6 foo bar ip saddr ::1 accept
+</pre>
+<p>These commands will add a rule to the <code>bar</code> chains in the ip and ip6 <code>foo</code> tables that matches an <code>ip</code> packet when its <code>saddr</code> (source address) is 127.0.0.1 (IPv4) or ::1 (IPv6) and accepts those packets.
+</p>
+<h4><span class="mw-headline" id="Matches">Matches</span></h4>
+<p>There are various matches available in nftables and, for the most part, coincide with their iptables counterparts. The most noticeable difference is that there are no generic or implicit matches anymore. A generic match was one that was always available, such as <code>--protocol</code> or <code>--source</code>. Implicit matches were protocol-specific, such as <code>--sport</code> when a packet was determined to be TCP.
+</p>
+<p>The following is an incomplete list of the matches available:
+</p>
+<ul>
+<li>meta    (meta properties, e.g. interfaces)</li>
+<li>icmp    (ICMP protocol)</li>
+<li>icmpv6  (ICMPv6 protocol)</li>
+<li>ip      (IP protocol)</li>
+<li>ip6     (IPv6 protocol)</li>
+<li>tcp     (TCP protocol)</li>
+<li>udp     (UDP protocol)</li>
+<li>sctp    (SCTP protocol)</li>
+<li>ct      (connection tracking)</li>
+</ul>
+<p>The following is an incomplete list of match arguments (for a more complete list, see <code>man 8 nft</code>):
+</p>
+<pre>
+meta:
+  oif &lt;output interface INDEX&gt;
+  iif &lt;input interface INDEX&gt;
+  oifname &lt;output interface NAME&gt;
+  iifname &lt;input interface NAME&gt;
+
+  (oif and iif accept string arguments and are converted to interface indexes)
+  (oifname and iifname are more dynamic, but slower because of string matching)
+
+icmp:
+  type &lt;icmp type&gt;
+
+icmpv6:
+  type &lt;icmpv6 type&gt;
+
+ip:
+  protocol &lt;protocol&gt;
+  daddr &lt;destination address&gt;
+  saddr &lt;source address&gt;
+
+ip6:
+  daddr &lt;destination address&gt;
+  saddr &lt;source address&gt;
+
+tcp:
+  dport &lt;destination port&gt;
+  sport &lt;source port&gt;
+
+udp:
+  dport &lt;destination port&gt;
+  sport &lt;source port&gt;
+
+sctp:
+  dport &lt;destination port&gt;
+  sport &lt;source port&gt;
+
+ct:
+  state &lt;new | established | related | invalid&gt;
+</pre>
+<h4><span class="mw-headline" id="Jumps">Jumps</span></h4>
+<p>Jumps work the same as they do in iptables, except multiple jumps can now be used in one rule.
+</p>
+<pre># nft add rule filter input tcp dport 22 log accept
+</pre>
+<p>The following is an incomplete list of jumps:
+</p>
+<ul>
+<li>accept  (accept a packet)</li>
+<li>reject  (reject a packet)</li>
+<li>drop    (drop a packet)</li>
+<li>snat    (perform source NAT on a packet)</li>
+<li>dnat    (perform destination NAT on a packet)</li>
+<li>log     (log a packet)</li>
+<li>counter (keep a counter on a packet; counters are optional in nftables)</li>
+<li>return  (stop traversing the chain)</li>
+<li>jump &lt;chain&gt; (jump to another chain)</li>
+<li>goto &lt;chain&gt; (jump to another chain, but do not return)</li>
+</ul>
+<h3><span class="mw-headline" id="Insertion">Insertion</span></h3>
+<h4><span class="mw-headline" id="Prepended">Prepended</span></h4>
+<p>Rules can be prepended to chains with the <code>nft insert rule</code> command.
+</p>
+<pre># nft insert rule filter input ct state established,related accept
+</pre>
+<h4><span class="mw-headline" id="At_a_given_position">At a given position</span></h4>
+<p>Nftables uses handles to define the position of a rule.
+To get this information, you need to list the ruleset with the -a flag:
+</p>
+<pre> # nft list ruleset -a
+</pre>
+<p>To add a rule <i>after</i> another rule with a given handler, you have to type:
+</p>
+<pre> # nft add rule <i>table_name</i> <i>chain_name</i> position <i>handler_number</i> <i>[rule-definition]</i>
+</pre>
+<h3><span class="mw-headline" id="Deletion_3">Deletion</span></h3>
+<p>Individual rules can only be deleted by their handles. The <code>nft --handle list</code> command must be used to determine rule handles. Note the <code>--handle</code> switch, which tells <code>nft</code> to list handles in its output.
+</p>
+<p>The following determines the handle for a rule and then deletes it. The <code>--number</code> argument is useful for viewing some numeric output, like unresolved IP addresses.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nft --handle --numeric list chain filter input</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+table ip fltrTable {
+     chain input {
+          type filter hook input priority 0;
+          ip saddr 127.0.0.1 accept # handle 10
+     }
+}
+</pre>
+<pre># nft delete rule fltrTable input handle 10
+</pre>
+<p>All the chains in a table can be flushed with the <code>nft flush table</code> command. Individual chains can be flushed using either the <code>nft flush chain</code> or <code>nft delete rule</code> commands.
+</p>
+<pre># nft flush table foo
+# nft flush chain foo bar
+# nft delete rule ip6 foo bar
+</pre>
+<p>The first command flushes all of the chains in the ip <code>foo</code> table. The second flushes the <code>bar</code> chain in the ip <code>foo</code> table. The third deletes all of the rules in <code>bar</code> chain in the ip6 <code>foo</code> table.
+</p>
+<h3><span class="mw-headline" id="Atomic_Reloading">Atomic Reloading</span></h3>
+<p>Flush the current ruleset:
+</p>
+<pre># echo "flush ruleset" &gt; /tmp/nftables 
+</pre>
+<p>Dump the current ruleset:
+</p>
+<pre># nft list ruleset &gt;&gt; /tmp/nftables
+</pre>
+<p>Now you can edit /tmp/nftables and apply your changes with:
+</p>
+<pre># nft -f /tmp/nftables
+</pre>
+<h2><span class="mw-headline" id="File_Definitions">File Definitions</span></h2>
+<p>File definitions can be used by the <code>nft -f</code> command, which acts like the <code>iptables-restore</code> command.
+However, unlike <code>iptables-restore</code>, this command does not flush out your existing ruleset, to do so you have
+to prepend the flush command.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nftables/filter.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+flush table ip filter
+table ip filter {
+     chain input {
+          type filter hook input priority 0;
+          ct state established,related accept
+          ip saddr 127.0.0.1 accept
+          tcp dport 22 log accept
+          reject
+     }
+}
+</pre>
+<p>To export your rules (like <code>iptables-save</code>):
+</p>
+<pre># nft list ruleset
+</pre>
+<h2><span class="mw-headline" id="Getting_Started">Getting Started</span></h2>
+<p>The below example shows <i>nft</i> commands to configure a basic <b>IPv4</b> only firewall. If you want to filter both IPv4 <b>and</b> IPv6 you should look at the other examples in <code>/usr/share/nftables</code> or just start with the default provided in <code>/etc/nftables.conf</code> which already works with IPv4/IPv6.
+</p>
+<p>To get an <a href="../en/Iptables.html" title="Iptables">iptables</a>-like chain set up, you will first need to use the provided IPv4 filter file:
+</p>
+<pre># nft -f /usr/share/nftables/ipv4-filter
+</pre>
+<p>To list the resulting chain:
+</p>
+<pre># nft list table filter
+</pre>
+<p>Drop output to a destination:
+</p>
+<pre># nft add rule ip filter output ip daddr 1.2.3.4 drop
+</pre>
+<p>Drop packets destined for local port 80:
+</p>
+<pre># nft add rule ip filter input tcp dport 80 drop
+</pre>
+<p>Delete all rules in a chain:
+</p>
+<pre># nft delete rule filter output
+</pre>
+<h2><span class="mw-headline" id="Samples">Samples</span></h2>
+<h3><span class="mw-headline" id="Simple_IP.2FIPv6_Firewall">Simple IP/IPv6 Firewall</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">firewall.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# A simple firewall
+
+flush ruleset
+
+table firewall {
+  chain incoming {
+    type filter hook input priority 0;
+
+    # established/related connections
+    ct state established,related accept
+
+    # invalid connections
+    ct state invalid drop
+
+    # loopback interface
+    iifname lo accept
+
+    # icmp
+    icmp type echo-request accept
+
+    # open tcp ports: sshd (22), httpd (80)
+    tcp dport {ssh, http} accept
+
+    # everything else
+    drop
+  }
+}
+
+table ip6 firewall {
+  chain incoming {
+    type filter hook input priority 0;
+
+    # established/related connections
+    ct state established,related accept
+
+    # invalid connections
+    ct state invalid drop
+
+    # loopback interface
+    iifname lo accept
+
+    # icmp
+    # routers may also want: mld-listener-query, nd-router-solicit
+    icmpv6 type {echo-request,nd-neighbor-solicit} accept
+
+    # open tcp ports: sshd (22), httpd (80)
+    tcp dport {ssh, http} accept
+
+    # everything else
+    drop
+  }
+}
+</pre>
+<h3><span class="mw-headline" id="Limit_rate_IP.2FIPv6_Firewall">Limit rate IP/IPv6 Firewall</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">firewall.2.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+table firewall {
+    chain incoming {
+        type filter hook input priority 0;
+
+        # no ping floods:
+        ip protocol icmp limit rate 10/second accept
+        ip protocol icmp drop
+
+        ct state established,related accept
+        ct state invalid drop
+
+        iifname lo accept
+
+	# avoid brute force on ssh:
+        tcp dport ssh limit rate 15/minute accept
+
+        reject
+    }
+}
+
+table ip6 firewall {
+    chain incoming {
+        type filter hook input priority 0;
+
+        # no ping floods:
+        ip6 nexthdr icmpv6 limit rate 10/second accept
+        ip6 nexthdr icmpv6 drop
+
+        ct state established,related accept
+        ct state invalid drop
+
+        # loopback interface
+        iifname lo accept
+
+	# avoid brute force on ssh:
+        tcp dport ssh limit rate 15/minute accept
+
+        reject
+    }
+}
+</pre>
+<h3><span class="mw-headline" id="Jump">Jump</span></h3>
+<p>When using jumps in config file, it is necessary to define the target chain first. Otherwise one could end up with <code>Error: Could not process rule: No such file or directory</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">jump.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+table inet filter {
+    chain web {
+        tcp dport http accept
+        tcp dport 8080 accept
+    }
+    chain input {
+        type filter hook input priority 0;
+        ip saddr 10.0.2.0/24 jump web
+        drop
+    }
+}
+</pre>
+<h2><span class="mw-headline" id="Practical_examples">Practical examples</span></h2>
+<h3><span class="mw-headline" id="Different_rules_for_different_interfaces">Different rules for different interfaces</span></h3>
+<p>If your box has more than one network interface, and you'd like to use different rules for different interfaces, you may want to use a "dispatching" filter chain, and then interface-specific filter chains. For example, let's assume your box acts as a home router, you want to run a web server accessible over the LAN (interface nsp3s0), but not from the public internet (interface enp2s0), you may want to consider a structure like this:
+</p>
+<pre>table inet filter {
+  chain input { # this chain serves as a dispatcher
+    type filter hook input priority 0;
+
+    iifname lo accept # always accept loopback
+    iifname enp2s0 jump input_enp2s0
+    iifname enp3s0 jump input_enp3s0
+
+    reject with icmp type port-unreachable # refuse traffic from all other interfaces
+  }
+  chain input_enp2s0 { # rules applicable to public interface interface
+    ct state {established,related} accept
+    ct state invalid drop
+    udp dport bootpc accept
+    tcp dport bootpc accept
+    reject with icmp type port-unreachable # all other traffic
+  }
+  chain input_enp3s0 {
+    ct state {established,related} accept
+    ct state invalid drop
+    udp dport bootpc accept
+    tcp dport bootpc accept
+    tcp port http accept
+    tcp port https accept
+    reject with icmp type port-unreachable # all other traffic
+  }
+  chain ouput { # we let everything out
+    type filter hook output priority 0;
+    accept
+  }
+ }
+</pre>
+<p>Alternatively you could choose only one <code>iifname</code> statement, such as for the single upstream interface, and put the default rules for all other interfaces in one place, instead of dispatching for each interface.
+</p>
+<h3><span class="mw-headline" id="Masquerading">Masquerading</span></h3>
+<p>nftables has a special keyword <code>masquerade</code> "where the source address is automagically set to the address of the output interface" (<a rel="nofollow" class="external text" href="http://wiki.nftables.org/wiki-nftables/index.php/Performing_Network_Address_Translation_%28NAT%29#Masquerading">source</a>). This is particularly useful for situations in which the IP address of the interface is unpredictable or unstable, such as the upstream interface of routers connecting to many ISPs. Without it, the Network Address Translation rules would have to be updated every time the IP address of the interface changed.
+</p>
+<p>To use it:
+</p>
+<ul>
+<li> use kernel &gt;=3.18 (true if you use the default kernel)</li>
+<li> make sure masquerading is enabled in the kernel (true if you use the default kernel), otherwise during kernel configuration, set</li>
+</ul>
+<pre>CONFIG_NFT_MASQ=m
+</pre>
+<ul>
+<li> the <code>masquerade</code> keyword can only be used in chains of type <code>nat</code>, which in turn cannot be contained in a table with family <code>inet</code>. Use a table with family <code>ip</code> and/or <code>ip6</code> instead.</li>
+<li> masquerading is a kind of source NAT, so only works in the output path.</li>
+</ul>
+<p>Example for a machine with two interfaces: LAN connected to <code>nsp3s0</code>, and public internet connected to <code>enp2s0</code>:
+</p>
+<pre>table ip nat {
+  chain prerouting {
+    type nat hook prerouting priority 0;
+  }
+  chain postrouting {
+    type nat hook postrouting priority 0;
+    oifname "enp0s2" masquerade
+  }
+}
+</pre>
+<h2><span class="mw-headline" id="Logging_to_Syslog">Logging to Syslog</span></h2>
+<p>If you use a Linux kernel &lt; 3.17, you have to modprobe <code>xt_LOG</code> to enable logging.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://wiki.nftables.org/">netfilter nftables wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://lwn.net/Articles/324251/">First release of nftables</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://home.regit.org/netfilter-en/nftables-quick-howto/">nftables quick howto</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://lwn.net/Articles/564095/">The return of nftables</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Firewalls.html" title="Category:Firewalls">Firewalls</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

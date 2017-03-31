@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>CherryMusic - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-CherryMusic skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">CherryMusic</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b><a rel="nofollow" class="external text" href="http://www.fomori.org/cherrymusic/">CherryMusic</a></b> is a music streaming server based on <a rel="nofollow" class="external text" href="http://www.cherrypy.org/">CherryPy</a> and <a rel="nofollow" class="external text" href="http://jplayer.org/">jPlayer</a>. It can be run remotely or on a single computer and is designed to handle huge music libraries (3 TB and more) but also works well with small collections. In contrast to <a href="../en/Music_Player_Daemon.html" title="MPD" class="mw-redirect">MPD</a>, <a href="../en/Streaming_With_Icecast.html" title="Icecast" class="mw-redirect">Icecast</a> and the like, CherryMusic allows multiple users to (individually) login via HTTP/HTTPS using a web browser, browse/search the music database and create/edit playlists and stream music to the browser. From the <a rel="nofollow" class="external text" href="http://www.fomori.org/cherrymusic/">website</a>:
+</p>
+<p>"CherryMusic is a standalone music server written in python based on CherryPy and jPlayer. It is intended to be an alternative to Last.fm, Spotify, Grooveshark... you name it."
+</p>
+<p>The project is developed on <a rel="nofollow" class="external text" href="https://github.com/devsnd/cherrymusic">GitHub</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Stable_version"><span class="tocnumber">1.1</span> <span class="toctext">Stable version</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Git_version"><span class="tocnumber">1.2</span> <span class="toctext">Git version</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Optional_dependencies"><span class="tocnumber">1.3</span> <span class="toctext">Optional dependencies</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Quick_start"><span class="tocnumber">2.1</span> <span class="toctext">Quick start</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Manual_setup"><span class="tocnumber">2.2</span> <span class="toctext">Manual setup</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Fine_tuning"><span class="tocnumber">2.3</span> <span class="toctext">Fine tuning</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Tips_.26_Tricks"><span class="tocnumber">3</span> <span class="toctext">Tips &amp; Tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Symlinks_in_.22basedir.22"><span class="tocnumber">3.1</span> <span class="toctext">Symlinks in "basedir"</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Systemd_service_file"><span class="tocnumber">3.2</span> <span class="toctext">Systemd service file</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Running_in_a_GNU_Screen_session"><span class="tocnumber">3.3</span> <span class="toctext">Running in a GNU Screen session</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Manually_adjust_the_search_parameters_of_the_search_algorithm"><span class="tocnumber">3.4</span> <span class="toctext">Manually adjust the search parameters of the search algorithm</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Bind_CherryMusic_to_ports_less_than_1024_.28without_root_access.29"><span class="tocnumber">3.5</span> <span class="toctext">Bind CherryMusic to ports less than 1024 (without root access)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#3rd_Party_Extensions"><span class="tocnumber">4</span> <span class="toctext">3rd Party Extensions</span></a></li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#Missing_module_.60wsgiserver2.60_when_using_pip_for_installation"><span class="tocnumber">5.1</span> <span class="toctext">Missing module `wsgiserver2` when using pip for installation</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Deactivate_flash_blocker"><span class="tocnumber">5.2</span> <span class="toctext">Deactivate flash blocker</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#CherryMusic_does_not_load_on_Android_Chrome"><span class="tocnumber">5.3</span> <span class="toctext">CherryMusic does not load on Android Chrome</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Track_scrolling_not_working_behind_Nginx"><span class="tocnumber">5.4</span> <span class="toctext">Track scrolling not working behind Nginx</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>CherryMusic is available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. There are two packages, the <a href="#Stable_version">stable release</a> and the <a href="#Git_version">development version</a>. If you do not depend on a completely stable version, the development version is recommended, but needs <a href="../en/Git.html" title="Git">Git</a> for installation.
+</p>
+<h3><span class="mw-headline" id="Stable_version">Stable version</span></h3>
+<p>The latest stable version of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cherrymusic/">cherrymusic</a></span><sup><small>AUR</small></sup> is available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Git_version">Git version</span></h3>
+<p>For a more up-to-date version of CherryMusic with experimental features, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cherrymusic-devel-git/">cherrymusic-devel-git</a></span><sup><small>AUR</small></sup> from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Optional_dependencies">Optional dependencies</span></h3>
+<p>Optional dependencies are:
+</p>
+<ul>
+<li> Live transcoding: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lame">lame</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vorbis-tools">vorbis-tools</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=flac">flac</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=faad2">faad2</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mpg123">mpg123</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=opus-tools">opus-tools</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span> (which replaces the aforementioned codecs plus adds WMA decoding)</li>
+<li> Automatic image resizing on displayed cover art: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=imagemagick">imagemagick</a></span>
+</li>
+<li> Special character search terms: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-unidecode">python-unidecode</a></span>
+</li>
+<li> GTK system tray icon: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-gobject">python-gobject</a></span>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Quick_start">Quick start</span></h3>
+<p>To just get it up and running with a basic setup, issue:
+</p>
+<pre> $ cherrymusic --setup --port 8080
+</pre>
+<p>and open the address "localhost:8080" in your browser (e.g. with <a href="../en/Firefox.html" title="Firefox">Firefox</a>):
+</p>
+<pre> $ firefox localhost:8080
+</pre>
+<p>This will let you configure the most important options from within the browser and you can set up the admin account.
+</p>
+<p>If you want CherryMusic to run as a system service and to automatically start on boot, see <a href="#Systemd_service_file">systemd service file</a>.
+</p>
+<h3><span class="mw-headline" id="Manual_setup">Manual setup</span></h3>
+<p>Start CherryMusic for the initial setup:
+</p>
+<pre> $ cherrymusic
+</pre>
+<p>On first startup CherryMusic will create its data and configuration files in <code>~/.local/share/cherrymusic/</code> and <code>~/.config/cherrymusic/</code>, print a note to <i>stdout</i> and exit.
+Now, edit the configuration file in <code>~/.config/cherrymusic/cherrymusic.conf</code>and change the following lines to match your setup:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/cherrymusic/cherrymusic.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[...]
+basedir = /path/to/your/music
+[...]
+port = 8080
+[...]
+</pre>
+<p>Open the address "localhost:8080" in your browser (e.g. with <a href="../en/Firefox.html" title="Firefox">Firefox</a>) to create an admin account:
+</p>
+<pre> $ firefox localhost:8080
+</pre>
+<p>After logging in, populate the search database by clicking <i>Update Music Library</i> in the <i>Admin</i> panel.
+</p>
+<p>If you want CherryMusic to run as a system service and to automatically start on boot, see <a href="#Systemd_service_file">systemd service file</a>.
+</p>
+<p>There are many more options to configure, please see <a href="#Fine_tuning">this section</a>.
+</p>
+<h3><span class="mw-headline" id="Fine_tuning">Fine tuning</span></h3>
+<p>CherryMusic comes with well-documented manpages. see
+</p>
+<pre> $ man cherrymusic
+</pre>
+<p>or
+</p>
+<pre> $ man cherrymusic.conf
+</pre>
+<h2><span class="mw-headline" id="Tips_.26_Tricks">Tips &amp; Tricks</span></h2>
+<h3><span class="mw-headline" id="Symlinks_in_.22basedir.22">Symlinks in "basedir"</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This is only useful if your music is in different locations, e.g. on an internal hard drive <b>and</b> an external hard dirve.</div>
+<p>Probably, the most modular and flexible way of populating CherryMusic's music directory (called "basedir") is to create a dedicated directory and only symlink all paths to your music collections into that directory, e.g.:
+</p>
+<pre> $ mkdir ~/.local/share/cherrymusic/basedir
+ $ ln -s /path/to/musicdir1 ~/.local/share/cherrymusic/basedir/musicdir1
+ $ ln -s /path/to/musicdir2 ~/.local/share/cherrymusic/basedir/musicdir2
+</pre>
+<h3><span class="mw-headline" id="Systemd_service_file">Systemd service file</span></h3>
+<p>CherryMusic does not come with a daemon yet, but <a href="#Installation">both CherryMusic AUR packages</a> provide a systemd service file. It can be <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">started</a> as <code>cherrymusic@<i>user</i>.service</code>, where <code><i>user</i></code> is the user that should run CherryMusic (do not use root!).
+</p>
+<h3><span class="mw-headline" id="Running_in_a_GNU_Screen_session">Running in a GNU Screen session</span></h3>
+<p>To keep CherryMusic running after logout, it can be run in a <a href="../en/GNU_Screen.html" title="GNU Screen">GNU Screen</a> session.
+</p>
+<pre>$ screen -d -m -S cherrymusic cherrymusic
+</pre>
+<p>Since CherryMusic only writes the output to the GNU Screen session, there is nothing to control from within the session. It may be more convenient to use a <a href="#Systemd_service_file">systemd service file</a>. However, this may still be useful for debugging.
+</p>
+<p>To run it in a GNU Screen session after boot, the following <a href="../en/Systemd.html" title="Systemd">systemd</a> service file can also be created and used:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/cherrymusic@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description = CherryMusic server
+Requires = network.target
+After = network.target
+
+[Service]
+User = %I
+Type = simple
+ExecStart = /usr/bin/screen -d -m -S cherrymusic /usr/bin/cherrymusic
+ExecStop = /usr/bin/screen -X -S cherrymusic quit
+StandardOutput = null
+PrivateTmp = true
+Restart = always
+
+[Install]
+WantedBy = multi-user.target
+</pre>
+<p>To finally enable and start the service, see <a href="#Systemd_service_file">systemd service file</a>.
+</p>
+<h3><span class="mw-headline" id="Manually_adjust_the_search_parameters_of_the_search_algorithm">Manually adjust the search parameters of the search algorithm</span></h3>
+<p>The search parameters of the search algorithm can be adjusted manually via the file <code>cherrymusicserver/tweak.py</code> within your CherryMusic installation.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Changing this file can potentially break CherryMusic's search function. Only proceed if you know what you are doing. It might also be a good idea to backup the file before editing.</div>
+<h3><span class="mw-headline" id="Bind_CherryMusic_to_ports_less_than_1024_.28without_root_access.29">Bind CherryMusic to ports less than 1024 (without root access)</span></h3>
+<p>To bind CherryMusic (or any other application) to a port less than 1024 you normally need root access. However, you should <b>never run CherryMusic as root!</b> There are several ways around this:
+</p>
+<ul>
+<li>Use a firewall (<a href="../en/Iptables.html" title="Iptables">iptables</a> or similar) for a port redirect</li>
+<li>Use <a href="https://en.wikipedia.org/wiki/Authbind" class="extiw" title="wikipedia:Authbind">authbind</a>
+</li>
+<li>Use <a href="../en/Capabilities.html" title="Capabilities">Capabilities</a> (more exactly <a href="../en/Capabilities.html#Other_programs_that_benefit_from_capabilities" title="Capabilities">setcap</a>)</li>
+</ul>
+<p>For more information, see these references:
+</p>
+<p><a rel="nofollow" class="external free" href="https://serverfault.com/questions/268099/bind-to-ports-less-than-1024-without-root-access">https://serverfault.com/questions/268099/bind-to-ports-less-than-1024-without-root-access</a> <br>
+<a rel="nofollow" class="external free" href="https://www.debian-administration.org/article/386/Running_network_services_as_a_non-root_user">https://www.debian-administration.org/article/386/Running_network_services_as_a_non-root_user</a> <br>
+<a rel="nofollow" class="external free" href="https://stackoverflow.com/questions/413807/is-there-a-way-for-non-root-processes-to-bind-to-privileged-ports-1024-on-l">https://stackoverflow.com/questions/413807/is-there-a-way-for-non-root-processes-to-bind-to-privileged-ports-1024-on-l</a>
+</p>
+<h2><span class="mw-headline" id="3rd_Party_Extensions">3rd Party Extensions</span></h2>
+<ul><li> CherryMusic Control - A Playback control plugin for Firefox: <br> <a rel="nofollow" class="external free" href="https://addons.mozilla.org/en-US/firefox/addon/cherrymusic-control">https://addons.mozilla.org/en-US/firefox/addon/cherrymusic-control</a> <br> Which is also developed on github: <a rel="nofollow" class="external free" href="https://github.com/Sets88/cherrymusicctrl">https://github.com/Sets88/cherrymusicctrl</a>
+</li></ul>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Missing_module_.60wsgiserver2.60_when_using_pip_for_installation">Missing module `wsgiserver2` when using pip for installation</span></h3>
+<p>If the error
+</p>
+<pre>   ImportError: No module named wsgiserver2
+</pre>
+<p>occurs when starting CherryMusic, probably a broken CherryPy package from pip (versions `3.2.6` and `3.4.0` seem to be affected) is used. Here is a <a rel="nofollow" class="external text" href="http://alessiofanelli.com/cherrypy-pip-package-not-working-properly-frustration/">description of the problem</a>. To fix this, uninstall CherryPy and reinstall:
+</p>
+<pre>   $ pip uninstall cherrypy
+   $ pip install --no-use-wheel cherrypy
+</pre>
+<h3><span class="mw-headline" id="Deactivate_flash_blocker">Deactivate flash blocker</span></h3>
+<p>An active flash blocker can interfere with the web frontend. If you have trouble with things like track selection or playback, try whitelisting the server in your browser's flash blocker/plugin manager.
+</p>
+<h3><span class="mw-headline" id="CherryMusic_does_not_load_on_Android_Chrome">CherryMusic does not load on Android Chrome</span></h3>
+<p>This might be due to AdBlock Plus being installed in the browser. CM does not feature any ads, so the problem is caused by this plug-in.
+</p>
+<h3><span class="mw-headline" id="Track_scrolling_not_working_behind_Nginx">Track scrolling not working behind Nginx</span></h3>
+<p>If track scrolling is not working in major desktop browsers behind Nginx and playback stops in the middle of the track and start over from the beginning, the Nginx module <code>ngx_http_proxy_module</code> <a rel="nofollow" class="external text" href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_http_version">has to be configured</a>.
+</p>
+<p>Change the line <code>proxy_http_version 1.0;</code> to:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">ngx_http_proxy_module</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[...]
+proxy_http_version 1.1;
+[...]
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://github.com/devsnd/cherrymusic/wiki/Setup-guide">https://github.com/devsnd/cherrymusic/wiki/Setup-guide</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://fomori.org/blog/?p=687">http://fomori.org/blog/?p=687</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.fomori.org/cherrymusic/">CherryMusic website</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/devsnd/cherrymusic">CherryMusic on GitHub</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Streaming.html" title="Category:Streaming">Streaming</a></li>
+<li><a href="../en/Category:Multimedia_players.html" title="Category:Multimedia players">Multimedia players</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

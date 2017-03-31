@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Snapper - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Snapper skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Snapper</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Btrfs.html" title="Btrfs">Btrfs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mkinitcpio.html" title="Mkinitcpio-btrfs" class="mw-redirect">mkinitcpio-btrfs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Btrfs.html#Tips_and_tricks" title="Btrfs - Tips and tricks" class="mw-redirect">Btrfs - Tips and tricks</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://snapper.io">Snapper</a> is a tool created by openSUSE's Arvin Schnell that helps with managing snapshots of <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> subvolumes and thin-provisioned <a href="../en/LVM.html" title="LVM">LVM</a> volumes. It can create and compare snapshots, revert between snapshots, and supports automatic snapshots timelines.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Create_a_new_configuration"><span class="tocnumber">2</span> <span class="toctext">Create a new configuration</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Take_snapshots"><span class="tocnumber">3</span> <span class="toctext">Take snapshots</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#Automatic_timeline_snapshots"><span class="tocnumber">3.1</span> <span class="toctext">Automatic timeline snapshots</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Enable.2Fdisable"><span class="tocnumber">3.1.1</span> <span class="toctext">Enable/disable</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Set_snapshot_limits"><span class="tocnumber">3.1.2</span> <span class="toctext">Set snapshot limits</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Change_snapshot_and_cleanup_frequencies"><span class="tocnumber">3.1.3</span> <span class="toctext">Change snapshot and cleanup frequencies</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Manual_snapshots"><span class="tocnumber">3.2</span> <span class="toctext">Manual snapshots</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Simple_snapshots"><span class="tocnumber">3.2.1</span> <span class="toctext">Simple snapshots</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Pre.2Fpost_snapshots"><span class="tocnumber">3.2.2</span> <span class="toctext">Pre/post snapshots</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#List_snapshots"><span class="tocnumber">4</span> <span class="toctext">List snapshots</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#List_configurations"><span class="tocnumber">5</span> <span class="toctext">List configurations</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Delete_a_snapshot"><span class="tocnumber">6</span> <span class="toctext">Delete a snapshot</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#Access_for_non-root_users"><span class="tocnumber">7</span> <span class="toctext">Access for non-root users</span></a></li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Tips_and_tricks"><span class="tocnumber">8</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#Snapshots_on_boot"><span class="tocnumber">8.1</span> <span class="toctext">Snapshots on boot</span></a></li>
+<li class="toclevel-2 tocsection-17">
+<a href="#Wrapping_pacman_transactions_in_snapshots"><span class="tocnumber">8.2</span> <span class="toctext">Wrapping pacman transactions in snapshots</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#Backup_non-btrfs_boot_partition_on_pacman_transactions"><span class="tocnumber">8.2.1</span> <span class="toctext">Backup non-btrfs boot partition on pacman transactions</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Incremental_backup_to_external_drive"><span class="tocnumber">8.3</span> <span class="toctext">Incremental backup to external drive</span></a></li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Suggested_filesystem_layout"><span class="tocnumber">8.4</span> <span class="toctext">Suggested filesystem layout</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#Configuration_of_snapper_and_mount_point"><span class="tocnumber">8.4.1</span> <span class="toctext">Configuration of snapper and mount point</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Restoring_.2F_to_a_previous_snapshot_of_.40"><span class="tocnumber">8.4.2</span> <span class="toctext">Restoring / to a previous snapshot of @</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-23"><a href="#Deleting_files_from_snapshots"><span class="tocnumber">8.5</span> <span class="toctext">Deleting files from snapshots</span></a></li>
+<li class="toclevel-2 tocsection-24">
+<a href="#Preventing_slowdowns"><span class="tocnumber">8.6</span> <span class="toctext">Preventing slowdowns</span></a>
+<ul>
+<li class="toclevel-3 tocsection-25"><a href="#updatedb"><span class="tocnumber">8.6.1</span> <span class="toctext">updatedb</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-26"><a href="#Preserving_log_files"><span class="tocnumber">8.7</span> <span class="toctext">Preserving log files</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-27">
+<a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-28"><a href="#Snapper_logs"><span class="tocnumber">9.1</span> <span class="toctext">Snapper logs</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#IO_error"><span class="tocnumber">9.2</span> <span class="toctext">IO error</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-30"><a href="#See_also"><span class="tocnumber">10</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=snapper">snapper</a></span> package. The development version <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snapper-git/">snapper-git</a></span><sup><small>AUR</small></sup> is also available.
+</p>
+<p>Additionally, a GUI is available with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snapper-gui-git/">snapper-gui-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Create_a_new_configuration">Create a new configuration</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Add instructions for using thin-provisioned <a href="../en/LVM.html" title="LVM">LVM</a> snapshots. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Snapper#LVM_thin-provisioned_snapshots">Talk:Snapper#LVM thin-provisioned snapshots</a>)</div>
+</div>
+<p>Before creating a snapper configuration for a btrfs subvolume, the subvolume must already exist. If it does not, you should <a href="../en/Btrfs.html#Creating_a_subvolume" title="Btrfs">create</a> it before generating a snapper configuration.
+</p>
+<p>To create a new snapper configuration named <code><i>config</i></code> for the btrfs subvolume at <code><i>/path/to/subvolume</i></code> do:
+</p>
+<pre># snapper -c <i>config</i> create-config <i>/path/to/subvolume</i>
+</pre>
+<p>This will:
+</p>
+<ul>
+<li>create a configuration file at <code>/etc/snapper/configs/<i>config</i></code> based on the default template from <code>/etc/snapper/config-templates</code>.</li>
+<li>create a subvolume at <code><i>/path/to/subvolume</i>/.snapshots</code> where future snapshots of for this configuration will be stored. A snapshot's path is <code><i>/path/to/subvolume</i>/.snapshots/<i>#</i>/snapshot</code>, where <code><i>#</i></code> is the snapshot number.</li>
+<li>add <code><i>config</i></code> to <code>SNAPPER_CONFIGS</code> in <code>/etc/conf.d/snapper</code>.</li>
+</ul>
+<p>For example, to create a configuration file for the subvolume mounted at <code>/</code> do:
+</p>
+<pre># snapper -c root create-config /
+</pre>
+<p>At this point, the configuration is active. If your <a href="../en/Cron.html" title="Cron">cron</a> daemon is running, snapper will take <a href="#Automatic_timeline_snapshots">#Automatic timeline snapshots</a>. If you do not use a <a href="../en/Cron.html" title="Cron">cron</a> daemon, you will need to use the systemd service and timer. See <a href="#Enable.2Fdisable">#Enable/disable</a>.
+</p>
+<p>See <a href="../en/Man_page.html" title="Man page">man page</a> for <code>snapper-configs</code>.
+</p>
+<h2><span class="mw-headline" id="Take_snapshots">Take snapshots</span></h2>
+<h3><span class="mw-headline" id="Automatic_timeline_snapshots">Automatic timeline snapshots</span></h3>
+<p>A snapshot timeline can be created with a configurable number of snapshots kept per hour/day/month/year. When the timeline is enabled, by default a snapshot gets created once an hour. Once a day the snapshots get cleaned up by the timeline cleanup algorithm.
+</p>
+<h4><span class="mw-headline" id="Enable.2Fdisable">Enable/disable</span></h4>
+<p>If you have a <a href="../en/Cron.html" title="Cron">cron</a> daemon, this feature should start automatically. To disable it, edit the configuration file corresponding with the subvolume you do not want to have this feature and set:
+</p>
+<pre>TIMELINE_CREATE="no"</pre>
+<p>If you do not have a <a href="../en/Cron.html" title="Cron">cron</a> daemon, you can use the provided systemd units. <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>snapper-timeline.timer</code> to start the automatic snapshot timeline. Additionally, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>snapper-cleanup.timer</code> to periodically cleanup older snapshots.
+</p>
+<h4><span class="mw-headline" id="Set_snapshot_limits">Set snapshot limits</span></h4>
+<p>The default settings will keep 10 hourly, 10 daily, 10 monthly and 10 yearly snapshots. You may want to change this in the configuration, especially on busy subvolumes like <code>/</code>. See <a href="#Preventing_slowdowns">#Preventing slowdowns</a>.
+</p>
+<p>Here is an example section of a configuration named <code><i>config</i></code> with only 5 hourly snapshots, 7 daily ones, no monthly and no yearly ones:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/snapper/configs/<i>config</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">TIMELINE_MIN_AGE="1800"
+TIMELINE_LIMIT_HOURLY="5"
+TIMELINE_LIMIT_DAILY="7"
+TIMELINE_LIMIT_WEEKLY="0"
+TIMELINE_LIMIT_MONTHLY="0"
+TIMELINE_LIMIT_YEARLY="0"</pre>
+<h4><span class="mw-headline" id="Change_snapshot_and_cleanup_frequencies">Change snapshot and cleanup frequencies</span></h4>
+<p>If you are using the provided systemd timers, you can <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">edit</a> them to change the snapshot and cleanup frequency.
+</p>
+<p>For example, when editing the <code>snapper-timeline.timer</code>, add the following to make the frequency every five minutes, instead of hourly:
+</p>
+<pre>[Timer]
+OnCalendar=*:0/5
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The configuration parameter <code>TIMELINE_LIMIT_HOURLY</code> is tied to the above setting. In the above example it now refers to how many 5-minute snapshots are kept.</div>
+<p>When editing <code>snapper-cleanup.timer</code>, you need to change <code>OnUnitActiveSec</code>. To make cleanups occur every hour instead of every day, add:
+</p>
+<pre>[Timer]
+OnUnitActiveSec=1h
+</pre>
+<p>See <a href="../en/Systemd/Timers.html" title="Systemd/Timers">Systemd/Timers</a> and <a href="../en/Systemd.html#Drop-in_snippets" title="Systemd">Systemd#Drop-in snippets</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<h3><span class="mw-headline" id="Manual_snapshots">Manual snapshots</span></h3>
+<h4><span class="mw-headline" id="Simple_snapshots">Simple snapshots</span></h4>
+<p>By default snapper takes snapshots that are of the <i>simple</i> type, having no special relationship to other snapshots.
+</p>
+<p>To take a snapshot of a subvolume manually, do:
+</p>
+<pre> # snapper -c <i>config</i> create --description <i>desc</i>
+</pre>
+<p>The above command does not use any cleanup algorithm, so the snapshot is stored permanently or until <a href="#Delete_a_snapshot">deleted</a>.
+</p>
+<p>To set a cleanup algorithm, use the <code>-c</code> flag after <code>create</code> and choose either <code>number</code>, <code>timeline</code>, <code>pre</code>, or <code>post</code>. <code>number</code> sets snapper to periodically remove snapshots that have exceeded a set number in the configuration file. For example, to create a snaphot that uses the <code>number</code> algorithm for cleanup do:
+</p>
+<pre> # snapper -c <i>config</i> create -c number
+</pre>
+<p>See <a href="#Automatic_timeline_snapshots">#Automatic timeline snapshots</a> for how <code>timeline</code> snapshots work and see <a href="#Pre.2Fpost_snapshots">#Pre/post snapshots</a> on how <code>pre</code> and <code>post</code> work.
+</p>
+<h4><span class="mw-headline" id="Pre.2Fpost_snapshots">Pre/post snapshots</span></h4>
+<p>In addition to <i>simple</i> snapshots, you can also create <i>pre/post</i> snapshots where <i>pre</i> snapshots always have a corresponding <i>post</i> snapshot. The purpose of these pairs is to create a snapshot before and after a system modification.
+</p>
+<p>To create a pre/post snapshot pair, first create a <i>pre</i> snapshot:
+</p>
+<pre> # snapper -c <i>config</i> create -t pre -p
+</pre>
+<p>Note the number of the snapshot printed, as it is required for the post snapshot.
+</p>
+<p>Then perform a system modification (*e.g.*, install a new program, upgrade, etc.).
+</p>
+<p>Now create the <i>post</i> snapshot:
+</p>
+<pre> # snapper -c <i>config</i> create -t post --pre-number <i>#</i>
+</pre>
+<p>where <code><i>#</i></code> is the corresponding <i>pre</i> snapshot number.
+</p>
+<p>An alternative method is to use the <code>--command</code> flag for <code>create</code>, which wraps a command with pre/post snapshots:
+</p>
+<pre> # snapper -c <i>config</i> create --command <i>cmd</i>
+</pre>
+<p>where <code><i>cmd</i></code> is the command you wish to wrap with pre/post snapshots.
+</p>
+<p>See <a href="#Wrapping_pacman_transactions_in_snapshots">#Wrapping pacman transactions in snapshots</a>.
+</p>
+<h2><span class="mw-headline" id="List_snapshots">List snapshots</span></h2>
+<p>To list snapshots taken for a given configuration <i>config</i> do:
+</p>
+<pre> # snapper -c <i>config</i> list
+</pre>
+<h2><span class="mw-headline" id="List_configurations">List configurations</span></h2>
+<p>To list all <a href="#Create_a_new_configuration">configurations</a> you have created do:
+</p>
+<pre> # snapper list-configs
+</pre>
+<h2><span class="mw-headline" id="Delete_a_snapshot">Delete a snapshot</span></h2>
+<p>To delete a snapshot number <code><i>#</i></code> do:
+</p>
+<pre> # snapper -c <i>config</i> delete <i>#</i>
+</pre>
+<p>Multiple snapshots can be deleted at one time. For example, to delete snapshots 65 and 70 of the root configuration do:
+</p>
+<pre> # snapper -c root delete 65 70
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When deleting a pre snapshot, you should always delete its corresponding post snapshot and vice versa.</div>
+<h2><span class="mw-headline" id="Access_for_non-root_users">Access for non-root users</span></h2>
+<p>Each config is created with the root user, and by default, only root can see and access it.
+</p>
+<p>To be able to list the snapshots for a given config for a specific user, simply change the value of <code>ALLOW_USERS</code> in your <code>/etc/snapper/configs/<i>config</i></code> file. You should now be able to run <code>snapper -c <i>config</i>list</code> as a normal user.
+</p>
+<p>Eventually, you want to be able to browse the <code>.snapshots</code> directory with a user, but the owner of this directory must stay root. Therefore, you should change the group owner by a group containing the user you are interested in, such as <code>users</code> for example:
+</p>
+<pre># chmod a+rx .snapshots
+# chown :users .snapshots
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Snapshots_on_boot">Snapshots on boot</span></h3>
+<p>One can setup a <a href="../en/Systemd.html" title="Systemd">systemd</a> unit and timer to have snapper create snapshots on boot:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/snapper-boot.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Take snapper snapshot of root on boot
+
+[Timer]
+OnBootSec=1
+
+[Install]
+WantedBy=basic.target</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/snapper-boot.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Take snapper snapshot of root on boot
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/snapper --config root create --cleanup-algorithm number --description "boot"</pre>
+<h3><span class="mw-headline" id="Wrapping_pacman_transactions_in_snapshots">Wrapping pacman transactions in snapshots</span></h3>
+<p>There are a couple of packages used for automatically creating snapshots upon a pacman transaction:
+</p>
+<ul><li> <b>snap-pac</b> — "Makes pacman automatically use snapper to create <a href="#Pre.2Fpost_snapshots">#Pre/post snapshots</a> like openSUSE's YaST". Uses <a href="../en/Pacman.html#Hooks" title="Pacman">Pacman#Hooks</a>.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/wesbarnett/snap-pac">https://github.com/wesbarnett/snap-pac</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snap-pac/">snap-pac</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>pacupg</b> — "Script that wraps package and AUR upgrades in btrfs snapshots and provides an easy way to roll them back."</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/crossroads1112/bin/tree/master/pacupg">https://github.com/crossroads1112/bin/tree/master/pacupg</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pacupg/">pacupg</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h4><span class="mw-headline" id="Backup_non-btrfs_boot_partition_on_pacman_transactions">Backup non-btrfs boot partition on pacman transactions</span></h4>
+<p>If your <code>/boot</code> partition is on a non btrfs filesystem (e.g. an <a href="../en/EFI_System_Partition.html" title="ESP" class="mw-redirect">ESP</a>) you are not able to do snapper backups with it. You can copy the boot partition automatically on a kernel update to your btrfs root with a hook. This also plays nice together with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snap-pac/">snap-pac</a></span><sup><small>AUR</small></sup>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/share/libalpm/hooks/50_bootbackup.hook</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Trigger]
+Operation = Upgrade
+Operation = Install
+Operation = Remove
+Type = Package
+Target = linux
+
+[Action]
+Description = Backing up /boot...
+When = PreTransaction
+Exec = /usr/bin/rsync -avzq --delete /boot /.bootbackup</pre>
+<h3><span class="mw-headline" id="Incremental_backup_to_external_drive">Incremental backup to external drive</span></h3>
+<p>The following packages use <code>btrfs send</code> and <code>btrfs receive</code> to send backups incrementally to an external drive. Refer to their documenation to see differences in implementation, features, and requirements.
+</p>
+<ul><li> <b>snap-sync</b> — "Use snapper snapshots to backup to external drive."</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/wesbarnett/snap-sync.git">https://github.com/wesbarnett/snap-sync.git</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snap-sync/">snap-sync</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>buttersink</b> — "Buttersink is like rsync for btrfs snapshots."</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/AmesCornish/buttersink.git">https://github.com/AmesCornish/buttersink.git</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/buttersink-git/">buttersink-git</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h3><span class="mw-headline" id="Suggested_filesystem_layout">Suggested filesystem layout</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The following layout is intended <i>not</i> to be used with <code>snapper rollback</code>, but is intended to mitigate inherit problems with restoring <code>/</code> with that command. See <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=194491">this forum thread</a>.</div>
+<p>Here is a suggested file system layout for easily restoring your <code>/</code> to a previous snapshot:
+</p>
+<pre>subvolid=5
+   |
+   ├── @
+   |       |
+   |       ├── /usr
+   |       |
+   |       ├── /bin
+   |       |
+   |       ├── /.snapshots
+   |       |
+   |       ├── ...
+   |
+   ├── @snapshots
+   |
+   └── @...
+</pre>
+<p>Where <code>/.snapshots</code> is a mountpoint for <code>@snapshots</code>. <code>@...</code> are subvolumes that you want to keep separate from the subvolume you will be mounting as <code>/</code> (<code>@</code>). When taking a snapshot of <code>/</code>, these other subvolumes are not included. However, you can still snapshot these other subvolumes separately by creating other snapper configurations for them. Additionally, if you were to restore your system to a previous snapshots of <code>/</code>, these other subvolumes will remain unaffected.
+</p>
+<p>For example if you want to be able restore <code>/</code> to a previous snapshot but keep your <code>/home</code> intact, you should create a subvolume that will be mounted at <code>/home</code>. See <a href="../en/Btrfs.html#Mounting_subvolumes" title="Btrfs">Btrfs#Mounting subvolumes</a>.
+</p>
+<p>This layout allows the snapper utility to take regular snapshots of <code>/</code>, while at the same time making it easy to restore <code>/</code> from an Arch Live CD if it becomes unbootable.
+</p>
+<p>In this sceneario, after the initial setup, snapper needs no changes, and will work as expected.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Even if a subvolume is nested below <code>@</code>, a snapshot of <code>/</code> will <i>not</i> include it. Be sure to set up snapper for any additional subvolumes you want to keep snapshots of besides the one mounted at <code>/</code>.</div>
+<h4><span class="mw-headline" id="Configuration_of_snapper_and_mount_point">Configuration of snapper and mount point</span></h4>
+<p>Make sure <code>/.snapshots</code> is <i>not</i> mounted and does <i>not</i> exist as folder.
+</p>
+<pre> # umount /.snapshots
+ # rm -r /.snapshots
+</pre>
+<p>Then <a href="#Create_a_new_configuration">#Create a new configuration</a> for <code>/</code>.
+</p>
+<p>Now <a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">mount</a> <code>@snapshots</code> to <code>/.snapshots</code>.
+For example, for a file system located on <code>/dev/sda1</code>:
+</p>
+<pre> # mount -o subvol=@snapshots /dev/sda1 /.snapshots
+</pre>
+<p>To make this mount permanent, add an entry to your <a href="../en/Fstab.html" title="Fstab">fstab</a>.
+</p>
+<p>Or if you have an existing fstab entry remount the snapshot subvolume:
+</p>
+<pre> # mount -a
+</pre>
+<p>Give the folder <code>750</code> <a href="../en/File_permissions_and_attributes.html#Numeric_method" title="Permissions" class="mw-redirect">permissions</a>.
+</p>
+<p>This will make all snapshots that snapper creates be stored outside of the <code>@</code> subvolume, so that <code>@</code> can easily be replaced anytime without losing the snapper snapshots.
+</p>
+<h4><span class="mw-headline" id="Restoring_.2F_to_a_previous_snapshot_of_.40">Restoring <code>/</code> to a previous snapshot of <code>@</code></span></h4>
+<p>If you ever want to restore <code>/</code> using one of snapper's snapshots, first boot into a live Arch Linux USB/CD.
+</p>
+<p><a href="../en/File_systems.html#Mount_a_file_system" title="Mount" class="mw-redirect">Mount</a> the toplevel subvolume (subvolid=5). That is, omit any <code>subvolid</code> mount flags.
+</p>
+<p>Find the snapshot you want to recover in <code>/mnt/@snapshots/*/info.xml</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> You can use <code>vi</code> to easily browse through each file:
+<pre> # vi /mnt/@snapshots/*/info.xml
+</pre>
+Use <code>:n</code> to see the next file and <code>:rew</code> to go back to the first file.</div>
+<p>Browse through the <code>&lt;description&gt;</code> tags and the <code>&lt;date&gt;</code> tags, and when you find the snapshot you wish to restore, remember the <code>&lt;num&gt;</code> number.
+</p>
+<p>Now, move <code>@</code> to another location (<i>e.g.</i> <code>/@.broken</code>) to save a copy of the current system. Alternatively, simply delete <code>@</code> using <code>btrfs subvolume delete</code>.
+</p>
+<p>Create a read-write snapshot of the read-only snapshot snapper took:
+</p>
+<pre> # btrfs subvol snapshot /mnt/@snapshots/<i>#</i>/snapshot /mnt/@
+</pre>
+<p>Where <code><i>#</i></code> is the number of the snapper snapshot you wish to restore. Your <code>/</code> has now been restore to the previous snapshot. Now just simply reboot.
+</p>
+<h3><span class="mw-headline" id="Deleting_files_from_snapshots">Deleting files from snapshots</span></h3>
+<p>If you want to delete a specific file or folder from past snapshots without deleting the snapshots themselves, <a rel="nofollow" class="external text" href="https://pypi.python.org/pypi/snapperS">snapperS</a> is a script that adds this functionality to Snapper. This script can also be used to manipulate past snapshots in a number of other ways that Snapper does not currently support.
+</p>
+<h3><span class="mw-headline" id="Preventing_slowdowns">Preventing slowdowns</span></h3>
+<p>Keeping many of snapshots for a large timeframe on a busy filesystem like <code>/</code>, where many system updates happen over time) can cause serious slowdowns. You can prevent it by:
+</p>
+<ul>
+<li> <a href="../en/Btrfs.html#Creating_a_subvolume" title="Btrfs">Creating</a> subvolumes for things that are not worth being snapshotted, like <code>/var/cache/pacman/pkg</code>, <code>/var/abs</code>, <code>/var/tmp</code>, and <code>/srv</code>.</li>
+<li> Editing the default settings for hourly/daily/monthly/yearly snapshots when using <a href="#Automatic_timeline_snapshots">#Automatic timeline snapshots</a>.</li>
+</ul>
+<h4><span class="mw-headline" id="updatedb">updatedb</span></h4>
+<p>By default, <code>updatedb</code> will also index the <code>.snapshots</code> directory created by snapper, which can cause serious slowdown and excessive memory usage if you have many snapshots. You can prevent <code>updatedb</code> from indexing over it by editing:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/updatedb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PRUNENAMES = ".snapshots"</pre>
+<h3><span class="mw-headline" id="Preserving_log_files">Preserving log files</span></h3>
+<p>It's recommended to create a subvolume of <code>/var/log</code> so that snapshots of <code>/</code> exclude it. That way if a snapshot of <code>/</code> is restored your log files will not also be reverted to the previous state. This make it easier to troubleshoot.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Snapper_logs">Snapper logs</span></h3>
+<p>Snapper writes all activity to <code>/var/log/snapper.log</code> - check this file first if you think something goes wrong.
+</p>
+<p>If you have issues with hourly/daily/weekly snapshots, the most common cause for this so far has been that the cronie service (or whatever cron daemon you are using) was not running.
+</p>
+<h3><span class="mw-headline" id="IO_error">IO error</span></h3>
+<p>If you get an 'IO Error' when trying to create a snapshot please make sure that the <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=164404">.snapshots</a> directory associated to the subvolume you are trying to snapshot is a subvolume by itself.
+</p>
+<p>Another possible cause is that .snapshots directory does not have root as an owner (You will find <code>Btrfs.cc(openInfosDir):219 - .snapshots must have owner root</code> in the <code>/var/log/snapper.log</code>).
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://snapper.io/">Snapper homepage</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://en.opensuse.org/Portal:Snapper">openSUSE Snapper portal</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://btrfs.wiki.kernel.org/index.php/Main_Page">Btrfs homepage</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.linux.com/news/enterprise/systems-management/878490-snapper-suses-ultimate-btrfs-snapshot-manager/">Linux.com: Snapper: SUSE's Ultimate Btrfs Snapshot Manager</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

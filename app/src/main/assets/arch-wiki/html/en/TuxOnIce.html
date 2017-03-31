@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>TuxOnIce - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-TuxOnIce skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">TuxOnIce</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Hibernate-script.html" title="Hibernate-script">hibernate-script</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pm-utils.html" title="Pm-utils">Pm-utils</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Uswsusp.html" title="Uswsusp">Uswsusp</a></li>
+</ul>
+</div>
+<p>This is a quick start guide for installing <a rel="nofollow" class="external text" href="http://tuxonice.nigelcunningham.com.au/">TuxOnIce</a> (formerly suspend2), an advanced suspend/hibernate framework which supports suspending to a swap-disk or a regular file with fast LZO-compression. Visit the TuxOnIce website for a full list of <a rel="nofollow" class="external text" href="http://tuxonice.nigelcunningham.com.au/features">features</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Preparing_the_kernel"><span class="tocnumber">1</span> <span class="toctext">Preparing the kernel</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Recreating_the_initramfs"><span class="tocnumber">2</span> <span class="toctext">Recreating the initramfs</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Setting_up_the_bootloader"><span class="tocnumber">3</span> <span class="toctext">Setting up the bootloader</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Suspend_to_swap_partition"><span class="tocnumber">3.1</span> <span class="toctext">Suspend to swap partition</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Suspend_to_swap_file"><span class="tocnumber">3.2</span> <span class="toctext">Suspend to swap file</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Suspend_to_file"><span class="tocnumber">3.3</span> <span class="toctext">Suspend to file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Suspending_and_resuming"><span class="tocnumber">4</span> <span class="toctext">Suspending and resuming</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Additional_pm-utils_setup"><span class="tocnumber">5</span> <span class="toctext">Additional pm-utils setup</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#userui_-_user_interface_for_TuxOnIce_.28optional.29"><span class="tocnumber">6</span> <span class="toctext">userui - user interface for TuxOnIce (optional)</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#References"><span class="tocnumber">7</span> <span class="toctext">References</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Preparing_the_kernel">Preparing the kernel</span></h2>
+<p>TuxOnIce consists of a kernel patch, plus an optional user interface. Only the kernel patch is necessary, the user interface merely provides a graphical interface displayed during the hibernation/resume cycle. 
+</p>
+<p>You can use the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ice/">linux-ice</a></span><sup><small>AUR</small></sup> package available in the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>. It automates all the patch routines, the compilation and installation of the kernel, and the regeneration of the initramfs with an appropriate hook. You maintain control over the install process, and its easy to make changes if you want to repeat the process.
+</p>
+<p>Otherwise, you need to patch, configure and compile your own kernel, visit <a href="../en/Kernels.html#Compilation" title="Kernel Compilation From Source" class="mw-redirect">Kernel Compilation From Source</a> and <a href="../en/Kernels/Arch_Build_System.html" title="Kernel Compilation with ABS" class="mw-redirect">Kernel Compilation with ABS</a> for instructions. The required patch can be obtained from the TuxOnIce website mentioned above.
+</p>
+<p>Next, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/hibernate-script/">hibernate-script</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> which we will use to call TuxOnIce. Hibernate-script is the default script developed by the TuxOnIce development team.
+</p>
+<p>The configuration files for hibernate-script are in <code>/etc/hibernate</code>, we will get back to them shortly.
+</p>
+<h2><span class="mw-headline" id="Recreating_the_initramfs">Recreating the initramfs</span></h2>
+<p>If you use an initramfs (default Arch systems do), you must add the resume hook in the HOOKS in the configuration of <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>. Additionally, if you want to speed things up by using LZO compression, add the lzo module to the MODULES array in the same file.
+</p>
+<p><code>/etc/mkinitcpio.conf</code> example:
+</p>
+<pre>MODULES="lzo"
+HOOKS="base udev autodetect block resume filesystems"
+</pre>
+<p>If you built a custom kernel with tuxonice_compress and tuxonice_swap as modules, add them to MODULES. This is not needed for linux-ice as they are built-in. If you want to use the tuxonice interface, add tuxonice_userui in MODULES as well.
+</p>
+<p>Rebuild the initramfs:
+</p>
+<pre># mkinitcpio -p linux-ice
+</pre>
+<h2><span class="mw-headline" id="Setting_up_the_bootloader">Setting up the bootloader</span></h2>
+<p>Before your can use the suspend function, you need to add the <code>resume</code> parameter in your bootloader (unless you have hard-coded your swap partition during the kernel configuration). The resume parameter points to the swap partition or swap file, below are the steps involved for both methods.
+</p>
+<h3><span class="mw-headline" id="Suspend_to_swap_partition">Suspend to swap partition</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As of the latest version of TuxOnIce (3.0.99.44), adding the kernel resume parameter is no longer necessary, it will auto-detect if your swap drive contains a bootable image. You only need to set the swap method appropriately. For more details, check out <a rel="nofollow" class="external autonumber" href="http://www.tuxonice.net/">[1]</a>.</div>
+<p>Set the swap method (make sure the right partition is indicated) in <code>/etc/hibernate/tuxonice.conf</code>:
+</p>
+<pre>SuspendDevice swap:/dev/sda3
+</pre>
+<h3><span class="mw-headline" id="Suspend_to_swap_file">Suspend to swap file</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Auto-detection as mentioned previously does not seem to work with swap files, you will still need to manually set the kernel resume parameter.</div>
+<p>If you use a <a href="../en/Swap.html#Swap_file" title="Swap file" class="mw-redirect">swap file</a> instead of a swap partition, you will need to pass the location of its header to TuxOnIce. TuxOnIce can list all available swap headers.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have just created, or intend to create, a swap file for this purpose, you will need to reboot once for tuxonice to be aware of it.</div>
+<pre>cat /sys/power/tuxonice/swap/headerlocations
+</pre>
+<p>Use the given string as-is in both <code>/etc/hibernate/tuxonice.conf</code> and passed to your kernel as a resume parameter. 
+</p>
+<pre>SuspendDevice swap:/dev/sda7:0x1087070
+</pre>
+<p>Append the following to your kernel parameters in your bootloader's configuration file:
+</p>
+<pre>resume=swap:/dev/sda7:0x1087070
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Specifying the resume device by UUID is supposed to work, but I was not able to get it to work. This may be a TuxOnIce or a mkinitcpio issue, YMMV. Specifying <code>/dev/sd<b>xx</b></code> should work in all cases though.</div>
+<h3><span class="mw-headline" id="Suspend_to_file">Suspend to file</span></h3>
+<p>For the file allocator, you will have to prepare a hibernation file. This is different from the standard swap file in that this file is ONLY used for hibernation and not as a general system swap file. The previous method is recommended as being more efficient in terms of disk space. First configure the <code>/etc/hibernate/tuxonice.conf</code> file, uncomment the "FilewriterLocation" option:
+</p>
+<pre>FilewriterLocation /suspend_file 1000
+</pre>
+<p>1000 is the amount of disk space reserved for the hibernation file, in this case 1000 megabytes. Usually an amount of 50% - 75% of your total amount of RAM will suffice.
+</p>
+<p>Next, we need to create the file, something like <a rel="nofollow" class="external autonumber" href="http://www.gentoo-wiki.info/TuxOnIce#Alternative:_Using_a_Dedicated_File">[2]</a>:
+</p>
+<pre># echo TuxOnIce &gt; /suspend_file
+# dd if=/dev/zero bs=1M count=1000 &gt;&gt; /suspend_file
+# echo /suspend_file &gt; /sys/power/tuxonice/file/target
+# cat /sys/power/tuxonice/resume
+</pre>
+<p>The output of <code>/sys/power/tuxonice/resume</code> is what you need to pass to your kernel. You should see something like <code>file:/dev/sda2:0xdc008</code>, in which case you should append <code>resume=file:/dev/sda2:0xdc008</code> as a kernel parameter in your <code>/etc/lilo.conf</code> file (for <a href="../en/LILO.html" title="LILO">LILO</a>), <code>/boot/syslinux/syslinux.cfg</code> (for <a href="../en/Syslinux.html" title="Syslinux">Syslinux</a>) or <code>/boot/grub/grub.cfg</code> (for <a href="../en/GRUB.html" title="Grub2" class="mw-redirect">Grub2</a>).
+</p>
+<h2><span class="mw-headline" id="Suspending_and_resuming">Suspending and resuming</span></h2>
+<p>With hibernate-script, your preferred hibernation method can be set in the file <code>/etc/hibernate/hibernate.conf</code>. See <a href="../en/Hibernate-script.html" title="Suspending to Disk with hibernate-script" class="mw-redirect">Suspending to Disk with hibernate-script</a> for more info.
+</p>
+<h2><span class="mw-headline" id="Additional_pm-utils_setup">Additional pm-utils setup</span></h2>
+<p>If using <a href="../en/GNOME.html" title="GNOME">GNOME</a> as your DE, or using any other environment that uses <a href="../en/Pm-utils.html" title="Pm-utils">pm-utils</a> to shutdown and suspend the system, some additional setup is required for TuxOnIce.
+</p>
+<p>Configuration made in <code>/etc/hibernate/hibernate.conf</code> is still useful, but some options do not seem to be used by pm-utils. Compression, for example, will default to lzo unless more action is taken.
+Editing files under <code>/etc/pm/sleep.d/</code> is a good way to make sure wanted settings are used.
+</p>
+<p>To change the compressor used by TuxOnIce, for example, edit <code>/etc/pm/sleep.d/00doit</code> and add a line like so:
+</p>
+<pre>#!/bin/bash
+ case $1 in
+ hibernate)
+ #Possible compressors include lzo, lzf, and none
+ <i>echo none &gt; /sys/power/tuxonice/compression/algorithm</i>
+;;
+</pre>
+<p>Additional lines can be used to change other options, such as the default logging level (found in <code>/sys/power/tuxonice/user_interface/default_console_level</code>).
+</p>
+<h2><span class="mw-headline" id="userui_-_user_interface_for_TuxOnIce_.28optional.29">userui - user interface for TuxOnIce (optional)</span></h2>
+<p>Optionally, you can use a text or graphical (<a href="../en/Fbsplash.html" title="Fbsplash">Fbsplash</a>) interface with a progress bar with TuxOnIce. To do this, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tuxonice-userui/">tuxonice-userui</a></span><sup><small>AUR</small></sup> package from the AUR.
+</p>
+<p>In <code>/etc/hibernate/tuxonice.conf</code>, set the desired user interface:
+</p>
+<pre>ProcSetting userui_program "/usr/sbin/tuxoniceui"      # Text interface
+</pre>
+<p>or
+</p>
+<pre>ProcSetting userui_program "/usr/sbin/tuxoniceui -f"   # Graphical fbsplash interface
+</pre>
+<p>The fbsplash interface also needs a symlink to the fbsplash theme, like so:
+</p>
+<pre># ln -s /etc/splash/arch-banner-noicons/ /etc/splash/tuxonice
+</pre>
+<p>Without this symlink, there will be no progress indicators during suspend/resume.
+</p>
+<p>It is probably necessary to regenerate the initramfs after changing the symlink above.
+</p>
+<p>The text interface may be good for debugging TuxOnIce, as it displays some messages.
+</p>
+<p>You will not see a user interface for the first few seconds of the resume process unless you add the <b>userui</b> hook to your mkinitcpio (before the <b>resume</b> hook) configuration and regenerate your initramfs, but this is also optional. 
+</p>
+<p>Generate initramfs:
+</p>
+<pre># mkinitcpio -p linux-ice
+</pre>
+<p>To test if userui works, switch to a text console and run:
+</p>
+<pre># tuxoniceui --test
+</pre>
+<p>For the graphical interface run:
+</p>
+<pre># tuxoniceui -f --test
+</pre>
+<h2><span class="mw-headline" id="References">References</span></h2>
+<ul>
+<li>The <a rel="nofollow" class="external text" href="http://www.tuxonice.net">TuxOnIce website</a> and <a rel="nofollow" class="external text" href="http://wiki.tuxonice.net/">TuxOnIce wiki</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2015-11-15]</sup> are excellent sources of documentation.</li>
+<li>More general information about suspend/hibernate with hibernate-script can be found on the <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to Disk" class="mw-redirect">Suspend to Disk</a> page of this wiki. This also covers some advanced topics like problems with specific hardware and configurations.</li>
+<li>Another good source of information is the <a rel="nofollow" class="external text" href="http://www.gentoo-wiki.info/TuxOnIce">Gentoo wiki</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

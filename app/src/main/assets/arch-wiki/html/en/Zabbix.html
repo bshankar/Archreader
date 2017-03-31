@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Zabbix - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Zabbix skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Zabbix</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://zabbix.com">Zabbix</a> is a full-featured monitoring solution for larger networks. It can discover all kind of networking devices using different methods, check machine states and applications, sending pre-defined alarm messages and visualize complex data correlations.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Server_setup"><span class="tocnumber">1</span> <span class="toctext">Server setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Configuration"><span class="tocnumber">1.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Starting"><span class="tocnumber">1.3</span> <span class="toctext">Starting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Agent_setup"><span class="tocnumber">2</span> <span class="toctext">Agent setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Installation_2"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Configuration_2"><span class="tocnumber">2.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Starting_2"><span class="tocnumber">2.3</span> <span class="toctext">Starting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Debugging_a_Zabbix_agent"><span class="tocnumber">3.1</span> <span class="toctext">Debugging a Zabbix agent</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Monitor_ArchLinux_system_updates"><span class="tocnumber">3.2</span> <span class="toctext">Monitor ArchLinux system updates</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Server_setup">Server setup</span></h2>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>If you want to use the Zabbix server with <a href="../en/MySQL.html" title="MariaDB" class="mw-redirect">MariaDB</a>, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zabbix-server-mysql/">zabbix-server-mysql</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. For <a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a> as database backend, you should use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zabbix-server/">zabbix-server</a></span><sup><small>AUR</small></sup>. You also have to choose a web server with PHP support, e.g.:
+</p>
+<ul>
+<li> <a href="../en/Apache_HTTP_Server.html" title="Apache HTTP Server">Apache HTTP Server</a>
+</li>
+<li> <a href="../en/Lighttpd.html" title="Lighttpd">Lighttpd</a>
+</li>
+<li> <a href="../en/Nginx.html" title="Nginx">nginx</a>
+</li>
+</ul>
+<p>Or one of the other servers found in the <a href="../en/Category:Web_server.html" title="Category:Web server">web server</a> category.
+You may edit the <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILDs</a> if you plan to use Nginx as web-server, since by default they have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-apache">php-apache</a></span> as dependency.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>Symlink the Zabbix web application directory to your http document root, e.g.:
+</p>
+<pre>$ ln -s /usr/share/webapps/zabbix /srv/http/zabbix
+</pre>
+<p>Make sure to adjust following variables to these minimal values in your <code>php.ini</code>:
+</p>
+<pre>extension=bcmath.so
+extension=gd.so
+extension=sockets.so
+extension=mysqli.so
+post_max_size = 16M
+max_execution_time = 300
+max_input_time = 300
+date.timezone = "UTC"
+</pre>
+<p>In this example, we create on localhost a MariaDB database called <code>zabbix</code> for the user <code>zabbix</code> identified by the password <code>test</code> and then import the database templates. This connection will be later used by the Zabbix server and web application:
+</p>
+<pre>$ mysql -u root -p -e "create database zabbix"
+$ mysql -u root -p -e "grant all on zabbix.* to zabbix@localhost identified by 'test'"
+$ mysql -u zabbix -p zabbix &lt; /usr/share/zabbix/database/schema.sql
+$ mysql -u zabbix -p zabbix &lt; /usr/share/zabbix/database/images.sql
+$ mysql -u zabbix -p zabbix &lt; /usr/share/zabbix/database/data.sql
+</pre>
+<h3><span class="mw-headline" id="Starting">Starting</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>zabbix-server</code> service.
+</p>
+<p>Finally you can access Zabbix via your local web server, e.g.: <a rel="nofollow" class="external free" href="http://127.0.0.1/zabbix">http://127.0.0.1/zabbix</a>, finish the installation wizard and access the frontend the first time. The default username is <code>Admin</code> and password <code>zabbix</code>.
+</p>
+<p>See appendix for a link to the official documentation, which explains all further steps in using it.
+</p>
+<h2><span class="mw-headline" id="Agent_setup">Agent setup</span></h2>
+<h3><span class="mw-headline" id="Installation_2">Installation</span></h3>
+<p>Currently, the server package already includes <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zabbix-agent/">zabbix-agent</a></span><sup><small>AUR</small></sup>, so you do not have to install this package on your monitoring server. However, for monitoring targets, the client part is more minimal, standalone and easy to deploy, just install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zabbix-agent/">zabbix-agent</a></span><sup><small>AUR</small></sup>.
+</p>
+<h3><span class="mw-headline" id="Configuration_2">Configuration</span></h3>
+<p>Simply edit the <code>zabbix_agentd.conf</code> and replace the server variable with the IP of your monitoring server. Only servers from this/these IP will be allowed to access the agent.
+</p>
+<pre>Server=&lt;IP of Zabbix server&gt;
+ServerActive=&lt;IP of Zabbix server&gt;
+</pre>
+<p>Further make sure the port <code>10050</code> on your device being monitored is not blocked and is properly forwarded.
+</p>
+<h3><span class="mw-headline" id="Starting_2">Starting</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>zabbix-agentd</code> service.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Debugging_a_Zabbix_agent">Debugging a Zabbix agent</span></h3>
+<p>On the client site, you can check the state of an item like this:
+</p>
+<pre>zabbix_agentd -t hdd.smart[sda,Temperature_Celsius]
+</pre>
+<p>On the server/monitoring site, try this:
+</p>
+<pre>zabbix_get -s <i>host</i> -k hdd.smart[sda,Temperature_Celsius]
+</pre>
+<h3><span class="mw-headline" id="Monitor_ArchLinux_system_updates">Monitor ArchLinux system updates</span></h3>
+<p>Here's an approach on how to monitor your ArchLinux clients for available system update using a custom <code>UserParameter</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/zabbix/zabbix_agentd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Include=/etc/zabbix/zabbix_agentd.conf.d/*.conf</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/zabbix/zabbix_agentd.conf.d/archlinuxupdates.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">UserParameter=archlinuxupdates,checkupdates | wc -l</pre>
+<p>You have to restart <code>zabbix-agentd</code> to apply the new configuration. The keyword for the item you later use in the web frontend is <code>archlinuxupdates</code>. It returns an integer representing the count of available updates.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://www.zabbix.com/documentation/doku.php?id=2.0">Official manual for version 2.0</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Network_monitoring.html" title="Category:Network monitoring">Network monitoring</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

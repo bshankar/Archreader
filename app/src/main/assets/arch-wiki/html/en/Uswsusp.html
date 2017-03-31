@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Uswsusp - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Uswsusp skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Uswsusp</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Hibernate-script.html" title="Hibernate-script">hibernate-script</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pm-utils.html" title="Pm-utils">Pm-utils</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://suspend.sourceforge.net/">uswsusp</a> (userspace software suspend) is a set of user space tools used for hibernation (suspend-to-disk) and suspend (suspend-to-RAM or standby) on Linux systems.
+It consists of:
+</p>
+<ul><li> <b>s2ram</b> - a wrapper around the kernel's suspend-to-RAM mechanism allowing the user to perform some graphics adapter manipulations from the user land before suspending and after resuming that may help to bring the graphics (and the entire system) back to life after the resume. Incorporates the functionality of vbetool and radeontool as well as some tricks of its own. Includes a list of working hardware configurations along with the appropriate sets of operations to be performed to resume them successfully. This is accomplished by a hardware whitelist maintained by HAL - <b>s2ram</b> translates the HAL database options into <b>s2ram</b> parameters.</li></ul>
+<dl><dd><div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since HAL is deprecated and KMS drivers can save the state of the graphics card directly without userspace quirks, <b>s2ram</b> development is discontinued and no further whitelist entries are accepted. If a KMS driver is in use, <b>s2ram</b> will directly suspend the machine.</div></dd></dl>
+<ul><li> <b>s2disk</b> - the reference implementation of the userspace software suspend (µswsusp); it coordinates the steps necessary to suspend the system (such as freezing the processes, preparing the swap space, etc.) and handles image writing and reading. s2disk already supports compression and encryption of the image and other features (e.g. a nice progress bar, saving the image on a remote disk, playing tetris while resuming, etc.) can be easily added.</li></ul>
+<ul><li> <b>s2both</b> - combines the funtionalities of s2ram and s2disk and it's very useful when the battery is almost depleted. s2both writes the system snapshot to the swap (just like s2disk) but then puts the machine into STR (just like s2ram). If the battery has enough power left you can quickly resume from STR, otherwise you can still resume from disk without losing your work. </li></ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Support_for_encryption"><span class="tocnumber">2.1</span> <span class="toctext">Support for encryption</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Recreate_initramfs"><span class="tocnumber">2.2</span> <span class="toctext">Recreate initramfs</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Sample_config"><span class="tocnumber">2.3</span> <span class="toctext">Sample config</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Standalone"><span class="tocnumber">3.1</span> <span class="toctext">Standalone</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#With_pm-utils"><span class="tocnumber">3.2</span> <span class="toctext">With pm-utils</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#With_systemd"><span class="tocnumber">3.3</span> <span class="toctext">With systemd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#My_machine_is_not_whitelisted"><span class="tocnumber">4.1</span> <span class="toctext">My machine is not whitelisted</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#s2ram_-f_doesn.27t_work"><span class="tocnumber">4.2</span> <span class="toctext">s2ram -f doesn't work</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#s2ram_does_not_work_with_any_combination_of_options"><span class="tocnumber">4.3</span> <span class="toctext">s2ram does not work with any combination of options</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>uswsusp is available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> under the name <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uswsusp-git/">uswsusp-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>You must edit <code>/etc/suspend.conf</code> before attempting to suspend to disk.
+</p>
+<ul><li> If using a swap partition:</li></ul>
+<pre>resume device = /dev/disk/by-label/swap
+</pre>
+<p>where <code>/dev/disk/by-label/swap</code> must be replaced with the correct block device containing the swap partition.
+</p>
+<ul><li> If using a <a href="../en/Swap.html#Swap_file" title="Swap file" class="mw-redirect">swap file</a>:</li></ul>
+<pre>resume device = /dev/sdXN  # the partition which contains swapfile 
+resume offset = 123456
+</pre>
+<p>where 123456 is the offset from the beginning of the resume device where the swap file's header is located. The resume offset can be obtained by running
+</p>
+<pre># swap-offset your-swap-file
+</pre>
+<ul><li> The <code>image size</code> parameter (optional) can be used to limit the size of the system snapshot image created by s2disk. If it's not possible to create an image of the desired size, s2disk will suspend anyway, using a bigger image. If image size is set to 0, the image will be as small as possible.</li></ul>
+<ul><li> The <code>shutdown method</code> parameter (optional) specifies the operation that will be carried out when the machine is ready to be powered off. If set to "reboot" the machine will be rebooted immediately. If set to "platform" the machine will be shut down using special power management operations available from the kernel that may be necessary for the hardware to be properly reinitialized after the resume, and may cause the system to resume faster.</li></ul>
+<ul><li> If the <code>compute checksum</code> parameter is set to 'y', the s2disk and resume tools will use the MD5 algorithm to verify the image integrity.</li></ul>
+<ul><li> If the <code>compress</code> parameter is set to 'y', the s2disk and resume tools will use the LZF compression algorithm to compress/decompress the image.</li></ul>
+<ul><li> If <code>splash</code> is set to 'y', s2disk and/or resume will use a splash system. Currently splashy and fbsplash are supported. <div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This requires additional <code>configure</code> flags for uswsusp (<code>--enable-splashy</code> and <code>--enable-fbsplash</code>, respectively).</div>
+</li></ul>
+<ul><li> The <code>resume pause</code> option will introduce a delay after successfully resuming from hibernation, in order to allow the user to read the stats (read and write speed, image size, etc.)</li></ul>
+<ul><li> If <code>threads</code> is enabled, s2disk will use several threads for compressing, encrypting and writing the image. This is supposed to speed things up. For details, read the comments in <a rel="nofollow" class="external text" href="http://git.kernel.org/?p=linux/kernel/git/rafael/suspend-utils.git;a=blob;f=suspend.c;h=166a62f03ea9daaba271e7cebf94c76881d4266f;hb=HEAD">suspend.c</a>
+</li></ul>
+<h3><span class="mw-headline" id="Support_for_encryption">Support for encryption</span></h3>
+<ul>
+<li> generate a key with the suspend-keygen utility included in the package;</li>
+<li> write the name of the key in <code>/etc/suspend.conf</code>;</li>
+</ul>
+<pre>encrypt = y
+RSA key file = &lt;path_to_keyfile&gt;
+</pre>
+<h3><span class="mw-headline" id="Recreate_initramfs">Recreate initramfs</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Whenever you modify <code>/etc/suspend.conf</code>, <b>you will need to rebuild</b> your initramfs. If you fail to do so, and linux cannot find your image at startup, you will not see an error message indicating this. Your boot process will hang after starting the <code>uresume</code> hook, typically after the message with the libgcrypt version.</div> 
+<p>Edit your <code>/etc/mkinitcpio.conf</code> file and add "uresume" to the HOOKS entry.
+</p>
+<pre>HOOKS="base udev autodetect block <b>uresume</b> filesystems"
+</pre>
+<ul><li> rebuild the ramdisk</li></ul>
+<pre># mkinitcpio -p linux
+</pre>
+<h3><span class="mw-headline" id="Sample_config">Sample config</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/suspend.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">snapshot device = /dev/snapshot
+
+resume device = /dev/disk/by-label/swap
+
+# image size is in bytes
+image size = 1468006400
+
+#suspend loglevel = 2
+
+compute checksum = y
+
+compress = y
+
+#encrypt = y
+
+#early writeout = y
+
+#splash = y
+
+# up to 60 (seconds)
+#resume pause = 30  
+
+threads = y</pre>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Standalone">Standalone</span></h3>
+<p>To suspend to disk, run:
+</p>
+<pre># s2disk
+</pre>
+<p>To suspend to ram, first run:
+</p>
+<pre># s2ram --test
+</pre>
+<p>to see if your machine is in the database of machines known to work. If it returns something like "Machine matched entry xyz" then go ahead and run:
+</p>
+<pre># s2ram
+</pre>
+<p>Otherwise, the --force parameter will be necessary, possibly combined with other parameters (see <code>s2ram --help</code>). It may fail.
+</p>
+<p>Now you could try to suspend directly calling s2disk from the command line:
+</p>
+<pre># s2disk
+</pre>
+<p>It is probably necessary to resort to a userspace tool which calls internally s2disk, like <a href="../en/Pm-utils.html" title="Pm-utils">Pm-utils</a> or hibernate-script. See <a href="../en/Hibernate-script.html" title="Suspending to Disk with hibernate-script" class="mw-redirect">Suspending to Disk with hibernate-script</a> about details for defining the ususpend-disk method as default.
+</p>
+<h3><span class="mw-headline" id="With_pm-utils">With pm-utils</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Since February 2013, the suspend and hibernate functions in UPower have been <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/upower/commit/?id=372c2f8d2922add987683a24b5d69902e05e2f97">deprecated</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Uswsusp">Talk:Uswsusp#</a>)</div>
+</div>
+<a href="../en/Pm-utils.html" title="Pm-utils">Pm-utils</a> can utilise several <a href="../en/Pm-utils.html#Using_another_sleep_backend_.28like_uswsusp.29" title="Pm-utils">sleep back-ends</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>, including uswsusp. Create or edit <code>/etc/pm/config.d/module</code>:
+<pre>SLEEP_MODULE=uswsusp
+</pre>
+<p>This way, pm-suspend and pm-hibernate will use uswsusp.
+There is an advantage to this: regular users can use these commands to suspend with uswsusp:
+</p>
+<pre>$ dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
+
+$ dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The user's <a href="../en/Window_manager.html" title="Window manager">window manager</a> or <a href="../en/Desktop_environment.html" title="Desktop environment">desktop environment</a> needs to be started either with a <a href="../en/Display_manager.html" title="Login manager" class="mw-redirect">login manager</a> like gdm or kdm. Also, upower needs to be installed.</div>
+<h3><span class="mw-headline" id="With_systemd">With systemd</span></h3>
+<p>To to put your system into hibernation a.k.a <i>Suspend to Disk</i> with <code>systemctl hibernate</code>, do:
+</p>
+<pre># cp /usr/lib/systemd/system/systemd-hibernate.service /etc/systemd/system/
+# cd /etc/systemd/system/
+</pre>
+<p>Open <code>systemd-hibernate.service</code> with your preferred text editor and edit the line from this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/systemd-hibernate.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+ExecStart=/usr/lib/systemd/systemd-sleep hibernate</pre>
+<p>to this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/systemd-hibernate.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+ExecStart=/bin/sh -c 's2disk &amp;&amp; run-parts --regex .\* -a post /usr/lib/systemd/system-sleep'</pre>
+<p>After that, execute <code>systemctl hibernate</code> to put your system into hibernation. Do similar changes for systemd-hybrid-sleep.service to enable uswsusp-based hybrid sleep too.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="My_machine_is_not_whitelisted">My machine is not whitelisted</span></h3>
+<p>If <code>s2ram</code> doesn't match your machine to an entry in its whitelist, it will output some general purpose identification strings for your machine (the same as those provided <code>s2ram -i</code>). In this case, you may try to force <code>s2ram</code> to suspend your machine by using <code>s2ram -f</code>.
+</p>
+<h3><span class="mw-headline" id="s2ram_-f_doesn.27t_work"><code>s2ram -f</code> doesn't work</span></h3>
+<p>If <code>s2ram -f</code> doesn't work, try the different workarounds offered by <code>s2ram</code>. Run <code>s2ram -h</code> to get a list of the possible options:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># s2ram -h</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Usage: s2ram [-nhi] [-fspmrav]
+
+Options:
+    -h, --help:       this text.
+    -n, --test:       test if the machine is in the database.
+                      returns 0 if known and supported
+    -i, --identify:   prints a string that identifies the machine.
+    -f, --force:      force suspending, even on unknown machines.
+
+The following options are only available with -f/--force:
+    -s, --vbe_save:   save VBE state before suspending and restore after resume.
+    -p, --vbe_post:   VBE POST the graphics card after resume
+    -m, --vbe_mode:   get VBE mode before suspend and set it after resume
+    -r, --radeontool: turn off the backlight on radeons before suspending.
+    -a, --acpi_sleep: set the acpi_sleep parameter before suspend
+                      1=s3_bios, 2=s3_mode, 3=both
+    -v, --pci_save:   save the PCI config space for the VGA card.
+</pre>
+<p>Try the following variations:
+</p>
+<pre>  s2ram -f -a 1
+  s2ram -f -a 2
+  s2ram -f -a 3
+  s2ram -f -p -m
+  s2ram -f -p -s
+  s2ram -f -m
+  s2ram -f -s
+  s2ram -f -p
+  s2ram -f -a 1 -m
+  s2ram -f -a 1 -s
+</pre>
+<p>If none of those combinations work, start again but add the <code>-v</code> switch.
+</p>
+<p>Note that mixing the <code>-a</code> options and the vbetool options (<code>-p</code>, <code>-m</code>, <code>-s</code>)
+is normally only a measure of last resort, it usually does not make much
+sense.
+</p>
+<p>If you find several combinations that work (e.g. <code>s2ram -f -a 3</code> and <code>s2ram -f -p -m</code> both work on your machine),
+the in-kernel method (<code>-a</code>) should be preferred over the userspace methods (<code>-p</code>, <code>-m</code>, <code>-s</code>).
+</p>
+<p>Verify all combinations in both cases when reporting success to the <code>s2ram</code> developers:
+</p>
+<ul>
+<li> when issuing <code>s2ram</code> from console</li>
+<li> when issuing <code>s2ram</code> from X</li>
+</ul>
+<h3><span class="mw-headline" id="s2ram_does_not_work_with_any_combination_of_options">s2ram does not work with any combination of options</span></h3>
+<p>There is a trick which does not correspond to a command line option, because it requires additional operations from you. It is marked with NOFB in the whitelist and used for those laptops which suspend and resume properly only if no framebuffer is used. If you verify that no command line option of <code>s2ram</code> works, you can try disabling the framebuffer. To do this, you need to edit your bootloader configuration, remove any possible <code>vga=&lt;foo&gt;</code> values from the kernel line and reboot. This at least if you use the VESAFB framebuffer (as in the arch default kernel). If you use a different framebuffer driver, refer to the documentation of the driver to see how to disable it.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://suspend.sourceforge.net/">Uswsusp Home Page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://git.kernel.org/?p=linux/kernel/git/rafael/suspend-utils.git;a=blob;f=HOWTO;h=116cddaa76cbdec69eb8b1e87b7df8931d3a73da;hb=HEAD">HOWTO file</a> included with the source code</li>
+<li> <code>/usr/share/doc/suspend/README</code> Uswsusp Documentation</li>
+<li> <code>/usr/share/doc/suspend/README.s2ram-whitelist</code> s2ram-whitelist README</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

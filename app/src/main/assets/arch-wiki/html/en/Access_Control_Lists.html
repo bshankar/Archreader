@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Access Control Lists - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Access_Control_Lists skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Access Control Lists</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>A</b>ccess <b>C</b>ontrol <b>L</b>ist (ACL) provides an additional, more flexible permission mechanism for file systems. It is designed to assist with <code>UNIX</code> file permissions. ACL allows you to give permissions for any user or group to any disc resource.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Enabling_ACL"><span class="tocnumber">2.1</span> <span class="toctext">Enabling ACL</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Set_ACL"><span class="tocnumber">2.2</span> <span class="toctext">Set ACL</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Show_ACL"><span class="tocnumber">2.3</span> <span class="toctext">Show ACL</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Examples"><span class="tocnumber">3</span> <span class="toctext">Examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Output_of_ls_command"><span class="tocnumber">3.1</span> <span class="toctext">Output of ls command</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Granting_execution_permissions_for_private_files_to_a_Web_Server"><span class="tocnumber">4</span> <span class="toctext">Granting execution permissions for private files to a Web Server</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The required package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=acl">acl</a></span> is a dependency of <a href="../en/Systemd.html" title="Systemd">systemd</a>, it should already be installed.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Enabling_ACL">Enabling ACL</span></h3>
+<p>To enable ACL, the filesystem must be mounted with the <code>acl</code> option. You can use <a href="../en/Fstab.html" title="Fstab">fstab</a> to make it permanent on your system.
+</p>
+<p>There is a possibility that the <code>acl</code> option is already active as default mount option on the filesystem. <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> does and possibly ext filesystems do too.  Use the following command to check ext* formatted partitions for the option:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># tune2fs -l /dev/sd<i>XY</i> | grep "Default mount options:"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Default mount options:    user_xattr acl
+</pre>
+<p>Also check that the default mount option is not overridden, in such case you will see <code>noacl</code> in <code>/proc/mounts</code> in the relevant line.
+</p>
+<p>You can set the default mount options of a filesystem using the <code>tune2fs -o <i>option</i> <i>partition</i></code> command, for example:
+</p>
+<pre># tune2fs -o acl /dev/sd<i>XY</i>
+</pre>
+<p>Using the default mount options instead of an entry in <code>/etc/fstab</code> is very useful for external drives, such partition will be mounted with <code>acl</code> option also on other Linux machines. There is no need to edit <code>/etc/fstab</code> on every machine.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> <code>acl</code> is specified as default mount option when creating an ext2/3/4 filesystem. This is configured in <code>/etc/mke2fs.conf</code>.</li>
+<li> The default mount options are not listed in <code>/proc/mounts</code>.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Set_ACL">Set ACL</span></h3>
+<p>The ACL can be modified using the <i>setfacl</i> command.
+</p>
+<p>To add permissions for a user (<code><i>user</i></code> is either the user name or ID):
+</p>
+<pre># setfacl -m "u:<i>user:permissions</i>" &lt;file/dir&gt;
+</pre>
+<p>To add permissions for a group (<code><i>group</i></code> is either the group name or ID):
+</p>
+<pre># setfacl -m "g:<i>group:permissions</i>" &lt;file/dir&gt;
+</pre>
+<p>To allow all files or directories to inherit ACL entries from the directory it is within:
+</p>
+<pre># setfacl -dm "<i>entry</i>" &lt;dir&gt;
+</pre>
+<p>To remove a specific entry:
+</p>
+<pre># setfacl -x "<i>entry</i>" &lt;file/dir&gt;
+</pre>
+<p>To remove all entries:
+</p>
+<pre># setfacl -b &lt;file/dir&gt;
+</pre>
+<h3><span class="mw-headline" id="Show_ACL">Show ACL</span></h3>
+<p>To show permissions, use:
+</p>
+<pre># getfacl filename
+</pre>
+<h2><span class="mw-headline" id="Examples">Examples</span></h2>
+<p>Set all permissions for user johny to file named "abc":
+</p>
+<pre># setfacl -m "u:johny:rwx" abc
+</pre>
+<p>Check permissions
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># getfacl abc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# file: abc
+# owner: someone
+# group: someone
+user::rw-
+user:johny:rwx
+group::r--
+mask::rwx
+other::r--
+</pre>
+<p>Change permissions for user johny:
+</p>
+<pre># setfacl -m "u:johny:r-x" abc
+</pre>
+<p>Check permissions
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># getfacl abc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# file: abc
+# owner: someone
+# group: someone
+user::rw-
+user:johny:r-x
+group::r--
+mask::r-x
+other::r--
+</pre>
+<p>Remove all extended ACL entries:
+</p>
+<pre># setfacl -b abc
+</pre>
+<p>Check permissions
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># getfacl abc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# file: abc
+# owner: someone
+# group: someone
+user::rw-
+group::r--
+other::r--
+</pre>
+<h3><span class="mw-headline" id="Output_of_ls_command">Output of ls command</span></h3>
+<p>You will notice that there is an ACL for a given file because it will exhibit a <code><b>+</b></code> (plus sign) after its Unix permissions in the output of <code>ls -l</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/audio</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+crw-rw----+ 1 root audio 14, 4 nov.   9 12:49 /dev/audio
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ getfacl /dev/audio</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+getfacl: Removing leading '/' from absolute path names
+# file: dev/audio
+# owner: root
+# group: audio
+user::rw-
+user:solstice:rw-
+group::rw-
+mask::rw-
+other::---
+</pre>
+<h2><span class="mw-headline" id="Granting_execution_permissions_for_private_files_to_a_Web_Server">Granting execution permissions for private files to a Web Server</span></h2>
+<p>The following technique describes how a process like a web server can be granted access to files that reside in a user's home directory, without compromising security by giving the whole world access.
+</p>
+<p>In the following we assume that the web server runs as the user <code>webserver</code> and grant it access to <code>geoffrey</code>'s home directory <code>/home/geoffrey</code>.
+</p>
+<p>The first step is granting execution permission to <code>webserver</code> so it can access <code>geoffrey</code>'s home: 
+</p>
+<pre># setfacl -m "u:webserver:--x" /home/geoffrey
+</pre>
+<p><i>Remember</i>: Execution permissions to a directory are necessary for a process to list the directory's content.
+</p>
+<p><br>
+Since <code>webserver</code> is now able to access files in <code>/home/geoffrey</code>, <code>other</code> no longer needs access, so it can be safely removed:
+</p>
+<pre># chmod o-rx /home/geoffrey
+</pre>
+<p><code>getfacl</code> can be used to verify the changes:
+</p>
+<pre>$ getfacl /home/geoffrey
+getfacl: Removing leading '/' from absolute path names
+# file: home/geoffrey
+# owner: geoffrey
+# group: geoffrey
+user::rwx
+user:webserver:--x
+group::r-x
+mask::r-x
+other::---
+</pre>
+<p>As the above output shows, <code>other</code>'s no longer have any permissions, but <code>webserver</code> still is able to access the files, thus security might be considered increased.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 1 getfacl"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/getfacl.1.html">getfacl(1)</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 1 setfacl"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/setfacl.1.html">setfacl(1)</a></span>
+</li>
+<li> An old but still relevant (and thorough) <a rel="nofollow" class="external text" href="http://www.vanemery.com/Linux/ACL/linux-acl.html">guide</a> to ACL</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

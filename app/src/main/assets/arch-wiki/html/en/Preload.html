@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Preload - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Preload skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Preload</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Preloading is the action of putting and keeping target files into the RAM. The benefit is that preloaded applications start more quickly because reading from the RAM is always quicker than from the hard drive. However, part of your RAM will be dedicated to this task, but no more than if you kept the application open. Therefore preloading is best used with large and often-used applications like Firefox and LibreOffice.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Go-preload"><span class="tocnumber">1</span> <span class="toctext">Go-preload</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Preload"><span class="tocnumber">2</span> <span class="toctext">Preload</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Installation"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Configuration"><span class="tocnumber">2.2</span> <span class="toctext">Configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Go-preload">Go-preload</span></h2>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gopreload-git/">gopreload-git</a></span><sup><small>AUR</small></sup> is a small daemon created in the <a rel="nofollow" class="external text" href="https://forums.gentoo.org/viewtopic-t-622085-highlight-preload.html">Gentoo forum</a>. To use it, first run this command in a terminal for each program you want to preload at boot:
+</p>
+<pre># gopreload-prepare <i>program</i>
+</pre>
+<p>For regular users, take ownership of <code>/usr/share/gopreload/enabled</code> and <code>/usr/share/gopreload/disabled</code>
+</p>
+<pre># chown username:users /usr/share/gopreload/enabled /usr/share/gopreload/disabled
+</pre>
+<p>and then gopreload each program you want to preload:
+</p>
+<pre>$ gopreload-prepare <i>program</i>
+</pre>
+<p>Then, as instructed, press Enter when the program is fully loaded. This will add a list of files needed by the program in <code>/usr/share/gopreload/enabled</code>. To load all lists at boot, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the systemd service file <code>gopreload.service</code>.
+</p>
+<p>To disable the loading of a program, remove the appropriate list in <code>/usr/share/gopreload/enabled</code> or move it to <code>/usr/share/gopreload/disabled</code>.
+</p>
+<p>It is advised to run gopreload-prepare after system upgrades to refresh the file lists.
+For the task, the following batch tool come handy:
+</p>
+<pre># gopreload-batch-refresh.sh
+</pre>
+<p>Just let it run without using the system.
+</p>
+<h2><span class="mw-headline" id="Preload">Preload</span></h2>
+<p><b>preload</b> is a program written by Behdad Esfahbod which runs as a <a href="../en/Daemons.html" title="Daemon" class="mw-redirect">daemon</a> and records statistics about usage of programs using Markov chains; files of more frequently-used programs are, during a computer's spare time, loaded into memory. This results in faster startup times as less data needs to be fetched from disk. <i>preload</i> is often paired with <a href="../en/Prelink.html" title="Prelink">prelink</a>.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/preload/">preload</a></span><sup><small>AUR</small></sup> package. You may now <a href="../en/Daemons.html" title="Daemon" class="mw-redirect">start</a> the <a href="../en/Systemd.html" title="Systemd">systemd</a> service <code>preload</code>, and/or enable it in order to start at boot.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>The configuration file is located in <code>/etc/preload.conf</code>, it contains default settings that should be suitable for regular users. The <code>cycle</code> option lets you configure how often to ping the
+preload system to update its model of which applications and libraries to cache.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/Preload_(software)" class="extiw" title="wikipedia:Preload (software)">wikipedia:Preload_(software)</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://techthrob.com/2009/03/02/drastically-speed-up-your-linux-system-with-preload/">http://techthrob.com/2009/03/02/drastically-speed-up-your-linux-system-with-preload/</a>
+</li>
+<li> <a href="../en/Improving_performance/Boot_process.html" title="Improve boot performance" class="mw-redirect">Improve boot performance</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

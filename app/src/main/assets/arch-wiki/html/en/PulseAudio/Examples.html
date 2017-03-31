@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PulseAudio/Examples - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PulseAudio_Examples skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PulseAudio/Examples</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/PulseAudio.html" title="PulseAudio">PulseAudio</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/PulseAudio.html" title="PulseAudio">PulseAudio</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/PulseAudio/Troubleshooting.html" title="PulseAudio/Troubleshooting">PulseAudio/Troubleshooting</a></li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Set_default_input_sources"><span class="tocnumber">1</span> <span class="toctext">Set default input sources</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Set_the_default_output_source"><span class="tocnumber">2</span> <span class="toctext">Set the default output source</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Simultaneous_HDMI_and_analog_output"><span class="tocnumber">3</span> <span class="toctext">Simultaneous HDMI and analog output</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#HDMI_output_configuration"><span class="tocnumber">4</span> <span class="toctext">HDMI output configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Finding_HDMI_output"><span class="tocnumber">4.1</span> <span class="toctext">Finding HDMI output</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Testing_for_the_correct_card"><span class="tocnumber">4.2</span> <span class="toctext">Testing for the correct card</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Manually_configuring_PulseAudio_to_detect_the_Nvidia_HDMI"><span class="tocnumber">4.3</span> <span class="toctext">Manually configuring PulseAudio to detect the Nvidia HDMI</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Automatically_switch_audio_to_HDMI"><span class="tocnumber">4.4</span> <span class="toctext">Automatically switch audio to HDMI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Surround_sound_systems"><span class="tocnumber">5</span> <span class="toctext">Surround sound systems</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Splitting_front.2Frear"><span class="tocnumber">5.1</span> <span class="toctext">Splitting front/rear</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Splitting_7.1_into_5.1.2B2.0"><span class="tocnumber">5.2</span> <span class="toctext">Splitting 7.1 into 5.1+2.0</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Disabling_LFE_remixing"><span class="tocnumber">5.3</span> <span class="toctext">Disabling LFE remixing</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Binaural_Headphones"><span class="tocnumber">5.4</span> <span class="toctext">Binaural Headphones</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#PulseAudio_over_network"><span class="tocnumber">6</span> <span class="toctext">PulseAudio over network</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#TCP_support_.28networked_sound.29"><span class="tocnumber">6.1</span> <span class="toctext">TCP support (networked sound)</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#TCP_support_with_anonymous_clients"><span class="tocnumber">6.2</span> <span class="toctext">TCP support with anonymous clients</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Zeroconf_.28Avahi.29_publishing"><span class="tocnumber">6.3</span> <span class="toctext">Zeroconf (Avahi) publishing</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Selecting_the_Server"><span class="tocnumber">6.4</span> <span class="toctext">Selecting the Server</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Switching_the_PulseAudio_server_used_by_local_X_clients"><span class="tocnumber">6.5</span> <span class="toctext">Switching the PulseAudio server used by local X clients</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#When_everything_else_seems_to_fail"><span class="tocnumber">6.6</span> <span class="toctext">When everything else seems to fail</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21"><a href="#ALSA_monitor_source"><span class="tocnumber">7</span> <span class="toctext">ALSA monitor source</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#Monitor_specific_output"><span class="tocnumber">8</span> <span class="toctext">Monitor specific output</span></a></li>
+<li class="toclevel-1 tocsection-23">
+<a href="#PulseAudio_through_JACK"><span class="tocnumber">9</span> <span class="toctext">PulseAudio through JACK</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#The_new_new_way"><span class="tocnumber">9.1</span> <span class="toctext">The new new way</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#The_new_way"><span class="tocnumber">9.2</span> <span class="toctext">The new way</span></a></li>
+<li class="toclevel-2 tocsection-26">
+<a href="#The_old_way"><span class="tocnumber">9.3</span> <span class="toctext">The old way</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#QjackCtl_with_start-up.2Fshutdown_scripts"><span class="tocnumber">9.3.1</span> <span class="toctext">QjackCtl with start-up/shutdown scripts</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-28"><a href="#PulseAudio_through_OSS"><span class="tocnumber">10</span> <span class="toctext">PulseAudio through OSS</span></a></li>
+<li class="toclevel-1 tocsection-29"><a href="#PulseAudio_from_within_a_chroot_.28e.g._32-bit_chroot_in_64-bit_install.29"><span class="tocnumber">11</span> <span class="toctext">PulseAudio from within a chroot (e.g. 32-bit chroot in 64-bit install)</span></a></li>
+<li class="toclevel-1 tocsection-30"><a href="#Disabling_automatic_spawning_of_PulseAudio_server"><span class="tocnumber">12</span> <span class="toctext">Disabling automatic spawning of PulseAudio server</span></a></li>
+<li class="toclevel-1 tocsection-31"><a href="#Disabling_pulseaudio_daemon_altogether"><span class="tocnumber">13</span> <span class="toctext">Disabling pulseaudio daemon altogether</span></a></li>
+<li class="toclevel-1 tocsection-32"><a href="#Remap_stereo_to_mono"><span class="tocnumber">14</span> <span class="toctext">Remap stereo to mono</span></a></li>
+<li class="toclevel-1 tocsection-33"><a href="#Swap_left.2Fright_channels"><span class="tocnumber">15</span> <span class="toctext">Swap left/right channels</span></a></li>
+<li class="toclevel-1 tocsection-34"><a href="#PulseAudio_as_a_minimal_unintrusive_dumb_pipe_to_ALSA"><span class="tocnumber">16</span> <span class="toctext">PulseAudio as a minimal unintrusive dumb pipe to ALSA</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Set_default_input_sources">Set default input sources</span></h2>
+<p>List available input sources
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacmd list-sources | grep -e device.string -e 'name:'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">name: &lt;input&gt;
+ device.string = "hw:2"
+name: &lt;oss_input.dsp&gt;
+ device.string = "/dev/dsp"
+name: &lt;alsa_output.pci-0000_04_01.0.analog-stereo.monitor&gt;
+name: &lt;combined.monitor&gt;</pre>
+<p>To set it as the system wide default, add your source name to /etc/pulse/default.pa
+</p>
+<pre>set-default-source <i>alsa_output.pci-0000_04_01.0.analog-stereo.monitor</i>
+</pre>
+<p>
+For temporary use
+</p>
+<pre>$ pacmd "set-default-source alsa_output.pci-0000_04_01.0.analog-stereo.monitor"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The default source can be referred as <code>@DEFAULT_SOURCE@</code> in commands, for example: <code>$ pactl set-source-mute @DEFAULT_SOURCE@ toggle</code>.</div>
+<h2><span class="mw-headline" id="Set_the_default_output_source">Set the default output source</span></h2>
+<p>Determine the name of the new source, which has a * in front of index:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacmd list-sinks | grep -e 'name:' -e 'index'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+  * index: 0
+	name: &lt;alsa_output.pci-0000_04_01.0.analog-stereo&gt;
+    index: 1
+	name: &lt;combined&gt;
+</pre>
+<p>To set it as the system wide default, add the following to <i> /etc/pulse/default.pa</i>
+</p>
+<pre>set-default-sink alsa_output.pci-0000_04_01.0.analog-stereo
+</pre>
+<p>When done then you can logout/login or restart PulseAudio manually for these changes to take effect.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> The sinks that are set as default are marked with <code>*</code> in front of the index.</li>
+<li> The numbering of sinks is not guaranteed to be persistent, so all sinks in the <code>default.pa</code> file should be identified by the name.</li>
+<li> For quick identification at runtime (e.g. to manage sound volume), you can use the sink index instead of the sink name: <pre>
+$ pactl set-sink-volume 0 +3%
+$ pactl set-sink-volume 0 -- -3%
+$ pactl set-sink-mute 0 toggle
+</pre>
+</li>
+<li> To avoid unnecessary overriding of 100% normal volume it is better to use alternative utilities for managing of sound. See the <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=124513">forum thread</a> for more information.</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The default sink can be referred as <code>@DEFAULT_SINK@</code> in commands, for example: <code>$ pactl set-sink-volume @DEFAULT_SINK@ +5%</code>.</div>
+<h2><span class="mw-headline" id="Simultaneous_HDMI_and_analog_output">Simultaneous HDMI and analog output</span></h2>
+<p>PulseAudio allows for simultaneous output to multiple sources.  In this example, some applications are configured to use HDMI while others are configured to use analog.  Multiple applications are able to receive audio at the same time.
+</p>
+<pre>$ aplay -l
+**** List of PLAYBACK Hardware Devices ****
+card 0: Intel [HDA Intel], device 0: ALC889A Analog [ALC889A Analog]
+  Subdevices: 0/1
+  Subdevice #0: subdevice #0
+card 0: Intel [HDA Intel], device 1: ALC889A Digital [ALC889A Digital]
+  Subdevices: 1/1
+  Subdevice #0: subdevice #0
+card 0: Intel [HDA Intel], device 3: HDMI 0 [HDMI 0]
+  Subdevices: 0/1
+  Subdevice #0: subdevice #0</pre>
+<p>Or by using the the <code>pacmd</code> command: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacmd list-sinks  | grep -e 'name:'  -e 'alsa.device ' -e 'alsa.subdevice '</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+	name: &lt;alsa_output.pci-0000_00_1b.0.analog-stereo&gt;
+		alsa.subdevice = "0"
+		alsa.device = "0"</pre>
+<p>The key to a configuration like this is to understand that whatever is selected in pavucontrol under <i>Configuration &gt; Internal Audio</i> is the default device. Load <i>pavucontrol &gt; Configuration</i> and select HDMI as the profile. 
+</p>
+<p>To setup the analog device as a secondary source, add the following to the <code>/etc/pulse/default.pa</code> configuration at the beginning, before any other modules are loaded: 
+</p>
+<pre>### Load analog device
+load-module module-alsa-sink device=hw:0,0
+load-module module-combine-sink sink_name=combined
+set-default-sink combined
+</pre>
+<p>Restart PulseAudio, run <i>pavucontrol</i> and select the "Output Devices" tab.  Three settings should be displayed:
+</p>
+<ol>
+<li> Internal Audio Digital Stereo (HDMI)</li>
+<li> Internal Audio</li>
+<li> Simultaneous output to Internal Audio Digital Stereo (HDMI), Internal Audio</li>
+</ol>
+<p>Now start a program that will use PulseAudio such as MPlayer, VLC, mpd, etc. and switch to the "Playback" tab. A drop-down list should be available for the running program to select one of the three sources.
+</p>
+<p>Also see <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=118026">this thread</a> for a variation on this theme and <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/PulseAudio/FAQ#Can_I_use_PulseAudio_to_playback_music_on_two_sound_cards_simultaneously.3F">PulseAudio FAQ</a>.
+</p>
+<h2><span class="mw-headline" id="HDMI_output_configuration">HDMI output configuration</span></h2>
+<p>As outlined in <a rel="nofollow" class="external free" href="ftp://download.nvidia.com/XFree86/gpu-hdmi-audio-document/gpu-hdmi-audio.html#_issues_in_pulseaudio">ftp://download.nvidia.com/XFree86/gpu-hdmi-audio-document/gpu-hdmi-audio.html#_issues_in_pulseaudio</a> unless the HDMI port is the first
+output, PulseAudio will not be able to have any audio when using certain graphics cards with HDMI audio support. This is because of a bug in PulseAudio where it will only select the first HDMI output on a device. A work around posted further down is to first find which HDMI output is working by using the aplay utility from ALSA.
+</p>
+<p>The original title for this section indicated the problem is specific to nVidia cards. As seen in <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=133222">this forum thread</a> other cards are affected as well. The rest of the section will use an nVidia card as a case-study but the solution should carry over for people using other affected cards.
+</p>
+<h3><span class="mw-headline" id="Finding_HDMI_output">Finding HDMI output</span></h3>
+<p>Then find the working output by listing the available cards
+</p>
+<pre># aplay -l
+</pre>
+<pre>sample output:
+ **** List of PLAYBACK Hardware Devices ****
+ card 0: NVidia [HDA NVidia], device 0: ALC1200 Analog [ALC1200 Analog]
+   Subdevices: 1/1
+   Subdevice #0: subdevice #0
+ card 0: NVidia [HDA NVidia], device 3: ALC1200 Digital [ALC1200 Digital]
+   Subdevices: 1/1
+   Subdevice #0: subdevice #0
+ card 1: NVidia_1 [HDA NVidia], device 3: HDMI 0 [HDMI 0]
+   Subdevices: 1/1
+   Subdevice #0: subdevice #0
+ card 1: NVidia_1 [HDA NVidia], device 7: HDMI 0 [HDMI 0]
+   Subdevices: 0/1
+   Subdevice #0: subdevice #0
+ card 1: NVidia_1 [HDA NVidia], device 8: HDMI 0 [HDMI 0]
+   Subdevices: 1/1
+   Subdevice #0: subdevice #0
+ card 1: NVidia_1 [HDA NVidia], device 9: HDMI 0 [HDMI 0]
+   Subdevices: 1/1
+   Subdevice #0: subdevice #0
+</pre>
+<h3><span class="mw-headline" id="Testing_for_the_correct_card">Testing for the correct card</span></h3>
+<p>Now a list of the detected cards is known, users will need to test for which one is outputting to the TV/monitor
+</p>
+<pre># aplay -D plughw:1,3 /usr/share/sounds/alsa/Front_Right.wav
+</pre>
+<p>where 1 is the card and 3 is the device substitute in the values listed from the previous section. If there is no audio, then try substituting a different device (on my card I had to use card 1 device 7)
+</p>
+<h3><span class="mw-headline" id="Manually_configuring_PulseAudio_to_detect_the_Nvidia_HDMI">Manually configuring PulseAudio to detect the Nvidia HDMI</span></h3>
+<p>Having identified which HDMI device is working, PulseAudio can be forced to use it via an edit to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre># load-module module-alsa-sink device=hw:1,7
+</pre>
+<p>where the 1 is the card and the 7 is the device found to work in the previous section
+</p>
+<p>restart pulse audio
+</p>
+<pre> $ pulseaudio -k
+ $ pulseaudio --start
+</pre>
+<p>open the sound settings manager, make sure that under the hardware tab the graphics cards HDMI audio is set to "Digital Stereo (HDMI) Output" (My graphics card audio is called "GF100 High Definition Audio Controller").
+</p>
+<p>Then, open the output tab. There should now be two HDMI outputs for the graphics card. Test which one works by selecting one of them, and then using a program to play audio. For example, use VLC to play a movie, and if it does not work, then select the other.
+</p>
+<h3><span class="mw-headline" id="Automatically_switch_audio_to_HDMI">Automatically switch audio to HDMI</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Dodgy code, e.g. hardcodes DISPLAY (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PulseAudio/Examples">Talk:PulseAudio/Examples#</a>)</div>
+</div>
+<p>Create a script to switch to the desired audio profile if an HDMI cable is plugged in:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/hdmi_sound_toggle.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+USER_NAME=$(w -hs | awk -v vt=tty$(fgconsole) '$0 ~ vt {print $1}')
+USER_ID=$(id -u "$USER_NAME")
+HDMI_STATUS=$(&lt;/sys/class/drm/card0/*HDMI*/status)
+
+export PULSE_SERVER="unix:/run/user/"$USER_ID"/pulse/native"
+
+if [[ $HDMI_STATUS == connected ]]
+then
+   sudo -u "$USER_NAME" pactl --server "$PULSE_SERVER" set-card-profile 0 output:hdmi-stereo+input:analog-stereo
+else
+   sudo -u "$USER_NAME" pactl --server "$PULSE_SERVER" set-card-profile 0 output:analog-stereo+input:analog-stereo
+fi
+</pre>
+<p>Make the script executable:
+</p>
+<pre>chmod +x /usr/local/bin/hdmi_sound_toggle.sh
+</pre>
+<p>Create a udev rule to run this script when the status of the HDMI change:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>udev rule can't directly run a script, a workaround is to use a .service to run this script</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-hdmi_sound.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="card0", SUBSYSTEM=="drm", ACTION=="change", RUN+="/usr/bin/systemctl start hdmi_sound_toggle.service"</pre>
+<p>Finally, create the .service file required by the udev rule above:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/hdmi_sound_toggle.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=hdmi sound hotplug
+
+[Service]
+Type=simple
+RemainAfterExit=no
+ExecStart=/usr/local/bin/hdmi_sound_toggle.sh
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>To make the change effective don't forget to reload the udev rules:
+</p>
+<pre>udevadm control --reload-rules
+</pre>
+<p>You'll also need to reload the systemd units.
+</p>
+<pre>systemctl daemon-reload
+</pre>
+<p>A reboot can be required.
+</p>
+<h2><span class="mw-headline" id="Surround_sound_systems">Surround sound systems</span></h2>
+<p>Many people have a surround sound card, but have speakers for just two channels, so PulseAudio cannot really default to a surround sound setup. To enable all of the channels, edit <code>/etc/pulse/daemon.conf</code>: uncomment the default-sample-channels line (i.e. remove the semicolon from the beginning of the line) and set the value to <b>6</b>. For a <i>5.1</i> setup, or <b>8</b> for a <i>7.1</i> setup etc.
+</p>
+<pre># Default
+default-sample-channels=2
+# For 5.1
+default-sample-channels=6
+# For 7.1
+default-sample-channels=8
+</pre>
+<p>If your channels are not correclty mapped or the volume controls for the individual channels do not work as expected in pavucontrol, and you have a HDMI and an anlog soundcard, then try to add the following line to <code>/etc/pulse/default.pa</code>
+</p>
+<pre>load-module module-combine channels=6 channel_map=front-left,front-right,rear-left,rear-right,front-center,lfe
+</pre>
+<p>Note that this example is for a 5.1 setup.
+</p>
+<p>After doing the edit, restart PulseAudio.
+</p>
+<h3><span class="mw-headline" id="Splitting_front.2Frear">Splitting front/rear</span></h3>
+<p>Connect speakers to front analog output and headphones to rear output. It would be useful to split front/rear to separate sinks. Add to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre> load-module module-remap-sink sink_name=speakers remix=no master=alsa_output.pci-0000_05_00.0.analog-surround-40 channels=2 master_channel_map=front-left,front-right channel_map=front-left,front-right
+ load-module module-remap-sink sink_name=headphones remix=no master=alsa_output.pci-0000_05_00.0.analog-surround-40 channels=2 master_channel_map=rear-left,rear-right channel_map=front-left,front-right
+</pre>
+<p>Make sure to replace alsa_output.pci-0000_05_00.0.analog-surround-40 with the sound card name shown in 'pacmd list-sinks'.
+Now you have 2 additional sinks which can be used separately. You can choose 'sink_name' freely, as long as there is no sink with that name already. The 'remix' parameter controls whether the audio should be down-/upmixed to match the channels in the sink.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If pulseaudio fails with <code>master sink not found</code>, comment out the remapping lines, start PulseAudio and verify your card output is set to the one you specified (e.g. analog surround 4.0). Alternatively, try using a <a href="#Set_the_default_output_source">sink index</a> instead of a sink name.</div>
+<h3><span class="mw-headline" id="Splitting_7.1_into_5.1.2B2.0">Splitting 7.1 into 5.1+2.0</span></h3>
+<p>Similar to the example above, you can also split a 7.1 configuration into 5.1 surround and stereo output devices.
+Set your card to 7.1 mode, then add the following lines to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre> load-module module-remap-sink sink_name=Surround remix=no master=alsa_output.pci-0000_00_14.2.analog-surround-71 channels=6 master_channel_map=front-left,front-right,rear-left,rear-right,front-center,lfe channel_map=front-left,front-right,rear-left,rear-right,front-center,lfe
+ load-module module-remap-sink sink_name=Stereo remix=no master=alsa_output.pci-0000_00_14.2.analog-surround-71 channels=2 master_channel_map=side-left,side-right channel_map=front-left,front-right
+</pre>
+<p>Make sure to replace alsa_output.pci-0000_00_14.2 with your sound card name, get it by running 'pacmd list-sinks'.
+This configuration will use the front/rear/center+lfe (green/black/orange) jacks for the 5.1 sink and the side (grey) jack for the stereo sink.
+It will also downmix any audio to stereo for the stereo sink, but will not touch the 5.1 output.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If pulseaudio fails with <code>master sink not found</code>, comment out the remapping lines, start PulseAudio and verify your card output is set to analog surround 7.1. Alternatively, try using a <a href="#Set_the_default_output_source">sink index</a> instead of a sink name.</div>
+<h3><span class="mw-headline" id="Disabling_LFE_remixing">Disabling LFE remixing</span></h3>
+<p>By default, PulseAudio remixes the number of channels to the default-sample-channels and since version 7 it also remixes the LFE channel. If you wish to disable LFE remixing, uncomment the line:
+</p>
+<pre>; enable-lfe-remixing = yes
+</pre>
+<p>and replace yes with no:
+</p>
+<pre>enable-lfe-remixing = no
+</pre>
+<p>then restart Pulseaudio.
+</p>
+<h3><span class="mw-headline" id="Binaural_Headphones">Binaural Headphones</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ladspa-bs2b/">ladspa-bs2b</a></span><sup><small>AUR</small></sup> provides a plugin to simulate surround sound on stereo headphones. To use it, find your headphones with:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pacmd list-sinks | grep -e 'name:'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+	name: &lt;alsa_output.pci-0000_00_1b.0.iec958-ac3-surround-51&gt;
+	name: &lt;alsa_output.pci-0000_00_1b.0.iec958-ac3-surround-51.equalizer&gt;
+	name: &lt;bluez_sink.00_1F_82_28_93_51&gt;
+</pre>
+<p>Load the plugin (<i>new</i> sink_name is up to you, master=<i>headphone's sink name</i>):
+</p>
+<pre>pacmd load-module module-ladspa-sink sink_name=binaural master=bluez_sink.00_1F_82_28_93_51 plugin=bs2b label=bs2b control=700,4.5
+</pre>
+<p>Use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pavucontrol">pavucontrol</a></span> to transfer streams to the new sink, or:
+</p>
+<pre>pactl move-sink-input $INPUTID $BINAURALSINKNAME
+</pre>
+<h2><span class="mw-headline" id="PulseAudio_over_network">PulseAudio over network</span></h2>
+<p>One of PulseAudio's unique features is its ability to stream audio from clients over TCP to a server running the PulseAudio daemon reliably within a LAN. Ensure that client and server systems agree on the time (e.g. use NTP), or audio streams may be choppy or may not work at all.
+</p>
+<p>To accomplish this, one needs to enable module-native-protocol-tcp. 
+</p>
+<h3><span class="mw-headline" id="TCP_support_.28networked_sound.29">TCP support (networked sound)</span></h3>
+<p>To enable the TCP module, add this to (or uncomment, if already there) <code>/etc/pulse/default.pa</code> on both the client and server:
+</p>
+<pre>load-module module-native-protocol-tcp
+</pre>
+<p>For this to work, it is a requirement that both the client and server share the same cookie. Ensure that the clients and server share the same cookie file found under <code>~/.config/pulse/cookie</code>. It does not matter whose cookie file you use (the server or a client's), just that the server and client(s) share the same one.
+</p>
+<p>Note: If experiencing trouble connecting, use (on server)
+</p>
+<pre>pacmd list-modules
+</pre>
+<h3><span class="mw-headline" id="TCP_support_with_anonymous_clients">TCP support with anonymous clients</span></h3>
+<p>If it is undesirable to copy the cookie file from clients, anonymous clients can access the server by giving these parameters to module-native-protocol-tcp on the server (again in <code>/etc/pulse/default.pa</code>):
+</p>
+<pre> load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1;192.168.0.0/24 auth-anonymous=1
+</pre>
+<p>Change the LAN IP subnet to match that of the those clients you wish to have access to the server.
+</p>
+<h3><span class="mw-headline" id="Zeroconf_.28Avahi.29_publishing">Zeroconf (Avahi) publishing</span></h3>
+<p>For the remote PulseAudio server to appear in the PulseAudio Device Chooser (<code>pasystray</code>), load the appropriate zeroconf modules, and enable the <a href="../../en/Avahi.html" title="Avahi">Avahi</a> <a href="../../en/Daemons.html" title="Daemon" class="mw-redirect">daemon</a>.
+</p>
+<p>On both machines, <a href="../../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>avahi-daemon</code> systemd unit.
+</p>
+<p>On the server, add <code>load-module module-zeroconf-publish</code> to <code>/etc/pulse/default.pa</code>, on the client, add <code>load-module module-zeroconf-discover</code> to <code>/etc/pulse/default.pa</code>. Now redirect any stream or complete audio output to the remote PulseAudio server by selecting the appropriate sink.
+</p>
+<p>If you have issues with the remote syncs appearing on the client, try restarting the Avahi daemon on the server to rebroadcast the available interfaces.
+</p>
+<h3><span class="mw-headline" id="Selecting_the_Server">Selecting the Server</span></h3>
+<p>Run the graphical PulseAudio Volume Control <code>pavucontrol</code>.  Under the <b>Output Devices</b> tab, you should see the local and remote output devices.  Under the <b>Playback</b> tab, to the left of the "X" Mute Audio button, you should see a box containing the name of an output device.  That box is <i>actually a button</i>, which will display a drop-down radio-button list of the available output devices, with one output device selected.  Selecting an output device from the list will allow the audio stream to be switched to the PulseAudio server associated with that output device.  This control is not at all obvious until you have used it, and is especially useful with a remote Headless sound server.
+</p>
+<p>Similarly, under the <b>Input Devices</b> tab, local and remote input devices will be seen.  And under the <b>Recording</b> tab, there will be a box, to the left of the "X" Mute Audio button, with the name of an input device which is actually a button which will display a drop-down radio-button list of available input devices.
+</p>
+<p>Run <code>pavucontrol</code> on the local or remote host associated with the audio stream to be directed.  For instance, run <code>pavucontrol</code> on the remote host to direct the remote audio output to the local host.  Run <code>pavucontrol</code> on the local host to direct the local audio output to some remote host.
+</p>
+<p>Setting up simultaneous inputs or outputs is a different thing.  Search about "monitor" and "module-combine-sink" for that.
+</p>
+<h3><span class="mw-headline" id="Switching_the_PulseAudio_server_used_by_local_X_clients">Switching the PulseAudio server used by local X clients</span></h3>
+<p>To switch between servers on the client from within X, the <code>pax11publish</code> command can be used.  For example, to switch from the default server to the server at hostname foo:
+</p>
+<pre>$ pax11publish -e -S foo
+</pre>
+<p>Or to switch back to the default:
+</p>
+<pre>$ pax11publish -e -r
+</pre>
+<p>Instead of telling the PulseAudio server to stream audio (as described above), this will edit PulseAudio variables on the X11 root window, which will instruct the PulseAudio client libraries to connect to a PulseAudio server other than <code>localhost</code>. As such, the programs will no longer interact with the local <code>pulseaudio</code> process, which can then be <a href="../../en/Systemd.html#Using_units" title="Stop" class="mw-redirect">stopped</a>. Programs such as <code>pactl</code>, <code>pacmd</code> or <code>pavucontrol</code> will need to also run with the appropriate <code>PULSE_SERVER</code> environment/X variable to control the remote PulseAudio server.
+</p>
+<p>Note that for the switch to become apparent, the programs using Pulse must be restarted, or their PulseAudio client library otherwise reinitialized (completely stopping and restarting playback may be enough). To make this setting permanent, edit <code>default-server</code> in <code>~/.config/pulse/client.conf</code> or <code>/etc/pulse/client.conf</code>.
+</p>
+<h3><span class="mw-headline" id="When_everything_else_seems_to_fail">When everything else seems to fail</span></h3>
+<p>The following is a quick fix and NOT a permanent solution
+</p>
+<p>On the server:
+</p>
+<pre> $ paprefs 
+</pre>
+<p>Go to Network Access -&gt; Enable access to local sound devices (Also check both 'Allow discover' and 'Don't require authentication').
+</p>
+<p>On the client:
+</p>
+<pre> $ export PULSE_SERVER=server.ip &amp;&amp; mplayer test.mp3
+</pre>
+<h2><span class="mw-headline" id="ALSA_monitor_source">ALSA monitor source</span></h2>
+<p>To be able to record from a monitor source (a.k.a. "What-U-Hear", "Stereo Mix"), use <code>pactl list</code> to find out the name of the source in PulseAudio (e.g. <code>alsa_output.pci-0000_00_1b.0.analog-stereo.monitor</code>). Then add lines like the following to <code>/etc/asound.conf</code> or <code>~/.asoundrc</code>:
+</p>
+<pre>pcm.pulse_monitor {
+  type pulse
+  device alsa_output.pci-0000_00_1b.0.analog-stereo.monitor
+}
+
+ctl.pulse_monitor {
+  type pulse
+  device alsa_output.pci-0000_00_1b.0.analog-stereo.monitor
+}
+</pre>
+<p>Now you can select <code>pulse_monitor</code> as a recording source.
+</p>
+<p>Alternatively, you can use pavucontrol to do this: make sure you have set up the display to "All input devices", then select "Monitor of [your sound card]" as the recording source.
+</p>
+<h2><span class="mw-headline" id="Monitor_specific_output">Monitor specific output</span></h2>
+<p>It is possible to monitor a specific output, for example to stream audio from a music player into a VOIP application.
+Simply create a null output device:
+</p>
+<pre>pactl load-module module-null-sink sink_name=&lt;name&gt;
+</pre>
+<p>In Pulseaudio Volume Control (pavucontrol), under the "Playback" tab, change the output of an application to &lt;name&gt;, and in the recording tab change the input of an application to "Monitor of &lt;name&gt;". Audio will now be outputted from one application into the other.
+</p>
+<h2><span class="mw-headline" id="PulseAudio_through_JACK">PulseAudio through JACK</span></h2>
+<h3><span class="mw-headline" id="The_new_new_way">The new new way</span></h3>
+<p>This configuration only works with jackdbus (JACK2 compiled with D-Bus support). It also requires the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pulseaudio-jack">pulseaudio-jack</a></span> package. Make sure that <code>/etc/pulse/default.pa</code> contains a line:
+</p>
+<pre>load-module module-jackdbus-detect <i>options</i>
+</pre>
+<p>Where <code><i>options</i></code> can be any options supported by this module, usually <code>channels=2</code>.
+</p>
+<p>As described on the <a rel="nofollow" class="external text" href="https://github.com/jackaudio/jackaudio.github.com/wiki/JackDbusPackaging">Jack-DBUS Packaging</a> page:
+</p>
+<p><i>Server auto-launching is implemented as D-Bus call that auto-activates JACK D-Bus service, in case it is not already started, and starts the JACK server. Correct interaction with PulseAudio is done using a D-Bus based audio card "acquire/release" mechanism. When JACK server starts, it asks this D-Bus service to acquire the audio card and PulseAudio will unconditionally release it. When JACK server stops, it releases the audio card that can be grabbed again by PulseAudio.</i>
+</p>
+<p><code>module-jackdbus-detect.so</code> dynamically loads and unloads module-jack-sink and module-jack-source when jackdbus is started and stopped.
+</p>
+<p>If PulseAudio sound does not work, check with <code>pavucontrol</code> to see if the relevant programs appear in the playback tab. If not, add the following to <code>~/.asound.conf</code> or <code>/etc/asound.conf</code> to redirect ALSA to PulseAudio:
+</p>
+<pre>pcm.pulse {
+    type pulse
+}
+
+ctl.pulse {
+    type pulse
+}
+
+pcm.!default {
+    type pulse
+}
+ctl.!default {
+    type pulse
+}
+</pre>
+<p>If it still does not work, check with <code>pavucontrol</code> in the playback tab and make sure the relevant programs are outputting to PulseAudio JACK Sink instead of your audio card (which JACK has control of, so it will not work).
+</p>
+<h3><span class="mw-headline" id="The_new_way">The new way</span></h3>
+<p>The basic idea is that killing PulseAudio is a bad idea because it may crash any apps using PulseAudio and disrupt any audio playing.
+</p>
+<p>The flow of how this setup works:
+</p>
+<ol>
+<li> PulseAudio releases the sound card</li>
+<li> JACK grabs sound card and starts up</li>
+<li> script redirects PulseAudio to JACK</li>
+<li> manually send PulseAudio apps to JACK output (pavucontrol may come in helpful for this)</li>
+<li> use JACK programs etc</li>
+<li> via script, stop redirecting PulseAudio to JACK</li>
+<li> stop JACK and release sound card</li>
+<li> PulseAudio grabs sound card and reroutes audio to it directly</li>
+</ol>
+<p>With QJackCTL, set up these scripts:
+</p>
+<p><code>pulse-jack-pre-start.sh</code> set it up as the execute script on startup script
+</p>
+<pre>#!/bin/bash
+pacmd suspend true
+</pre>
+<p><code>pulse-jack-post-start.sh</code> set this one up as execute script after startup
+</p>
+<pre>#!/bin/bash
+pactl load-module module-jack-sink channels=2
+pactl load-module module-jack-source channels=2
+pacmd set-default-sink jack_out
+pacmd set-default-source jack_in
+</pre>
+<p><code>pulse-jack-pre-stop.sh</code> "execute script on shutdown"
+</p>
+<pre>#!/bin/bash
+SINKID=$(pactl list | grep -B 1 "Name: module-jack-sink" | grep Module | sed 's/[^0-9]//g')
+SOURCEID=$(pactl list | grep -B 1 "Name: module-jack-source" | grep Module | sed 's/[^0-9]//g')
+pactl unload-module $SINKID
+pactl unload-module $SOURCEID
+sleep 5
+</pre>
+<p><code>pulse-jack-post-stop.sh</code> "execute script after shutdown"
+</p>
+<pre>#!/bin/bash
+pacmd suspend false
+</pre>
+<h3><span class="mw-headline" id="The_old_way">The old way</span></h3>
+<p>The JACK-Audio-Connection-Kit is popular for audio work, and is widely supported by Linux audio applications. It fills a similar niche as PulseAudio, but with more of an emphasis on professional audio work. In particular, audio applications such as Ardour and Audacity (recently) work well with Jack.
+</p>
+<p>PulseAudio provides module-jack-source and module-jack-sink which allow PulseAudio to be run as a sound server above the JACK daemon. This allows the usage of per-volume adjustments and the like for the apps which need it, play-back apps for movies and audio, while allowing low-latency and inter-app connectivity for sound-processing apps which connect to JACK. However, this will prevent PulseAudio from directly writing to the sound card buffers, which will increase overall CPU usage.
+</p>
+<p>To just try PA on top of JACK, have PA load the necessary modules on start:
+</p>
+<pre>pulseaudio -L module-jack-sink -L module-jack-source
+</pre>
+<p>To use PulseAudio with JACK, JACK must be started before PulseAudio, using whichever method one prefers. PulseAudio then needs to be started loading the two relevant modules. Edit <code>/etc/pulse/default.pa</code>, and change the following region:
+</p>
+<pre>### Load audio drivers statically (it is probably better to not load
+### these drivers manually, but instead use module-hal-detect --
+### see below -- for doing this automatically)
+#load-module module-alsa-sink
+#load-module module-alsa-source device=hw:1,0
+#load-module module-oss device="/dev/dsp" sink_name=output source_name=input
+#load-module module-oss-mmap device="/dev/dsp" sink_name=output source_name=input
+#load-module module-null-sink
+#load-module module-pipe-sink
+
+### Automatically load driver modules depending on the hardware available
+.ifexists module-udev-detect.so
+load-module module-udev-detect
+.else
+### Alternatively use the static hardware detection module (for systems that
+### lack udev support)
+load-module module-detect
+.endif
+</pre>
+<p>to the following:
+</p>
+<pre>### Load audio drivers statically (it is probably better to not load
+### these drivers manually, but instead use module-hal-detect --
+### see below -- for doing this automatically)
+#load-module module-alsa-sink
+#load-module module-alsa-source device=hw:1,0
+#load-module module-oss device="/dev/dsp" sink_name=output source_name=input
+#load-module module-oss-mmap device="/dev/dsp" sink_name=output source_name=input
+#load-module module-null-sink
+#load-module module-pipe-sink
+load-module module-jack-source
+load-module module-jack-sink
+
+### Automatically load driver modules depending on the hardware available
+#.ifexists module-udev-detect.so
+#load-module module-udev-detect
+#.else
+### Alternatively use the static hardware detection module (for systems that
+### lack udev support)
+#load-module module-detect
+#.endif
+</pre>
+<p>Basically, this prevents module-udev-detect from loading. module-udev-detect will always try to grab the sound card (JACK has already done that, so this will cause an error). Also, the JACK source and sink must be explicitly loaded.
+</p>
+<h4><span class="mw-headline" id="QjackCtl_with_start-up.2Fshutdown_scripts">QjackCtl with start-up/shutdown scripts</span></h4>
+<p>Using the settings listed above, use QjackCtl to execute a script upon startup and shutdown to load/unload PulseAudio. Part of the reason users may wish to do this is that the above changes disable PulseAudio's automatic hardware detection modules. This particular setup is for using PulseAudio in an exclusive fashion with JACK, though the scripts could be modified to unload and load an alternate non-JACK setup, but killing and starting PulseAudio while programs might be using it would become problematic.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>padevchooser in the following example is deprecated. It is replaced by pasystray</div>
+<p>The following example could be used and modified as necessary as a startup script that daemonizes PulseAudio and loads the <i>padevchooser</i> program (optional, needs to be built from AUR) called <code>jack_startup</code>:
+</p>
+<pre>#!/bin/bash
+#Load PulseAudio and PulseAudio Device Chooser
+
+pulseaudio -D
+padevchooser&amp;
+</pre>
+<p>as well as a shutdown script to kill PulseAudio and the Pulse Audio Device Chooser, as another example called <code>jack_shutdown</code> also in the home directory:
+</p>
+<pre>#!/bin/bash
+#Kill PulseAudio and PulseAudio Device Chooser
+
+pulseaudio --kill
+killall padevchooser
+</pre>
+<p>Both scripts need to be made executable:
+</p>
+<pre>chmod +x jack_startup jack_shutdown
+</pre>
+<p>then with QjackCtl loaded, click on the <i>Setup</i> button and then the <i>Options</i> tab and tick both "Execute Script after Startup:" And "Execute Script on Shutdown:" and put either use the ... button or type the path to the scripts (assuming the scripts are in the home directory) <code>~/jack_startup</code> and <code>~/jack_shutdown</code> making sure to save the changes.
+</p>
+<h2><span class="mw-headline" id="PulseAudio_through_OSS">PulseAudio through OSS</span></h2>
+<p>Add the following to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre>load-module module-oss
+</pre>
+<p>Then start PulseAudio as usual, making sure that sinks and sources are defined for OSS devices.
+</p>
+<h2><span class="mw-headline" id="PulseAudio_from_within_a_chroot_.28e.g._32-bit_chroot_in_64-bit_install.29">PulseAudio from within a chroot (e.g. 32-bit chroot in 64-bit install)</span></h2>
+<p>Since a chroot sets up an alternative root for the running/jailing of applications, PulseAudio must be installed within the chroot itself (<code>pacman -S pulseaudio</code> within the chroot environment).
+</p>
+<p>PulseAudio, if not set up to connect to any specific server (this can be done in <code>/etc/pulse/client.conf</code>, through the PULSE_SERVER environment variable, or through publishing to the local X11 properties using module-x11-publish), will attempt to connect to the local pulse server, failing which it will spawn a new pulse server. Each pulse server has a unique ID based on the machine-id value in <code>/var/lib/dbus</code>. To allow for chrooted apps to access the pulse server, the following directories must be mounted within the chroot:-
+</p>
+<pre>/run
+/var/lib/dbus
+/tmp
+~/config/.pulse
+</pre>
+<p><code>/dev/shm</code> should also be mounted for efficiency and good performance. Note that mounting /home would normally also allow sharing of the <code>~/.pulse</code> folder.
+</p>
+<p>PulseAudio selects the path to the socket via XDG_RUNTIME_DIR, so be sure to drag it along when you chroot as a normal user using <a href="../../en/Sudo.html" title="Sudo">sudo</a> (see <a href="../../en/Sudo.html#Environment_variables" title="Sudo">Sudo#Environment variables</a>).
+</p>
+<p>For specific direction on accomplishing the appropriate mounts, please refer to the wiki on installing a bundled 32-bit system, especially the <a href="../../en/Install_bundled_32-bit_system_in_64-bit_system.html#Allow_32-bit_applications_access_to_64-bit_PulseAudio" title="Install bundled 32-bit system in Arch64" class="mw-redirect">additional section</a> specific to PulseAudio.
+</p>
+<h2><span class="mw-headline" id="Disabling_automatic_spawning_of_PulseAudio_server">Disabling automatic spawning of PulseAudio server</span></h2>
+<p>Some users may prefer to manually start the PulseAudio server before running certain programs and then stop the PulseAudio server when they are finished. A simple way to accomplish this is to edit <code>~/.config/pulse/client.conf</code> or <code>/etc/pulse/client.conf</code> and change <code>autospawn = yes</code> to <code>autospawn=no</code>. Make sure the line is uncommented as well.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/pulse/client.conf #or /etc/pulse/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+autospawn=no
+</pre>
+<p>Now you can manually start the pulseaudio server with
+</p>
+<pre>$ pulseaudio --start
+</pre>
+<p>and stop it with
+</p>
+<pre>$ pulseaudio --kill
+</pre>
+<p>This setting is also respected by the default pulseaudio dektop session startup script <code>start-pulseaudio-x11</code> which is executed from <code>/etc/xdg/autostart/pulseaudio.desktop</code>.
+</p>
+<h2><span class="mw-headline" id="Disabling_pulseaudio_daemon_altogether">Disabling pulseaudio daemon altogether</span></h2>
+<p>To disable the pulseaudio daemon completely, and thereby preventing it from starting, one can add <code>daemon-binary=/bin/true</code> to the configuration file.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/pulse/client.conf #or /etc/pulse/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">daemon-binary=/bin/true</pre>
+<h2><span class="mw-headline" id="Remap_stereo_to_mono">Remap stereo to mono</span></h2>
+<p>Remap a stereo input-sink to a mono sink by creating a virtual sink. It would be useful if you only have one speaker. Add to <code>/etc/pulse/default.pa</code>:
+</p>
+<pre>load-module module-remap-sink master=alsa_output.pci-0000_00_1f.5.analog-stereo sink_name=mono channels=2 channel_map=mono,mono
+# Optional: Select new remap as default
+set-default-sink mono
+</pre>
+<p>(replace alsa_output.pci-0000_00_1f.5.analog-stereo in the sound card name shown from <code>pacmd list-sinks</code>)
+</p>
+<p>Switch player between virtual mono sink and real stereo sink.
+</p>
+<h2><span class="mw-headline" id="Swap_left.2Fright_channels">Swap left/right channels</span></h2>
+<p>This is the same as "reverse stereo", where the left and right channels are to be swapped.
+</p>
+<p>First, identify the card you want its channels swapped:
+</p>
+<pre>$ cat /proc/asound/cards
+</pre>
+<p>and use the name string for the device you wish to use (the one in square brackets, e.g. [Intel]).
+</p>
+<p>Edit <code>/etc/pulse/default.pa</code> and comment out module-hal-detect and module-detect lines.
+</p>
+<p>Search for the commented-out line that starts "#load-module module-alsa-sink", uncomment it and change it to
+</p>
+<pre>load-module module-alsa-sink device=hw:[device name] channel_map=right,left
+</pre>
+<p>Restart the pulseaudio deamon by running
+</p>
+<pre>pulseaudio -k; pulseaudio -D
+</pre>
+<p><a rel="nofollow" class="external text" href="https://www.freedesktop.org/wiki/Software/PulseAudio/FAQ/#index34h3">Pulseaudio FAQ: How can I reverse my left and right speaker channels?</a>
+</p>
+<h2><span class="mw-headline" id="PulseAudio_as_a_minimal_unintrusive_dumb_pipe_to_ALSA">PulseAudio as a minimal unintrusive dumb pipe to ALSA</span></h2>
+<p>Some people do not want to run PulseAudio all the time for various reasons. This example will turn the full fledged audio server into an unobstrusive dumb pipe to ALSA devices that automatically starts <b>and</b> stops itself when done, allowing applications that requires PulseAudio to fully function while not touching any ALSA setting nor setting itself as the default ALSA device.
+</p>
+<p>This configuration tells native PA clients to autospawn the daemon when they need it, then the daemon is configured to autoexit as soon as all clients have disconnected. The daemon itself uses a plain simple static configuration that uses your configured <code>pcm.!default</code> ALSA devices and nothing more. No replacement of ALSA's default, no playing with mixer levels, nothing but record/playback. Also make sure <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pulseaudio-alsa">pulseaudio-alsa</a></span> is <b>not</b> installed so standard ALSA clients don't default to pulse. <code>alsamixer</code> functions properly as well as any other ALSA clients. Also make sure common frameworks like Xine, Gstreamer and Phonon are configured to use ALSA: by default if they detect PulseAudio is installed they will try to use it before ALSA.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/daemon.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Replace these with the proper values
+exit-idle-time = 0 # Exit as soon as unneeded
+flat-volumes = yes # Prevent messing with the master volume
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Replace these with the proper values
+
+# Applications that uses PulseAudio *directly* will spawn it,
+# use it, and pulse will exit itself when done because of the
+# exit-idle-time setting in daemon.conf
+autospawn = yes
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pulse/default.pa</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Replace the *entire* content of this file with these few lines and
+# read the comments
+
+.fail
+    # Set tsched=0 here if you experience glitchy playback. This will
+    # revert back to interrupt-based scheduling and should fix it.
+    #
+    # Replace the device= part if you want pulse to use a specific device
+    # such as "dmix" and "dsnoop" so it doesn't lock an hw: device.
+    
+    # INPUT/RECORD
+    load-module module-alsa-source device="default" tsched=1
+    
+    # OUTPUT/PLAYBACK
+    load-module module-alsa-sink device="default" tsched=1 
+    
+    # Accept clients -- very important
+    load-module module-native-protocol-unix
+
+.nofail
+.ifexists module-x11-publish.so
+    # Publish to X11 so the clients know how to connect to Pulse. Will
+    # clear itself on unload.
+    load-module module-x11-publish
+.endif
+</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Sound.html" title="Category:Sound">Sound</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=PulseAudio/Examples&amp;oldid=452738">https://wiki.archlinux.org/index.php?title=PulseAudio/Examples&amp;oldid=452738</a>"</li>
+					<li id="lastmod"> This page was last modified on 2 October 2016, at 20:25.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

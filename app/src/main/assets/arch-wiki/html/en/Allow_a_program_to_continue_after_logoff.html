@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Allow a program to continue after logoff - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Allow_a_program_to_continue_after_logoff skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Allow a program to continue after logoff</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Needs better introduction, the section <a href="#Conclusion">#Conclusion</a> is useless. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Allow_a_program_to_continue_after_logoff">Talk:Allow a program to continue after logoff#</a>)</div>
+</div>
+<p>Have you ever had the need to leave a program running after you have logged off? 
+</p>
+<p>This article will show you how to easily achieve this goal. The things you need to do differ depending on if you are trying to keep a console application running (e.g. mutt, centerICQ) or a X application running (e.g. gaim, graveman).  I have created a section for each scenario.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Console_applications"><span class="tocnumber">1</span> <span class="toctext">Console applications</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#X_applications"><span class="tocnumber">2</span> <span class="toctext">X applications</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Secondary_X_server"><span class="tocnumber">2.1</span> <span class="toctext">Secondary X server</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#xpra"><span class="tocnumber">2.2</span> <span class="toctext">xpra</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#X2Go"><span class="tocnumber">2.3</span> <span class="toctext">X2Go</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Conclusion"><span class="tocnumber">3</span> <span class="toctext">Conclusion</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Console_applications">Console applications</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Needs expansion with regard to <a href="../en/Systemd.html" title="Systemd">systemd</a> and its <code>KillUserProcesses</code> option. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Allow_a_program_to_continue_after_logoff">Talk:Allow a program to continue after logoff#</a>)</div>
+</div>
+<p>You can use a terminal multiplexer to create a session and launch some program inside it. Then you can detach from the session and leave it running in background. When you reattach later (even after logout), you will find the session in the state you left it.
+</p>
+<p>Popular terminal multiplexers are <a href="../en/GNU_Screen.html" title="Screen" class="mw-redirect">screen</a> and <a href="../en/Tmux.html" title="Tmux">tmux</a>.
+</p>
+<h2><span class="mw-headline" id="X_applications">X applications</span></h2>
+<h3><span class="mw-headline" id="Secondary_X_server">Secondary X server</span></h3>
+<p>xmove project seems dead, many applications do not work inside the xmove pseudo server. So an other solution is using a secondary real <b>X server</b>.
+</p>
+<p>With your favourite editor make a script with this content, use <b>chmod</b> to make it executable (<code>chmod a+x scriptname.sh</code>).
+</p>
+<pre>#!/bin/sh
+
+if [ $# -eq 0 ] ; then # check to see if arguments are given (color depth)
+    a=24        # default color depth
+else
+    a=$1        # use given argument
+fi
+
+if [ $a -ne 8 -a $a -ne 16 -a $a -ne 24 ] ; then
+    echo "Invalid color depth. Use 8, 16, or 24."
+    exit 1
+fi
+
+for display in 0 1 2 3 4 5 ; do
+    if [ ! -f "/tmp/.X$display-lock" ] ; then
+        exec startx -- :$display -depth $a -quiet
+        exit 0
+    fi
+done
+
+echo "No displays available."
+exit 1</pre>
+<p>executing this little script will start a new X server. Then you can simply start your application and lock the server with <code>xlock -mode blank</code> (you need the <b>xlockmore</b> package for using <b>xlock</b>.)
+</p>
+<p>Do not start your application in the first X server. If it is not already started, start the first and start a second one. Use the second one for your applications.
+</p>
+<p>This is important because some features, like AGP mode, works only on one X server and other users of the computer will be annoyed if those feature will be lacking because you started a X server for your own purposes. So just use the second, the first will be full featured for everyone who need.
+</p>
+<h3><span class="mw-headline" id="xpra">xpra</span></h3>
+<p>Xpra allows you to start X programs and leave them running after disconnecting to reconnect again at a later time. It is possible to start X programs on a remote machine, connect to the machine over ssh, disconnect and reconnect again while the programs continue running.
+</p>
+<p>Read the <a href="../en/Xpra.html" title="Xpra">Xpra</a> article for more information.
+</p>
+<h3><span class="mw-headline" id="X2Go">X2Go</span></h3>
+<p><a href="../en/X2Go.html" title="X2Go">X2Go</a> supports suspending of sessions and reconnecting even from different client. While designed for remote access, it can be used even on localhost.
+</p>
+<h2><span class="mw-headline" id="Conclusion">Conclusion</span></h2>
+<p>Detaching programs is very useful in shared systems, you can easily leave the machine to someone else while your programs continue to run. At the moment, however, it is still easier to do this with console applications. Since in the Linux world almost every task has its console the only application it is a good idea use it with screen. In the above example using <b>transmission</b> and screen is actually easier than ktorrent and xmove.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

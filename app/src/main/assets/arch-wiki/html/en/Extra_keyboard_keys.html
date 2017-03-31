@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Extra keyboard keys - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Extra_keyboard_keys skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Extra keyboard keys</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Extra_keyboard_keys_in_Xorg.html" title="Extra keyboard keys in Xorg">Extra keyboard keys in Xorg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Extra_keyboard_keys_in_console.html" title="Extra keyboard keys in console">Extra keyboard keys in console</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Keyboard_configuration_in_Xorg.html" title="Keyboard configuration in Xorg">Keyboard configuration in Xorg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Keyboard_configuration_in_console.html" title="Keyboard configuration in console">Keyboard configuration in console</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Map_scancodes_to_keycodes.html" title="Map scancodes to keycodes">Map scancodes to keycodes</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Xmodmap.html" title="Xmodmap">Xmodmap</a></li>
+</ul>
+</div>
+<p>Many keyboards include some <i>special keys</i> (also called <i>hotkeys</i> or <i>multimedia keys</i>), which are supposed to execute an application or print special characters (not included in the standard national keymaps). <a href="../en/Udev.html" title="Udev">udev</a> contains a large database of mappings specific to individual keyboards, so common keyboards usually work out of the box. If you have very recent or uncommon piece of hardware, you may need to adjust the mapping manually.
+</p>
+<p>Prerequisite for modifying the key mapping is knowing how the keys are identified on the system. There are multiple levels: 
+</p>
+<ul>
+<li> A <a href="https://en.wikipedia.org/wiki/Scancode" class="extiw" title="wikipedia:Scancode">scancode</a> is the lowest identification number for a key, it is the value that a keyboard sends to a computer.</li>
+<li> A <b>keycode</b> is the second level of identification for a key, a <i>keycode</i> corresponds to a function.</li>
+<li> A <b>keysym</b> is the third level of identification for a key, it corresponds to a <i>symbol</i>. It may depend on whether the Shift key or another <a href="https://en.wikipedia.org/wiki/Modifier_key" class="extiw" title="wikipedia:Modifier key">modifier key</a> was also pressed.</li>
+</ul>
+<p><i>Scancodes</i> are mapped to <i>keycodes</i>, which are then mapped to <i>keysyms</i> depending on used keyboard layout. Most of your keys should already have a <i>keycode</i>, or at least a <i>scancode</i>. Keys without a <i>scancode</i> are not recognized by the kernel; these can include additional keys from 'gaming' keyboards, etc.
+</p>
+<p>In Xorg, some <i>keysyms</i> (e.g. <code>XF86AudioPlay</code>, <code>XF86AudioRaiseVolume</code> etc.) can be mapped to actions (i.e. launching an external application). See <a href="../en/Extra_keyboard_keys_in_Xorg.html#Mapping_keysyms_to_actions" title="Extra keyboard keys in Xorg">Extra keyboard keys in Xorg#Mapping keysyms to actions</a> for details.
+</p>
+<p>In Linux console, some <i>keysyms</i> (e.g. <code>F1</code> to <code>F246</code>) can be mapped to certain actions (e.g. switch to other console or print some sequence of characters). See <a href="../en/Extra_keyboard_keys_in_console.html" title="Extra keyboard keys in console">Extra keyboard keys in console</a> for details.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Identifying_key_codes"><span class="tocnumber">1</span> <span class="toctext">Identifying key codes</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Scancodes"><span class="tocnumber">1.1</span> <span class="toctext">Scancodes</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Using_showkey"><span class="tocnumber">1.1.1</span> <span class="toctext">Using showkey</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Using_evtest"><span class="tocnumber">1.1.2</span> <span class="toctext">Using evtest</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Using_dmesg"><span class="tocnumber">1.1.3</span> <span class="toctext">Using dmesg</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Keycodes"><span class="tocnumber">1.2</span> <span class="toctext">Keycodes</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#In_console"><span class="tocnumber">1.2.1</span> <span class="toctext">In console</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#In_Xorg"><span class="tocnumber">1.2.2</span> <span class="toctext">In Xorg</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Mapping_scancodes_to_keycodes"><span class="tocnumber">2</span> <span class="toctext">Mapping scancodes to keycodes</span></a></li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Mapping_keycodes_to_keysyms"><span class="tocnumber">3</span> <span class="toctext">Mapping keycodes to keysyms</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#In_console_2"><span class="tocnumber">3.1</span> <span class="toctext">In console</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#In_Xorg_2"><span class="tocnumber">3.2</span> <span class="toctext">In Xorg</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Laptops"><span class="tocnumber">4</span> <span class="toctext">Laptops</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Asus_M_series"><span class="tocnumber">4.1</span> <span class="toctext">Asus M series</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Asus_N56VJ_.28or_possibly_others.29"><span class="tocnumber">4.2</span> <span class="toctext">Asus N56VJ (or possibly others)</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Lenovo_T460p_.28or_possibly_others.29"><span class="tocnumber">4.3</span> <span class="toctext">Lenovo T460p (or possibly others)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Gaming_Keyboards"><span class="tocnumber">5</span> <span class="toctext">Gaming Keyboards</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#Cooler_Master_CM_Storm_QuickFire_TK"><span class="tocnumber">5.1</span> <span class="toctext">Cooler Master CM Storm QuickFire TK</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Identifying_key_codes">Identifying key codes</span></h2>
+<h3><span class="mw-headline" id="Scancodes">Scancodes</span></h3>
+<h4><span class="mw-headline" id="Using_showkey">Using showkey</span></h4>
+<p>The traditional way to get a <i>scancode</i> is to use the <i>showkey</i> utility. <i>showkey</i> waits for a key to be pressed, or exits if no keys are pressed within 10 seconds. For <i>showkey</i> to work you need to be in a <a href="https://en.wikipedia.org/wiki/Virtual_console" class="extiw" title="wikipedia:Virtual console">virtual console</a>, not in a graphical environment or logged in via a network connection. Run the following command:
+</p>
+<pre># showkey --scancodes
+</pre>
+<p>and try to push keyboard keys; you should see <i>scancodes</i> being printed to the output.
+</p>
+<h4><span class="mw-headline" id="Using_evtest">Using evtest</span></h4>
+<p>For USB keyboards, it is apparently necessary to use <i>evtest</i> from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=evtest">evtest</a></span> package instead of <i>showkey</i>:<a rel="nofollow" class="external autonumber" href="https://ask.fedoraproject.org/en/question/46201/how-to-map-scancodes-to-keycodes/">[1]</a>
+</p>
+<pre># evtest /dev/input/event12
+...
+Event: time 1434666536.001123, type 4 (EV_MSC), code 4 (MSC_SCAN), value 70053
+Event: time 1434666536.001123, type 1 (EV_KEY), code 69 (KEY_NUMLOCK), value 0
+Event: time 1434666536.001123, -------------- EV_SYN ------------
+</pre>
+<p>Use the "value" field of <code>MSC_SCAN</code>. This example shows that NumLock has scancode 70053 and keycode 69.
+</p>
+<h4><span class="mw-headline" id="Using_dmesg">Using dmesg</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method does not provide <i>scancodes</i> for all keys, it only identifies the unknown keys.</div>
+<p>You can get the <i>scancode</i> of a key by pressing the desired key and looking the output of <code>dmesg</code> command. For example, if you get:
+</p>
+<pre>Unknown key pressed (translated set 2, code 0xa0 on isa0060/serio0
+</pre>
+<p>then the <i>scancode</i> you need is <code>0xa0</code>.
+</p>
+<h3><span class="mw-headline" id="Keycodes">Keycodes</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Note that the <i>keycodes</i> are different for Linux console and Xorg. Use the appropriate tool to determine the desired value.</div>
+<h4><span class="mw-headline" id="In_console">In console</span></h4>
+<p>The <i>keycodes</i> for <a href="https://en.wikipedia.org/wiki/Virtual_console" class="extiw" title="wikipedia:Virtual console">virtual console</a> are reported by the <i>showkey</i> utility. <i>showkey</i> waits for a key to be pressed and if none is during 10 seconds it quits, which is the only way to exit the program. To execute <i>showkey</i> you need to be in a virtual console, not in a graphical environment. Run the following command
+</p>
+<pre># showkey --keycodes
+</pre>
+<p>and try to push keyboard keys, you should see <i>keycodes</i> being printed to the output.
+</p>
+<h4><span class="mw-headline" id="In_Xorg">In Xorg</span></h4>
+<p>The <i>keycodes</i> used by <a href="../en/Xorg.html" title="Xorg">Xorg</a> are reported by a utility called <i>xev</i>, which is provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xev">xorg-xev</a></span> package. Of course to execute <i>xev</i>, you need to be in a graphical environment, not in the console.
+</p>
+<p>With the following command you can start <i>xev</i> and show only the relevant parts:
+</p>
+<pre> $ xev | awk -F'[ )]+' '/^KeyPress/ { a[NR+2] } NR in a { printf "%-3s %s\n", $5, $8 }'
+</pre>
+<p>Here is an example output:
+</p>
+<pre>38  a
+55  v
+54  c
+50  Shift_L
+133 Super_L
+135 Menu
+</pre>
+<p>If you press a key and nothing appears in the terminal, it means that either the key does not have a <i>scancode</i>, the <i>scancode</i> is not mapped to a <i>keycode</i>, or some other process is capturing the keypress. If you suspect that a process listening to X server is capturing the keypress, you can try running xev from a clean X session: 
+</p>
+<pre>$ xinit /usr/bin/xterm -- :1
+</pre>
+<h2><span class="mw-headline" id="Mapping_scancodes_to_keycodes">Mapping scancodes to keycodes</span></h2>
+<p>See the main article: <a href="../en/Map_scancodes_to_keycodes.html" title="Map scancodes to keycodes">Map scancodes to keycodes</a>.
+</p>
+<h2><span class="mw-headline" id="Mapping_keycodes_to_keysyms">Mapping keycodes to keysyms</span></h2>
+<h3><span class="mw-headline" id="In_console_2">In console</span></h3>
+<p>See the main article: <a href="../en/Extra_keyboard_keys_in_console.html" title="Extra keyboard keys in console">Extra keyboard keys in console</a>.
+</p>
+<h3><span class="mw-headline" id="In_Xorg_2">In Xorg</span></h3>
+<p>See the main article: <a href="../en/Xmodmap.html" title="Xmodmap">xmodmap</a>.
+</p>
+<h2><span class="mw-headline" id="Laptops">Laptops</span></h2>
+<h3><span class="mw-headline" id="Asus_M_series">Asus M series</span></h3>
+<p>In order to have control over the light sensor and the multimedia keys on your Asus machine, you should use the following command:
+</p>
+<pre># echo 1 &gt; /sys/devices/platform/asus_laptop/ls_switch
+</pre>
+<p>To have it run on boot create a <a href="../en/Systemd.html#Temporary_files" title="Systemd">Systemd tmpfile</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/local.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+w /sys/devices/platform/asus_laptop/ls_switch - - - - 1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This may work also for other Asus notebook models.</div>
+<h3><span class="mw-headline" id="Asus_N56VJ_.28or_possibly_others.29">Asus N56VJ (or possibly others)</span></h3>
+<p>If most of your special keys do not work, try loading the asus-nb-wmi kernel module with
+</p>
+<pre># modprobe asus-nb-wmi
+</pre>
+<p>then check xev again. If you combine this with the acpi_osi="!Windows 2012" boot option, you may get weird results in xev, so try not using it. If this did fix things, make sure to make the module load at boot with methods described <a href="../en/Kernel_modules.html" title="Kernel modules">here</a>.
+</p>
+<h3><span class="mw-headline" id="Lenovo_T460p_.28or_possibly_others.29">Lenovo T460p (or possibly others)</span></h3>
+<p>Out of the box, the backlight keys (on F5, F6) might not be available, even via the /dev/input interface. To fix this, try adding the following option to your boot parameters:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/grub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">GRUB_CMDLINE_LINUX_DEFAULT="... video.use_native_backlight=1 ..."</pre>
+<h2><span class="mw-headline" id="Gaming_Keyboards">Gaming Keyboards</span></h2>
+<p>Gaming keyboards have some special features which may cause them to "misbehave" in Linux.
+</p>
+<h3><span class="mw-headline" id="Cooler_Master_CM_Storm_QuickFire_TK">Cooler Master CM Storm QuickFire TK</span></h3>
+<p>This keyboard has two features that could cause confusion in Linux: N-Key Rollover and the Win-Lock Key.
+</p>
+<p>N-Key Rollover can <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=170877">cause problems with the Function keys</a>. To disable N-key rollover, hold down the FN lock key (next to right-ctrl) until it lights up, then hold Escape and press 6 to switch to 6-key rollover. Hold down the FN lock key to disable the Fn lock.
+</p>
+<p>The Win-Lock Key completely disables the Super (Windows) keys. Simply press the FN lock key and F12 together to toggle Win-Lock on and off.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://wiki.linuxquestions.org/wiki/Configuring_keyboards#Enabling_Keyboard_Multimedia_Keys">Enabling Keyboard Multimedia Keys</a> - guide on LinuxQuestions wiki</li>
+<li> <a rel="nofollow" class="external text" href="http://www.gentoo-wiki.info/HOWTO_Use_Multimedia_Keys">Multimedia Keys</a> on <a rel="nofollow" class="external text" href="http://www.gentoo-wiki.info/">Gentoo Wiki Archives</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Keyboards.html" title="Category:Keyboards">Keyboards</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

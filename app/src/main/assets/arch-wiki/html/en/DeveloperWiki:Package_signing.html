@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Package signing - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Package_signing skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Package signing</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page covers usage of package signing with <a href="../en/Pacman.html" title="Pacman">pacman</a>, as well as being a brain dump and collaborative design document.  To set up package signing in pacman, see <a href="../en/Pacman/Package_signing.html" title="Pacman-key" class="mw-redirect">pacman-key</a>.
+</p>
+<p>See also: <a href="../en/DeveloperWiki:Package_Signing_Proposal_for_Pacman.html" title="DeveloperWiki:Package Signing Proposal for Pacman">DeveloperWiki:Package Signing Proposal for Pacman</a>
+</p>
+<p>Pacman 4 uses <a href="../en/GnuPG.html" title="GnuPG">GnuPG</a> to implement package signing.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Arch_implementation"><span class="tocnumber">1.1</span> <span class="toctext">Arch implementation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Signature_checking"><span class="tocnumber">1.2</span> <span class="toctext">Signature checking</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Course_of_action_for_development"><span class="tocnumber">2</span> <span class="toctext">Course of action for development</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Documentation"><span class="tocnumber">2.1</span> <span class="toctext">Documentation</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Additional_Features"><span class="tocnumber">2.2</span> <span class="toctext">Additional Features</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Package_validation_without_root_privileges"><span class="tocnumber">2.2.1</span> <span class="toctext">Package validation without root privileges</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Timeline_for_increasing_security"><span class="tocnumber">2.2.2</span> <span class="toctext">Timeline for increasing security</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#How_signing_is_implemented_in_other_distributions"><span class="tocnumber">3</span> <span class="toctext">How signing is implemented in other distributions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Frugalware"><span class="tocnumber">3.1</span> <span class="toctext">Frugalware</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Gnuffy"><span class="tocnumber">3.2</span> <span class="toctext">Gnuffy</span></a></li>
+<li class="toclevel-2 tocsection-12">
+<a href="#Debian"><span class="tocnumber">3.3</span> <span class="toctext">Debian</span></a>
+<ul>
+<li class="toclevel-3 tocsection-13"><a href="#Binary_packages_.28.deb.29"><span class="tocnumber">3.3.1</span> <span class="toctext">Binary packages (.deb)</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Source_packages"><span class="tocnumber">3.3.2</span> <span class="toctext">Source packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-15"><a href="#Gentoo"><span class="tocnumber">3.4</span> <span class="toctext">Gentoo</span></a></li>
+<li class="toclevel-2 tocsection-16">
+<a href="#Red_Hat.2FFedora.2FCentOS"><span class="tocnumber">3.5</span> <span class="toctext">Red Hat/Fedora/CentOS</span></a>
+<ul>
+<li class="toclevel-3 tocsection-17"><a href="#Pros"><span class="tocnumber">3.5.1</span> <span class="toctext">Pros</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Cons"><span class="tocnumber">3.5.2</span> <span class="toctext">Cons</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#SUSE"><span class="tocnumber">3.6</span> <span class="toctext">SUSE</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Slackware"><span class="tocnumber">3.7</span> <span class="toctext">Slackware</span></a></li>
+<li class="toclevel-2 tocsection-21">
+<a href="#Ubuntu"><span class="tocnumber">3.8</span> <span class="toctext">Ubuntu</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#Cons_2"><span class="tocnumber">3.8.1</span> <span class="toctext">Cons</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Links"><span class="tocnumber">4</span> <span class="toctext">Links</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#Bug_reports"><span class="tocnumber">4.1</span> <span class="toctext">Bug reports</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Blogs"><span class="tocnumber">4.2</span> <span class="toctext">Blogs</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Mailing_list_discussions_and_patches"><span class="tocnumber">4.3</span> <span class="toctext">Mailing list discussions and patches</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Forum_discussions"><span class="tocnumber">4.4</span> <span class="toctext">Forum discussions</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Arch_implementation">Arch implementation</span></h3>
+<ul>
+<li>Packages are signed using <code>makepkg --sign</code>. This creates a detached binary signature (.sig).</li>
+<li>The signed package is added to the repository database, and a detached signature of the repository database will be generated, using <code>repo-add --verify --sign</code>. The command line options indicate that the signature of the old database will be verified, and that the new database will be signed. Independently of these options, <code>repo-add</code> will detect the detached signature, convert it via base64 to ASCII, and add it to the repository database.</li>
+<li>
+<code>pacman</code> will download both the databases and the database signatures and verify the databases upon database sync and each time the database is opened. When a package is loaded, its signature will be checked whether that comes from a repo database or a standalone .sig file.</li>
+<li>
+<code>pacman-key</code> exists for the sake of managing keys, but there is missing functionality</li>
+</ul>
+<h3><span class="mw-headline" id="Signature_checking">Signature checking</span></h3>
+<p>To prepare for checking signed packages, run the <a href="../en/Pacman/Package_signing.html" title="Pacman-key" class="mw-redirect">pacman-key</a> command shown below, with root permissions. It generates a random key and a “keyring” in <code>/etc/pacman.d/gnupg/</code>. You may need to move the mouse around to generate <a href="../en/Pacman/Package_signing.html#How_can_I_collect_entropy.3F" title="Pacman-key" class="mw-redirect">entropy</a> for the key.
+</p>
+<pre># pacman-key --init
+</pre>
+<p>If this command is never run, pacman will abort saying “<i>failed to commit transaction (invalid or corrupted package [PGP signature])</i>” when it encounters packages signed with an unknown key.
+</p>
+<p>Pacman usually prompts to add new keys of signed packages to its keyring. Keys can be manually compared against the lists of Arch <a href="../en/Arch_terminology.html#Developer" title="Developer" class="mw-redirect">developers</a> and <a href="../en/Trusted_Users.html" title="Trusted Users">trusted users</a> on the <a rel="nofollow" class="external text" href="https://www.archlinux.org">Arch Linux web site</a>. If the <i>SigLevel</i> configuration specifies “TrustAll”, pacman considers keys to be trusted once they are imported to the keyring, so it will then continue installing each package. If pacman does not prompt to add new keys (cannot find on configured key server perhaps?), they could still be added manually by using the <a href="../en/Pacman/Package_signing.html" title="Pacman-key" class="mw-redirect">pacman-key</a> tool.
+</p>
+<p>If <i>SigLevel</i> specifies <i>TrustedOnly</i> (the default), pacman also considers the “trust level” for each key. A key is considered trusted if it is locally signed, or it has a sufficient level in the pacman web of trust. Locally signing a key (with <code>pacman-key --lsign</code>) only really works after the key has already been imported.
+</p>
+<p>If there is a long time and failure right after checking packages integrity, edit <code>/etc/pacman.d/gnupg/gpg.conf</code> to use a different key server, for example <code>keyserver hkp://pgp.mit.edu</code> instead of keys.gnupg.net.
+</p>
+<h2><span class="mw-headline" id="Course_of_action_for_development">Course of action for development</span></h2>
+<h3><span class="mw-headline" id="Documentation">Documentation</span></h3>
+<p>Documentation for the new features must be reviewed and finalized.
+</p>
+<h3><span class="mw-headline" id="Additional_Features">Additional Features</span></h3>
+<p>These are important but non-essential features that should be added soon after package signing is implemented. Work on these issues can start now, but priority should be given to the "requirements" above.
+</p>
+<h4><span class="mw-headline" id="Package_validation_without_root_privileges">Package validation without root privileges</span></h4>
+<p>Currently, pacman's GnuPG home directory (aka gpgdir, typically /etc/pacman.d/gnupg/) must be locked in order to check a package's signature. Only root can perform this locking, so either locking must be disabled for read-only accesses, or the directory must be copied/linked to a writable location when a user is performing package verification.
+</p>
+<h4><span class="mw-headline" id="Timeline_for_increasing_security">Timeline for increasing security</span></h4>
+<p>A timeline for transitioning between some unsigned packages and a fully-signed set of packages must be made. This is the responsibility of the developers.
+</p>
+<h2><span class="mw-headline" id="How_signing_is_implemented_in_other_distributions">How signing is implemented in other distributions</span></h2>
+<h3><span class="mw-headline" id="Frugalware">Frugalware</span></h3>
+<p>Frugalware uses a fork of pacman which implements package signing (verify)
+</p>
+<h3><span class="mw-headline" id="Gnuffy">Gnuffy</span></h3>
+<p>Arch based distro gnuffy uses signed packages with their custom package manager <a rel="nofollow" class="external text" href="http://gnuffy.chaotika.org/index.php/Spaceman">Spaceman</a> modeled on pacman.
+</p>
+<h3><span class="mw-headline" id="Debian">Debian</span></h3>
+<h4><span class="mw-headline" id="Binary_packages_.28.deb.29">Binary packages (.deb)</span></h4>
+<p>To sum up, the GPG signature is included in the .deb.
+</p>
+<p>Details:
+</p>
+<p>Regular non signed binary packages are "ar" archives of at least 3 files:
+</p>
+<ul>
+<li> data.tar.gz (files to be installed)</li>
+<li> control.tar.gz (package metadata)</li>
+<li> debian-binary (contains the version of the deb format)</li>
+</ul>
+<p>Signed packages also have a _gpgorigin file at the root of the .deb that is a "gpg -abs" of the concatenation of the 3 laters (as <a rel="nofollow" class="external text" href="http://purplefloyd.wordpress.com/2009/02/05/signing-deb-packages/">explained here</a>):
+</p>
+<pre>cat debian-binary control.tar.gz data.tar.gz &gt; /tmp/combined-contents
+gpg -abs -o _gpgorigin /tmp/combined-contents (-a "Create ASCII armored output" ; -b "detach signature" ; -s "sign")
+</pre>
+<h4><span class="mw-headline" id="Source_packages">Source packages</span></h4>
+<p>Original files are provided on <a rel="nofollow" class="external text" href="http://ftp.de.debian.org/debian/pool/main/a/acpid/">the repo</a> like this <a rel="nofollow" class="external text" href="http://ftp.de.debian.org/debian/pool/main/a/acpid/acpid_2.0.4.orig.tar.gz">acpid_2.0.4.orig.tar.gz</a> with diff if necessary (<a rel="nofollow" class="external text" href="http://ftp.de.debian.org/debian/pool/main/a/acpid/acpid_2.0.4-1.diff.gz">acpid_2.0.4-1.diff.gz</a>). A <a rel="nofollow" class="external text" href="http://ftp.de.debian.org/debian/pool/main/a/acpid/acpid_2.0.4-1.dsc">description file</a> containing MD5sums of the orig.tar.gz and diff.gz is written and signed using GPG and uploaded along these.
+</p>
+<h3><span class="mw-headline" id="Gentoo">Gentoo</span></h3>
+<p>According to the Gentoo wiki, individual ebuilds are not signed.
+</p>
+<h3><span class="mw-headline" id="Red_Hat.2FFedora.2FCentOS">Red Hat/Fedora/CentOS</span></h3>
+<ul>
+<li> Signature type: GPG</li>
+<li> Stored: in the RPM</li>
+</ul>
+<p>A RPM package is a tarball of installed files to which is added a header made up of metadata (name of package, version, ...). This metadata can contain a GPG signature of the tarball. See the <a rel="nofollow" class="external text" href="http://www.rpm.org/wiki/DevelDocs/FileFormat">file format specification for details</a>.
+</p>
+<p>NB: packages built for the Red Hat Network are signed with the <a rel="nofollow" class="external text" href="https://www.redhat.com/security/team/key/">Red Hat official key(s)</a> but technically a RPM can be signed using any other key (one can even add another signature to the RPM)
+</p>
+<p>To check a package correction, one must first import the signer's key first:
+Example for Red Hat:
+</p>
+<pre>rpm --import /usr/share/doc/rpm-4.1/RPM-GPG-KEY
+</pre>
+<p>And can then check signature manually:
+</p>
+<pre>$ rpm -K openldap-clients-2.3.43-4.x86_64.rpm 
+  openldap-clients-2.3.43-4.x86_64.rpm: sha1 md5 OK
+</pre>
+<p>And even fully check the package (MD5):
+</p>
+<pre>$ rpm -Kv openldap-clients-2.3.43-4.x86_64.rpm 
+  openldap-clients-2.3.43-4.x86_64.rpm:
+     SHA1 header hash: OK (65999383ad859be0ce337aee4c1f6bd049ebe4a0)
+     MD5 sum: OK (4be23a341d23b794d08fbee35c459c83)
+</pre>
+<p>Option <code>--nogpg</code> prevents rpm from checking GPG signatures
+</p>
+<h4><span class="mw-headline" id="Pros">Pros</span></h4>
+<ul><li> Enable Official Distribution package signature but also enables personal and multiple signatures</li></ul>
+<h4><span class="mw-headline" id="Cons">Cons</span></h4>
+<ul>
+<li> Implies complicated package format with header containing signature of an inner tarball (not very KISS)</li>
+<li> Space greedy on repos</li>
+</ul>
+<h3><span class="mw-headline" id="SUSE">SUSE</span></h3>
+<h3><span class="mw-headline" id="Slackware">Slackware</span></h3>
+<h3><span class="mw-headline" id="Ubuntu">Ubuntu</span></h3>
+<p>For each package, a small description file containing the SHA sum of the package is created. That file is then signed using gpg (.dsc) and uploaded within the same folder as the package:
+</p>
+<pre>gpg --clearsign description_of_package
+</pre>
+<p>See <a rel="nofollow" class="external text" href="http://security.ubuntu.com/ubuntu/pool/main/a/acpid/acpid_1.0.4-1ubuntu11.2.dsc">result</a> for <a rel="nofollow" class="external text" href="http://security.ubuntu.com/ubuntu/pool/main/a/acpid/">acpid in Ubuntu</a>
+</p>
+<h4><span class="mw-headline" id="Cons_2">Cons</span></h4>
+<ul><li> Space greedy (2 files for 1 package)</li></ul>
+<h2><span class="mw-headline" id="Links">Links</span></h2>
+<h3><span class="mw-headline" id="Bug_reports">Bug reports</span></h3>
+<ol><li> <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/5331">Bugreport Signed packages</a>
+</li></ol>
+<h3><span class="mw-headline" id="Blogs">Blogs</span></h3>
+<ol>
+<li> <a rel="nofollow" class="external text" href="http://www.cs.arizona.edu/people/justin/packagemanagersecurity/attacks-on-package-managers.html#overview">Attack on package managers</a>
+</li>
+<li><a rel="nofollow" class="external text" href="http://www.cs.arizona.edu/people/justin/packagemanagersecurity/faq.html">Attack faq</a></li>
+</ol>
+<h3><span class="mw-headline" id="Mailing_list_discussions_and_patches">Mailing list discussions and patches</span></h3>
+<ol>
+<li> <a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006607.html">Add Keyring option in alpm/pacman</a>
+</li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2009-June/008858.html">Package signing again</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-December/007808.html">PATCH (newgpg) Let pacman specify GnuPG's home directory.</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-December/007726.html">Dan's pacman tree build&amp;test</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-December/007761.html">GPG work</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006548.html">GPG signature option in makepkg patch</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006560.html">GPG signature support for makepkg</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006552.html">GPG signature option in makepkg, adapted to Dan McGee's suggestions patch</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006559.html">GPG verification patch</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006559.html">GPGSIG in repo-add patch</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-June/006621.html">Signing by default</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-December/007720.html">Package Database signing</a></li>
+<li>
+<a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/arch-general/2009-January/003216.html">Pointless to use non-md5 for makepkg INTEGRITY_CHECK</a> </li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/arch-dev-public/2008-November/009089.html">Can we trust our mirrors</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pipermail/pacman-dev/2008-September/007567.html">Multiple/Shared Architectures</a></li>
+</ol>
+<h3><span class="mw-headline" id="Forum_discussions">Forum discussions</span></h3>
+<ol>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=35609">Pacman vulnerable to MITM attacks?</a></li>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=333982#p333982">Arch approach to security</a></li>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=58302">Pacman Veanurability</a></li>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=27867">Package signing</a></li>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=51570">pacman vulnerabilities</a></li>
+</ol>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li>
+<li><a href="../en/Category:Pacman_development.html" title="Category:Pacman development">Pacman development</a></li>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SSHFS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SSHFS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SSHFS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SCP_and_SFTP.html" title="SCP and SFTP">SCP and SFTP</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SFTP_chroot.html" title="SFTP chroot">SFTP chroot</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pure-FTPd.html" title="Pure-FTPd">Pure-FTPd</a></li>
+</ul>
+</div>
+<p>You can use sshfs to mount a remote system - accessible via <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> - to a local folder, so you will be able to do any operation on the mounted files with any tool (copy, rename, edit with vim, etc.).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Mounting"><span class="tocnumber">1.1</span> <span class="toctext">Mounting</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Unmounting"><span class="tocnumber">1.2</span> <span class="toctext">Unmounting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Chrooting"><span class="tocnumber">2</span> <span class="toctext">Chrooting</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Helpers"><span class="tocnumber">3</span> <span class="toctext">Helpers</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Automounting"><span class="tocnumber">4</span> <span class="toctext">Automounting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#On_demand"><span class="tocnumber">4.1</span> <span class="toctext">On demand</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#On_boot"><span class="tocnumber">4.2</span> <span class="toctext">On boot</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Secure_user_access"><span class="tocnumber">4.3</span> <span class="toctext">Secure user access</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Options"><span class="tocnumber">5</span> <span class="toctext">Options</span></a></li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Checklist"><span class="tocnumber">6.1</span> <span class="toctext">Checklist</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Connection_reset_by_peer"><span class="tocnumber">6.2</span> <span class="toctext">Connection reset by peer</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Remote_host_has_disconnected"><span class="tocnumber">6.3</span> <span class="toctext">Remote host has disconnected</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Freezing_apps_.28e.g._Gnome_Files.2C_Gedit.29"><span class="tocnumber">6.4</span> <span class="toctext">Freezing apps (e.g. Gnome Files, Gedit)</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Shutdown_hangs_when_sshfs_is_mounted"><span class="tocnumber">6.5</span> <span class="toctext">Shutdown hangs when sshfs is mounted</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sshfs">sshfs</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h3><span class="mw-headline" id="Mounting">Mounting</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a href="../en/Google_Authenticator.html" title="Google Authenticator">Google Authenticator</a> can be used with sshfs as additional security.</div>
+<p>Before attempting to mount a directory, make sure the file permissions on the target directory allow your user correct access.  To mount, invoke <code>sshfs</code> to mount a remote directory:
+</p>
+<pre>$ sshfs <i>USERNAME@HOSTNAME_OR_IP:/REMOTE_PATH LOCAL_MOUNT_POINT SSH_OPTIONS</i>
+</pre>
+<p>For example:
+</p>
+<pre>$ sshfs sessy@mycomputer:/remote/path /local/path -C -p 9876 -o allow_other
+</pre>
+<p>Where <code>-p 9876</code> stands for the port number, <code>-C</code> use compression and <code>-o allow_other</code> to allow non-rooted users have read/write access.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>allow_other</code> option is disabled by default. To enable it, uncomment the line <code>user_allow_other</code> in <code>/etc/fuse.conf</code> to enable non-root users to use the allow_other mount option.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Users may also define a non-standard port on a host-by-host basis in <code>~/.ssh/config</code> to avoid appending the -p switch here. For more information see <a href="../en/Secure_Shell.html#Client_usage" title="Secure Shell">Secure Shell#Client usage</a>.</div>
+<p>SSH will ask for the password, if needed. If you do not want to type in the password multiple times a day, read: <a rel="nofollow" class="external text" href="http://linuxmafia.com/~karsten/Linux/FAQs/sshrsakey.html">How to Use RSA Key Authentication with SSH</a> or <a href="../en/SSH_keys.html" title="Using SSH Keys" class="mw-redirect">Using SSH Keys</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To quickly mount a remote dir, do some file-management and unmount it, put this in a script:
+<pre>sshfs USERNAME@HOSTNAME_OR_IP:/REMOTE_PATH LOCAL_MOUNT_POINT SSH_OPTIONS
+mc LOCAL_MOUNT_POINT
+fusermount -u LOCAL_MOUNT_POINT
+</pre>
+This will mount the remote directory, launch MC, and unmount it when you exit.</div>
+<h3><span class="mw-headline" id="Unmounting">Unmounting</span></h3>
+<p>To unmount the remote system:
+</p>
+<pre>$ fusermount -u <i>LOCAL_MOUNT_POINT</i>
+</pre>
+<p>Example:
+</p>
+<pre>$ fusermount -u /mnt/sessy
+</pre>
+<h2><span class="mw-headline" id="Chrooting">Chrooting</span></h2>
+<p>You may want to jail a (specific) user to a directory by editing <code>/etc/ssh/sshd_config</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.....
+Match User someuser 
+       ChrootDirectory /chroot/%u
+       ForceCommand internal-sftp #to restrict the user to sftp only
+       AllowTcpForwarding no
+       X11Forwarding no
+.....</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The chroot directory <b>must</b> be owned by root, otherwise you will not be able to connect.
+For more info check the manpages for <code>Match, ChrootDirectory</code> and <code>ForceCommand</code>.</div>
+<h2><span class="mw-headline" id="Helpers">Helpers</span></h2>
+<p>If you often need to mount sshfs filesystems you may be interested in using an sshfs helper, such as <a href="../en/Sftpman.html" title="Sftpman">sftpman</a>.
+</p>
+<p>It provides a command-line and a GTK frontend, to make mounting and unmounting a simple one click/command process.
+</p>
+<h2><span class="mw-headline" id="Automounting">Automounting</span></h2>
+<p>Automounting can happen on boot, or on demand (when accessing the directory). For both, the setup happens in <code>/etc/<a href="../en/Fstab.html" title="Fstab">fstab</a></code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Be mindful that automounting is done through the root user, therefore you cannot use Hosts configured in <code>.ssh/config</code> of your normal user.
+<p>To let root user use an SSH key of a normal user, specify its full path in option <code>IdentityFile</code>.
+</p>
+<p><b>And most importantly</b>, use each sshfs mount at least once manually <b>while root</b> so the host's signature is added to the <code>.ssh/known_hosts</code> file.
+</p>
+</div>
+<h3><span class="mw-headline" id="On_demand">On demand</span></h3>
+<p>With systemd on-demand mounting is possible using <code>/etc/fstab</code> entries.
+</p>
+<p>Example:
+</p>
+<pre>user@host:/remote/folder /mount/point  fuse.sshfs noauto,x-systemd.automount,_netdev,users,idmap=user,IdentityFile=/home/user/.ssh/id_rsa,allow_other,reconnect 0 0
+</pre>
+<p>The important mount options here are <i>noauto,x-systemd.automount,_netdev</i>.
+</p>
+<ul>
+<li> <i>noauto</i> tells it not to mount at boot</li>
+<li> <i>x-systemd.automount</i> does the on-demand magic</li>
+<li> <i>_netdev</i> tells it that it is a network device, not a block device (without it "No such device" errors might happen)</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<p>There are two other ways to do this. Both do not require editing <code>/etc/fstab</code> to add a new mountpoint. Instead, regular users can create one by simply attempting to access it (with e. g. something like <code>ls ~/mnt/ssh/[user@]yourremotehost[:port]</code>):
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/autosshfs-git/">autosshfs-git</a></span><sup><small>AUR</small></sup> uses AutoFS. Users need to be enabled to use it with <code>autosshfs-user</code>.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/afuse/">afuse</a></span><sup><small>AUR</small></sup> is a general-purpose userspace automounter for FUSE filesystems. It works well with sshfs. No user-activation is necessary. Example invocation: <code>afuse -o mount_template='sshfs -o ServerAliveInterval=10 -o reconnect %r:/ %m' -o unmount_template='fusermount -u -z %m' ~/mnt/ssh</code>
+</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="On_boot">On boot</span></h3>
+<p>An example on how to use sshfs to mount a remote filesystem through <code>/etc/<a href="../en/Fstab.html" title="Fstab">fstab</a></code>
+</p>
+<pre>USERNAME@HOSTNAME_OR_IP:/REMOTE/DIRECTORY  /LOCAL/MOUNTPOINT  fuse.sshfs  defaults,_netdev  0  0
+</pre>
+<p>Take for example the <i>fstab</i> line
+</p>
+<pre>llib@192.168.1.200:/home/llib/FAH  /media/FAH2  fuse.sshfs  defaults,_netdev  0  0
+</pre>
+<p>The above will work automatically if you are using an SSH key for the user. See <a href="../en/SSH_keys.html" title="Using SSH Keys" class="mw-redirect">Using SSH Keys</a>.
+</p>
+<p>If you want to use sshfs with multiple users:
+</p>
+<pre>user@domain.org:/home/user  /media/user   fuse.sshfs    defaults,allow_other,_netdev    0  0
+</pre>
+<p>Again, it is important to set the <i>_netdev</i> mount option to make sure the network is available before trying to mount.
+</p>
+<h3><span class="mw-headline" id="Secure_user_access">Secure user access</span></h3>
+<p>When automounting via <code>/etc/<a href="../en/Fstab.html" title="Fstab">fstab</a></code>, the filesystem will generally be mounted by root. By default, this produces undesireable results if you wish access as an ordinary user and limit access to other users.
+</p>
+<p>An example mountpoint configuration:
+</p>
+<pre>USERNAME@HOSTNAME_OR_IP:/REMOTE/DIRECTORY  /LOCAL/MOUNTPOINT  fuse.sshfs noauto,x-systemd.automount,_netdev,user,idmap=user,follow_symlinks,identityfile=/home/USERNAME/.ssh/id_rsa,allow_other,default_permissions,uid=USER_ID_N,gid=USER_GID_N 0 0
+</pre>
+<p>Summary of the relevant options:
+</p>
+<ul>
+<li> <i>allow_other</i> - Allow other users than the mounter (i.e. root) to access the share.</li>
+<li> <i>default_permissions</i> - Allow kernel to check permissions, i.e. use the actual permissions on the remote filesystem. This allows prohibiting access to everybody otherwise granted by <i>allow_other</i>.</li>
+<li> <i>uid</i>, <i>gid</i> - set reported ownership of files to given values; <i>uid</i> is the numeric user ID of your user, <i>gid</i> is the numeric group ID of your user.</li>
+</ul>
+<h2><span class="mw-headline" id="Options">Options</span></h2>
+<p>sshfs can automatically convert your local and remote user IDs.
+</p>
+<p>Add the <i>idmap</i> option with <i>user</i> value to translate UID of connecting user:
+</p>
+<pre># sshfs -o idmap=user sessy@mycomputer:/home/sessy /mnt/sessy -C -p 9876
+</pre>
+<p>This will map UID of the remote user "sessy" to the local user, who runs this process ("root" in the above example) and GID remains unchanged. If you need more precise control over UID and GID translation, look at the options <i>idmap=file</i> and <i>uidfile</i> and <i>gidfile</i>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Checklist">Checklist</span></h3>
+<p>Read the <a href="../en/Secure_Shell.html#Checklist" title="Secure Shell">SSH Checklist</a> Wiki entry first. Further issues to check are:
+</p>
+<p>1. Is your SSH login sending additional information from server's <code>/etc/issue</code> file e.g.? This might confuse SSHFS. You should temporarily deactivate server's <code>/etc/issue</code> file:
+</p>
+<pre>$ mv /etc/issue /etc/issue.orig
+</pre>
+<p>2. Keep in mind that most SSH related troubleshooting articles you will find on the web are <b>not</b> Systemd related. Often <code>/etc/fstab</code> definitions wrongly begin with <code><i>sshfs#</i>user@host:/mnt/server/folder ... fuse ...</code> instead of using the syntax <code>user@host:/mnt/server/folder ... fuse.<i>sshfs</i> ... <i>x-systemd</i>, ...</code>. 
+</p>
+<p>3. Check that the owner of server's source folder and content is owned by the server's user. 
+</p>
+<pre>$ chown -R USER_S: /mnt/servers/folder
+</pre>
+<p>4. The server's user ID can be different from the client's one. Obviously both user names have to be the same. You just have to care for the client's user IDs. SSHFS will translate the UID for you with the following mount options:
+</p>
+<pre>uid=<i>USER_C_ID</i>,gid=<i>GROUP_C_ID</i>
+</pre>
+<p>5. Check that the client's target mount point (folder) is owned by the client user. This folder should have the same user ID as defined in SSHFS's mount options.
+</p>
+<pre>$ chown -R USER_C: /mnt/client/folder
+</pre>
+<p>6. Check that the client's mount point (folder) is empty. By default you cannot mount SSHFS folders to non-empty folders.
+</p>
+<p>7. If you want to automount SSH shares by using an SSH public key authentication (no password) via <code>/etc/fstab</code>, you can use this line as an example:
+</p>
+<pre><i>USER_S</i>@<i>SERVER</i>:/mnt/on/server      /nmt/on/client        fuse.sshfs      x-systemd.automount,_netdev,user,idmap=user,transform_symlinks,identityfile=/home/<i>USER_C</i>/.ssh/id_rsa,allow_other,default_permissions,uid=<i>USER_C_ID</i>,gid=<i>GROUP_C_ID</i>,umask=0   0 0
+</pre>
+<p>Considering the following example settings ...
+</p>
+<p>SERVER = Server host name (serv)
+USER_S = Server user name (pete)
+USER_C = Client user name (pete)
+USER_S_ID = Server user ID (1004)
+USER_C_ID = Client user ID (1000)
+GROUP_C_ID = Client user's group ID (100)
+</p>
+<p>you get the client user's ID and group ID with
+</p>
+<pre>$ id USERNAME
+</pre>
+<p>this is the final SSHFS mount row in <code>/etc/fstab</code>;
+</p>
+<pre>pete@serv:/mnt/on/server      /nmt/on/client        fuse.sshfs      x-systemd.automount,_netdev,user,idmap=user,transform_symlinks,identityfile=/home/pete/.ssh/id_rsa,allow_other,default_permissions,uid=1004,gid=1000,umask=0   0 0
+</pre>
+<p>8. If you know another issue for this checklist please add it the list above.
+</p>
+<h3><span class="mw-headline" id="Connection_reset_by_peer">Connection reset by peer</span></h3>
+<ul>
+<li> If you are trying to access the remote system with a hostname, try using its IP address, as it can be a domain name solving issue. Make sure you edit <code>/etc/hosts</code> with the server details.</li>
+<li> If you are using non-default key names and are passing it as <code>-i .ssh/my_key</code>, this will not work. You have to use <code>-o IdentityFile=/home/user/.ssh/my_key</code>, with the full path to the key.</li>
+<li> If your <code>/root/.ssh/config</code> is a symlink, you will be getting this error as well. See <a rel="nofollow" class="external text" href="http://serverfault.com/questions/507748/bad-owner-or-permissions-on-root-ssh-config">this serverfault topic</a>
+</li>
+<li> Adding the option '<code>sshfs_debug</code>' (as in '<code>sshfs -o sshfs_debug user@server ...</code>') can help in resolving the issue.</li>
+<li> If that doesn't reveal anything useful, you might also try adding the option '<code>debug</code>'</li>
+<li> If you are trying to sshfs into a router running DD-WRT or the like, there is a solution <a rel="nofollow" class="external text" href="http://www.dd-wrt.com/wiki/index.php/SFTP_with_DD-WRT">here</a>. (note that the -osftp_server=/opt/libexec/sftp-server option can be used to the sshfs command in stead of patching dropbear)</li>
+<li> Old Forum thread: <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=27613">sshfs: Connection reset by peer</a>
+</li>
+<li> Make sure your user can log into the server (especially when using AllowUsers)</li>
+<li> Make sure <code>Subsystem sftp /usr/lib/ssh/sftp-server</code> is enabled in <code>/etc/ssh/sshd_config</code>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> When providing more than one option for sshfs, they must be comma separated. Like so: '<code>sshfs -o sshfs_debug,IdentityFile=&lt;/path/to/key&gt; user@server ...</code>')</div>
+<h3><span class="mw-headline" id="Remote_host_has_disconnected">Remote host has disconnected</span></h3>
+<p>If you receive this message directly after attempting to use <i>sshfs</i>:
+</p>
+<ul><li> First make sure that the <b>remote</b> machine has <i>sftp</i> installed! It will not work, if not.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If your remote server is running OpenWRT: <code>opkg install openssh-sftp-server</code> will do the trick</div>
+<ul><li> Then, try checking the path of the <code>Subsystem</code> listed in <code>/etc/ssh/sshd_config</code> on the remote machine to see, if it is valid. You can check the path to it with <code>find / -name sftp-server</code>.</li></ul>
+<p>For Arch Linux the default value in <code>/etc/ssh/sshd_config</code> is <code>Subsystem sftp /usr/lib/ssh/sftp-server</code>.
+</p>
+<h3><span class="mw-headline" id="Freezing_apps_.28e.g._Gnome_Files.2C_Gedit.29">Freezing apps (e.g. Gnome Files, Gedit)</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This prevents the recently used file list from being populated and may lead to possible write errors.</div>
+<p>If you experience freezing/hanging (stopped responding) applications, you may need to disable write-access to the <code>~/recently-used.xbel</code> file.
+</p>
+<pre># chattr +i /home/USERNAME/.local/share/recently-used.xbel
+</pre>
+<p>See the following <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/40260">bug report</a> for more details and/or solutions.
+</p>
+<h3><span class="mw-headline" id="Shutdown_hangs_when_sshfs_is_mounted">Shutdown hangs when sshfs is mounted</span></h3>
+<p>Systemd may hang on shutdown if an sshfs mount was mounted manually and not unmounted before shutdown. To solve this problem, create this file (as root):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/killsshfs.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+After=network.target
+
+[Service]
+RemainAfterExit=yes
+ExecStart=-/bin/true
+ExecStop=-/usr/bin/pkill sshfs
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Then enable the service: <code>systemctl enable killsshfs.service</code>
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="../en/Sftpman.html" title="Sftpman">sftpman</a> - sshfs helper tool</li>
+<li> <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://wiki.gilug.org/index.php/How_to_mount_SFTP_accesses">How to mount chrooted SSH filesystem</a>, with special care with owners and permissions questions.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+<li><a href="../en/Category:Secure_Shell.html" title="Category:Secure Shell">Secure Shell</a></li>
+<li><a href="../en/Category:Network_sharing.html" title="Category:Network sharing">Network sharing</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

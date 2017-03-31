@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Gamepad - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Gamepad skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Gamepad</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Joysticks can be a bit of a hassle to get working in Linux. Not because they are poorly supported, but simply because you need to determine which modules to load to get your joystick working, and it's not always very obvious!
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Joystick_Input_Systems"><span class="tocnumber">1</span> <span class="toctext">Joystick Input Systems</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Determining_which_modules_you_need"><span class="tocnumber">2</span> <span class="toctext">Determining which modules you need</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Loading_the_modules_for_analogue_devices"><span class="tocnumber">2.1</span> <span class="toctext">Loading the modules for analogue devices</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#USB_joysticks"><span class="tocnumber">2.2</span> <span class="toctext">USB joysticks</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Testing_Your_Configuration"><span class="tocnumber">3</span> <span class="toctext">Testing Your Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Joystick_API"><span class="tocnumber">3.1</span> <span class="toctext">Joystick API</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#evdev_API"><span class="tocnumber">3.2</span> <span class="toctext">evdev API</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Setting_up_deadzones_and_calibration"><span class="tocnumber">4</span> <span class="toctext">Setting up deadzones and calibration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Wine_deadzones"><span class="tocnumber">4.1</span> <span class="toctext">Wine deadzones</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Xorg_deadzones"><span class="tocnumber">4.2</span> <span class="toctext">Xorg deadzones</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Joystick_API_deadzones"><span class="tocnumber">4.3</span> <span class="toctext">Joystick API deadzones</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#evdev_API_deadzones"><span class="tocnumber">4.4</span> <span class="toctext">evdev API deadzones</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Configuring_curves_and_responsivness"><span class="tocnumber">4.5</span> <span class="toctext">Configuring curves and responsivness</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14"><a href="#Disable_Joystick_From_Controlling_Mouse"><span class="tocnumber">5</span> <span class="toctext">Disable Joystick From Controlling Mouse</span></a></li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Using_Joystick_to_send_keystrokes"><span class="tocnumber">6</span> <span class="toctext">Using Joystick to send keystrokes</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#Xorg_configuration_example"><span class="tocnumber">6.1</span> <span class="toctext">Xorg configuration example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Specific_devices"><span class="tocnumber">7</span> <span class="toctext">Specific devices</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#Dance_pads"><span class="tocnumber">7.1</span> <span class="toctext">Dance pads</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Logitech_Thunderpad_Digital"><span class="tocnumber">7.2</span> <span class="toctext">Logitech Thunderpad Digital</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Nintendo_Gamecube_Controller"><span class="tocnumber">7.3</span> <span class="toctext">Nintendo Gamecube Controller</span></a></li>
+<li class="toclevel-2 tocsection-21">
+<a href="#PlayStation_3.2F4_controller"><span class="tocnumber">7.4</span> <span class="toctext">PlayStation 3/4 controller</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#Connecting_via_Bluetooth"><span class="tocnumber">7.4.1</span> <span class="toctext">Connecting via Bluetooth</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-23">
+<a href="#Steam_Controller"><span class="tocnumber">7.5</span> <span class="toctext">Steam Controller</span></a>
+<ul>
+<li class="toclevel-3 tocsection-24"><a href="#Wine"><span class="tocnumber">7.5.1</span> <span class="toctext">Wine</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-25">
+<a href="#Xbox_360_controller"><span class="tocnumber">7.6</span> <span class="toctext">Xbox 360 controller</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#SteamOS_xpad"><span class="tocnumber">7.6.1</span> <span class="toctext">SteamOS xpad</span></a></li>
+<li class="toclevel-3 tocsection-27">
+<a href="#xboxdrv"><span class="tocnumber">7.6.2</span> <span class="toctext">xboxdrv</span></a>
+<ul>
+<li class="toclevel-4 tocsection-28"><a href="#Multiple_controllers"><span class="tocnumber">7.6.2.1</span> <span class="toctext">Multiple controllers</span></a></li>
+<li class="toclevel-4 tocsection-29">
+<a href="#Mimic_Xbox_360_controller_with_other_controllers"><span class="tocnumber">7.6.2.2</span> <span class="toctext">Mimic Xbox 360 controller with other controllers</span></a>
+<ul>
+<li class="toclevel-5 tocsection-30"><a href="#Logitech_Dual_Action"><span class="tocnumber">7.6.2.2.1</span> <span class="toctext">Logitech Dual Action</span></a></li>
+<li class="toclevel-5 tocsection-31"><a href="#PlayStation_2_controller_via_USB_adapter"><span class="tocnumber">7.6.2.2.2</span> <span class="toctext">PlayStation 2 controller via USB adapter</span></a></li>
+<li class="toclevel-5 tocsection-32"><a href="#PlayStation_3_controller_via_USB"><span class="tocnumber">7.6.2.2.3</span> <span class="toctext">PlayStation 3 controller via USB</span></a></li>
+<li class="toclevel-5 tocsection-33"><a href="#PlayStation_3_controller_via_Bluetooth"><span class="tocnumber">7.6.2.2.4</span> <span class="toctext">PlayStation 3 controller via Bluetooth</span></a></li>
+<li class="toclevel-5 tocsection-34"><a href="#PlayStation_4_controller"><span class="tocnumber">7.6.2.2.5</span> <span class="toctext">PlayStation 4 controller</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-35">
+<a href="#Troubleshooting"><span class="tocnumber">8</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-36"><a href="#Joystick_moving_mouse"><span class="tocnumber">8.1</span> <span class="toctext">Joystick moving mouse</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Joystick_not_working_in_FNA.2FSDL_based_games"><span class="tocnumber">8.2</span> <span class="toctext">Joystick not working in FNA/SDL based games</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Joystick_not_recognized_by_all_programs"><span class="tocnumber">8.3</span> <span class="toctext">Joystick not recognized by all programs</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Steam_Controller_Not_Pairing"><span class="tocnumber">8.4</span> <span class="toctext">Steam Controller Not Pairing</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Joystick_Input_Systems">Joystick Input Systems</span></h2>
+<p>Linux actually has 2 different input systems for Joysticks. The original 'Joystick' interface and the newer 'evdev' based one.
+</p>
+<p><code>/dev/input/jsX</code> maps to the 'Joystick' API interface and <code>/dev/input/event*</code> maps to the 'evdev' ones (this also includes other input devices such as mice and keyboards). Symbolic links to those devices are also available in <code>/dev/input/by-id/</code> and <code>/dev/input/by-path/</code> where the legacy 'Joystick' API has names ending with <code>-joystick</code> while the 'evdev' have names ending with <code>-event-joystick</code>.
+</p>
+<p>Most new games will default to the 'evdev' interface as it gives more detailed information about the buttons and axes available and also adds support for force feedback.
+</p>
+<p>While SDL1.x defaults to 'evdev' interface you can force it to use the old 'Joystick' API by setting the environment variable <code>SDL_JOYSTICK_DEVICE=/dev/input/js0</code>. This can help many games such as X3. SDL2.x supports only the new 'evdev' interface.
+</p>
+<p>It's also worth mentioning that there is also a xorg driver <code>xf86-input-joystick</code>. It just allows you to control the mouse/keyboard in xorg using a joystick, for most people this will be undesirable. Disabling this behaviour is described below in <a href="#Disable_Joystick_From_Controlling_Mouse">Disable Joystick From Controlling Mouse</a>, in most cases you can just remove this package though.
+</p>
+<h2><span class="mw-headline" id="Determining_which_modules_you_need">Determining which modules you need</span></h2>
+<p>Unless you're using very old joystick that uses gameport or proprietary USB protocol, you will need just the generic USB human interface device (HID) modules.
+</p>
+<p>For an extensive overview of all joystick related modules in Linux, you will need access to the Linux kernel sources -- specifically the Documentation section. Unfortunately, pacman kernel packages do not include what we need. If you have the kernel sources downloaded, have a look at <code>Documentation/input/joystick.txt</code>. You can browse the kernel source tree at <a rel="nofollow" class="external text" href="https://kernel.org/">kernel.org</a> by clicking the "browse" (cgit - the git frontend) link for the kernel that you're using, then clicking the "tree" link near the top. Here's a link to the <a rel="nofollow" class="external text" href="https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/tree/Documentation/input/joystick.txt">documentation from the latest kernel</a>.
+</p>
+<p>Some joysticks need specific modules, such as the Microsoft Sidewinder controllers (<code>sidewinder</code>), or the Logitech digital controllers (<code>adi</code>). Many older joysticks will work with the simple <code>analog</code> module. If your joystick is plugging in to a gameport provided by your soundcard, you will need your soundcard drivers loaded - however, some cards, like the Soundblaster Live, have a specific gameport driver (<code>emu10k1-gp</code>). Older ISA soundcards may need the <code>ns558</code> module, which is a standard gameport module.
+</p>
+<p>As you can see, there are many different modules related to getting your joystick working in Linux, so I couldn't possibly cover everything here. Please have a look at the documentation mentioned above for details.
+</p>
+<h3><span class="mw-headline" id="Loading_the_modules_for_analogue_devices">Loading the modules for analogue devices</span></h3>
+<p>You need to load a module for your gameport (<code>ns558</code>, <code>emu10k1-gp</code>, <code>cs461x</code>, etc...), a module for your joystick (<code>analog</code>, <code>sidewinder</code>, <code>adi</code>, etc...), and finally the kernel joystick device driver (<code>joydev</code>). Add these to a new file in <code>/etc/modules-load.d/</code>, or simply modprobe them. The <code>gameport</code> module should load automatically, as this is a dependency of the other modules.
+</p>
+<h3><span class="mw-headline" id="USB_joysticks">USB joysticks</span></h3>
+<p>You need to get USB working, and then modprobe your joystick driver, which is <code>usbhid</code>, as well as <code>joydev</code>. 
+If you use a usb mouse or keyboard, <code>usbhid</code> will be loaded already and you just have to load the <code>joydev</code> module.
+</p>
+<h2><span class="mw-headline" id="Testing_Your_Configuration">Testing Your Configuration</span></h2>
+<p>Once the modules are loaded, you should be able to find a new device: <code>/dev/input/js0</code> and a file ending with <code>-event-joystick</code> in <code>/dev/input/by-id</code> directory. You can simply <code>cat</code> those devices to see if the joystick works - move the stick around, press all the buttons - you should see mojibake printed when you move the sticks or press buttons. 
+</p>
+<p>Both interfaces are also supported in wine and reported as separate devices. You can test them with <code>wine control joy.cpl</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> Input devices by default have <b>input</b> group, for example <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pcsx2">pcsx2</a></span> have no access to gamepad without rights. Make sure your user in <b>input</b> group.</div>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="Joystick_API">Joystick API</span></h3>
+<p>There are a lot of applications that can test this old API, <code>jstest</code> from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=joyutils">joyutils</a></span> package is the simplest one. If the output is unreadable because the line printed is too long you can also use graphical tools. KDE4 has a built in one in Input Devices panel in System Settings or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/jstest-gtk-git/">jstest-gtk-git</a></span><sup><small>AUR</small></sup> is an alternative.
+</p>
+<p>Use of <code>jstest</code> is fairly simple, you just run <code>jstest /dev/input/js0</code> and it will print a line with state of all the axes (normalised to {-32767,32767}) and buttons.
+</p>
+<p>After you start <code>jstest-gtk</code>, it will just show you a list of joysticks available, you just need to select one and press Properties.
+</p>
+<h3><span class="mw-headline" id="evdev_API">evdev API</span></h3>
+<p>The new 'evdev' API can be tested using the SDL2 joystick test application or using <code>evtest</code> from community repository. Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sdl2-jstest-git/">sdl2-jstest-git</a></span><sup><small>AUR</small></sup> and then run <code>sdl2-jstest --test 0</code>. Use <code>sdl2-jstest --list</code> to get IDs of other controllers if you have multiple ones connected.
+</p>
+<p>To test force feedback on the device, use <code>fftest</code> from <code>linuxconsole</code> package:
+</p>
+<pre>$ fftest /dev/input/by-id/usb-*event-joystick
+</pre>
+<h2><span class="mw-headline" id="Setting_up_deadzones_and_calibration">Setting up deadzones and calibration</span></h2>
+<p>If you want to set up the deadzones (or remove them completely) of your analog input you have to do it separately for the xorg (for mouse and keyboard emulation), Joystick API and evdev API.
+</p>
+<h3><span class="mw-headline" id="Wine_deadzones">Wine deadzones</span></h3>
+<p>Add the following registry entry and set it to a string from 0 to 10000 (affects all axes):
+</p>
+<pre>HKEY_CURRENT_USER\Software\Wine\DirectInput\DefaultDeadZone
+</pre>
+<p>Source: <a rel="nofollow" class="external text" href="http://wiki.winehq.org/UsefulRegistryKeys">UsefulRegistryKeys</a>
+</p>
+<h3><span class="mw-headline" id="Xorg_deadzones">Xorg deadzones</span></h3>
+<p>Add a similar line into your <code>/etc/X11/xorg.conf.d/50-joystick.conf</code> before the <code>EndSection</code>:
+</p>
+<pre>Option "MapAxis1" "deadzone=1000"
+</pre>
+<p>1000 is the default value, but you can set anything between 0 and 30 000. To get the axis number see the "Testing Your Configuration" section of this article.
+If you already have an option with a specific axis just type in the <code>deadzone=value</code> at the end of the parameter separated by a space.
+</p>
+<h3><span class="mw-headline" id="Joystick_API_deadzones">Joystick API deadzones</span></h3>
+<p>The easiest way is using <code>jstest-gtk</code> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/jstest-gtk-git/">jstest-gtk-git</a></span><sup><small>AUR</small></sup>. Select the controller you want to edit, then click the Calibration button at the bottom of the dialog (<b>don't</b> click Start Calibration there). You can then set the CenterMin and CenterMax values (which control the center deadzone), RangeMin and RangeMax which control the end of throw deadzones. Note that the calibration settings are applied when the application opens the device, so you need to restart your game or test application to see updated calibration settings.
+</p>
+<p>After you set the deadzones use <code>jscal</code> to dump the new values into a shell script:
+</p>
+<pre>$ jscal -p /dev/input/jsX &gt; jscal.sh # replace X with your joystick's number 
+$ chmod +x jscal.sh
+</pre>
+<p>Now you need to make a <a href="../en/Udev.html" title="Udev">udev</a> rule (for example <code>/etc/udev/rules.d and name it 85-jscal.rules</code>) so the script will automatically run when you connect the controller:
+</p>
+<pre>SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="c268", ACTION=="add", RUN+="/usr/bin/jscal.sh"
+</pre>
+<p>To get the idVendor and idProduct use <code>udevadm info --attribute-walk --name /dev/input/jsX</code>
+</p>
+<p>Use the `/dev/input/by-id/*-joystick` device names in case you use multiple controllers.
+</p>
+<h3><span class="mw-headline" id="evdev_API_deadzones">evdev API deadzones</span></h3>
+<p>Currently there is no standalone application that allows changing calibration for <code>evdev</code> API, but there is <code>G25manage</code> distributed together with VDrift game that can change the center deadzone.
+</p>
+<p>The easiest way to get it is to go to VDrift <a rel="nofollow" class="external text" href="https://github.com/VDrift/vdrift/tree/master/tools/G25manage">github</a>, download all files in the folder and build them using <code>make</code>.
+</p>
+<p>After that, you should be able to see your device configuration by using:
+</p>
+<pre>$ ./G25manage --showcalibration /dev/input/by-id/usb-*-event-joystick
+</pre>
+<p>To change deadzones of any of the axes, you use the following command:
+</p>
+<pre>$ ./G25manage --evdev /dev/input/by-id/usb-*-event-joystick --axis 0 --deadzone 0
+</pre>
+<p>Use udev rules file to set them automatically when the controller is connected.
+</p>
+<p>Note that inside the kernel, the value is called <code>flatness</code> and is set using the <code>EVIOCSABS</code> <code>ioctl</code>.
+</p>
+<p>Default configuration will look like similar to this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ./G25manage --showcalibration /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Supported Absolute axes:
+   Absolute axis 0x00 (0) (X Axis) (min: 0, max: 65535, flatness: 4095 (=6.25%), fuzz: 255)
+   Absolute axis 0x01 (1) (Y Axis) (min: 0, max: 65535, flatness: 4095 (=6.25%), fuzz: 255)
+   Absolute axis 0x05 (5) (Z Rate Axis) (min: 0, max: 4095, flatness: 255 (=6.23%), fuzz: 15)
+   Absolute axis 0x10 (16) (Hat zero, x axis) (min: -1, max: 1, flatness: 0 (=0.00%), fuzz: 0)
+   Absolute axis 0x11 (17) (Hat zero, y axis) (min: -1, max: 1, flatness: 0 (=0.00%), fuzz: 0)</pre>
+<p>While a more reasonable setting would be achieved with something like this (repeat for other axes):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ./G25manage --evdev /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick --axis 0 --deadzone 512</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Event device file: /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick
+ Axis index to deal with: 0
+ New dead zone value: 512
+ Trying to set axis 0 deadzone to: 512
+   Absolute axis 0x00 (0) (X Axis) Setting deadzone value to : 512
+ (min: 0, max: 65535, flatness: 512 (=0.78%), fuzz: 255)</pre>
+<h3><span class="mw-headline" id="Configuring_curves_and_responsivness">Configuring curves and responsivness</span></h3>
+<p>In case your game requires just limited amount of buttons or has good support for multiple controllers, you may have good results with using <code>xboxdrv</code> to change response curves of the joystick.
+</p>
+<p>Below are the setups I use for Saitek X-55 HOTAS:
+</p>
+<pre>$ xboxdrv --evdev /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Throttle_G0000021-event-joystick \
+  --evdev-no-grab --evdev-absmap 'ABS_#40=x1,ABS_#41=y1,ABS_X=x2,ABS_Y=y2' --device-name 'Hat and throttle' \
+  --ui-axismap 'x2^cal:-32000:0:32000=,y2^cal:-32000:0:32000=' --silent
+</pre>
+<p>this maps the EV_ABS event with id of 40 and 41 (use xboxdrv with --evdev-debug to see the events registered), which is the normally inaccessible "mouse pointer" on the throttle, to first gamepad joystick and throttles to second joystick, it also clamps the top and lower ranges as they not always register fully.
+</p>
+<p>A bit more interesting is the setup for the stick:
+</p>
+<pre>$ xboxdrv --evdev /dev/input/by-id/usb-Madcatz_Saitek_Pro_Flight_X-55_Rhino_Stick_G0000090-event-joystick \
+  --evdev-no-grab --evdev-absmap 'ABS_X=x1' --evdev-absmap 'ABS_Y=y1' --device-name 'Joystick' \
+  --ui-axismap 'x1^cal:-32537:-455:32561=,x1^dead:-900:700:1=,x1^resp:-32768:-21845:-2000:0:2000:21485:32767=' \
+  --ui-axismap 'y1^cal:-32539:-177:32532=,y1^dead:-700:2500:1=,y1^resp:-32768:-21845:-2000:0:2000:21485:32767=' \
+  --evdev-absmap 'ABS_RZ=x2' --ui-axismap 'x2^cal:-32000:-100:32000,x2^dead:-1500:1000:1=,x2^resp:-32768:-21845:-2000:0:2000:21485:32767=' \
+  --silent
+</pre>
+<p>this maps the 3 joystick axes to gamepad axes and changes the calibration (min value, centre value, max value), dead zones (negative side, positive side, flag to turn smoothing) and finally change of response curve to a more flat one in the middle.
+</p>
+<p>You can also modify the responsiveness by setting the 'sen' (sensitivity). Setting it to value of 0 will give you a linear sensitivity, value of -1 will give very insensitive axis while value of 1 will give very sensitive axis. You can use intermediate values to make it less or more sensitive. Internally xboxdrv uses a quadratic formula to calculate the resulting value, so this setting gives a more smooth result than 'resp' shown above.
+</p>
+<p>Nice thing about xboxdrv is that it exports resulting device as both old Joystick API and new style evdev API so it should be compatible with basically any application.
+</p>
+<h2><span class="mw-headline" id="Disable_Joystick_From_Controlling_Mouse">Disable Joystick From Controlling Mouse</span></h2>
+<p>If you want to play games with your controller, you might want to disable joystick control over mouse cursor.  To do this, edit /etc/X11/xorg.conf.d/50-joystick.conf so that it looks like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-joystick.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "InputClass"
+        Identifier "joystick catchall"
+        MatchIsJoystick "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "joystick"
+        Option "StartKeysEnabled" "False"       #Disable mouse
+        Option "StartMouseEnabled" "False"      #support
+EndSection</pre>
+<h2><span class="mw-headline" id="Using_Joystick_to_send_keystrokes">Using Joystick to send keystrokes</span></h2>
+<p>A couple joystick to keystroke programs exist like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/qjoypad/">qjoypad</a></span><sup><small>AUR</small></sup> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/antimicro/">antimicro</a></span><sup><small>AUR</small></sup>, all work well without the need for X.org configuration.
+</p>
+<h3><span class="mw-headline" id="Xorg_configuration_example">Xorg configuration example</span></h3>
+<p>This is a good solution for systems where restarting Xorg is a rare event because it is a static configuration loaded only on X startup. The example runs on a <a href="../en/Kodi.html" title="Kodi">Kodi</a> media PC, controlled with a Logitech Cordless RumblePad 2. Due to a problem with the d-pad (a.k.a. "hat") being recognized as another axis, <a href="../en/Joy2key.html" title="Joy2key">Joy2key</a> was used as a workaround. Since upgrade to Kodi version 11.0 and joy2key 1.6.3-1, this setup no longer worked and the following was created for letting Xorg handle joystick events.
+</p>
+<p>First, make sure you have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-joystick">xf86-input-joystick</a></span> installed. Then, create <code>/etc/X11/xorg.conf.d/51-joystick.conf</code> like so:
+</p>
+<pre>
+ Section "InputClass"
+  Identifier "Joystick hat mapping"
+  Option "StartKeysEnabled" "True"
+  #MatchIsJoystick "on"
+  Option "MapAxis5" "keylow=113 keyhigh=114"
+  Option "MapAxis6" "keylow=111 keyhigh=116"
+ EndSection
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>MatchIsJoystick "on"</code> line does not seem to be required for the setup to work, but you may want to uncomment it.</div>
+<h2><span class="mw-headline" id="Specific_devices">Specific devices</span></h2>
+<p>While most joysticks, especially USB based ones should just work, some may require (or give better results) if you use alternative drivers. If it doesn't work the first time, do not give up, and read those docs thoroughly!
+</p>
+<h3><span class="mw-headline" id="Dance_pads">Dance pads</span></h3>
+<p>Most dance pads should work. However some pads, especially those used from a video game console via an adapter, have a tendency to map the directional buttons as axis buttons. This prevents hitting left-right or up-down simultaneously. This behavior can be fixed for devices recognized by xpad via a module option:
+</p>
+<pre> # modprobe -r xpad
+ # modprobe xpad dpad_to_buttons=1
+</pre>
+<h3><span class="mw-headline" id="Logitech_Thunderpad_Digital">Logitech Thunderpad Digital</span></h3>
+<p>Logitech Thunderpad Digital won't show all the buttons if you use the <code>analog</code> module. Use the device specific <code>adi</code> module for this controller.
+</p>
+<h3><span class="mw-headline" id="Nintendo_Gamecube_Controller">Nintendo Gamecube Controller</span></h3>
+<p>Dolphin Emulator has a <a rel="nofollow" class="external text" href="https://wiki.dolphin-emu.org/index.php?title=How_to_use_the_Official_GameCube_Controller_Adapter_for_Wii_U_in_Dolphin">page on their wiki</a> that explains how to use the official Nintendo USB adapter with a Gamecube controller. This configuration also works with the Mayflash Controller Adapter if the switch is set to "Wii U".
+</p>
+<p>By default, the controller will register with <a href="../en/Udev.html" title="Udev">udev</a>, but will only be readable by the root user. You can fix this by adding a udev device rule, like the below. 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/51-gcadapter.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0337", MODE="0666"</pre>
+<p>This only matches the USB device with the specified vendor and product IDs, which match those of the official USB adapter. It sets the permissions of the device file to 0666 so that programs that aren't running as root can read the device's input. 
+</p>
+<p>udev can be reloaded with the new configuration by executing
+</p>
+<pre> # udevadm control --reload-rules
+</pre>
+<h3><span class="mw-headline" id="PlayStation_3.2F4_controller">PlayStation 3/4 controller</span></h3>
+<p>The DualShock 3, DualShock 4 and Sixaxis controllers work out of the box when plugged in via USB (the PS button will need to be pushed to begin). They can also be used wirelessly via Bluetooth.
+</p>
+<p>Steam properly recognizes it as a PS3 pad and Big Picture can be launched with the PS button. Big Picture and some games may act as if it was a 360 controller.  Gamepad control over mouse is on by default.  You may want to turn it off before playing games, see <a href="#Joystick_moving_mouse">#Joystick moving mouse</a>.
+</p>
+<h5><span class="mw-headline" id="Connecting_via_Bluetooth">Connecting via Bluetooth</span></h5>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bluez-plugins">bluez-plugins</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bluez-utils">bluez-utils</a></span> packages, which includes the <i>sixaxis</i> plugin. Then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>bluetooth.service</code>, plug the controller in via USB, and the plugin should program your PC's bluetooth address into the controller automatically.
+</p>
+<p>You can now disconnect your controller. The next time you hit the PlayStation button it will connect without asking anything else.
+</p>
+<p>Remember to disconnect the controller when you are done as the controller will stay on when connected and drain the battery.
+</p>
+<h3><span class="mw-headline" id="Steam_Controller">Steam Controller</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=steam">steam</a></span> package (starting from version 1.0.0.51-1) will recognize the controller and provide keyboard/mouse/gamepad emulation while Steam is running. The in-game Steam overlay needs to be enabled and working in order for gamepad emulation to work. You may need to run <code>udevadm trigger</code> with root privileges or plug the dongle out and in again, if the controller doesn't work immediately after installing and running steam. If all else fails, try restarting the computer while the dongle is plugged in.
+</p>
+<p>If you can't get the Steam Controller to work, see <a href="#Steam_Controller_Not_Pairing">#Steam Controller Not Pairing</a>.
+</p>
+<p>Alternatively you can install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python-steamcontroller-git/">python-steamcontroller-git</a></span><sup><small>AUR</small></sup> to have controller and mouse emulation without Steam.
+</p>
+<h4><span class="mw-headline" id="Wine">Wine</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Binaries from questionable hoster. There is also <a rel="nofollow" class="external text" href="https://github.com/x360ce/x360ce">x360ce</a>, but it is most likely different project. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Gamepad">Talk:Gamepad#</a>)</div>
+</div>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python-steamcontroller-git/">python-steamcontroller-git</a></span><sup><small>AUR</small></sup> can also be used to make the Steam Controller work for games running under Wine. You need to find and download the file <code>xbox360cemu.v.3.0.rar</code> (e.g. from here: <a rel="nofollow" class="external text" href="http://www.2shared.com/file/wcq8xuPf/xbox360cemuv30.html">Download Link from 2shared</a>). Then copy the files <code>dinput8.dll</code>, <code>xbox360cemu.ini</code>, <code>xinput1_3.dll</code> and <code>xinput_9_1_0.dll</code> to the directory that contains your game executable. Edit <code>xbox360cemu.ini</code> and only change the following values under <code>[PAD1]</code> to remap the Steam Controller correctly to a XBox Controller.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">xbox360cemu.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Right Analog X=4
+Right Analog Y=-5
+A=1
+B=2
+X=3
+Y=4
+Back=7
+Start=8
+Left Thumb=10
+Right Thumb=11
+Left Trigger=a3
+Right Trigger=a6</pre>
+<p>Now start python-steamcontroller in Xbox360 mode (<code>sc-xbox.py start</code>). You might also want to copy <code>XInputTest.exe</code> from <code>xbox360cemu.v.3.0.rar</code> to the same directory and run it with Wine in order to test if it works. However neither mouse nor keyboard emulation work with this method.
+</p>
+<h3><span class="mw-headline" id="Xbox_360_controller">Xbox 360 controller</span></h3>
+<p>Both the wired and wireless (with the <i>Xbox 360 Wireless Receiver for Windows</i>) controllers are supported by the <code>xpad</code> kernel module and should work without additional packages.
+</p>
+<p>It has been reported that the default xpad driver has some issues with a few newer wired and wireless controllers, such as:
+</p>
+<ul>
+<li> incorrect button mapping. (<a rel="nofollow" class="external text" href="https://github.com/ValveSoftware/steam-for-linux/issues/95#issuecomment-14009081">discussion in Steam bugtracker</a>)</li>
+<li> not-working sync. All four leds keep blinking, but controller works. (<a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=156028">discussion in Arch Forum</a>)</li>
+</ul>
+<p>If you experience such issues, you can use either <a href="#SteamOS_xpad">#SteamOS xpad</a> or <a href="#xboxdrv">#xboxdrv</a> instead of the default <code>xpad</code> driver.
+</p>
+<p>If you wish to use the controller for controlling the mouse, or mapping buttons to keys, etc. you should use the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-joystick">xf86-input-joystick</a></span> package (configuration help can be found using <code>man joystick</code>). If the mouse locks itself in a corner, it might help changing the <code>MatchDevicePath</code> in <code>/etc/X11/xorg.conf.d/50-joystick.conf</code> from <code>/dev/input/event*</code> to <code>/dev/input/js*</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you use the <a href="../en/TLP.html" title="TLP">TLP</a> power management tool, you may experience connection issues with your Microsoft wireless adapter (e.g. the indicator LED will go out after the adapter has been connected for a few seconds, and controller connection attempts fail). This is due to TLP's USB autosuspend functionality, and the solution is to add the Microsoft wireless adapter's device ID to this feature's blacklist (USB_BLACKLIST, check <a rel="nofollow" class="external text" href="http://linrunner.de/en/tlp/docs/tlp-configuration.html#usb">TLP configuration</a> for more details).</div>
+<h4><span class="mw-headline" id="SteamOS_xpad">SteamOS xpad</span></h4>
+<p>If you have issues with the default <code>xpad</code> kernel module, you can install the SteamOS version. There is still a known issue with compatibility between wireless Xbox360 controllers and games made in GameMaker Studio. If you encounter this problem, the only known workaround is to use xboxdrv. YoYo Games has refused to acknowledge this as a bug with their product and it is unlikely to ever be fixed.
+</p>
+<p>First make sure you have <a href="../en/Dynamic_Kernel_Module_Support.html" title="DKMS" class="mw-redirect">DKMS</a> installed and running, then install the modified kernel module <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/steamos-xpad-dkms/">steamos-xpad-dkms</a></span><sup><small>AUR</small></sup>. During the installation you'll see that new xpad kernel module is strapped to your current kernel:
+</p>
+<pre>Creating symlink /var/lib/dkms/steamos-xpad-dkms/0.1/source -&gt;
+                 /usr/src/steamos-xpad-dkms-0.1
+ 
+DKMS: add completed.
+ 
+Kernel preparation unnecessary for this kernel.  Skipping...
+ 
+Building module:
+cleaning build area....
+make KERNELRELEASE=3.12.8-1-ARCH KVERSION=3.12.8-1-ARCH....
+cleaning build area....
+</pre>
+<p>Then unload the old xpad module and load new one:
+</p>
+<pre># rmmod xpad
+# modprobe steamos-xpad
+</pre>
+<p>Or just restart your computer.
+</p>
+<h4><span class="mw-headline" id="xboxdrv">xboxdrv</span></h4>
+<p>xboxdrv is an alternative to <code>xpad</code> which provides more functionality and might work better with certain controllers. It works in userspace and can be launched as system service. 
+</p>
+<p>Install it with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xboxdrv/">xboxdrv</a></span><sup><small>AUR</small></sup> package. Then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a>/<a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>xboxdrv.service</code>.
+</p>
+<p>If you have issues with the controller being recognized but not working in steam games or working but with incorrect mappings, it may be required to modify you config as such:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/xboxdrv/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[xboxdrv]
+silent = true
+device-name = "Xbox 360 Wireless Receiver"
+mimic-xpad = true
+deadzone = 4000
+
+[xboxdrv-daemon]
+dbus = disabled</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>xboxdrv.service</code>.
+</p>
+<h5><span class="mw-headline" id="Multiple_controllers">Multiple controllers</span></h5>
+<p>xboxdrv supports a multitude of controllers, but they need to be set up in <code>/etc/default/xboxdrv</code>. For each extra controller, add an <code>next-controller = true</code> line. For example, when using 4 controllers, add it 3 times:
+</p>
+<pre>
+ [xboxdrv]
+ silent = true
+ next-controller = true
+ next-controller = true
+ next-controller = true
+ [xboxdrv-daemon]
+ dbus = disabled
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>xboxdrv.service</code>.
+</p>
+<h5><span class="mw-headline" id="Mimic_Xbox_360_controller_with_other_controllers">Mimic Xbox 360 controller with other controllers</span></h5>
+<p>xboxdrv can be used to make any controller register as an Xbox 360 controller with the <code>--mimic-xpad</code> switch. This may be desirable for games that support Xbox 360 controllers out of the box, but have trouble detecting or working with other gamepads.
+</p>
+<p>First, you need to find out what each button and axis on the controller is called. You can use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=evtest">evtest</a></span> for this. Run <code>evtest</code> and select the device event ID number (<code>/dev/input/event*</code>) that corresponds to your controller. Press the buttons on the controller and move the axes to read the names of each button and axis.
+</p>
+<p>Here is an example of the output:
+</p>
+<pre>
+
+Event: time 1380985017.964843, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90003
+Event: time 1380985017.964843, type 1 (EV_KEY), code 290 (BTN_THUMB2), value 1
+Event: time 1380985017.964843, -------------- SYN_REPORT ------------
+Event: time 1380985018.076843, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90003
+Event: time 1380985018.076843, type 1 (EV_KEY), code 290 (BTN_THUMB2), value 0
+Event: time 1380985018.076843, -------------- SYN_REPORT ------------
+Event: time 1380985018.460841, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90002
+Event: time 1380985018.460841, type 1 (EV_KEY), code 289 (BTN_THUMB), value 1
+Event: time 1380985018.460841, -------------- SYN_REPORT ------------
+Event: time 1380985018.572835, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90002
+Event: time 1380985018.572835, type 1 (EV_KEY), code 289 (BTN_THUMB), value 0
+Event: time 1380985018.572835, -------------- SYN_REPORT ------------
+Event: time 1380985019.980824, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90006
+Event: time 1380985019.980824, type 1 (EV_KEY), code 293 (BTN_PINKIE), value 1
+Event: time 1380985019.980824, -------------- SYN_REPORT ------------
+Event: time 1380985020.092835, type 4 (EV_MSC), code 4 (MSC_SCAN), value 90006
+Event: time 1380985020.092835, type 1 (EV_KEY), code 293 (BTN_PINKIE), value 0
+Event: time 1380985020.092835, -------------- SYN_REPORT ------------
+Event: time 1380985023.596806, type 3 (EV_ABS), code 3 (ABS_RX), value 18
+Event: time 1380985023.596806, -------------- SYN_REPORT ------------
+Event: time 1380985023.612811, type 3 (EV_ABS), code 3 (ABS_RX), value 0
+Event: time 1380985023.612811, -------------- SYN_REPORT ------------
+Event: time 1380985023.708768, type 3 (EV_ABS), code 3 (ABS_RX), value 14
+Event: time 1380985023.708768, -------------- SYN_REPORT ------------
+Event: time 1380985023.724772, type 3 (EV_ABS), code 3 (ABS_RX), value 128
+Event: time 1380985023.724772, -------------- SYN_REPORT ------------
+</pre>
+<p>In this case, <code>BTN_THUMB</code>, <code>BTN_THUMB2</code> and <code>BTN_PINKIE</code> are buttons and <code>ABS_RX</code> is the X axis of the right analogue stick.
+You can now mimic an Xbox 360 controller with the following command:
+</p>
+<pre>$ xboxdrv --evdev /dev/input/event* --evdev-absmap ABS_RX=X2 --evdev-keymap BTN_THUMB2=a,BTN_THUMB=b,BTN_PINKIE=rt --mimic-xpad
+</pre>
+<p>The above example is incomplete. It only maps one axis and 3 buttons for demonstration purposes. Use <code>xboxdrv --help-button</code> to see the names of the Xbox controller buttons and axes and bind them accordingly by expanding the command above. Axes mappings should go after <code>--evdev-absmap</code> and button mappings follow <code>--evdev-keymap</code> (comma separated list; no spaces).
+</p>
+<p>By default, xboxdrv outputs all events to the terminal. You can use this to test that the mappings are correct. Append the <code>--silent</code> option to keep it quiet.
+</p>
+<h6><span class="mw-headline" id="Logitech_Dual_Action">Logitech Dual Action</span></h6>
+<p>The Logitech Dual Action gamepad has a very similar mapping to the PS2 pad, but some buttons and triggers need to be swapped to mimic the Xbox controller.
+</p>
+<pre> # xboxdrv --evdev /dev/input/event* \
+   --evdev-absmap ABS_X=x1,ABS_Y=y1,ABS_RZ=x2,ABS_Z=y2,ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --axismap -Y1=Y1,-Y2=Y2 \
+   --evdev-keymap BTN_TRIGGER=x,BTN_TOP=y,BTN_THUMB=a,BTN_THUMB2=b,BTN_BASE3=back,BTN_BASE4=start,BTN_BASE=lt,BTN_BASE2=rt,BTN_TOP2=lb,BTN_PINKIE=rb,BTN_BASE5=tl,BTN_BASE6=tr \
+   --mimic-xpad --silent
+</pre>
+<h6><span class="mw-headline" id="PlayStation_2_controller_via_USB_adapter">PlayStation 2 controller via USB adapter</span></h6>
+<p>To fix the button mapping of PS2 dual adapters and mimic the Xbox controller you can run the following command:
+</p>
+<pre> # xboxdrv --evdev /dev/input/event* \
+   --evdev-absmap ABS_X=x1,ABS_Y=y1,ABS_RZ=x2,ABS_Z=y2,ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --axismap -Y1=Y1,-Y2=Y2 \
+   --evdev-keymap   BTN_TOP=x,BTN_TRIGGER=y,BTN_THUMB2=a,BTN_THUMB=b,BTN_BASE3=back,BTN_BASE4=start,BTN_BASE=lb,BTN_BASE2=rb,BTN_TOP2=lt,BTN_PINKIE=rt,BTN_BASE5=tl,BTN_BASE6=tr \
+   --mimic-xpad --silent
+</pre>
+<h6><span class="mw-headline" id="PlayStation_3_controller_via_USB">PlayStation 3 controller via USB</span></h6>
+<p>If you own a PS3 controller and can connect with USB, xboxdrv has the mappings built in. Just run the program (and detach the running driver) and it works! 
+</p>
+<pre># xboxdrv --silent --detach-kernel-driver
+</pre>
+<h6><span class="mw-headline" id="PlayStation_3_controller_via_Bluetooth">PlayStation 3 controller via Bluetooth</span></h6>
+<p>With your controller connected via Bluetooth, find the device address with <code>bluetoothctl</code>. Then create a new udev rule with the following content:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-dualshock.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">KERNEL=="event*", SUBSYSTEM=="input", ATTRS{uniq}=="&lt;device_addr_you_got_on_pairing&gt;", SYMLINK+="input/dualshock3"</pre>
+<p>The address must be in lowercase, like <code>06:9a:b4:c8:ef:8b</code>.
+</p>
+<p>Now run xboxdrv over the new device:
+</p>
+<pre>$ xboxdrv --evdev /dev/input/dualshock3 --mimic-xpad
+</pre>
+<h6><span class="mw-headline" id="PlayStation_4_controller">PlayStation 4 controller</span></h6>
+<p>To fix the button mapping of PS4 controller you can use the following command with xboxdrv (or try with the <a rel="nofollow" class="external text" href="https://github.com/chrippa/ds4drv">ds4drv</a> program):
+</p>
+<pre> # xboxdrv \
+   --evdev /dev/input/by-id/usb-Sony_Computer_Entertainment_Wireless_Controller-event-joystick\
+   --evdev-absmap ABS_X=x1,ABS_Y=y1                 \
+   --evdev-absmap ABS_Z=x2,ABS_RZ=y2                \
+   --evdev-absmap ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+   --evdev-keymap BTN_A=x,BTN_B=a                   \
+   --evdev-keymap BTN_C=b,BTN_X=y                   \
+   --evdev-keymap BTN_Y=lb,BTN_Z=rb                 \
+   --evdev-keymap BTN_TL=lt,BTN_TR=rt               \
+   --evdev-keymap BTN_SELECT=tl,BTN_START=tr        \
+   --evdev-keymap BTN_TL2=back,BTN_TR2=start        \
+   --evdev-keymap BTN_MODE=guide                    \
+   --axismap -y1=y1,-y2=y2                          \
+   --mimic-xpad                                     \
+   --silent
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Joystick_moving_mouse">Joystick moving mouse</span></h3>
+<p>Sometimes USB joystick can be recognized as HID mouse (only in X, it is still being installed as <code>/dev/input/js0</code> as well). Known issue is cursor being moved by the joystick, or escaping to en edge of a screen right after plugin. If your application can detect joystick by it self, you can remove xf86-input-joystick package.
+</p>
+<p>More gentle solution is to <a href="#Disable_Joystick_From_Controlling_Mouse">Disable Joystick From Controlling Mouse</a>.
+</p>
+<h3><span class="mw-headline" id="Joystick_not_working_in_FNA.2FSDL_based_games">Joystick not working in FNA/SDL based games</span></h3>
+<p>If you are using a generic non-widely used gamepad you may encounter issues getting the gamepad recognized in games based on SDL. Since <a rel="nofollow" class="external text" href="https://github.com/flibitijibibo/FNA/commit/e55742cfe7e38b778a21ed8a12cb2f2081490d8d">May the 14th 2015</a>, FNA supports dropping a <code>gamecontrollerdb.txt </code> into the executable folder of the game, for example the <a rel="nofollow" class="external text" href="https://github.com/gabomdq/SDL_GameControllerDB">SDL_GameControllerDB</a>.
+</p>
+<p>As an alternative and for older versions of FNA or for SDL you can generate a mapping yourself by downloading the SDL source code via <a rel="nofollow" class="external free" href="http://libsdl.org/">http://libsdl.org/</a>, navigating to <code>/test/</code>, compile the <code>controllermap.c</code> program (alternatively install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/controllermap/">controllermap</a></span><sup><small>AUR</small></sup>) and run the test. After completing the controllermap test, a guid will be generated that you can put in the <code>SDL_GAMECONTROLLERCONFIG</code> environment variable which will then be picked up by SDL/FNA games. For example:
+</p>
+<pre> $ export SDL_GAMECONTROLLERCONFIG="030000008f0e00000300000010010000,GreenAsia Inc. USB Joystick ,platform:Linux,x:b3,a:b2,b:b1,y:b0,back:b8,start:b9,dpleft:h0.8,dpdown:h0.0,dpdown:h0.4,dpright:h0.0,dpright:h0.2,dpup:h0.0,dpup:h0.1,leftshoulder:h0.0,leftshoulder:b6,lefttrigger:b4,rightshoulder:b7,righttrigger:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a3,righty:a2,"
+</pre>
+<h3><span class="mw-headline" id="Joystick_not_recognized_by_all_programs">Joystick not recognized by all programs</span></h3>
+<p>Some software, Steam for example, will only recognize the first joystick it encounters. Due to a bug in the driver for Microsoft wireless periphery devices this can in fact be the bluetooth dongle. If you find you have a <code>/dev/input/js*</code> and <code>/dev/input/event*</code> belonging to you keyboard's bluetooth transceiver you can get automatically get rid of it by creating according udev rules.
+Create a <code>/</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-btcleanup.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ACTION=="add", KERNEL=="js[0-9]*", SUBSYSTEM=="input", KERNELS=="...", ATTRS{bInterfaceSubClass}=="00", ATTRS{bInterfaceProtocol}=="00", ATTRS{bInterfaceNumber}=="02", RUN+="/usr/bin/rm /dev/input/js%n"
+ACTION=="add", KERNEL=="event*", SUBSYSTEM=="input", KERNELS=="...", ATTRS{bInterfaceSubClass}=="00", ATTRS{bInterfaceProtocol}=="00", ATTRS{bInterfaceNumber}=="02", RUN+="/usr/bin/rm /dev/input/event%n"
+</pre>
+<p>Correct the <code>KERNELS=="..."</code> to match your device. The correct value can be found by running
+</p>
+<pre># udevadm info -an /dev/input/js0
+</pre>
+<p>Assuming the device in question is <code>/dev/input/js0</code>. After you placed the rule reload the rules with
+</p>
+<pre># udevadm control --reload
+</pre>
+<p>Then replug the device making you trouble. The joystick and event devices should be gone, although their number will still be reserved. But the files are out of the way.
+</p>
+<h3><span class="mw-headline" id="Steam_Controller_Not_Pairing">Steam Controller Not Pairing</span></h3>
+<p>If you want your system to be able to recognise Steam controller after hot swapping between wireless and wired connection, and also want system to recognise Steam controller if connected via micro-usb cable while wireless dongle is plugged in, you need to do instructions below. Otherwise, Steam controller will behave just as keyboard/mouse devise after hot swapping or unrecognised at all by steam and games.
+</p>
+<p>If the Steam Controller will not pair wirelessly but works when wired make you may need to create the following udev rule, suggested by Valve<a rel="nofollow" class="external autonumber" href="https://steamcommunity.com/app/353370/discussions/0/490123197956024380/">[1]</a>.
+</p>
+<p><code>/lib/udev/rules.d/99-steam-controller-perms.rules</code>
+</p>
+<pre># This rule is needed for basic functionality of the controller in Steam and keyboard/mouse emulation
+SUBSYSTEM=="usb", ATTRS{idVendor}=="28de", MODE="0666"
+
+# This rule is necessary for gamepad emulation; make sure you add yourself to 'steamcontroller' group
+KERNEL=="uinput", MODE="0660", GROUP="steamcontroller", OPTIONS+="static_node=uinput"
+</pre>
+<p>Create a group of steam controller users.
+</p>
+<pre># groupadd steamcontroller
+</pre>
+<p>And add your user to that group.
+</p>
+<pre># gpasswd -a $USER steamcontroller
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Input_devices.html" title="Category:Input devices">Input devices</a></li>
+<li><a href="../en/Category:Gaming.html" title="Category:Gaming">Gaming</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

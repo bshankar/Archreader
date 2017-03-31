@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>LIRC - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-LIRC skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">LIRC</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/LIRC.html" title="LIRC Device Examples" class="mw-redirect">LIRC Device Examples</a></li>
+</ul>
+</div>
+<p>This article covers setup and usage of <a rel="nofollow" class="external text" href="http://lirc.org/">LIRC</a> "Linux Infrared Remote Control" with serial or USB infrared devices.
+</p>
+<p>LIRC is a daemon that can translate key presses on a supported remote into program specific commands.  In this context, the term, "program specific" means that a key press can do different things depending on which program is running and taking commands from LIRC.
+</p>
+<p>The Central Dogma of LIRC (an allusion to the <a rel="nofollow" class="external text" href="http://www.ncbi.nlm.nih.gov/Class/MLACourse/Modules/MolBioReview/central_dogma.html">flow of information</a> in biological systems) is summarized below wherein the flow of information from the remote to the application is summarized with LIRC at the center of it all:
+</p>
+<ul>
+<li> User hits a button on the remote causing it to transmit an IR or RF signal.</li>
+<li> The signal is received by the receiver connected to the Linux box.</li>
+<li> The kernel (via the correct module) use presents pulse data from the remote on a device like /dev/lirc0, /dev/input/eventX, /dev/ttyUSBX or /dev/ttyS0.</li>
+<li> <code>/usr/bin/lircd</code> uses the information from <code>/etc/lirc/lircd.conf.d/foo.conf</code> to convert the pulse data into button press information.</li>
+<li> Programs that use LIRC translate the button press info from <code>/usr/bin/lircd</code> into user-defined actions according to <code>~/.lircrc</code> or to program-specific mappings.</li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Upstream_provided"><span class="tocnumber">2.1</span> <span class="toctext">Upstream provided</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#User_created"><span class="tocnumber">2.2</span> <span class="toctext">User created</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Optional_files"><span class="tocnumber">2.3</span> <span class="toctext">Optional files</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Program_Specific_Configuration"><span class="tocnumber">4</span> <span class="toctext">Program Specific Configuration</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9">
+<a href="#Remote_functions_as_a_keyboard"><span class="tocnumber">5.1</span> <span class="toctext">Remote functions as a keyboard</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#When_using_Xorg"><span class="tocnumber">5.1.1</span> <span class="toctext">When using Xorg</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#On_an_ARM_device_not_using_Xorg"><span class="tocnumber">5.1.2</span> <span class="toctext">On an ARM device not using Xorg</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lirc">lirc</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This section is a quick summary. Complete documentation is available <a rel="nofollow" class="external text" href="http://lirc.sourceforge.net/lirc.org/html/index.html">upstream</a>.</div>
+<p><code>/etc/lirc/lircd.conf.d/foo.conf</code> is the system-wide configuration translating scancodes --&gt; keys.  This directory may contain multiple conf files and each one is specific to each remote control/receiver on the system. These files are user-created config files and not directly supplied by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lirc">lirc</a></span>.
+</p>
+<p>The definition of scancodes to keymaps is required to allow LIRC to manage a remote.  Users have several options to obtain one.
+</p>
+<h3><span class="mw-headline" id="Upstream_provided">Upstream provided</span></h3>
+<p>Identify which remote/receiver is to be used and see if there is a known config for it.  One can use <code>irdb-get</code> to search the <a rel="nofollow" class="external text" href="http://lirc-remotes.sourceforge.net/remotes-table.html">remotes database</a> or simply browse to the URL and do the same.
+</p>
+<p>An example using <code>irdb-get</code> to find a config file for a Streamzap remote:
+</p>
+<pre>$ irdb-get find stream
+atiusb/atiusb.lircd.conf
+digital_stream/DTX9900.lircd.conf
+snapstream/Firefly-Mini.lircd.conf
+streamzap/PC_Remote.lircd.conf
+streamzap/streamzap.lircd.conf
+x10/atiusb.lircd.conf
+
+$ irdb-get download streamzap/streamzap.lircd.conf 
+Downloaded sourceforge.net/p/lirc-remotes/code/ci/master/tree/remotes/streamzap/streamzap.lircd.conf as streamzap.lircd.conf
+</pre>
+<p>Once identified, copy the needed conf to <code>/etc/lirc/lircd.conf.d/</code> to allow the daemon to initialize support for it.
+</p>
+<pre># cp streamzap.lircd.conf /etc/lirc/lircd.conf.d/
+</pre>
+<h3><span class="mw-headline" id="User_created">User created</span></h3>
+<p>Users with unsupported hardware will need to either find a config file someone else has created (i.e. google) or create one.  Creating one is fairly straightforward using <code>/usr/bin/irrecord</code> which guides users along the needed process.  If using a detected remote, invoke it like so:
+</p>
+<pre># irrecord --device=/dev/lirc0 MyRemote
+</pre>
+<p>The program will instruct users to begin hitting keys on the remote in an attempt to learn it, ultimately mapping out every button and its corresponding scancode.  The process should take no more than 10 minutes.  When finished, save the resulting file to <code>/etc/lirc/lircd.conf.d/foo.conf</code> and proceed.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Consider sending the finished config file to the email address mentioned in the program so it can be made available to others.</div>
+<h3><span class="mw-headline" id="Optional_files">Optional files</span></h3>
+<p>Depending on the application using LIRC, the following are optional.  For example, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mplayer">mplayer</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mythtv">mythtv</a></span> use the these files to define key maps and actions.  Some other programs such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kodi">kodi</a></span> for example do not make use of this at all but do have an internal system to achieve these mappings.  Users should consult the documentation for the specific application to know if modifications to <code>~/.lircrc</code> are needed.
+</p>
+<ul>
+<li> <code>~/.lircrc</code> - File containing an <b>include</b> statement pointing to each program's lirc map, i.e., <code>~/.lirc/foo</code>, <code>~/.lirc/bar</code>, etc.</li>
+<li> <code>~/.lirc/foo</code> - User-level config translating of keys --&gt; actions.  Is specific to each remote and to application foo.</li>
+</ul>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>lircd.service</code> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it to run at boot time/shutdown (recommended).
+</p>
+<p>Test the remote using <code>/usr/bin/irw</code>, which simply echos anything received by LIRC when users push buttons on the remote to stdout.
+</p>
+<p>Example:
+</p>
+<pre>$ irw
+000000037ff07bfe 00 One mceusb
+000000037ff07bfd 00 Two mceusb
+000000037ff07bfd 01 Two mceusb
+000000037ff07bf2 00 Home mceusb
+000000037ff07bf2 01 Home mceusb
+</pre>
+<p>If <code>irw</code> gives no output, double check the config files in <code>/etc/lirc/lircd.conf.d/</code> for errors.
+</p>
+<h2><span class="mw-headline" id="Program_Specific_Configuration">Program Specific Configuration</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/LIRC.html#Optional" title="LIRC">LIRC#Optional</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> or the other way around (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:LIRC">Talk:LIRC#</a>)</div>
+</div>
+<p>LIRC has the ability to allow for different programs to use the same keypress and result in unique commands.  In other words, one can setup different programs to respond differently to a given key press.
+</p>
+<ul><li> Decide which programs are to use LIRC commands.</li></ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Common programs include: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mplayer">mplayer</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mythtv">mythtv</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=totem">totem</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vlc">vlc</a></span>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kodi">kodi</a></span> but not all programs will use this particular method to map keys.  <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kodi">kodi</a></span> for example, implements LIRC in a non-standard way.  Users must edit <code>~/.xbmc/userdata/Lircmap.xml</code> which is a unique xml file, rather than the LIRC standard files the rest of the programs use.  Interested users should consult <a href="../en/Kodi.html#Using_a_remote_control" title="Kodi">Kodi#Using a remote control</a>.</div>
+<ul><li> Create the expected files showing LIRC where the various program-specific maps reside:</li></ul>
+<pre>$ mkdir ~/.lirc
+$ touch ~/.lircrc
+</pre>
+<ul><li> Populate <code>~/.lirc</code> with the program specific config files named for each program.</li></ul>
+<p>Example:
+</p>
+<pre>$ ls ~/.lirc
+mplayer
+mythtv
+vlc
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Many pre-made files unique to each remote/program are available via googling.  Providing an exhaustive listing of keymaps for each program is beyond the scope of this article.</div>
+<ul><li> Edit <code>~/.lircrc</code> to contain an <b>include</b> statement pointing to <code>~/.lirc/foo</code> and repeat for each program that is to be controlled by LIRC.</li></ul>
+<p>Example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.lircrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+include "~/.lirc/mplayer"
+include "~/.lirc/mythtv"
+include "~/.lirc/vlc"
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Remote_functions_as_a_keyboard">Remote functions as a keyboard</span></h3>
+<h4><span class="mw-headline" id="When_using_Xorg">When using Xorg</span></h4>
+<p>Xorg detects some remotes, such as the Streamzap USB PC Remote, as a Human Interface Device (HID) which means some or all of the keys will show up as  key strokes as if entered from the physical keyboard.  This behavior will present problems if LIRC is to be used to manage the device.  
+To disable, create the following file and restart X:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/90-streamzap.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "InputClass"
+  Identifier "Ignore Streamzap IR"
+  MatchProduct "Streamzap"
+  MatchIsKeyboard "true"
+  Option "Ignore" "true"
+EndSection</pre>
+<p>Do not forget to alter the <code>MatchProduct</code> property according to one shown in <code>Name</code> from output of 
+</p>
+<pre>$ cat /proc/bus/input/devices | grep -e IR
+</pre>
+<p>For example <code>WinFast</code> for <code>N: Name="cx88 IR (WinFast DTV2000 H rev."</code>
+</p>
+<h4><span class="mw-headline" id="On_an_ARM_device_not_using_Xorg">On an ARM device not using Xorg</span></h4>
+<p>Blacklist the offending modules by creating <code>/etc/modprobed.d/streamzap.conf</code> to suppress this behavior. An example is provided for the Streamzap remote.
+</p>
+<pre>install ir_sharp_decoder /bin/false
+install ir_xmp_decoder /bin/false
+install ir_rc5_decoder /bin/false
+install ir_nec_decoder /bin/false
+install ir_sony_decoder /bin/false
+install ir_mce_kbd_decoder /bin/false
+install ir_jvc_decoder /bin/false
+install ir_rc6_decoder /bin/false
+install ir_sanyo_decoder /bin/false
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://lirc.sourceforge.net/lirc.org/html/index.html">Upstream documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://lirc-remotes.sourceforge.net/remotes-table.html">Remotes database</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://sf.net/p/lirc">Project site</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://lirc.org/html/configuration-guide.html">Upstream Configuration Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.mythtv.org/wiki/Category:Remote_Controls">MythTV Wiki:Remotes article</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://lirc-remotes.sourceforge.net/remotes-table.html">Official list of supported hardware</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/graysky2/streamzap">Linux Streamzap config files</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Other_hardware.html" title="Category:Other hardware">Other hardware</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

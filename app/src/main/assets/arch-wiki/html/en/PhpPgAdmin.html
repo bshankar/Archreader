@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>phpPgAdmin - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PhpPgAdmin skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">phpPgAdmin</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PostgreSQL.html" title="PostgreSQL">PostgreSQL</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://phppgadmin.sourceforge.net/">phpPgAdmin</a> is a web-based tool to help manage PostgreSQL databases using an PHP frontend.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#PHP"><span class="tocnumber">2.1</span> <span class="toctext">PHP</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Web_server"><span class="tocnumber">2.2</span> <span class="toctext">Web server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Apache"><span class="tocnumber">2.2.1</span> <span class="toctext">Apache</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Lighttpd"><span class="tocnumber">2.2.2</span> <span class="toctext">Lighttpd</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Nginx"><span class="tocnumber">2.2.3</span> <span class="toctext">Nginx</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#phpPgAdmin_configuration"><span class="tocnumber">2.3</span> <span class="toctext">phpPgAdmin configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Accessing_your_phpPgAdmin_installation"><span class="tocnumber">3</span> <span class="toctext">Accessing your phpPgAdmin installation</span></a></li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Login_disallowed_for_security_reasons"><span class="tocnumber">4.1</span> <span class="toctext">Login disallowed for security reasons</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>PhpPgAdmin requires a web server with PHP, such as Apache. To set it up, see <a href="../en/Apache_HTTP_Server.html" title="Apache HTTP Server">Apache HTTP Server</a> and <a href="../en/Apache_HTTP_Server.html#PHP" title="Apache HTTP Server">Apache HTTP Server#PHP</a>.
+</p>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=phppgadmin">phppgadmin</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="PHP">PHP</span></h3>
+<p>You need to enable the <code>pgsql</code> extension in PHP by editing <code>/etc/php/php.ini</code> and uncommenting the following line:
+</p>
+<pre>extension=pgsql.so
+</pre>
+<p>You need to make sure that PHP can access <code>/etc/webapps</code>. Add it to <code>open_basedir</code> in <code>/etc/php/php.ini</code> if necessary:
+</p>
+<pre>open_basedir = /srv/http/:/home/:/tmp/:/usr/share/pear/:/usr/share/webapps/:/etc/webapps
+</pre>
+<h3><span class="mw-headline" id="Web_server">Web server</span></h3>
+<h4><span class="mw-headline" id="Apache">Apache</span></h4>
+<p>Create the Apache configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/httpd/conf/extra/phppgadmin.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Alias /phppgadmin "/usr/share/webapps/phppgadmin"
+&lt;Directory "/usr/share/webapps/phppgadmin"&gt;
+    DirectoryIndex index.php
+    AllowOverride All
+    Options FollowSymlinks
+    Require all granted
+&lt;/Directory&gt;
+</pre>
+<p>And include it in <code>/etc/httpd/conf/httpd.conf</code>:
+</p>
+<pre># phpPgAdmin configuration
+Include conf/extra/phppgadmin.conf
+</pre>
+<p>By default, everyone can see the phpPgAdmin page, to change this, edit <code>/etc/httpd/conf/extra/phppgadmin.conf</code> to your liking. For example, if you only want to be able to access it from the same machine, replace <code>Require all granted</code> by <code>Require local</code>.
+</p>
+<h4><span class="mw-headline" id="Lighttpd">Lighttpd</span></h4>
+<p>The php setup for lighttpd is exactly the same as for apache.
+Make an alias for phppgadmin in your lighttpd config.
+</p>
+<pre> alias.url = ( "/phppgadmin" =&gt; "/usr/share/webapps/phppgadmin/")
+</pre>
+<p>Then enable mod_alias, mod_fastcgi and mod_cgi in your config ( server.modules section )
+</p>
+<p>Make sure lighttpd is setup to serve php files, <a href="../en/Lighttpd.html#FastCGI" title="Lighttpd">Lighttpd#FastCGI</a>
+</p>
+<p>Restart lighttpd and browse to <a rel="nofollow" class="external free" href="http://localhost/phppgadmin/index.php">http://localhost/phppgadmin/index.php</a>
+</p>
+<h4><span class="mw-headline" id="Nginx">Nginx</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Grammar, punctuation, style issues, see also <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a> and related. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PhpPgAdmin">Talk:PhpPgAdmin#</a>)</div>
+</div>
+<p>Create a symbolic link to the /usr/share/webapps/phppgadmin directory from whichever directory your vhost is serving files from, e.g. /srv/http/&lt;domain&gt;/public_html/
+</p>
+<pre> sudo ln -s /usr/share/webapps/phppgadmin /srv/http/&lt;domain&gt;/public_html/phppgadmin
+</pre>
+<p>You can also setup a sub domain with a server block like so (if using php-fpm):
+</p>
+<p>Also, you need to use at less php-fpm (you need it), you have to make it running first (if you not do it, you will have a "502 bad gateway" error instead of the phpPgadmin first page).
+</p>
+<p>For make it running after install the package, make a "systemctl start php-fpm" (and enable it if you want to use it all the time and/or after reboot, by "systemctl enable php-fpm)
+</p>
+<pre> server {
+         server_name     phppgadmin.&lt;domain.tld&gt;;
+         access_log      /srv/http/&lt;domain&gt;/logs/phppgadmin.access.log;
+         error_log       /srv/http/&lt;domain.tld&gt;/logs/phppgadmin.error.log;
+ 
+         location / {
+                 root    /srv/http/&lt;domain.tld&gt;/public_html/phppgadmin;
+                 index   index.html index.htm index.php;
+         }
+ 
+         location ~ \.php$ {
+                 root            /srv/http/&lt;domain.tld&gt;/public_html/phppgadmin;
+                 fastcgi_pass    unix:/var/run/php-fpm/php-fpm.sock;
+                 fastcgi_index   index.php;
+                 fastcgi_param   SCRIPT_FILENAME  /srv/http/&lt;domain.tld&gt;/public_html/phppgadmin/$fastcgi_script_name;
+                 include         fastcgi_params;
+         }
+ }
+</pre>
+<p>but there is an other simple way to do it running (also, if you need some other web apps, it would be easy more after):
+</p>
+<pre> server {
+     listen 80;
+     server_name localhost default_server;
+     root /srv/http/www/public_html;
+     index index.html index.html index.php;
+     location ~ \.php$ {
+         try_files $uri =404;
+         include fastcgi_params;
+         fastcgi_pass unix:/var/run/php-fpm/php-fpm.sock;
+         fastcgi_index index.php;
+         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; } }
+</pre>
+<p><br>
+with this config, your phppgadmin will be accessible at <a rel="nofollow" class="external free" href="http://localhost/phppgadmin">http://localhost/phppgadmin</a> directly and you will be able also to add some other web apps easy in the same way 
+</p>
+<p>(just have to paste/link them under public_html directory and find it at localhost/your_webapps) 
+</p>
+<p>this config make working all php file inside your localhost directly 
+</p>
+<p>(also it is a good idea to allow a user http http in the top of this nginx file and make directory srv/http/ under http owner/group)
+</p>
+<p>the "server" serve only if you want to create some other server name designed only for this... 
+</p>
+<p>also, make a root inside the location of php is not a simple way to do and make the config file in trouble...
+</p>
+<h3><span class="mw-headline" id="phpPgAdmin_configuration">phpPgAdmin configuration</span></h3>
+<p>phpPgAdmin's configuration file is located at <code>/etc/webapps/phppgadmin/config.inc.php</code>. If you have a local PostgreSQL server, it should be usable without making any modifications.
+</p>
+<p>If your PostgreSQL server is not on the localhost, edit the following line:
+</p>
+<pre>$conf['servers'][0]['host'] = <i>;</i>
+</pre>
+<h2><span class="mw-headline" id="Accessing_your_phpPgAdmin_installation">Accessing your phpPgAdmin installation</span></h2>
+<p>Your phpPgAdmin installation is now complete. Before start using it you need to restart your apache server by following command:
+</p>
+<pre># systemctl restart httpd.service
+</pre>
+<p>You can access your phpPgAdmin installation by going to <a rel="nofollow" class="external free" href="http://localhost/phppgadmin/">http://localhost/phppgadmin/</a>
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Login_disallowed_for_security_reasons">Login disallowed for security reasons</span></h3>
+<p>If extra login security is true, then logins via phpPgAdmin with no password or certain usernames (<i>pgsql</i>, <i>postgres</i>, <i>root</i>, <i>administrator</i>) will be denied. Only set this to <code>false</code> once you have read the FAQ and understand how to change PostgreSQL's <code>pg_hba.conf</code> to enable passworded local connections.
+</p>
+<p>Edit <code>/etc/webapps/phppgadmin/config.inc.php</code> and change the following line
+</p>
+<pre> $conf['extra_login_security'] = true;
+</pre>
+<p>to
+</p>
+<pre> $conf['extra_login_security'] = false;
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

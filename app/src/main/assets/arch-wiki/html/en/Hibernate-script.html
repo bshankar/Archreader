@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>hibernate-script - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Hibernate-script skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">hibernate-script</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pm-utils.html" title="Pm-utils">pm-utils</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Laptop.html" title="Laptop">Laptop</a></li>
+</ul>
+</div>
+<p>"Hibernating" or suspending to disk writes all the running processes to the disk (typically to the swap partition), then completely powers down the machine. This resembles suspending to RAM, but while a machine suspended to RAM still requires a small charge from a battery or power source, a hibernated machine does not and can remain hibernated indefinitely. This advantage comes at the cost of additional time needed to hibernate and to resume, since disks (especially HDD swap partitions) write and read slower than RAM.
+</p>
+<p>This guide focuses on hibernate-script (see the <a href="../en/Pm-utils.html" title="Pm-utils">pm-utils</a> page for the alternative), a frontend used with the <a href="../en/Uswsusp.html" title="Uswsusp">uswsusp</a> ("userspace suspension") and <a href="../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a> (formerly known as suspend2) hibernate backends. Uswsusp generally works without requiring a patched kernel but should be used with initrd/initramfs. Tuxonice requires a modified kernel, but works without initrd/initramfs and also allows suspending to a swap file if a user does not have, or does not want to use, a swap partition.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Backend_setup"><span class="tocnumber">2</span> <span class="toctext">Backend setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Direct_Run"><span class="tocnumber">2.1</span> <span class="toctext">Direct Run</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Setting_the_suspend_method"><span class="tocnumber">2.2</span> <span class="toctext">Setting the suspend method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Hibernate_tricks_with_the_hibernate.script"><span class="tocnumber">3</span> <span class="toctext">Hibernate tricks with the hibernate.script</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Editing_.2Fetc.2Fhibernate.2Fcommon.conf"><span class="tocnumber">3.1</span> <span class="toctext">Editing /etc/hibernate/common.conf</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#NVIDIA_specific_settings"><span class="tocnumber">3.2</span> <span class="toctext">NVIDIA specific settings</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Suspending_with_fglrx"><span class="tocnumber">3.3</span> <span class="toctext">Suspending with fglrx</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Dropping_disk_caches"><span class="tocnumber">3.4</span> <span class="toctext">Dropping disk caches</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Specific_settings_for_TuxOnIce"><span class="tocnumber">3.5</span> <span class="toctext">Specific settings for TuxOnIce</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Combining_suspend_to_disk_with_suspend_to_RAM"><span class="tocnumber">4</span> <span class="toctext">Combining suspend to disk with suspend to RAM</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Take_action_based_on_events"><span class="tocnumber">5</span> <span class="toctext">Take action based on events</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#After_pressing_power_button"><span class="tocnumber">5.1</span> <span class="toctext">After pressing power button</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#After_closing_lid"><span class="tocnumber">5.2</span> <span class="toctext">After closing lid</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Different_methods_of_suspending_to_RAM"><span class="tocnumber">6</span> <span class="toctext">Different methods of suspending to RAM</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#The_hibernate-script_and_suspension_to_RAM"><span class="tocnumber">6.1</span> <span class="toctext">The hibernate-script and suspension to RAM</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Sound"><span class="tocnumber">6.2</span> <span class="toctext">Sound</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Automatic_suspend_and_wakeup"><span class="tocnumber">6.3</span> <span class="toctext">Automatic suspend and wakeup</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Automatic_suspend.2C_the_hard_way"><span class="tocnumber">6.4</span> <span class="toctext">Automatic suspend, the hard way</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Controlling_wakeup"><span class="tocnumber">6.5</span> <span class="toctext">Controlling wakeup</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>You can install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/hibernate-script/">hibernate-script</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h2><span class="mw-headline" id="Backend_setup">Backend setup</span></h2>
+<p>There is a dedicated pages which covers the installing and configuring of these backend:
+</p>
+<ul>
+<li> Tuxonice method: <a href="../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a>
+</li>
+<li> Uswsusp method: <a href="../en/Uswsusp.html" title="Uswsusp">Uswsusp</a>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Direct_Run">Direct Run</span></h3>
+<p>you can suspend to disk with the method with the following command. 
+</p>
+<p>Using uswsusp:
+</p>
+<pre># hibernate -F /etc/hibernate/ususpend-disk.conf
+</pre>
+<p>Using TuxOnIce:
+</p>
+<pre># hibernate -F /etc/hibernate/tuxonice.conf
+</pre>
+<h3><span class="mw-headline" id="Setting_the_suspend_method">Setting the suspend method</span></h3>
+<p>Preferred suspend/hibernation method of hibernate-script can be set in the file <code>/etc/hibernate/hibernate.conf</code>. If you list several methods, the first one will be used. Note that <i>hibernate</i> can also be used with <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to RAM" class="mw-redirect">Suspend to RAM</a> or vanilla uswsusp).
+</p>
+<p>For Uswsusp use:
+</p>
+<pre>TryMethod ususpend-disk.conf
+</pre>
+<p>For TuxOnIce use: 
+</p>
+<pre>TryMethod tuxonice.conf
+</pre>
+<h2><span class="mw-headline" id="Hibernate_tricks_with_the_hibernate.script">Hibernate tricks with the hibernate.script</span></h2>
+<p>This is a brief overview of the hibernate script. If you want to tweak it further, examine the <code>common.conf</code> and <code>suspend2.conf</code> files further and read the excellent and exhaustive man pages for hibernate and <code>hibernate.conf</code>.
+</p>
+<h3><span class="mw-headline" id="Editing_.2Fetc.2Fhibernate.2Fcommon.conf">Editing /etc/hibernate/common.conf</span></h3>
+<p>The options in this file are used with any hibernation method (actually, the file is sourced by the configuration files of each method) and also by <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to RAM" class="mw-redirect">Suspend to RAM</a> when accomplished with the hibernate-script. This file is complex and well commented. The man page <code>hibernate.conf</code> describes adequately all the options. Here, we can only stress the most commonly useful parts.
+</p>
+<p>Uncomment the lines for any filesystems that have the potential to change while your computer is suspended (for example shared partitions with windows like vfat or ntfs ones). They will be remounted upon resume. Otherwise you would risk corrupting the filesystems.
+</p>
+<pre>### filesystems
+# Unmount /nfsshare /windows /mnt/sambaserver
+# UnmountFSTypes smbfs nfs
+# UnmountGraceTime 1
+# Mount /windows
+</pre>
+<p>If you do not explicitly restore the volume levels, ALSA may have the sound channels muted after resuming. If this happens, look for:
+</p>
+<pre>### services
+</pre>
+<p>in <code>/etc/hibernate/common.conf</code> and change the line just below to:
+</p>
+<pre>RestartServices alsa
+</pre>
+<p>The alsa service will be stopped before suspension and restarted after resuming: the sound channels and volumes will be as before.
+You may want to restart other problematic services here.
+</p>
+<p>A common issue is that some drivers do not support suspension, that is they do not work properly after a suspension cycle or even they prevent the system from suspending or resuming properly. 
+In these cases (which should be reported - at least for modules in the vanilla kernel - to the suspend-devel@lists.sourceforge.net mailing list, so that they can be fixed upstream) you can unload the module before suspension and reload it after resuming: the hibernate-script can automatize this routine with the LoadModules and UnloadModules options. Actually, the hibernate-script already unloads some problematic modules, listed in <code>/etc/hibernate/blacklisted-modules</code>, so you can also add the modules in that file.
+</p>
+<p>To re-connect to networks after rebooting, you may want to add:
+</p>
+<pre>OnSuspend 25 netcfg2 -a
+OnResume 20 netcfg-auto-wireless &lt;your-network-interface&gt;
+</pre>
+<p>This will disconnect from all networks, then should automatically choose the correct one. If you use another way to connect to a network (such as netcfg2 &lt;profile-name&gt; then of-course, put that there instead.
+</p>
+<p>One 'gotcha' to watch out for is the priority level you put on your user-commands, this won't work:
+</p>
+<pre>OnSuspend 5 netcfg -a
+</pre>
+<p>You'll need to set the priority as 05 instead. Its normally best to use something within the range of 20-50 for your user scripts.
+</p>
+<p>If you need/want to eject all PcCards before suspending and reinsert them after resuming, change the <i>EjectCards</i> setting in <code>common.conf</code>:
+</p>
+<pre>### pcmcia
+EjectCards yes
+</pre>
+<p>This is necessary on some laptops, if the pccards stop working after resume.
+</p>
+<p>Finally, the most problematic aspect is constituted by the video card: its status needs often to be restored after resuming. In other cases, it is necessary to switch from X to the console.
+The following options in <code>/etc/hibernate/common.conf</code> will probably fix these issues (whose symptom could be a frozen machine or only a black display after resuming):
+</p>
+<pre>### vbetool
+#EnableVbetool yes
+#RestoreVbeStateFrom /var/lib/vbetool/vbestate
+#VbetoolPost yes
+# RestoreVCSAData yes
+</pre>
+<pre>### xhacks
+#SwitchToTextMode yes
+#UseDummyXServer yes
+#DummyXServerConfig xorg-dummy.conf
+</pre>
+<p>You can uncomment one or many of them in order to see if the problem is solved. In order to use the first block of options, you need to install the vbetool package from the extra repository. Each of the option is documented in man <code>hibernate.conf</code>. 
+Please note that it is very important to try all the different combinations of these options before than anything else, becaause the problems with the display are the most common source of troubles in a suspension cycle.
+</p>
+<h3><span class="mw-headline" id="NVIDIA_specific_settings">NVIDIA specific settings</span></h3>
+<p>If you have an <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a> graphics card and use a driver version &gt;177, you need to add the following line to <code>/etc/hibernate/tuxonice.conf</code>: 
+</p>
+<pre>ProcSetting extra_pages_allowance 7500
+</pre>
+<p>A value lower than 7500 might also work on certain systems, though 7500 should be a working default. Setting this option should allow you to hibernate and resume without any additional X hacks. You will also need to comment out the nvidia module in <code>/etc/hibernate/blacklisted-modules</code> for this to work.
+</p>
+<p>The suggested value for extra_pages_allowance for driver versions &lt;177 is 0:
+</p>
+<pre>ProcSetting extra_pages_allowance 0
+</pre>
+<p>This setting has also been reported to help with the binary ATI driver.
+</p>
+<p>If you have an AGP Nvidia card and are using the binary driver, you might also have to add the following line to your <code>/etc/X11/xorg.conf</code>:
+</p>
+<pre>Option "NvAGP" "1"
+</pre>
+<h3><span class="mw-headline" id="Suspending_with_fglrx">Suspending with fglrx</span></h3>
+<p>Following addition to <code>/etc/hibernate/suspend2.conf</code> is required:
+</p>
+<pre># For fglrx
+ProcSetting extra_pages_allowance 20000
+</pre>
+<h3><span class="mw-headline" id="Dropping_disk_caches">Dropping disk caches</span></h3>
+<dl><dd><small><i>From: <a rel="nofollow" class="external text" href="http://www.linuxinsight.com/proc_sys_vm_drop_caches.html">drop_caches introduction</a></i></small></dd></dl>
+<p>As a way to speed up suspending, you can free the memory used for disk caches so there will be less to write to the disk. Just add something like this to the <code>common.conf</code>:
+</p>
+<pre>OnSuspend 00 sync; echo 3 &gt; /proc/sys/vm/drop_caches
+</pre>
+<h3><span class="mw-headline" id="Specific_settings_for_TuxOnIce">Specific settings for TuxOnIce</span></h3>
+<p>Specific settings for TuxOnIce are in <code>/etc/hibernate/tuxonice.conf</code>. Make sure that the following lines are uncommented and appropriately configured:
+</p>
+<pre>UseTuxOnIce   yes
+Compressor    lzo
+</pre>
+<p>There are a number of additional settings and tweaks which you can set in <code>/etc/hibernate/tuxonice.conf</code> and <code>/etc/hibernate/common.conf</code>, more information about these can be found on the <a rel="nofollow" class="external text" href="http://www.tuxonice.net/HOWTO-4.html">TuxOnIce</a> website and on the <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to Disk" class="mw-redirect">Suspend to Disk</a> page of this wiki.
+</p>
+<p>You can abort a suspend cycle if you press the escape key. If you press a capital R, you will force the system to reboot after hibernation.
+</p>
+<p>If all goes well, you should be able to resume using the same GRUB menu selection.  If you make that option the default for GRUB, you will always default to resuming if a resume image is available. It is recommended that you test the suspend/hibernate from a text console first and then once you have confirmed that it works try it from within X.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Never use a different kernel to resume than you used to suspend! If pacman updates your kernel, do not suspend before you have rebooted properly.</div>
+<p>You can make this practice safer adding the hibernate-cleanup daemon to your DAEMONS array in <code>/etc/rc.conf</code>. This script will make sure that any stale image is deleted from your swap partition at boot time. This should make your system safe also in the case that you have chosen the mistaken kernel at the GRUB prompt. The hibernate-cleanup service is included in the hibernate-script package.
+</p>
+<h2><span class="mw-headline" id="Combining_suspend_to_disk_with_suspend_to_RAM">Combining suspend to disk with suspend to RAM</span></h2>
+<p>If your motherboard or laptop supports <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to RAM" class="mw-redirect">Suspend to RAM</a>, you can combine it with suspend2. This will result in the following behavior:
+</p>
+<ul>
+<li> When you call hibernate, your system will suspend to disk and after that suspend to RAM instead of powering down.</li>
+<li> When you turn your system back on, it will resume directly from RAM (which only takes a few seconds)</li>
+<li> If your battery fails in the meantime (and the image in your memory is therefore lost), you will be able to resumes from disk.</li>
+</ul>
+<p>This can be done both with uswsusp and with tuxonice. 
+</p>
+<p>With uswsusp, you should use s2both. You can also call s2both from the hibernate script (with all its richness of options), resorting to the <code>ususpend-both.conf</code> method. Please note that s2both works only if s2ram (see <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to RAM" class="mw-redirect">Suspend to RAM</a>) works in your system. There is no way to force it to work if your laptop model is not whitelisted in s2ram. See <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to RAM" class="mw-redirect">Suspend to RAM</a> for instructions about how to whitelist your laptop in the local copy of s2ram and how to report that your laptop suspend to ram properly so that it is whitelisted in the next uswsusp release.
+</p>
+<p>To do it with tuxonice, edit <code>/etc/hibernate/suspend2.conf</code>:
+</p>
+<pre>## Powerdown method - 3 for suspend-to-RAM, 4 for ACPI S4 sleep, 5 for poweroff
+PowerdownMethod 3
+</pre>
+<p>For this to work, your computer must be able to use suspend to RAM also without s2ram.
+</p>
+<h2><span class="mw-headline" id="Take_action_based_on_events">Take action based on events</span></h2>
+<p>Tuning hibernate-script for context sensitive modal operation. You need to have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=acpid">acpid</a></span> installed.
+</p>
+<h3><span class="mw-headline" id="After_pressing_power_button">After pressing power button</span></h3>
+<p>Edit the following file <code>/etc/acpi/events/power</code>
+</p>
+<pre># This is called when the user presses the power button
+event=button/power (PWR.||PBTN)
+# To Hibernate uncomment the following line
+#action=hibernate 
+# To Suspend uncomment the following line
+#action=suspend
+</pre>
+<h3><span class="mw-headline" id="After_closing_lid">After closing lid</span></h3>
+<p>Edit the following file <code>/etc/acpi/events/lid</code>
+</p>
+<pre># This is called when the user closes the lid
+event=button/lid
+# To Hibernate uncomment the following line
+#action=hibernate 
+# To Suspend uncomment the following line
+#action=suspend
+</pre>
+<p>You can also install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lidsleep/">lidsleep</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/lidsleep">aur-mirror</a>]</sup> which includes the file altered to use pm-utils and suspend to RAM.
+</p>
+<p>Alternatively you can edit <code>/etc/acpi/actions/lm_lid.sh</code> this is the file that is executed when the lid state is changed
+</p>
+<p>Example:
+</p>
+<pre>
+#!/bin/bash
+# lid button pressed/released event handler
+#laptop mode helps minimized hdd activity
+test -x /usr/sbin/laptop_mode &amp;&amp; /usr/sbin/laptop_mode auto
+# get the -xauth variable so we can access the display
+XAUTH="$( ps -C X f | sed -n 's/.*-auth \(.*\)/\1/p' )"
+if [[ -z $XAUTH ]]; then
+  # if XAUTH is blank try another way to get it 
+  XAUTH="$( ps -C xinit f | sed -n 's/.*-auth \(.*\)serverauth.*/\1Xauthority/p' )"
+fi
+#Find out if the lid is open or closed
+if grep -q open /proc/acpi/button/lid/LID/state; then
+  # the screen is on, forces it to be on
+  ACTION="on"
+  XAUTHORITY=$XAUTH /usr/bin/xset -display :0.0 dpms force $ACTION
+else
+  # screen is off, forces off
+  ACTION="off"
+  XAUTHORITY=$XAUTH /usr/bin/xset -display :0.0 dpms force $ACTION
+  # script waits for 10 minutes
+  sleep 10m
+  # checks to make sure screen is still closed
+  if grep -q closed /proc/acpi/button/lid/LID/state; then
+    # if it is, then it suspends to disk
+    s2disk
+  else
+    # or it turns it back on
+    XAUTHORITY=$XAUTH /usr/bin/xset -display :0.0 dpms force on
+  fi
+fi
+</pre>
+<p>The script turns the monitor off or on. But if the screen is left shut for 10 minutes, it will suspend to the disk automatically. <code> man sleep</code> for more info on the sleep command.
+</p>
+<h2><span class="mw-headline" id="Different_methods_of_suspending_to_RAM">Different methods of suspending to RAM</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> use "uswsusp" instead of "s2ram" to refer to <a href="../en/Uswsusp.html" title="Uswsusp">Uswsusp</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hibernate-script">Talk:Hibernate-script#</a>)</div>
+</div>
+<p>There is an application, called <code>s2ram</code>, which contains a "whitelist" of known laptop models and, according to what has been reported by other owners of these laptops, tries to do the right things for that specific laptop. The whitelisted laptops can therefore use <code>s2ram</code> to suspend to RAM "out of the box". Non-whitelisted laptops need to try different command line options of <code>s2ram</code> in order to determine - by trial and error - the appropriate "tricks" needed to make suspend and resume work. Your experience, if reported to the <code>s2ram</code> developers, will contribute to whitelist your machine in the next release of <code>s2ram</code>.
+</p>
+<p>However, <code>s2ram</code> is not the only resource: the hibernate-script, which is commonly used to accomplish <a href="../en/Power_management/Suspend_and_hibernate.html" title="Suspend to Disk" class="mw-redirect">Suspend to Disk</a> , supports also suspension to RAM and proposes some further tricks which could convince your machine to suspend to RAM and resume properly. Moreover, the hibernate-script can automatize other useful operations which you could want/need to do before suspension or after resuming from suspension to RAM.
+</p>
+<p>Thus, the first part of this article will be devoted to <code>s2ram</code>. The second will discuss the use of the hibernate-script in suspension to RAM. In particular, we will see how the hibernate-script can be used to suspend to RAM your system just with the <code>s2ram</code>, but providing some additional tweakings. Finally, we will mention the possibility to suspend the machine both to RAM and to disk.
+</p>
+<h3><span class="mw-headline" id="The_hibernate-script_and_suspension_to_RAM">The hibernate-script and suspension to RAM</span></h3>
+<p>The hibernate-script, developed in the field of the tuxonice project for suspend-to-disk method, can be used also to suspend your machine to RAM. Actually, you can also try to do this directly, performing the required operations before calling the ACPI S3 state. However, the <code>s2ram</code> seems to be the leading method nowadays and, through the named whitelist, should assure in the future that virtually any laptop can suspend to RAM without too much hassle. So, the actually best way to use the power of the hibernate-script for suspension to RAM is to use it to call <code>s2ram</code>.
+</p>
+<p>You can edit <code>/etc/hibernate/hibernate.conf</code> to select <code>ususpend-ram.conf</code> as the default action called by:
+</p>
+<pre># hibernate
+</pre>
+<p>Just put the following as the first uncommented line:
+</p>
+<pre> TryMethod ususpend-ram.conf
+</pre>
+<p>However, may be that you want to use the hibernate-script primarily to suspend to disk. In that case you should resort to the ram-specific configuration file from the command line:
+</p>
+<pre># hibernate -F /etc/hibernate/ususpend-ram.conf
+</pre>
+<p>Now you should configure the script. Please note that the options that you put in <code>/etc/hibernate/common.conf</code> will be used anytime you call hibernate (that is also for suspension to disk). On the contrary, the options in <code>/etc/hibernate/ususpend-ram.conf</code> will be used only when you suspend to RAM with the <code>s2ram</code> method.
+</p>
+<p>The hibernate-script options are exhaustively described in the man page <code>hibernate.conf</code>.
+</p>
+<p>First of all, may be that some module is preventing you from accomplishing a proper suspension cycle. In this case, list it in the UnloadModules: it will be unloaded before suspension and reloaded after resuming. Note that the hibernation script already does this for some blacklisted modules, whose list is <code>/etc/hibernate/blacklisted-modules</code>.
+</p>
+<p>If you discover that a module is guilty, you should report this to the suspend-devel@lists.sourceforge.net, so that the bad behaviour of the module can be fixed.
+</p>
+<p>May be also that your display is the guilty and that the tricks provided by <code>s2ram</code> are not enough. The hibernate-script has some further tricks:
+</p>
+<p>The relevant block of options is the following:
+</p>
+<pre>### vbetool
+#EnableVbetool yes
+#RestoreVbeStateFrom /var/lib/vbetool/vbestate
+#VbetoolPost yes
+# RestoreVCSAData yes
+</pre>
+<pre>### xhacks
+#SwitchToTextMode yes
+#UseDummyXServer yes
+#DummyXServerConfig xorg-dummy.conf
+</pre>
+<p>However, most of these tricks are already attempted by <code>s2ram</code> and you should not duplicate the effort. Only three tricks in this section are specific to the script. The first is to uncomment both the following two lines:
+</p>
+<pre>EnableVbetool yes
+RestoreVbeStateFrom /var/lib/vbetool/vbestate
+</pre>
+<p>Please note that, while <code>s2ram</code> uses an internal vbetool component, the hibernate-script relies on the vbetool package in the extra repo, so you should install it. Basically, this combination of options do something similar to the <code>--vbe_save</code> <code>s2ram</code> option, but, instead of restoring the state saved immediately before suspension, it restores a state manually saved by the user in the file /var/lib/vbetool/vbestate (or any other file you have chosen). You can try to save the state in a peculiar safe situation, like immediately after booting, or before any switching from X to console and back. You can save the state with the following command:
+</p>
+<pre># vbetool vbestate save &gt; /var/lib/vbetool/vbestate
+</pre>
+<p>The second peculiar trick (very often required!) is to uncomment the following line:
+</p>
+<pre>SwitchToTextMode yes
+</pre>
+<p>The script will switch from X to console before suspension and back to X after a successful resuming.
+</p>
+<p>Finally, the UseDummyXServer trick uses a second XServer, with a minimal safe configuration only during the suspension cycle, restoring the full fledged X server only after a complete resume. This can be useful with cards with problematic proprietary drivers: the dummy xserver will use the standard vesa driver instead. Anyway, this last trick should be seldom useful nowadays, because also proprietary drivers seem to support suspension without too many problems.
+</p>
+<p>The hibernate-script gives you many other useful possibilities (such as restarting services, unmounting partitions, ejecting pccards, and so on). Read about them in the man pages.
+</p>
+<h3><span class="mw-headline" id="Sound">Sound</span></h3>
+<p>If you do not explicitly restore the volume level, ALSA may have the sound channels muted after resuming. If this happens, you can edit <code>/etc/suspend.conf</code> by adding 
+</p>
+<pre>RestartServices alsa
+</pre>
+<h3><span class="mw-headline" id="Automatic_suspend_and_wakeup">Automatic suspend and wakeup</span></h3>
+<p>Once you have suspend to RAM working, you will probably want it to happend automatically e.g., when you close the laptop lid.
+</p>
+<p>There are several ways to do this. The easiest is to use a high-level power management tool such as KDE's PowerDevil. Another is to create your own ACPI event handler scripts.
+</p>
+<h3><span class="mw-headline" id="Automatic_suspend.2C_the_hard_way">Automatic suspend, the hard way</span></h3>
+<p>ACPI events are managed by configuration files in <code>/etc/acpi/events/</code>. (The laptop-mode-tools package contains some examples). A default configuration file called 'anything' is provided by the acpid package, which runs <code>/etc/acpi/handler.sh</code> on every event.
+</p>
+<p>An simple event configuration file to manage the opening and closing of a laptop lid (that could be called <code>/etc/acpi/events/lid</code>) looks like this:
+</p>
+<pre>event=button[ /]lid
+action=/etc/acpi/actions/lid_handler.sh %e
+</pre>
+<p>The first line specifies the names of the events applicable to this file with a regexp. You can get the names of events by enabling event logging in acpid and looking at <code>/var/log/acpid</code>. 
+</p>
+<p>The second line specifies an executable to be run when an applicable event occurs. The <code>%e</code> is a variable containing arguments that the event provides. It's a good idea to provide them to the program.
+</p>
+<p>It's customary to put handling programs in <code>/etc/acpi/actions/</code>. A possible implementation of <code>lid_handler.sh</code> in the previous example could be:
+</p>
+<pre>#!/bin/sh
+# check if the lid is open or closed, using the /proc file
+if grep closed /proc/acpi/button/lid/LID/state &gt;/dev/null ; then
+    # if the lid is now closed, save the network state and suspend to RAM
+    netcfg all-suspend
+    pm-suspend
+else
+    # if the lid is now open, restore the network state.
+    # (if we are running, a wakeup has already occured!)
+    netcfg all-resume
+fi
+</pre>
+<p>The same example, adapted for wicd instead of netcfg:
+</p>
+<pre>#!/bin/sh
+# check if the lid is open or closed, using the /proc file
+if grep closed /proc/acpi/button/lid/LID/state &gt;/dev/null ; then
+    # if the lid is now closed, save the network state and suspend to RAM
+    /usr/lib/wicd/suspend.py
+    pm-suspend
+else
+    # if the lid is now open, restore the network state.
+    # (if we are running, a wakeup has already occured!)
+    /usr/lib/wicd/autoconnect.py
+fi
+</pre>
+<p>Remember to make it executable. With some basic knowledge of shell scripting, you have a lot of possibilities.
+</p>
+<h3><span class="mw-headline" id="Controlling_wakeup">Controlling wakeup</span></h3>
+<p>The ACPI events that trigger wakeup are controlled through the procfile /proc/acpi/wakeup. An example output is:
+</p>
+<pre>root@hex in /proc/acpi $ cat wakeup
+Device  S-state   Status   Sysfs node
+LID       S3    *enabled
+PBTN      S4    *enabled
+MBTN      S5     enabled
+PCI0      S3     disabled  no-bus:pci0000:00
+USB0      S0     disabled  pci:0000:00:1d.0
+USB1      S0     disabled  pci:0000:00:1d.1
+USB2      S0     disabled  pci:0000:00:1d.2
+USB3      S0     disabled  pci:0000:00:1d.3
+EHCI      S0     disabled  pci:0000:00:1d.7
+AZAL      S3     disabled  pci:0000:00:1b.0
+PCIE      S4     disabled  pci:0000:00:1e.0
+RP01      S4     disabled  pci:0000:00:1c.0
+RP02      S3     disabled
+RP03      S3     disabled
+RP04      S3     disabled  pci:0000:00:1c.3
+RP05      S3     disabled
+RP06      S3     disabled
+</pre>
+<p>To toggle whether an event will trigger a wakeup, pipe its name into the /proc/acpi/wakeup. (Note that every name in the file must have 4 letters, so if it is shorter e.g. LID, it needs be prepended with spaces). So to prevent opening the laptop lid from triggering a wakeup, you could do:
+</p>
+<pre>root@hex in /proc/acpi $ echo " LID" &gt; wakeup
+root@hex in /proc/acpi $ cat wakeup
+Device  S-state   Status   Sysfs node
+LID       S3    *disabled
+PBTN      S4    *disabled
+MBTN      S5     disabled
+PCI0      S3     disabled  no-bus:pci0000:00
+...
+</pre>
+<p>Another thing to note is that the PBTN and MBTN events were also toggle with the LID event. Sometimes events are linked, so that all of them will be enable and disabled in unison. Checking the 'dmesg' command can confirm this:
+</p>
+<pre>root@hex in /proc/acpi $ dmesg
+...
+ACPI: 'PBTN' and 'LID' have the same GPE, can't disable/enable one separately
+ACPI: 'MBTN' and 'LID' have the same GPE, can't disable/enable one separately
+</pre>
+<p>This may not actually affect the other events. On a Dell Inspiron 6400, for example, the power button always triggers a wake up. Your mileage may vary.
+</p>
+<p>None of this will persist between boots, so you might want to add the echo command to <code>/etc/rc.local</code> so it is executed on every boot:
+</p>
+<pre># disable the laptop lid switch
+echo " LID" &gt; /proc/acpi/wakeup
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Prelink - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Prelink skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Prelink</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Most programs require libraries to function. Libraries can be integrated into a program once, by a linker, when it is compiled (static linking) or they can be integrated when the program is run by a loader, (dynamic linking). Dynamic linking has advantages in code size and management, but every time a program is run, the loader needs to find the relevant libraries. Because the libraries can move around in memory, this causes a performance penalty, and the more libraries that need to be resolved, the greater the penalty. Prelink reduces this penalty by using the system's dynamic linker to reversibly perform this linking in advance ("prelinking" the executable file) by relocating. Afterward, the program only needs to spend time finding the relevant libraries on being run if, for some reason (perhaps an upgrade), the libraries have changed since being prelinked.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>There are some arguments against using Prelink presented in <a rel="nofollow" class="external text" href="https://fedorahosted.org/fesco/ticket/1183">Fedora bug #1183</a>. As summed up in the linked <a rel="nofollow" class="external text" href="http://lwn.net/Articles/341244/">LWN article</a>: "overall, pre-linking is a bit of a hack, and it is far from clear that its benefits are substantial enough to overcome that".</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing"><span class="tocnumber">1</span> <span class="toctext">Installing</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Prelinking"><span class="tocnumber">3.1</span> <span class="toctext">Prelinking</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Exclude_list"><span class="tocnumber">3.2</span> <span class="toctext">Exclude list</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Removing_prelink"><span class="tocnumber">3.3</span> <span class="toctext">Removing prelink</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Daily_cron_job"><span class="tocnumber">4</span> <span class="toctext">Daily cron job</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#KDE"><span class="tocnumber">5</span> <span class="toctext">KDE</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing">Installing</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/prelink/">prelink</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>All settings are in <code>/etc/prelink.conf</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some proprietary binaries will crash with prelink (such as Flash, Skype, Nvidia proprietary driver). You can add these to the exclude list in <code>/etc/prelink.conf</code>.</div>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Prelinking">Prelinking</span></h3>
+<p>The following command prelinks all the binaries in the directories given by /etc/prelink.conf:
+</p>
+<pre># prelink -amR
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>It has been observed that if you are low on disk space and you prelink your entire system then there is a possibility that your binaries may be truncated, the result being a broken install. Use the file or readelf command to check the state of a binary file. Alternatively, check the amount of free space on your harddrive ahead of time with df -h. </div>
+<h3><span class="mw-headline" id="Exclude_list">Exclude list</span></h3>
+<p>Taken from the <a href="../en/Talk:Prelink.html#Exclude_list" title="Talk:Prelink">discussion page</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/prelink.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Skype
+-b /usr/lib32/skype/skype
+-b /usr/lib/skype/skype
+
+# Flash Player Plugin
+-b /usr/lib/mozilla/plugins/libflashplayer.so
+
+# NVIDIA
+-b /usr/lib/libGL.so*
+-b /usr/lib32/libGL.so*
+-b //usr/lib/libOpenCL.so*
+-b //usr/lib32/libOpenCL.so*
+-b /usr/lib32/vdpau/
+-b /usr/lib/vdpau/
+-b /usr/lib/xorg/modules/drivers/nvidia_drv.so
+-b /usr/lib/xorg/modules/extensions/libglx.so*
+-b /usr/lib/libnvidia-*
+-b /usr/lib32/libnvidia-*
+
+# Catalyst
+-b /usr/lib/libati*
+-b /usr/lib/fglrx*
+-b /usr/lib/libAMDXvBA*
+-b /usr/lib/libGL.so*
+-b /usr/lib/libfglrx*
+-b /usr/lib/xorg/modules/dri/fglrx_dri.so
+-b /usr/lib/xorg/modules/drivers/fglrx_drv.so
+-b /usr/lib/xorg/modules/extensions/fglrx/
+-b /usr/lib/xorg/modules/linux/libfglrxdrm.so
+-b /usr/lib/xorg/modules/extensions/libglx.so
+</pre>
+<h3><span class="mw-headline" id="Removing_prelink">Removing prelink</span></h3>
+<p>Remove prelinking from all binaries:
+</p>
+<pre># prelink -au
+</pre>
+<h2><span class="mw-headline" id="Daily_cron_job">Daily cron job</span></h2>
+<p>This is recommended (and included in other distros packages) as it has to be done in order to get speed benefits from updates.  Save as <code>/etc/cron.daily/prelink</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/cron.daily/prelink</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+[[ -x /usr/bin/prelink ]] &amp;&amp; /usr/bin/prelink -amR &amp;&gt;/dev/null</pre>
+<p>and give it the necessary ownership and permissions:
+</p>
+<p><code># chmod 755 /etc/cron.daily/prelink</code>
+</p>
+<p>Alternatively, there's a <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/prelink-systemd/">prelink-systemd</a></span><sup><small>AUR</small></sup> package in the AUR that installs a daily systemd timer unit with the same effect as the above cron script.
+</p>
+<h2><span class="mw-headline" id="KDE">KDE</span></h2>
+<p>KDE knows about prelinking and it will start faster if you tell it you have it.
+It is best to stick this in where all the users can use it.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/profile.d/kde-is-prelinked.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export KDE_IS_PRELINKED=1</pre>
+<p>and give it the necessary ownership and permissions:
+</p>
+<p><code># chmod 755 /etc/profile.d/kde-is-prelinked.sh</code>
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/prelink">Prelink man page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.gentoo.org/doc/en/prelink-howto.xml">Gentoo Linux Prelink Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://crast.us/james/articles/prelink.php">ELF Prelinking and what it can do for you</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

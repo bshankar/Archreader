@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SSMTP - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SSMTP skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SSMTP</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>SSMTP is a program which delivers email from a local computer to a configured mailhost (mailhub). It is not a mail server (like feature-rich mail server <a href="../en/Sendmail.html" title="Sendmail">sendmail</a>) and does not receive mail, expand aliases or manage a queue. One of its primary uses is for forwarding automated email (like system alerts) off your machine and to an external email address.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Forward_to_a_Gmail_mail_server"><span class="tocnumber">2</span> <span class="toctext">Forward to a Gmail mail server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Using_an_app_password"><span class="tocnumber">2.1</span> <span class="toctext">Using an app password</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Security"><span class="tocnumber">3</span> <span class="toctext">Security</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Sending_email"><span class="tocnumber">4</span> <span class="toctext">Sending email</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Attachments"><span class="tocnumber">4.1</span> <span class="toctext">Attachments</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#References"><span class="tocnumber">5</span> <span class="toctext">References</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ssmtp">ssmtp</a></span>.
+</p>
+<h2><span class="mw-headline" id="Forward_to_a_Gmail_mail_server">Forward to a Gmail mail server</span></h2>
+<p>To configure SSMTP, you will have to edit its configuration file (<code>/etc/ssmtp/ssmtp.conf</code>) and enter your account settings:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssmtp/ssmtp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+# The user that gets all the mails (UID &lt; 1000, usually the admin)
+root=username@gmail.com
+
+# The mail server (where the mail is sent to), both port 465 or 587 should be acceptable
+# See also https://support.google.com/mail/answer/78799
+mailhub=smtp.gmail.com:587
+
+# The address where the mail appears to come from for user authentication.
+rewriteDomain=gmail.com
+
+# The full hostname
+hostname=localhost
+
+# Use SSL/TLS before starting negotiation
+UseTLS=Yes
+UseSTARTTLS=Yes
+
+# Username/Password
+AuthUser=username
+AuthPass=password
+
+# Email 'From header's can override the default domain?
+FromLineOverride=yes
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Take note, that the shown configuration is an example for Gmail, You may have to use other settings. If it is not working as expected read the man page <code>man 8 ssmtp</code>, please.</div>
+<p>Create aliases for local usernames (optional)
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssmtp/revaliases</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root:username@gmail.com:smtp.gmail.com:587
+mainuser:username@gmail.com:smtp.gmail.com:587</pre>
+<p>To test whether the Gmail server will properly forward your email:
+</p>
+<pre>$ echo test | mail -v -s "testing ssmtp setup" tousername@somedomain.com</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> "Recently"? <a rel="nofollow" class="external autonumber" href="https://googleonlinesecurity.blogspot.de/2014/04/new-security-measures-will-affect-older.html">[1]</a> and <a rel="nofollow" class="external autonumber" href="http://www.ghacks.net/2014/07/21/gmail-starts-block-less-secure-apps-enable-access/">[2]</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SSMTP">Talk:SSMTP#</a>)</div>
+</div>
+Gmail has recently started blocking emails from senders that do not authenticate using OAuth.  To allow SSMTP to use gmail's SMTP server, you need to <a rel="nofollow" class="external text" href="https://support.google.com/accounts/answer/6010255">allow access to unsecure apps</a>.</div>
+<p>Change the 'From' text by editing <code>/etc/passwd</code> to receive mail from 'root at myhost' instead of just 'root'.
+</p>
+<pre># chfn -f 'root at myhost' root
+# chfn -f 'mainuser at myhost' mainuser</pre>
+<p>Which changes <code>/etc/passwd</code> to:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep myhostname /etc/passwd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root:x:0:0:root@myhostname,,,:/root:/bin/bash
+mainuser:x:1000:1000:mainuser@myhostname,,,:/home/mainuser:/bin/bash</pre>
+<h3><span class="mw-headline" id="Using_an_app_password">Using an app password</span></h3>
+<p>If your Gmail account is secured with two-factor authentication, you need to generate a unique <a rel="nofollow" class="external text" href="https://support.google.com/mail/answer/185833">App Password</a> to use in <code>ssmtp.conf</code>. You can do so on your <a rel="nofollow" class="external text" href="https://security.google.com/settings/security/apppasswords">App Passwords</a> page. Use the generated 16-character password in the <code>AuthPass</code> line. Spaces in the password can be omitted.
+</p>
+<h2><span class="mw-headline" id="Security">Security</span></h2>
+<p>Because your email password is stored as cleartext in <code>/etc/ssmtp/ssmtp.conf</code>, it is important to secure the file.
+Securing ssmtp.conf will ensure that:
+</p>
+<ul>
+<li>if any users have unprivileged access to your system, they cannot read the file and see your email password, while still letting them send out email</li>
+<li>if your user account is ever compromised, the hacker cannot read the <code>ssmtp.conf</code> file, and therefore your email password, unless he gains access to the root account as well</li>
+</ul>
+<p>To secure <code>ssmtp.conf</code>, do this:
+</p>
+<p>Create an <code>ssmtp</code> group:
+</p>
+<pre># groupadd ssmtp
+</pre>
+<p>Set ssmtp.conf group owner to the new <code>ssmtp</code> group:
+</p>
+<pre># chown :ssmtp /etc/ssmtp/ssmtp.conf
+</pre>
+<p>Set the group owner of the <i>ssmtp</i> binary to the new <code>ssmtp</code> group:
+</p>
+<pre># chown :ssmtp /usr/bin/ssmtp
+</pre>
+<p>Make sure only root, and the <code>ssmtp</code> group can access <code>ssmtp.conf</code>:
+</p>
+<pre># chmod 640 /etc/ssmtp/ssmtp.conf
+</pre>
+<p>Set the SGID bit on the <i>ssmtp</i> binary.
+</p>
+<pre># chmod g+s /usr/bin/ssmtp
+</pre>
+<p>Now, all the regular users can still send email using the terminal, but none can read the <code>ssmtp.conf</code> file.
+</p>
+<h2><span class="mw-headline" id="Sending_email">Sending email</span></h2>
+<p>To send email from the terminal, do:
+</p>
+<pre>$ echo "this is the body" | mail -s "Subject" username@somedomain.com
+</pre>
+<p>or interactively as:
+</p>
+<pre>$ mail username@somedomain.com
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When using mail interactively, after typing the Subject and hitting enter, you type the body.
+Hit <code>Ctrl</code>+<code>d</code> on a blank line to end your message and automatically send it out.</div>
+<p>An alternate method for sending emails is to create a text file and send it with <i>ssmtp</i> or <i>mail</i>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">test-mail.txt</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">To:username@somedomain.com
+From:youraccount@gmail.com
+Subject: Test
+
+This is a test mail.</pre>
+<p>Send the <code>test-mail.txt</code> file
+</p>
+<pre>$ mail username@somedomain.com &lt; test-mail.txt
+</pre>
+<h3><span class="mw-headline" id="Attachments">Attachments</span></h3>
+<p>If you need to be able to add attachments, install and configure <a href="../en/Mutt.html" title="Mutt">Mutt</a> and <a href="../en/Msmtp.html" title="Msmtp">Msmtp</a> and then go see the tip at <a rel="nofollow" class="external text" href="http://www.cyberciti.biz/tips/sending-mail-with-attachment.html">nixcraft</a>.
+</p>
+<p>Alternatively, you can attach using <i>uuencode</i>:
+</p>
+<pre>$ uuencode file.txt file.txt | mail user@domain.com
+</pre>
+<h2><span class="mw-headline" id="References">References</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=446831">SSMTP and Gmail on the Arch forums</a></li>
+<li><a rel="nofollow" class="external text" href="http://tombuntu.com/index.php/2008/10/21/sending-email-from-your-system-with-ssmtp/">Sending Email From Your System with sSMTP</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.scottro.net/qnd/qnd-ssmtp.html">The Qnd Guide to ssmtp</a></li>
+<li><a rel="nofollow" class="external text" href="https://support.google.com/mail/answer/78799">GMail Support - Configuring other mail clients</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

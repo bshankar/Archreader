@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Hddtemp - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Hddtemp skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Hddtemp</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Lm_sensors.html" title="Lm sensors">lm sensors</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="https://savannah.nongnu.org/projects/hddtemp/">hddtemp</a> is a small utility (with daemon) that gives the hard-drive temperature via S.M.A.R.T. (for drives supporting this feature).
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Daemon"><span class="tocnumber">3</span> <span class="toctext">Daemon</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Monitors"><span class="tocnumber">4</span> <span class="toctext">Monitors</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Solid_State_Drives"><span class="tocnumber">5</span> <span class="toctext">Solid State Drives</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hddtemp">hddtemp</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Hddtemp requires root privileges. The command <code>hddtemp</code> must be followed by at least one drive's location, with several directories separated by spaces:
+</p>
+<pre># hddtemp /dev/sd<i>X1</i> /dev/sd<i>X2</i> ... /dev/sd<i>Xn</i>
+</pre>
+<h2><span class="mw-headline" id="Daemon">Daemon</span></h2>
+<p>Running the daemon allows to access the temperature via TCP/IP, to use for example with scripts.
+</p>
+<p>The daemon is <a href="../en/Systemd.html#Using_units" title="Systemd">controlled</a> by <code>hddtemp.service</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Arguments to <code>hddtemp</code> are directly given in <code>/usr/lib/systemd/system/hddtemp.service</code>. This is especially important with multiple disks, as the default configuration only monitors <code>/dev/sda</code>. Change <code>ExecStart</code> <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">to override</a> <code>hddtemp.service</code>:
+<ul><li> Create a directory in <code>/etc/systemd/system</code>:</li></ul>
+<pre># mkdir /etc/systemd/system/hddtemp.service.d
+</pre>
+<ul><li> Create <code>customexec.conf</code> inside and add the drives you want to monitor, e.g.:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/hddtemp.service.d/customexec.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=/usr/bin/hddtemp -dF /dev/sda /dev/sdb /dev/sdc</pre>
+<p>You can also the <a rel="nofollow" class="external text" href="https://github.com/AndyCrowd/auto-generate-configuration-files/blob/master/gen-customexec.conf-hddtemp.sh">auto-generate</a> script that detects with help of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smartmontools">smartmontools</a></span> all supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hddtemp">hddtemp</a></span> hard-drivers and generating to the stdout the <code>customexec.conf</code> pattern file.
+</p>
+<ul>
+<li> <a href="../en/Systemd.html#Using_units" title="Reload" class="mw-redirect">Reload</a> systemd's unit files.</li>
+<li> <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the hddtemp service.</li>
+</ul>
+</div>
+<p>To get the temperature, connect to the daemon which listens on port 7634. With <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=inetutils">inetutils</a></span>:
+</p>
+<pre>$ telnet localhost 7634
+</pre>
+<p>With <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnu-netcat">gnu-netcat</a></span>:
+</p>
+<pre>$ nc localhost 7634
+</pre>
+<p>Both outputs are similar to: 
+</p>
+<pre>|/dev/sda|ST3500413AS|32|C||/dev/sdb|ST2000DM001-1CH164|36|C|
+</pre>
+<p>For a better looking statistic: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nc localhost 7634 |sed 's/|//m' | sed 's/||/ \n/g' | awk -F'|' '{print $1 " " $3 " " $4}'</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sda 32 C 
+/dev/sdb 36 C</pre>
+<p>Refer to the manpage for more information:
+</p>
+<pre>$ man hddtemp
+</pre>
+<h2><span class="mw-headline" id="Monitors">Monitors</span></h2>
+<p>Hddtemp can be integrated with <a href="../en/List_of_applications.html#System_monitoring" title="List of applications">system monitors</a>.
+</p>
+<h2><span class="mw-headline" id="Solid_State_Drives">Solid State Drives</span></h2>
+<p>Hddtemp usually reads field <code>194</code> from the smart data of the drive. In SSDs temperature information is usually stored in field <code>190</code>. To obtain this information, one can run:
+</p>
+<pre>$ smartctl -a /dev/sdX
+</pre>
+<p>or
+</p>
+<pre>$ hddtemp --debug /dev/sdX
+</pre>
+<p>where X is a character (e.g. a,b,c...) representing the drive. Use <code>lsblk</code> to check this.
+</p>
+<p>Alternatively, add a new entry in <code>/usr/share/hddtemp/hddtemp.db</code>. For example:
+</p>
+<pre>$ echo '"Samsung SSD 840 EVO 250G B" 190 C "Samsung SSD 840 EVO 250GB"' &gt;&gt; /usr/share/hddtemp/hddtemp.db
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Status_monitoring_and_notification.html" title="Category:Status monitoring and notification">Status monitoring and notification</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

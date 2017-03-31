@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Desktop entries - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Desktop_entries skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Desktop entries</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The freedesktop <a rel="nofollow" class="external text" href="https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">Desktop Entry specification</a> provides a standard for applications to integrate into a <a href="../en/Desktop_environment.html" title="Desktop environment">desktop environment</a>. Desktop entries are the configuration files that describe how an application is launched and which data it can handle. They also configure how an application appears in a menu with an icon, which is subject to the related <a rel="nofollow" class="external text" href="https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html">menu specification</a> standard. 
+</p>
+<p>The most common desktop entries are the <code>.desktop</code> and <code>.directory</code> files. This article explains briefly how to create useful and standard compliant desktop entries. It is mainly intended for package contributors and maintainers, but may also be useful for software developers and others.
+</p>
+<p>There are roughly three types of desktop entries:
+</p>
+<dl>
+<dt> Application </dt>
+<dd> a shortcut to an application</dd>
+<dt> Link </dt>
+<dd> a shortcut to a web link.</dd>
+<dt> Directory </dt>
+<dd> a container of meta data of a menu entry</dd>
+</dl>
+<p>The following sections will roughly explain how these are created and validated. 
+</p>
+<p>Related to this content, and also defined in <code>.desktop</code> files, are MIME-type associations for data files. <a href="../en/Default_applications.html" title="Default applications">Default applications</a> describes how these are configured. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Application_entry"><span class="tocnumber">1</span> <span class="toctext">Application entry</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#File_example"><span class="tocnumber">1.1</span> <span class="toctext">File example</span></a></li>
+<li class="toclevel-2 tocsection-3">
+<a href="#Key_definition"><span class="tocnumber">1.2</span> <span class="toctext">Key definition</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Deprecation"><span class="tocnumber">1.2.1</span> <span class="toctext">Deprecation</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Icons"><span class="tocnumber">2</span> <span class="toctext">Icons</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Common_image_formats"><span class="tocnumber">2.1</span> <span class="toctext">Common image formats</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Converting_icons"><span class="tocnumber">2.2</span> <span class="toctext">Converting icons</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Obtaining_icons"><span class="tocnumber">2.3</span> <span class="toctext">Obtaining icons</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Tools"><span class="tocnumber">3</span> <span class="toctext">Tools</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10">
+<a href="#gendesk"><span class="tocnumber">3.1</span> <span class="toctext">gendesk</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#How_to_use"><span class="tocnumber">3.1.1</span> <span class="toctext">How to use</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#List_or_search_in_.desktop_files"><span class="tocnumber">3.2</span> <span class="toctext">List or search in .desktop files</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#fbrokendesktop"><span class="tocnumber">3.3</span> <span class="toctext">fbrokendesktop</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Hide_desktop_entries"><span class="tocnumber">4.1</span> <span class="toctext">Hide desktop entries</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Autostart"><span class="tocnumber">4.2</span> <span class="toctext">Autostart</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Modify_environment_variables"><span class="tocnumber">4.3</span> <span class="toctext">Modify environment variables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Application_entry">Application entry</span></h2>
+<p>Desktop entries for applications, or <code>.desktop</code> files, are generally a combination of meta information resources and a shortcut of an application. These files usually reside in <code>/usr/share/applications</code> or <code>/usr/local/share/applications</code> for applications installed system-wide, or <code>~/.local/share/applications</code> for user-specific applications. User entries take precedence over system entries.
+</p>
+<h3><span class="mw-headline" id="File_example">File example</span></h3>
+<p>Following is an example of its structure with additional comments. The example is only meant to give a quick impression, and does not show how to utilize all possible entry keys. The complete list of keys can be found in the <a rel="nofollow" class="external text" href="https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys">freedesktop.org specification</a>.
+</p>
+<pre>[Desktop Entry]
+
+# The type as listed above
+Type=Application
+
+# The version of the desktop entry specification to which this file complies
+Version=1.0
+
+# The name of the application
+Name=jMemorize
+
+# A comment which can/will be used as a tooltip
+Comment=Flash card based learning tool
+
+# The path to the folder in which the executable is run
+Path=/opt/jmemorise
+
+# The executable of the application.
+Exec=jmemorize
+
+# The name of the icon that will be used to display this entry
+Icon=jmemorize
+
+# Describes whether this application needs to be run in a terminal or not
+Terminal=false
+
+# Describes the categories in which this entry should be shown
+Categories=Education;Languages;Java;
+</pre>
+<h3><span class="mw-headline" id="Key_definition">Key definition</span></h3>
+<p>All Desktop recognized desktop entries can be found on the <a rel="nofollow" class="external text" href="https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#recognized-keys">freedesktop.org</a> site.
+For example, the <code>Type</code> key defines three types of desktop entries: Application (type 1), Link (type 2) and Directory (type 3).
+</p>
+<ul><li> <code>Version</code> key does not stand for the version of the application, but for the version of the desktop entry specification to which this file complies.</li></ul>
+<ul><li> <code>Name</code>, <code>GenericName</code> and <code>Comment</code> often contain redundant values in the form of combinations of them, like:</li></ul>
+<pre>Name=Pidgin Internet Messenger
+GenericName=Internet Messenger
+</pre>
+<p>or
+</p>
+<pre>Name=NoteCase notes manager
+Comment=Notes Manager
+</pre>
+<p>This should be avoided, as it will only be confusing to users. The <code>Name</code> key should only contain the name, or maybe an abbreviation/acronym if available.
+</p>
+<ul>
+<li> <code>GenericName</code> should state what you would generally call an application that does what this specific application offers (i.e. Firefox is a "Web Browser").</li>
+<li> <code>Comment</code> is intended to contain any usefull additional information.</li>
+</ul>
+<h4><span class="mw-headline" id="Deprecation">Deprecation</span></h4>
+<p>There are quite some keys that have become deprecated over time as the standard has matured. The best/simplest way is to use the tool <code>desktop-file-validate</code> which is part of the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=desktop-file-utils">desktop-file-utils</a></span>. To validate, run
+</p>
+<pre>$ desktop-file-validate &lt;your desktop file&gt;
+</pre>
+<p>This will give you very verbose and useful warnings and error messages.
+</p>
+<h2><span class="mw-headline" id="Icons">Icons</span></h2>
+<p>See also the <a rel="nofollow" class="external text" href="https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">Icon Theme Specification</a>.
+</p>
+<h3><span class="mw-headline" id="Common_image_formats">Common image formats</span></h3>
+<p>Here is a short overview of image formats commonly used for icons.
+</p>
+<table class="wikitable" align="center">
+<caption> Support for image formats for icons as specified by the freedesktop.org standard.
+</caption>
+<tr>
+<th> Extension
+</th>
+<th> Full Name and/or Description
+</th>
+<th> Graphics Type
+</th>
+<th> Container Format
+</th>
+<th> Supported
+</th>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/Portable_Network_Graphics" class="extiw" title="wikipedia:Portable Network Graphics">png</a>
+</th>
+<td> Portable Network Graphics
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Raster_graphics" class="extiw" title="wikipedia:Raster graphics">Raster</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/Scalable_Vector_Graphics" class="extiw" title="wikipedia:Scalable Vector Graphics">svg(z)</a>
+</th>
+<td> Scalable Vector Graphics
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Vector_graphics" class="extiw" title="wikipedia:Vector graphics">Vector</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes (optional)
+</td>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/X_PixMap" class="extiw" title="wikipedia:X PixMap">xpm</a>
+</th>
+<td> X PixMap
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Raster_graphics" class="extiw" title="wikipedia:Raster graphics">Raster</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Yes (deprecated)
+</td>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/Graphics_Interchange_Format" class="extiw" title="wikipedia:Graphics Interchange Format">gif</a>
+</th>
+<td> Graphics Interchange Format
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Raster_graphics" class="extiw" title="wikipedia:Raster graphics">Raster</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/ICO_(icon_image_file_format)" class="extiw" title="wikipedia:ICO (icon image file format)">ico</a>
+</th>
+<td> MS Windows Icon Format
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Raster_graphics" class="extiw" title="wikipedia:Raster graphics">Raster</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<th align="left"> .<a href="https://en.wikipedia.org/wiki/Apple_Icon_Image" class="extiw" title="wikipedia:Apple Icon Image">icns</a>
+</th>
+<td> Apple Icon Image
+</td>
+<td> <a href="https://en.wikipedia.org/wiki/Raster_graphics" class="extiw" title="wikipedia:Raster graphics">Raster</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Converting_icons">Converting icons</span></h3>
+<p>If you stumble across an icon which is in a format that is not supported by the freedesktop.org standard (like <code>gif</code> or <code>ico</code>), you can use the <i>convert</i> tool (which is part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=imagemagick">imagemagick</a></span> package) to convert it to a supported/recommended format, e.g.:
+</p>
+<pre>$ convert &lt;icon name&gt;.gif &lt;icon name&gt;.png
+</pre>
+<p>If you convert from a container format like <code>ico</code>, you will get all images that were encapsulated in the <code>ico</code> file in the form <code>&lt;icon name&gt;-&lt;number&gt;.png</code>. If you want to know the size of the image, or the number of images in a container file like <code>ico</code> you can use the <i>identify</i> tool (also part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=imagemagick">imagemagick</a></span> package):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ identify /usr/share/vlc/vlc48x48.ico</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/usr/share/vlc/vlc48x48.ico[0] ICO 32x32 32x32+0+0 8-bit DirectClass 84.3kb
+/usr/share/vlc/vlc48x48.ico[1] ICO 16x16 16x16+0+0 8-bit DirectClass 84.3kb
+/usr/share/vlc/vlc48x48.ico[2] ICO 128x128 128x128+0+0 8-bit DirectClass 84.3kb
+/usr/share/vlc/vlc48x48.ico[3] ICO 48x48 48x48+0+0 8-bit DirectClass 84.3kb
+/usr/share/vlc/vlc48x48.ico[4] ICO 32x32 32x32+0+0 8-bit DirectClass 84.3kb
+/usr/share/vlc/vlc48x48.ico[5] ICO 16x16 16x16+0+0 8-bit DirectClass 84.3kb
+</pre>
+<p>As you can see, the example <i>ico</i> file, although its name might suggest a single image of size 48x48, contains no less than 6 different sizes, of which one is even greater than 48x48, namely 128x128.
+</p>
+<p>Alternatively, you can use <i>icotool</i> (from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=icoutils">icoutils</a></span>) to extract png images from ico container:
+</p>
+<pre>$ icotool -x &lt;icon name&gt;.ico
+</pre>
+<p>For extracting images from .icns container, you can use <i>icns2png</i> (provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libicns/">libicns</a></span><sup><small>AUR</small></sup>):
+</p>
+<pre>$ icns2png -x &lt;icon name&gt;.icns
+</pre>
+<h3><span class="mw-headline" id="Obtaining_icons">Obtaining icons</span></h3>
+<p>Although packages that already ship with a .desktop-file most certainly contain an icon or a set of icons, there is sometimes the case when a developer has not created a .desktop-file, but may ship icons, nonetheless. So a good start is to look for icons in the source package.
+You can i.e. first filter for the extension with <b>find</b> and then use <b>grep</b> to filter further for certain buzzwords like the package name, "icon", "logo", etc, if there are quite a lot of images in the source package.
+</p>
+<pre>$ find /path/to/source/package -regex ".*\.\(svg\|png\|xpm\|gif\|ico\)$"
+</pre>
+<p>If the developers of an application do not include icons in their source packages, the next step would be to search on their web sites.
+Some projects, like i.e. <i>tvbrowser</i> have an <a rel="nofollow" class="external text" href="http://enwiki.tvbrowser.org/index.php/Banners,_Logos_and_other_Promotion_Material">artwork/logo page</a> where additional icons may be found. If a project is multi-platform, there may be the case that even if the linux/unix package does not come with an icon, the Windows package might provide one. If the project uses a <a href="https://en.wikipedia.org/wiki/Version_control_system" class="extiw" title="wikipedia:Version control system">Version control system</a> like CVS/SVN/etc. and you have some experience with it, you also might consider browsing it for icons.
+If everything fails, the project might simply have no icon/logo yet.
+</p>
+<h2><span class="mw-headline" id="Tools">Tools</span></h2>
+<h3><span class="mw-headline" id="gendesk">gendesk</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gendesk">gendesk</a></span> started as an Arch Linux-specific tool for generating .desktop files by fetching the needed information directly from PKGBUILD files. Now it is a general tool that takes command-line arguments.
+</p>
+<p>Icons can be automatically downloaded from <a rel="nofollow" class="external text" href="http://openiconlibrary.sourceforge.net/">openiconlibrary</a>, if available. (The source for icons can easily be changed in the future).
+</p>
+<h4><span class="mw-headline" id="How_to_use">How to use</span></h4>
+<ul><li> Add <code>gendesk</code> to makedepends</li></ul>
+<ul><li> Start the <code>prepare()</code> function with:</li></ul>
+<pre>gendesk --pkgname "$pkgname" --pkgdesc "$pkgdesc"</pre>
+<ul><li> Alternatively, if an icon is already provided ($pkgname.png, for instance). The <code>-n</code> flag is for not downloading an icon or using the default icon. Example:</li></ul>
+<pre>gendesk -n --pkgname "$pkgname" --pkgdesc "$pkgdesc"</pre>
+<ul><li> <code>$srcdir/$pkgname.desktop</code> will be created and can be installed in the <code>package()</code> function with:</li></ul>
+<pre>install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"</pre>
+<ul><li> The icon can be installed with:</li></ul>
+<pre>install -Dm644 "$pkgname.png" "$pkgdir/usr/share/pixmaps/$pkgname.png"</pre>
+<ul><li> Use <code>--name='Program Name'</code> for choosing a name for the menu entry.</li></ul>
+<ul><li> Use <code>--exec='/opt/some_app/elf --with-ponies'</code> for setting the exec field.</li></ul>
+<ul><li> See the <a rel="nofollow" class="external text" href="https://github.com/xyproto/gendesk">gendesk project</a> for more information.</li></ul>
+<h3><span class="mw-headline" id="List_or_search_in_.desktop_files">List or search in .desktop files</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lsdesktopf/">lsdesktopf</a></span><sup><small>AUR</small></sup> script is listing available <i>.desktop</i> files or searching in their content.
+</p>
+<p>Examples
+</p>
+<pre>$ lsdesktopf
+$ lsdesktopf --list
+$ lsdesktopf --list gtk zh_TW,zh_CN,en_GB
+</pre>
+<p>List MIME-types or parts of MIME-types found in <i>.desktop</i>, and which desktop files shares same MIME-type, output is equal as in <a href="../en/Default_applications.html#Configuration_of_the_mimeapps.list_file" title="Default applications">mimeapps.list</a> for section <code>[Added Associations]</code>. 
+</p>
+<pre>$ lsdesktopf --gm
+$ lsdesktopf --gm [options]
+</pre>
+<p>For more options use <code>lsdesktopf --help</code>.
+</p>
+<h3><span class="mw-headline" id="fbrokendesktop">fbrokendesktop</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/fbrokendesktop/">fbrokendesktop</a></span><sup><small>AUR</small></sup> bash script using command <i>which</i> to detect broken <code>Exec</code> that points to not existing path. Without any parameters it uses preset folders in <code>DskPath</code> array. It shows only broken <i>.desktop</i> with full path and filename that is missing.
+</p>
+<p>Examples
+</p>
+<pre>$ fbrokendesktop
+$ fbrokendesktop /usr
+$ fbrokendesktop /usr/share/apps/kdm/sessions/icewm.desktop
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Hide_desktop_entries">Hide desktop entries</span></h3>
+<p>Firstly, copy the desktop entry file in question to <code>~/.local/share/applications</code> to avoid your changes being overwritten.
+</p>
+<p>Then, to hide the entry in all environments, open the desktop entry file in a text editor and add the following line: <code>NoDisplay=true</code>.
+</p>
+<p>To hide the entry in a specific desktop, add the following line to the desktop entry file: <code>NotShowIn=<i>desktop-name</i></code>
+</p>
+<p>where <i>desktop-name</i> can be option such as <i>GNOME</i>, <i>Xfce</i>, <i>KDE</i> etc. A desktop entry can be hidden in more than desktop at once - simply separate the desktop names with a semi-colon.
+</p>
+<h3><span class="mw-headline" id="Autostart">Autostart</span></h3>
+<p>If you use an XDG-compliant desktop environment, such as GNOME or KDE, the desktop environment will automatically start <strong class="selflink">*.desktop</strong> files found in the following directories:
+</p>
+<ul><li> System-wide: <code>$XDG_CONFIG_DIRS/autostart/</code> (<code>/etc/xdg/autostart/</code> by default)</li></ul>
+<dl><dd><ul><li> GNOME also starts files found in <code>/usr/share/gnome/autostart/</code>
+</li></ul></dd></dl>
+<ul><li> User-specific: <code>$XDG_CONFIG_HOME/autostart/</code> (<code>~/.config/autostart/</code> by default)</li></ul>
+<p>Users can override system-wide <code>*.desktop</code> files by copying them into the user-specific <code>~/.config/autostart/</code> folder.
+</p>
+<p>For a more specific description of directories used, <a rel="nofollow" class="external text" href="http://standards.freedesktop.org/autostart-spec/autostart-spec-latest.html">Desktop Application Autostart Specification</a>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method is supported only by XDG-compliant desktop environments. Tools like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dapper/">dapper</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dex">dex</a></span>, or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/fbautostart/">fbautostart</a></span><sup><small>AUR</small></sup> can be used to offer XDG autostart in unsupported desktop environments as long as some other autostart mechanism exists. Use the existing mechanism to start the xdg compliant autostart tool.</div>
+<h3><span class="mw-headline" id="Modify_environment_variables">Modify environment variables</span></h3>
+<p>Edit the <code>Exec</code> command by appending <code>env</code>, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.local/share/applications/abiword.desktop</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Exec=env LANG=he_IL.UTF-8 abiword %U</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="../en/DeveloperWiki:Removal_of_desktop_files.html" title="DeveloperWiki:Removal of desktop files">DeveloperWiki:Removal of desktop files</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/.desktop" class="extiw" title="wikipedia:.desktop">desktop wikipedia article</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Howto_desktop_files">information for developers</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

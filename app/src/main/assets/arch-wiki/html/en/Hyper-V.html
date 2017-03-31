@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Hyper-V - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Hyper-V skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Hyper-V</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Hyper-V is a hypervisor that is included with some versions of Microsoft Windows. It is capable of running an Arch Linux virtual machine. Hyper-V is generally oriented toward enterprise rather than desktop use, and doesn't provide as convenient and simple of an interface as consumer VM programs like <a rel="nofollow" class="external text" href="https://www.virtualbox.org/">VirtualBox</a>, <a rel="nofollow" class="external text" href="https://www.parallels.com/">Parallels</a>, or <a rel="nofollow" class="external text" href="http://www.vmware.com/">VMWare</a>. Nevertheless, it is a convenient, native way to run Arch Linux on top of Windows.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Network_configuration"><span class="tocnumber">2</span> <span class="toctext">Network configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Set_up_a_virtual_switch"><span class="tocnumber">2.1</span> <span class="toctext">Set up a virtual switch</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#External_switch"><span class="tocnumber">2.1.1</span> <span class="toctext">External switch</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Internal_switch"><span class="tocnumber">2.1.2</span> <span class="toctext">Internal switch</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Virtual_machine_creation"><span class="tocnumber">3</span> <span class="toctext">Virtual machine creation</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Virtual_machine_configuration"><span class="tocnumber">4</span> <span class="toctext">Virtual machine configuration</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Arch_installation"><span class="tocnumber">5</span> <span class="toctext">Arch installation</span></a></li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Post-installation"><span class="tocnumber">6</span> <span class="toctext">Post-installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Shared_directories"><span class="tocnumber">6.1</span> <span class="toctext">Shared directories</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Xorg"><span class="tocnumber">6.2</span> <span class="toctext">Xorg</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Hyper-V is included with Windows since Windows Server 2008 as well as Windows 8, 8.1 and 10 in the Pro versions.  It can be enabled from Control Panel at "Turn Windows features on or off" under "Programs and Features". Activate the "Hyper-V" checkbox, apply the change, and follow the directions on screen.
+</p>
+<h2><span class="mw-headline" id="Network_configuration">Network configuration</span></h2>
+<p>First, you must configure a new virtual switch so that your virtual machine will be able to connect to the Internet. Once Hyper-V is enabled, start the Hyper-V Manager (search for it, or start it from Command Prompt with the command
+</p>
+<pre>%windir%\system32\mmc.exe "%windir%\system32\virtmgmt.msc"
+</pre>
+<h3><span class="mw-headline" id="Set_up_a_virtual_switch">Set up a virtual switch</span></h3>
+<p>In order to connect your virtual machine to an existing network, either use an internal or external network switch. An external switch will assign the VM an IP address, and will give it total external access on the network, which not be possible on some networks with high security; the host machine will lose internet access as a result. An internal switch can be used for simple internet access.
+</p>
+<h4><span class="mw-headline" id="External_switch">External switch</span></h4>
+<p>To create an external switch, in the right sidebar, select "Virtual Switch Manager...". In the left sidebar of the dialog that opens, choose "New virtual network switch". Under "What type of virtual switch do you want to create?", select "External", then "Create Virtual Switch". You will be prompted about network disruption; continue and your network will be briefly disconnected as the switch is configured.
+</p>
+<h4><span class="mw-headline" id="Internal_switch">Internal switch</span></h4>
+<p>To create an internal switch, follow the same steps as the external switch, however replace the relevant choices for 'internal switch'. Then open Network and Sharing Settings, and Adapter Settings, where you will need to enable internet connection sharing for your internet adapter that you normally use. Once the connection can be shared, add it to a bridge together with the virtual switch that you created in the previous step.
+</p>
+<h2><span class="mw-headline" id="Virtual_machine_creation">Virtual machine creation</span></h2>
+<p>In the left sidebar, select "PC" under "Hyper-V Manager". In the right sidebar, select "New" &gt; "Virtual Machine...". In New Virtual Machine Wizard, you may in general specify whichever settings you like, but some must be specifically configured. 
+</p>
+<p>Under "Specify Generation", you must choose "Generation 1", as Arch does not work properly in Generation 2 Hyper-V VMs. 
+</p>
+<p>For "Startup memory" under Assign Memory, choose enough to ensure Arch and any programs will run properly.
+</p>
+<p>For "Connection" under "Configure Networking", choose the virtual switch you created earlier.
+</p>
+<p>For "Connect Virtual Hard Disk", choose "Create a virtual hard disk", and make sure the "Size" is appropriate for your use case. The virtual hard disk is sparse, so the virtual hard disk will only use as much real storage as is necessary to store what the virtual OS has written to it.
+</p>
+<p>For "Installation Options", choose "Install an operating system from a bootable CD/DVD-ROM". If you are installing Arch from a disc or USB device, choose "Physical CD/DVD drive" under "Media", and select the appropriate letter. If you are installing Arch from an ISO file, select "Image file (.iso)", and select the file in the "Browse..." dialog.
+</p>
+<h2><span class="mw-headline" id="Virtual_machine_configuration">Virtual machine configuration</span></h2>
+<p>Next, you need to configure the VM's settings.
+</p>
+<p>If you like, you can add more virtual processors to your virtual machine. This allows the virtual machine to use more than one of your processor cores, which will increase performance in many cases. If you plan to use the virtual machine intensively, you may wish to allot up to half of your processor cores. To change the number of virtual processors, select "Processor" in the left sidebar, then adjust "Number of virtual processors".
+</p>
+<p>Change any settings, then select "OK" to apply your changes and exit the settings dialog.
+</p>
+<h2><span class="mw-headline" id="Arch_installation">Arch installation</span></h2>
+<p>Once the virtual machine is fully configured, you are ready to install Arch. In the right sidebar, select "Start", then "Connect...", and a connection window will open. The network should work automatically when the Arch installation media is running; check by using <code>ping</code> on an address you know is responding, e.g.
+</p>
+<pre>ping archlinux.org
+</pre>
+<p>If no response is received, the connection is not working. If this is the case, you are probably experiencing <a rel="nofollow" class="external text" href="https://support.microsoft.com/kb/974909">a bug Microsoft has acknowledged</a>. You can try installing the hotfix from the Knowledge Base page, or just wait a little while and try again.
+</p>
+<p>In general, you may now install Arch as you would on any other system. The Generation 1 VMs are BIOS-only (no UEFI), so you must follow the BIOS-specific instructions for the various <a href="../en/Bootloaders.html" title="Bootloaders" class="mw-redirect">bootloaders</a>.
+</p>
+<h2><span class="mw-headline" id="Post-installation">Post-installation</span></h2>
+<p>After Arch has been installed, you can continue to configure features.
+</p>
+<p>First, you should shut down the VM, open the Settings dialog again, and in the left sidebar, select "DVD Drive" under "IDE Controller 1". Under "Media", choose "None". This will stop the VM from trying to boot from the install media on every start.
+</p>
+<h3><span class="mw-headline" id="Shared_directories">Shared directories</span></h3>
+<p>Files can be shared between the host and guest with very little effort. First, on the host, choose the folder you want to share with the guest, or create it. Open the Properties dialog for the folder (<code>alt</code> + <code>Enter</code> or right-click and choose "Properties..."). Go to the "Sharing" tab and select "Advanced Sharing...". Activate the "Share this folder" checkbox. By default, the folder will have read-only permissions, meaning the VM can read from the folder but cannot write anything to it. If you'd like to modify these permissions, select "Permissions". Here, you choose which users can access the shared folder, and what permissions they have. In general, you will probably be sharing in both directions and should check "Allow" for both "Change" and "Read".
+Before exiting the Properties dialog for the shared folder, note its "Network Path", which should be of the form <code>\\<i>computer name</i>\<i>folder name</i></code>.
+</p>
+<p>Next, you need to find the IP address of the host. Exit the Properties dialog, and open Command Prompt or PowerShell. Run <code>ipconfig</code>. You should see an entry whose name ends with the name of the virtual switch you created (e.g. <code>Ethernet adapter vEthernet (New Virtual Switch)</code>). Under this entry, look for <code>IPv4 Address</code> and note it down.
+</p>
+<p>Next, you need to mount the shared folder from Arch. Boot the VM. Once it is running, you will first need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cifs-utils">cifs-utils</a></span>, which will allow you to mount CIFS shares (CIFS is the protocol Windows uses for shared folders). Next, you will need to decide where you will be mounting the shared folder. A reasonable choice would be somewhere in <code>/mnt</code>, like <code>/mnt/Hyper-V</code>.
+</p>
+<p>In the command to mount the share, replace any backslashes in the "Network Path" from earlier with forward slashes.
+</p>
+<pre># mount -t cifs [<i>Network Path with forward slashes</i>] <i>mountpoint</i> -o user=[<i>user you wish to authenticate as</i>],ip=[<i>host IP noted earlier</i>]
+</pre>
+<p>You will be prompted for the password for the user you're authenticating as. You can specify the password in the command options via <code>password=<i>password</i></code>, but this isn't a good idea in terms of security as the password for the host will now be in your command history file; or if you are running the command from a script, stored in the script indefinitely. Instead, you can use a credentials file, which allows you to specify your username and password in a file with restricted access rights. It can be called anything; for an example, if it were called <code>.credentials</code> and stored in your home directory, it would be of the following form:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.credentials</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">username=<i>username</i>
+password=<i>password</i></pre>
+<p>After creating the file, change the permissions to restrict read access:
+</p>
+<pre>chmod 600 ~/.credentials
+</pre>
+<p>Then you can add another option to the <code>mount</code> command: <code>credentials=~/.credentials</code>. Now, when mounting the share, your username and password will automatically be applied.
+</p>
+<p>For a more concrete example, let's say you are mounting a share with a Network Path of <code>\\PC\share</code> at <code>/mnt/Hyper-V</code>, where your username on the host is "John" and the host's IP is 198.123.151.23. The mount command would thus be
+</p>
+<pre># mount -t cifs //PC/share /mnt/Hyper-V -o credentials=~/.credentials,ip=198.123.151.23
+</pre>
+<p>One problem with this method is that if the host's IP ever changes (e.g. it has a dynamic IP assigned via DHCP, or moves to a new network), every instance of the host's IP on the guest must be replaced. However, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbclient">smbclient</a></span> package provides <code>nmblookup</code>, a utility which finds the IP address associated with an SMB host. Thus, in the case of the example above, you would run
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">nmblookup PC</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">198.123.151.23 PC&lt;00&gt;</pre>
+<p>You only want the IP address, so you can use <code>head</code> and <code>cut</code> to parse it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">nmblookup PC | head -n 1 | cut -d ' ' -f 1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">192.123.151.23</pre>
+<p>Then you can simply replace the IP address in the <code>mount</code> command:
+</p>
+<pre># mount -t cifs //PC/share /mnt/Hyper-V -o credentials=~/.credentials,ip="$(nmblookup PC | head -n 1 | cut -d ' ' -f 1)"
+</pre>
+<p>More ways to mount shared folders, including automatic mounting on startup, are detailed in the <a href="../en/Samba.html" title="Samba">Samba</a> article.
+</p>
+<h3><span class="mw-headline" id="Xorg">Xorg</span></h3>
+<p>Graphical programs can easily be run via Xorg via the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-fbdev">xf86-video-fbdev</a></span> package. Simply install it and the window manager or desktop environment you wish to use, and you should be able to start X without issue.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Hypervisors</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

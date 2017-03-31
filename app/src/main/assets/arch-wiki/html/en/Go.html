@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Go - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Go skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Go</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://golang.org/">Go</a> is a statically-typed language with syntax loosely derived from that of C, adding garbage collected memory management, type safety, some dynamic-typing capabilities, additional built-in types such as variable-length arrays and key-value maps, and a large standard library.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Test_your_installation"><span class="tocnumber">1.1</span> <span class="toctext">Test your installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#.24GOPATH"><span class="tocnumber">1.2</span> <span class="toctext">$GOPATH</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Enable_cross_compilation_for_other_platforms"><span class="tocnumber">1.3</span> <span class="toctext">Enable cross compilation for other platforms</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Troubleshooting"><span class="tocnumber">2</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Jetbrains_Go_Plugin"><span class="tocnumber">2.1</span> <span class="toctext">Jetbrains Go Plugin</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>There are two Go compilers nowadays, and they can be <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> from <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>:
+</p>
+<ul>
+<li> <b>go</b>: interface to the set of compilation tools that can be <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=go">go</a></span>
+<ul>
+<li> fast compilation</li>
+<li> official tools (go get, go doc, etc.)</li>
+<li> cross-compilation</li>
+</ul>
+</li>
+<li> <b>gccgo</b>: frontend for <i>gcc</i>, part of its compiler collection, can be <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gcc-go">gcc-go</a></span>
+<ul>
+<li> goroutines becomes full flow</li>
+<li> small size of the binary (dynamic linking)</li>
+</ul>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Test_your_installation">Test your installation</span></h3>
+<p>Check that Go is installed correctly by building a simple program, as follows:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">hello.go</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Arch!")
+}
+</pre>
+<p>Then run it with the go tool: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ go run hello.go</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Hello, Arch!
+</pre>
+<p>Compilation with standard <i>gc</i> compiler (same as <code>go build -compiler=gc hello.go</code>):
+</p>
+<pre>$ go build hello.go
+</pre>
+<p>Compilation with <i>gccgo</i> (same as <code>go build -compiler=gccgo hello.go</code>):
+</p>
+<pre>$ gccgo hello.go -o hello
+</pre>
+<h3><span class="mw-headline" id=".24GOPATH">$GOPATH</span></h3>
+<p>Go dependencies, when used for example in <code>import</code> statements, are searched for in the <code>$GOPATH</code> variable, and then - in <code>$GOROOT</code> (<i>go</i> installation directory, <code>/usr/lib/go</code> by default). If you expect to use external dependencies, not only basic from <code>$GOROOT</code>, you must specify workspace area in your <code>~/.bash_profile</code> (or equivalent):
+</p>
+<pre>export GOPATH=~/go
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can see all Go variables by running <code>go env</code>
+</div>
+<p>Create that workspace:
+</p>
+<pre>$ mkdir -p ~/go/{bin,src}
+</pre>
+<p><code>src</code> directory is used to store sources of the project, and <code>bin</code> for executables.
+</p>
+<p>Also you can add path to <code>bin</code> directory in <code>$PATH</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a> to run installed programs (written on Go language) anywhere (like, for example, <code>ls</code>):
+</p>
+<pre>export PATH="$PATH:$GOPATH/bin"
+</pre>
+<p>Note that we also add the <code>bin</code> subdirectory to the <code>$PATH</code> so we can run any executables that be required.
+</p>
+<p>Run <code>go help gopath</code> for more information.
+</p>
+<h3><span class="mw-headline" id="Enable_cross_compilation_for_other_platforms">Enable cross compilation for other platforms</span></h3>
+<p>The official package only supports Linux amd64, 386 and arm architectures. To support cross compilation for Darwin, FreeBSD and MS Windows,  follow along as below.
+</p>
+<p>You can not build <code>/usr/lib/go/src</code> of itself, ie if you set <code>$GOROOT_BOOTSTRAP</code> to <code>/usr/lib/go</code> you will get a warning like this.
+</p>
+<pre> $ cd /usr/lib/go/src
+ $ GOROOT_BOOTSTRAP=/usr/lib/go GOOS=darwin GOARCH=amd64 ./make.bash --no-clean 
+ ##### Building Go bootstrap tool.
+ cmd/dist
+ ERROR: $GOROOT_BOOTSTRAP must not be set to $GOROOT
+ Set $GOROOT_BOOTSTRAP to a working Go tree &gt;= Go 1.4.
+</pre>
+<p>To get around this, grab a source copy of Go from <a rel="nofollow" class="external free" href="https://golang.org/">https://golang.org/</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Commands below will assume you extracted your download of Go to <code>~/downloads/go</code>.</div>
+<p>Build your downloaded Go with your system GO.
+</p>
+<pre> $ cd ~/downloads/go/src
+ $ GOROOT_BOOTSTRAP=/usr/lib/go GOOS=linux GOARCH=amd64 ./make.bash --no-clean
+</pre>
+<p>You can now build your system Go using the downloaded Go as bootstrap with this command.
+</p>
+<pre> $ cd /usr/lib/go/src; for os in darwin freebsd windows; do for arch in amd64 386; do sudo GOROOT_BOOTSTRAP="$HOME/downloads/go" GOOS=$os GOARCH=$arch ./make.bash --no-clean; done; done
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>These commands will need to be run following each Go package update.</div>
+<p>For more information, see <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/30287">FS#30287</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Jetbrains_Go_Plugin">Jetbrains Go Plugin</span></h3>
+<p>If you are using a Jetbrains IDE and the Go plugin cannot find your Go SDK path, you might be using an incompatible package. Remove the <code>gcc-go</code> package and replace it with <code>go</code>. If your GOPATH is set, the IDE should now be able to find your Go SDK at <code>/usr/lib/go</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://golang.org/">Official web-site of Go Programming Language</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Go_(programming_language)" class="extiw" title="wikipedia:Go (programming language)">Wikipedia article</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://gobyexample.com/">Examples with small descriptions</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://tour.golang.org">Interactive Go training tour</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins">IDEs and Plugins for Go</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://docs.google.com/document/d/1OaatvGhEAq7VseQ9kkavxKNAfepWy2yhPUBs96FGV28/edit">Go 1.5 Bootstrap Plan</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Programming_languages.html" title="Category:Programming languages">Programming languages</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

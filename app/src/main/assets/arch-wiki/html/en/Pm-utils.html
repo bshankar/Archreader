@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>pm-utils - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Pm-utils skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">pm-utils</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Uswsusp.html" title="Uswsusp">Uswsusp</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/TuxOnIce.html" title="TuxOnIce">TuxOnIce</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b>  Need to address pm-utils relevance compared to systemd's suspend functions (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Pm-utils">Talk:Pm-utils#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Hibernating with Pm-utils and then updating systemd is reported to corrupt files:
+<a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1423442">https://bbs.archlinux.org/viewtopic.php?pid=1423442</a>
+</div>
+<p><b>pm-utils</b> is a suspend and powerstate setting framework. It is designed to replace such scripts as those provided by the <code>powersave</code> package.
+</p>
+<p>pm-utils is a collection of shell scripts that wrap the kernel mode suspend/resume with the various hacks. These hacks are needed to work around bugs in drivers and subsystems that are not yet aware of suspend. It is easily extensible by putting custom hooks into a directory, which can either be done by the system administrator or those hooks can be part of a package, especially if this package needs special attention during a system suspend or power state transition.
+</p>
+<p>A lesser known feature is one that mimics toggling done by <a href="../en/Laptop_Mode_Tools.html" title="Laptop Mode Tools">Laptop Mode Tools</a>.
+</p>
+<p>Used in conjunction with the <a href="../en/CPU_frequency_scaling.html" title="Cpupower" class="mw-redirect">cpupower</a> package, notebook (and desktop) owners are provided with a complete power management suite.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installing_alternative_suspend_backend_.28optional.29"><span class="tocnumber">1.1</span> <span class="toctext">Installing alternative suspend backend (optional)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Basic_configuration"><span class="tocnumber">2</span> <span class="toctext">Basic configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Standby.2Fsuspend_to_RAM"><span class="tocnumber">2.1</span> <span class="toctext">Standby/suspend to RAM</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Hibernation_.28suspend2disk.29"><span class="tocnumber">2.2</span> <span class="toctext">Hibernation (suspend2disk)</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Suspend.2Fhibernate_as_regular_user"><span class="tocnumber">2.3</span> <span class="toctext">Suspend/hibernate as regular user</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#User_permission_method"><span class="tocnumber">2.3.1</span> <span class="toctext">User permission method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Power_saving"><span class="tocnumber">2.4</span> <span class="toctext">Power saving</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Change_brightness_depending_on_AC_state"><span class="tocnumber">2.4.1</span> <span class="toctext">Change brightness depending on AC state</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#Suspend_on_idle.2Finactivity"><span class="tocnumber">2.5</span> <span class="toctext">Suspend on idle/inactivity</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Using_Swap_file_instead_of_regular_swap_partition"><span class="tocnumber">2.6</span> <span class="toctext">Using Swap file instead of regular swap partition</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Advanced_configuration"><span class="tocnumber">3</span> <span class="toctext">Advanced configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Available_variables_for_use_in_config_files"><span class="tocnumber">3.1</span> <span class="toctext">Available variables for use in config files</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Disabling_a_hook"><span class="tocnumber">3.2</span> <span class="toctext">Disabling a hook</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Alternative_method"><span class="tocnumber">3.2.1</span> <span class="toctext">Alternative method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-16"><a href="#Creating_your_own_hooks"><span class="tocnumber">3.3</span> <span class="toctext">Creating your own hooks</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#How_it_works"><span class="tocnumber">4</span> <span class="toctext">How it works</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#Pm-suspend_internals"><span class="tocnumber">4.1</span> <span class="toctext">Pm-suspend internals</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#Segmentation_faults"><span class="tocnumber">5.1</span> <span class="toctext">Segmentation faults</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#Reboot_instead_of_resume_from_suspend"><span class="tocnumber">5.2</span> <span class="toctext">Reboot instead of resume from suspend</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Resume_from_suspend_shuts_down_instead_of_wake_up"><span class="tocnumber">5.3</span> <span class="toctext">Resume from suspend shuts down instead of wake up</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Blank_screen_when_waking_from_suspend"><span class="tocnumber">5.4</span> <span class="toctext">Blank screen when waking from suspend</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#VirtualBox_problems"><span class="tocnumber">5.5</span> <span class="toctext">VirtualBox problems</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Hibernate_with_missing_swap_partition"><span class="tocnumber">5.6</span> <span class="toctext">Hibernate with missing swap partition</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Black_screen_with_unblinking_cursor_when_trying_to_suspend"><span class="tocnumber">5.7</span> <span class="toctext">Black screen with unblinking cursor when trying to suspend</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Blank_screen_issue"><span class="tocnumber">5.8</span> <span class="toctext">Blank screen issue</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Unable_to_resume_with_64_bit_OS"><span class="tocnumber">5.9</span> <span class="toctext">Unable to resume with 64 bit OS</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Black_screen_when_waking_from_hibernate_with_radeon_driver"><span class="tocnumber">5.10</span> <span class="toctext">Black screen when waking from hibernate with radeon driver</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#Computer_does_not_turn_off_when_hibernating"><span class="tocnumber">5.11</span> <span class="toctext">Computer does not turn off when hibernating</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Display_not_powering_on_after_suspension_.28radeon.29"><span class="tocnumber">5.12</span> <span class="toctext">Display not powering on after suspension (radeon)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Tips_and_tricks"><span class="tocnumber">6</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33"><a href="#Having_the_HD_power_management_level_automatically_set_again_on_resume"><span class="tocnumber">6.1</span> <span class="toctext">Having the HD power management level automatically set again on resume</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Restarting_the_mouse"><span class="tocnumber">6.2</span> <span class="toctext">Restarting the mouse</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#Add_sleep_modes_to_Openbox_menu"><span class="tocnumber">6.3</span> <span class="toctext">Add sleep modes to Openbox menu</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Handling_.22sleep.22_and_.22power.22_buttons"><span class="tocnumber">6.4</span> <span class="toctext">Handling "sleep" and "power" buttons</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Locking_the_screen_saver_on_hibernate_or_suspend"><span class="tocnumber">6.5</span> <span class="toctext">Locking the screen saver on hibernate or suspend</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Disabling_hibernation_via_polkit"><span class="tocnumber">6.6</span> <span class="toctext">Disabling hibernation via polkit</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-39"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pm-utils">pm-utils</a></span> package.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you run into issues when resuming video, it might be necessary to also install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vbetool">vbetool</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.</li>
+<li> If you are starting from a clean install, make sure that you have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=acpi">acpi</a></span> installed.</li>
+</ul>
+</div>
+<p>Run <code>pm-suspend</code>, <code>pm-suspend-hybrid</code> or <code>pm-hibernate</code> as root to trigger suspend manually. The suspend scripts write log to <code>/var/log/pm-suspend.log</code>.
+</p>
+<h3><span class="mw-headline" id="Installing_alternative_suspend_backend_.28optional.29">Installing alternative suspend backend (optional)</span></h3>
+<p>The Arch Linux package ships with support for the following backends: <code>kernel</code>, <code>tuxonice</code> and <code>uswsusp</code> which can be seen from command:
+</p>
+<pre>pacman -Ql pm-utils | grep module.d
+</pre>
+<p>Suspend backend is specified by the <code>SLEEP_MODULE</code> configuration variable in <code>/etc/pm/config.d</code> and defaults to the <code>kernel</code> backend. To use the alternative suspend backends the respective packages need to be installed. Both of these are available in the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>:
+</p>
+<ul>
+<li> uswsusp - <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/uswsusp-git/">uswsusp-git</a></span><sup><small>AUR</small></sup>
+</li>
+<li> tuxonice - <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ice/">linux-ice</a></span><sup><small>AUR</small></sup> / <a href="../en/Linux-pf.html" title="Linux-pf">linux-pf</a>
+</li>
+</ul>
+<p>Furthermore, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pm-utils">pm-utils</a></span> ships with its own video quirks database in <code>/usr/lib/pm-utils/video-quirks/</code>.
+</p>
+<h2><span class="mw-headline" id="Basic_configuration">Basic configuration</span></h2>
+<h3><span class="mw-headline" id="Standby.2Fsuspend_to_RAM">Standby/suspend to RAM</span></h3>
+<p>In the ideal case, running <code>pm-suspend</code> as root should initiate suspend to memory, meaning that all running state will be preserved in RAM and all components other than RAM will be shut down to conserve power. Pressing the power button should initiate a resume from this state.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is always recommended to put your network drivers in SUSPENDED_MODULES because most wireless drivers are known to cause issues after standby. Intel's iwlwifi, Atheros' ath5k and Realtek's r8* drivers were all reported to have issues after resume on the forums. Iwlwifi even drops to 1Mbps connection if it is not reloaded after resume.</div> 
+<p>In some cases, it is possible that running <code>pm-suspend</code> causes hangs or other issues. This may be due to specific "misbehaving" modules. If you know which modules could cause such issues, adding a <code>SUSPEND_MODULES</code> config to <code>/etc/pm/config.d/modules</code> of the form:
+</p>
+<pre>SUSPEND_MODULES="uhci_hd button ehci_hd iwlwifi"
+</pre>
+<p>should cause these modules to be specifically unloaded before suspend and reloaded after resume.
+</p>
+<p>To configure invoking <code>pm-suspend</code> automatically on power events like laptop lid close, please refer to <a href="../en/Acpid.html" title="Acpid">Acpid</a>.
+</p>
+<h3><span class="mw-headline" id="Hibernation_.28suspend2disk.29">Hibernation (suspend2disk)</span></h3>
+<p>You need to follow instructions in <a href="../en/Power_management/Suspend_and_hibernate.html#Hibernation" title="Suspend and hibernate" class="mw-redirect">Suspend and hibernate#Hibernation</a> in order to set up hibernation.
+</p>
+<p>Alternatively, if you do not use the <code>kernel</code> backend, see <a href="../en/Uswsusp.html#Configuration" title="Uswsusp">Uswsusp#Configuration</a> or <a href="../en/TuxOnIce.html#Setting_up_the_bootloader" title="TuxOnIce">TuxOnIce#Setting up the bootloader</a>.
+</p>
+<h3><span class="mw-headline" id="Suspend.2Fhibernate_as_regular_user">Suspend/hibernate as regular user</span></h3>
+<p>Three methods are available to suspend without the need for a root password: using <a href="../en/Udev.html" title="Udev">Udev</a>, using UPower, and giving the user the appropriate permissions with <a href="../en/Sudo.html" title="Sudo">visudo</a>.
+</p>
+<h4><span class="mw-headline" id="User_permission_method">User permission method</span></h4>
+<p>Because the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pm-utils">pm-utils</a></span> scripts must be run as root, you may want to make the scripts accessible to normal users by running sudo without the root password. To do so, edit the <code>/etc/sudoers</code> file with <code>visudo</code> as root. For more information, see <a href="../en/Sudo.html" title="Sudo">sudo</a>.
+</p>
+<p>Add the following lines, replacing <code><i>username</i></code> with your own user name, then save and exit <code>visudo</code>:
+</p>
+<pre><i>username</i>  ALL = NOPASSWD: /usr/sbin/pm-hibernate
+<i>username</i>  ALL = NOPASSWD: /usr/sbin/pm-suspend
+</pre>
+<p>Or you can enable it for a group, using the following lines, replacing <code><i>group</i></code>:
+</p>
+<pre>%<i>group</i>   ALL = NOPASSWD: /usr/sbin/pm-hibernate
+%<i>group</i>   ALL = NOPASSWD: /usr/sbin/pm-suspend
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>These must come after any user privilege specifications, e.g., <code>username ALL=(ALL) ALL</code>, or they will not work.</div>
+<p>You can now run the scripts without a password by simply running:
+</p>
+<pre>$ sudo pm-hibernate
+</pre>
+<p>or:
+</p>
+<pre>$ sudo pm-suspend
+</pre>
+<p>Also, add yourself to the <code>power</code> <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a> so that way using things like applets to do suspend will work. If you do not do this, when you try to use suspend though things like <a href="../en/GNOME.html" title="GNOME">GNOME</a>'s shutdown applet, your computer will just play a very annoying loud triple beep and lock the screen.
+</p>
+<pre># gpasswd -a <i>username</i> power
+</pre>
+<p>You should now be able to use your <a href="../en/Desktop_environment.html" title="Desktop environment">Desktop environment</a>'s power management tools to automatically suspend or hibernate when doing things like closing the laptop lid, running low on battery power, etc.
+</p>
+<h3><span class="mw-headline" id="Power_saving">Power saving</span></h3>
+<p>pm-utils supports running commands depending on whether the system is connected to the AC adapter or not; therefore, a script has to be created inside the folder <code>/etc/pm/power.d/</code>. An example of such a script can be found in the <a rel="nofollow" class="external text" href="http://crunchbanglinux.org/forums/post/110148/#p110148">crunchbang forum</a>. Be aware that upower must be running in order to detect changing AC states <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=132125">(see more information)</a>.
+</p>
+<h4><span class="mw-headline" id="Change_brightness_depending_on_AC_state">Change brightness depending on AC state</span></h4>
+<p>One possible example looks as follows and changes brightness according to the AC state. Create a file called <code>/etc/pm/power.d/00-brightness</code> with the following content and change the path to the brightness setting as well as the value written into the file with echo according to your system.
+</p>
+<pre>
+#!/bin/bash
+
+case $1 in
+    true)
+        echo "Enable screen power saving"
+        echo 5 &gt; /sys/class/backlight/acpi_video0/device/backlight/acpi_video0/brightness
+    ;;
+    false)
+        echo "Disable screen power saving"
+        echo 14 &gt; /sys/class/backlight/acpi_video0/device/backlight/acpi_video0/brightness
+    ;;
+esac
+</pre>
+<h3><span class="mw-headline" id="Suspend_on_idle.2Finactivity">Suspend on idle/inactivity</span></h3>
+<p>One method relies on xautolock program. Add following: <code>xautolock -time 30 -locker "sudo pm-suspend" -detectsleep &amp;</code> to <code>~/.xinitrc</code>. This implies that <code>pm-suspend</code> is called after 30 minutes of inactivity.
+</p>
+<h3><span class="mw-headline" id="Using_Swap_file_instead_of_regular_swap_partition">Using Swap file instead of regular swap partition</span></h3>
+<p>If you want use swap file instead of regular swap partition, see <a href="../en/Swap.html#Swap_file" title="Swap">Swap File</a>.
+</p>
+<h2><span class="mw-headline" id="Advanced_configuration">Advanced configuration</span></h2>
+<p>The main configuration file is <code>/usr/lib/pm-utils/defaults</code>. You <i>should not edit this file</i>, since after a package update it might be overwritten with the default settings. Put your config file into <code>/etc/pm/config.d/</code> instead.
+You can just put a simple text file with
+</p>
+<pre>SUSPEND_MODULES="button uhci_hcd"
+</pre>
+<p>named <code>modules</code> or <code>config</code> into <code>/etc/pm/config.d</code> and it will override the settings in the system-wide configuration file.
+</p>
+<h3><span class="mw-headline" id="Available_variables_for_use_in_config_files">Available variables for use in config files</span></h3>
+<dl>
+<dt> SUSPEND_MODULES="button"</dt>
+<dd> the list of modules to be unloaded before suspend</dd>
+<dt> SLEEP_MODULE="tuxonice uswsusp kernel"</dt>
+<dd> the default sleep/wake systems to try</dd>
+<dt> HIBERNATE_MODE="shutdown"</dt>
+<dd> forces the system to shut down rather than reboot</dd>
+</dl>
+<h3><span class="mw-headline" id="Disabling_a_hook">Disabling a hook</span></h3>
+<p>If a hook is run which you do not like or which you think is not useful or even harmful, we would appreciate a bug report for that.
+You can however easily disable hooks by just creating an empty file corresponding to the hook in <code>/etc/pm/sleep.d/</code>. Say you want to disable the hook <code>/usr/lib/pm-utils/sleep.d/45pcmcia</code>, you can do this easily by calling
+</p>
+<pre># touch /etc/pm/sleep.d/45pcmcia
+</pre>
+<p>Do not set the executable bit on that dummy-hook.
+</p>
+<p>Note: Make sure you create the dummy files in the appropriate directory. For example if you are trying to disable hooks in /usr/lib/pm-utils/power.d, you will need to place the dummy file in /etc/pm/power.d.
+</p>
+<h4><span class="mw-headline" id="Alternative_method">Alternative method</span></h4>
+<p>Create a file in <code>/etc/pm/config.d</code> with the modules you want to blacklist in the <code>HOOK_BLACKLIST</code> variable.
+For example, to manage power saving yourself, use:
+</p>
+<pre>HOOK_BLACKLIST="hal-cd-polling intel-audio-powersave journal-commit laptop-mode pcie_aspm readahead sata_alpm sched-powersave xfs_buffer wireless"
+</pre>
+<h3><span class="mw-headline" id="Creating_your_own_hooks">Creating your own hooks</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using systemd, then these hooks located in sleep.d will probably not work. In these cases you want to consider using <a href="../en/Power_management.html#Sleep_hooks" title="Power management">sleep hooks</a> of systemd.</div>
+<p>If you want to do something specific to your setup during suspend or hibernate, then you can easily put your own hook into <code>/etc/pm/sleep.d</code>. The hooks in this directory will be called in alphabetic order during suspend (that is the reason their names all start with 2 digits, to make the ordering explicit) and in the reverse order during resume. The general convention to be followed on number ordering is:.
+</p>
+<dl>
+<dt>00 - 49</dt>
+<dd> User and most package supplied hooks. If a hook assumes that all of the usual services and userspace infrastructure is still running, it should be here.</dd>
+<dt>50 - 74</dt>
+<dd> Service handling hooks. Hooks that start or stop a service belong in this range. At or before 50, hooks can assume that all services are still enabled.</dd>
+<dt>75 - 89</dt>
+<dd> Module and non-core hardware handling. If a hook needs to load/unload a module, or if it needs to place non-video hardware that would otherwise break suspend or hibernate into a safe state, it belongs in this range. At or before 75, hooks can assume all modules are still loaded.</dd>
+<dt>90 - 99</dt>
+<dd> Reserved for critical suspend hooks.</dd>
+</dl>
+<p>I am showing a pretty useless demonstration hook here, that will just put some informative lines into your log file:
+</p>
+<pre>#!/bin/bash
+case $1 in
+    hibernate)
+        echo "Hey guy, we are going to suspend to disk!"
+    ;;
+    suspend)
+        echo "Oh, this time we are doing a suspend to RAM. Cool!"
+    ;;
+    thaw)
+        echo "Oh, suspend to disk is over, we are resuming..."
+    ;;
+    resume)
+        echo "Hey, the suspend to RAM seems to be over..."
+    ;;
+    *)  echo "Somebody is calling me totally wrong."
+    ;;
+esac
+</pre>
+<p>Put this into <code>/etc/pm/sleep.d/66dummy</code>, do a <code>chmod +x /etc/pm/sleep.d/66dummy</code> and it will spew some useless lines during suspend and resume.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>All the hooks run as root. This means that you need to be careful when creating temporary files, check that the <code>PATH</code> environment variable is set correctly, etc. to avoid security problems.</div>
+<h2><span class="mw-headline" id="How_it_works">How it works</span></h2>
+<p>The concept is quite easy: the main script (<code>pm-action</code>, called via symlinks as either <code>pm-suspend</code>, <code>pm-hibernate</code> or <code>pm-suspend-hybrid</code>) executes so-called "hooks", executable scripts, in the alphabetical sorted order with the parameter <code>suspend</code> (suspend to RAM) or <code>hibernate</code> (suspend to disk).
+Once all hooks are done, it puts the machine to sleep. After the machine has woken up again, all those hooks are executed in reverse order with the parameter <code>resume</code> (resume from RAM) or <code>thaw</code> (resume from disk).
+The hooks perform various tasks, such as preparing the bootloader, stopping the Bluetooth subsystem, or unloading of critical modules.
+</p>
+<p>Both <code>pm-suspend</code> and <code>pm-hibernate</code> are usually called from <a href="../en/Udev.html" title="Udev">Udev</a>, initiated by desktop applets like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnome-power-manager">gnome-power-manager</a></span> or <code>kpowersave</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>suspend-hybrid</code> is a placeholder right now -- it is not completely implemented.</div>
+<p>There is also the possibility to set the machine into high-power and low-power mode, the command <code>pm-powersave</code> is used with an additional parameter of <code>true</code> or <code>false</code>. It works basically the same as the suspend framework.
+</p>
+<p>The hooks for suspend are placed in
+</p>
+<dl>
+<dt><code>/usr/lib/pm-utils/sleep.d</code></dt>
+<dd> distribution / package provided hooks</dd>
+<dt><code>/etc/pm/sleep.d</code></dt>
+<dd> hooks added by the system administrator</dd>
+</dl>
+<p>The hooks for the power state are placed in 
+</p>
+<dl>
+<dt><code>/usr/lib/pm-utils/power.d</code></dt>
+<dd> distribution / package provided hooks</dd>
+<dt><code>/etc/pm/power.d</code></dt>
+<dd> hooks added by the system administrator</dd>
+</dl>
+<p>Hooks in <code>/etc/pm/</code> take precedence over those in <code>/usr/lib/pm-utils/</code>, so the system administrator can override the defaults provided by the distribution.
+</p>
+<h3><span class="mw-headline" id="Pm-suspend_internals">Pm-suspend internals</span></h3>
+<p>This outlines the internal actions when <code>pm-suspend</code> is run, describing how <code>pm-utils</code> gracefully falls back onto the kernel method if the requirements of other methods are not met.
+</p>
+<pre>$ pm-suspend
+</pre>
+<p>The first step is set-up preliminary variables and source parent scripts:
+</p>
+<pre>export STASHNAME=pm-suspend
+export METHOD="$(echo ${0##*pm-} |tr - _)"
+. "/usr/lib/pm-utils/pm-functions"
+</pre>
+<p>The variable <code>METHOD</code> is extracted from the executable name, <i>suspend</i> from <code>pm-suspend</code> and <i>hibernate</i> from <code>pm-hibernate</code>.
+</p>
+<p>The location of runtime configuration parameters is defined in <code>/usr/lib/pm-utils/pm-functions</code> as <i>PM_UTILS_RUNDIR="/var/run/pm-utils"</i> and <i>STORAGEDIR="${PM_UTILS_RUNDIR}/${STASHNAME}/storage"</i>. Therefore <i>STORAGEDIR="/var/run/pm-utils/pm-suspend/storage"</i>; this is where <code>pm-suspend</code> will cache its configuration. Disabled hooks are stored as plain text files with the hook name prefixed by "<i>disable_hook:</i>". Configuration parameters are appended to the <i>parameters</i> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$  ls -lah /var/run/pm-utils/pm-suspend/storage/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+-rw-r--r-- 1 root root  20 May 19 09:57 disable_hook:99video
+-rw-r--r-- 1 root root   0 May 19 02:59 parameters
+-rw-r--r-- 1 root root 247 May 19 02:59 parameters.rm
+-rw-r--r-- 1 root root   9 May 19 02:59 state:cpu0_governor
+-rw-r--r-- 1 root root   9 May 19 02:59 state:cpu1_governor
+</pre>
+<p>Then <code>pm-functions</code> will source the files located in <code>/etc/pm/config.d/</code> in addition to <code>/usr/lib/pm-utils/defaults</code>. Upon returning, <code>pm-functions</code> will proceed to source the files specified by <b>$SLEEP_METHOD</b> as <code>/usr/lib/pm-utils/module.d/$SLEEP_METHOD[...]</code> if they exist:
+</p>
+<pre>for mod in $SLEEP_MODULE; do
+    mod="${PM_UTILS_LIBDIR}/module.d/${mod}"
+    [ -f "$mod" ] || continue
+    . "$mod"
+done
+</pre>
+<p>Otherwise, if <b>$SLEEP_MODULE</b> is empty, <code>do_suspend()</code> will be set to the kernel backend as described above:
+</p>
+<pre>if [ -z "$SUSPEND_MODULE" ]; then
+    if grep -q mem /sys/power/state; then
+       SUSPEND_MODULE="kernel"
+       do_suspend() { echo -n "mem" &gt;/sys/power/state; }
+    elif [ -c /dev/pmu ] &amp;&amp; pm-pmu --check; then
+       SUSPEND_MODULE="kernel"
+       do_suspend() { pm-pmu --suspend; }
+    elif grep -q standby /sys/power/state; then
+       SUSPEND_MODULE="kernel"
+       do_suspend() { echo -n "standby" &gt;/sys/power/state; }
+    fi
+fi
+</pre>
+<p>Assuming <b>$SLEEP_MODULE</b> is not empty and <code>uswsusp</code> is specified, <code>/usr/lib/pm-utils/module.d/uswsusp</code> is executed. This script checks several requirements (these are the requirements for being able to use uswsusp):
+</p>
+<ul>
+<li> [ -z $SUSPEND_MODULE ]</li>
+<li> command_exists s2ram</li>
+<li> grep -q mem /sys/power/state || ( [ -c /dev/pmu ] &amp;&amp; pm-pmu --check; );</li>
+</ul>
+<p>If these requirements are met, do_suspend() is defined as:
+</p>
+<pre>do_suspend()
+{
+   uswsusp_get_quirks
+   s2ram --force $OPTS
+}
+</pre>
+<p>Most importantly, the <code>uswsusp</code> module runs:
+</p>
+<pre>add_before_hooks uswsusp_hooks
+add_module_help uswsusp_help
+</pre>
+<p>The first function, <i>add_before_hook</i> disables the <b>pm-utils</b> hooks <b>99video</b> since this functionality is subsumed by <b>s2ram</b>.
+The second function, <i>add_module_help</i>, adds uswsusp-module-specific help, which in essence replaces the help function provided by <b>99video</b>.
+</p>
+<p>Back to <code>pm-suspend</code>:
+</p>
+<pre>command_exists "check_$METHOD" &amp;&amp; command_exists "do_$METHOD"
+"check_$METHOD"
+</pre>
+<p>This verifies that the <i>check_suspend</i> and <i>do_suspend</i> methods have been defined. The <i>check_suspend</i> method simply verifies that $SUSPEND_MODULE is not empty:
+</p>
+<pre>check_suspend() { [ -n "$SUSPEND_MODULE" ]; }
+</pre>
+<p>Lastly, <code>pm-suspend</code> must run all hooks that have not been disabled, sync file-system buffers, and run <i>do_suspend</i>:
+</p>
+<pre>if run_hooks sleep "$ACTION $METHOD"; then
+    # Sleep only if we know how and if a hook did not inhibit us.
+    log "$(date): performing $METHOD"
+    sync
+    "do_$METHOD" || r=128
+    log "$(date): Awake."
+</pre>
+<p>The method <i>run_hooks</i> is a wrapper for <i>_run_hooks</i>, which the case of <code>pm-suspend</code> is called as <i>run_hooks sleep "suspend suspend"</i>. Given that:
+</p>
+<pre>PARAMETERS="${STORAGEDIR}/parameters"
+PM_UTILS_LIBDIR="/usr/lib/pm-utils"
+PM_UTILS_ETCDIR="/etc/pm"
+</pre>
+<p>The method <i>_run_hooks</i>, will for each hook in <i>"${PM_UTILS_LIBDIR}/$1.d"</i> and <i>"${PM_UTILS_ETCDIR}/$1.d"</i>, check that sleep has not been inhibited and update the runtime parameters stored in <i>$PARAMETERS</i> before running each hook via <i>run_hook $hook $2</i>. In the case of Suspend-to-RAM, all the hooks in <i>{/usr/lib/pm-utils/sleep.d/,/etc/pm/sleep.d/}</i> will be enumerated, and <i>run_hook</i> will be passed the parameters <i>$hook</i> and "<i>suspend suspend</i>". The method <i>run_hook</i> uses the <i>hook_ok</i> function to verify that the hook has not been disabled before executing the hook with the "<i>suspend suspend</i>" parameters.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>If suspend or hibernate did not work correctly, you will probably find some information in the log file <code>/var/log/pm-suspend.log</code>. For example, which hooks were run and what the output of them was should be in that log file.
+</p>
+<p>Also, check the output of the <code>pm-is-supported</code> command. This command (with the <code>--hibernate</code> or <code>--suspend</code> flag) will do some sanity checking and report any errors it finds in your configuration. It will not detect all possible errors, but may still be useful.
+</p>
+<h3><span class="mw-headline" id="Segmentation_faults">Segmentation faults</span></h3>
+<p>If you experience segmentation faults that might result in an unresponsive system and missing keys then try to set the UUID in the resume-path in <code>/boot/grub/menu.lst</code> as explained <a href="#Hibernation_.28suspend2disk.29">above</a>.
+</p>
+<h3><span class="mw-headline" id="Reboot_instead_of_resume_from_suspend">Reboot instead of resume from suspend</span></h3>
+<p>This problem started when saving NVS area during suspend was introduced (in 2.6.35-rc4) (<a rel="nofollow" class="external text" href="http://www.spinics.net/lists/linux-acpi/msg29521.html">mailing list post</a>). However, it is known that this mechanism does not work on all machines, so the kernel developers allow the user to disable it with the help of the <code>acpi_sleep=nonvs</code> kernel command line option (see <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>).
+</p>
+<h3><span class="mw-headline" id="Resume_from_suspend_shuts_down_instead_of_wake_up">Resume from suspend shuts down instead of wake up</span></h3>
+<p>On an Acer Aspire AS3810TG, resuming from suspend shuts down the computer instead of waking it up. If you experience a similar issue, try passing the parameter <code>i8042.reset=1</code> to your kernel. In <a href="../en/GRUB.html" title="GRUB">GRUB</a>, the line in <code>/boot/grub/grub.cfg</code> should be something like this:
+</p>
+<pre>linux /vmlinuz-linux root=/dev/vg00/root resume=/dev/vg00/swap i8042.reset=1 ro
+</pre>
+<p>Although I have not tested this, you could also set this parameter live without having to restart by doing:
+</p>
+<pre># sysctl -e -w i8042.reset=1
+</pre>
+<h3><span class="mw-headline" id="Blank_screen_when_waking_from_suspend">Blank screen when waking from suspend</span></h3>
+<p>Some laptops will just show a black screen with no backlight after resuming from suspend. There are several workaround that may solve this issue:
+</p>
+<ul><li> In computers with multiplexed PS/2 controller that supports a Y adapter for using both keyboard and mouse (some laptops use this system internally) try to add <code>i8042.nomux=1</code> to your <a href="../en/Kernel_parameters.html" title="Kernel parameters"> kernel parameters</a> (you may also need <code>i8042.reset=1</code>). Alternatively, you may be able to disable the PS/2 Y adapter in your BIOS settings.</li></ul>
+<ul><li> Disabling the <a href="https://en.wikipedia.org/wiki/SpeedStep" class="extiw" title="wikipedia:SpeedStep"> Intel SpeedStep</a> feature in the BIOS settings may help (e.g. Dell Inspiron Mini 1018). You could also try, without disabling SpeedStep, creating a quirk in <code>/etc/pm/sleep.d/</code> with this content (requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vbetool">vbetool</a></span>):<pre>
+#!/bin/sh
+#
+case "$1" in
+    suspend)
+    ;;
+    resume)
+        sleep 5
+        vbetool dpms off
+        vbetool dpms on
+    ;;
+    *) exit $NA
+    ;;
+esac
+</pre> save it as you want but with a <code>00</code> in front of the name so this is called last when resuming; remember to <code>chmod +x</code> the script. <br> Try adjusting the <code>sleep</code> time if the other commands are called too soon, or if it works well, you can also try removing that line.</li></ul>
+<ul><li> Disable the VT-d virtualization setting in your BIOS by switching to "VT-x only" (e.g. Toshiba Portégé R830).</li></ul>
+<h3><span class="mw-headline" id="VirtualBox_problems">VirtualBox problems</span></h3>
+<p>The VirtualBox kernel modules cause <code>pm-suspend</code> and <code>pm-hibernate</code> to fail on some laptops. (See <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=123354">this discussion</a>). Instead of suspending or hibernating, the system freezes and indicator LEDs blink (the suspend indicator in the case of ThinkPads and the Caps Lock and Scroll Lock indicators in the case of the MSI Wind U100). The <code>pm-suspend</code> and <code>pm-hibernate</code> logs appear normal.
+</p>
+<p>The problem can be fixed by removing the modules before suspension or hibernation and reloading them afterwards. That can be accomplished through a script:
+</p>
+<pre>#!/bin/sh
+
+rmmod vboxdrv
+pm-hibernate
+modprobe vboxdrv</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some users reported that it is sufficient to rebuild the kernel module by running <code>vboxbuild</code> as root.</div>
+<h3><span class="mw-headline" id="Hibernate_with_missing_swap_partition">Hibernate with missing swap partition</span></h3>
+<p>If you try to hibernate without an active swap partition, your system will look like it is going into hibernate, and then immediately resume again. There are no error messages warning you that there is no swap partition, even when verbose logging is activated, so this problem can be very hard to debug. On my system, the swap partition was somehow corrupted and deactivated, so this may happen even if you set up a swap partition during install. If hibernate displays this behaviour, make sure that you actually have a swap partition that is being used as such. The output of the <code>blkid</code> command should look e.g. like
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># blkid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/dev/sda1: UUID="00000-000-000-0000000" TYPE="ext2" 
+/dev/sda2: UUID="00000-000-000-0000000" TYPE="ext4"
+/dev/sda3: UUID="00000-000-000-0000000" TYPE="ext4"
+/dev/sda4: UUID="00000-000-000-0000000" TYPE="swap"</pre>
+<p>with one of the lines having <code>"swap"</code> as the type. If this is not the case, consult <a href="../en/Swap.html#Swap_partition" title="Swap">Swap#Swap partition</a> for instructions on re-creating/activating the swap partition.
+</p>
+<h3><span class="mw-headline" id="Black_screen_with_unblinking_cursor_when_trying_to_suspend">Black screen with unblinking cursor when trying to suspend</span></h3>
+<p>If you get a black screen with unblinking cursor when trying to do
+</p>
+<pre>$ sudo pm-suspend
+</pre>
+<p>have a look at <code>/var/log/pm-suspend.log</code> and search for "ehci" or "xhci". Some of the names you could find may be "ehci_hd", "xhci_hd" or "ehci_hcd".
+</p>
+<p>Then as root create the file <code>/etc/pm/config.d/modules</code> and include this code with the exact name of the ehci or xhci module you found. For example:
+</p>
+<pre>SUSPEND_MODULES="ehci_hcd"
+</pre>
+<p>Suspend should now be working.
+</p>
+<h3><span class="mw-headline" id="Blank_screen_issue">Blank screen issue</span></h3>
+<p>Some users have reported having issues with their laptops not resuming after a suspend or hibernate. This is due to the <code>autodetect</code> hook in "HOOKS" array of the <code>/etc/mkinitcpio.conf</code> file. This can be disabled using the same method for adding the <code>resume</code> hook. Just remove <code>autodetect</code> from the list and follow the steps to build the new image. See <a href="#Mkinitcpio_Resume_Hook">Resume Hook</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for more details on building the new image.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using <a href="../en/Plymouth.html" title="Plymouth">plymouth</a> it may be an other reason to this issue. Adding <code>resume</code> before <code>plymouth</code> in "HOOKS" array of the <code>/etc/mkinitcpio.conf</code> file should fix this.</div>
+<h3><span class="mw-headline" id="Unable_to_resume_with_64_bit_OS">Unable to resume with 64 bit OS</span></h3>
+<p>Certain motherboards/BIOS combinations (specifically known are some Zotac ITX boards, perhaps others) will not resume properly from suspend if any 64 bit operating system is installed. The solution is the enter your BIOS setup and Disable the "Memory Remapping Hole" in your DRAM configuration page. This will probably fix the suspend to RAM problem but will probably result in your OS not detecting all of your RAM.
+</p>
+<h3><span class="mw-headline" id="Black_screen_when_waking_from_hibernate_with_radeon_driver">Black screen when waking from hibernate with radeon driver</span></h3>
+<p>When using the radeon driver and having <code>radeon</code> in the <code>HOOKS</code> array of the <code>/etc/mkinitcpio.conf</code> resuming from hibernation results in the screen being black, however everything else working (testable by keeping a console open with a command to execute and starting the execution after resuming).
+This seems to be related to using <code>radeon.dpm=1</code> (default since kernel 3.13) as the power management method in radeon.
+</p>
+<p>Removing <code>radeon</code> from the HOOKS array (and rebuiling the initrd) fixes this problem.
+(See <a rel="nofollow" class="external text" href="https://bugs.freedesktop.org/show_bug.cgi?id=72716">here</a>.) 
+</p>
+<h3><span class="mw-headline" id="Computer_does_not_turn_off_when_hibernating">Computer does not turn off when hibernating</span></h3>
+<p>It is possible that after Linux hibernates and has written the data to disk, the computer does not power off properly. If it is then forcefully powered off and later restarted, resuming will work fine.
+</p>
+<p>This can easily be fixed by making an executable file named <code>/etc/pm/config.d/hibernate_mode</code> which contains the single line: <code> HIBERNATE_MODE="shutdown" </code>.
+After that pm-hibernate should properly shut down the computer.
+</p>
+<h3><span class="mw-headline" id="Display_not_powering_on_after_suspension_.28radeon.29">Display not powering on after suspension (radeon)</span></h3>
+<p>If you get a blank display after suspension with radeon gpu, try to create <code>/etc/pm/config.d/radeon</code>, and add the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/config.d/radeon</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">QUIRK_S3_BIOS="true"
+QUIRK_S3_MODE="true"</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Having_the_HD_power_management_level_automatically_set_again_on_resume">Having the HD power management level automatically set again on resume</span></h3>
+<p>Do it like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/sleep.d/50-hdparm_pm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ #!/bin/dash
+ 
+ if [ -n "$1" ] &amp;&amp; ([ "$1" = "resume" ] || [ "$1" = "thaw" ]); then
+ 	hdparm -B 254 /dev/sda &gt; /dev/null
+ fi
+</pre>
+<p>Then run:
+</p>
+<pre># chmod +x /etc/pm/sleep.d/50-hdparm_pm
+</pre>
+<p>If the above <a href="../en/Bash.html" title="Bash">Bash</a> script fails the work, the following may work instead:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/sleep.d/50-hdparm_pm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ #!/bin/sh
+ 
+ . "${PM_FUNCTIONS}"
+ case "$1" in
+        thaw|resume)
+                sleep 6
+                hdparm -B 254 /dev/sda
+                ;;
+        *)
+                ;;
+ esac
+ exit $NA
+</pre>
+<p>Lower <code>-B</code> switch values may be effective. See <a href="../en/Hdparm.html" title="Hdparm">hdparm</a>.
+</p>
+<h3><span class="mw-headline" id="Restarting_the_mouse">Restarting the mouse</span></h3>
+<p>On some laptops the mouse will hang after an otherwise successful suspend. One way to remedy this is to force a re-initialization of the PS/2 driver (here <code>i8042</code>) through a hook in <code>/etc/pm/hooks</code> (see <a href="#Creating_your_own_hooks">hooks</a>)
+</p>
+<pre>#!/bin/sh
+echo -n "i8042" &gt; /sys/bus/platform/drivers/i8042/unbind
+echo -n "i8042" &gt; /sys/bus/platform/drivers/i8042/bind
+</pre>
+<h3><span class="mw-headline" id="Add_sleep_modes_to_Openbox_menu">Add sleep modes to Openbox menu</span></h3>
+<p>Openbox users can add the new scripts as additional shutdown options within the Openbox menu by adding the items to a new or existing sub-menu in <code>~/.config/openbox/menu.xml</code>, for example:
+</p>
+<pre>&lt;menu id="64" label="Shutdown"&gt;
+	&lt;item label="Lock"&gt; &lt;action name="Execute"&gt; &lt;execute&gt;xscreensaver-command -lock&lt;/execute&gt; &lt;/action&gt; &lt;/item&gt;
+	&lt;item label="Logout"&gt; &lt;action name="Exit"/&gt; &lt;/item&gt;
+	&lt;item label="Reboot"&gt; &lt;action name="Execute"&gt; &lt;execute&gt;sudo shutdown -r now&lt;/execute&gt; &lt;/action&gt; &lt;/item&gt;
+	&lt;item label="Poweroff"&gt; &lt;action name="Execute"&gt; &lt;execute&gt;sudo shutdown -h now &lt;/execute&gt; &lt;/action&gt; &lt;/item&gt;
+	<b>&lt;item label="Hibernate"&gt; &lt;action name="Execute"&gt; &lt;execute&gt;sudo pm-hibernate&lt;/execute&gt; &lt;/action&gt; &lt;/item&gt;</b>
+	<b>&lt;item label="Suspend"&gt; &lt;action name="Execute"&gt; &lt;execute&gt;sudo pm-suspend&lt;/execute&gt; &lt;/action&gt; &lt;/item&gt;</b>
+&lt;/menu&gt;
+</pre>
+<h3><span class="mw-headline" id="Handling_.22sleep.22_and_.22power.22_buttons">Handling "sleep" and "power" buttons</span></h3>
+<p>"Sleep" and "power" buttons are handled by <code>acpid</code> in <code>/etc/acpi/handler.sh</code> (see "button/power" and "power/sleep" entries). You may want to substitute the default actions with calls to <code>pm-suspend</code> and <code>pm-hibernate</code>.
+</p>
+<p>Please note that <a href="../en/Power_management.html#ACPI_events" title="Power management">systemd</a> handles power events on its own and does not use pm-utils or any scripts from <code>/etc/pm/*</code>.
+</p>
+<h3><span class="mw-headline" id="Locking_the_screen_saver_on_hibernate_or_suspend">Locking the screen saver on hibernate or suspend</span></h3>
+<p>You may wish to run a screen locking utility when the system suspends (so that a password is required after waking up).  This can be done by adding a script to the <code>/etc/pm/sleep.d</code> folder. Make sure the script is executable (chmod 755) and owned by <code>root:root</code>.
+</p>
+<p>A simple example script is:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/sleep.d/00screensaver-lock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ #!/bin/sh
+ #
+ # 00screensaver-lock: lock workstation on hibernate or suspend
+
+ username= # add username here; i.e.: username=foobar
+ userhome=/home/$username
+ export XAUTHORITY="$userhome/.Xauthority"
+ export DISPLAY=":0"
+
+  case "$1" in
+    hibernate|suspend)
+       su $username -c "/usr/bin/slimlock" &amp; # or any other such as /usr/bin/xscreensaver-command -lock
+    ;;
+    thaw|resume)
+    ;;
+    *) exit $NA
+    ;;
+ esac</pre>
+<p>Replace <code>/usr/bin/slimlock</code> with the path to your screen locking utility of choice.
+</p>
+<p>If you do not wish to hard-code your username (e.g., if you have multiple users), then it is necessary to determine the current X11 username and display number. For systems using <a href="../en/Systemd.html" title="Systemd">systemd</a>, you can use <a rel="nofollow" class="external text" href="https://github.com/rephorm/xuserrun">xuserrun</a> and the following sleep.d script (be sure to modify the path to xuserrun and your desired screen locker):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/sleep.d/00screensaver-lock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+#
+# 00screensaver-lock: lock workstation on hibernate or suspend
+
+ case "$1" in
+   hibernate|suspend)
+      /path/to/xuserrun /usr/bin/slimlock &amp; # or any other such as /usr/bin/xscreensaver-command -lock
+   ;;
+   thaw|resume)
+   ;;
+   *) exit $NA
+   ;;
+esac
+</pre>
+<p>If you have problems using xuserrun, you can instead try having loginctl do this directly. This script will lock all active sessions before going into hibernation:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pm/sleep.d/00screensaver-lock</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+#
+# 00screensaver-lock: lock workstation on hibernate or suspend
+
+ case "$1" in
+   hibernate|suspend)
+      loginctl lock-sessions
+   ;;
+   thaw|resume)
+   ;;
+   *) exit $NA
+   ;;
+esac
+</pre>
+<h3><span class="mw-headline" id="Disabling_hibernation_via_polkit">Disabling hibernation via polkit</span></h3>
+<p>In order to disable hibernation, create a new file in /etc/polkit-1/ called 99-disable-hibernate.rules. Then add the following lines:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">99-disable-hibernate.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+polkit.addRule(function(action, subject) {
+   if ((action.id == "org.freedesktop.login1.hibernate")) {
+      return polkit.Result.NO;
+   }
+});
+
+polkit.addRule(function(action, subject) {
+   if ((action.id == "org.freedesktop.login1.hibernate-multiple-sessions")) {
+      return polkit.Result.NO;
+   }
+});
+</pre>
+<p>If you're using KDE, log off once and the hibernation option should be gone.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://en.opensuse.org/SDB:Pm-utils">OpenSUSE Wiki</a> - The article from where this was originally sourced (Licensed under GPL)</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.ubuntu.com/UnderstandingSuspend">Understanding Suspend</a> - Ubuntu article explaining how suspending to RAM works</li>
+<li> <a rel="nofollow" class="external text" href="http://www.mjmwired.net/kernel/Documentation/power/basic-pm-debugging.txt#178">PM Debugging</a> - Basic PM debugging</li>
+<li>
+<a href="../en/CPU_frequency_scaling.html" title="Cpufrequtils" class="mw-redirect">Cpufrequtils</a> - CPU Frequency Scaling and CPU Power schemes</li>
+<li>
+<a href="../en/Acpid.html" title="Acpid">Acpid</a> - daemon for delivering ACPI events</li>
+<li> <a rel="nofollow" class="external text" href="http://superuser.com/questions/298672/linuxhow-to-hibernate-after-a-period-of-sleep">Hibernate after sleep</a> - An example of a custom pm-utils hook where hibernation is triggered after a period of time in suspension</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>uWSGI - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-UWSGI skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">uWSGI</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+uWSGI is a fast, self-healing and developer/sysadmin-friendly application container server coded in pure C.
+</p>
+<p>There are alternatives written in Python such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gunicorn/">gunicorn</a></span><sup><small>AUR</small></sup>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Web_applications"><span class="tocnumber">2.1</span> <span class="toctext">Web applications</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Python"><span class="tocnumber">2.1.1</span> <span class="toctext">Python</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Php"><span class="tocnumber">2.1.2</span> <span class="toctext">Php</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Web_server"><span class="tocnumber">2.2</span> <span class="toctext">Web server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Nginx"><span class="tocnumber">2.2.1</span> <span class="toctext">Nginx</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Nginx_.28in_chroot.29"><span class="tocnumber">2.2.2</span> <span class="toctext">Nginx (in chroot)</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Running_uWSGI"><span class="tocnumber">3</span> <span class="toctext">Running uWSGI</span></a></li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Tips_and_tricks"><span class="tocnumber">4</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Socket_activation"><span class="tocnumber">4.1</span> <span class="toctext">Socket activation</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Hardening_uWSGI"><span class="tocnumber">4.2</span> <span class="toctext">Hardening uWSGI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#See_Also"><span class="tocnumber">5</span> <span class="toctext">See Also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi">uwsgi</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>. 
+Note, that the package does not come with plugins. They have to be installed separately: 
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-cgi">uwsgi-plugin-cgi</a></span> for CGI support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-jvm">uwsgi-plugin-jvm</a></span> for <a href="../en/Java.html" title="Java">Java</a> support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-lua51">uwsgi-plugin-lua51</a></span> for Lua support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-mono">uwsgi-plugin-mono</a></span> for <a href="../en/Mono.html" title="Mono">Mono</a> support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-php">uwsgi-plugin-php</a></span> for <a href="../en/PHP.html" title="PHP">PHP</a> support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-psgi">uwsgi-plugin-psgi</a></span> for Perl support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-pypy">uwsgi-plugin-pypy</a></span> for <a href="../en/PyPy.html" title="PyPy">PyPy</a> support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-python">uwsgi-plugin-python</a></span> for <a href="../en/Python.html" title="Python">Python</a> support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-python2">uwsgi-plugin-python2</a></span> for Python2 support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-rack">uwsgi-plugin-rack</a></span> for <a href="../en/Ruby.html" title="Ruby">Ruby</a> Rack support</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi-plugin-webdav">uwsgi-plugin-webdav</a></span> for <a href="../en/WebDAV.html" title="WebDAV">WebDAV</a> support</li>
+</ul>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Web applications (e.g. <a href="../en/Wordpress.html" title="Wordpress">Wordpress</a>, <a href="../en/OwnCloud.html" title="OwnCloud">ownCloud</a>, <a href="../en/Mailman.html" title="Mailman">Mailman</a>, <a href="../en/Cgit.html" title="Cgit">cgit</a>) served by uWSGI are configured in <code>/etc/uwsgi/</code>, where each of them requires its own configuration file (ini-style). Details can be found <a rel="nofollow" class="external text" href="http://uwsgi-docs.readthedocs.org/en/latest/">in the uWSGI documentation</a>.
+</p>
+<p>Alternatively, you can run uWSGI in <a rel="nofollow" class="external text" href="http://uwsgi-docs.readthedocs.org/en/latest/Emperor.html">Emperor mode</a> (configured in <code>/etc/uwsgi/emperor.ini</code>). It enables a single uWSGI instance to run a set of different apps (called vassals) using a single main supervisor (called emperor).
+</p>
+<h3><span class="mw-headline" id="Web_applications">Web applications</span></h3>
+<p>uWSGI supports many different languages and thus also many web applications.
+As an example the configuration file <code>/etc/uwsgi/example.ini</code> and the prior installation of the plugin needed for your web application is assumed.
+For further common configuration examples, have a look at this <a rel="nofollow" class="external text" href="https://sleepmap.de/2016/securely-serving-webapps-using-uwsgi/">blog post</a>.
+</p>
+<h4><span class="mw-headline" id="Python">Python</span></h4>
+<p>The following is a simple example for a <a href="../en/Python.html" title="Python">Python</a> application.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/uwsgi/example.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ [uwsgi]
+ chdir = /srv/http/example
+ module = example
+ plugins = python
+</pre>
+<p>It is also possible to run uWSGI separately with the following syntax for instance:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It seems --wsgi-file option is not available from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=uwsgi">uwsgi</a></span>. Official guides suggest building from sources (see <a rel="nofollow" class="external free" href="http://uwsgi-docs.readthedocs.org/en/latest/WSGIquickstart.html#installing-uwsgi-with-python-support">http://uwsgi-docs.readthedocs.org/en/latest/WSGIquickstart.html#installing-uwsgi-with-python-support</a>).</div>
+<pre>uwsgi --socket 127.0.0.1:3031 --plugin python2 --wsgi-file ~/foo.py --master --processes 4 --threads 2 --stats 127.0.0.1:9191 --uid --gid
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You should avoid running this command as root</div>
+<h4><span class="mw-headline" id="Php">Php</span></h4>
+<p>The following is a simple example for a <a href="../en/PHP.html" title="PHP">PHP</a> based website.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/uwsgi/example.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[uwsgi]
+; maximum number of worker processes
+processes = 4
+; the user and group id of the process once it’s started
+uid = http
+gid = http
+socket = /run/uwsgi/%n.sock
+master = true
+chdir = /srv/http/%n
+; php
+plugins = php
+; jail our php environment
+php-docroot = /srv/http/%n
+php-index = index.php
+; clear environment on exit
+vacuum = true
+</pre>
+<h3><span class="mw-headline" id="Web_server">Web server</span></h3>
+<p>uWSGI can be the backend to many web servers, that support the forwarding of access. The following are examples for configurations.
+</p>
+<h4><span class="mw-headline" id="Nginx">Nginx</span></h4>
+<p><a href="../en/Nginx.html" title="Nginx">nginx</a> can redirect access towards unix sockets or ports (on localhost or remote machine), depending on your web application.
+</p>
+<p><br>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/example.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# ...
+# forward all access to / towards 
+location / {
+  root /usr/share/nginx/html;
+  index index.html index.htm;
+  include uwsgi_params;
+  # this is the correct uwsgi_modifier1 parameter for a php based application
+  uwsgi_modifier1 14;
+  # uncomment the following if you want to use the unix socket instead
+  # uwsgi_pass unix:/var/run/uwsgi/example.sock;
+  # access is redirected to localhost:3031
+  uwsgi_pass 127.0.0.1:3031;
+}
+# ...
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Have a look at <a rel="nofollow" class="external text" href="https://uwsgi-docs.readthedocs.io/en/latest/Protocol.html#packet-descriptions">the documentation</a> for the list of <code>uwsgi_modifier1</code> parameters fitting to your web application.</div>
+<h4><span class="mw-headline" id="Nginx_.28in_chroot.29">Nginx (in chroot)</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Please refer to the below tips if you have deployed Nginx as described here: <a href="../en/Nginx.html#Installation_in_a_chroot" title="Nginx">Nginx#Installation in a chroot</a>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is assumed your Nginx chroot is located within <code>/srv/http</code>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You will most likely want to read through uWSGI documentation to understand your configuration from both performance and security point of view</div>
+<p>First create ini file that will point to your application:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/uwsgi/application1.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[uwsgi]
+chroot = /srv/http
+chdir = /www/application1
+wsgi-file = application1.py
+plugins = python
+socket = /run/application1.sock
+uid = http
+gid = http
+threads = 2
+stats = 127.0.0.1:9191
+vacuum = true
+</pre>
+<p>Since we are chrooting to <code>/srv/http</code> above configuration will result in following unix socket being created <code>/srv/http/run/application1.sock</code>
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Your application must be placed within <code>/srv/http/www/application1</code> before service is started. Depending on configuration your application may be cached so you may need to restart the service when you modify it</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are deploying python application you may need to copy standard python libraries - if you develop under python 3 then you can copy them from <code>/lib/python3.4</code> to <code>/srv/http/lib/python3.4</code>
+<p>You can try to run following:
+</p>
+<pre># cp -r -p /lib/python3.4 /srv/http/lib
+# cp -r -p /lib/*python*so /srv/http/lib
+</pre>
+</div>
+<p>You will need to disable notifications within your service file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/multi-user.target.wants/uwsgi\@application1.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=uWSGI service unit
+After=syslog.target
+
+[Service]
+PIDFile=/run/%I.pid
+RemainAfterExit=yes
+ExecStart=/usr/bin/uwsgi --ini /etc/uwsgi/%I.ini
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -INT $MAINPID
+Restart=always
+StandardError=syslog
+KillSignal=SIGQUIT
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>PID file will be created within <code>/run</code> rather than <code>/srv/http/run</code>
+</div>
+<p>After modification make sure to <a href="../en/Systemd.html#Using_units" title="Reload" class="mw-redirect">reload</a> to incorporate the new or changed units.
+</p>
+<p>You are then free to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>uwsgi@application1.service</code>. 
+</p>
+<p>Edit <code>/srv/http/etc/nginx/nginx.conf</code> and add new <code>server</code> section within it that would contain at least following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+    server
+    {
+        listen       80;
+        server_name  127.0.0.1;
+        location /
+        {
+            root   /www/application1;
+            include uwsgi_params;
+            uwsgi_pass unix:/run/application1.sock;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html
+        {
+            root   /usr/share/nginx/html;
+        }
+    }
+...
+</pre>
+<p>Make sure to now <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>nginx.service</code> to have your <code>application1</code> be served at <code>127.0.0.1</code>.
+</p>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Running_uWSGI">Running uWSGI</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> This assumes the used web application has been properly configured, is being served by your web server, which redirects towards the socket or port it is using and was configured in <code>/etc/uwsgi/</code>.</div>
+<p>If you plan on using a web application all the time (without it being activated on demand), you can simply <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>uwsgi@example</code>.
+</p>
+<p>If you plan on having your web application be started on demand you can <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>uwsgi@example.socket</code>.
+</p>
+<p><br>
+To use the Emperor mode, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>emperor.uwsgi.service</code>.
+</p>
+<p>To use socket activation of this mode <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>emperor.uwsgi.socket</code>.
+</p>
+<p><br>
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<p>Some functionality, that uWSGI offers is not accessible by using the <a href="../en/Systemd.html" title="Systemd">systemd</a> service files provided in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+Changes to them are explained in the following sections. For further information about this, <a rel="nofollow" class="external text" href="https://sleepmap.de/2016/securely-serving-webapps-using-uwsgi/">read this blog post</a>.
+</p>
+<h3><span class="mw-headline" id="Socket_activation">Socket activation</span></h3>
+<p>Using socket activation, you want to
+</p>
+<ul>
+<li> direct your web server to a unix socket and thereby start your uWSGI instance running the application</li>
+<li> you most likely want to have the application be closed by uWSGI after a certain idle time</li>
+<li> you want your web server be able to start the application again, once it is accessed</li>
+</ul>
+<p>uWSGI offers settings, with which you can have the instance close the application:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/uwsgi/example.ini</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[uwsgi]
+# ...
+
+# set idle time in seconds
+idle = 600
+# kill the application after idle time was reached
+kill-on-idle = true
+
+# ...
+</pre>
+<p>The current <code>uwsgi@.service</code> file however doesn't allow this, because <a href="../en/Systemd.html" title="Systemd">systemd</a> treats non-zero exit codes as failure and thereby marking the unit as failed and additionally the <code>Restart=always</code> directive makes a closing after idle time useless.
+A fix for this is to add the exit codes, that uWSGI may provide after closing an application by itself to a list, that <a href="../en/Systemd.html" title="Systemd">systemd</a> will treat as success by using the <code>SuccessExitStatus</code> directive (for further information <a rel="nofollow" class="external text" href="https://sleepmap.de/2016/securely-serving-webapps-using-uwsgi/">read this blog post</a>)
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/uwsgi-socket@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=uWSGI service unit
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/uwsgi --ini /etc/uwsgi/%I.ini
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -INT $MAINPID
+Type=notify
+SuccessExitStatus=15 17 29 30
+StandardError=syslog
+NotifyAccess=all
+KillSignal=SIGQUIT
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>This will allow for proper socket activation with kill-after-idle functionality.
+</p>
+<h3><span class="mw-headline" id="Hardening_uWSGI">Hardening uWSGI</span></h3>
+<p>Web applications are exposed to the wild and depending on their quality and the security of their underlying languages, some are more dangerous to run, than others.
+A good way to start dealing with possible unsafe web applications is to jail them. <a href="../en/Systemd.html" title="Systemd">systemd</a> has some functionality, that can be put to use.
+Have a look at the following example (and for further information read the <a rel="nofollow" class="external text" href="https://www.freedesktop.org/software/systemd/man/systemd.exec.html">systemd.exec manual</a> and <a rel="nofollow" class="external text" href="https://sleepmap.de/2016/securely-serving-webapps-using-uwsgi/">this blog post</a>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/uwsgi-secure@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=uWSGI service unit
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/uwsgi --ini /etc/uwsgi/%I.ini
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/bin/kill -INT $MAINPID
+Type=notify
+SuccessExitStatus=15 17 29 30
+StandardError=syslog
+NotifyAccess=all
+KillSignal=SIGQUIT
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectSystem=full
+ReadWriteDirectories=/etc/webapps /var/lib/
+ProtectHome=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Using <code>NoNewPrivileges=yes</code> doesn't work with <a href="../en/Mailman.html" title="Mailman">Mailman</a>'s cgi frontend! Remove this setting, if you want to use it in conjunction with it.</div>
+<h2><span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://uwsgi-docs.readthedocs.org/en/latest">Official Documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/unbit/uwsgi-docs">uWSGI Github</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://sleepmap.de/2016/securely-serving-webapps-using-uwsgi/">Securely serving webapps using uWSGI</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.kgriffs.com/">Fluffy White Stuff Benchmark</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://flask.pocoo.org/docs/deploying/uwsgi/">Flask uWSGI deploying</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://docs.djangoproject.com/en/dev/howto/deployment/wsgi/uwsgi/">Django and uWSGI</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.youtube.com/watch?v=tD6UCfPCVLA">Flask with uWSGI and nginx video</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://uwsgi-docs.readthedocs.org/en/latest/Apache.html">Apache and uWSGI</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

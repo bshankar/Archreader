@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>IBM ThinkPad T30 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-IBM_ThinkPad_T30 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">IBM ThinkPad T30</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:IBM_ThinkPad_T30">Talk:IBM ThinkPad T30#</a>)</div>
+</div>
+<p>Extensive information about Linux on the T30 can be found at <a rel="nofollow" class="external autonumber" href="http://www.thinkwiki.org/wiki/Category:T30">[1]</a>. What follows here are details specific to Arch Linux.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Configuration"><span class="tocnumber">1</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Modules"><span class="tocnumber">1.1</span> <span class="toctext">Modules</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#cpufreq_Drivers"><span class="tocnumber">1.1.1</span> <span class="toctext">cpufreq Drivers</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Wireless_Drivers"><span class="tocnumber">1.1.2</span> <span class="toctext">Wireless Drivers</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Sound_Drivers"><span class="tocnumber">1.1.3</span> <span class="toctext">Sound Drivers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#Networking"><span class="tocnumber">1.2</span> <span class="toctext">Networking</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#ACPI"><span class="tocnumber">1.3</span> <span class="toctext">ACPI</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Xorg"><span class="tocnumber">1.4</span> <span class="toctext">Xorg</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Modules">Modules</span></h3>
+<p>udev in Arch does a pretty good job of detecting the T30's hardware. I modified the MODULES line in /etc/rc.conf as follows:
+</p>
+<pre>MODULES=(!usbserial !acpi_cpufreq !p4-clockmod !powernow-k6 !powernow-k7
+ !powernow-k8 !cpufreq-nforce2 !speedstep-smi !hostap !hostap_pci 
+ orinoco_pci snd_intel8x0 fuse)
+</pre>
+<h4><span class="mw-headline" id="cpufreq_Drivers">cpufreq Drivers</span></h4>
+<p>This blacklists most of the cpufreq drivers so that only speedstep-ich will be loaded. It's not clear to me that the speedstep-ich driver is actually doing anything on this laptop, but it does <i>appear</i> to load and operate correctly.
+</p>
+<h4><span class="mw-headline" id="Wireless_Drivers">Wireless Drivers</span></h4>
+<p>For T30s with the Intel 802.11b mini-PCI wireless adapter, either the hostap or orinoco driver modules should work. I've blacklisted hostap and forced the orinoco wireless driver to be loaded. ThinkWiki talks about some possible problems with the orinoco driver, but I've seen no issues on my T30 with the stock Arch kernel.
+</p>
+<h4><span class="mw-headline" id="Sound_Drivers">Sound Drivers</span></h4>
+<p>For whatever reason, udev wasn't able to get the right ALSA drivers loaded automatically. Simply forcing the load of the snd_intel8x0 resolved the issue so I didn't debug further.
+</p>
+<h3><span class="mw-headline" id="Networking">Networking</span></h3>
+<p>The asignment of interface names to the wired and wireless ethernet adapters is a function of the order in which the modules load and complete their initializtion. This can make network configuration difficult because on one boot cycle the wireless may be eth0 but on the next boot it may be eth1. It should be possible to rename the interfaces through udev rules, but I had little success with that.
+</p>
+<p>I solved the problem using the nameif utility. nameif uses the file /etc/mactab to associate ethernet adapter MAC addresses to interface names. My /etc/mactab is as follows:
+</p>
+<pre>eth0 00:09:6B:90:31:D4
+wlan0 00:05:3C:04:B9:A0
+</pre>
+<p>Obviously you need to change the MAC addresses to match your hardware.
+</p>
+<p>In addition, a small change to /etc/rc.d/network is necessary to run the nameif command prior to configuring the interfaces. The following excerpt from /etc/rc.d/network shows the lines that need to be added. This change simply checks for the existance of the /etc/mactab file and if it exists executes nameif to assign interface names.
+</p>
+<pre>               stat_busy "Starting Network"
+               error=0
+               ##### begin nameif change #####
+               # set names
+               if [ -n /etc/mactab ]; then
+                 /sbin/nameif
+               fi
+               ##### end nameif change #####
+               # bring up bridge interfaces
+               bridge_up
+               # bring up ethernet interfaces
+</pre>
+<h3><span class="mw-headline" id="ACPI">ACPI</span></h3>
+<h3><span class="mw-headline" id="Xorg">Xorg</span></h3>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:IBM.html" title="Category:IBM">IBM</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

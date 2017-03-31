@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dell Latitude C600 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dell_Latitude_C600 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dell Latitude C600</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><br>
+In an attempt to give back to the Arch community I decided to write a wiki page about my laptop the Dell Latitude C600 and what I've found out about it, it's treated me well and plays fairly nicely with Linux. I would recommend it.
+</p>
+<p>Much of this information has been based off of the wiki page for the <a rel="nofollow" class="external text" href="http://gentoo-wiki.com/HARDWARE_Dell_Latitude_C600">Dell Latitude C600</a> at the Gentoo wiki and the <a rel="nofollow" class="external text" href="http://www.whacked.net/ldl/faq/">linux-dell-laptops faq</a> page which although old is still very good, I suggest you also read both of these if you do not find answers here.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Known_Hardware"><span class="tocnumber">1</span> <span class="toctext">Known Hardware</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#PCMCIA_Cardbus"><span class="tocnumber">2</span> <span class="toctext">PCMCIA Cardbus</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Audio"><span class="tocnumber">3</span> <span class="toctext">Audio</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Video"><span class="tocnumber">4</span> <span class="toctext">Video</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Framebuffer"><span class="tocnumber">4.1</span> <span class="toctext">Framebuffer</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Xorg"><span class="tocnumber">4.2</span> <span class="toctext">Xorg</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Network"><span class="tocnumber">5</span> <span class="toctext">Network</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Ethernet"><span class="tocnumber">5.1</span> <span class="toctext">Ethernet</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Winmodem"><span class="tocnumber">5.2</span> <span class="toctext">Winmodem</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Touchpad"><span class="tocnumber">6</span> <span class="toctext">Touchpad</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#External_Links"><span class="tocnumber">7</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Known_Hardware">Known Hardware</span></h2>
+<p><b>Cardbus:</b> 2 slots, Texas Instruments PCI1420<br>
+<b>Audio:</b> 3Com Corporation 3c556 Hurricane CardBus [Cyclone] (rev 10)<br>
+<b>Video:</b> ATI Technologies Inc Rage Mobility M3 AGP 2x (rev 02)<br>
+<b>Ethernet:</b> 3Com Corporation 3c556 Hurricane CardBus [Cyclone] (rev 10)<br>
+<b>Modem:</b> 3Com Corporation Mini PCI 56k Winmodem (rev 10)
+</p>
+<h2><span class="mw-headline" id="PCMCIA_Cardbus">PCMCIA Cardbus</span></h2>
+<p>After some configuration changes I know personally that this cardbus works perfectly.
+</p>
+<p>First <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pcmciautils">pcmciautils</a></span> package.
+</p>
+<p>Once installed to stop boot freezes you have to edit /etc/pcmcia/config.opts and find the line
+</p>
+<pre>include port 0x820-0x8ff
+</pre>
+<p>and comment it out. Dell likes to be special for some reason and if that range is probed at boot it will usually result in the laptop dying, I think this configuration change can be applied to most Dell laptops.
+</p>
+<p>If you're compiling your own kernel remember that this is a yenta-compatible cardbus and that should be enabled in the pccard section of the kernel config.
+</p>
+<pre>&lt;M&gt;   CardBus yenta-compatible bridge support
+</pre>
+<h2><span class="mw-headline" id="Audio">Audio</span></h2>
+<p>I've had absolutely no problems with audio for this laptop, if you're using the Arch stock kernel it should work straight out of the box after it is enabled like a regular sound card.
+</p>
+<p>If you're compiling your own kernel you should enable this card in the sound pci device section
+</p>
+<pre>&lt;*&gt; ESS Allegro/Maestro3
+</pre>
+<h2><span class="mw-headline" id="Video">Video</span></h2>
+<h3><span class="mw-headline" id="Framebuffer">Framebuffer</span></h3>
+<p>If you're using a stock kernel I can confirm that you can get a high resolution framebuffer by simply adding
+</p>
+<pre>vga=791
+</pre>
+<p>to your kernel's boot options for a good 1024x768 resolution. I'll leave you to find out other values to use for other resolutions but this one workd for me and is a good guideline.
+</p>
+<p>Using the beyond kernel it is also quite easy to achieve extras like a background or progress bar on boot using other articles in this wiki.
+</p>
+<p>If you're compiling your own kernel then you're out of luck with getting a framebuffer to work with this guide, I've not been able to find the right options and the rage128 driver causes a freeze, that being said it has to be possible some how and feel free to add your solution here.
+</p>
+<h3><span class="mw-headline" id="Xorg">Xorg</span></h3>
+<p>I always use xorgconfig to generate my xorg config and it's quite easy to get xorg going at first, a general rule is to use the ati and rage128 drivers for it. The Gentoo wiki article has links to <a rel="nofollow" class="external text" href="http://rserve.biz/gentoo/kilrathi/xorg.conf">this</a> xorg.conf which has some great additions you can add for your video sections. One thing to add is that contrary what the config says this laptop can get a top resolution of 1400x1050 for me at least.
+</p>
+<h2><span class="mw-headline" id="Network">Network</span></h2>
+<h3><span class="mw-headline" id="Ethernet">Ethernet</span></h3>
+<p>This works perfectly straight out of the box without any configuration using any of the stock kernels. Not much to say about it.
+</p>
+<p>If you're compiling your own kernel remember to enable this card in the net device section
+</p>
+<pre>&lt;*&gt;   3c590/3c900 series (592/595/597) "Vortex/Boomerang" support
+</pre>
+<h3><span class="mw-headline" id="Winmodem">Winmodem</span></h3>
+<p>Apparently this laptop has a 3Com Corporation Mini PCI 56k Winmodem but I'm yet to get it working and doubt it would. I also have no need or desire to get it working anyway.
+</p>
+<p>Please anyone feel free to add to this section how you got it working if you have.
+</p>
+<h2><span class="mw-headline" id="Touchpad">Touchpad</span></h2>
+<p>This laptop has a great touchpad and has lots of features if used in conjunction with the synaptics driver for xorg.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=synaptics">synaptics</a></span><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: replaced by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-synaptics">xf86-input-synaptics</a></span>]</sup> package and use this in your xorg config's mouse section
+</p>
+<pre>Driver          "synaptics"
+Option          "Protocol"              "auto-dev"
+Option          "Device"                "/dev/psaux"
+Option          "Emulate3Buttons"
+Option          "HorizScrollDelta"      "0"
+</pre>
+<p>This adds all sorts neat features like a "scroll wheel" on the right, tap-to-click, tapping in corners for right-clicking, middle-clicking etc. and using the bottom as another scroll wheel for things like back and forward buttons in Firefox. I have this disabled with the HorizScrollDelta line as it gets really annoying.
+</p>
+<p>The little joystick in the center of the keyboard also works perfectly.
+</p>
+<h2><span class="mw-headline" id="External_Links">External Links</span></h2>
+<ul><li> This document is listed at the <a rel="nofollow" class="external text" href="http://tuxmobil.org/dell.html">TuxMobil Linux laptop and notebook installation guides survey (DELL)</a>.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Dell.html" title="Category:Dell">Dell</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

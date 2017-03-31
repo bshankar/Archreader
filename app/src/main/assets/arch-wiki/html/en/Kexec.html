@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Kexec - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Kexec skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Kexec</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd.html" title="Systemd">Systemd</a></li>
+</ul>
+</div>
+<p><b>Kexec</b> is a system call that enables you to load and boot into another kernel from the currently running kernel. This is useful for kernel developers or other people who need to reboot very quickly without waiting for the whole BIOS boot process to finish. Note that kexec may not work correctly for you due to devices <i>not</i> fully re-initializing when using this method, however this is rarely the case.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Rebooting_using_kexec"><span class="tocnumber">2</span> <span class="toctext">Rebooting using kexec</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Manually"><span class="tocnumber">2.1</span> <span class="toctext">Manually</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Systemd"><span class="tocnumber">2.2</span> <span class="toctext">Systemd</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Separate_.2Fboot_partition"><span class="tocnumber">2.2.1</span> <span class="toctext">Separate /boot partition</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kexec-tools">kexec-tools</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Rebooting_using_kexec">Rebooting using kexec</span></h2>
+<h3><span class="mw-headline" id="Manually">Manually</span></h3>
+<p>You can manually invoke kexec using:
+</p>
+<pre># kexec -l /boot/vmlinuz-linux --initrd=/boot/initramfs-linux.img --reuse-cmdline
+# kexec -e
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Running <code>kexec -e</code> directly will not unmount active filesystems or terminate any running services gracefully.</div>
+<p>It is also possible to load kernel manually and then let systemd handle service shutdown and kexec for you:
+</p>
+<pre># kexec -l /boot/vmlinuz-linux --initrd=/boot/initramfs-linux.img --reuse-cmdline
+# systemctl kexec
+</pre>
+<h3><span class="mw-headline" id="Systemd">Systemd</span></h3>
+<p>You will need to create a new unit file, <code>kexec-load@.service</code>, that will load the specified kernel to be kexec'ed:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/kexec-load@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=load %i kernel into the current kernel
+Documentation=man:kexec(8)
+DefaultDependencies=no
+Before=shutdown.target umount.target final.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/kexec -l /boot/vmlinuz-%i --initrd=/boot/initramfs-%i.img --reuse-cmdline
+
+[Install]
+WantedBy=kexec.target</pre>
+<p>Then enable the service file for the kernel you want to load, for example simply the default kernel <code>linux</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl enable kexec-load@linux</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ln -s '/etc/systemd/system/kexec-load@.service' '/etc/systemd/system/kexec.target.wants/kexec-load@linux.service'</pre>
+<p>Ensure that the shutdown hook is not part of your initramfs image by removing it from the <code>HOOKS</code> array in <code>/etc/mkinitcpio.conf</code>. If it is, remove it and rebuild your initrd image with <code>mkinitcpio -p linux</code>.
+</p>
+<p>Then to kexec
+</p>
+<pre># systemctl kexec
+</pre>
+<p>If you wish to load a different kernel for the next kexec, for example <code>linux-lts</code>, disable the service for the current kernel and enable the one for the new kernel:
+</p>
+<pre># systemctl disable kexec-load@linux
+# systemctl enable kexec-load@linux-lts
+</pre>
+<h4><span class="mw-headline" id="Separate_.2Fboot_partition">Separate /boot partition</span></h4>
+<p>The above systemd unit file will fail if /boot is not on the root file system, as systemd will likely unmount /boot before it runs the kexec-load unit file. An alternative approach is to load a "hook" unit file that does nothing on startup and invokes kexec upon termination. By making this unit file conflict with kexec.target and only kexec.target, you can ensure the new kernel gets loaded early enough and only after a "systemctl kexec" command. Here is an alternate <code>/etc/systemd/system/kexec-load@.service</code> file that follows this strategy:
+</p>
+<pre>[Unit]
+Description=hook to load vmlinuz-%i kernel upon kexec
+Documentation=man:kexec(8)
+DefaultDependencies=no
+Requires=sysinit.target
+After=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/true
+RemainAfterExit=yes
+ExecStop=/usr/bin/kexec -l /boot/vmlinuz-%i --initrd=/boot/initramfs-%i.img --reuse-cmdline
+
+[Install]
+WantedBy=basic.target</pre>
+<p>Note that Conflicts=shutdown.target is not really needed, as it's implicitly guaranteed by strict ordering on systinit.target which itself Conflicts= with shutdown.target.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://lists.freedesktop.org/archives/systemd-devel/2012-March/004760.html">[systemd-devel] Right way to do kexec</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://lse.sourceforge.net/kdump/">kdump: a kexec based crash dumping mechansim for Linux</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://web.archive.org/web/20090505132901/http://www.ibm.com/developerworks/linux/library/l-kexec.html">Reboot Linux faster using kexec</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

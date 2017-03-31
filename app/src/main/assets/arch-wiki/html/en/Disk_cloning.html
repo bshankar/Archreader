@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Disk cloning - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Disk_cloning skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Disk cloning</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Disk cloning is the process of making an image of a partition or of an entire hard drive. This can be useful for copying the drive to other computers and for <a href="../en/Synchronization_and_backup_programs.html" title="Backup" class="mw-redirect">backup</a> and <a href="../en/File_recovery.html" title="File recovery">recovery</a> purposes.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Using_dd"><span class="tocnumber">1</span> <span class="toctext">Using dd</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Cloning_a_partition"><span class="tocnumber">1.1</span> <span class="toctext">Cloning a partition</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Cloning_an_entire_hard_disk"><span class="tocnumber">1.2</span> <span class="toctext">Cloning an entire hard disk</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Backing_up_the_MBR"><span class="tocnumber">1.3</span> <span class="toctext">Backing up the MBR</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Create_disk_image"><span class="tocnumber">1.4</span> <span class="toctext">Create disk image</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Restore_system"><span class="tocnumber">1.5</span> <span class="toctext">Restore system</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Using_ddrescue"><span class="tocnumber">2</span> <span class="toctext">Using ddrescue</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Disk_cloning_software"><span class="tocnumber">3</span> <span class="toctext">Disk cloning software</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#dd_spin-offs"><span class="tocnumber">3.1</span> <span class="toctext">dd spin-offs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Using_dd">Using dd</span></h2>
+<p>The <i>dd</i> command is a simple, yet versatile and powerful tool. It can be used to copy from source to destination, block-by-block, regardless of their filesystem types or operating systems. A convenient method is to use <i>dd</i> from a live environment, as in a Live CD.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>As with any command of this type, you should be very cautious when using it; it can destroy data. Remember the order of input file (<code>if=</code>) and output file (<code>of=</code>) and do not reverse them! Always ensure that the destination drive or partition (<code>of=</code>) is of equal or greater size than the source (<code>if=</code>).
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Are the conv= options safe to use? See: (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Disk_cloning#remove_conv_sync_noerror">Talk:Disk cloning#remove conv sync noerror</a>)</div>
+</div> 
+<h3><span class="mw-headline" id="Cloning_a_partition">Cloning a partition</span></h3>
+<p>From physical disk <code>/dev/sda</code>, partition 1, to physical disk <code>/dev/sdb</code>, partition 1.
+</p>
+<pre># dd if=/dev/sda1 of=/dev/sdb1 bs=64K conv=noerror,sync
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If output file <code>of=</code> (<code>sdb1</code> in the example) does not exist, <i>dd</i> will create a file with this name and will start filling up your root file system!</div>
+<h3><span class="mw-headline" id="Cloning_an_entire_hard_disk">Cloning an entire hard disk</span></h3>
+<p>From physical disk <code>/dev/sd<i>X</i></code> to physical disk <code>/dev/sd<i>Y</i></code>
+</p>
+<pre># dd if=/dev/sd<i>X</i> of=/dev/sd<i>Y</i> bs=64K conv=noerror,sync
+</pre>
+<p>This will clone the entire drive, including the MBR (and therefore bootloader), all partitions, UUIDs, and data.
+</p>
+<ul>
+<li> <code>noerror</code> instructs <i>dd</i> to continue operation, ignoring all read errors. Default behavior for <i>dd</i> is to halt at any error. </li>
+<li> <code>sync</code> fills input blocks with zeroes if there were any read errors, so data offsets stay in sync.</li>
+<li> <code>bs=</code> sets the block size. Defaults to 512 bytes, which is the "classic" block size for hard drives since the early 1980s, but is not the most convenient. Use a bigger value, 64K or 128K. Also, please read the warning below, because there is more to this than just "block sizes" -it also influences how read errors propagate. See <a rel="nofollow" class="external autonumber" href="http://www.mail-archive.com/eug-lug@efn.org/msg12073.html">[1]</a> and <a rel="nofollow" class="external autonumber" href="http://blog.tdg5.com/tuning-dd-block-size/">[2]</a> for details and to figure out the best bs value for your use case.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The block size you specify influences how read errors are handled. Read below. For data recovery, use <a href="#Using_ddrescue">ddrescue</a>.</div>
+<p>The <i>dd</i> utility technically has an "input block size" (IBS) and an "output block size" (OBS). When you set <code>bs</code>, you effectively set both IBS and OBS. Normally, if your block size is, say, 1 MiB, <i>dd</i> will read 1024*1024 bytes and write as many bytes. But if a read error occurs, things will go wrong. Many people seem to think that <i>dd</i> will "fill up read errors with zeroes" if you use the <code>noerror,sync</code> options, but this is not what happens. <i>dd</i> will, according to documentation, fill up the OBS to IBS size <i>after completing its read</i>, which means adding zeroes at the <i>end</i> of the block. This means, for a disk, that effectively the whole 1 MiB would become messed up because of a single 512 byte read error in the beginning of the read: 12ERROR89 would become 128900000 instead of 120000089.
+</p>
+<p>If you are positive that your disk does not contain any errors, you could proceed using a larger block size, which will increase the speed of your copying several fold. For example, changing bs from 512 to 64K changed copying speed from 35 MB/s to 120 MB/s on a simple Celeron 2.7 GHz system. But keep in mind that read errors on the source disk will end up as <i>block errors</i> on the destination disk, i.e. a single 512-byte read error will mess up the whole 64 KiB output block.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you would like to view <i>dd</i> progressing, use the <code>status=progress</code> option. See <a href="../en/Core_utilities.html#dd" title="Dd" class="mw-redirect">dd</a> for details.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> To regain unique UUIDs of an <i>ext2/3/4</i> filesystem, use <code>tune2fs /dev/sd<i>XY</i> -U random</code> on every partition.</li>
+<li> Partition table changes from <i>dd</i> are not registered by the kernel. To notify of changes without rebooting, use a utility like <i>partprobe</i> (part of <a href="../en/GNU_Parted.html" title="GNU Parted">GNU Parted</a>).</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Backing_up_the_MBR">Backing up the MBR</span></h3>
+<p>The MBR is stored in the the first 512 bytes of the disk. It consist of 3 parts:
+</p>
+<ol>
+<li> The first 446 bytes contain the boot loader.</li>
+<li> The next 64 bytes contain the partition table (4 entries of 16 bytes each, one entry for each primary partition).</li>
+<li> The last 2 bytes contain an identifier</li>
+</ol>
+<p>To save the MBR as <code>mbr.img</code>:
+</p>
+<pre># dd if=/dev/sdX of=/path/to/mbr_file.img bs=512 count=1
+</pre>
+<p>To restore (be careful: this could destroy your existing partition table and with it access to all data on the disk):
+</p>
+<pre># dd if=/path/to/mbr_file.img of=/dev/sdX
+</pre>
+<p>If you only want to restore the boot loader, but not the primary partition table entries, just restore the first 446 bytes of the MBR: 
+</p>
+<pre># dd if=/path/to/mbr_file.img of=/dev/sdX bs=446 count=1
+</pre>
+<p>To restore only the partition table, one must use:
+</p>
+<pre># dd if=/path/to/mbr_file.img of=/dev/sdX bs=1 skip=446 count=64
+</pre>
+<p>You can also get the MBR from a full dd disk image:
+</p>
+<pre># dd if=/path/to/disk.img of=/path/to/mbr_file.img bs=512 count=1
+</pre>
+<h3><span class="mw-headline" id="Create_disk_image">Create disk image</span></h3>
+<p>1. Boot from a live media.
+</p>
+<p>2. Make sure no partitions are mounted from the source hard drive.
+</p>
+<p>3. Mount the external HD
+</p>
+<p>4. Backup the drive. 
+</p>
+<pre># dd if=/dev/sd<i>X</i> conv=sync,noerror bs=64K | gzip -c  &gt; <i>/path/to/backup.img.gz</i>
+</pre>
+<p>If necessary (e.g. when the format of the external HD is FAT32) split the disk image in volumes (see also the <i>split</i> man pages).
+</p>
+<pre># dd if=/dev/sd<i>X</i> conv=sync,noerror bs=64K | gzip -c | split -a3 -b2G - <i>/path/to/backup.img.gz</i>
+</pre>
+<p>If there is not enough disk space locally, you may send the image through ssh:
+</p>
+<pre># dd if=/dev/sd<i>X</i> conv=sync,noerror bs=64K | gzip -c | ssh user@local dd of=backup.img.gz
+</pre>
+<p>5. Save extra information about the drive geometry necessary in order to interpret the partition table stored within the image. The most important of which is the cylinder size.
+</p>
+<pre># fdisk -l /dev/sd<i>X</i> &gt; <i>/path/to/list_fdisk.info</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may wish to use a block size (<code>bs=</code>) that is equal to the amount of cache on the HD you are backing up. For example, <code>bs=8192K</code> works for an 8 MiB cache. The 64 KiB mentioned in this article is better than the default <code>bs=512</code> bytes, but it will run faster with a larger <code>bs=</code>.</div>
+<h3><span class="mw-headline" id="Restore_system">Restore system</span></h3>
+<p>To restore your system:
+</p>
+<pre># gunzip -c <i>/path/to/backup.img.gz</i> | dd of=/dev/sd<i>X</i>
+</pre>
+<p>When the image has been split, use the following instead:
+</p>
+<pre># cat <i>/path/to/backup.img.gz*</i> | gunzip -c | dd of=/dev/sd<i>X</i>
+</pre>
+<h2><span class="mw-headline" id="Using_ddrescue">Using ddrescue</span></h2>
+<p><i>ddrescue</i> is a tool designed for cloning and recovering data. It copies data from one file or block device (hard disc, cdrom, etc) to another, trying to rescue the good parts first in case of read errors, to maximize the recovered data.
+</p>
+<p>To clone a faulty or dying drive, run ddrescue twice. First round, copy every block without read error and log the errors to rescue.log.
+</p>
+<pre># ddrescue -f -n /dev/sdX /dev/sdY rescue.log
+</pre>
+<p>Second round, copy only the bad blocks and try 3 times to read from the source before giving up.
+</p>
+<pre># ddrescue -d -f -r3 /dev/sdX /dev/sdY rescue.log
+</pre>
+<p>Now you can check the file system for corruption and mount the new drive.
+</p>
+<pre># fsck -f /dev/sdY
+</pre>
+<h2><span class="mw-headline" id="Disk_cloning_software">Disk cloning software</span></h2>
+<p>These applications allow easy backup of entire filesystems and recovery in case of failure, usually in the form of a Live CD or USB drive. They contain complete system images from one or more specific points in time and are frequently used to record known good configurations.
+</p>
+<p>See also <a href="../en/Synchronization_and_backup_programs.html" title="Synchronization and backup programs">Synchronization and backup programs</a> for other applications that can take full system snapshots, among other functionality.
+</p>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Acronis_True_Image" class="extiw" title="wikipedia:Acronis True Image">Acronis True Image</a></b> — Commercial disk cloner for Windows. It allows you to create a live (from within Windows), so you do not need a working Windows install on the actual machine to use it. After registration of the Acronis software on their website, you will be able to download a Linux-based Live CD and/or plugins for BartPE for creation of the Windows-based live CD. It can also create a WinPE Live CD based on Windows. The created ISO Live CD image by Acronis doesn't have the <a rel="nofollow" class="external text" href="http://www.syslinux.org/wiki/index.php/Isohybrid">hybrid boot</a> ability and cannot be written to USB storage as a raw file.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.acronis.com/products/trueimage/">http://www.acronis.com/products/trueimage/</a> || </dd></dl>
+<ul><li> <b>Arch Backup</b> — A trivial backup script with simple configuration.
+<ul>
+<li> Configurable compression method.</li>
+<li> Multiple backup targets.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://code.google.com/p/archlinux-stuff/">http://code.google.com/p/archlinux-stuff/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/arch-backup/">arch-backup</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Clonezilla" class="extiw" title="wikipedia:Clonezilla">Clonezilla</a></b> — A disaster recovery, disk cloning, disk imaging and deployment solution.
+<ul>
+<li> Boots from live CD, USB flash drive, or PXE server.</li>
+<li> Supports ext2, ext3, ext4, reiserfs, reiser4, xfs, jfs, btrfs FAT32, NTFS, HFS+ and others.</li>
+<li> Uses Partclone (default), Partimage (optional), ntfsclone (optional), or dd to image or clone a partition.</li>
+<li> Multicasting server to restore to many machines at once.</li>
+<li> Included on the Arch Linux installation media.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://clonezilla.org/">http://clonezilla.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=clonezilla">clonezilla</a></span>
+</dd></dl>
+<ul><li> <b>FSArchiver</b> — A safe and flexible file-system backup and deployment tool
+<ul>
+<li> Support for basic file attributes (permissions, owner, ...).</li>
+<li> Support for multiple file-systems per archive.</li>
+<li> Support for extended attributes (they are used by SELinux).</li>
+<li> Support the basic file-system attributes (label, uuid, block-size) for all linux file-systems.</li>
+<li> Support for <a rel="nofollow" class="external text" href="http://www.fsarchiver.org/Cloning-ntfs">ntfs filesystems</a> (ability to create flexible clones of a Windows partitions).</li>
+<li> Checksumming of everything which is written in the archive (headers, data blocks, whole files).</li>
+<li> Ability to restore an archive which is corrupt (it will just skip the current file).</li>
+<li> Multi-threaded lzo, gzip, bzip2, lzma compression.</li>
+<li> Support for splitting large archives into several files with a fixed maximum size.</li>
+<li> Encryption of the archive using a password. Based on blowfish from libcrypto from <a href="../en/OpenSSL.html" title="OpenSSL">OpenSSL</a>.</li>
+<li> Support backup of a mounted root filesystem (-A option).</li>
+<li> Can be found on the <a rel="nofollow" class="external text" href="http://www.sysresccd.org/Main_Page">System Rescue CD</a>.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.fsarchiver.org/Main_Page">http://www.fsarchiver.org/Main_Page</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=fsarchiver">fsarchiver</a></span>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Mondo_Rescue" class="extiw" title="wikipedia:Mondo Rescue">Mondo Rescue</a></b> — A disaster recovery solution to create backup media that can be used to redeploy the damaged system.
+<ul>
+<li> Image-based backups, supporting Linux/Windows.</li>
+<li> Compression rate is adjustable.</li>
+<li> Can backup live systems (without having to halt it).</li>
+<li> Can split image over many files.</li>
+<li> Supports booting to a Live CD to perform a full restore.</li>
+<li> Can backup/restore over NFS, from CDs, tape drives and and other media.</li>
+<li> Can verify backups.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.mondorescue.org/">http://www.mondorescue.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mondo/">mondo</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Partclone.html" title="Partclone">Partclone</a></b> — A tool that can be used to back up and restore a partition while considering only used blocks.
+<ul>
+<li> Supports <i>ext2</i>, <i>ext3</i>, <i>ext4</i>, <i>hfs+</i>, <i>reiserfs</i>, <i>reiser4</i>, <i>btrfs</i>, <i>vmfs3</i>, <i>vmfs5</i>, <i>xfs</i>, <i>jfs</i>, <i>ufs</i>, <i>ntfs</i>, <i>fat(12/16/32)</i>, <i>exfat</i>.</li>
+<li> Supports compression.</li>
+<li> Optionally, an <i>ncurses</i> interface can be used.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://partclone.org/">http://partclone.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=partclone">partclone</a></span>
+</dd></dl>
+<ul><li> <b>PartedMagic</b> — Live cd/usb with PartImage and other recovery tools.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://partedmagic.com/doku.php?id=start">http://partedmagic.com/doku.php?id=start</a> || </dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Partimage" class="extiw" title="wikipedia:Partimage">Partimage</a></b> — An <i>ncurses</i> disk cloning utility for Linux/UNIX environments.
+<ul>
+<li> Has a Live CD.</li>
+<li> Supports the most popular filesystems on Linux, Windows and Mac OS.</li>
+<li> Compression.</li>
+<li> Saving to multiple CDs or DVDs or across a network using Samba/NFS.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.partimage.org/Main_Page">http://www.partimage.org/Main_Page</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=partimage">partimage</a></span>
+</dd></dl>
+<ul><li> <b>Q7Z</b> — P7Zip GUI for Linux, which attempts to simplify data compression and backup.  It can create the following archive types: 7z, BZip2, Zip, GZip, Tar.
+<ul>
+<li> Updates existing archives quickly.</li>
+<li> Backup multiple folders to a storage location.</li>
+<li> Create or extract protected archives.</li>
+<li> Lessen effort by using archiving profiles and lists.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://k7z.sourceforge.net/">http://k7z.sourceforge.net/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/q7z/">q7z</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Redo_Backup_and_Recovery" class="extiw" title="wikipedia:Redo Backup and Recovery">Redo Backup and Recovery</a></b> — A backup and disaster recovery application that runs from a bootable Linux CD image.
+<ul>
+<li> Is capable of bare-metal backup and recovery of disk partitions.</li>
+<li> Uses <a rel="nofollow" class="external text" href="http://www.xpud.org/">xPUD</a> and <a href="../en/Partclone.html" title="Partclone">Partclone</a> for the backend.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.redobackup.org/">http://www.redobackup.org/</a> || </dd></dl>
+<ul><li> <b>System Tar &amp; Restore</b> — Backup and Restore your system using tar or Transfer it with rsync
+<ul>
+<li> CLI and Dialog interfaces</li>
+<li> Easy backup and restore wizards</li>
+<li> Creates <i>.tar.gz</i>, <i>.tar.bz2</i>, <i>.tar.xz</i> or <i>.tar</i> archives</li>
+<li> Supports openssl / gpg encryption</li>
+<li> Uses rsync to transfer a running system</li>
+<li> Supports Grub2, Syslinux, EFISTUB/efibootmgr and Systemd/bootctl</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/tritonas00/system-tar-and-restore">https://github.com/tritonas00/system-tar-and-restore</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/system-tar-and-restore/">system-tar-and-restore</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h3><span class="mw-headline" id="dd_spin-offs">dd spin-offs</span></h3>
+<p>Other <i>dd</i>-like programs feature periodical status output, e.g. a simple progress bar.
+</p>
+<dl>
+<dt> dcfldd </dt>
+<dd> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dcfldd">dcfldd</a></span> is an enhanced version of dd with features useful for forensics and security. It accepts most of dd's parameters and includes status output. The last stable version of dcfldd was released on December 19, 2006.<sup><a rel="nofollow" class="external autonumber" href="http://dcfldd.sourceforge.net/">[3]</a></sup>
+</dd>
+</dl>
+<dl>
+<dt> ddrescue </dt>
+<dd> GNU <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ddrescue">ddrescue</a></span> is a data recovery tool. It is capable of ignoring read errors, which is a useless feature for disk wiping in almost any case. See the <a rel="nofollow" class="external text" href="http://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html">official manual</a> for details.</dd>
+</dl>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/List_of_disk_cloning_software" class="extiw" title="wikipedia:List of disk cloning software">Wikipedia:List of disk cloning software</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=4329">Arch Linux forum thread</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Data_compression_and_archiving.html" title="Category:Data compression and archiving">Data compression and archiving</a></li>
+<li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

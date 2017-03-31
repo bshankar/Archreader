@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>systemd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Systemd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">systemd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd/User.html" title="Systemd/User">systemd/User</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd/Timers.html" title="Systemd/Timers">systemd/Timers</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd_FAQ.html" title="Systemd FAQ">systemd FAQ</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Init.html" title="Init">init</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Init/Rosetta.html" title="Init Rosetta" class="mw-redirect">init Rosetta</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Daemons.html#List_of_daemons" title="Daemons">Daemons#List of daemons</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Udev.html" title="Udev">udev</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Improving_performance/Boot_process.html" title="Improve boot performance" class="mw-redirect">Improve boot performance</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Allow_users_to_shutdown.html" title="Allow users to shutdown">Allow users to shutdown</a></li>
+</ul>
+</div>
+<p>From the <a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Software/systemd">project web page</a>:
+</p>
+<dl><dd>
+<i>systemd</i> is a system and service manager for Linux, compatible with SysV and LSB init scripts. systemd provides aggressive parallelization capabilities, uses socket and <a href="../en/D-Bus.html" title="D-Bus">D-Bus</a> activation for starting services, offers on-demand starting of daemons, keeps track of processes using Linux <a href="../en/Cgroups.html" title="Control groups" class="mw-redirect">control groups</a>, supports snapshotting and restoring of the system state, maintains mount and automount points and implements an elaborate transactional dependency-based service control logic.</dd></dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For a detailed explanation as to why Arch has moved to <i>systemd</i>, see <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1149530#p1149530">this forum post</a>.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Basic_systemctl_usage"><span class="tocnumber">1</span> <span class="toctext">Basic systemctl usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Analyzing_the_system_state"><span class="tocnumber">1.1</span> <span class="toctext">Analyzing the system state</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Using_units"><span class="tocnumber">1.2</span> <span class="toctext">Using units</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Power_management"><span class="tocnumber">1.3</span> <span class="toctext">Power management</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Writing_unit_files"><span class="tocnumber">2</span> <span class="toctext">Writing unit files</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Handling_dependencies"><span class="tocnumber">2.1</span> <span class="toctext">Handling dependencies</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Service_types"><span class="tocnumber">2.2</span> <span class="toctext">Service types</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Editing_provided_units"><span class="tocnumber">2.3</span> <span class="toctext">Editing provided units</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Replacement_unit_files"><span class="tocnumber">2.3.1</span> <span class="toctext">Replacement unit files</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Drop-in_files"><span class="tocnumber">2.3.2</span> <span class="toctext">Drop-in files</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Examples"><span class="tocnumber">2.3.3</span> <span class="toctext">Examples</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Targets"><span class="tocnumber">3</span> <span class="toctext">Targets</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Get_current_targets"><span class="tocnumber">3.1</span> <span class="toctext">Get current targets</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Create_custom_target"><span class="tocnumber">3.2</span> <span class="toctext">Create custom target</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Targets_table"><span class="tocnumber">3.3</span> <span class="toctext">Targets table</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Change_current_target"><span class="tocnumber">3.4</span> <span class="toctext">Change current target</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Change_default_target_to_boot_into"><span class="tocnumber">3.5</span> <span class="toctext">Change default target to boot into</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18"><a href="#Temporary_files"><span class="tocnumber">4</span> <span class="toctext">Temporary files</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#Timers"><span class="tocnumber">5</span> <span class="toctext">Timers</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#Mounting"><span class="tocnumber">6</span> <span class="toctext">Mounting</span></a></li>
+<li class="toclevel-1 tocsection-21">
+<a href="#Journal"><span class="tocnumber">7</span> <span class="toctext">Journal</span></a>
+<ul>
+<li class="toclevel-2 tocsection-22"><a href="#Priority_level"><span class="tocnumber">7.1</span> <span class="toctext">Priority level</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Facility"><span class="tocnumber">7.2</span> <span class="toctext">Facility</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Filtering_output"><span class="tocnumber">7.3</span> <span class="toctext">Filtering output</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Journal_size_limit"><span class="tocnumber">7.4</span> <span class="toctext">Journal size limit</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Clean_journal_files_manually"><span class="tocnumber">7.5</span> <span class="toctext">Clean journal files manually</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Journald_in_conjunction_with_syslog"><span class="tocnumber">7.6</span> <span class="toctext">Journald in conjunction with syslog</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Forward_journald_to_.2Fdev.2Ftty12"><span class="tocnumber">7.7</span> <span class="toctext">Forward journald to /dev/tty12</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Specify_a_different_journal_to_view"><span class="tocnumber">7.8</span> <span class="toctext">Specify a different journal to view</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-30">
+<a href="#Tips_and_tricks"><span class="tocnumber">8</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-31"><a href="#Enable_installed_units_by_default"><span class="tocnumber">8.1</span> <span class="toctext">Enable installed units by default</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33"><a href="#Investigating_systemd_errors"><span class="tocnumber">9.1</span> <span class="toctext">Investigating systemd errors</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Diagnosing_boot_problems"><span class="tocnumber">9.2</span> <span class="toctext">Diagnosing boot problems</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#Diagnosing_problems_with_a_specific_service"><span class="tocnumber">9.3</span> <span class="toctext">Diagnosing problems with a specific service</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Shutdown.2Freboot_takes_terribly_long"><span class="tocnumber">9.4</span> <span class="toctext">Shutdown/reboot takes terribly long</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Short_lived_processes_do_not_seem_to_log_any_output"><span class="tocnumber">9.5</span> <span class="toctext">Short lived processes do not seem to log any output</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Boot_time_increasing_over_time"><span class="tocnumber">9.6</span> <span class="toctext">Boot time increasing over time</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#systemd-tmpfiles-setup.service_fails_to_start_at_boot"><span class="tocnumber">9.7</span> <span class="toctext">systemd-tmpfiles-setup.service fails to start at boot</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#systemctl_enable_fails_for_symlinks_in_.2Fetc.2Fsystemd.2Fsystem"><span class="tocnumber">9.8</span> <span class="toctext">systemctl enable fails for symlinks in /etc/systemd/system</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#dependent_services_are_not_started_when_starting_a_service_manually"><span class="tocnumber">9.9</span> <span class="toctext">dependent services are not started when starting a service manually</span></a></li>
+<li class="toclevel-2 tocsection-42"><a href="#systemd_version_printed_on_boot_is_not_the_same_as_installed_package_version"><span class="tocnumber">9.10</span> <span class="toctext">systemd version printed on boot is not the same as installed package version</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-43"><a href="#See_also"><span class="tocnumber">10</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Basic_systemctl_usage">Basic systemctl usage</span></h2>
+<p>The main command used to introspect and control <i>systemd</i> is <i>systemctl</i>. Some of its uses are examining the system state and managing the system and services. See <code>man systemctl</code> for more details.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> You can use all of the following <i>systemctl</i> commands with the <code>-H <i>user</i>@<i>host</i></code> switch to control a <i>systemd</i> instance on a remote machine. This will use <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> to connect to the remote <i>systemd</i> instance.</li>
+<li> <i>systemadm</i> is the official graphical frontend for <i>systemctl</i> and is provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-ui">systemd-ui</a></span> package.</li>
+<li> <a href="../en/KDE.html" title="Plasma" class="mw-redirect">Plasma</a> users can install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-kcm">systemd-kcm</a></span> as a graphical fronted for <i>systemctl</i>. After installing the module will be added under <i>System administration</i>.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Analyzing_the_system_state">Analyzing the system state</span></h3>
+<p>Show <b>system status</b> using:
+</p>
+<pre>$ systemctl status
+</pre>
+<p><b>List running</b> units:
+</p>
+<pre>$ systemctl
+</pre>
+<p>or:
+</p>
+<pre>$ systemctl list-units
+</pre>
+<p><b>List failed</b> units:
+</p>
+<pre>$ systemctl --failed
+</pre>
+<p>The available unit files can be seen in <code>/usr/lib/systemd/system/</code> and <code>/etc/systemd/system/</code> (the latter takes precedence). <b>List installed</b> unit files with:
+</p>
+<pre>$ systemctl list-unit-files
+</pre>
+<h3><span class="mw-headline" id="Using_units">Using units</span></h3>
+<p>Units can be, for example, services (<i>.service</i>), mount points (<i>.mount</i>), devices (<i>.device</i>) or sockets (<i>.socket</i>).
+</p>
+<p>When using <i>systemctl</i>, you generally have to specify the complete name of the unit file, including its suffix, for example <code>sshd.socket</code>. There are however a few short forms when specifying the unit in the following <i>systemctl</i> commands:
+</p>
+<ul>
+<li> If you do not specify the suffix, systemctl will assume <i>.service</i>. For example, <code>netctl</code> and <code>netctl.service</code> are equivalent.</li>
+<li> Mount points will automatically be translated into the appropriate <i>.mount</i> unit. For example, specifying <code>/home</code> is equivalent to <code>home.mount</code>.</li>
+<li> Similar to mount points, devices are automatically translated into the appropriate <i>.device</i> unit, therefore specifying <code>/dev/sda2</code> is equivalent to <code>dev-sda2.device</code>.</li>
+</ul>
+<p>See <code>man systemd.unit</code> for details.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some unit names contain an <code>@</code> sign (e.g. <code>name@<i>string</i>.service</code>): this means that they are <a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/instances.html">instances</a> of a <i>template</i> unit, whose actual file name does not contain the <code><i>string</i></code> part (e.g. <code>name@.service</code>). <code><i>string</i></code> is called the <i>instance identifier</i>, and is similar to an argument that is passed to the template unit when called with the <i>systemctl</i> command: in the unit file it will substitute the <code>%i</code> specifier. 
+<p>To be more accurate, <i>before</i> trying to instantiate the <code>name@.suffix</code> template unit, <i>systemd</i> will actually look for a unit with the exact <code>name@string.suffix</code> file name, although by convention such a "clash" happens rarely, i.e. most unit files containing an <code>@</code> sign are meant to be templates. Also, if a template unit is called without an instance identifier, it will just fail, since the <code>%i</code> specifier cannot be substituted.
+</p>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Most of the following commands also work if multiple units are specified, see <code>man systemctl</code> for more information.</li>
+<li> The <code>--now</code> switch can be used in conjunction with <code>enable</code>, <code>disable</code>, and <code>mask</code> to respectively start, stop, or mask immediately the unit rather than after the next boot.</li>
+<li> A package may offer units for different purposes. If you just installed a package, <code>pacman -Qql <i>package</i> | grep -Fe .service -e .socket</code> can be used to check and find them.</li>
+</ul>
+</div>
+<p><b>Start</b> a unit immediately:
+</p>
+<pre># systemctl start <i>unit</i>
+</pre>
+<p><b>Stop</b> a unit immediately:
+</p>
+<pre># systemctl stop <i>unit</i>
+</pre>
+<p><b>Restart</b> a unit:
+</p>
+<pre># systemctl restart <i>unit</i>
+</pre>
+<p>Ask a unit to <b>reload</b> its configuration:
+</p>
+<pre># systemctl reload <i>unit</i>
+</pre>
+<p>Show the <b>status</b> of a unit, including whether it is running or not:
+</p>
+<pre>$ systemctl status <i>unit</i>
+</pre>
+<p><b>Check</b> whether a unit is already enabled or not:
+</p>
+<pre>$ systemctl is-enabled <i>unit</i>
+</pre>
+<p><b>Enable</b> a unit to be started on <b>bootup</b>:
+</p>
+<pre># systemctl enable <i>unit</i>
+</pre>
+<p><b>Disable</b> a unit to not start during bootup:
+</p>
+<pre># systemctl disable <i>unit</i>
+</pre>
+<p><b>Mask</b> a unit to make it impossible to start it:
+</p>
+<pre># systemctl mask <i>unit</i>
+</pre>
+<p><b>Unmask</b> a unit:
+</p>
+<pre># systemctl unmask <i>unit</i>
+</pre>
+<p>Show the <b>manual page</b> associated with a unit (this has to be supported by the unit file):
+</p>
+<pre>$ systemctl help <i>unit</i>
+</pre>
+<p>Reload <i>systemd</i>, scanning for <b>new or changed units</b>:
+</p>
+<pre># systemctl daemon-reload
+</pre>
+<h3><span class="mw-headline" id="Power_management">Power management</span></h3>
+<p><a href="../en/Polkit.html" title="Polkit">polkit</a> is necessary for power management as an unprivileged user. If you are in a local <i>systemd-logind</i> user session and no other session is active, the following commands will work without root privileges. If not (for example, because another user is logged into a tty), <i>systemd</i> will automatically ask you for the root password.
+</p>
+<p>Shut down and reboot the system:
+</p>
+<pre>$ systemctl reboot
+</pre>
+<p>Shut down and power-off the system:
+</p>
+<pre>$ systemctl poweroff
+</pre>
+<p>Suspend the system:
+</p>
+<pre>$ systemctl suspend
+</pre>
+<p>Put the system into hibernation:
+</p>
+<pre>$ systemctl hibernate
+</pre>
+<p>Put the system into hybrid-sleep state (or suspend-to-both):
+</p>
+<pre>$ systemctl hybrid-sleep
+</pre>
+<h2><span class="mw-headline" id="Writing_unit_files">Writing unit files</span></h2>
+<p>The syntax of <i>systemd'</i>s <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd.unit.html">unit files</a> is inspired by XDG Desktop Entry Specification <i>.desktop</i> files, which are in turn inspired by Microsoft Windows <i>.ini</i> files. Unit files are loaded from two locations. From lowest to highest precedence they are:
+</p>
+<ul>
+<li> <code>/usr/lib/systemd/system/</code>: units provided by installed packages</li>
+<li> <code>/etc/systemd/system/</code>: units installed by the system administrator</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> The load paths are completely different when running <i>systemd</i> in <a href="../en/Systemd/User.html#How_it_works" title="Systemd/User">user mode</a>.</li>
+<li> systemd unit names may only contain ASCII alphanumeric characters, underscores and periods. All other characters must be replaced by C-style "\x2d" escapes. See <code>man systemd.unit</code> and <code>man systemd-escape</code> for more information.</li>
+</ul>
+</div>
+<p>Look at the units installed by your packages for examples, as well as the <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd.service.html#Examples">annotated example section</a> of <code>man systemd.service</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Comments prepended with <code>#</code> may be used in unit-files as well, but only in new lines. Do not use end-line comments after <i>systemd</i> parameters or the unit will fail to activate.</div>
+<h3><span class="mw-headline" id="Handling_dependencies">Handling dependencies</span></h3>
+<p>With <i>systemd</i>, dependencies can be resolved by designing the unit files correctly. The most typical case is that the unit <i>A</i> requires the unit <i>B</i> to be running before <i>A</i> is started. In that case add <code>Requires=<i>B</i></code> and <code>After=<i>B</i></code> to the <code>[Unit]</code> section of <i>A</i>. If the dependency is optional, add <code>Wants=<i>B</i></code> and <code>After=<i>B</i></code> instead. Note that <code>Wants=</code> and <code>Requires=</code> do not imply <code>After=</code>, meaning that if <code>After=</code> is not specified, the two units will be started in parallel.
+</p>
+<p>Dependencies are typically placed on services and not on targets. For example, <code>network.target</code> is pulled in by whatever service configures your network interfaces, therefore ordering your custom unit after it is sufficient since <code>network.target</code> is started anyway.
+</p>
+<h3><span class="mw-headline" id="Service_types">Service types</span></h3>
+<p>There are several different start-up types to consider when writing a custom service file. This is set with the <code>Type=</code> parameter in the <code>[Service]</code> section:
+</p>
+<ul>
+<li> <code>Type=simple</code> (default): <i>systemd</i> considers the service to be started up immediately. The process must not fork. Do not use this type if other services need to be ordered on this service, unless it is socket activated.</li>
+<li> <code>Type=forking</code>: <i>systemd</i> considers the service started up once the process forks and the parent has exited. For classic daemons use this type unless you know that it is not necessary. You should specify <code>PIDFile=</code> as well so <i>systemd</i> can keep track of the main process.</li>
+<li> <code>Type=oneshot</code>: this is useful for scripts that do a single job and then exit. You may want to set <code>RemainAfterExit=yes</code> as well so that <i>systemd</i> still considers the service as active after the process has exited.</li>
+<li> <code>Type=notify</code>: identical to <code>Type=simple</code>, but with the stipulation that the daemon will send a signal to <i>systemd</i> when it is ready. The reference implementation for this notification is provided by <i>libsystemd-daemon.so</i>.</li>
+<li> <code>Type=dbus</code>: the service is considered ready when the specified <code>BusName</code> appears on DBus's system bus.</li>
+<li> <code>Type=idle</code>: <i>systemd</i> will delay execution of the service binary until all jobs are dispatched. Other than that behavior is very similar to <code>Type=simple</code>. </li>
+</ul>
+<p>See the <a rel="nofollow" class="external text" href="http://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=">systemd.service(5)</a> man page for a more detailed explanation of the <code>Type</code> values.
+</p>
+<h3><span class="mw-headline" id="Editing_provided_units">Editing provided units</span></h3>
+<p>To avoid conflicts with pacman, unit files provided by packages should not be directly edited. There are two safe ways to modify a unit without touching the original file: create a new unit file which overrides the original unit or create drop-in snippets which are applied on top of the original unit. For both methods, you must reload the unit afterwards to apply your changes. This can be done either by editing the unit with <code>systemctl edit</code> (which reloads the unit automatically) or by reloading all units with:
+</p>
+<pre># systemctl daemon-reload
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> You can use <i>systemd-delta</i> to see which unit files have been overridden or extended and what exactly has been changed.</li>
+<li> Use <code>systemctl cat <i>unit</i></code> to view the content of a unit file and all associated drop-in snippets.</li>
+<li> Syntax highlighting for <i>systemd</i> unit files within <a href="../en/Vim.html" title="Vim">Vim</a> can be enabled by installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vim-systemd">vim-systemd</a></span>.</li>
+</ul>
+</div>
+<h4><span class="mw-headline" id="Replacement_unit_files">Replacement unit files</span></h4>
+<p>To replace the unit file <code>/usr/lib/systemd/system/<i>unit</i></code>, create the file <code>/etc/systemd/system/<i>unit</i></code> and reenable the unit to update the symlinks:
+</p>
+<pre># systemctl reenable <i>unit</i>
+</pre>
+<p>Alternatively, run:
+</p>
+<pre># systemctl edit --full <i>unit</i>
+</pre>
+<p>This opens <code>/etc/systemd/system/<i>unit</i></code> in your editor (copying the installed version if it does not exist yet) and automatically reloads it when you finish editing.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Pacman does not update the replacement unit files when the originals are updated, so this method can make system maintenance more difficult. For this reason the next approach is recommended.</div>
+<h4><span class="mw-headline" id="Drop-in_files">Drop-in files</span></h4>
+<p>To create drop-in files for the unit file <code>/usr/lib/systemd/system/<i>unit</i></code>, create the directory <code>/etc/systemd/system/<i>unit</i>.d/</code> and place <i>.conf</i> files there to override or add new options. <i>systemd</i> will parse these <i>.conf</i> files and apply them on top of the original unit.
+</p>
+<p>The easiest way to do this is to run:
+</p>
+<pre># systemctl edit <i>unit</i>
+</pre>
+<p>This opens the file <code>/etc/systemd/system/<i>unit</i>.d/override.conf</code> in your text editor (creating it if necessary) and automatically reloads the unit when you are done editing.
+</p>
+<h4><span class="mw-headline" id="Examples">Examples</span></h4>
+<p>For example, if you simply want to add an additional dependency to a unit, you may create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>unit</i>.d/customdependency.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Requires=<i>new dependency</i>
+After=<i>new dependency</i></pre>
+<p>As another example, in order to replace the <code>ExecStart</code> directive for a unit that is not of type <code>oneshot</code>, create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>unit</i>.d/customexec.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+ExecStart=
+ExecStart=<i>new command</i></pre>
+<p>Note how <code>ExecStart</code> must be cleared before being re-assigned <a rel="nofollow" class="external autonumber" href="https://bugzilla.redhat.com/show_bug.cgi?id=756787#c9">[1]</a>. The same holds for every item that can be specified multiple times, e.g. <code>OnCalendar</code> for timers.
+</p>
+<p>One more example to automatically restart a service:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/<i>unit</i>.d/restart.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Restart=always
+RestartSec=30</pre>
+<h2><span class="mw-headline" id="Targets">Targets</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Unclear description, copy-pasted content (explicitly mentions "Fedora"). (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Systemd#Make_section_.22Targets.22_more_clearly">Talk:Systemd#Make section "Targets" more clearly</a>)</div>
+</div>
+<p><i>systemd</i> uses <i>targets</i> which serve a similar purpose as runlevels but act a little different. Each <i>target</i> is named instead of numbered and is intended to serve a specific purpose with the possibility of having multiple ones active at the same time. Some <i>target</i>s are implemented by inheriting all of the services of another <i>target</i> and adding additional services to it. There are <i>systemd</i> <i>target</i>s that mimic the common SystemVinit runlevels so you can still switch <i>target</i>s using the familiar <code>telinit RUNLEVEL</code> command.
+</p>
+<h3><span class="mw-headline" id="Get_current_targets">Get current targets</span></h3>
+<p>The following should be used under <i>systemd</i> instead of running <code>runlevel</code>:
+</p>
+<pre>$ systemctl list-units --type=target
+</pre>
+<h3><span class="mw-headline" id="Create_custom_target">Create custom target</span></h3>
+<p>The runlevels that held a defined meaning under sysvinit (i.e., 0, 1, 3, 5, and 6); have a 1:1 mapping with a specific <i>systemd</i> <i>target</i>. Unfortunately, there is no good way to do the same for the user-defined runlevels like 2 and 4. If you make use of those it is suggested that you make a new named <i>systemd</i> <i>target</i> as <code>/etc/systemd/system/<i>your target</i></code> that takes one of the existing runlevels as a base (you can look at <code>/usr/lib/systemd/system/graphical.target</code> as an example), make a directory <code>/etc/systemd/system/<i>your target</i>.wants</code>, and then symlink the additional services from <code>/usr/lib/systemd/system/</code> that you wish to enable.
+</p>
+<h3><span class="mw-headline" id="Targets_table">Targets table</span></h3>
+<table class="wikitable">
+<tr>
+<th> SysV Runlevel </th>
+<th> systemd Target </th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> 0 </td>
+<td> runlevel0.target, poweroff.target </td>
+<td> Halt the system.
+</td>
+</tr>
+<tr>
+<td> 1, s, single </td>
+<td> runlevel1.target, rescue.target </td>
+<td> Single user mode.
+</td>
+</tr>
+<tr>
+<td> 2, 4 </td>
+<td> runlevel2.target, runlevel4.target, multi-user.target </td>
+<td> User-defined/Site-specific runlevels. By default, identical to 3.
+</td>
+</tr>
+<tr>
+<td> 3 </td>
+<td> runlevel3.target, multi-user.target </td>
+<td> Multi-user, non-graphical. Users can usually login via multiple consoles or via the network.
+</td>
+</tr>
+<tr>
+<td> 5 </td>
+<td> runlevel5.target, graphical.target </td>
+<td> Multi-user, graphical. Usually has all the services of runlevel 3 plus a graphical login.
+</td>
+</tr>
+<tr>
+<td> 6 </td>
+<td> runlevel6.target, reboot.target </td>
+<td> Reboot
+</td>
+</tr>
+<tr>
+<td> emergency </td>
+<td> emergency.target </td>
+<td> Emergency shell
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Change_current_target">Change current target</span></h3>
+<p>In <i>systemd</i> targets are exposed via <i>target units</i>. You can change them like this:
+</p>
+<pre># systemctl isolate graphical.target
+</pre>
+<p>This will only change the current target, and has no effect on the next boot. This is equivalent to commands such as <code>telinit 3</code> or <code>telinit 5</code> in Sysvinit.
+</p>
+<h3><span class="mw-headline" id="Change_default_target_to_boot_into">Change default target to boot into</span></h3>
+<p>The standard target is <code>default.target</code>, which is aliased by default to <code>graphical.target</code> (which roughly corresponds to the old runlevel 5). To change the default target at boot-time, append one of the following <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> to your bootloader:
+</p>
+<ul>
+<li> <code>systemd.unit=multi-user.target</code> (which roughly corresponds to the old runlevel 3),</li>
+<li> <code>systemd.unit=rescue.target</code> (which roughly corresponds to the old runlevel 1).</li>
+</ul>
+<p>Alternatively, you may leave the bootloader alone and change <code>default.target</code>. This can be done using <i>systemctl</i>:
+</p>
+<pre># systemctl set-default multi-user.target
+</pre>
+<p>To be able to override the previously set <code>default.target</code>, use the force option:
+</p>
+<pre># systemctl set-default -f multi-user.target
+</pre>
+<p>The effect of this command is output by <i>systemctl</i>; a symlink to the new default target is made at <code>/etc/systemd/system/default.target</code>.
+</p>
+<h2><span class="mw-headline" id="Temporary_files">Temporary files</span></h2>
+<p>"<i>systemd-tmpfiles</i> creates, deletes and cleans up volatile and temporary files and directories." It reads configuration files in <code>/etc/tmpfiles.d/</code> and <code>/usr/lib/tmpfiles.d/</code> to discover which actions to perform. Configuration files in the former directory take precedence over those in the latter directory.
+</p>
+<p>Configuration files are usually provided together with service files, and they are named in the style of <code>/usr/lib/tmpfiles.d/<i>program</i>.conf</code>. For example, the <a href="../en/Samba.html" title="Samba">Samba</a> daemon expects the directory <code>/run/samba</code> to exist and to have the correct permissions. Therefore, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=samba">samba</a></span> package ships with this configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/tmpfiles.d/samba.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+D /run/samba 0755 root root</pre>
+<p>Configuration files may also be used to write values into certain files on boot. For example, if you used <code>/etc/rc.local</code> to disable wakeup from USB devices with <code>echo USBE &gt; /proc/acpi/wakeup</code>, you may use the following tmpfile instead:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/disable-usb-wake.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+w /proc/acpi/wakeup - - - - USBE</pre>
+<p>See the <code>systemd-tmpfiles(8)</code> and <code>tmpfiles.d(5)</code> man pages for details.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method may not work to set options in <code>/sys</code> since the <i>systemd-tmpfiles-setup</i> service may run before the appropriate device modules is loaded. In this case you could check whether the module has a parameter for the option you want to set with <code>modinfo <i>module</i></code> and set this option with a <a href="../en/Kernel_modules.html#Setting_module_options" title="Kernel modules">config file in /etc/modprobe.d</a>. Otherwise you will have to write a <a href="../en/Udev.html#About_udev_rules" title="Udev">udev rule</a> to set the appropriate attribute as soon as the device appears.</div>
+<h2><span class="mw-headline" id="Timers">Timers</span></h2>
+<p>A timer is a unit configuration file whose name ends with <i>.timer</i> and encodes information about a timer controlled and supervised by <i>systemd</i>, for timer-based activation. See <a href="../en/Systemd/Timers.html" title="Systemd/Timers">systemd/Timers</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Timers can replace <i>cron</i> functionality to a great extent. See <a href="../en/Systemd/Timers.html#As_a_cron_replacement" title="Systemd/Timers">systemd/Timers#As a cron replacement</a>.</div>
+<h2><span class="mw-headline" id="Mounting">Mounting</span></h2>
+<p>Since systemd is a replacement for System V init, it is in charge of the mounts specified in <code>/etc/fstab</code>. In fact, it goes beyond the usual <code>fstab</code> capabilities, implementing special mount options prefixed with <code>x-systemd.</code>. See <a href="../en/Fstab.html#Automount_with_systemd" title="Fstab">Fstab#Automount with systemd</a> for an example of <i>automounting</i> (mounting on-demand) using these extensions. See <a rel="nofollow" class="external autonumber" href="https://www.freedesktop.org/software/systemd/man/systemd.mount.html#fstab">[2]</a> for the complete documentation of these extensions.
+</p>
+<h2><span class="mw-headline" id="Journal">Journal</span></h2>
+<p><i>systemd</i> has its own logging system called the journal; therefore, running a <code>syslog</code> daemon is no longer required. To read the log, use:
+</p>
+<pre># journalctl
+</pre>
+<p>In Arch Linux, the directory <code>/var/log/journal/</code> is a part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> package, and the journal (when <code>Storage=</code> is set to <code>auto</code> in <code>/etc/systemd/journald.conf</code>) will write to <code>/var/log/journal/</code>.  If you or some program delete that directory, <i>systemd</i> will <b>not</b> recreate it automatically and instead will write its logs to <code>/run/systemd/journal</code> in a nonpersistent way. However, the folder will be recreated when you set <code>Storage=persistent</code> and run <code>systemctl restart systemd-journald</code> (or reboot).
+</p>
+<p>Systemd journal classifies messages by <a href="#Priority_level">Priority level</a> and <a href="#Facility">Facility</a>. Logging classification corresponds to classic <a href="https://en.wikipedia.org/wiki/Syslog" class="extiw" title="wikipedia:Syslog">Syslog</a> protocol (<a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc5424">RFC 5424</a>).
+</p>
+<h3><span class="mw-headline" id="Priority_level">Priority level</span></h3>
+<p>A syslog severity code (in systemd called priority) is used to mark the importance of a message <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc5424#section-6.2.1">RFC 5424 Section 6.2.1</a>.
+</p>
+<table class="wikitable">
+
+<tr>
+<th> Value </th>
+<th> Severity </th>
+<th> Keyword  </th>
+<th> Description </th>
+<th> Examples
+</th>
+</tr>
+<tr>
+<td> 0 </td>
+<td> Emergency </td>
+<td> emerg </td>
+<td> System is unusable </td>
+<td> Severe Kernel BUG, systemd dumped core.<br>This level should not be used by applications.
+</td>
+</tr>
+<tr>
+<td> 1 </td>
+<td> Alert </td>
+<td> alert </td>
+<td> Should be corrected immediately </td>
+<td> Vital subsystem goes out of work. Data loss. <br><code>kernel: BUG: unable to handle kernel paging request at ffffc90403238ffc</code>.
+</td>
+</tr>
+<tr>
+<td> 2 </td>
+<td> Critical </td>
+<td> crit </td>
+<td> Critical conditions </td>
+<td> Crashes, coredumps. Like familiar flash:<br><code>systemd-coredump[25319]: Process 25310 (plugin-containe) of user 1000 dumped core</code><br>Failure in the system primary application, like X11.
+</td>
+</tr>
+<tr>
+<td> 3 </td>
+<td> Error </td>
+<td> err </td>
+<td> Error conditions </td>
+<td> Not severe error reported:<br><code>kernel: usb 1-3: 3:1: cannot get freq at ep 0x84</code>,<br><code>systemd[1]: Failed unmounting /var.</code>,<br><code>libvirtd[1720]: internal error: Failed to initialize a valid firewall backend</code>).
+</td>
+</tr>
+<tr>
+<td> 4 </td>
+<td> Warning </td>
+<td> warning </td>
+<td> May indicate that an error will occur if action is not taken. </td>
+<td>  A non-root file system has only 1GB free.<br><code>org.freedesktop. Notifications[1860]: (process:5999): Gtk-WARNING **: Locale not supported by C library. Using the fallback 'C' locale</code>.
+</td>
+</tr>
+<tr>
+<td> 5 </td>
+<td> Notice </td>
+<td> notice </td>
+<td> Events that are unusual, but not error conditions. </td>
+<td> <code>systemd[1]: var.mount: Directory /var to mount over is not empty, mounting anyway</code>. <code>gcr-prompter[4997]: Gtk: GtkDialog mapped without a transient parent. This is discouraged</code>.
+</td>
+</tr>
+<tr>
+<td> 6 </td>
+<td> Informational </td>
+<td> info </td>
+<td>  Normal operational messages that require no action. </td>
+<td> <code>lvm[585]:   7 logical volume(s) in volume group "archvg" now active</code>.
+</td>
+</tr>
+<tr>
+<td> 7 </td>
+<td> Debug </td>
+<td> debug </td>
+<td> Information useful to developers for debugging the application. </td>
+<td> <code>kdeinit5[1900]: powerdevil: Scheduling inhibition from ":1.14" "firefox" with cookie 13 and reason "screen"</code>.
+</td>
+</tr>
+</table>
+<p>If issue you are looking for, was not found on according level, search it on couple of priority levels above and below. This rules are recommendations. Some errors considered a normal occasion for program so they marked low in priority by developer, and on the contrary, sometimes too many messages plaques too high priorities for them, but often it's an arguable situation. And often you really should solve an issue, also to understand architecture and adopt best practices.
+</p>
+<p>Examples:
+</p>
+<ul>
+<li> Info message:  <pre>pulseaudio[2047]: W: [pulseaudio] alsa-mixer.c: Volume element Master has 8 channels. That's too much! I can't handle that!</pre> It is an warning or error by definition.</li>
+<li> Plaguing alert message: <pre>sudo[21711]:     user : a password is required ; TTY=pts/0 ; PWD=/home/user ; USER=root ; COMMAND=list /usr/bin/pacman --color auto -Sy</pre> The <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=184455">reason</a> - user was manually added to sudoers file, not to wheel group, which is arguably normal action, but sudo produced an alert on every occasion.</li>
+</ul>
+<h3><span class="mw-headline" id="Facility">Facility</span></h3>
+<p>A syslog facility code is used to specify the type of program that is logging the message <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc5424#section-6.2.1">RFC 5424 Section 6.2.1</a>.
+</p>
+<table class="wikitable">
+<tr>
+<th> Facility code </th>
+<th> Keyword </th>
+<th> Description </th>
+<th> Info
+</th>
+</tr>
+<tr>
+<td> 0 </td>
+<td> kern </td>
+<td> kernel messages
+</td>
+</tr>
+<tr>
+<td> 1 </td>
+<td> user </td>
+<td> user-level messages
+</td>
+</tr>
+<tr>
+<td> 2 </td>
+<td> mail </td>
+<td> mail system </td>
+<td> Archaic POSIX still supported and sometimes used system, for more <code>man mail</code>)
+</td>
+</tr>
+<tr>
+<td> 3 </td>
+<td> daemon </td>
+<td> system daemons </td>
+<td> All deamons, including systemd and its subsystems
+</td>
+</tr>
+<tr>
+<td> 4 </td>
+<td> auth </td>
+<td> security/authorization messages </td>
+<td> Also watch for different facility 10
+</td>
+</tr>
+<tr>
+<td> 5 </td>
+<td> syslog </td>
+<td> messages generated internally by syslogd </td>
+<td> As it standartized for syslogd, not used by systemd (see facility 3)
+</td>
+</tr>
+<tr>
+<td> 6 </td>
+<td> lpr </td>
+<td> line printer subsystem (archaic subsystem)
+</td>
+</tr>
+<tr>
+<td> 7 </td>
+<td> news </td>
+<td> network news subsystem (archaic subsystem)
+</td>
+</tr>
+<tr>
+<td> 8 </td>
+<td> uucp </td>
+<td> UUCP subsystem (archaic subsystem)
+</td>
+</tr>
+<tr>
+<td> 9 </td>
+<td> </td>
+<td> clock daemon </td>
+<td> systemd-timesyncd
+</td>
+</tr>
+<tr>
+<td> 10 </td>
+<td> authpriv </td>
+<td> security/authorization messages </td>
+<td> Also watch for different facility 4
+</td>
+</tr>
+<tr>
+<td> 11 </td>
+<td> ftp </td>
+<td> FTP daemon
+</td>
+</tr>
+<tr>
+<td> 12 </td>
+<td> - </td>
+<td> NTP subsystem
+</td>
+</tr>
+<tr>
+<td> 13 </td>
+<td> - </td>
+<td> log audit
+</td>
+</tr>
+<tr>
+<td> 14 </td>
+<td> - </td>
+<td> log alert
+</td>
+</tr>
+<tr>
+<td> 15 </td>
+<td> cron </td>
+<td> scheduling daemon
+</td>
+</tr>
+<tr>
+<td> 16 </td>
+<td> local0 </td>
+<td> local use 0  (local0)
+</td>
+</tr>
+<tr>
+<td> 17 </td>
+<td> local1 </td>
+<td> local use 1  (local1)
+</td>
+</tr>
+<tr>
+<td> 18 </td>
+<td> local2 </td>
+<td> local use 2  (local2)
+</td>
+</tr>
+<tr>
+<td> 19 </td>
+<td> local3 </td>
+<td> local use 3  (local3)
+</td>
+</tr>
+<tr>
+<td> 20 </td>
+<td> local4 </td>
+<td> local use 4  (local4)
+</td>
+</tr>
+<tr>
+<td> 21 </td>
+<td> local5 </td>
+<td> local use 5  (local5)
+</td>
+</tr>
+<tr>
+<td> 22 </td>
+<td> local6 </td>
+<td> local use 6  (local6)
+</td>
+</tr>
+<tr>
+<td> 23 </td>
+<td> local7 </td>
+<td> local use 7  (local7)
+</td>
+</tr>
+</table>
+<p>So, useful facilities to watch: 0,1,3,4,9,10,15.
+</p>
+<h3><span class="mw-headline" id="Filtering_output">Filtering output</span></h3>
+<p><i>journalctl</i> allows you to filter the output by specific fields. Be aware that if there are many messages to display or filtering of large time span has to be done, the output of this command can be delayed for quite some time.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>While the journal is stored in a binary format, the content of stored messages is not modified. This means it is viewable with <i>strings</i>, for example for recovery in an environment which does not have <i>systemd</i> installed. Example command:
+<pre>$ strings /mnt/arch/var/log/journal/af4967d77fba44c6b093d0e9862f6ddd/system.journal | grep -i <i>message</i></pre>
+</div>
+<p>Examples:
+</p>
+<ul>
+<li> Show all messages from this boot: <pre># journalctl -b</pre> However, often one is interested in messages not from the current, but from the previous boot (e.g. if an unrecoverable system crash happened). This is possible through optional offset parameter of the <code>-b</code> flag: <code>journalctl -b -0</code> shows messages from the current boot, <code>journalctl -b -1</code> from the previous boot, <code>journalctl -b -2</code> from the second previous and so on. See <code>man 1 journalctl</code> for full description, the semantics is much more powerful.</li>
+<li> Show all messages from date (and optional time): <pre># journalctl --since="2012-10-30 18:17:16"</pre>
+</li>
+<li> Show all messages since 20 minutes ago: <pre># journalctl --since "20 min ago"</pre>
+</li>
+<li> Follow new messages: <pre># journalctl -f</pre>
+</li>
+<li> Show all messages by a specific executable: <pre># journalctl /usr/lib/systemd/systemd</pre>
+</li>
+<li> Show all messages by a specific process: <pre># journalctl _PID=1</pre>
+</li>
+<li> Show all messages by a specific unit: <pre># journalctl -u netcfg</pre>
+</li>
+<li> Show kernel ring buffer: <pre># journalctl -k</pre>
+</li>
+<li> Show only error, critical, and alert priority messages <pre># journalctl -p err..alert</pre> Numbers also can be used, <code>journalctl -p 3..1</code>. If single number/keyword used, <code>journalctl -p 3</code> - all higher priority levels also included.</li>
+<li> Show auth.log equivalent by filtering on syslog facility: <pre># journalctl SYSLOG_FACILITY=10</pre>
+</li>
+</ul>
+<p>See <code>man 1 journalctl</code>, <code>man 7 systemd.journal-fields</code>, or Lennart's <a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/journalctl.html">blog post</a> for details.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>By default, <i>journalctl</i> truncates lines longer than screen width, but in some cases, it may be better to enable wrapping instead of truncating. This can be controlled by the <code>SYSTEMD_LESS</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a>, which contains options passed to <a href="../en/Core_utilities.html#less" title="Core utilities">less</a> (the default pager) and defaults to <code>FRSXMK</code> (see <code>man 1 less</code> and <code>man 1 journalctl</code> for details).
+<p>By omitting the <code>S</code> option, the output will be wrapped instead of truncated. For example, start <i>journalctl</i> as follows:
+</p>
+<pre>$ SYSTEMD_LESS=FRXMK journalctl
+</pre>
+If you would like to set this behaviour as default, <a href="../en/Environment_variables.html#Per_user" title="Environment variables">export</a> the variable from <code>~/.bashrc</code> or <code>~/.zshrc</code>.</div>
+<h3><span class="mw-headline" id="Journal_size_limit">Journal size limit</span></h3>
+<p>If the journal is persistent (non-volatile), its size limit is set to a default value of 10% of the size of the underlying file system but capped to 4 GiB. For example, with <code>/var/log/journal/</code> located on a 20 GiB partition, journal data may take up to 2 GiB. On a 50 GiB partition, it would max at 4 GiB.
+</p>
+<p>The maximum size of the persistent journal can be controlled by uncommenting and changing the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SystemMaxUse=50M</pre>
+<p>It is also possible to use the drop-in snippets configuration override mechanism rather than editing the global configuration file. In this case do not forget to place the overrides under the <code>[Journal]</code> header:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf.d/00-journal-size.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Journal]
+SystemMaxUse=50M</pre>
+<p>See <code>man journald.conf</code> for more info.
+</p>
+<h3><span class="mw-headline" id="Clean_journal_files_manually">Clean journal files manually</span></h3>
+<p>Journal files can be globally removed from <code>/var/log/journal/</code> using <i>e.g.</i> <code>rm</code>, or can be trimmed according to various criteria using <code>journalctl</code>. Examples:
+</p>
+<ul>
+<li> Remove archived journal files until the disk space they use falls below 100M: <pre># journalctl --vacuum-size=100M</pre>
+</li>
+<li> Make all journal files contain no data older than 2 weeks. <pre># journalctl --vacuum-time=2weeks</pre>
+</li>
+</ul>
+<p>See <code>man journalctl</code> for more info.
+</p>
+<h3><span class="mw-headline" id="Journald_in_conjunction_with_syslog">Journald in conjunction with syslog</span></h3>
+<p>Compatibility with a classic, non-journald aware <a href="../en/Syslog-ng.html" title="Syslog-ng">syslog</a> implementation can be provided by letting <i>systemd</i> forward all messages via the socket <code>/run/systemd/journal/syslog</code>. To make the syslog daemon work with the journal, it has to bind to this socket instead of <code>/dev/log</code> (<a rel="nofollow" class="external text" href="http://lwn.net/Articles/474968/">official announcement</a>). 
+</p>
+<p>The default <code>journald.conf</code> for forwarding to the socket is <code>ForwardToSyslog=no</code> to avoid system overhead, because <a href="../en/Rsyslog.html" title="Rsyslog">rsyslog</a> or <a href="../en/Syslog-ng.html" title="Syslog-ng">syslog-ng</a> pull the messages from the journal by <a rel="nofollow" class="external text" href="http://lists.freedesktop.org/archives/systemd-devel/2014-August/022295.html#journald">itself</a>. 
+</p>
+<p>See <a href="../en/Syslog-ng.html#Overview" title="Syslog-ng">Syslog-ng#Overview</a> and <a href="../en/Syslog-ng.html#syslog-ng_and_systemd_journal" title="Syslog-ng">Syslog-ng#syslog-ng and systemd journal</a>, or <a href="../en/Rsyslog.html" title="Rsyslog">rsyslog</a> respectively, for details on configuration.
+</p>
+<h3><span class="mw-headline" id="Forward_journald_to_.2Fdev.2Ftty12">Forward journald to /dev/tty12</span></h3>
+<p>Create a <a href="#Editing_provided_units">drop-in directory</a> <code>/etc/systemd/journald.conf.d</code> and create a <code>fw-tty12.conf</code> file in it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/journald.conf.d/fw-tty12.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Journal]
+ForwardToConsole=yes
+TTYPath=/dev/tty12
+MaxLevelConsole=info</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> systemd-journald.
+</p>
+<h3><span class="mw-headline" id="Specify_a_different_journal_to_view">Specify a different journal to view</span></h3>
+<p>There may be a need to check the logs of another system that is dead in the water, like booting from a live system to recover a production system. In such case, one can mount the disk in e.g. <code>/mnt</code>, and specify the journal path via <code>-D</code>/<code>--directory</code>, like so:
+</p>
+<pre>$ journalctl -D <i>/mnt</i>/var/log/journal -xe
+</pre>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Enable_installed_units_by_default">Enable installed units by default</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> How does it work with instantiated units? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Systemd">Talk:Systemd#</a>)</div>
+</div>
+<p>Arch Linux ships with <code>/usr/lib/systemd/system-preset/99-default.preset</code> containing <code>disable *</code>. This causes <i>systemctl preset</i> to disable all units by default, such that when a new package is installed, the user must manually enable the unit.
+</p>
+<p>If this behavior is not desired, simply create a symlink from <code>/etc/systemd/system-preset/99-default.preset</code> to <code>/dev/null</code> in order to override the configuration file. This will cause <i>systemctl preset</i> to enable all units that get installed—regardless of unit type—unless specified in another file in one <i>systemctl preset'</i>s configuration directories. User units are not affected. See the manpage for <code>systemd.preset</code> for more information.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Enabling all units by default may cause problems with packages that contain two or more mutually exclusive units. <i>systemctl preset</i> is designed to be used by distributions and spins or system administrators. In the case where two conflicting units would be enabled, you should explicitly specify which one is to be disabled in a preset configuration file as specified in the manpage for <code>systemd.preset</code>.</div>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Investigating_systemd_errors">Investigating systemd errors</span></h3>
+<p>As an example, we will investigate an error with <code>systemd-modules-load</code> service:
+</p>
+<p><b>1.</b> Lets find the <i>systemd</i> services which fail to start:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ systemctl --failed</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">systemd-modules-load.service   loaded <b>failed failed</b>  Load Kernel Modules</pre>
+<p><b>2.</b> Ok, we found a problem with <code>systemd-modules-load</code> service. We want to know more:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ systemctl status systemd-modules-load</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">systemd-modules-load.service - Load Kernel Modules
+   Loaded: loaded (/usr/lib/systemd/system/systemd-modules-load.service; static)
+   Active: <b>failed</b> (Result: exit-code) since So 2013-08-25 11:48:13 CEST; 32s ago
+     Docs: man:systemd-modules-load.service(8).
+           man:modules-load.d(5)
+  Process: <b>15630</b> ExecStart=/usr/lib/systemd/systemd-modules-load (<b>code=exited, status=1/FAILURE</b>)</pre>
+<p>If the <code>Process ID</code> is not listed, just restart the failed service with <code>systemctl restart systemd-modules-load</code>
+</p>
+<p><b>3.</b> Now we have the process id (PID) to investigate this error in depth. Enter the following command with the current <code>Process ID</code> (here: 15630):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ journalctl _PID=15630</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">-- Logs begin at Sa 2013-05-25 10:31:12 CEST, end at So 2013-08-25 11:51:17 CEST. --
+Aug 25 11:48:13 mypc systemd-modules-load[15630]: <b>Failed to find module 'blacklist usblp'</b>
+Aug 25 11:48:13 mypc systemd-modules-load[15630]: <b>Failed to find module 'install usblp /bin/false'</b></pre>
+<p><b>4.</b> We see that some of the kernel module configs have wrong settings. Therefore we have a look at these settings in <code>/etc/modules-load.d/</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -Al /etc/modules-load.d/</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+-rw-r--r--   1 root root    79  1. Dez 2012  blacklist.conf
+-rw-r--r--   1 root root     1  2. Mär 14:30 encrypt.conf
+-rw-r--r--   1 root root     3  5. Dez 2012  printing.conf
+-rw-r--r--   1 root root     6 14. Jul 11:01 realtek.conf
+-rw-r--r--   1 root root    65  2. Jun 23:01 virtualbox.conf
+...
+</pre>
+<p><b>5.</b> The <code>Failed to find module 'blacklist usblp'</code> error message might be related to a wrong setting inside of <code>blacklist.conf</code>. Lets deactivate it with inserting a trailing <b>#</b> before each option we found via step 3:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modules-load.d/blacklist.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+<b>#</b> blacklist usblp
+<b>#</b> install usblp /bin/false
+</pre>
+<p><b>6.</b> Now, try to start <code>systemd-modules-load</code>:
+</p>
+<pre>$ systemctl start systemd-modules-load
+</pre>
+<p>If it was successful, this should not prompt anything. If you see any error, go back to step 3 and use the new PID for solving the errors left.
+</p>
+<p>If everything is ok, you can verify that the service was started successfully with:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ systemctl status systemd-modules-load</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">systemd-modules-load.service - Load Kernel Modules
+   Loaded: <b>loaded</b> (/usr/lib/systemd/system/systemd-modules-load.service; static)
+   Active: <b>active (exited)</b> since So 2013-08-25 12:22:31 CEST; 34s ago
+     Docs: man:systemd-modules-load.service(8)
+           man:modules-load.d(5)
+ Process: 19005 ExecStart=/usr/lib/systemd/systemd-modules-load (code=exited, status=0/SUCCESS)
+Aug 25 12:22:31 mypc systemd[1]: <b>Started Load Kernel Modules</b>.</pre>
+<p>Often you can solve these kind of problems like shown above. For further investigation look at <a href="#Diagnosing_boot_problems">#Diagnosing boot problems</a>.
+</p>
+<h3><span class="mw-headline" id="Diagnosing_boot_problems">Diagnosing boot problems</span></h3>
+<p><i>systemd</i> has several options for diagnosing problems with the boot process. See <a href="../en/General_troubleshooting.html" title="Boot debugging" class="mw-redirect">boot debugging</a> and the <a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Software/systemd/Debugging/">systemd debugging documentation</a>.
+</p>
+<h3><span class="mw-headline" id="Diagnosing_problems_with_a_specific_service">Diagnosing problems with a specific service</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This may not catch all errors such as missing libraries. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/User_talk:Alucryd#Plex">User talk:Alucryd#Plex</a>)</div>
+</div>
+<p>If some <i>systemd</i> service misbehaves and you want to get more information about what is going on, set the <code>SYSTEMD_LOG_LEVEL</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a> to <code>debug</code>. For example, to run the <i>systemd-networkd</i> daemon in debug mode:
+</p>
+<pre># systemctl stop systemd-networkd
+# SYSTEMD_LOG_LEVEL=debug /lib/systemd/systemd-networkd
+</pre>
+<p>Or, equivalently, modify the service file temporarily for gathering enough output. For example: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/systemd-networkd.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+...
+Environment=SYSTEMD_LOG_LEVEL=debug
+....</pre>
+<p>If debug information is required long-term, add the variable the <a href="#Editing_provided_units">regular</a> way.
+</p>
+<h3><span class="mw-headline" id="Shutdown.2Freboot_takes_terribly_long">Shutdown/reboot takes terribly long</span></h3>
+<p>If the shutdown process takes a very long time (or seems to freeze) most likely a service not exiting is to blame. <i>systemd</i> waits some time for each service to exit before trying to kill it. To find out if you are affected, see <a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Software/systemd/Debugging/#shutdowncompleteseventually">this article</a>.
+</p>
+<h3><span class="mw-headline" id="Short_lived_processes_do_not_seem_to_log_any_output">Short lived processes do not seem to log any output</span></h3>
+<p>If <code>journalctl -u foounit</code> does not show any output for a short lived service, look at the PID instead. For example, if <code>systemd-modules-load.service</code> fails, and <code>systemctl status systemd-modules-load</code> shows that it ran as PID 123, then you might be able to see output in the journal for that PID, i.e. <code>journalctl -b _PID=123</code>. Metadata fields for the journal such as <code>_SYSTEMD_UNIT</code> and <code>_COMM</code> are collected asynchronously and rely on the <code>/proc</code> directory for the process existing. Fixing this requires fixing the kernel to provide this data via a socket connection, similar to <code>SCM_CREDENTIALS</code>.
+</p>
+<h3><span class="mw-headline" id="Boot_time_increasing_over_time">Boot time increasing over time</span></h3>
+<p>After using <code>systemd-analyze</code> a number of users have noticed that their boot time has increased significantly in comparison with what it used to be. After using <code>systemd-analyze blame</code> <a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a> is being reported as taking an unusually large amount of time to start. 
+</p>
+<p>The problem for some users has been due to <code>/var/log/journal</code> becoming too large. This may have other impacts on performance, such as for <code>systemctl status</code> or <code>journalctl</code>. As such the solution is to remove every file within the folder (ideally making a backup of it somewhere, at least temporarily) and then setting a journal file size limit as described in <a href="#Journal_size_limit">#Journal size limit</a>.
+</p>
+<h3><span class="mw-headline" id="systemd-tmpfiles-setup.service_fails_to_start_at_boot">systemd-tmpfiles-setup.service fails to start at boot</span></h3>
+<p>Starting with systemd 219, <code>/usr/lib/tmpfiles.d/systemd.conf</code> specifies ACL attributes for directories under <code>/var/log/journal</code> and, therefore, requires ACL support to be enabled for the filesystem the journal resides on.
+</p>
+<p>See <a href="../en/Access_Control_Lists.html#Enabling_ACL" title="Access Control Lists">Access Control Lists#Enabling ACL</a> for instructions on how to enable ACL on the filesystem that houses <code>/var/log/journal</code>.
+</p>
+<h3><span class="mw-headline" id="systemctl_enable_fails_for_symlinks_in_.2Fetc.2Fsystemd.2Fsystem">systemctl enable fails for symlinks in /etc/systemd/system</span></h3>
+<p>If <code>/etc/systemd/system/<i>foo</i>.service</code> is a symlink and <code>systemctl enable <i>foo</i>.service</code> is run, it will fail with this error:
+</p>
+<pre>Failed to issue method call: No such file or directory
+</pre>
+<p>This is a <a rel="nofollow" class="external text" href="https://bugzilla.redhat.com/show_bug.cgi?id=955379#c14">design choice</a> of systemd. As a workaround, enabling by absolute path works:
+</p>
+<pre># systemctl enable <i>/absolute/path/foo</i>.service
+</pre>
+<h3><span class="mw-headline" id="dependent_services_are_not_started_when_starting_a_service_manually">dependent services are not started when starting a service manually</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a><b>This section is being considered for removal.</b><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Guesswork instead of actual research, and bug reports belong to the bug tracker, not to the wiki. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Systemd#Subsection_.22dependent_services_are_not_started_when_starting_a_service_manually.22">Talk:Systemd#Subsection .22dependent services are not started when starting a service manually.22</a>)</div>
+</div>
+<p>One (in)famous example is <code>libvirtd.service</code> which needs the <code>virtlogd.socket</code> to function properly. 
+</p>
+<p>The dependencies in <code>/usr/lib/systemd/system/libvirtd.service</code> are defined as
+</p>
+<pre>[Install]
+WantedBy=multi-user.target
+Also=virtlockd.socket
+Also=virtlogd.socket
+</pre>
+<p>This only defines the necessary/dependent sockets to be enabled services(i.e. as "autostart"), too - but does not start them whenever the DISABLED (= non-autostarting) service ist started manually e.g. by running <code>systemctl start libvirtd</code>
+</p>
+<p>Thus the correct (?) way to manually start a service with dependent subservices once (instead of at each start of the system) probably is 
+</p>
+<pre>systemctl enable ServiceWithSubservices
+systemctl start ServiceWithSubservices
+systemctl disable ServiceWithSubservices
+</pre>
+<h3><span class="mw-headline" id="systemd_version_printed_on_boot_is_not_the_same_as_installed_package_version">systemd version printed on boot is not the same as installed package version</span></h3>
+<p>You need to <a href="../en/Mkinitcpio.html#Image_creation_and_activation" title="Mkinitcpio">regenerate your initramfs</a> and the versions should match. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>A pacman hook can be used to automatically regenerate the initramfs every time <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> is upgraded. See <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=215411">this forum thread</a> and <a href="../en/Pacman.html#Hooks" title="Pacman">Pacman#Hooks</a>.</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd">Official web site</a></li>
+<li><a href="https://en.wikipedia.org/wiki/systemd" class="extiw" title="wikipedia:systemd">Wikipedia article</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/public/systemd-man/">Manual pages</a></li>
+<li><a rel="nofollow" class="external text" href="http://freedesktop.org/wiki/Software/systemd/Optimizations">systemd optimizations</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/FrequentlyAskedQuestions">FAQ</a></li>
+<li><a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/TipsAndTricks">Tips and tricks</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/public/systemd-ebook-psankar.pdf">systemd for Administrators (PDF)</a></li>
+<li><a rel="nofollow" class="external text" href="http://fedoraproject.org/wiki/Systemd">About systemd on Fedora Project</a></li>
+<li><a rel="nofollow" class="external text" href="http://fedoraproject.org/wiki/How_to_debug_Systemd_problems">How to debug systemd problems</a></li>
+<li>
+<a rel="nofollow" class="external text" href="http://www.h-online.com/open/features/Control-Centre-The-systemd-Linux-init-system-1565543.html">Two</a> <a rel="nofollow" class="external text" href="http://www.h-online.com/open/features/Booting-up-Tools-and-tips-for-systemd-1570630.html">part</a> introductory article in <i>The H Open</i> magazine.</li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/systemd.html">Lennart's blog story</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/systemd-update.html">Status update</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/systemd-update-2.html">Status update2</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/systemd-update-3.html">Status update3</a></li>
+<li><a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/why.html">Most recent summary</a></li>
+<li><a rel="nofollow" class="external text" href="http://fedoraproject.org/wiki/SysVinit_to_Systemd_Cheatsheet">Fedora's SysVinit to systemd cheatsheet</a></li>
+<li><a rel="nofollow" class="external text" href="http://wiki.gentoo.org/wiki/Systemd">Gentoo Wiki systemd page</a></li>
+<li><a href="../en/Emacs.html#Syntax_highlighting_for_systemd_Files" title="Emacs">Emacs Syntax highlighting for Systemd files</a></li>
+<li><a rel="nofollow" class="external text" href="https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units">digital ocean tutorial</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Daemons_and_system_services.html" title="Category:Daemons and system services">Daemons and system services</a></li>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Sections_flagged_with_Template:Remove.html" title="Category:Sections flagged with Template:Remove">Sections flagged with Template:Remove</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

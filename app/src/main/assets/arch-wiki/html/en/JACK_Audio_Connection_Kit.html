@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>JACK Audio Connection Kit - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-JACK_Audio_Connection_Kit skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">JACK Audio Connection Kit</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Professional_audio.html" title="Professional audio">Professional audio</a></li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#JACK2"><span class="tocnumber">1.1</span> <span class="toctext">JACK2</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#JACK2_D-Bus"><span class="tocnumber">1.1.1</span> <span class="toctext">JACK2 D-Bus</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-4"><a href="#JACK"><span class="tocnumber">1.2</span> <span class="toctext">JACK</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#GUI"><span class="tocnumber">1.3</span> <span class="toctext">GUI</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Basic_Configuration"><span class="tocnumber">2</span> <span class="toctext">Basic Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Overview"><span class="tocnumber">2.1</span> <span class="toctext">Overview</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#A_shell-based_example_setup"><span class="tocnumber">2.2</span> <span class="toctext">A shell-based example setup</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Details_of_the_shell-based_example_setup"><span class="tocnumber">2.2.1</span> <span class="toctext">Details of the shell-based example setup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#A_GUI-based_example_setup"><span class="tocnumber">2.3</span> <span class="toctext">A GUI-based example setup</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Playing_nice_with_ALSA"><span class="tocnumber">2.4</span> <span class="toctext">Playing nice with ALSA</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#gstreamer"><span class="tocnumber">2.5</span> <span class="toctext">gstreamer</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#PulseAudio"><span class="tocnumber">2.6</span> <span class="toctext">PulseAudio</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Firewire"><span class="tocnumber">2.7</span> <span class="toctext">Firewire</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#MIDI"><span class="tocnumber">3</span> <span class="toctext">MIDI</span></a></li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#.22Cannot_lock_down_memory_area_.28Cannot_allocate_memory.29.22_message_on_startup"><span class="tocnumber">4.1</span> <span class="toctext">"Cannot lock down memory area (Cannot allocate memory)" message on startup</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#jack2-dbus_and_qjackctl_errors"><span class="tocnumber">4.2</span> <span class="toctext">jack2-dbus and qjackctl errors</span></a></li>
+<li class="toclevel-2 tocsection-19">
+<a href="#Problems_with_specific_applications"><span class="tocnumber">4.3</span> <span class="toctext">Problems with specific applications</span></a>
+<ul>
+<li class="toclevel-3 tocsection-20"><a href="#VLC_-_no_audio_after_starting_JACK"><span class="tocnumber">4.3.1</span> <span class="toctext">VLC - no audio after starting JACK</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>In order for JACK to work properly, your user needs to be <a href="../en/Users_and_groups.html#Group_management" title="Users and groups">added</a> to the <code>audio</code> group for access to higher ulimits defined in <code>/etc/security/limits.d/99-audio.conf</code>, which is needed for realtime audio processing.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You need to manually add your user to the <code>audio</code> group even if you're using logind, since logind just handles access to direct hardware.</div>
+<p>There are two JACK implementations, see <a rel="nofollow" class="external text" href="https://github.com/jackaudio/jackaudio.github.com/wiki/Q_difference_jack1_jack2">this comparison</a> for the difference between the two. In short, Jack 1 and Jack 2 are equivalent implementations of the same protocol. Programs compiled against Jack 1 will work with Jack 2 without recompile (and vice versa). 
+</p>
+<h3><span class="mw-headline" id="JACK2">JACK2</span></h3>
+<p><b>JACK2</b> is a C++ implementation with SMP support. <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> it with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack2">jack2</a></span> package. If you are on a 64-bit installation and need to run 32-bit applications that require JACK, also install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lib32-jack2">lib32-jack2</a></span> package from the <a href="../en/Multilib.html" title="Multilib">multilib</a> repository.
+</p>
+<h4><span class="mw-headline" id="JACK2_D-Bus">JACK2 D-Bus</span></h4>
+<p>JACK2 with <a href="../en/D-Bus.html" title="D-Bus">D-Bus</a> can be installed via <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack2-dbus">jack2-dbus</a></span>. It is the same as the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack2">jack2</a></span> package but does not provide the legacy "jackd" server.
+</p>
+<p>It is controlled by the <code>jack_control</code> utility. The important commands are listed below:
+</p>
+<pre>jack_control start  -  starts the jack server
+jack_control stop  - stops the jack server
+jack_control ds alsa  -  selects alsa as the driver (backend)
+jack_control eps realtime True  -  set engine parameters, such as realtime
+jack_control dps period 256  -  set the driver parameter period to 256
+</pre>
+<h3><span class="mw-headline" id="JACK">JACK</span></h3>
+<p><b>JACK</b> uses a C API and supports more than one soundcard on Linux (plus MIDI). <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> it with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack">jack</a></span> package. If you are on a 64-bit installation and need to run 32-bit applications that require JACK, also install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lib32-jack">lib32-jack</a></span> package from the <a href="../en/Multilib.html" title="Multilib">multilib</a> repository.
+</p>
+<h3><span class="mw-headline" id="GUI">GUI</span></h3>
+<p>If you want a GUI control application, the most widely used one is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qjackctl">qjackctl</a></span>.
+</p>
+<p>Also, <a rel="nofollow" class="external text" href="http://kxstudio.linuxaudio.org/Applications:Cadence">cadence</a> offers a set of applications and eases some advanced jack configurations. It is available on <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cadence/">aur</a>.
+</p>
+<h2><span class="mw-headline" id="Basic_Configuration">Basic Configuration</span></h2>
+<h3><span class="mw-headline" id="Overview">Overview</span></h3>
+<p><a rel="nofollow" class="external text" href="http://www.linux-magazine.com/content/download/63041/486886/version/1/file/JACK_Audio_Server.pdf">This Linux Magazine article</a> is a very good general overview, although do not worry about manual compilations, quite a few JACK tools work right off the wire now, <i>after</i> JACK is configured correctly.
+</p>
+<p>Most tutorials are advising a realtime kernel, which is quite helpful for live synthesis and FX; but for purposes of recording and editing it is not necessary, as long as you set up for non-realtime latencies -- 10-40+ ms (100-500+ ms for older hardware).
+</p>
+<p>The right configuration for your hardware and application needs, depends on several factors.
+</p>
+<h3><span class="mw-headline" id="A_shell-based_example_setup">A shell-based example setup</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The JACK FAQ points to this specific section as an example of a myth that needs debunking. <a rel="nofollow" class="external text" href="https://github.com/jackaudio/jackaudio.github.com/wiki/FAQ_and_Myths">It says</a>, "No you do not [have to set up realtime scheduling of each audio application]. There are countless examples e.g. archwiki which demonstrate elaborate scripts to raise the priority of audio-processing applications. In fact they all achieve the opposite." (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:JACK_Audio_Connection_Kit">Talk:JACK Audio Connection Kit#</a>)</div>
+</div>
+<p>The D-Bus edition of JACK2 can make startup much easier.  Formerly, we had to have QjackCtl start it for us, or use a daemonizer, or some other method.  But using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack2-dbus">jack2-dbus</a></span>, we can easily start and configure it via a shell script.
+</p>
+<p>Create a shell script that can be executed at X login:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">start_jack.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+
+jack_control start
+sudo schedtool -R -p 20 `pidof jackdbus`
+jack_control eps realtime true
+jack_control ds alsa
+jack_control dps device hw:HD2
+jack_control dps rate 48000
+jack_control dps nperiods 2
+jack_control dps period 64
+sleep 10
+/usr/bin/a2jmidid -e &amp;
+sleep 10
+qjackctl &amp;
+sleep 10
+qmidiroute ~/All2MIDI1.qmr &amp;
+sleep 10
+yoshimi -S &amp;
+sleep 10
+</pre>
+<p>The above will start a complete realtime JACK live-synthesis setup, integrating several tools.  Details of each line follow.  When discovering your own best configuration, it is helpful to do trial and error using QjackCtl's GUI with a non-D-Bus JACK2 version.
+</p>
+<h4><span class="mw-headline" id="Details_of_the_shell-based_example_setup">Details of the shell-based example setup</span></h4>
+<pre>jack_control start
+</pre>
+<p>Starts JACK if it is not already started.
+</p>
+<pre>sudo schedtool -R -p 20 `pidof jackdbus`
+</pre>
+<p>Set JACK to realtime mode in the Linux kernel, priority 20 (options range 1-99).
+</p>
+<pre>jack_control eps realtime true
+</pre>
+<p>Sets JACK to realtime mode in its own internal setup.
+</p>
+<pre>jack_control ds alsa
+</pre>
+<p>Sets JACK to use the ALSA driver set.
+</p>
+<pre>jack_control dps device hw:HD2
+</pre>
+<p>Sets JACK to use ALSA-compatible sound card named HD2.  One can find the names with <code>cat /proc/asound/cards</code>.  Most ALSA tutorials and default configurations use card numbers, but this can get confusing when external MIDI devices are in use; names make it easier.
+</p>
+<pre>jack_control dps rate 48000
+</pre>
+<p>Sets JACK to use 48000 khz sampling.  Happens to work very well with this card.  Some cards only do 44100, many will go much higher.  The higher you go, the lower your latency, but the better your card and your CPU has to be, and software has to support this as well.
+</p>
+<pre>jack_control dps nperiods 2
+</pre>
+<p>Sets JACK to use 2 periods.  2 is right for motherboard, PCI, PCI-X, etc.; 3 for USB.
+</p>
+<pre>jack_control dps period 64
+</pre>
+<p>Sets JACK to use 64 periods per frame.  Lower is less latency, but the setting in this script gives 2.67 ms latency, which is nicely low without putting too much stress on the particular hardware this example was built for.  If a USB sound system were in use it might be good to try 32.  Anything less than 3-4 ms should be fine for realtime synthesis and/or FX, 5 ms is the smallest a human being can detect.  There are many cases of perfect-storm-gorgeous hardware which can handle 1 ms latency without stressing the CPU, but definitely this is not always the case!  QjackCtl will tell you how you are doing; at no-load, which means no clients attached, you will want a max of 3-5% CPU usage, and if you cannot get that without xruns (the red numbers which mean the system cannot keep up with the demands), you will have to improve your hardware.  There are many inexpensive USB sound systems which produce very good quality at very low latency if the USB is good on the motherboard, but not all.  
+</p>
+<pre>sleep 10
+</pre>
+<p>Wait for the above to settle.
+</p>
+<pre>/usr/bin/a2jmidid -e &amp;
+</pre>
+<p>Start the ALSA-to-JACK MIDI bridge.  Good for mixing in applications which take MIDI input through ALSA but not JACK.
+</p>
+<pre>sleep 10
+</pre>
+<p>Wait for the above to settle.
+</p>
+<pre>qjackctl &amp;
+</pre>
+<p>Load QjackCtl.  GUI configuration tells it to run in the system tray.  It will pick up the JACK session started by D-Bus just fine, and very smoothly too.  It maintains the patchbay, the connections between these applications and any other JACK-enabled apps to be started manually.  The patchbay is set up using manual GUI, but connections pre-configured in the patchbay are automatically created by QjackCtl itself when apps are started.
+</p>
+<pre>sleep 10
+</pre>
+<p>Wait for the above to settle.
+</p>
+<pre>qmidiroute ~/All2MIDI1.qmr &amp;
+</pre>
+<p>Load qmidiroute, loading a custom-created configuration file which will rewrite all MIDI events on all channels to channel 1.  This is useful when plugging the PC into any keyboard anywhere -- no matter what the keyboard's channel defaults to, qmidiroute will send the signal to the synth on channel 1, where it needs it.  qmidiroute is capable of very complex and useful configurations of many sorts, including multiple simultaneous translations, transpositions, signal type rewrites, etcetera.
+</p>
+<pre>sleep 10
+</pre>
+<p>Wait for the above to settle.
+</p>
+<pre>yoshimi -S &amp;
+</pre>
+<p>Load the Yoshimi synthesizer, using the pre-saved default state.
+</p>
+<pre>sleep 10
+</pre>
+<p>Wait for the above to settle.
+</p>
+<p>With all of the above in a script run at logon, and with the QjackCtl patchbay set correctly, all we have to do is plug the PC/laptop into a MIDI keyboard using a USB-to-MIDI adapter, or simply the USB-in MIDI capability of many modern keyboards, and you are ready to play!
+</p>
+<p>The essence of QJackCtl is described fairly well in <a rel="nofollow" class="external text" href="http://www.linuxjournal.com/article/8354?page=full">this article.</a>
+</p>
+<h3><span class="mw-headline" id="A_GUI-based_example_setup">A GUI-based example setup</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> You don't need to install pulseaudio to use QjackCtl, this section is confusing. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:JACK_Audio_Connection_Kit">Talk:JACK Audio Connection Kit#</a>)</div>
+</div>
+<p>The shell-based example above, lays out in detail lots of things you may well need to know, and it does work well.  If you want something much more GUI, however, do this:
+</p>
+<ul>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=jack2-dbus">jack2-dbus</a></span>.</li>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pulseaudio">pulseaudio</a></span>.</li>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pulseaudio-alsa">pulseaudio-alsa</a></span>.</li>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qjackctl">qjackctl</a></span>, and tell your GUI window/desktop system to run it at startup.</li>
+<li> Make sure QjackCtl is told to:
+<ul>
+<li> use the D-Bus interface,</li>
+<li> run at startup,</li>
+<li> save its configuration to the default location,</li>
+<li> start the JACK audio server on application startup,</li>
+<li> enable the system tray icon, and</li>
+<li> start minimized to sytem tray.</li>
+</ul>
+</li>
+<li> Reboot.</li>
+<li> After logging in, you will see QjackCtl in your system tray. Left-click on it.</li>
+<li> Start tweaking in the QjackCtl GUI.  The info embedded in the shell-script setup above may be of some help :-)  As may be the info in <a rel="nofollow" class="external text" href="http://www.linuxjournal.com/article/8354">this article</a>. Just remember that you have to get your latency down to less than 5ms for live tone production or filtration of any sort, or the delay will be obvious to player and listener alike.</li>
+<li> From the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/non-sessionmanager-git/">non-sessionmanager-git</a></span><sup><small>AUR</small></sup>; it has the function of setting up "sessions": sets of other audio software items which Jack (through the QjackCtl patchbay or not!) will wire together.  NSM can handle as many different sessions as you wish to set up; and as a result, it's all GUI, apart from the one rc.local edit in the beginning.</li>
+</ul>
+<h3><span class="mw-headline" id="Playing_nice_with_ALSA">Playing nice with ALSA</span></h3>
+<p>To allow Alsa programs to play while jack is running you must install the jack plugin for alsa with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=alsa-plugins">alsa-plugins</a></span>.
+</p>
+<p>And enable it by editing (or creating) /etc/asound.conf (system wide settings) to have these lines:
+</p>
+<pre>
+# convert alsa API over jack API
+# use it with
+# % aplay foo.wav
+
+# use this as default
+pcm.!default {
+    type plug
+    slave { pcm "jack" }
+}
+
+ctl.mixer0 {
+    type hw
+    card 1
+}
+
+# pcm type jack
+pcm.jack {
+    type jack
+    playback_ports {
+        0 system:playback_1
+        1 system:playback_2
+    }
+    capture_ports {
+        0 system:capture_1
+        1 system:capture_2
+    }
+}</pre>
+<p>You need not restart your computer or anything.  Just edit the alsa config files, start up jack, and there you go...
+</p>
+<p>Remember to start it as a <b>user</b>. If you start it with <code>jackd</code> -d alsa" as user X, it will not work for user Y.
+</p>
+<p>Another approach, using ALSA loopback device (more complex but probably more robust), is described in <a rel="nofollow" class="external text" href="http://alsa.opensrc.org/Jack_and_Loopback_device_as_Alsa-to-Jack_bridge">this article</a>.
+</p>
+<h3><span class="mw-headline" id="gstreamer">gstreamer</span></h3>
+<p>Example: watching a live stream without gconf
+</p>
+<pre>gst-launch-0.10 playbin2 uri=http://streamer.stackingdwarves.net/bewerungeroom.ogv audio-sink="jackaudiosink"</pre>
+<p>Setting gstreamer to use jack using gconftool-2
+</p>
+<pre>gconftool-2 --type string --set /system/gstreamer/0.10/audio/default/audiosink "jackaudiosink buffer-time=2000000"
+gconftool-2 --type string --set /system/gstreamer/0.10/audio/default/musicaudiosink "jackaudiosink buffer-time=2000000"
+gconftool-2 --type string --set /system/gstreamer/0.10/audio/default/chataudiosink "jackaudiosink buffer-time=2000000"
+</pre>
+<p>Further information: <a rel="nofollow" class="external free" href="http://jackaudio.org/gstreamer_via_jack">http://jackaudio.org/gstreamer_via_jack</a>
+</p>
+<h3><span class="mw-headline" id="PulseAudio">PulseAudio</span></h3>
+<p>If you need to keep <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pulseaudio">pulseaudio</a></span> installed (in the event it is required by other packages, like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnome-settings-daemon">gnome-settings-daemon</a></span>), you may want to prevent it from spawning automatically with X and taking over from JACK.
+</p>
+<p>Edit <code>/etc/pulse/client.conf</code>, uncomment "autospawn" and set it to "no":
+</p>
+<pre>;autospawn = yes
+autospawn = no
+</pre>
+<p><i>If you want both to play along, see: <a href="../en/PulseAudio/Examples.html#PulseAudio_through_JACK" title="PulseAudio/Examples">PulseAudio/Examples#PulseAudio through JACK</a></i>
+</p>
+<h3><span class="mw-headline" id="Firewire">Firewire</span></h3>
+<p>In order to prevent ALSA from messing around with your firewire devices you have to blacklist all firewire related kernel modules. This also prevents PulseAudio from using firewire. Create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/alsa-no-jack.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+blacklist snd-fireworks
+blacklist snd-bebob
+blacklist snd-oxfw
+blacklist snd-dice
+blacklist snd-firewire-digi00x
+blacklist snd-firewire-tascam
+blacklist snd-firewire-lib
+blacklist snd-firewire-transceiver
+blacklist snd-fireface
+blacklist snd-firewire-motu
+</pre>
+<p><i>The list of modules is the most recent available at the time of writing at <a rel="nofollow" class="external text" href="https://github.com/takaswie/snd-firewire-improve">Alsa Firewire Improve Repository</a>.</i>
+</p>
+<p>Now you can unload your loaded firewire modules or reboot.
+</p>
+<h2><span class="mw-headline" id="MIDI">MIDI</span></h2>
+<p>JACK can handle one soundcard very well, and an arbitrary number of MIDI devices (connected e.g. via USB).
+If you start JACK and want to use a MIDI keyboard or a synthesizer or some other pure MIDI device, you have to start JACK with a proper soundcard (one that actually outputs or inputs PCM sound).
+As soon you have done that, you can connect the MIDI device. E.g. with QjackCtl (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qjackctl">qjackctl</a></span>), you click on the connect button and you will find your device listed under JACK-MIDI or ALSA-MIDI, depending on the driver.
+</p>
+<p>For JACK-MIDI, you may want to set the <b>MIDI Driver</b> to <b>seq</b> or <b>raw</b> in QjackCtl <i>Setup &gt; Settings</i>. This should make your MIDI device appear under the <i>MIDI</i> tab. You can also change the name of the client (from a generic "midi_capture_1" to something more descriptive), if you enable <i>Setup &gt; Display &gt; Enable client/port aliases</i> and then <i>Enable client/port aliases editing (rename)</i>.
+</p>
+<p>For ALSA-MIDI, make sure to turn on <b>Enable ALSA Sequencer support</b> in QjackCtl <i>Setup &gt; Misc</i>. This will add the <i>ALSA</i> tab in QjackCtl <i>Connect</i> window where your MIDI controller will show up.
+</p>
+<p>For bridging ALSA-MIDI to JACK-MIDI, you may consider using a2jmidid (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=a2jmidid">a2jmidid</a></span>). The following command will export all available ALSA MIDI ports to JACK MIDI ports:
+</p>
+<pre>$ a2jmidid -e
+</pre>
+<p>They will be visible in QjackCtl under the <i>MIDI</i> tab labelled "a2j" client.
+You can automate starting of a2jmidid by adding to QjackCtl <i>Setup &gt; Options &gt; Execute script after Startup</i>: <code>/usr/bin/a2jmidid -e &amp;</code>
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When connecting MIDI keyboard controllers in QjackCtl, make sure to <i>Expand All</i> first and connect the desired <i>Output Ports</i> (below the <i>Readable Clients</i>) to the <i>Input Ports</i> (below the <i>Writable Clients</i>). As a shortcut, if you select a writable client instead of individual ports as your destination, it should connect all its currently displayed output ports underneath.</div>
+<ul>
+<li>
+<b>Q:</b> What is the difference between JACK-MIDI and ALSA-MIDI?</li>
+<li>
+<b>A:</b> The former has improved timing and sample accurate MIDI event alignment. It extends or may even replace the latter but at this point they both co-exist.</li>
+</ul>
+<p>To install some M-Audio MIDI keyboards, you will need the firmware package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/midisport-firmware/">midisport-firmware</a></span><sup><small>AUR</small></sup> in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. Also, the snd_usb_audio module has to be available.
+For more information about specific USB MIDI devices, see <a rel="nofollow" class="external free" href="http://alsa.opensrc.org/USBMidiDevices">http://alsa.opensrc.org/USBMidiDevices</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id=".22Cannot_lock_down_memory_area_.28Cannot_allocate_memory.29.22_message_on_startup">"Cannot lock down memory area (Cannot allocate memory)" message on startup</span></h3>
+<p>See <a href="../en/Realtime_process_management.html#Configuring_PAM" title="Realtime process management">Realtime process management#Configuring PAM</a> and ensure that the user is in the <code>audio</code> <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a>.
+</p>
+<h3><span class="mw-headline" id="jack2-dbus_and_qjackctl_errors">jack2-dbus and qjackctl errors</span></h3>
+<p>Still having the "Cannot allocate memory" and/or "Cannot connect to server socket err = No such file or directory" error(s) when pressing qjackctl's start button (assuming that you have package jack2-dbus installed) ?
+</p>
+<p>Please delete <code>~/.jackdrc</code>, <code>~/.config/jack/conf.xml</code>, <code>~/.config/rncbc.org/QjackCtl.conf</code>. Kill <i>jackdbus</i> and restart from scratch :)
+(Thanks to nedko)
+</p>
+<p>Also try running 
+</p>
+<pre>$ fuser /dev/snd/*
+</pre>
+<p>and check the resulting PID's with
+</p>
+<pre>$ ps ax | grep [PID here]
+</pre>
+<p>This will hopefully show the conflicting programs.
+</p>
+<h3><span class="mw-headline" id="Problems_with_specific_applications">Problems with specific applications</span></h3>
+<h4><span class="mw-headline" id="VLC_-_no_audio_after_starting_JACK">VLC - no audio after starting JACK</span></h4>
+<p>Run VLC and change the following menu options:
+</p>
+<ul>
+<li> Tools &gt; Preferences</li>
+<li> Show settings: All</li>
+<li> Audio &gt; Output modules &gt; Audio output module: JACK audio output</li>
+<li> Audio &gt; Output modules &gt; JACK: Automatically connect to writable clients (enable)</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Sound.html" title="Category:Sound">Sound</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

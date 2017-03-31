@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>IBM ThinkPad X41 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-IBM_ThinkPad_X41 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">IBM ThinkPad X41</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The X41 and X41t (tablet) are both SATA-based machines that
+include a SATA-PATA bridge allowing the use of PATA HDDs, see external links for
+modifications to use SATA HDDs and SSDs. The laptops utilise a Pentium M
+processor (either 1.5GHz or 1.6GHz), the <a href="../en/Linux-ck.html" title="Linux-ck">Linux-ck</a> packages contain optimised
+packages for this architecture.  
+</p>
+<p>This article contains some useful tweaks to make the most of your machine, the
+tweaks are mainly powersaving biased. With vanilla Arch, around 3 hours battery
+life was achieved, following powersaving tweaks a bit over than 5 hours
+was achieved, this was performed with screen brightness at the second highest
+value.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Useful_packages"><span class="tocnumber">2</span> <span class="toctext">Useful packages</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#System_Packages"><span class="tocnumber">2.1</span> <span class="toctext">System Packages</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Applications"><span class="tocnumber">2.2</span> <span class="toctext">Applications</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Powersaving_tweaks"><span class="tocnumber">3</span> <span class="toctext">Powersaving tweaks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#laptop-mode_.28kernel.29"><span class="tocnumber">3.1</span> <span class="toctext">laptop-mode (kernel)</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#SATA-ALPM_.28pm-utils.29"><span class="tocnumber">3.2</span> <span class="toctext">SATA-ALPM (pm-utils)</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Powersaving_on_PCI_devices"><span class="tocnumber">3.3</span> <span class="toctext">Powersaving on PCI devices</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#i915_RC6_powersaving"><span class="tocnumber">3.4</span> <span class="toctext">i915 RC6 powersaving</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Disable_NMI_watchdog"><span class="tocnumber">3.5</span> <span class="toctext">Disable NMI watchdog</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#PHC"><span class="tocnumber">3.6</span> <span class="toctext">PHC</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Tablet_support"><span class="tocnumber">4</span> <span class="toctext">Tablet support</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Getting_display_keys_to_work"><span class="tocnumber">4.1</span> <span class="toctext">Getting display keys to work</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14"><a href="#External_links"><span class="tocnumber">5</span> <span class="toctext">External links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+Grab the .iso file from <a rel="nofollow" class="external text" href="https://www.archlinux.org/download/">the download page</a>, write this to a memory stick <pre> sudo dd if=archlinux-201x.xx.xx-dual.iso of=/dev/sdX bs=4M</pre>Restart the computer and boot into it like any other Arch installation.
+<h2><span class="mw-headline" id="Useful_packages">Useful packages</span></h2>
+<p>Some useful packages for your IBM/Lenovo ThinkPad X41: 
+</p>
+<h3><span class="mw-headline" id="System_Packages">System Packages</span></h3>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=acpi">acpi</a></span> - provides /proc/acpi, interesting things like lid state, temperatures, volume, brightness etc.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-wacom">xf86-input-wacom</a></span> - Driver supporting Wacom tablet screen.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span> - Xorg driver for the Intel 915GM graphics chip.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tp_smapi">tp_smapi</a></span> - Adds support for SMAPI functions (battery discharge control, battery information, hdaps acceloremeter support). If you're using <a href="../en/Linux-ck.html" title="Linux-ck">Linux-ck</a> try <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tp_smapi-dkms/">tp_smapi-dkms</a></span><sup><small>AUR</small></sup> (AUR).</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=thinkfinger">thinkfinger</a></span> - Driver for fingerprint reader.</li>
+<li> See <a href="../en/TrackPoint.html" title="TrackPoint">TrackPoint</a> for track point support.</li>
+</ul>
+<p>The IBM X41 comes with a "ipw2915" wireless Centrino (A, B and G) or ipw2200
+wireless Centrino (B and G) module, the kernel provides support
+for these two devices. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=netctl">netctl</a></span> has been tested and works flawlessly with
+the "ipw2915". See <a href="../en/Wireless_network_configuration.html#ipw2100_and_ipw2200" title="Wireless network configuration">Wireless network configuration#ipw2100 and ipw2200</a>
+</p>
+<h3><span class="mw-headline" id="Applications">Applications</span></h3>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=powertop">powertop</a></span> - Measure power usage.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cellwriter">cellwriter</a></span> - (X41t) on-screen tablet keyboard.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Thinkfan seems to fail due to thinkpad_acpi not having a fan_control function</div>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/thinkfan/">thinkfan</a></span><sup><small>AUR</small></sup> - Control the utilisation of the fan. </li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gpm">gpm</a></span> - Linux console mouse server.</li>
+</ul>
+<h2><span class="mw-headline" id="Powersaving_tweaks">Powersaving tweaks</span></h2>
+<p>Initially without any powersaving tweaks, the X41 uses quite a lot of power
+(this can be monitored using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=powertop">powertop</a></span>, it also provides suggestions for
+reducing power consumption). Here are some modifications that I found
+considerable improved the battery life of the X41t. 
+</p>
+<h3><span class="mw-headline" id="laptop-mode_.28kernel.29">laptop-mode (kernel)</span></h3>
+<p>Laptop mode is included in the kernel, it buffers disk activities to reduce
+utilisation of your HDD therefore saving a considerable amount of power. The
+effect with SSDs is less pronounced, but still saves some power.
+</p>
+<pre>echo "vm.laptop_mode=5" | sudo tee /etc/sysctl.d/laptop_mode.conf</pre>
+<h3><span class="mw-headline" id="SATA-ALPM_.28pm-utils.29">SATA-ALPM (pm-utils)</span></h3>
+<p>ALPM - Aggressive Link Power Management allows the SATA host bus adapter to
+enter a low power state when inactive therefore reducing power consumption.
+</p>
+<pre>echo "SATA_ALPM_ENABLE=true" | sudo tee /etc/pm/config.d/sata_alpm
+sudo chmod +x /etc/pm/config.d/sata_alpm</pre>
+<h3><span class="mw-headline" id="Powersaving_on_PCI_devices">Powersaving on PCI devices</span></h3>
+<p>Powersaving isn't automatically enabled on devices as sometimes it causes
+issues, this can save about 2W.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/pci_powersaving.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"</pre>
+<h3><span class="mw-headline" id="i915_RC6_powersaving">i915 RC6 powersaving</span></h3>
+<p>See <a href="../en/Intel_graphics.html#Module-based_Powersaving_Options" title="Intel graphics">Intel graphics#Module-based Powersaving Options</a>.
+</p>
+<h3><span class="mw-headline" id="Disable_NMI_watchdog">Disable NMI watchdog</span></h3>
+<p>The NMI watchdog is a debugging feature of the linux kernel that is enabled by
+default. It is useless for normal operation and significantly increases the
+number of CPU wakeups/second. 
+</p>
+<pre>echo "kernel.nmi_watchdog=0" | sudo tee /etc/sysctl.d/nmi_watchdog.conf
+</pre>
+<h3><span class="mw-headline" id="PHC">PHC</span></h3>
+<p><a href="../en/PHC.html" title="PHC">PHC</a> - Processor Hardware Control. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/phc-intel/">phc-intel</a></span><sup><small>AUR</small></sup> supports the Mobile Centrino
+line of processors and hence the X41, this program allows you to undervolt your
+CPU. Undervolting reduces the voltage(V) the processor runs at, because P=IV this will reduce your power consumption, this has no effect on performance, any excess voltage will be dissipated as heat, your laptop will run cooler and the fan will activate less frequently.
+</p>
+<h2><span class="mw-headline" id="Tablet_support">Tablet support</span></h2>
+<p>The X41t utilises a Wacom digitiser for input, <code>pacman -S xf86-input-wacom</code>
+provides support for it. Once installed the driver should be activated following
+the next reboot.
+</p>
+<h3><span class="mw-headline" id="Getting_display_keys_to_work">Getting display keys to work</span></h3>
+<p>If the display keys (Rotate, Escape, Enter, Prev, Next,...) on your X41 tablet aren't working, add <code>atkbd.softraw=0</code> as a <a href="../en/Kernel_parameters.html" title="Kernel parameter" class="mw-redirect">kernel parameter</a> in your boot loader configuration. Once they're producing <a href="../en/Extra_keyboard_keys.html" title="Extra keyboard keys">scancodes</a>, you can <a href="../en/Map_scancodes_to_keycodes.html#Using_setkeycodes" title="Map scancodes to keycodes">map them to keycodes</a>.
+</p>
+<h1><span class="mw-headline" id="External_links">External links</span></h1>
+<ul>
+<li> This report has been listed in the <a rel="nofollow" class="external text" href="http://tuxmobil.org/ibm.html">Linux Laptop and Notebook Installation Survey: IBM</a>. </li>
+<li> <a rel="nofollow" class="external text" href="http://www.placaware.com/?page_id=120">SATA support modification</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.thinkwiki.org/wiki/Category:X41">ThinkWiki X41 page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://linuxfocus.org/~guido/gentoo-tpt43p/cooling/">T43p Cooling - applicable to X41t</a>, I've added ~1mm thick copper sheet to both the CPU and northbridge heatsinks with no ill effects.</li>
+<li> <a rel="nofollow" class="external text" href="https://paste.ee/p/EoSef">A shell/zenity script for common X41t tasks</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:IBM.html" title="Category:IBM">IBM</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

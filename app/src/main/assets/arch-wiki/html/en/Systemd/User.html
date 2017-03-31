@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>systemd/User - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Systemd_User skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">systemd/User</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Systemd.html" title="Systemd">Systemd</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Systemd.html" title="Systemd">systemd</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Getty.html#Automatic_login_to_virtual_console" title="Automatic login to virtual console" class="mw-redirect">Automatic login to virtual console</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Xinit.html#Autostart_X_at_login" title="Start X at login" class="mw-redirect">Start X at login</a></li>
+</ul>
+</div>
+<p><a href="../../en/Systemd.html" title="Systemd">systemd</a> offers users the ability to manage services under the user's control with a per-user systemd instance, enabling users to start, stop, enable, and disable their own units. This is convenient for daemons and other services that are commonly run for a single user, such as <a href="../../en/Music_Player_Daemon.html" title="Mpd" class="mw-redirect">mpd</a>, or to perform automated tasks like fetching mail. With some caveats it is even possible to run xorg and the entire window manager from user services.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#How_it_works"><span class="tocnumber">1</span> <span class="toctext">How it works</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Basic_setup"><span class="tocnumber">2</span> <span class="toctext">Basic setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#D-Bus"><span class="tocnumber">2.1</span> <span class="toctext">D-Bus</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Environment_variables"><span class="tocnumber">2.2</span> <span class="toctext">Environment variables</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Service_example"><span class="tocnumber">2.2.1</span> <span class="toctext">Service example</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#DISPLAY_and_XAUTHORITY"><span class="tocnumber">2.2.2</span> <span class="toctext">DISPLAY and XAUTHORITY</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#PATH"><span class="tocnumber">2.2.3</span> <span class="toctext">PATH</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Automatic_start-up_of_systemd_user_instances"><span class="tocnumber">2.3</span> <span class="toctext">Automatic start-up of systemd user instances</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Xorg_and_systemd"><span class="tocnumber">3</span> <span class="toctext">Xorg and systemd</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Automatic_login_into_Xorg_without_display_manager"><span class="tocnumber">3.1</span> <span class="toctext">Automatic login into Xorg without display manager</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Xorg_as_a_systemd_user_service"><span class="tocnumber">3.2</span> <span class="toctext">Xorg as a systemd user service</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Writing_user_units"><span class="tocnumber">4</span> <span class="toctext">Writing user units</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Example"><span class="tocnumber">4.1</span> <span class="toctext">Example</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Example_with_variables"><span class="tocnumber">4.2</span> <span class="toctext">Example with variables</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Note_about_X_applications"><span class="tocnumber">4.3</span> <span class="toctext">Note about X applications</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Some_use_cases"><span class="tocnumber">5</span> <span class="toctext">Some use cases</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#Persistent_terminal_multiplexer"><span class="tocnumber">5.1</span> <span class="toctext">Persistent terminal multiplexer</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Window_manager"><span class="tocnumber">5.2</span> <span class="toctext">Window manager</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#Kill_user_processes_on_logout"><span class="tocnumber">6</span> <span class="toctext">Kill user processes on logout</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="How_it_works">How it works</span></h2>
+<p>As per default configuration in <code>/etc/pam.d/system-login</code>, the <code>pam_systemd</code> module automatically launches a <code>systemd --user</code> instance when the user logs in for the first time. This process will survive as long as there is some session for that user, and will be killed as soon as the last session for the user is closed. When <a href="#Automatic_start-up_of_systemd_user_instances">#Automatic start-up of systemd user instances</a> is enabled, the instance is started on boot and will not be killed. The systemd user instance is responsible for managing user services, which can be used to run daemons or automated tasks, with all the benefits of systemd, such as socket activation, timers, dependency system or strict process control via cgroups.
+</p>
+<p>Similarly to system units, user units are located in the following directories (ordered by ascending precedence):
+</p>
+<ul>
+<li> <code>/usr/lib/systemd/user/</code> where units provided by installed packages belong.</li>
+<li> <code>~/.local/share/systemd/user/</code> where units of packages that have been installed in the home directory belong.</li>
+<li> <code>/etc/systemd/user/</code> where system-wide user units are placed by the system administrator.</li>
+<li> <code>~/.config/systemd/user/</code> where the user puts its own units.</li>
+</ul>
+<p>When systemd user instance starts, it brings up the target <code>default.target</code>. Other units can be controlled manually with <code>systemctl --user</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> Be aware that the <code>systemd --user</code> instance is a per-user process, and not per-session. The rationale is that most resources handled by user services, like sockets or state files will be per-user (live on the user's home dir) and not per session. This means that all user services run outside of a session. As a consequence, programs that need to be run inside a session will probably break in user services. The way systemd handles user sessions is pretty much in flux. See <a rel="nofollow" class="external autonumber" href="https://mail.gnome.org/archives/desktop-devel-list/2014-January/msg00079.html">[1]</a> and <a rel="nofollow" class="external autonumber" href="http://lists.freedesktop.org/archives/systemd-devel/2014-March/017552.html">[2]</a> for some hints on where things are going.</li>
+<li> <code>systemd --user</code> runs as a separate process from the <code>systemd --system</code> process. User units can not reference or depend on system units.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="Basic_setup">Basic setup</span></h2>
+<p>All the user services will be placed in <code>~/.config/systemd/user/</code>. If you want to run services on first login, execute <code>systemctl --user enable <i>service</i></code> for any service you want to be autostarted.
+</p>
+<h3><span class="mw-headline" id="D-Bus">D-Bus</span></h3>
+<p>Some programs will need a <a href="../../en/D-Bus.html" title="D-Bus">D-Bus</a> user message bus, and systemd is the manager of the user message bus.<a rel="nofollow" class="external autonumber" href="https://www.archlinux.org/news/d-bus-now-launches-user-buses/">[3]</a> The <i>dbus-daemon</i> is started once per user for all sessions with the provided <code>dbus.socket</code> and <code>dbus.service</code> user units.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you had previously created these units manually under <code>/etc/systemd/user/</code> or <code>~/.config/systemd/user/</code>, they can be removed.</div>
+<h3><span class="mw-headline" id="Environment_variables">Environment variables</span></h3>
+<p>The user instance of systemd does not inherit any of the <a href="../../en/Environment_variables.html" title="Environment variables">environment variables</a> set in places like <code>.bashrc</code> etc. There are several ways to set environment variables for the systemd user instance:
+</p>
+<ol>
+<li> For users with a <code>$HOME</code> directory, use the <code>DefaultEnvironment</code> option in <code>~/.config/systemd/user.conf</code>. Affects only that user's user unit.</li>
+<li> Use the <code>DefaultEnvironment</code> option in <code>/etc/systemd/user.conf</code> file. Affects all user units.</li>
+<li> Add a drop-in config file in <code>/etc/systemd/system/user@.service.d/</code>. Affects all user units; see <a href="#Service_example">#Service example</a>
+</li>
+<li> At any time, use <code>systemctl --user set-environment</code> or <code>systemctl --user import-environment</code>. Affects all user units started after setting the environment variables, but not the units that were already running.</li>
+<li> Using the <code>dbus-update-activation-environment --systemd --all</code> command provided by <a href="../../en/D-Bus.html" title="Dbus" class="mw-redirect">dbus</a>. Has the same effect as <code>systemctl --user import-environment</code>, but also affects the D-Bus session. You can add this to the end of your shell initialization file.</li>
+</ol>
+<p>One variable you may want to set is <code>PATH</code>.
+</p>
+<h4><span class="mw-headline" id="Service_example">Service example</span></h4>
+<p>Create the <a href="../../en/Systemd.html#Drop-in_files" title="Systemd">drop-in</a> directory <code>/etc/systemd/system/user@.service.d/</code> and inside create a file that has the extension <code>.conf</code> (e.g. <code>local.conf</code>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/user@.service.d/local.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Environment="PATH=/usr/lib/ccache/bin/:$PATH"
+Environment="EDITOR=nano -c"
+Environment="BROWSER=firefox"
+Environment="NO_AT_BRIDGE=1"</pre>
+<h4><span class="mw-headline" id="DISPLAY_and_XAUTHORITY">DISPLAY and XAUTHORITY</span></h4>
+<p><code>DISPLAY</code> is used by any X application to know which display to use and <code>XAUTHORITY</code> to provide a path to the user's <code>.Xauthority</code> file and thus the cookie needed to access the X server. If you plan on launching X applications from systemd units, these variables need to be set. Systemd provides a script in <code>/etc/X11/xinit/xinitrc.d/50-systemd-user.sh</code> to import those variables into the systemd user session on X launch. <a rel="nofollow" class="external autonumber" href="https://github.com/systemd/systemd/blob/v219/NEWS#L194">[4]</a> So unless you start X in a nonstandard way, user services should be aware of the <code>DISPLAY</code> and <code>XAUTHORITY</code>.
+</p>
+<h4><span class="mw-headline" id="PATH">PATH</span></h4>
+<p>If you customize your <code>PATH</code> and plan on launching applications that make use of it from systemd units, you should make sure the modified <code>PATH</code> is set on the systemd environment. Assuming you set your <code>PATH</code> in <code>.bash_profile</code>, the best way to make systemd aware of your modified <code>PATH</code> is by adding the following to <code>.bash_profile</code> after the <code>PATH</code> variable is set:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bash_profile</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+systemctl --user import-environment PATH
+</pre>
+<h3><span class="mw-headline" id="Automatic_start-up_of_systemd_user_instances">Automatic start-up of systemd user instances</span></h3>
+<p>The systemd user instance is started after the first login of a user and killed after the last session of the user is closed. Sometimes it may be useful to start it right after boot, and keep the systemd user instance running after the last session closes, for instance to have some user process running without any open session. Lingering is used to that effect. Use the following command to enable lingering for specific user:
+</p>
+<pre># loginctl enable-linger <i>username</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>systemd services are <b>not</b> sessions, they run outside of <i>logind</i>. Do not use lingering to enable automatic login as it will <a href="../../en/General_troubleshooting.html#Session_permissions" title="General troubleshooting">break the session</a>.</div>
+<h2><span class="mw-headline" id="Xorg_and_systemd">Xorg and systemd</span></h2>
+<p>There are several ways to run xorg within systemd units. Below there are two options, either by starting a new user session with an xorg process, or by launching xorg from a systemd user service.
+</p>
+<h3><span class="mw-headline" id="Automatic_login_into_Xorg_without_display_manager">Automatic login into Xorg without display manager</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This setup ends up with two user D-Bus buses, one for the desktop, and an other for systemd. Why can't we use the systemd one alone?  (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Systemd/User">Talk:Systemd/User#</a>)</div>
+</div>
+<p>This option will launch a system unit that will start a user session with an xorg server and then run the usual <code>~/.xinitrc</code> to launch the window manager, etc.
+</p>
+<p>You need to have <a href="#D-Bus">#D-Bus</a> correctly set up and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xlogin-git/">xlogin-git</a></span><sup><small>AUR</small></sup> installed.
+</p>
+<p>Set up your <a href="../../en/Xinit.html" title="Xinitrc" class="mw-redirect">xinitrc</a> from the skeleton, so that it will source the files in <code>/etc/X11/xinit/xinitrc.d/</code>. Running your <code>~/.xinitrc</code> should not return, so either have <code>wait</code> as the last command, or add <code>exec</code> to the last command that will be called and which should not return (your window manager, for instance).
+</p>
+<p>The session will use its own dbus daemon, but various systemd utilities will automatically connect to the <code>dbus.service</code> instance.
+</p>
+<p>Finally, enable (<b>as root</b>) the <i>xlogin</i> service for automatic login at boot:
+</p>
+<pre># systemctl enable xlogin@<i>username</i>
+</pre>
+<p>The user session lives entirely inside a systemd scope and everything in the user session should work just fine.
+</p>
+<h3><span class="mw-headline" id="Xorg_as_a_systemd_user_service">Xorg as a systemd user service</span></h3>
+<p>Alternatively, <a href="../../en/Xorg.html" title="Xorg">xorg</a> can be run from within a systemd user service. This is nice since other X-related units can be made to depend on xorg, etc, but on the other hand, it has some drawbacks explained below.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-server">xorg-server</a></span> provides integration with systemd in two ways:
+</p>
+<ul>
+<li> Can be run unprivileged, delegating device management to logind (see Hans de Goede commits around <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/xorg/xserver/commit/?id=82863656ec449644cd34a86388ba40f36cea11e9">this commit</a>).</li>
+<li> Can be made into a socket activated service (see <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/xorg/xserver/commit/?id=b3d3ffd19937827bcbdb833a628f9b1814a6e189">this commit</a>). This removes the need for <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/systemd-xorg-launch-helper-git/">systemd-xorg-launch-helper-git</a></span><sup><small>AUR</small></sup>.</li>
+</ul>
+<p>Unfortunately, to be able to run xorg in unprivileged mode, it needs to run inside a session. So, right now the handicap of running xorg as user service is that it must be run with root privileges (like before 1.16), and can't take advantage of the unprivileged mode introduced in 1.16.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This is not a fundamental restriction imposed by logind, but the reason seems to be that xorg needs to know which session to take over, and right now it gets this information calling <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/systemd/logind">logind</a>'s <code>GetSessionByPID</code> using its own pid as argument. See <a rel="nofollow" class="external text" href="http://lists.x.org/archives/xorg-devel/2014-February/040476.html">this thread</a> and <a rel="nofollow" class="external text" href="http://cgit.freedesktop.org/xorg/xserver/tree/hw/xfree86/os-support/linux/systemd-logind.c">xorg sources</a>. It seems likely that xorg could be modified to get the session from the tty it is attaching to, and then it could run unprivileged from a user service outside a session.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>On xorg 1.18 socket activation seems to be broken. The client triggering the activation deadlocks. See the upstream bug report <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=93072">[5]</a>. As a temporary workaround you can start the xorg server without socket activation, making sure the clients connect after a delay, so the server is fully started. There seems to be no nice mechanism te get startup notification for the X server.</div>
+<p>This is how to launch xorg from a user service:
+</p>
+<p>1. Make xorg run with root privileges and for any user, by editing <code>/etc/X11/Xwrapper.config</code> 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/Xwrapper.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+allowed_users=anybody
+needs_root_rights=yes
+</pre>
+<p>2. Add the following units to <code>~/.config/systemd/user</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/xorg@.socket</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Socket for xorg at display %i
+
+[Socket]
+ListenStream=/tmp/.X11-unix/X%i
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/xorg@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Xorg server at display %i
+
+Requires=xorg@%i.socket
+After=xorg@%i.socket
+
+[Service]
+Type=simple
+SuccessExitStatus=0 1
+
+ExecStart=/usr/bin/Xorg :%i -nolisten tcp -noreset -verbose 2 "vt${XDG_VTNR}"
+</pre>
+<p>where <code>${XDG_VTNR} </code> is the virtual terminal where xorg will be launched, either hard-coded in the service unit, or set  in the systemd environment with
+</p>
+<pre>$ systemctl --user set-environment XDG_VTNR=1
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>xorg should be launched at the same virtual terminal where the user logged in. Otherwise logind will consider the session inactive.</div>
+<p>3. Make sure to configure the <code>DISPLAY</code> environment variable as explained <a href="#DISPLAY_and_XAUTHORITY">above</a>.
+</p>
+<p>4. Then, to enable socket activation for xorg on display 0 and tty 2 one would do:
+</p>
+<pre>$ systemctl --user set-environment XDG_VTNR=2     # So that xorg@.service knows which vt use
+$ systemctl --user start xorg@0.socket            # Start listening on the socket for display 0
+</pre>
+<p>Now running any X application will launch xorg on virtual terminal 2 automatically.
+</p>
+<p>The environment variable <code>XDG_VTNR</code> can be set in the systemd environment from <code>.bash_profile</code>, and then one could start any X application, including a window manager, as a systemd unit that depends on <code>xorg@0.socket</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Currently running a window manager as a user service means it runs outside of a session with the problems this may bring: <a href="../../en/General_troubleshooting.html#Session_permissions" title="General troubleshooting">break the session</a>. However, it seems that systemd developers intend to make something like this possible. See <a rel="nofollow" class="external autonumber" href="https://mail.gnome.org/archives/desktop-devel-list/2014-January/msg00079.html">[6]</a> and <a rel="nofollow" class="external autonumber" href="http://lists.freedesktop.org/archives/systemd-devel/2014-March/017552.html">[7]</a>
+</div>
+<h2><span class="mw-headline" id="Writing_user_units">Writing user units</span></h2>
+<h3><span class="mw-headline" id="Example">Example</span></h3>
+<p>The following is an example of a user version of the mpd service.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/mpd.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Music Player Daemon
+
+[Service]
+ExecStart=/usr/bin/mpd --no-daemon
+
+[Install]
+WantedBy=default.target
+</pre>
+<h3><span class="mw-headline" id="Example_with_variables">Example with variables</span></h3>
+<p>The following is an example of a user version of <code>sickbeard.service</code>, which takes into account variable home directories where SickBeard can find certain files:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/sickbeard.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=SickBeard Daemon
+
+[Service]
+ExecStart=/usr/bin/env python2 /opt/sickbeard/SickBeard.py --config %h/.sickbeard/config.ini --datadir %h/.sickbeard
+
+[Install]
+WantedBy=default.target
+</pre>
+<p>As detailed in <code>man systemd.unit</code>, the <code>%h</code> variable is replaced by the home directory of the user running the service. There are other variables that can be taken into account in the <a href="../../en/Systemd.html" title="Systemd">systemd</a> manpages.
+</p>
+<h3><span class="mw-headline" id="Note_about_X_applications">Note about X applications</span></h3>
+<p>Most X apps need a <code>DISPLAY</code> variable to run. See <a href="#DISPLAY_and_XAUTHORITY">#DISPLAY and XAUTHORITY</a> for how to this variable is set for the entire systemd user instance.
+</p>
+<h2><span class="mw-headline" id="Some_use_cases">Some use cases</span></h2>
+<h3><span class="mw-headline" id="Persistent_terminal_multiplexer">Persistent terminal multiplexer</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> References <code>user-session@.service</code> instead of <code>user@.service</code>; the latter does not contain <code>Conflicts=getty@tty1.service</code>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Systemd/User">Talk:Systemd/User#</a>)</div>
+</div>
+<p>You may wish your user session to default to running a terminal multiplexer, such as <a href="../../en/GNU_Screen.html" title="GNU Screen">GNU Screen</a> or <a href="../../en/Tmux.html" title="Tmux">Tmux</a>, in the background rather than logging you into a window manager session. Separating login from X login is most likely only useful for those who boot to a TTY instead of to a display manager (in which case you can simply bundle everything you start in with myStuff.target). 
+</p>
+<p>To create this type of user session, procede as above, but instead of creating wm.target, create multiplexer.target:
+</p>
+<pre>[Unit]
+Description=Terminal multiplexer
+Documentation=info:screen man:screen(1) man:tmux(1)
+After=cruft.target
+Wants=cruft.target
+
+[Install]
+Alias=default.target</pre>
+<p><code>cruft.target</code>, like <code>mystuff.target</code> above, should start anything you think should run before tmux or screen starts (or which you want started at boot regardless of timing), such as a GnuPG daemon session.
+</p>
+<p>You then need to create a service for your multiplexer session. Here is a sample service, using tmux as an example and sourcing a gpg-agent session which wrote its information to <code>/tmp/gpg-agent-info</code>. This sample session, when you start X, will also be able to run X programs, since DISPLAY is set.
+</p>
+<pre>[Unit]
+Description=tmux: A terminal multiplixer 
+Documentation=man:tmux(1)
+After=gpg-agent.service
+Wants=gpg-agent.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/tmux start
+ExecStop=/usr/bin/tmux kill-server
+Environment=DISPLAY=:0
+EnvironmentFile=/tmp/gpg-agent-info
+
+[Install]
+WantedBy=multiplexer.target</pre>
+<p>Once this is done, <code>systemctl --user enable</code> <code>tmux.service</code>, <code>multiplexer.target</code> and any services you created to be run by <code>cruft.target</code> and you should be set to go! Activated <code>user-session@.service</code> as described above, but be sure to remove the <code>Conflicts=getty@tty1.service</code> from <code>user-session@.service</code>, since your user session will not be taking over a TTY. Congratulations! You have a running terminal multiplexer and some other useful programs ready to start at boot!
+</p>
+<h3><span class="mw-headline" id="Window_manager">Window manager</span></h3>
+<p>To run a window manager as a systemd service, you first need to run <a href="#Xorg_as_a_systemd_user_service">#Xorg as a systemd user service</a>. In the following we will use awesome as an example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/awesome.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Awesome window manager
+After=xorg.target
+Requires=xorg.target
+
+[Service]
+ExecStart=/usr/bin/awesome
+Restart=always
+RestartSec=10
+ 
+[Install]
+WantedBy=wm.target
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>[Install]</code> section includes a <code>WantedBy</code> part. When using <code>systemctl --user enable</code> it will link this as <code>~/.config/systemd/user/wm.target.wants/<i>window_manager</i>.service</code>, allowing it to be started at login. Is recommended to enable this service, not to link it manually.</div>
+<h2><span class="mw-headline" id="Kill_user_processes_on_logout">Kill user processes on logout</span></h2>
+<p>Arch Linux builds the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> package with <code>--without-kill-user-processes</code>, setting <code>KillUserProcesses</code> to <code>no</code> by default. This setting causes user processes not to be killed when the user completely logs out. To change this behavior in order to have all user processes killed on the user's logout, set <code>KillUserProcesses=yes</code> in <code>/etc/systemd/logind.conf</code>. 
+</p>
+<p>Note that changing this setting breaks terminal multiplexers such as <a href="../../en/Tmux.html" title="Tmux">tmux</a> and <a href="../../en/GNU_Screen.html" title="Screen" class="mw-redirect">screen</a>. If you change this setting, you can still use a terminal multiplexer by using <code>systemd-run</code> as follows:
+</p>
+<pre>$ systemd-run --scope --user <i>command</i> <i>args</i>
+</pre>
+<p>For example, to run <code>screen</code> you would do:
+</p>
+<pre>$ systemd-run --scope --user screen -S <i>foo</i>
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://bitbucket.org/KaiSforza/systemd-user-units/wiki/Home">KaiSforza's Bitbucket wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/zoqaeski/systemd-user-units">Zoqaeski's units on GitHub</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=167115">Arch forum thread about changes in systemd 206 user instances</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../../en/Category:Daemons_and_system_services.html" title="Category:Daemons and system services">Daemons and system services</a></li>
+<li><a href="../../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Systemd/User&amp;oldid=450371">https://wiki.archlinux.org/index.php?title=Systemd/User&amp;oldid=450371</a>"</li>
+					<li id="lastmod"> This page was last modified on 11 September 2016, at 16:46.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Samba - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Samba skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Samba</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Active_Directory_Integration.html" title="Active Directory Integration">Active Directory Integration</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Samba/Active_Directory_domain_controller.html" title="Samba/Active Directory domain controller">Samba/Active Directory domain controller</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/NFS.html" title="NFS">NFS</a></li>
+</ul>
+</div>
+<p><b>Samba</b> is a re-implementation of the <a href="https://en.wikipedia.org/wiki/Server_Message_Block" class="extiw" title="wikipedia:Server Message Block">SMB</a> networking protocol. It facilitates file and printer sharing among Linux and Windows systems as an alternative to <a href="../en/NFS.html" title="NFS">NFS</a>. Some users say that Samba is easily configured and that operation is very straight-forward. However, many new users run into problems with its complexity and non-intuitive mechanism. This article provides instructions for users on how to setup Samba.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Server_configuration"><span class="tocnumber">1</span> <span class="toctext">Server configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#smb.conf"><span class="tocnumber">1.1</span> <span class="toctext">smb.conf</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Creating_a_share"><span class="tocnumber">1.2</span> <span class="toctext">Creating a share</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Starting_services"><span class="tocnumber">1.3</span> <span class="toctext">Starting services</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Creating_usershare_path"><span class="tocnumber">1.4</span> <span class="toctext">Creating usershare path</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Adding_a_user"><span class="tocnumber">1.5</span> <span class="toctext">Adding a user</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Changing_Samba_user.27s_password"><span class="tocnumber">1.6</span> <span class="toctext">Changing Samba user's password</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Required_ports"><span class="tocnumber">1.7</span> <span class="toctext">Required ports</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Sample_configuration"><span class="tocnumber">1.8</span> <span class="toctext">Sample configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Client_configuration"><span class="tocnumber">2</span> <span class="toctext">Client configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#List_Public_Shares"><span class="tocnumber">2.1</span> <span class="toctext">List Public Shares</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#NetBIOS.2FWINS_host_names"><span class="tocnumber">2.2</span> <span class="toctext">NetBIOS/WINS host names</span></a></li>
+<li class="toclevel-2 tocsection-13">
+<a href="#Manual_mounting"><span class="tocnumber">2.3</span> <span class="toctext">Manual mounting</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Storing_Share_Passwords"><span class="tocnumber">2.3.1</span> <span class="toctext">Storing Share Passwords</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Automatic_mounting"><span class="tocnumber">2.4</span> <span class="toctext">Automatic mounting</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#As_mount_entry"><span class="tocnumber">2.4.1</span> <span class="toctext">As mount entry</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#As_systemd_unit"><span class="tocnumber">2.4.2</span> <span class="toctext">As systemd unit</span></a></li>
+<li class="toclevel-3 tocsection-18">
+<a href="#smbnetfs"><span class="tocnumber">2.4.3</span> <span class="toctext">smbnetfs</span></a>
+<ul>
+<li class="toclevel-4 tocsection-19"><a href="#Daemon"><span class="tocnumber">2.4.3.1</span> <span class="toctext">Daemon</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-20"><a href="#autofs"><span class="tocnumber">2.4.4</span> <span class="toctext">autofs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-21">
+<a href="#File_manager_configuration"><span class="tocnumber">2.5</span> <span class="toctext">File manager configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#GNOME_Files.2C_Nemo.2C_Caja.2C_Thunar_and_PCManFM"><span class="tocnumber">2.5.1</span> <span class="toctext">GNOME Files, Nemo, Caja, Thunar and PCManFM</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#KDE"><span class="tocnumber">2.5.2</span> <span class="toctext">KDE</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Other_graphical_environments"><span class="tocnumber">2.5.3</span> <span class="toctext">Other graphical environments</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-25">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-26"><a href="#Block_certain_file_extensions_on_Samba_share"><span class="tocnumber">3.1</span> <span class="toctext">Block certain file extensions on Samba share</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Discovering_network_shares"><span class="tocnumber">3.2</span> <span class="toctext">Discovering network shares</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Remote_control_of_Windows_computer"><span class="tocnumber">3.3</span> <span class="toctext">Remote control of Windows computer</span></a></li>
+<li class="toclevel-2 tocsection-29">
+<a href="#Share_files_without_a_username_and_password"><span class="tocnumber">3.4</span> <span class="toctext">Share files without a username and password</span></a>
+<ul>
+<li class="toclevel-3 tocsection-30"><a href="#Sample_Passwordless_Configuration"><span class="tocnumber">3.4.1</span> <span class="toctext">Sample Passwordless Configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-31"><a href="#Build_Samba_without_CUPS"><span class="tocnumber">3.5</span> <span class="toctext">Build Samba without CUPS</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33"><a href="#Failed_to_start_Samba_SMB.2FCIFS_server"><span class="tocnumber">4.1</span> <span class="toctext">Failed to start Samba SMB/CIFS server</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#Unable_to_overwrite_files.2C_permissions_errors"><span class="tocnumber">4.2</span> <span class="toctext">Unable to overwrite files, permissions errors</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#Windows_clients_keep_asking_for_password_even_if_Samba_shares_are_created_with_guest_permissions"><span class="tocnumber">4.3</span> <span class="toctext">Windows clients keep asking for password even if Samba shares are created with guest permissions</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Windows_7_connectivity_problems_-_mount_error.2812.29:_cannot_allocate_memory"><span class="tocnumber">4.4</span> <span class="toctext">Windows 7 connectivity problems - mount error(12): cannot allocate memory</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Error:_Failed_to_retrieve_printer_list:_NT_STATUS_UNSUCCESSFUL"><span class="tocnumber">4.5</span> <span class="toctext">Error: Failed to retrieve printer list: NT_STATUS_UNSUCCESSFUL</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Sharing_a_folder_fails"><span class="tocnumber">4.6</span> <span class="toctext">Sharing a folder fails</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#.22Browsing.22_network_fails_with_.22Failed_to_retrieve_share_list_from_server.22"><span class="tocnumber">4.7</span> <span class="toctext">"Browsing" network fails with "Failed to retrieve share list from server"</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#Protocol_negotiation_failed:_NT_STATUS_INVALID_NETWORK_RESPONSE"><span class="tocnumber">4.8</span> <span class="toctext">Protocol negotiation failed: NT_STATUS_INVALID_NETWORK_RESPONSE</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#Connection_to_SERVER_failed:_.28Error_NT_STATUS_UNSUCCESSFUL.29"><span class="tocnumber">4.9</span> <span class="toctext">Connection to SERVER failed: (Error NT_STATUS_UNSUCCESSFUL)</span></a></li>
+<li class="toclevel-2 tocsection-42"><a href="#Connection_to_SERVER_failed:_.28Error_NT_STATUS_CONNECTION_REFUSED.29"><span class="tocnumber">4.10</span> <span class="toctext">Connection to SERVER failed: (Error NT_STATUS_CONNECTION_REFUSED)</span></a></li>
+<li class="toclevel-2 tocsection-43"><a href="#Password_Error_when_correct_credentials_are_given_.28error_1326.29"><span class="tocnumber">4.11</span> <span class="toctext">Password Error when correct credentials are given (error 1326)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-44"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Server_configuration">Server configuration</span></h2>
+<p>To share files with Samba, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=samba">samba</a></span> package.
+</p>
+<h3><span class="mw-headline" id="smb.conf">smb.conf</span></h3>
+<p>Samba is configured in <code>/etc/samba/smb.conf</code>, if this file doesn't exist smbd will fail to start.
+</p>
+<p>To get started you can copy the default config file <code>/etc/samba/smb.conf.default</code>:
+</p>
+<pre># cp /etc/samba/smb.conf.default /etc/samba/smb.conf
+</pre>
+<p>The available options are documented in the <code>smb.conf</code> man page (<a rel="nofollow" class="external text" href="http://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html">link</a>).
+Whenever you modify the file run the <code>testparm</code> command to check for syntactic errrors.
+</p>
+<h3><span class="mw-headline" id="Creating_a_share">Creating a share</span></h3>
+<p>Open <code>/etc/samba/smb.conf</code> and scroll down to the <b>Share Definitions</b> section. The default configuration automatically creates a share for each user's home directory. However, users cannot actually log in unless you add a users wildcard.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[homes]
+   comment = Home Directories
+   browseable = no
+   writable = yes
+   valid users = %S</pre>
+<p>The <code>workgroup</code> specified in <code>smb.conf</code> has to match the in use Windows workgroup (default <code>WORKGROUP</code>).
+</p>
+<h3><span class="mw-headline" id="Starting_services">Starting services</span></h3>
+<p>To provide basic file sharing through SMB <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">start/enable</a> <code>smbd.service</code> and/or <code>nmbd.service</code> services. See <a rel="nofollow" class="external text" href="http://www.samba.org/samba/docs/man/manpages-3/smbd.8.html">smbd</a> and <a rel="nofollow" class="external text" href="http://www.samba.org/samba/docs/man/manpages-3/nmbd.8.html">nmbd</a> manpages for details, as the <code>nmbd.service</code> service may not always be required.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Instead of having the service running since boot, you can enable <code>smbd.socket</code> so the daemon is started on the first incoming connection. Do not forget to disable <code>smbd.service</code>.</div>
+<h3><span class="mw-headline" id="Creating_usershare_path">Creating usershare path</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This is an optional feature. Skip this section if you do not need it.</div>
+<p>"Usershare" is a feature that gives non-root users the capability to add, modify, and delete their own share definitions. 
+</p>
+<p>This creates the usershare directory in <code>/var/lib/samba</code>:
+</p>
+<pre># mkdir -p /var/lib/samba/usershare
+</pre>
+<p>This creates the group sambashare:
+</p>
+<pre># groupadd -r sambashare
+</pre>
+<p>This changes the owner of the directory to root and the group to sambashare:
+</p>
+<pre># chown root:sambashare /var/lib/samba/usershare
+</pre>
+<p>This changes the permissions of the usershare directory so that users in the group sambashare can read, write and execute files:
+</p>
+<pre># chmod 1770 /var/lib/samba/usershare
+</pre>
+<p>Set the following parameters in the <code>smb.conf</code> configuration file: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[global]
+  usershare path = /var/lib/samba/usershare
+  usershare max shares = 100
+  usershare allow guests = yes
+  usershare owner only = yes
+  ...</pre>
+<p>Add your user to the <i>sambashare</i> group. Replace <code><i>your_username</i></code> with the name of your user:
+</p>
+<pre># gpasswd sambashare -a <i>your_username</i>
+</pre>
+<p>Restart <code>smbd.service</code> and <code>nmbd.service</code> services.
+</p>
+<p>Log out and log back in. You should now be able to configure your samba share using GUI. For example, in <a href="../en/Thunar.html" title="Thunar">Thunar</a> you can right click on any directory and share it on the network. If you want to share paths inside your home directory you must make it listable for the group others.
+</p>
+<h3><span class="mw-headline" id="Adding_a_user">Adding a user</span></h3>
+<p>Samba requires a Linux user account - you may use an existing user account or create a <a href="../en/Users_and_groups.html#User_management" title="Users and groups">new one</a>.
+</p>
+<p>Although the user name is shared with Linux system, Samba uses a password separate from that of the Linux user accounts. Replace <code>samba_user</code> with the chosen Samba user account:
+</p>
+<pre># smbpasswd -a <i>samba_user</i>
+</pre>
+<p>Depending on the <a rel="nofollow" class="external text" href="https://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html#SERVERROLE">server role</a>, existing <a href="../en/File_permissions_and_attributes.html" title="File permissions and attributes">File permissions and attributes</a> may need to be altered for the Samba user account.
+</p>
+<p>If you want the new user only to be allowed to remotely access the file server shares through Samba, you can restrict other login options：
+</p>
+<ul>
+<li> disabling shell - <code>usermod --shell /usr/bin/nologin --lock username</code>
+</li>
+<li> disabling SSH logons - edit <code>/etc/ssh/sshd_conf</code>, change option <code>AllowUsers</code>
+</li>
+</ul>
+<p>Also see <a href="../en/Security.html" title="Security">Security</a> for hardening your system.
+</p>
+<h3><span class="mw-headline" id="Changing_Samba_user.27s_password">Changing Samba user's password</span></h3>
+<p>To change a user's password, use <code>smbpasswd</code>:
+</p>
+<pre># smbpasswd <i>samba_user</i>
+</pre>
+<h3><span class="mw-headline" id="Required_ports">Required ports</span></h3>
+<p>If you are using a <a href="../en/Firewalls.html" title="Firewall" class="mw-redirect">firewall</a>, do not forget to open required ports (usually 137-139 + 445). For a complete list please check <a rel="nofollow" class="external text" href="https://wiki.samba.org/index.php/Samba_port_usage">Samba port usage</a>.
+</p>
+<h3><span class="mw-headline" id="Sample_configuration">Sample configuration</span></h3>
+<p>See <code>man smb.conf</code> for details and explanation of configuration options. There is also an <a rel="nofollow" class="external text" href="http://www.samba.org/samba/docs/man/manpages-3/smb.conf.5.html">online version</a> available.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[global]
+  deadtime = 60 ; This is useful to stop a server's resources being exhausted by a large number of inactive connections
+  disable netbios = yes ; Disable netbios announcing
+  dns proxy = no ; nmbd spawns a second copy of itself to do the DNS name lookup requests on 'yes'
+  hosts allow = 192.168.1. 127. 10. ; This parameter is a comma, space, or tab delimited set of hosts which are permitted to access a service
+  invalid users = root ; This is a list of users that should not be allowed to login to this service
+  security = user ; Use as standalone file server
+  map to guest = Bad User ; Means user logins with an invalid password are rejected, or allow guest login and mapped into the guest account
+  max connections = 100 ; Number of simultaneous connections to a service to be limited
+  workgroup = WORKGROUP ; Workgroup the server will appear to be in when queried by clients
+
+  ; Uncomment the following lines to disable printer support
+  ;load printers = no
+  ;printing = bsd
+  ;printcap name = /dev/null
+  ;disable spoolss = yes
+
+  ; Default permissions for all shares  
+  inherit owner = yes ; Take the ownership of the parent directory when creating files/folders
+  create mask = 0664 ; Create file mask
+  directory mask = 0775 ; Create director mask
+  force create mode = 0664 ; Force create file mask
+  force directory mode = 0775 ; Force create directory mask
+
+; Private Share
+[private] ; translate into: \\server\private
+  comment = My Private Share ; Seen next to a share when a client queries the server
+  path = /path/to/data ; Directory to which the user of the service is to be given access
+  read only = no ; An inverted synonym to writeable.
+  valid users = user1 user2 @group1 @group2; restrict a service to a particular set of users and/or groups
+
+; Public Share
+;[public]
+; comment = My Public Share
+; path = /path/to/public
+; read only = yes
+; guest ok = yes; No password required to connect to the service
+</pre>
+<p>Restart the <code>smbd</code> service to apply configuration changes.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Connected clients may need to reconnect before configuration changes take effect.</div>
+<h2><span class="mw-headline" id="Client_configuration">Client configuration</span></h2>
+<p>For a lightweight method (without support for listing public shares, etc.), only install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cifs-utils">cifs-utils</a></span> to provide <code>/usr/bin/mount.cifs</code>.
+</p>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbclient">smbclient</a></span> for an ftp-like command line interface. See <code>man smbclient</code> for commonly used commands.
+</p>
+<p>Depending on the <a href="../en/Desktop_environment.html" title="Desktop environment">desktop environment</a>, GUI methods may be available. See <a href="#File_manager_configuration">#File manager configuration</a> for use with a file manager.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>After installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cifs-utils">cifs-utils</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbclient">smbclient</a></span>, load the <code>cifs</code> <a href="../en/Kernel_modules.html" title="Kernel module" class="mw-redirect">kernel module</a> or reboot to prevent mount fails.</div>
+<h3><span class="mw-headline" id="List_Public_Shares">List Public Shares</span></h3>
+<p>The following command lists public shares on a server:
+</p>
+<pre>$ smbclient -L <i>hostname</i> -U%
+</pre>
+<p>Alternatively, running <i>smbtree</i> will show a tree diagram of all the shares. This is not advisable on a network with a lot of computers, but can be helpful for diagnosing if you have the correct sharename.
+</p>
+<pre>$ smbtree -b -N
+</pre>
+<p>Where the options are <code>-b</code> (<code>--broadcast</code>) to use broadcast instead of using the master browser and <code>-N</code> (<code>-no-pass</code>) to not ask for a password.
+</p>
+<h3><span class="mw-headline" id="NetBIOS.2FWINS_host_names">NetBIOS/WINS host names</span></h3>
+<p>You may need to <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">start/enable</a> winbindd in order to resolve host names with e.g., mount.cifs
+</p>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbclient">smbclient</a></span> package provides a driver to resolve host names using WINS. To enable it, add “wins” to the “hosts” line in /etc/nsswitch.conf.
+</p>
+<h3><span class="mw-headline" id="Manual_mounting">Manual mounting</span></h3>
+<p>Create a mount point for the share:
+</p>
+<pre># mkdir /mnt/<i>mountpoint</i>
+</pre>
+<p>Mount the share using <code>mount.cifs</code> as <code>type</code>. Not all the options listed below are needed or desirable:
+</p>
+<pre># mount -t cifs //<i>SERVER</i>/<i>sharename</i> /mnt/<i>mountpoint</i> -o user=<i>username</i>,password=<i>password</i>,uid=<i>username</i>,gid=<i>group</i>,workgroup=<i>workgroup</i>,ip=<i>serverip</i>,iocharset=<i>utf8</i></pre>
+<p>To allow users to mount it as long as the mount point resides in a directory controllable by the user; i.e. the user's home, append the <code>users</code> mount option.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The option is user<b>s</b> (plural). For other filesystem types handled by mount, this option is usually <i>user</i>; sans the "<b>s</b>".</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Using <code>uid</code> and/or <code>gid</code> as mount options may cause I/O errors, it's recommended to set/check the <a href="../en/File_permissions_and_attributes.html" title="File permissions and attributes">File permissions and attributes</a> instead.</div>
+<p><i>SERVER</i>
+</p>
+<dl><dd> The server name.</dd></dl>
+<p><i>sharename</i>
+</p>
+<dl><dd> The shared directory.</dd></dl>
+<p><i>mountpoint</i>
+</p>
+<dl><dd> The local directory where the share will be mounted.</dd></dl>
+<p><code>-o [options]</code>
+</p>
+<dl><dd> See <code>man mount.cifs</code> for more information.</dd></dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> Abstain from using a trailing <code>/</code>. <code>//<i>SERVER</i>/<i>sharename</i><b>/</b></code> will not work.</li>
+<li> If your mount does not work stable, stutters or freezes, try to enable different SMB protocol version with <code>vers=</code> option. For example, <code>vers=2.0</code> for Windows Vista mount.</li>
+<li> If having timeouts on a mounted network share with cifs on a shutdown, see <a href="../en/WPA_supplicant.html#Problem_with_mounted_network_shares_.28cifs.29_and_shutdown_.28Date:_1st_Oct._2015.29" title="WPA supplicant">WPA supplicant#Problem with mounted network shares (cifs) and shutdown (Date: 1st Oct. 2015)</a>.</li>
+</ul>
+</div>
+<h5><span class="mw-headline" id="Storing_Share_Passwords">Storing Share Passwords</span></h5>
+<p>Storing passwords in a world readable file is not recommended. A safer method is to create a credentials file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/path/to/credentials/share</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">username=<i>myuser</i>
+password=<i>mypass</i></pre>
+<p>Replace <code>username=myuser,password=mypass</code> with <code>credentials=/path/to/credentials/share</code>.
+</p>
+<p>The credential file should explicitly readable/writeable to root:
+</p>
+<pre># chmod 600 /path/to/credentials/share
+</pre>
+<h3><span class="mw-headline" id="Automatic_mounting">Automatic mounting</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may need to <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>systemd-networkd-wait-online.service</code> or <code> NetworkManager-wait-online.service</code> (depending on your setup) to proper enable booting on start-up.</div>
+<h4><span class="mw-headline" id="As_mount_entry">As mount entry</span></h4>
+<p>This is an simple example of a <code>cifs</code> <a href="../en/Fstab.html" title="Fstab">mount entry</a> that requires authentication:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">//<i>SERVER</i>/<i>sharename</i> /mnt/<i>mountpoint</i> cifs username=<i>myuser</i>,password=<i>mypass</i> 0 0</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Space in sharename should be replaced by <code>\040</code> (ASCII code for space in octal). For example, <code>//<i>SERVER</i>/share name</code> on the command line should be <code>//<i>SERVER</i>/share\040name</code> in <code>/etc/fstab</code>.</div>
+<p>To speed up the service on boot, add the <code>x-systemd.automount</code> option to the entry:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">//<i>SERVER</i>/<i>SHARENAME</i> /mnt/<i>mountpoint</i> cifs credentials=<i>/path/to/smbcredentials/share</i>,x-systemd.automount 0 0</pre>
+<h4><span class="mw-headline" id="As_systemd_unit">As systemd unit</span></h4>
+<p>Create a new <code>.mount</code> file inside <code>/etc/systemd/system</code>, e.g. <code>mnt-myshare.mount</code>.
+</p>
+<p><code>Requires=</code> replace (if needed) with your <a href="../en/Category:Network_configuration.html" title="Category:Network configuration">Network configuration</a>.
+</p>
+<p><code>What=</code> path to share
+</p>
+<p><code>Where=</code> path to mount the share
+</p>
+<p><code>Options=</code> share mounting options
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/mnt-myshare.mount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Mount Share at boot
+Requires=systemd-networkd.service
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What=//server/share
+Where=/mnt/myshare
+Options=credentials=/etc/samba/creds/myshare,iocharset=utf8,rw,x-systemd.automount
+Type=cifs
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>To use <code>mnt-myshare.mount</code>, <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the unit and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it to run on system boot.
+</p>
+<h4><span class="mw-headline" id="smbnetfs">smbnetfs</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>smbnetfs needs an intact Samba server setup.
+See above on how to do that.</div>
+<p>First, check if you can see all the shares you are interested in mounting:
+</p>
+<pre>$ smbtree -U <i>remote_user</i>
+</pre>
+<p>If that does not work, find and modify the following line
+in <code>/etc/samba/smb.conf</code> accordingly:
+</p>
+<pre>domain master = auto
+</pre>
+<p>Now <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>smbd.service</code> and <code>nmbd.service</code>.
+</p>
+<p>If everything works as expected, <a href="../en/Pacman.html#Installing_specific_packages" title="Pacman">install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbnetfs">smbnetfs</a></span> from the official repositories.
+</p>
+<p>Then, add the following line to <code>/etc/fuse.conf</code>:
+</p>
+<pre>user_allow_other
+</pre>
+<p>Now copy the directory <code>/etc/smbnetfs/.smb</code> to your home directory:
+</p>
+<pre>$ cp -a /etc/smbnetfs/.smb ~
+</pre>
+<p>Then create a link to <code>smb.conf</code>:
+</p>
+<pre>$ ln -sf /etc/samba/smb.conf ~/.smb/smb.conf
+</pre>
+<p>If a username and a password are required to access some of the shared folders, edit <code>~/.smb/smbnetfs.auth</code>
+to include one or more entries like this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.smb/smbnetfs.auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+auth			"hostname" "username" "password"
+</pre>
+<p>It is also possible to add entries for specific hosts to be mounted by smbnetfs, if necessary.
+More details can be found in <code>~/.smb/smbnetfs.conf</code>.
+</p>
+<p>If you are using the <a href="../en/Dolphin.html" title="Dolphin">Dolphin</a> or <a href="../en/GNOME/Files.html" title="GNOME Files" class="mw-redirect">GNOME Files</a>, you may want to add the following to <code>~/.smb/smbnetfs.conf</code> to avoid "Disk full" errors as smbnetfs by default will report 0 bytes of free space:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.smb/smbnetfs.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+free_space_size 1073741824
+</pre>
+<p>When you are done with the configuration, you need to run
+</p>
+<pre>$ chmod 600 ~/.smb/smbnetfs.*
+</pre>
+<p>Otherwise, smbnetfs complains about 'insecure config file permissions'.
+</p>
+<p>Finally, to mount your Samba network neighbourhood to a directory of your choice, call
+</p>
+<pre>$ smbnetfs <i>mount_point</i>
+</pre>
+<h5><span class="mw-headline" id="Daemon">Daemon</span></h5>
+<p>The Arch Linux package also maintains an additional system-wide operation mode for smbnetfs. To enable it, you need to make the
+said modifications in the directoy <code>/etc/smbnetfs/.smb</code>.
+</p>
+<p>Then, you can start and/or enable the <code>smbnetfs</code> <a href="../en/Daemons.html" title="Daemon" class="mw-redirect">daemon</a> as usual. The system-wide mount point is at <code>/mnt/smbnet/</code>.
+</p>
+<h4><span class="mw-headline" id="autofs">autofs</span></h4>
+<p>See <a href="../en/Autofs.html" title="Autofs">Autofs</a> for information on the kernel-based automounter for Linux.
+</p>
+<h3><span class="mw-headline" id="File_manager_configuration">File manager configuration</span></h3>
+<h4><span class="mw-headline" id="GNOME_Files.2C_Nemo.2C_Caja.2C_Thunar_and_PCManFM">GNOME Files, Nemo, Caja, Thunar and PCManFM</span></h4>
+<p>In order to access samba shares through GNOME Files, Nemo, Caja, Thunar or PCManFM, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gvfs-smb">gvfs-smb</a></span> package, available in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>Press <code>Ctrl+l</code> and enter <code>smb://<i>servername</i>/<i>share</i></code> in the location bar to access your share.
+</p>
+<p>The mounted share is likely to be present at <code>/run/user/<i>your_UID</i>/gvfs</code> or <code>~/.gvfs</code> in the filesystem.
+</p>
+<h4><span class="mw-headline" id="KDE">KDE</span></h4>
+<p>KDE, has the ability to browse Samba shares built in. Therefore do not need any additional packages. However, for a GUI in the KDE System Settings, install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kdenetwork-filesharing">kdenetwork-filesharing</a></span> package from the official repositories.
+</p>
+If when navigating with Dolphin you get a "Time Out" Error, you should uncomment and edit this line in smb.conf:<pre>name resolve order = lmhosts bcast host wins</pre>
+<p>as shown in this <a rel="nofollow" class="external text" href="http://ubuntuforums.org/showthread.php?t=1605499">page</a>.
+</p>
+<h4><span class="mw-headline" id="Other_graphical_environments">Other graphical environments</span></h4>
+<p>There are a number of useful programs, but they may need to have packages created for them. This can be done with the Arch package build system. The good thing about these others is that they do not require a particular environment to be installed to support them, and so they bring along less baggage.
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pyneighborhood">pyneighborhood</a></span> is available in the official repositories.</li>
+<li> LinNeighborhood, RUmba, xffm-samba plugin for Xffm are not available in the official repositories or the AUR. As they are not officially (or even unofficially supported), they may be obsolete and may not work at all.</li>
+</ul>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Block_certain_file_extensions_on_Samba_share">Block certain file extensions on Samba share</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Setting this parameter will affect the performance of Samba, as it will be forced to check all files and directories for a match as they are scanned.</div>
+<p>Samba offers an option to block files with certain patterns, like file extensions. This option can be used to prevent dissemination of viruses or to dissuade users from wasting space with certain files. More information about this option can be found in <code>man smb.conf</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+[myshare]
+  comment = Private
+  path = /mnt/data
+  read only = no
+  veto files = /*.exe/*.com/*.dll/*.bat/*.vbs/*.tmp/*.mp3/*.avi/*.mp4/*.wmv/*.wma/</pre>
+<h3><span class="mw-headline" id="Discovering_network_shares">Discovering network shares</span></h3>
+<p>If nothing is known about other systems on the local network, and automated tools such as <a href="#smbnetfs">smbnetfs</a> are not available, the following methods allow one to manually probe for Samba shares.
+</p>
+<p>1. First, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nmap">nmap</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=smbclient">smbclient</a></span> using <a href="../en/Pacman.html" title="Pacman">pacman</a>:
+</p>
+<pre># pacman -S nmap smbclient
+</pre>
+<p>2. <code>nmap</code> checks which ports are open:
+</p>
+<pre># nmap -p 139 -sT "192.168.1.*"
+</pre>
+<p>In this case, a scan on the 192.168.1.* IP address range and port 139 has been performed, resulting in:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nmap -sT "192.168.1.*"
+</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Starting nmap 3.78 ( <a rel="nofollow" class="external free" href="http://www.insecure.org/nmap/">http://www.insecure.org/nmap/</a> ) at 2005-02-15 11:45 PHT
+Interesting ports on 192.168.1.1:
+(The 1661 ports scanned but not shown below are in state: closed)
+PORT     STATE SERVICE
+<b>139/tcp  open  netbios-ssn</b>
+5000/tcp open  UPnP
+
+Interesting ports on 192.168.1.5:
+(The 1662 ports scanned but not shown below are in state: closed)
+PORT     STATE SERVICE
+6000/tcp open  X11
+
+Nmap run completed -- 256 IP addresses (2 hosts up) scanned in 7.255 seconds
+</pre>
+<p>The first result is another system; the second happens to be the client from where this scan was performed.
+</p>
+<p>3. Now that systems with port 139 open are revealed, use <code>nmblookup</code> to check for NetBIOS names: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ nmblookup -A 192.168.1.1
+</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Looking up status of 192.168.1.1
+        PUTER           &lt;00&gt; -         B &lt;ACTIVE&gt;
+        HOMENET         &lt;00&gt; - &lt;GROUP&gt; B &lt;ACTIVE&gt;
+        PUTER           &lt;03&gt; -         B &lt;ACTIVE&gt;
+        <b>PUTER           &lt;20&gt; -         B &lt;ACTIVE&gt;</b>
+        HOMENET         &lt;1e&gt; - &lt;GROUP&gt; B &lt;ACTIVE&gt;
+        USERNAME        &lt;03&gt; -         B &lt;ACTIVE&gt;
+        HOMENET         &lt;1d&gt; -         B &lt;ACTIVE&gt;
+        MSBROWSE        &lt;01&gt; - &lt;GROUP&gt; B &lt;ACTIVE&gt;
+</pre>
+<p>Regardless of the output, look for <b>&lt;20&gt;</b>, which shows the host with open services.
+</p>
+<p>4. Use <code>smbclient</code> to list which services are shared on <i>PUTER</i>. If prompted for a password, pressing enter should still display the list:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ smbclient -L \\PUTER
+</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Sharename       Type      Comment
+---------       ----      -------
+MY_MUSIC        Disk
+SHAREDDOCS      Disk
+PRINTER$        Disk
+PRINTER         Printer
+IPC$            IPC       Remote Inter Process Communication
+
+Server               Comment
+---------            -------
+PUTER
+
+Workgroup            Master
+---------            -------
+HOMENET               PUTER
+</pre>
+<h3><span class="mw-headline" id="Remote_control_of_Windows_computer">Remote control of Windows computer</span></h3>
+<p>Samba offers a set of tools for communication with Windows. These can be handy if access to a Windows computer through remote desktop is not an option, as shown by some examples.
+</p>
+<p>Send shutdown command with a comment:
+</p>
+<pre>$ net rpc shutdown -C "comment" -I IPADDRESS -U USERNAME%PASSWORD
+</pre>
+<p>A forced shutdown instead can be invoked by changing -C with comment to a single -f. For a restart, only add -r, followed by a -C or -f.
+</p>
+<p>Stop and start services:
+</p>
+<pre>$ net rpc service stop SERVICENAME -I IPADDRESS -U USERNAME%PASSWORD
+</pre>
+<p>To see all possible net rpc command:
+</p>
+<pre>$ net rpc
+</pre>
+<h3><span class="mw-headline" id="Share_files_without_a_username_and_password">Share files without a username and password</span></h3>
+<p>Edit <code>/etc/samba/smb.conf</code> and add the following line:
+</p>
+<pre>map to guest = Bad User</pre>
+<p>After this line:
+</p>
+<pre>security = user</pre>
+<p>Restrict the shares data to a specific interface replace:
+</p>
+<pre>;   interfaces = 192.168.12.2/24 192.168.13.2/24</pre>
+<p>with:
+</p>
+<pre>
+interfaces = lo eth0
+bind interfaces only = true</pre>
+<p>Optionally edit the account that access the shares, edit the following line:
+</p>
+<pre>;   guest account = nobody</pre>
+<p>For example:
+</p>
+<pre>   guest account = pcguest</pre>
+<p>And do something in the likes of:
+</p>
+<pre># useradd -c "Guest User" -d /dev/null -s /bin/false pcguest</pre>
+<p>Then setup a "" password for user pcguest.
+</p>
+<p>The last step is to create share directory (for write access make writable = yes):
+</p>
+<pre>
+[Public Share]
+path = /path/to/public/share
+available = yes
+browsable = yes
+public = yes
+writable = no
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Make sure the guest also has permission to visit /path, /path/to and /path/to/public, according to <a rel="nofollow" class="external free" href="http://unix.stackexchange.com/questions/13858/do-the-parent-directorys-permissions-matter-when-accessing-a-subdirectory">http://unix.stackexchange.com/questions/13858/do-the-parent-directorys-permissions-matter-when-accessing-a-subdirectory</a>
+</div>
+<h4><span class="mw-headline" id="Sample_Passwordless_Configuration">Sample Passwordless Configuration</span></h4>
+<p>This is the configuration I use with samba 4 for easy passwordless filesharing with family on a home network. Change any options needed to suit your network (workgroup and interface). I'm restricting it to the static IP I have on my ethernet interface, just delete that line if you do not care which interface is used.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[global]
+
+   workgroup = WORKGROUP
+
+   server string = Media Server
+
+   security = user
+   map to guest = Bad User
+
+   log file = /var/log/samba/%m.log
+
+   max log size = 50
+
+
+   interfaces = 192.168.2.194/24
+
+
+   dns proxy = no 
+
+
+[media]
+   path = /shares
+   public = yes
+   only guest = yes
+   writable = yes
+
+[storage]
+   path = /media/storage
+   public = yes
+   only guest = yes
+   writable = yes
+</pre>
+<h3><span class="mw-headline" id="Build_Samba_without_CUPS">Build Samba without CUPS</span></h3>
+<p>Just build without cups installed. From the <a rel="nofollow" class="external text" href="https://wiki.samba.org/index.php/Samba_as_a_print_server">Samba Wiki</a>:
+</p>
+<blockquote>Samba has built-in support [for CUPS] and defaults to CUPS if the development package (aka header files and libraries) could be found at compile time.</blockquote>
+<p>Of course, modifications to the PKGBUILD will also be necessary: libcups will have to be removed from the depends and makedepends arrays and other references to cups and printing will need to be deleted. In the case of the 4.1.9-1 PKGBUILD, 'other references' includes lines 169, 170 and 236:
+</p>
+<pre>
+    mkdir -p ${pkgdir}/usr/lib/cups/backend
+    ln -sf /usr/bin/smbspool ${pkgdir}/usr/lib/cups/backend/smb
+  install -d -m1777 ${pkgdir}/var/spool/samba
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Failed_to_start_Samba_SMB.2FCIFS_server">Failed to start Samba SMB/CIFS server</span></h3>
+<p>Check if the permissions are set correctly for <code>/var/cache/samba/</code> and restart the <code>smbd.service</code> or <code>smbd.socket</code>:
+</p>
+<pre># chmod 0755 /var/cache/samba/msg
+</pre>
+<h3><span class="mw-headline" id="Unable_to_overwrite_files.2C_permissions_errors">Unable to overwrite files, permissions errors</span></h3>
+<p>Possible solutions:
+</p>
+<ul>
+<li>Append the mount option <code>nodfs</code> to the <code>/etc/fstab</code> <a href="#Add_Share_to_.2Fetc.2Ffstab">entry</a>.</li>
+<li>Add <code>msdfs root = no</code> to the <code>[global]</code> section of the server's <code>/etc/samba/smb.conf</code>.</li>
+</ul>
+<h3><span class="mw-headline" id="Windows_clients_keep_asking_for_password_even_if_Samba_shares_are_created_with_guest_permissions">Windows clients keep asking for password even if Samba shares are created with guest permissions</span></h3>
+<p>Set <code>map to guest</code> inside the <code>global</code> section of <code>/etc/samba/smb.conf</code>:
+</p>
+<pre>map to guest = Bad User
+</pre>
+<h3><span class="mw-headline" id="Windows_7_connectivity_problems_-_mount_error.2812.29:_cannot_allocate_memory">Windows 7 connectivity problems - mount error(12): cannot allocate memory</span></h3>
+<p>A known Windows 7 bug that causes "mount error(12): cannot allocate memory" on an otherwise perfect cifs share on the Linux end can be fixed by setting a few registry keys on the Windows box as follows:
+</p>
+<ul>
+<li>
+<code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\LargeSystemCache</code> (set to <code>1</code>)</li>
+<li>
+<code>HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters\Size</code> (set to <code>3</code>)</li>
+</ul>
+<p>Alternatively, start Command Prompt in Admin Mode and execute the following:
+</p>
+<pre>reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v "LargeSystemCache" /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v "Size" /t REG_DWORD /d 3 /f
+</pre>
+<p>Do one of the following for the settings to take effect:
+</p>
+<ul>
+<li> Restart Windows</li>
+<li> Restart the Server service via services.msc</li>
+<li> From the Command Prompt run: 'net stop lanmanserver' and 'net start lanmanserver' - The server may automatically restart after stopping it.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Googling will reveal another tweak recommending users to add a key modifying the "IRPStackSize" size.  This is incorrect for fixing this issue under Windows 7.  Do not attempt it.</div>
+<p><a rel="nofollow" class="external text" href="http://alan.lamielle.net/2009/09/03/windows-7-nonpaged-pool-srv-error-2017">Original article</a>.
+</p>
+<h3><span class="mw-headline" id="Error:_Failed_to_retrieve_printer_list:_NT_STATUS_UNSUCCESSFUL">Error: Failed to retrieve printer list: NT_STATUS_UNSUCCESSFUL</span></h3>
+<p>If you are a home user and using samba purely for file sharing from a server or NAS, you are probably not interested in sharing printers through it. If so, you can prevent this error from occurring by adding the following lines to your <code>/etc/samba/smb.conf</code>:
+</p>
+<pre>
+load printers = No
+printing = bsd
+printcap name = /dev/null
+disable spoolss = Yes
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the samba service, <code>smbd.service</code>, and then check your logs:
+</p>
+<pre>cat /var/log/samba/smbd.log</pre>
+<p>and the error should now no longer be appearing.
+</p>
+<h3><span class="mw-headline" id="Sharing_a_folder_fails">Sharing a folder fails</span></h3>
+<p>It means that while you are sharing a folder from <i>Dolphin</i> (file manager) and everything seems ok at first, after restarting <i>Dolphin</i> the share icon is gone from the shared folder, and also some output like this in terminal (<i>Konsole</i>) output:
+</p>
+<pre>‘net usershare’ returned error 255: net usershare: usershares are currently disabled
+</pre>
+<p>To fix it, enable usershare as described in <a href="#Creating_usershare_path">#Creating usershare path</a>.
+</p>
+<h3><span class="mw-headline" id=".22Browsing.22_network_fails_with_.22Failed_to_retrieve_share_list_from_server.22">"Browsing" network fails with "Failed to retrieve share list from server"</span></h3>
+And you are using a firewall (iptables) because you do not trust your local (school, university, hotel) local network.  This may be due to the following: When the smbclient is browsing the local network it sends out a broadcast request on udp port 137.  The servers on the network then reply to your client but as the source address of this reply is different from the destination address iptables saw when sending the request for the listing out, iptables will not recognize the reply as being "ESTABLISHED" or "RELATED", and hence the packet is dropped.  A possible solution is to add:<pre>
+iptables -t raw -A OUTPUT -p udp -m udp --dport 137 -j CT --helper netbios-ns
+</pre>
+<p>to your iptables setup.
+</p>
+<h3><span class="mw-headline" id="Protocol_negotiation_failed:_NT_STATUS_INVALID_NETWORK_RESPONSE">Protocol negotiation failed: NT_STATUS_INVALID_NETWORK_RESPONSE</span></h3>
+<p>The client probably does not have access to shares.  Make sure clients' IP address is in <code>hosts allow =</code> line in <code>/etc/samba/smb.conf</code>.
+</p>
+<h3><span class="mw-headline" id="Connection_to_SERVER_failed:_.28Error_NT_STATUS_UNSUCCESSFUL.29">Connection to SERVER failed: (Error NT_STATUS_UNSUCCESSFUL)</span></h3>
+<p>You are probably passing wrong server name to <code>smbclient</code>.  To find out the server name, run <code>hostnamectl</code> on the server and look at "Transient hostname" line
+</p>
+<h3><span class="mw-headline" id="Connection_to_SERVER_failed:_.28Error_NT_STATUS_CONNECTION_REFUSED.29">Connection to SERVER failed: (Error NT_STATUS_CONNECTION_REFUSED)</span></h3>
+<p>Make sure that the server has started. The shared directories should exist and be accessible.
+</p>
+<h3><span class="mw-headline" id="Password_Error_when_correct_credentials_are_given_.28error_1326.29">Password Error when correct credentials are given (error 1326)</span></h3>
+<p><a rel="nofollow" class="external text" href="https://www.samba.org/samba/history/samba-4.5.0.html">Samba 4.5</a> has NTLMv1 authentication disabled by default. It is recommend to install the latest available upgrades on clients and deny access for unsupported clients.
+</p>
+<p>If you still need support for very old clients without NTLMv2 support (e.g. Windows XP), it is possible force enable NTLMv1, although this is <b>not recommend</b> for security reasons:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/samba/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[global]
+   lanman auth = yes
+   ntlm auth = yes</pre>
+<p>If NTLMv2 clients are unable to authenticate when NTLMv1 has been enabled, create the following file on the client:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/home/user/.smb/smb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[global]
+   sec = ntlmv2
+   client ntlmv2 auth = yes</pre>
+<p>This change also affects samba shares mounted with <b>mount.cifs</b>. If after upgrade to Samba 4.5 your mount fails, add the <b>sec=ntlmssp</b> option to your mount command, e.g.
+</p>
+<pre>mount.cifs //server/share /mnt/point -o sec=ntlmssp,...
+</pre>
+<p>See: <a rel="nofollow" class="external text" href="https://www.samba.org/samba/docs/man/manpages-3/mount.cifs.8.html">man 8 mount.cifs</a> <b>ntlmssp</b> - Use NTLMv2 password hashing encapsulated in Raw NTLMSSP message. The default in mainline kernel versions prior to v3.8 was <b>sec=ntlm</b>. In v3.8, the default was changed to <b>sec=ntlmssp</b>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.samba.org/samba/docs/SambaIntro.html">Samba: An Introduction</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.samba.org/">Official Samba site</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Network_sharing.html" title="Category:Network sharing">Network sharing</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

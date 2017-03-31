@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>JHBuild - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-JHBuild skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">JHBuild</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>JHBuild is a tool that allows you to automatically download and compile "modules" (i.e. source code packages). It can pull modules from a variety of sources (CVS, Subversion, Git, Bazaar, tarballs, etc.) and handle dependencies. You can also choose which specific modules you want to build, instead of building the whole project.
+</p>
+<p>JHBuild was originally written for building <a href="../en/GNOME.html" title="GNOME">GNOME</a>, but has since been extended to be usable with other projects.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Installing_prerequisites"><span class="tocnumber">3.1</span> <span class="toctext">Installing prerequisites</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Building"><span class="tocnumber">3.2</span> <span class="toctext">Building</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7">
+<a href="#Python_issues"><span class="tocnumber">4.1</span> <span class="toctext">Python issues</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Building_from_scratch_without_JHBuild.2C_or_in_a_JHBuild_shell"><span class="tocnumber">4.1.1</span> <span class="toctext">Building from scratch without JHBuild, or in a JHBuild shell</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#itstool_missing_Python_modules"><span class="tocnumber">4.1.2</span> <span class="toctext">itstool missing Python modules</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#pkg-config_issues"><span class="tocnumber">4.2</span> <span class="toctext">pkg-config issues</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#gnome-devel-docs_does_not_build"><span class="tocnumber">4.3</span> <span class="toctext">gnome-devel-docs does not build</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#pango_does_not_build"><span class="tocnumber">4.4</span> <span class="toctext">pango does not build</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#geary_does_not_build"><span class="tocnumber">4.5</span> <span class="toctext">geary does not build</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Other_broken_modules"><span class="tocnumber">4.6</span> <span class="toctext">Other broken modules</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#Packages_needed_to_build_specific_modules"><span class="tocnumber">5</span> <span class="toctext">Packages needed to build specific modules</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/jhbuild/">jhbuild</a></span><sup><small>AUR</small></sup> package, which provides the stable version.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>The configuration file for JHBuild is located at <code>~/.config/jhbuildrc</code>. It uses <a href="../en/Python.html" title="Python">Python</a> syntax to set configuration variables. Here is the sample file provided for building GNOME:
+</p>
+<pre>
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+# edit this file to match your settings and copy it to ~/.config/jhbuildrc
+
+# if you have a GNOME git account, uncomment this line
+# repos['git.gnome.org'] = 'ssh://user@git.gnome.org/git/'
+
+# what module set should be used. The default can be found in
+# jhbuild/defaults.jhbuildrc, but can be any file in the modulesets directory
+# or a URL of a module set file on a web server.
+# moduleset = 'gnome-apps-3.12'
+#
+# A list of the modules to build. Defaults to the GNOME core and tested apps.
+# modules = [ 'meta-gnome-core', 'meta-gnome-apps-tested' ]
+
+# Or to build the old GNOME 2.32:
+# moduleset = 'gnome2/gnome-2.32'
+# modules = ['meta-gnome-desktop']
+
+# what directory should the source be checked out to?
+checkoutroot = os.path.expanduser('~/checkout/gnome')
+
+# the prefix to configure/install modules to (must have write access)
+prefix = '/opt/gnome'
+
+# custom CFLAGS / environment pieces for the build
+# os.environ['CFLAGS'] = '-Wall -g -O0'
+
+# extra arguments to pass to all autogen.sh scripts
+# to speed up builds of GNOME, try '--disable-static --disable-gtk-doc'
+#autogenargs=''
+
+# On multiprocessor systems setting makeargs to '-j2' may improve compilation
+# time. Be aware that not all modules compile correctly with '-j2'.
+# Set makeargs to 'V=1' for verbose build output.
+#makeargs = '-j2'
+</pre>
+<p>You should edit (at least) <i>modules</i> to the desired modules to be built. A reference for most configuration variables is available at <a rel="nofollow" class="external text" href="http://developer.gnome.org/jhbuild/unstable/config-reference.html">GNOME JHBuild Manual</a>.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Installing_prerequisites">Installing prerequisites</span></h3>
+<p>JHBuild can check if the required tools are installed by running <i>sysdeps</i>:
+</p>
+<pre>$ jhbuild sysdeps
+</pre>
+<p><i>sanitycheck</i> has the similar function of <i>sysdeps</i>, but it fails on checking automake version due to an <a rel="nofollow" class="external text" href="http://lists.gnu.org/archive/html/automake/2016-05/msg00000.html">regexp error in automake</a> until 1.15 (<a rel="nofollow" class="external text" href="http://git.savannah.gnu.org/gitweb/?p=automake.git;a=commit;h=13f00eb4493c217269b76614759e452d8302955e">Already fixed next automake version</a>).
+</p>
+<p>If any errors are shown, missing packages may be installed from repositories or running the <i>bootstrap</i> command, which tries to download, build and install the build prerequisites:
+</p>
+<pre>$ jhbuild bootstrap
+</pre>
+<h3><span class="mw-headline" id="Building">Building</span></h3>
+<p>To build all the modules selected in the configuration file, just run the <i>build</i> command:
+</p>
+<pre>$ jhbuild build
+</pre>
+<p>JHBuild will download, configure, compile and install each of the modules. See
+</p>
+<pre>$ jhbuild help
+</pre>
+<p>for more details.
+</p>
+<p>If an error occurs at any stage, JHBuild will present a menu asking what to do. The choices include dropping to a shell to fix the error, rerunning the build from various stages, giving up on the module, or ignore the error and continue. Often, dropping to a shell and checking makefiles and configuration files can be helpful. If you face a build error, for example, you can try to manually <code>make</code> and check errors on the shell.
+</p>
+<p>Giving up on a module will cause any modules depending on it to fail.
+</p>
+<p>To build as many packages as possible, skipping broken packages, run:
+</p>
+<pre>$ yes 3 | jhbuild --try-checkout build
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you encounter an issue that is not documented below, please report it in a comment on the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/jhbuild/">jhbuild</a></span><sup><small>AUR</small></sup> package.</div>
+<h3><span class="mw-headline" id="Python_issues">Python issues</span></h3>
+<h4><span class="mw-headline" id="Building_from_scratch_without_JHBuild.2C_or_in_a_JHBuild_shell">Building from scratch without JHBuild, or in a JHBuild shell</span></h4>
+<p>If you are building from scratch on your own, it may be necessary to run <i>autogen.sh</i> with the following:
+</p>
+<pre>$ PYTHON=/usr/bin/python2 ./autogen.sh
+</pre>
+<p>And set the PYTHON environment variable in ~/.config/jhbuildrc
+</p>
+<pre>os.environ['PYTHON'] = '/usr/bin/python2'
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>JHBuild uses its own python lib directory in /opt/gnome/lib/python2.7; if you are having problems with python imports check to see that the .py files are there.</div>
+<h4><span class="mw-headline" id="itstool_missing_Python_modules">itstool missing Python modules</span></h4>
+<p>Chose <code>[4] Start shell</code> and run:
+</p>
+<pre>$ sed -ir 's/| python /| python2 /' configure
+</pre>
+<p>Then, exit the shell and choose <code>[1] Rerun phase configure</code>. See <a rel="nofollow" class="external text" href="https://gitorious.org/itstool/itstool/merge_requests/6">this merge request</a> for more details.
+</p>
+<h3><span class="mw-headline" id="pkg-config_issues">pkg-config issues</span></h3>
+<p>If you have a malformatted .pc file on your PKG_CONFIG_PATH, JHBuild will not be able to detect all the (valid) .pc files you have installed and will complain that the .pc files are missing. Look at the output of <code>jhbuild sysdeps</code>—there should be a message about the problematic .pc files.
+</p>
+<h3><span class="mw-headline" id="gnome-devel-docs_does_not_build">gnome-devel-docs does not build</span></h3>
+<p>Choose <code>[4] Start shell</code> and run:
+</p>
+<pre>$ git revert --no-edit 9ba0d959
+</pre>
+<p>Then, exit the shell and choose <code>[1] Rerun phase build</code>. See <a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=707007">this bug</a> for further details.
+</p>
+<h3><span class="mw-headline" id="pango_does_not_build">pango does not build</span></h3>
+<p>If build failed due to cairo.h not found, do the following: Enter [4]shell, edit <code>pango/pangocairo.h</code> changing:
+</p>
+<pre> #define &lt;cairo.h&gt;</pre>
+<p>to
+</p>
+<pre> #define &lt;cairo/cairo.h&gt;</pre>
+<h3><span class="mw-headline" id="geary_does_not_build">geary does not build</span></h3>
+<p>If you are getting this error message...
+</p>
+<pre>[ 78%] Generating webkitgtk-3.0.vapi
+error: /home/rffontenelle/jhbuild/install/share/gir-1.0/WebKit-3.0.gir not found
+Generation failed: 1 error(s), 0 warning(s)
+make[2]: *** [src/CMakeFiles/geary.dir/build.make:1277: src/webkitgtk-3.0.vapi] Error 1
+make[1]: *** [CMakeFiles/Makefile2:798: src/CMakeFiles/geary.dir/all] Error 2</pre>
+<p>... then please notice that geary depends on WebKitGTK (&lt;= 2.4), but JHBuild compiles WebKit2GTK (newer). This is a known issue (<a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=741866">#741866</a> and <a rel="nofollow" class="external text" href="https://mail.gnome.org/archives/geary-list/2016-June/msg00022.html">mailing list</a>) and there is a plan for porting Geary (<a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=728002">#728002</a>)
+</p>
+<h3><span class="mw-headline" id="Other_broken_modules">Other broken modules</span></h3>
+<p>The following modules do not build, and there are no known/immediate fixes (feel free to jump in and investigate):
+</p>
+<ul>
+<li> aisleriot—<a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=707106">bug report</a> (probably easy to fix if you poke around)</li>
+<li> gegl</li>
+<li> gnome-boxes—<a rel="nofollow" class="external text" href="https://bugzilla.gnome.org/show_bug.cgi?id=725520">bug report</a> (a fix is provided there)</li>
+<li> gnome-photos</li>
+<li> gtksourceviewmm</li>
+<li> meta-gnome-apps-tested</li>
+<li> nemiver</li>
+<li> orca</li>
+<li> rygel</li>
+<li> valadoc</li>
+</ul>
+<p>This list includes modules transitively depending on broken modules (i.e. some of the modules might be fine; I did not check).
+</p>
+<h2><span class="mw-headline" id="Packages_needed_to_build_specific_modules">Packages needed to build specific modules</span></h2>
+<ul>
+<li> gitg requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtkspell3">gtkspell3</a></span>
+</li>
+<li> gtk-vnc requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-text-csv">perl-text-csv</a></span>
+</li>
+<li> latexila requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lcov/">lcov</a></span><sup><small>AUR</small></sup>
+</li>
+<li> pango requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libpthread-stubs/">libpthread-stubs</a></span><sup><small>AUR</small></sup>
+</li>
+<li> totem-pl-parser requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libgcrypt15">libgcrypt15</a></span>
+</li>
+<li> xf86-video-intel requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-server-devel">xorg-server-devel</a></span>
+</li>
+<li> xwayland requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xtrans">xtrans</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xcmiscproto">xcmiscproto</a></span>, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bigreqsproto">bigreqsproto</a></span>
+</li>
+<li> zeitgeist requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2-rdflib">python2-rdflib</a></span>
+</li>
+<li> wireless-tools requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireless_tools">wireless_tools</a></span>
+</li>
+<li> xorg-macros requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-util-macros">xorg-util-macros</a></span>
+</li>
+</ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<p><a rel="nofollow" class="external text" href="http://developer.gnome.org/jhbuild/">GNOME JHBuild Manual</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Development.html" title="Category:Development">Development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

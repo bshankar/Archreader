@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>IPv6 - 6in4 Tunnel - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-IPv6_-_6in4_Tunnel skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">IPv6 - 6in4 Tunnel</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> rc.d (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:IPv6_-_6in4_Tunnel">Talk:IPv6 - 6in4 Tunnel#</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/IPv6_tunnel_broker_setup.html" title="IPv6 tunnel broker setup">IPv6 tunnel broker setup</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the second argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:IPv6_-_6in4_Tunnel">Talk:IPv6 - 6in4 Tunnel#</a>)</div>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#6in4-tunnel_rc.d_script"><span class="tocnumber">2</span> <span class="toctext">6in4-tunnel rc.d script</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#6in4-tunnel_configuration"><span class="tocnumber">2.1</span> <span class="toctext">6in4-tunnel configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#6in4-tunnel_usage"><span class="tocnumber">2.2</span> <span class="toctext">6in4-tunnel usage</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Boot-time_configuration"><span class="tocnumber">2.3</span> <span class="toctext">Boot-time configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/6in4" class="extiw" title="wikipedia:6in4">wikipedia:6in4</a>
+</p>
+<h2><span class="mw-headline" id="6in4-tunnel_rc.d_script">6in4-tunnel rc.d script</span></h2>
+<p>Arch Linux uses a BSD-style network interface configuration located in <i>/etc/rc.conf</i>, which can make exotic network configurations interesting, to say the least. The following rc.d script is meant to help remedy the situation by providing a configurable wrapper to sanely manage a 6in4 link interface.
+</p>
+<dl><dd><ul><li> This script uses the <i>route2</i> method; make sure that the <b>iproute2</b> package is installed.</li></ul></dd></dl>
+<p>As <i>root</i>, write the following rc.d init script to <i>/etc/rc.d/6in4-tunnel</i>:
+</p>
+<pre>#!/bin/bash
+
+### begin user configuration
+
+##############################################
+#                                            #
+#  Stop this script before you reconfigure!  #
+#                                            #
+##############################################
+
+# if_name     - interface name that is to be created for the 6in4 link
+if_name=6in4
+
+# server_ipv4 - ipv4 address of the server that is providing the 6in4 tunnel
+server_ipv4=127.0.0.1
+
+# client_ipv4 - ipv4 address of the client that is receiving the 6in4 tunnel
+client_ipv4=127.0.0.1
+
+# client_ipv6 - ipv6 address of the client 6in4 tunnel endpoint
+client_ipv6=2001:feed:face:beef::2/64
+
+# link_mtu    - set the mtu for the 6in4 link
+link_mtu=1480
+
+# tunnel_ttl  - set the ttl for the 6in4 tunnel
+tunnel_ttl=64
+
+### end user configuration
+
+daemon_name=6in4-tunnel
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+case "$1" in
+  start)
+    stat_busy "Starting $daemon_name daemon"
+
+    ifconfig $if_name &amp;&gt;/dev/null
+    if [ $? -eq 0 ]; then
+      stat_busy "Interface $if_name already exists"
+      stat_fail
+      exit 1
+    fi
+
+    ip tunnel add $if_name mode sit remote $server_ipv4 local $client_ipv4 ttl $tunnel_ttl
+    ip link set $if_name up mtu $link_mtu
+    ip addr add $client_ipv6 dev $if_name
+    ip route add ::/0 dev $if_name
+
+    add_daemon $daemon_name
+    stat_done
+    ;;
+
+  stop)
+    stat_busy "Stopping $daemon_name daemon"
+
+    ifconfig $if_name &amp;&gt;/dev/null
+    if [ $? -ne 0 ]; then
+      stat_busy "Interface $if_name does not exist"
+      stat_fail
+      exit 1
+    fi
+
+    ip link set $if_name down
+    ip tunnel del $if_name
+
+    rm_daemon $daemon_name
+    stat_done
+    ;;
+
+  *)
+    echo "usage: $0 {start|stop}"
+esac
+exit 0
+</pre>
+<h3><span class="mw-headline" id="6in4-tunnel_configuration">6in4-tunnel configuration</span></h3>
+<p>You will need to provide your 6in4 link configuration between the following sections of <i>/etc/rc.d/6in4-tunnel</i>:
+</p>
+<pre>### begin user configuration
+</pre>
+<pre>### end user configuration
+</pre>
+<p>Once <i>/etc/rc.d/6in4-tunnel</i> has been configured properly, give it permission to be executed:
+</p>
+<pre># chmod +x /etc/rc.d/6in4-tunnel
+</pre>
+<h3><span class="mw-headline" id="6in4-tunnel_usage">6in4-tunnel usage</span></h3>
+<p>To create the 6in4 tunnel link and bring up the interface:
+</p>
+<pre># /etc/rc.d/6in4-tunnel start
+</pre>
+<p>To delete the 6in4 tunnel link and remove the interface:
+</p>
+<pre># /etc/rc.d/6in4-tunnel stop
+</pre>
+<h3><span class="mw-headline" id="Boot-time_configuration">Boot-time configuration</span></h3>
+<p>The following method allows <i>/etc/rc.d/6in4-tunnel</i> to start automatically at system startup.
+</p>
+<dl><dd><ul><li> Verify that the 6in4 tunnel link is configured and working properly before doing this!</li></ul></dd></dl>
+<p>As <i>root</i>, insert <i>6in4-tunnel</i> right after <i>network</i> in the <b>DAEMONS</b> line of <i>/etc/rc.conf</i>.
+</p>
+<p>After this addition, the <b>DAEMONS</b> line in <i>/etc/rc.conf</i> should look something like this:
+</p>
+<pre>...
+
+# 
+# -----------------------------------------------------------------------
+# DAEMONS
+# -----------------------------------------------------------------------
+#
+# Daemons to start at boot-up (in this order)
+#   - prefix a daemon with a ! to disable it
+#   - prefix a daemon with a @ to start it up in the background
+#
+DAEMONS=(syslog-ng iptables ip6tables network 6in4-tunnel openntpd ...
+
+...
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

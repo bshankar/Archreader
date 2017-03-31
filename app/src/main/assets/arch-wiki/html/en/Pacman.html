@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>pacman - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Pacman skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">pacman</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Creating_packages.html" title="Creating packages">Creating packages</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Downgrading_packages.html" title="Downgrading packages">Downgrading packages</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Package_signing.html" title="Pacman/Package signing">pacman/Package signing</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Pacnew_and_Pacsave.html" title="Pacman/Pacnew and Pacsave">pacman/Pacnew and Pacsave</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Restore_local_database.html" title="Pacman/Restore local database">pacman/Restore local database</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Rosetta.html" title="Pacman/Rosetta">pacman/Rosetta</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Tips_and_tricks.html" title="Pacman/Tips and tricks">pacman/Tips and tricks</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Frequently_asked_questions.html#Package_management" title="FAQ" class="mw-redirect">FAQ#Package management</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/System_maintenance.html" title="System maintenance">System maintenance</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_Build_System.html" title="Arch Build System">Arch Build System</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a></li>
+</ul>
+</div>
+<p>The <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/">pacman</a> <a href="https://en.wikipedia.org/wiki/Package_manager" class="extiw" title="wikipedia:Package manager">package manager</a> is one of the major distinguishing features of Arch Linux. It combines a simple binary package format with an easy-to-use <a href="../en/Arch_Build_System.html" title="Arch Build System">build system</a>. The goal of <i>pacman</i> is to make it possible to easily manage packages, whether they are from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> or the user's own builds.
+</p>
+<p><i>pacman</i> keeps the system up to date by synchronizing package lists with the master server. This server/client model also allows the user to download/install packages with a simple command, complete with all required dependencies.
+</p>
+<p><i>pacman</i> is written in the C programming language and uses the <i>.pkg.tar.xz</i> package format.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pacman">pacman</a></span> package contains other useful tools such as <b>makepkg</b>, <b>pactree</b>, <b>vercmp</b>, and <a href="../en/System_maintenance.html" title="Checkupdates" class="mw-redirect">checkupdates</a>. Run <code>pacman -Qlq pacman | grep bin</code> to see the full list.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Installing_packages"><span class="tocnumber">1.1</span> <span class="toctext">Installing packages</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Installing_specific_packages"><span class="tocnumber">1.1.1</span> <span class="toctext">Installing specific packages</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Installing_package_groups"><span class="tocnumber">1.1.2</span> <span class="toctext">Installing package groups</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#Removing_packages"><span class="tocnumber">1.2</span> <span class="toctext">Removing packages</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Upgrading_packages"><span class="tocnumber">1.3</span> <span class="toctext">Upgrading packages</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Querying_package_databases"><span class="tocnumber">1.4</span> <span class="toctext">Querying package databases</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Database_structure"><span class="tocnumber">1.4.1</span> <span class="toctext">Database structure</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9"><a href="#Cleaning_the_package_cache"><span class="tocnumber">1.5</span> <span class="toctext">Cleaning the package cache</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Additional_commands"><span class="tocnumber">1.6</span> <span class="toctext">Additional commands</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Installation_reason"><span class="tocnumber">1.7</span> <span class="toctext">Installation reason</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13">
+<a href="#General_options"><span class="tocnumber">2.1</span> <span class="toctext">General options</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Comparing_versions_before_updating"><span class="tocnumber">2.1.1</span> <span class="toctext">Comparing versions before updating</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Skip_package_from_being_upgraded"><span class="tocnumber">2.1.2</span> <span class="toctext">Skip package from being upgraded</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Skip_package_group_from_being_upgraded"><span class="tocnumber">2.1.3</span> <span class="toctext">Skip package group from being upgraded</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#Skip_files_from_being_installed_to_system"><span class="tocnumber">2.1.4</span> <span class="toctext">Skip files from being installed to system</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Maintain_several_configuration_files"><span class="tocnumber">2.1.5</span> <span class="toctext">Maintain several configuration files</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Hooks"><span class="tocnumber">2.1.6</span> <span class="toctext">Hooks</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Repositories_and_mirrors"><span class="tocnumber">2.2</span> <span class="toctext">Repositories and mirrors</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#Package_security"><span class="tocnumber">2.2.1</span> <span class="toctext">Package security</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Troubleshooting"><span class="tocnumber">3</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#.22Failed_to_commit_transaction_.28conflicting_files.29.22_error"><span class="tocnumber">3.1</span> <span class="toctext">"Failed to commit transaction (conflicting files)" error</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#.22Failed_to_commit_transaction_.28invalid_or_corrupted_package.29.22_error"><span class="tocnumber">3.2</span> <span class="toctext">"Failed to commit transaction (invalid or corrupted package)" error</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#.22Failed_to_init_transaction_.28unable_to_lock_database.29.22_error"><span class="tocnumber">3.3</span> <span class="toctext">"Failed to init transaction (unable to lock database)" error</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Packages_cannot_be_retrieved_on_installation"><span class="tocnumber">3.4</span> <span class="toctext">Packages cannot be retrieved on installation</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Search_for_a_package_that_contains_a_specific_file"><span class="tocnumber">3.5</span> <span class="toctext">Search for a package that contains a specific file</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#Manually_reinstalling_pacman"><span class="tocnumber">3.6</span> <span class="toctext">Manually reinstalling pacman</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#pacman_crashes_during_an_upgrade"><span class="tocnumber">3.7</span> <span class="toctext">pacman crashes during an upgrade</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#.22Unable_to_find_root_device.22_error_after_rebooting"><span class="tocnumber">3.8</span> <span class="toctext">"Unable to find root device" error after rebooting</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Signature_from_.22User_.3Cemail.40gmail.com.3E.22_is_unknown_trust.2C_installation_failed"><span class="tocnumber">3.9</span> <span class="toctext">Signature from "User &lt;email@gmail.com&gt;" is unknown trust, installation failed</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Request_on_importing_PGP_keys"><span class="tocnumber">3.10</span> <span class="toctext">Request on importing PGP keys</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#Signature_from_.22User_.3Cemail.40archlinux.org.3E.22_is_invalid.2C_installation_failed"><span class="tocnumber">3.11</span> <span class="toctext">Signature from "User &lt;email@archlinux.org&gt;" is invalid, installation failed</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#.22Warning:_current_locale_is_invalid.3B_using_default_.22C.22_locale.22_error"><span class="tocnumber">3.12</span> <span class="toctext">"Warning: current locale is invalid; using default "C" locale" error</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#pacman_does_not_honor_proxy_settings"><span class="tocnumber">3.13</span> <span class="toctext">pacman does not honor proxy settings</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#How_do_I_reinstall_all_packages.2C_retaining_information_on_whether_something_was_explicitly_installed_or_as_a_dependency.3F"><span class="tocnumber">3.14</span> <span class="toctext">How do I reinstall all packages, retaining information on whether something was explicitly installed or as a dependency?</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#.22Cannot_open_shared_object_file.22_error"><span class="tocnumber">3.15</span> <span class="toctext">"Cannot open shared object file" error</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Freeze_of_package_downloads"><span class="tocnumber">3.16</span> <span class="toctext">Freeze of package downloads</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Failed_retrieving_file_.27core.db.27_from_mirror"><span class="tocnumber">3.17</span> <span class="toctext">Failed retrieving file 'core.db' from mirror</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-40"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> pacman 5.0 added some new operations: <code>-F</code> and <code>-D</code> <a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/pacman.git/tree/NEWS?h=v5.0.0">[1]</a>. Compare <code>-F</code> with <a href="../en/Pkgfile.html" title="Pkgfile">pkgfile</a>, which is already linked below. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Pacman">Talk:Pacman#</a>)</div>
+</div>
+<p>What follows is just a small sample of the operations that <i>pacman</i> can perform. To read more examples, refer to <span class="plainlinks archwiki-template-man" title="$ man 8 pacman"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.8.html#_examples">pacman(8)</a></span>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For those who have used other Linux distributions before, there is a helpful <a href="../en/Pacman/Rosetta.html" title="Pacman Rosetta" class="mw-redirect">Pacman Rosetta</a> article.</div>
+<h3><span class="mw-headline" id="Installing_packages">Installing packages</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Packages often have a series of <a href="../en/PKGBUILD.html#optdepends" title="PKGBUILD">optional dependencies</a> which are packages that provide additional functionality to the application, albeit not strictly required for running it. When installing a package, <i>pacman</i> will list its optional dependencies among the output messages, but they will not be found in <code>pacman.log</code>: use the <a href="#Querying_package_databases">pacman -Si</a> command to view the optional dependencies of a package, together with short descriptions of their functionality.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>When installing packages in Arch, avoid refreshing the package list without <a href="#Upgrading_packages">upgrading the system</a> (for example, when a <a href="#Packages_cannot_be_retrieved_on_installation">package is no longer found</a> in the official repositories). In practice, do <b>not</b> run <code>pacman -Sy <i>package_name</i></code> instead of <code>pacman -Sy<b>u</b> <i>package_name</i></code>, as this could lead to dependency issues. See <a href="../en/System_maintenance.html#Partial_upgrades_are_unsupported" title="System maintenance">System maintenance#Partial upgrades are unsupported</a> and <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=89328">BBS#89328</a>.</div>
+<h4><span class="mw-headline" id="Installing_specific_packages">Installing specific packages</span></h4>
+<p>To install a single package or list of packages (including dependencies), issue the following command:
+</p>
+<pre># pacman -S <i>package_name1</i> <i>package_name2</i> ...
+</pre>
+<p>To install a list of packages with regex (see <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=7179">this forum thread</a>):
+</p>
+<pre># pacman -S $(pacman -Ssq <i>package_regex</i>)
+</pre>
+<p>Sometimes there are multiple versions of a package in different repositories, e.g. <i>extra</i> and <i>testing</i>. To install the former version, the repository needs to be defined in front:
+</p>
+<pre># pacman -S extra/<i>package_name</i>
+</pre>
+<p>To install a number of packages sharing similar patterns in their names -- not the entire group nor all matching packages; eg. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/plasma/">plasma</a></span>:
+</p>
+<pre># pacman -S plasma-{desktop,mediacenter,nm}
+</pre>
+<p>Of course, that is not limited and can be expanded to however many levels needed:
+</p>
+<pre># pacman -S plasma-{workspace{,-wallpapers},pa}
+</pre>
+<h4><span class="mw-headline" id="Installing_package_groups">Installing package groups</span></h4>
+<p>Some packages belong to a <a href="../en/Creating_packages.html#Meta_packages_and_groups" title="Creating packages">group of packages</a> that can all be installed simultaneously. For example, issuing the command:
+</p>
+<pre># pacman -S gnome
+</pre>
+<p>will prompt you to select the packages from the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/gnome/">gnome</a></span> group that you wish to install.
+</p>
+<p>Sometimes a package group will contain a large amount of packages, and there may be only a few that you do or do not want to install. Instead of having to enter all the numbers except the ones you do not want, it is sometimes more convenient to select or exclude packages or ranges of packages with the following syntax:
+</p>
+<pre>Enter a selection (default=all): 1-10 15
+</pre>
+<p>which will select packages 1 through 10 and 15 for installation, or:
+</p>
+<pre>Enter a selection (default=all): ^5-8 ^2
+</pre>
+<p>which will select all packages except 5 through 8 and 2 for installation.
+</p>
+<p>To see what packages belong to the gnome group, run:
+</p>
+<pre># pacman -Sg gnome
+</pre>
+<p>Also visit <a rel="nofollow" class="external free" href="https://www.archlinux.org/groups/">https://www.archlinux.org/groups/</a> to see what package groups are available.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If a package in the list is already installed on the system, it will be reinstalled even if it is already up to date. This behavior can be overridden with the <code>--needed</code> option.</div>
+<h3><span class="mw-headline" id="Removing_packages">Removing packages</span></h3>
+<p>To remove a single package, leaving all of its dependencies installed:
+</p>
+<pre># pacman -R <i>package_name</i>
+</pre>
+<p>To remove a package and its dependencies which are not required by any other installed package:
+</p>
+<pre># pacman -Rs <i>package_name</i>
+</pre>
+<p>To remove a package, its dependencies and all the packages that depend on the target package:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This operation is recursive, and must be used with care since it can remove many potentially needed packages.</div>
+<pre># pacman -Rsc <i>package_name</i>
+</pre>
+<p>To remove a package, which is required by another package, without removing the dependent package:
+</p>
+<pre># pacman -Rdd <i>package_name</i>
+</pre>
+<p><i>pacman</i> saves important configuration files when removing certain applications and names them with the extension: <i>.pacsave</i>. To prevent the creation of these backup files use the <code>-n</code> option:
+</p>
+<pre># pacman -Rn <i>package_name</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><i>pacman</i> will not remove configurations that the application itself creates (for example "dotfiles" in the home folder).</div>
+<h3><span class="mw-headline" id="Upgrading_packages">Upgrading packages</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/System_maintenance.html" title="System maintenance">System maintenance</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b>  (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Pacman#Don.27t_rush_upgrades">Talk:Pacman#Don't rush upgrades</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Arch only supports full system upgrades. See <a href="../en/System_maintenance.html#Partial_upgrades_are_unsupported" title="System maintenance">System maintenance#Partial upgrades are unsupported</a> and <a href="#Installing_packages">#Installing packages</a> for details.</div>
+<p>It is recommended that users <a href="../en/System_maintenance.html#Upgrading_the_system" title="System maintenance">upgrade their system regularly</a>. When requesting support from the community, it will usually be assumed that the system is up to date.
+</p>
+<p>Before upgrading, users are expected to visit the <a rel="nofollow" class="external text" href="https://www.archlinux.org/">Arch Linux home page</a> to check the latest news, or alternatively subscribe to the <a rel="nofollow" class="external text" href="https://www.archlinux.org/feeds/news/">RSS feed</a>, <a rel="nofollow" class="external text" href="https://mailman.archlinux.org/mailman/listinfo/arch-announce/">arch-announce mailing list</a>, or follow <a rel="nofollow" class="external text" href="https://twitter.com/archlinux">@archlinux</a> on Twitter: when updates require out-of-the-ordinary user intervention (more than what can be handled simply by following the instructions given by <i>pacman</i>), an appropriate news post will be made. Users must equally be aware that upgrading packages can raise <b>unexpected</b> problems that could need immediate intervention, therefore it is discouraged to upgrade a stable system shortly before it is required for carrying out an important task: it is wise to wait instead to have enough time in order to be able to deal with possible post-upgrade issues.
+</p>
+<p><i>pacman</i> can update all packages on the system with just one command. This could take quite a while depending on how up-to-date the system is. This command can synchronize the repository databases <i>and</i> update the system's packages (excluding "local" packages that are not in the configured repositories):
+</p>
+<pre># pacman -Syu
+</pre>
+<p><i>pacman</i> is a powerful package management tool, but it does not attempt to handle all corner cases. Users must be vigilant and take responsibility for maintaining their own system. <b>When performing a system update, it is essential that users read all information output by <i>pacman</i> and use common sense.</b> If a user-modified configuration file needs to be upgraded for a new version of a package, a <i>.pacnew</i> file will be created to avoid overwriting settings modified by the user. <i>pacman</i> will prompt the user to merge them. These files require manual intervention from the user and it is good practice to handle them right after every package upgrade or removal. See <a href="../en/Pacman/Pacnew_and_Pacsave.html" title="Pacnew and Pacsave files" class="mw-redirect">Pacnew and Pacsave files</a> for more information.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> Remember that <i>pacman'</i>s output is logged in <code>/var/log/pacman.log</code>.</li>
+<li> You can use a log viewer such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/wat-git/">wat-git</a></span><sup><small>AUR</small></sup> to search the pacman logs.</li>
+</ul>
+</div>
+<p>If one encounters problems that cannot be solved by these instructions, make sure to search the forum. It is likely that others have encountered the same problem and have posted instructions for solving it.
+</p>
+<h3><span class="mw-headline" id="Querying_package_databases">Querying package databases</span></h3>
+<p><i>pacman</i> queries the local package database with the <code>-Q</code> flag; see:
+</p>
+<pre>$ pacman -Q --help
+</pre>
+<p>and queries the sync databases with the <code>-S</code> flag; see:
+</p>
+<pre>$ pacman -S --help
+</pre>
+<p><i>pacman</i> can search for packages in the database, searching both in packages' names and descriptions:
+</p>
+<pre>$ pacman -Ss <i>string1</i> <i>string2</i> ...
+</pre>
+<p>Sometimes, <code>-s</code>'s builtin ERE can cause a lot of unwanted results, so it has to be limited to match the package name only; not the description nor any other field:
+</p>
+<pre># pacman -Ss '^vim-'
+</pre>
+<p>To search for already installed packages:
+</p>
+<pre>$ pacman -Qs <i>string1</i> <i>string2</i> ...
+</pre>
+<p>To display extensive information about a given package:
+</p>
+<pre>$ pacman -Si <i>package_name</i>
+</pre>
+<p>For locally installed packages:
+</p>
+<pre>$ pacman -Qi <i>package_name</i>
+</pre>
+<p>Passing two <code>-i</code> flags will also display the list of backup files and their modification states:
+</p>
+<pre>$ pacman -Qii <i>package_name</i>
+</pre>
+<p>To retrieve a list of the files installed by a package:
+</p>
+<pre>$ pacman -Ql <i>package_name</i>
+</pre>
+<p>For packages not installed, use <a href="../en/Pkgfile.html" title="Pkgfile">pkgfile</a>.
+</p>
+<p>To verify the presence of the files installed by a package:
+</p>
+<pre>$ pacman -Qk <i>package_name</i>
+</pre>
+<p>Passing the <code>k</code> flag twice will perform a more thorough check.
+</p>
+<p>One can also query the database to know which package a file in the file system belongs to:
+</p>
+<pre>$ pacman -Qo <i>/path/to/file_name</i>
+</pre>
+<p>To list all packages no longer required as dependencies (orphans):
+</p>
+<pre>$ pacman -Qdt
+</pre>
+<p>To list all packages explicitly installed and not required as dependencies:
+</p>
+<pre>$ pacman -Qet
+</pre>
+<p>To list a dependency tree of a package:
+</p>
+<pre>$ pactree <i>package_name</i>
+</pre>
+<p>To list all the packages recursively depending on an <i>installed</i> package, use <i>whoneeds</i> from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pkgtools/">pkgtools</a></span><sup><small>AUR</small></sup>:
+</p>
+<pre>$ whoneeds <i>package_name</i>
+</pre>
+<p>or the reverse flag to <i>pactree</i>:
+</p>
+<pre>$ pactree -r <i>package_name</i>
+</pre>
+<p>See <a href="../en/Pacman/Tips_and_tricks.html" title="Pacman tips" class="mw-redirect">pacman tips</a> for more examples.
+</p>
+<h4><span class="mw-headline" id="Database_structure">Database structure</span></h4>
+<p>The pacman databases are normally located at <code>/var/lib/pacman/sync</code>. For each repository specified in <code>/etc/pacman.conf</code> there will be a corresponding database file located there. Database files are tar-gzipped archives containing one directory for each package, for example for the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=which">which</a></span> package:
+</p>
+<pre>
+% tree which-2.20-6 
+which-2.20-6
+|-- depends
+`-- desc
+</pre>
+<p>The <code>depends</code> file lists the packages this package depends on, while <code>desc</code> has a description of the package such as the file size and the MD5 hash.
+</p>
+<h3><span class="mw-headline" id="Cleaning_the_package_cache">Cleaning the package cache</span></h3>
+<p><i>pacman</i> stores its downloaded packages in <code>/var/cache/pacman/pkg/</code> and does not remove the old or uninstalled versions automatically, therefore it is necessary to deliberately clean up that folder periodically to prevent such folder to grow indefinitely in size.
+</p>
+<p>The built-in option to remove all the cached packages that are not currently installed is:
+</p>
+<pre># pacman -Sc
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Only do this when certain that previous package versions are not required, for example for a later <a href="../en/Downgrading_packages.html" title="Downgrade" class="mw-redirect">downgrade</a>. <code>pacman -Sc</code> only leaves the versions of packages which are <i>currently installed</i> available, older versions would have to be retrieved through other means, such as the <a href="../en/Arch_Linux_Archive.html" title="Archive" class="mw-redirect">Archive</a>.</li>
+<li> It is possible to empty the cache folder fully with <code>pacman -Scc</code>. In addition to the above, this also prevents from reinstalling a package directly <i>from</i> the cache folder in case of need, thus requiring a new download. It should be avoided unless there is an immediate need for disk space.</li>
+</ul>
+</div>
+<p>Because of the above limitations, consider an alternative for more control over which packages, and how many, are deleted from the cache:
+</p>
+<p>The <i>paccache</i> script, provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pacman">pacman</a></span> package itself, deletes all cached versions of each package regardless of whether they're installed or not, except for the most recent 3, by default:
+</p>
+<pre># paccache -r
+</pre>
+<p>You can also define how many recent versions you want to keep:
+</p>
+<pre># paccache -rk 1
+</pre>
+<p>To remove all cached versions of uninstalled packages, re-run <i>paccache</i> with:
+</p>
+<pre># paccache -ruk0
+</pre>
+<p>See <code>paccache -h</code> for more options.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pkgcacheclean/">pkgcacheclean</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pacleaner/">pacleaner</a></span><sup><small>AUR</small></sup> are two further alternatives.
+</p>
+<h3><span class="mw-headline" id="Additional_commands">Additional commands</span></h3>
+<p>Download a package without installing it:
+</p>
+<pre># pacman -Sw <i>package_name</i>
+</pre>
+<p>Install a 'local' package that is not from a remote repository (e.g. the package is from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>):
+</p>
+<pre># pacman -U <i>/path/to/package/package_name-version.pkg.tar.xz</i>
+</pre>
+<p>To keep a copy of the local package in <i>pacman'</i>s cache, use:
+</p>
+<pre># pacman -U file:///<i>path/to/package/package_name-version.pkg.tar.xz</i>
+</pre>
+<p>Install a 'remote' package (not from a repository stated in <i>pacman'</i>s configuration files):
+</p>
+<pre># pacman -U <i>http://www.example.com/repo/example.pkg.tar.xz</i>
+</pre>
+<p>To inhibit the <code>-S</code>, <code>-U</code> and <code>-R</code> actions, <code>-p</code> can be used.
+</p>
+<p><i>pacman</i> always lists packages to be installed or removed and asks for permission before it takes action.
+</p>
+<h3><span class="mw-headline" id="Installation_reason">Installation reason</span></h3>
+<p>The <i>pacman</i> database distinguishes the installed packages in two groups according to the reason why they were installed:
+</p>
+<ul>
+<li> <b>explicitly-installed</b>: the packages that were literally passed to a generic <i>pacman</i> <code>-S</code> or <code>-U</code> command;</li>
+<li> <b>dependencies</b>: the packages that, despite never (in general) having been passed to a <i>pacman</i> installation command, were implicitly installed because <a href="../en/PKGBUILD.html#Dependencies" title="Dependency" class="mw-redirect">required</a> by another package that was explicitly installed.</li>
+</ul>
+<p>When installing a package, it is possible to force its installation reason to <i>dependency</i> with:
+</p>
+<pre># pacman -S --asdeps <i>package_name</i>
+</pre>
+<p>When <b>re</b>installing a package, though, the current installation reason is preserved by default.
+</p>
+<p>The list of explicitly-installed packages can be shown with <code>pacman -Qe</code>, while the complementary list of dependencies can be shown with <code>pacman -Qd</code>.
+</p>
+<p>To change the installation reason of an already installed package, execute:
+</p>
+<pre># pacman -D --asdeps <i>package_name</i>
+</pre>
+<p>Use <code>--asexplicit</code> to do the opposite operation.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p><i>pacman'</i>s settings are located in <code>/etc/pacman.conf</code>: this is the place where the user configures the program to work in the desired manner. In-depth information about the configuration file can be found in <span class="plainlinks archwiki-template-man" title="$ man 5 pacman.conf"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.conf.5.html">pacman.conf(5)</a></span>.
+</p>
+<h3><span class="mw-headline" id="General_options">General options</span></h3>
+<p>General options are in the <code>[options]</code> section. Read <span class="plainlinks archwiki-template-man" title="$ man 8 pacman"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.8.html">pacman(8)</a></span> or look in the default <code>pacman.conf</code> for information on what can be done here.
+</p>
+<h4><span class="mw-headline" id="Comparing_versions_before_updating">Comparing versions before updating</span></h4>
+<p>To see old and new versions of available packages, uncomment the "VerbosePkgLists" line in <code>/etc/pacman.conf</code>. The output of <code>pacman -Syu</code> will be like this:
+</p>
+<pre>Package (6)             Old Version  New Version  Net Change  Download Size
+
+extra/libmariadbclient  10.1.9-4     10.1.10-1      0.03 MiB       4.35 MiB
+extra/libpng            1.6.19-1     1.6.20-1       0.00 MiB       0.23 MiB
+extra/mariadb           10.1.9-4     10.1.10-1      0.26 MiB      13.80 MiB
+</pre>
+<h4><span class="mw-headline" id="Skip_package_from_being_upgraded">Skip package from being upgraded</span></h4>
+<p>To have a specific package skipped when <a href="#Upgrading_packages">upgrading</a> the system, specify it as such:
+</p>
+<pre>IgnorePkg=linux
+</pre>
+<p>For multiple packages use a space-separated list, or use additional <code>IgnorePkg</code> lines. Also, glob patterns can be used. If you want to skip packages just once, you can also use the <code>--ignore</code> option on the command-line - this time with a comma-separated list.
+</p>
+<p>It will still be possible to upgrade the ignored packages using <code>pacman -S</code>: in this case <i>pacman</i> will remind you that the packages have been included in an <code>IgnorePkg</code> statement.
+</p>
+<h4><span class="mw-headline" id="Skip_package_group_from_being_upgraded">Skip package group from being upgraded</span></h4>
+<p>As with packages, skipping a whole package group is also possible:
+</p>
+<pre>IgnoreGroup=gnome
+</pre>
+<h4><span class="mw-headline" id="Skip_files_from_being_installed_to_system">Skip files from being installed to system</span></h4>
+<p>To always skip installation of specific directories list them under <code>NoExtract</code>. For example, to avoid installation of <a href="../en/Systemd.html" title="Systemd">systemd</a> units use this:
+</p>
+<pre>NoExtract=usr/lib/systemd/system/*
+</pre>
+<p>Later rules override previous ones, and you can negate a rule by prepending <code>!</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><i>pacman</i> issues warning messages about missing locales when updating a package for which locales have been cleared by <i>localepurge</i> or <i>bleachbit</i>. Commenting the <code>CheckSpace</code> option in <code>pacman.conf</code> suppresses such warnings, but consider that the space-checking functionality will be disabled for all packages.</div>
+<h4><span class="mw-headline" id="Maintain_several_configuration_files">Maintain several configuration files</span></h4>
+<p>If you have several configuration files (e.g. main configuration and configuration with <a href="../en/Official_repositories.html#testing" title="Testing" class="mw-redirect">testing</a> repository enabled) and would have to share options between configurations you may use <code>Include</code> option declared in the configuration files, e.g.:
+</p>
+<pre>Include = <i>/path/to/common/settings</i>
+</pre>
+<p>where <code><i>/path/to/common/settings</i></code> file contains the same options for both configurations.
+</p>
+<h4><span class="mw-headline" id="Hooks">Hooks</span></h4>
+<p><i>pacman</i> can run pre- and post-transaction hooks from the <code>/usr/share/libalpm/hooks/</code> directory; more directories can be specified with the <code>HookDir</code> option in <code>pacman.conf</code>, which defaults to <code>/etc/pacman.d/hooks</code>. Hook file names must be suffixed with <i>.hook</i>.
+</p>
+<p>For more information on alpm hooks, see <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/alpm-hooks.5.html">alpm-hooks(5)</a>
+</p>
+<h3><span class="mw-headline" id="Repositories_and_mirrors">Repositories and mirrors</span></h3>
+<p>Besides the special <a href="#General_options">[options]</a> section, each other <code>[section]</code> in <code>pacman.conf</code> defines a package repository to be used. A <i>repository</i> is a <i>logical</i> collection of packages, which are <i>physically</i> stored on one or more servers: for this reason each server is called a <i>mirror</i> for the repository.
+</p>
+<p>Repositories are distinguished between <a href="../en/Official_repositories.html" title="Official repositories">official</a> and <a href="../en/Unofficial_user_repositories.html" title="Unofficial user repositories">unofficial</a>. The order of repositories in the configuration file matters; repositories listed first will take precedence over those listed later in the file when packages in two repositories have identical names, regardless of version number. In order to use a repository after adding it, you will need to <a href="#Upgrading_packages">upgrade</a> the whole system first.
+</p>
+<p>Each repository section allows defining the list of its mirrors directly or in a dedicated external file through the <code>Include</code> directive: for example, the mirrors for the official repositories are included from <code>/etc/pacman.d/mirrorlist</code>. See the <a href="../en/Mirrors.html" title="Mirrors">Mirrors</a> article for mirror configuration.
+</p>
+<h4><span class="mw-headline" id="Package_security">Package security</span></h4>
+<p><i>pacman</i> supports package signatures, which add an extra layer of security to the packages. The default configuration, <code>SigLevel = Required DatabaseOptional</code>, enables signature verification for all the packages on a global level: this can be overridden by per-repository <code>SigLevel</code> lines. For more details on package signing and signature verification, take a look at <a href="../en/Pacman/Package_signing.html" title="Pacman-key" class="mw-redirect">pacman-key</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id=".22Failed_to_commit_transaction_.28conflicting_files.29.22_error">"Failed to commit transaction (conflicting files)" error</span></h3>
+<p>If you see the following error: <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=56373">[2]</a>
+</p>
+<pre>error: could not prepare transaction
+error: failed to commit transaction (conflicting files)
+<i>package</i>: <i>/path/to/file</i> exists in filesystem
+Errors occurred, no packages were upgraded.
+</pre>
+<p>Why this is happening: <i>pacman</i> has detected a file conflict, and by design, will not overwrite files for you. This is a design feature, not a flaw.
+</p>
+<p>The problem is usually trivial to solve. A safe way is to first check if another package owns the file (<code>pacman -Qo <i>/path/to/file</i></code>). If the file is owned by another package, <a href="../en/Reporting_bug_guidelines.html" title="Reporting bug guidelines">file a bug report</a>. If the file is not owned by another package, rename the file which 'exists in filesystem' and re-issue the update command. If all goes well, the file may then be removed.
+</p>
+<p>If you had installed a program manually without using <i>pacman</i> or a frontend, for example through <code>make install</code>, you have to remove it and all its files and reinstall properly using <i>pacman</i>. See also <a href="../en/Pacman/Tips_and_tricks.html#Identify_files_not_owned_by_any_package" title="Pacman tips" class="mw-redirect">Pacman tips#Identify files not owned by any package</a>.
+</p>
+<p>Every installed package provides a <code>/var/lib/pacman/local/<i>$package-$version</i>/files</code> file that contains metadata about this package. If this file gets corrupted, is empty or goes missing, it results in <code>file exists in filesystem</code> errors when trying to update the package. Such an error usually concerns only one package. Instead of manually renaming and later removing all the files that belong to the package in question, you may exceptionally run <code>pacman -S --force $package</code> to force <i>pacman</i> to overwrite these files.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Take care when using the <code>--force</code> switch (for example <code>pacman -Syu --force</code>) as it can cause major problems if used improperly. It is highly recommended to only use this option when the Arch news instructs the user to do so.</div>
+<h3><span class="mw-headline" id=".22Failed_to_commit_transaction_.28invalid_or_corrupted_package.29.22_error">"Failed to commit transaction (invalid or corrupted package)" error</span></h3>
+<p>Look for <i>.part</i> files (partially downloaded packages) in <code>/var/cache/pacman/pkg</code> and remove them (often caused by usage of a custom <code>XferCommand</code> in <code>pacman.conf</code>).
+</p>
+<pre># find /var/cache/pacman/pkg/ -iname "*.part" -exec rm {} \;
+</pre>
+<h3><span class="mw-headline" id=".22Failed_to_init_transaction_.28unable_to_lock_database.29.22_error">"Failed to init transaction (unable to lock database)" error</span></h3>
+<p>When <i>pacman</i> is about to alter the package database, for example installing a package, it creates a lock file at <code>/var/lib/pacman/db.lck</code>. This prevents another instance of <i>pacman</i> from trying to alter the package database at the same time.
+</p>
+<p>If <i>pacman</i> is interrupted while changing the database, this stale lock file can remain. If you are certain that no instances of <i>pacman</i> are running then delete the lock file:
+</p>
+<pre># rm /var/lib/pacman/db.lck
+</pre>
+<h3><span class="mw-headline" id="Packages_cannot_be_retrieved_on_installation">Packages cannot be retrieved on installation</span></h3>
+<p>This error manifests as <code>Not found in sync db</code>, <code>Target not found</code> or <code>Failed retrieving file</code>.
+</p>
+<p>Firstly, ensure the package actually exists (and watch out for typos!). If certain the package exists, your package list may be out-of-date or your repositories may be incorrectly configured. Try running <code>pacman -Syyu</code> to force a refresh of all package lists and upgrade.
+</p>
+<p>It could also be that the repository containing the package is not enabled on your system, e.g. the package could be in the <i>multilib</i> repository, but <i>multilib</i> is not enabled in your <i>pacman.conf</i>.
+</p>
+<p>See also <a href="../en/Frequently_asked_questions.html#Why_is_there_only_a_single_version_of_each_shared_library_in_the_official_repositories.3F" title="FAQ" class="mw-redirect">FAQ#Why is there only a single version of each shared library in the official repositories?</a>.
+</p>
+<h3><span class="mw-headline" id="Search_for_a_package_that_contains_a_specific_file">Search for a package that contains a specific file</span></h3>
+<p>Install <a href="../en/Pkgfile.html" title="Pkgfile">pkgfile</a> which uses a separate database with all files and their associated packages.
+</p>
+<h3><span class="mw-headline" id="Manually_reinstalling_pacman">Manually reinstalling pacman</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>It is extremely easy to break your system even worse using this approach. Use this only as a last resort if the method from <a href="#pacman_crashes_during_an_upgrade">#pacman crashes during an upgrade</a> is not an option.</div>
+<p>Even if <i>pacman</i> is terribly broken, you can fix it manually by downloading the latest packages and extracting them to the correct locations. The rough steps to perform are
+</p>
+<ol>
+<li> Determine dependencies to install</li>
+<li> Download each package from a mirror of your choice</li>
+<li> Extract each package to root</li>
+<li> Reinstall these packages with <code>pacman -Sf</code> to update the package database accordingly</li>
+<li> Do a full system upgrade</li>
+</ol>
+<p>If you have a healthy Arch system on hand, you can see the full list of dependencies with
+</p>
+<pre>$ pacman -Q $(pactree -u pacman)
+</pre>
+<p>but you may only need to update a few of them depending on your issue. An example of extracting a package is
+</p>
+<pre># tar -xvpwf <i>package.tar.xz</i> -C / --exclude .PKGINFO --exclude .INSTALL
+</pre>
+<p>Note the use of the <code>w</code> flag for interactive mode. Running non-interactively is very risky since you might end up overwriting an important file. Also take care to extract packages in the correct order (i.e. dependencies first). <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=95007">This forum post</a> contains an example of this process where only a couple <i>pacman</i> dependencies are broken.
+</p>
+<h3><span class="mw-headline" id="pacman_crashes_during_an_upgrade">pacman crashes during an upgrade</span></h3>
+<p>In the case that <i>pacman</i> crashes with a "database write" error while removing packages, and reinstalling or upgrading packages fails thereafter, do the following:
+</p>
+<ol>
+<li> Boot using the Arch installation media. Preferably use a recent media so that the <i>pacman</i> version matches/is newer than the system. </li>
+<li> Mount the system's root filesystem, e.g. <code>mount /dev/sdaX /mnt</code> as root, and check the mount has sufficient space with <code>df -h</code> </li>
+<li> If the system uses default database and directory locations, you can now update the system's pacman database and upgrade it via <code>pacman --root=/mnt --cachedir=/mnt/var/cache/pacman/pkg -Syyu</code> as root. </li>
+<li> After the upgrade, one way to double-check for not upgraded but still broken packages: <code>find /mnt/usr/lib -size 0</code> </li>
+<li> Followed by a re-install of any still broken package via <code>pacman --root /mnt --cachedir=/mnt/var/cache/pacman/pkg -S <i>package</i></code>.</li>
+</ol>
+<h3><span class="mw-headline" id=".22Unable_to_find_root_device.22_error_after_rebooting">"Unable to find root device" error after rebooting</span></h3>
+<p>Most likely your initramfs got broken during a kernel update (improper use of <i>pacman'</i>s <code>--force</code> option can be a cause). You have two options; first, try the <i>Fallback</i> entry:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>In case you removed this entry for whatever reason, you can always press the <code>Tab</code> key when the bootloader menu shows up (for Syslinux) or <code>e</code> (for GRUB or systemd-boot), rename it <code>initramfs-linux-fallback.img</code> and press <code>Enter</code> or <code>b</code> (depending on your bootloader) to boot with the new parameters.</div>
+<p>Once the system starts, run this command (for the stock <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> kernel) either from the console or from a terminal to rebuild the initramfs image:
+</p>
+<pre># mkinitcpio -p linux
+</pre>
+<p>If that does not work, from a current Arch release (CD/DVD or USB stick), run:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you do not have a current release or if you only have some other "live" Linux distribution laying around, you can <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroot</a> using the old fashioned way. Obviously, there will be more typing than simply running the <code>arch-chroot</code> script.</div>
+<pre># mount /dev/sdxY /mnt         # Your root partition.
+# mount /dev/sdxZ /mnt/boot    # If you use a separate /boot partition.
+# arch-chroot /mnt
+# pacman -Syu mkinitcpio systemd linux
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If <i>pacman</i> fails with <code>Could not resolve host</code>, please <a href="../en/Network_configuration.html#Check_the_connection" title="Network configuration">check your internet connection</a>.</div>
+<p>Reinstalling the kernel (the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> package) will automatically re-generate the initramfs image with <code>mkinitcpio -p linux</code>. There is no need to do this separately.
+</p>
+<p>Afterwards, it is recommended that you run <code>exit</code>, <code>umount /mnt/{boot,} </code> and <code>reboot</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you cannot enter the arch-chroot or chroot environment but need to re-install packages you can use the command <code>pacman -r /mnt -Syu foo bar</code> to use <i>pacman</i> on your root partition.</div>
+<h3><span class="mw-headline" id="Signature_from_.22User_.3Cemail.40gmail.com.3E.22_is_unknown_trust.2C_installation_failed">Signature from "User &lt;email@gmail.com&gt;" is unknown trust, installation failed</span></h3>
+<p>Follow <a href="../en/Pacman/Package_signing.html#Resetting_all_the_keys" title="Pacman-key" class="mw-redirect">pacman-key#Resetting all the keys</a>. Or you can try to either:
+</p>
+<ul>
+<li> update the known keys, i.e. <code>pacman-key --refresh-keys</code>;</li>
+<li> or manually upgrade <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=archlinux-keyring">archlinux-keyring</a></span> package first, i.e. <code>pacman -S archlinux-keyring</code>.</li>
+</ul>
+<h3><span class="mw-headline" id="Request_on_importing_PGP_keys">Request on importing PGP keys</span></h3>
+<p>If <a href="../en/Installation_guide.html" title="Installation guide">installing</a> Arch with an outdated ISO, you are likely prompted to import PGP keys. Agree to download the key to proceed. If you are unable to add the PGP key successfully, update the keyring or upgrade <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=archlinux-keyring">archlinux-keyring</a></span> (see <a href="#Signature_from_.22User_.3Cemail.40gmail.com.3E.22_is_unknown_trust.2C_installation_failed">above</a>).
+</p>
+<h3><span class="mw-headline" id="Signature_from_.22User_.3Cemail.40archlinux.org.3E.22_is_invalid.2C_installation_failed">Signature from "User &lt;email@archlinux.org&gt;" is invalid, installation failed</span></h3>
+<p>When the system time is faulty, signing keys are considered expired (or invalid) and signature checks on packages will fail with the following error:
+</p>
+<pre>error: <i>package</i>: signature from "User &lt;email@archlinux.org&gt;" is invalid
+error: failed to commit transaction (invalid or corrupted package (PGP signature))
+Errors occured, no packages were upgraded.
+</pre>
+<p>Make sure to correct the <a href="../en/Time.html" title="Time">time</a>, for example with <code>ntpd -qg</code> run as root, and run <code>hwclock -w</code> as root before subsequent installations or upgrades.
+</p>
+<h3><span class="mw-headline" id=".22Warning:_current_locale_is_invalid.3B_using_default_.22C.22_locale.22_error">"Warning: current locale is invalid; using default "C" locale" error</span></h3>
+<p>As the error message says, your locale is not correctly configured. See <a href="../en/Locale.html" title="Locale">Locale</a>.
+</p>
+<h3><span class="mw-headline" id="pacman_does_not_honor_proxy_settings">pacman does not honor proxy settings</span></h3>
+<p>Make sure that the relevant environment variables (<code>$http_proxy</code>, <code>$ftp_proxy</code> etc.) are set up. If you use  <i>pacman</i> with <a href="../en/Sudo.html" title="Sudo">sudo</a>, you need to configure sudo to <a href="../en/Sudo.html#Environment_variables" title="Sudo">pass these environment variables to pacman</a>.
+</p>
+<h3><span class="mw-headline" id="How_do_I_reinstall_all_packages.2C_retaining_information_on_whether_something_was_explicitly_installed_or_as_a_dependency.3F">How do I reinstall all packages, retaining information on whether something was explicitly installed or as a dependency?</span></h3>
+<p>To reinstall all the native packages: <code>pacman -Qnq | pacman -S -</code> (the <code>-S</code> option preserves the installation reason by default).
+</p>
+<p>You will then need to reinstall all the foreign packages, which can be listed with <code>pacman -Qmq</code>.
+</p>
+<h3><span class="mw-headline" id=".22Cannot_open_shared_object_file.22_error">"Cannot open shared object file" error</span></h3>
+<p>It looks like previous <i>pacman</i> transaction removed or corrupted shared libraries needed for pacman itself.
+</p>
+<p>To recover from this situation you need to unpack required libraries to your filesystem manually. First find what package contains the missed library and then locate it in the <i>pacman</i> cache (<code>/var/cache/pacman/pkg/</code>). Unpack required shared library to the filesystem. This will allow to run <i>pacman</i>.
+</p>
+<p>Now you need to <a href="#Installing_specific_packages">reinstall</a> the broken package. Note that you need to use <code>--force</code> flag as you just unpacked system files and <i>pacman</i> does not know about it. <i>pacman</i> will correctly replace our shared library file with one from package.
+</p>
+<p>That's it. Update the rest of the system.
+</p>
+<h3><span class="mw-headline" id="Freeze_of_package_downloads">Freeze of package downloads</span></h3>
+<p>Some issues have been reported regarding network problems that prevent <i>pacman</i> from updating/synchronizing repositories. <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=68944">[3]</a> <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=65728">[4]</a> When installing Arch Linux natively, these issues have been resolved by replacing the default <i>pacman</i> file downloader with an alternative (see <a href="../en/Pacman/Tips_and_tricks.html#Performance" title="Improve pacman performance" class="mw-redirect">Improve pacman performance</a> for more details). When installing Arch Linux as a guest OS in <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a>, this issue has also been addressed by using <i>Host interface</i> instead of <i>NAT</i> in the machine properties.
+</p>
+<h3><span class="mw-headline" id="Failed_retrieving_file_.27core.db.27_from_mirror">Failed retrieving file 'core.db' from mirror</span></h3>
+<p>If you receive this error message with correct <a href="../en/Mirrors.html" title="Mirrors">mirrors</a>, try setting a different <a href="../en/Resolv.conf.html" title="Resolv.conf">name server</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/">Pacman's homepage</a>
+</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 3 libalpm"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/libalpm.3.html">libalpm(3)</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 8 pacman"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.8.html">pacman(8)</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 5 pacman.conf"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.conf.5.html">pacman.conf(5)</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-man" title="$ man 8 repo-add"><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/repo-add.8.html">repo-add(8)</a></span>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_management.html" title="Category:Package management">Package management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

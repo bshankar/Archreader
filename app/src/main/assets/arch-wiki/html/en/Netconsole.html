@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Netconsole - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Netconsole skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Netconsole</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a><b>This article is being considered for redirection to <a href="../en/General_troubleshooting.html" title="Boot debugging" class="mw-redirect">Boot debugging</a>.</b><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Poor adaptation of <a rel="nofollow" class="external autonumber" href="https://www.kernel.org/doc/Documentation/networking/netconsole.txt">[1]</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Netconsole">Talk:Netconsole#</a>)</div>
+</div>
+<p><b>netconsole</b> is a kernel module that sends all kernel log messages (i.e. dmesg) over the network to another computer, without involving user space (e.g. syslogd). Name "netconsole" is a misnomer because it's not really a "console", more like a remote logging service.
+</p>
+<p>It can be used either built-in or as a module. Built-in <i>netconsole</i> initializes immediately after NIC cards and will bring up the specified interface as soon as possible. The module is mainly used for capturing kernel panic output from a headless machine, or in other situations where the user space is no more functional.
+</p>
+<p>Documentation is available in the Linux kernel tree under <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/networking/netconsole.txt">Documentation/networking/netconsole.txt</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Sender_configuration"><span class="tocnumber">1</span> <span class="toctext">Sender configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Built-in_Configuration"><span class="tocnumber">1.1</span> <span class="toctext">Built-in Configuration</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Runtime_configuration"><span class="tocnumber">1.2</span> <span class="toctext">Runtime configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Receiver_configuration"><span class="tocnumber">2</span> <span class="toctext">Receiver configuration</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Sender_configuration">Sender configuration</span></h2>
+<h3><span class="mw-headline" id="Built-in_Configuration">Built-in Configuration</span></h3>
+<p>Netconsole can be configured via the <code>netconsole</code> <a href="../en/Kernel_parameters.html" title="Kernel parameter" class="mw-redirect">kernel parameter</a> in the following format:
+</p>
+<pre>netconsole=[src-port]@[src-ip]/[&lt;dev&gt;],[tgt-port]@&lt;tgt-ip&gt;/[tgt-macaddr]
+</pre>
+<p>where the fields have the following meaning:
+</p>
+<ul>
+<li> <code>src-port</code> — source for UDP packets (defaults to 6665)</li>
+<li> <code>src-ip</code> — source IP to use (interface address)</li>
+<li> <code>dev</code> — network interface (eth0)</li>
+<li> <code>tgt-port</code> — port for logging agent (6666)</li>
+<li> <code>tgt-ip</code> — IP address for logging agent</li>
+<li> <code>tgt-macaddr</code> — ethernet MAC address for logging agent (broadcast)</li>
+</ul>
+<p>For example:
+</p>
+<pre>netconsole=6665@192.168.1.28/eth0,6666@192.168.1.19/00:13:32:20:r9:a5'
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>MAC address is optional, but the slash must stay: <code>...,6666@192.168.1.19/</code>
+</div>
+<p>The logging level can be set with the <code>loglevel</code> kernel parameter, e.g.:
+</p>
+<pre>loglevel=7
+</pre>
+<h3><span class="mw-headline" id="Runtime_configuration">Runtime configuration</span></h3>
+<p>Netconsole can be loaded as <i>kernel module</i> manually after boot or automatically during boot depending on the module configuration (see <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a> for details).
+</p>
+<p>To load the <code>netconsole</code> module manually any time after boot:
+</p>
+<pre>
+# set log level for kernel messages
+dmesg -n 8
+
+modprobe configfs
+modprobe netconsole
+mount none -t configfs /sys/kernel/config
+
+# 'netconsole' dir is auto created if the module is loaded 
+mkdir /sys/kernel/config/netconsole/target1
+cd /sys/kernel/config/netconsole/target1
+
+# set local IP address
+echo 192.168.0.111 &gt; local_ip
+# set destination IP address
+echo 192.168.0.17 &gt; remote_ip
+# set local network device name (find it trough ifconfig, examples: eth0, eno1, wlan0)
+echo eno1 &gt; dev_name
+# find destination MAC address
+arping $(cat remote_ip) -f | grep -o ..:..:..:..:..:.. &gt; remote_mac
+
+echo 1 &gt; enabled
+</pre>
+<p>Netconsole should now be configured. To verify, run <code>dmesg | tail</code> and you should see "netconsole: network logging started". Check available log levels by running <code>dmesg -h</code>.
+</p>
+<h2><span class="mw-headline" id="Receiver_configuration">Receiver configuration</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Netconsole">Talk:Netconsole#</a>)</div>
+</div>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnu-netcat">gnu-netcat</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=socat">socat</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<pre>nc -u -l 6666
+</pre>
+<p>or
+</p>
+<pre>nc -u -l -p 6666
+</pre>
+<p>Logging is done by your Arch Linux set logger like <i>syslog-ng</i>, so available loglevels (output details) are defined in that logger docs, and may differ for each log type. One can also pass <i>netconsole</i> string parameters at kernel runtime (no config file required), then start two <i>netconsole</i> instances on the monitoring PC (one to read output, another for input), and restart it on the PC or device you are logging as shown in <i>Dynamic Configuration</i>:
+</p>
+<pre>
+# set log level for kernel messages
+dmesg -n 8
+
+netconsole=6666@192.168.1.28/eth0,6666@192.168.1.19/00:13:32:20:r9:a5
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> MAC address is optional.</div>
+<pre>
+nc -l -u -p 6666 &amp;
+nc -u 192.168.1.28 6666
+
+# socat as alternative to nc in one command
+socat - udp4-datagram:192.168.1.28:6666,bind=6666
+</pre>
+<p>One may need to switch off PC and router firewall, and setup proper router port forwarding to monitor and input data in <i>Netconsole</i>. A more flexible configuration can be achieved if netconsole is setup on a <a rel="nofollow" class="external text" href="http://archlinuxarm.org/forum/viewtopic.php?f=18&amp;t=3355">different subnet</a> so that if the device is moved to a different network IP's won't clash, however <a rel="nofollow" class="external text" href="http://archlinuxarm.org/platforms/armv5/seagate-goflex-home#qt-platform_tabs-ui-tabs3">it may require a more complex setup</a> on the receiver with aliased ethernet interface.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Moved from <a href="../en/General_troubleshooting.html" title="Boot debugging" class="mw-redirect">Boot debugging</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Netconsole">Talk:Netconsole#</a>)</div>
+</div>
+<strong class="selflink">netconsole</strong> is a kernel module which sends kernel logs over the network, which is useful for debugging slower computers. The setup process is:
+<ol>
+<li> Set up another computer (running Arch) to accept syslog requests on a remote port using <code>syslog.conf</code>
+</li>
+<li> View the logs using your <code>/var/log/everything.log</code> file</li>
+<li> On the computer you are debugging, add a kernel paramter like <code>netconsole=514@10.0.0.2/12:34:56:78:9a:bc</code> (along with whatever debugging parameters you want)</li>
+<li> Restart the computer and view the logs</li>
+</ol>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a href="../en/General_troubleshooting.html#netconsole" title="Boot debugging" class="mw-redirect">Boot debugging#netconsole</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+<li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_flagged_with_Template:Redirect.html" title="Category:Pages flagged with Template:Redirect">Pages flagged with Template:Redirect</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Intel C++ - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Intel_C skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Intel C++</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Creating_packages.html" title="Creating packages">Creating packages</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Makepkg.html" title="Makepkg">Makepkg</a></li>
+</ul>
+</div>
+<p>Installation and basic usage of Intel® C++ Composer XE (formerly Intel® C++ Compiler Professional Edition) for Linux on Arch.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Before_you_begin"><span class="tocnumber">1</span> <span class="toctext">Before you begin</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Setup_and_installation"><span class="tocnumber">2</span> <span class="toctext">Setup and installation</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Using_icc_with_makepkg"><span class="tocnumber">3</span> <span class="toctext">Using icc with makepkg</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Method_1_.2812.2F08.2F2012.29"><span class="tocnumber">3.1</span> <span class="toctext">Method 1 (12/08/2012)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#icc_CFLAGS"><span class="tocnumber">4</span> <span class="toctext">icc CFLAGS</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#-xX"><span class="tocnumber">4.1</span> <span class="toctext">-xX</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#-Ox"><span class="tocnumber">4.2</span> <span class="toctext">-Ox</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#-w"><span class="tocnumber">4.3</span> <span class="toctext">-w</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Software_compiled_with_Intel_C_.2F_C.2B.2B"><span class="tocnumber">5</span> <span class="toctext">Software compiled with Intel C / C++</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Before_you_begin">Before you begin</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Packages that have been compiled by icc will depend on the associated libs contained in the <b>intel-openmp</b> package in order to run.  Since <b>intel-openmp</b> depends on <b>intel-compiler-base</b>, users MUST have both packages installed at all times!</div>
+<h2><span class="mw-headline" id="Setup_and_installation">Setup and installation</span></h2>
+<p><a rel="nofollow" class="external text" href="https://aur.archlinux.org/pkgbase/intel-parallel-studio-xe">intel-parallel-studio-xe</a> are available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.  To build the package, one needs a license file which is free for personal and for non-commercial use. The requisite license file is emailed to users upon <a rel="nofollow" class="external text" href="https://registrationcenter.intel.com/RegCenter/AutoGen.aspx?ProductID=1517&amp;AccountID=&amp;EmailID=&amp;ProgramID=&amp;RequestDt=&amp;rm=NCOM&amp;lang=">registration</a> and should be copied into the $startdir prior to running makepkg.  The current PKGBUILD assembles 7 or 8 packages:
+</p>
+<ul>
+<li> <b>intel-compiler-base</b> - Intel C/C++ compiler and base libs</li>
+<li> <b>intel-fortran-compiler</b> - Intel fortran compiler and base libs  (only Parallel Studio XE)</li>
+<li> <b>intel-openmp</b> - Intel OpenMP Library</li>
+<li> intel-idb- Intel C/C++ debugger</li>
+<li> intel-ipp - Intel Integrated Performance Primitives</li>
+<li> intel-mkl - Intel Math Kernel Library (Intel® MKL)</li>
+<li> intel-sourcechecker - Intel Source Checker</li>
+<li> intel-tbb - Intel Threading Building Blocks (TBB)</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>A minimal working environment requires the <b>intel-compiler-base</b> and <b>intel-openmp</b> packages; if you want also the fortran compiler you must install <b>intel-fortran-compiler</b>.</div>
+<h2><span class="mw-headline" id="Using_icc_with_makepkg">Using icc with makepkg</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Not every package will successfully compile with icc without heavy modifications to the underlying source.</div>
+<p>There is currently no official guide to using icc with makepkg.  This section is meant to capture various methods suggested by users.  Please make a new sub-section with your suggested method titled as such.
+</p>
+<h3><span class="mw-headline" id="Method_1_.2812.2F08.2F2012.29">Method 1 (12/08/2012)</span></h3>
+<p>Modify <code>/etc/makepkg.conf</code> inserting the following code <i>under</i> the existing line defining <b>CXXFLAGS</b> to enable makepkg to use icc.  No special switches are needed when calling makepkg to build.
+</p>
+<pre>_CC=icc
+if [ $_CC = "icc" ]; then
+export CC="icc"
+export CXX="icpc"
+export CFLAGS="-march=native -O3 -no-prec-div -fno-alias -pipe"
+export CXXFLAGS="${CFLAGS}"
+export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
+export AR="xiar"
+export LD="xild"
+fi</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> To toggle between the native gcc and icc, simple comment or uncomment the newly created <b>_CC</b> variable.</li>
+<li> In some case the compilation method described above fails and the compilation will be performed with <i>gcc</i>, so you should test if yours application has been effectively compiled with <i>icc</i>.</li>
+</ul>
+</div>
+<p>To test if your package has been really compiled with icc:
+</p>
+<ul><li> Type the command <b>ldd [your_app] | grep intel</b> If the application is linked to a shared object located in the directory <b>/opt/intel/lib/</b> it is mind that has been complied with icc.</li></ul>
+<ul><li> Another method is to observe the build output and watch if it is using the <i>icc</i> or <i>icpc</i> command.</li></ul>
+<ul><li> The last method is to watch if the warnings are in <i>icc</i> style or not.</li></ul>
+<h2><span class="mw-headline" id="icc_CFLAGS">icc CFLAGS</span></h2>
+<p>In general, icc supports many of the same CFLAGS gcc supports and is also pretty tolerant to gcc flags it cannot use.  In most cases it will happily ignore the flag warning the user and moving on.  For an exhaustive list and explanation of available compiler flags, consult the icc manpage or better yet by invoking the compiler with the help flag:
+</p>
+<pre>icc --help
+</pre>
+<h3><span class="mw-headline" id="-xX">-xX</span></h3>
+<p>Use to generate specialized code to run exclusively on processors supporting it.  If unsure which option to use, simply inspect the <b>flags</b> section of <code>/proc/cpuinfo</code>.  In the example below, <b>SSE4.1</b> would be the correct selection:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep -m 1 flags /proc/cpuinfo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+flags: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush 
+dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx lm constant_tsc arch_perfmon pebs 
+bts rep_good nopl aperfmperf pni dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr
+pdcm sse4_1 lahf_lm dts tpr_shadow vnmi flexpriority
+</pre>
+<ul>
+<li> -xHost</li>
+<li> -xSSE2</li>
+<li> -xSSE3</li>
+<li> -xSSSE3</li>
+<li> -xSSE4.1</li>
+<li> -xSSE4.2</li>
+<li> -xAVX</li>
+<li> -xCORE-AVX-I</li>
+<li> -xSSSE3_ATOM</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Use the <b>-xHost</b> flag if unsure what your specific processor supports.</div>
+<h3><span class="mw-headline" id="-Ox">-Ox</span></h3>
+<p>Same behavior as gcc. x is one of the following options:
+</p>
+<ul>
+<li> 0 - disables optimizations</li>
+<li> 1 - optimize for maximum speed, but disable some optimizations which increase code size for a small speed benefit</li>
+<li> 2 - optimize for maximum speed (DEFAULT)</li>
+<li> 3 - optimize for maximum speed and enable more aggressive optimizations that may not improve performance on some programs (recommended for math intensive looping programs)</li>
+</ul>
+<h3><span class="mw-headline" id="-w">-w</span></h3>
+<p>Similar to the gcc:
+</p>
+<ul>
+<li> -w      - disable all warnings (recommended for the package compilation)</li>
+<li> -Wbrief - print brief one-line diagnostics</li>
+<li> -Wall   - enable all warnings</li>
+<li> -Werror  - force warnings to be reported as errors</li>
+</ul>
+<h2><span class="mw-headline" id="Software_compiled_with_Intel_C_.2F_C.2B.2B">Software compiled with Intel C / C++</span></h2>
+<p>In the following table we report a list of packages from the officials repository that we have tried to compile with the intel C/C++ compiler. The compilation should be done by using the PKGBUILD from ABS.
+</p>
+<table class="wikitable sortable collapsible" border="1">
+
+<tr style="background: #ffdead;">
+<th> Application </th>
+<th> Compile </th>
+<th> Comments
+</th>
+</tr>
+<tr>
+<td> <b>xvidcore</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>kdebase</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>conky 1.9.0</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>nginx 1.4.2</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>gzip 1.6</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>xz</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>lz4</b> </td>
+<td style="background: GreenYellow"> OK </td>
+<td> We must edit the PKGBUILD.
+</td>
+</tr>
+<tr>
+<td> <b>minetest</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>opus</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>zlib 1.2.8</b> </td>
+<td style="background: yellow"> Not recommended </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>, but caused bugs in some apps, like tightvnc
+</td>
+</tr>
+<tr>
+<td> <b>Gimp 2.8 / 2.9 </b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>Pacman 4.0.3</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>x264</b> </td>
+<td style="background: Lime"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>MySql</b> </td>
+<td style="background: Lime"> OK  </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>SqlLite</b> </td>
+<td style="background: Lime"> OK  </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>lame</b> </td>
+<td style="background: Lime"> OK  </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>xaos</b> </td>
+<td style="background: Lime"> OK  </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>gegl</b> </td>
+<td style="background: Lime"> OK  </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>
+</td>
+</tr>
+<tr>
+<td> <b>VLC</b> </td>
+<td style="background: Tomato"> Unsuccessful </td>
+<td> There is some problem with the compiler flags
+</td>
+</tr>
+<tr>
+<td> <b>bzip2</b> </td>
+<td style="background: Tomato"> Unsuccessful </td>
+<td> There is some problem with the compiler flags
+</td>
+</tr>
+<tr>
+<td> <b>mplayer</b> </td>
+<td style="background: pink"> Out of date  </td>
+<td> It do not recognize the Intel compiler
+</td>
+</tr>
+<tr>
+<td> <b>optipng</b> </td>
+<td style="background: GreenYellow"> OK </td>
+<td> Works with the <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>. Comment out LD=xild in makepkg.conf
+</td>
+</tr>
+<tr>
+<td> <b>python-numpy</b> </td>
+<td style="background: GreenYellow"> OK  </td>
+<td> We must edit the PKGBUILD. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python-numpy-mkl/">python-numpy-mkl</a></span><sup><small>AUR</small></sup>
+</td>
+</tr>
+<tr>
+<td> <b>python-scipy</b> </td>
+<td style="background: GreenYellow"> OK  </td>
+<td> We must edit the PKGBUILD. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python-scipy-mkl/">python-scipy-mkl</a></span><sup><small>AUR</small></sup>
+</td>
+</tr>
+<tr>
+<td> <b>Qt</b> </td>
+<td style="background: GreenYellow"> OK  </td>
+<td> We must add the option <i>-platform linux-icc-64 (or 32)</i> in the configure command
+</td>
+</tr>
+<tr>
+<td> <b>systemd</b> </td>
+<td style="background: red"> Fail </td>
+<td>undefined reference to `server_dispatch_message'
+</td>
+</tr>
+</table>
+<p><b>Legend:</b>
+</p>
+<table>
+
+<tr>
+<td style="background: Lime"> OK  </td>
+<td> The compilation with ICC works!
+</td>
+</tr>
+<tr>
+<td style="background: GreenYellow"> OK  </td>
+<td> The compilation works but is needed an editing of the PKGBUILD
+</td>
+</tr>
+<tr>
+<td style="background: Tomato"> Unsuccessful </td>
+<td> The compilation may work, but there are some compilations errors.
+</td>
+</tr>
+<tr>
+<td style="background: yellow"> Not recommended </td>
+<td> The compilation works, but is not recommended
+</td>
+</tr>
+<tr>
+<td style="background: red"> Fail  </td>
+<td> It is impossible to compile the PKG with ICC.
+</td>
+</tr>
+<tr>
+<td style="background: pink"> Out of date  </td>
+<td> It is unsuccessful or fails with older CFLAGS. You can try compiling it with new <a href="#Method_1">Method 1</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.(Do not forget to paste your result here!)
+</td>
+</tr>
+</table>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Development.html" title="Category:Development">Development</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

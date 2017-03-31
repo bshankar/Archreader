@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Flashing BIOS from Linux - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Flashing_BIOS_from_Linux skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Flashing BIOS from Linux</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This article aims on providing information on flashing your system BIOS under Linux. Most manufacturers provide a Windows executable or a BIOS executable that can only be run under Windows. However, there are a few utilities, that allow you to upgrade your system BIOS under Linux.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Flashing motherboard BIOS is a dangerous activity that can render your motherboard inoperable! While the author of this article has successfully run this procedure many times, your mileage may vary. Be careful! You may want to consider updating <a href="../en/Microcode.html" title="Microcode">microcode</a> instead if it is supported by your system.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#BiosDisk"><span class="tocnumber">1</span> <span class="toctext">BiosDisk</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Usage"><span class="tocnumber">1.2</span> <span class="toctext">Usage</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Flashrom"><span class="tocnumber">2</span> <span class="toctext">Flashrom</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Installation_2"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Usage_2"><span class="tocnumber">2.2</span> <span class="toctext">Usage</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#FreeDOS"><span class="tocnumber">3</span> <span class="toctext">FreeDOS</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Unetbootin"><span class="tocnumber">3.1</span> <span class="toctext">Unetbootin</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Gentoo"><span class="tocnumber">3.2</span> <span class="toctext">Gentoo</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Prebuilt_images"><span class="tocnumber">3.3</span> <span class="toctext">Prebuilt images</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Images_that_are_too_large_for_a_floppy"><span class="tocnumber">3.4</span> <span class="toctext">Images that are too large for a floppy</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Usage_3"><span class="tocnumber">3.5</span> <span class="toctext">Usage</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Bootable_optical_disk_emulation"><span class="tocnumber">4</span> <span class="toctext">Bootable optical disk emulation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Installation_3"><span class="tocnumber">4.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Usage_4"><span class="tocnumber">4.2</span> <span class="toctext">Usage</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="BiosDisk">BiosDisk</span></h2>
+<p><a rel="nofollow" class="external text" href="http://linux.dell.com/git/biosdisk.git">BiosDisk</a> BiosDisk simplifies the process of flashing your system BIOS under Linux
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/biosdisk-git/">biosdisk-git</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h3><span class="mw-headline" id="Usage">Usage</span></h3>
+<p>To use the biosdisk utility to create a BIOS flash image, first download the latest raw BIOS image for your system from your manufacturer's website. Make sure however, that you always get the BIOS executable and NOT the Windows executable. You then have one of several options: create a floppy, create a dd floppy image, create a user-installable distribution-specific package (e.g. RPM), or actually install the image for your bootloader.
+</p>
+<ul><li> The mkfloppy action will create the biosdisk image and write it directly to a floppy disk. Usage is the following:</li></ul>
+<pre>    biosdisk mkfloppy [-o option] [-d device] [-k baseimage] /path/to/.exe 
+</pre>
+<ul><li> The mkimage action will create a floppy image on the user's hard drive. Usage is the following:</li></ul>
+<pre>    biosdisk mkimage [-o option] [-i destination] [-k baseimage] /path/to/.exe 
+</pre>
+<ul><li> The mkpkg action will create the floppy image, and use it to create a user-installable package specific to the distribution (example: RPM). When the package is installed, it will use the distribution's built-in tools to update the system's bootloader so that the user can boot to the image from the hard drive to flash the BIOS, without needing a floppy drive. Currently only Red Hat/Fedora RPM packages are supported. Usage is as follows:</li></ul>
+<pre>    biosdisk mkpkg [-o option] [--install] [--distro=] [--name=] [--version=] [--release=] /path/to/{.exe | .img}
+</pre>
+<ul><li> The install action will create the biosdisk image, copy the image file to /boot, and then update the bootloader with an entry for the image. Then all the user has to do is boot the system and select the image to flash the BIOS; this will load the biosdisk image directly from the hard drive and flash the BIOS.</li></ul>
+<pre>    biosdisk install [-o option] [--name=] /path/to/{.exe | .img}
+</pre>
+<h2><span class="mw-headline" id="Flashrom">Flashrom</span></h2>
+<p><a rel="nofollow" class="external text" href="http://www.flashrom.org/Flashrom">Flashrom</a>is a utility for identifying, reading, writing, verifying and erasing flash chips. It is designed to flash BIOS/EFI/coreboot/firmware/optionROM images on mainboards, network/graphics/storage controller cards, and various programmer devices.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you have a laptop/notebook/netbook, please do NOT try flashrom because interactions with the EC on these machines might crash your machine during flashing. flashrom tries to detect if a machine is a laptop, but not all laptops follow the standard, so this is not 100% reliable.<a rel="nofollow" class="external autonumber" href="https://www.flashrom.org/Board_Testing_HOWTO">[1]</a>
+</div>
+<h3><span class="mw-headline" id="Installation_2">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=flashrom">flashrom</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/flashrom-svn/">flashrom-svn</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h3><span class="mw-headline" id="Usage_2">Usage</span></h3>
+<p>Find out if your motherboard and chipset (internal) is supported by flashrom at this website. <a rel="nofollow" class="external text" href="http://www.flashrom.org/Supported_hardware">Supported Hardware</a>
+You can also find out if your hardware is supported by issuing the following command
+</p>
+<pre># flashrom --programmer internal
+</pre>
+<p>The above command will tell you your motherboard and chipset. You can then find out if yours is supported by issuing this command:
+</p>
+<pre># flashrom --programmer internal -L | grep CHIPNAMEfrompreviouscommand
+</pre>
+<p>On modern mainboards you probably get more than one rom chip listed. You have to select the chipname you get from the upper command. Then you use the <code>-c</code> option to select which rom is affected by the command
+</p>
+<pre># flashrom --programmer internal -c "CHIPNAME" -r backup_CHIPNAME.bin
+</pre>
+<p>Write and verify the new BIOS image (proprietary or Coreboot) on the ROM chip:
+</p>
+<pre># flashrom --programmer internal internal -c "CHIPNAME" -w newbios.bin
+</pre>
+<p>If you want to flash other flash chips on your mainboard, you will find all options with
+</p>
+<pre># flashrom
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>With Linux kernel versions greater than 4.4, CONFIG_IO_STRICT_DEVMEM a new kernel security measure can make flashrom stop working, in that case you can try adding "iomem=relaxed" to your kernel parameters. <a rel="nofollow" class="external autonumber" href="https://www.flashrom.org/FAQ%EF%BB%BF">[2]</a>.</div>
+<h2><span class="mw-headline" id="FreeDOS">FreeDOS</span></h2>
+<p><a rel="nofollow" class="external text" href="http://www.freedos.org/">FreeDOS</a> a free DOS-compatible operating system, is up to the challenge, no need for proprietary DOS versions. So, all you need is a bootable floppy disk image with FreeDOS kernel on it.
+</p>
+<h3><span class="mw-headline" id="Unetbootin">Unetbootin</span></h3>
+<p>By far the easiest way to make a bootable FreeDOS USB Stick is using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=unetbootin">unetbootin</a></span>, available in the <a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a>.
+</p>
+<p>You should format a pendrive with FAT16 and flag it as "boot" (you may do this through a GUI with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gparted">gparted</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/qtparted/">qtparted</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/qtparted">aur-mirror</a>]</sup> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=partitionmanager">partitionmanager</a></span>). Then, after mounting the flash drive, select under distribution <b>FreeDOS</b> and your mounted stick. The app will automatically download the image for you and copy it to the drive. Finally, you may copy everything you want to flash there (BIOS, firmwares, etc).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Unetbootin may not function properly on some Lenovo systems. It may be necessary to create the bootable stick on a different device. See <a rel="nofollow" class="external text" href="http://reboot.pro/topic/9849-blinking-cursor-at-boot/">here</a>.</div>
+<h3><span class="mw-headline" id="Gentoo">Gentoo</span></h3>
+<p>Check out <a rel="nofollow" class="external text" href="https://wiki.gentoo.org/wiki/BIOS_Update#FreeDOS_environment">FreeDOS Flash Drive</a> on the Gentoo Wiki if you want to create a bootable FreeDOS Flash drive.
+</p>
+<h3><span class="mw-headline" id="Prebuilt_images">Prebuilt images</span></h3>
+<p>Yet another simple solution: <a rel="nofollow" class="external text" href="http://chtaube.eu/computers/freedos/bootable-usb/">FreeDOS prebuilt bootable USB flash drive image by Christian Taube</a>
+</p>
+<h3><span class="mw-headline" id="Images_that_are_too_large_for_a_floppy">Images that are too large for a floppy</span></h3>
+<p>If your flash image is too large for a floppy, go to the <a rel="nofollow" class="external text" href="http://www.fdos.org/bootdisks/">FreeDos bootdisk website</a>, and download the 10Mb hard-disk image.  This image is a full disk image, including partitions, so adding your flash utility will be a little trickier:
+</p>
+<p>First find the first partition (at time of writing, the first partition starts at block 63; this means that the partitions starts at offset <tt>512 * 63 = 32256</tt>).
+You can either use:
+</p>
+<pre># file -sk <i>&lt;image-file&gt;</i> | sed -r 's/.*startsector ([0-9]+).*/\1/'
+<b>63</b>
+</pre>
+<p>Or:
+</p>
+<pre># fdisk -l <i>&lt;image-file&gt;</i>
+…
+Units = sectors of 1 * <b>512</b> = 512 bytes
+…
+      Device  Boot  Start    End  Blocks  Id  System
+              *        <b>63</b>  19151   9544+   1  FAT12
+</pre>
+<p>Now you can mount the image:
+</p>
+<pre># mount -oloop,offset=$((63 * 512)) <i>&lt;image-file&gt;</i> /mnt
+</pre>
+<p>Then you can copy your flash utility onto the filesystem as normal.
+Once you're done:
+</p>
+<pre># umount /mnt
+</pre>
+<p>The image can now be copied to a USB stick for booting, or booted as a memdisk as per normal instructions.
+</p>
+<h3><span class="mw-headline" id="Usage_3">Usage</span></h3>
+<p>The OEM Bootdisk version is recommended, as it only includes <code>kernel</code> and <code>command.com</code> thus leaving more space for the flash utility and new BIOS image. Download and decompress the FreeDOS image:
+</p>
+<pre>$ wget <a rel="nofollow" class="external free" href="http://www.fdos.org/bootdisks/autogen/FDOEM.144.gz">http://www.fdos.org/bootdisks/autogen/FDOEM.144.gz</a>
+$ gunzip FDOEM.144.gz
+</pre>
+<p>Copy your BIOS flash utility and new BIOS image to the mounted floppy disk image. Load the necessary modules:
+</p>
+<pre># modprobe vfat
+# modprobe loop
+</pre>
+<p><code>/proc/fileystems</code> shows if the needed file systems are supported. "loop mount" the floppy disk image to a temporary path:
+</p>
+<pre>$ mkdir /tmp/floppy
+$ mount -t vfat -o loop FDOEM.144 /tmp/floppy
+</pre>
+<p>If the mount went without errors, copy the BIOS flash utility and new BIOS image to the mounted floppy disk image. You will probably have to unzip the archive you downloaded from your motherboard vendor site, to get to those two files. For example:
+</p>
+<pre># unzip 775Dual-VSTA\(2.60\).zip
+Archive: 775Dual-VSTA(2.60).zip
+ inflating: 75DVSTA2.60
+ inflating: ASRflash.exe
+# cp 75DVSTA2.60 ASRflash.exe /tmp/floppy
+</pre>
+<p>Check that the two files were not too big for the floppy:
+</p>
+<pre>Filesystem           1K-blocks      Used Available Use% Mounted on
+/tmp/FDOEM.144
+                         1424       990       434  70% /tmp/floppy
+</pre>
+<p>Unmount the floppy disk image:
+</p>
+<pre>umount /tmp/floppy
+</pre>
+<p>The next step is to burn the floppy image to a CD/DVD-RW media, but in a way that it can be booted afterwards. First create a bootable CD image, and then burn it.
+</p>
+<pre>genisoimage -o bootcd.iso -b FDOEM.144 FDOEM.144
+wodim -v bootcd.iso
+</pre>
+<p>You may alternatively add your image to the <a href="../en/GRUB.html" title="GRUB">GRUB</a> menu. Install <a href="../en/Syslinux.html" title="Syslinux">syslinux</a> and copy <code>memdisk</code> and your image to <code>/boot</code>:
+</p>
+<pre> cp /usr/lib/syslinux/memdisk /boot
+ cp FDOEM.144 /boot/flashbios.img
+</pre>
+<p>Now add an entry to <code>/boot/grub/menu.lst</code>:
+</p>
+<pre> title Flash BIOS
+ kernel /memdisk
+ initrd /flashbios.img
+</pre>
+<p>Or for GRUB2 in <code>/boot/grub/grub.cfg</code>:
+</p>
+<pre> menuentry "Flash BIOS" {
+ linux16 /boot/memdisk
+ initrd16 /boot/flashbios.img
+ }
+</pre>
+<p>Or for syslinux in <code>/boot/syslinux/syslinux.cfg</code>:
+</p>
+<pre>LABEL flashbios
+	MENU LABEL Flash BIOS
+	LINUX ../memdisk
+	INITRD ../fdboot.img
+</pre>
+<p>Finally reboot your machine, making sure the CD drive is first in the boot sequence, and run the BIOS upgrade procedure when the CD boots. If using the GRUB method, choose the new entry on the list, and it should boot into FreeDOS.
+</p>
+<h2><span class="mw-headline" id="Bootable_optical_disk_emulation">Bootable optical disk emulation</span></h2>
+<p>The script Geteltorito.pl will extract the <a href="https://en.wikipedia.org/wiki/El_Torito_(CD-ROM_standard)" class="extiw" title="wikipedia:El Torito (CD-ROM standard)">El Torito</a> boot image. It has worked on Lenovo laptops like X220, X230, W540 and T450s. It may work for other vendors as well.
+</p>
+<h3><span class="mw-headline" id="Installation_3">Installation</span></h3>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/geteltorito/">geteltorito</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h3><span class="mw-headline" id="Usage_4">Usage</span></h3>
+<p>Get the bios update iso from the vendor support site. Run the <i>geteltorito</i> image extraction:
+</p>
+<pre>$ geteltorito.pl -o &lt;image&gt;.img &lt;image&gt;.iso
+</pre>
+<p>Copy the image to the usb thumbdrive:
+</p>
+<pre># dd if=&lt;image&gt;.img of=&lt;destination&gt; bs=512K
+</pre>
+<p>Reboot and boot from the USB drive, follow vendor directions.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you get the message "Secure Flash Authentication failed!", it means that some security check did not allow the flash to happen. It can help to go to the BIOS options page "Security" &gt; "UEFI BIOS Update Option" and disable "Secure RollBack Prevention" and enable "Flash BIOS Updating by End-Users". You can set them to what you want after flashing.</div>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mainboards_and_BIOS.html" title="Category:Mainboards and BIOS">Mainboards and BIOS</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

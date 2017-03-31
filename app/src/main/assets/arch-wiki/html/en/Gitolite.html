@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Gitolite - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Gitolite skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Gitolite</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="https://github.com/sitaramc/gitolite/wiki/">Gitolite</a> allows you to host Git repositories for multiple users easily and securely.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Admin_SSH_access"><span class="tocnumber">2.1</span> <span class="toctext">Admin SSH access</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Adding_http.28s.29_access_via_Apache_.28with_basic_authentication.29"><span class="tocnumber">2.2</span> <span class="toctext">Adding http(s) access via Apache (with basic authentication)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Add_users"><span class="tocnumber">3</span> <span class="toctext">Add users</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#ssh_users"><span class="tocnumber">3.1</span> <span class="toctext">ssh users</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#http.28s.29_users"><span class="tocnumber">3.2</span> <span class="toctext">http(s) users</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Gitosis-like_ssh_usernames"><span class="tocnumber">4</span> <span class="toctext">Gitosis-like ssh usernames</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gitolite">gitolite</a></span> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Installing gitolite automatically adds the <i>gitolite</i> user to the system, with home directory <code>/var/lib/gitolite</code>.
+</p>
+<h3><span class="mw-headline" id="Admin_SSH_access">Admin SSH access</span></h3>
+<p>To give you admin access, copy your SSH public key to <code>/var/lib/gitolite/<i>username</i>.pub</code>, where <code>username</code> is your username.
+</p>
+<pre># install -o gitolite -g gitolite ~/.ssh/id_rsa.pub /var/lib/gitolite/<i>username</i>.pub
+</pre>
+<p>Then run the Gitolite setup script as the <i>gitolite</i> user.
+</p>
+<pre># su - gitolite
+$ gitolite setup -pk <i>username</i>.pub
+</pre>
+<p>This puts your public key into the gitolite-admin keydir
+and gives your username RW+ access to the gitolite-admin repository
+</p>
+<p>You can now remove the SSH public key you copied and exit the <i>gitolite</i> user shell
+</p>
+<pre>$ rm <i>username</i>.pub
+$ exit
+</pre>
+<p>Now as your user you can check that everything went correctly
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ssh gitolite@<i>hostname</i> info</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+hello <i>username</i>, this is gitolite@<i>hostname</i> running gitolite3 v3.6.2 on git 2.3.3
+
+ R W    gitolite-admin
+ R W    testing
+</pre>
+<p>Do NOT add repositories or users directly as <i>gitolite</i> on the server!
+You MUST manage the server by cloning the special <i>gitolite-admin</i> repository
+</p>
+<pre>$ git clone gitolite@<i>hostname</i>:gitolite-admin
+</pre>
+<p>For reference see <a rel="nofollow" class="external text" href="https://github.com/sitaramc/gitolite/">Gitolite</a>
+</p>
+<h3><span class="mw-headline" id="Adding_http.28s.29_access_via_Apache_.28with_basic_authentication.29">Adding http(s) access via Apache (with basic authentication)</span></h3>
+<p>We need to create an suEXEC wrapper script. To satisfy suEXEC's security requirements, the script and the directory containing it must be owned by <code>gitolite:gitolite</code> and below <code>/srv/http</code> in the directory hierarchy. For this example, we create the directory as <code>/srv/http/git/cgi-bin</code>.
+</p>
+<pre># install -o gitolite -g gitolite -d /srv/http/git/cgi-bin
+</pre>
+<p>Create an suEXEC wrapper for the gitolite shell with the contents below. For this example, we create it as <code>/srv/http/git/cgi-bin/gitolite-suexec-wrapper</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/srv/http/git/cgi-bin/gitolite-suexec-wrapper</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/usr/bin/bash
+#
+# suEXEC wrapper for gitolite-shell
+#
+
+export GIT_PROJECT_ROOT=/var/lib/gitolite/repositories
+export GITOLITE_HTTP_HOME=/var/lib/gitolite
+
+exec /usr/lib/gitolite/gitolite-shell</pre>
+<p>Make the wrapper executable and owned by <code>gitolite:gitolite</code>.
+</p>
+<pre># chown gitolite:gitolite /srv/http/git/cgi-bin/gitolite-suexec-wrapper
+# chmod 0755 /srv/http/git/cgi-bin/gitolite-suexec-wrapper
+</pre>
+<p>Create an empty password database file, owned by <code>gitolite:http</code>
+</p>
+<pre># install -o gitolite -g http -m 0640 /dev/null /srv/http/git/htpasswd
+</pre>
+<p>Apache's basic authentication mechanism is separate from ssh, and therefore requires a separate set of credentials. Create your web users using <code>htpasswd</code>.
+</p>
+<pre># htpasswd /srv/http/git/htpasswd <i>username</i>
+</pre>
+<p>Add the following to your Apache vhost configuration:
+</p>
+<pre>
+SuexecUserGroup gitolite gitolite
+ScriptAlias /git/ /srv/http/git/cgi-bin/gitolite-suexec-wrapper/
+
+&lt;Directory /srv/http/git/cgi-bin&gt;
+    Require all granted
+&lt;/Directory&gt;
+
+&lt;Location /git&gt;
+    AuthType Basic
+    AuthName "Git Access"
+    AuthBasicProvider file
+    AuthUserFile /srv/http/git/htpasswd
+    Require valid-user
+&lt;/Location&gt;
+</pre>
+<p>Restart <code>httpd.service</code>.
+</p>
+<p>Finally, in the gitolite-admin repository you cloned in the previous section, edit <code>conf/gitolite.conf</code>, add an <code>R = daemon</code> access rule to all repositories you want to make available via http, and push the changes.
+</p>
+<h2><span class="mw-headline" id="Add_users">Add users</span></h2>
+<h3><span class="mw-headline" id="ssh_users">ssh users</span></h3>
+<p>Ask each user who will get access to send you a public key. On their workstation generate the pair of ssh keys:
+</p>
+<pre>$ ssh-keygen
+</pre>
+<p>Rename each public key according to the user's name, with a .pub extension, like sitaram.pub or john-smith.pub. You can also use periods and underscores. Have the users send you the keys.
+</p>
+<p>Copy all these *.pub files to keydir in your gitolite-admin repo clone. You can also organise them into various subdirectories of keydir if you wish, since the entire tree is searched.
+</p>
+<p>Edit the config file (conf/gitolite.conf in your admin repo clone). See the gitolite.conf documentation (<a rel="nofollow" class="external free" href="http://sitaramc.github.com/gitolite/admin.html#conf">http://sitaramc.github.com/gitolite/admin.html#conf</a>) for details on what goes in that file, syntax, etc. Just add new repos as needed, and add new users and give them permissions as required. The users names should be exactly the same as their keyfile names, but without the .pub extension
+</p>
+<pre>$ nano conf/gitolite.conf
+</pre>
+<p>Commit and push the changes them:
+</p>
+<pre>$ git commit -a
+$ git push
+</pre>
+<h3><span class="mw-headline" id="http.28s.29_users">http(s) users</span></h3>
+<p>User management for http(s) is more suitable for single-user setups. To add a new user or to change an existing user's password:
+</p>
+<pre># htpasswd /srv/http/git/htpasswd <i>username</i>
+</pre>
+<h2><span class="mw-headline" id="Gitosis-like_ssh_usernames">Gitosis-like ssh usernames</span></h2>
+<p>If you want to distinguish users with the same login (like <code>username@server1</code>, <code>username@server2</code>) you may want to do the following (tested with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gitolite">gitolite</a></span> 3.04-1):
+</p>
+<ul><li> edit <code>/usr/lib/gitolite/triggers/post-compile/ssh-authkeys</code> and replace</li></ul>
+<pre>$user =~ s/(\@[^.]+)?\.pub$//;    # baz.pub, baz@home.pub -&gt; baz
+</pre>
+<p>by
+</p>
+<pre>$user =~ s/\.pub$//;              # baz@home.pub -&gt; baz@home
+</pre>
+<ul><li> update authorized_keys file (for example, by pushing into the <i>gitolite-admin</i> repository)</li></ul>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>In case you cannot log in with the gitolite account, it may be caused by the account being locked, and depending of your ssh configuration.
+</p>
+<p>If you have done some SSH hardening, it may be the cause of this behavior, as noted in <a rel="nofollow" class="external text" href="http://arlimus.github.io/articles/usepam/">SSH and locked users Article</a> and <a rel="nofollow" class="external text" href="http://unix.stackexchange.com/questions/193066/how-to-unlock-account-for-public-key-ssh-authorization-but-not-for-password-aut">Unix &amp; Linux StackExchange - How to unlock account for public key ssh authorization, but not for password authorization</a>.
+</p>
+<p>To solve this you have to allow PAM in <code>sshd_config</code> or unlock the account by:
+</p>
+<pre># usermod -p '*' gitolite
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># nano /etc/passwd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+gitolite:*:16199:0:99999:7:::
+...</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not leave the account in the state left by <code>passwd -u</code> (with a blank password field). Doing that will allow logins without entering a password!</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://sitaramc.github.com/gitolite/index.html">Gitolite Site</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://arlimus.github.io/articles/usepam/">SSH and locked users Article</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://unix.stackexchange.com/questions/193066/how-to-unlock-account-for-public-key-ssh-authorization-but-not-for-password-aut">Unix &amp; Linux StackExchange - How to unlock account for public key ssh authorization, but not for password authorization</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Version_Control_System.html" title="Category:Version Control System">Version Control System</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

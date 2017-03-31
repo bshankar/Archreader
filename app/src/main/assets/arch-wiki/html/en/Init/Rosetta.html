@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>init/Rosetta - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Init_Rosetta skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">init/Rosetta</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Init.html" title="Init">Init</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Add comparisons with the other available <a href="../../en/Init.html" title="Init">init</a> systems. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Init/Rosetta">Talk:Init/Rosetta#</a>)</div>
+</div>
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Init.html" title="Init">init</a></li>
+</ul>
+</div>
+<p>This article draws a parallel between <a href="../../en/Systemd.html" title="Systemd">systemd</a> and other <a href="../../en/Init.html" title="Init">init</a> systems.
+</p>
+<p>You can omit the <code>.service</code> and <code>.target</code> extensions, especially if temporarily editing the <a href="../../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.
+</p>
+<h2><span class="mw-headline" id="SysVinit">SysVinit</span></h2>
+<table class="wikitable">
+<tr>
+<th> systemd </th>
+<th> SysVinit </th>
+<th> OpenRC </th>
+<th> Description
+</th>
+</tr>
+<tr>
+<td> <code>systemctl list-units</code> </td>
+<td> <code>rc.d list</code> </td>
+<td> <code>rc-status</code> </td>
+<td> List running services status
+</td>
+</tr>
+<tr>
+<td> <code>systemctl --failed</code> </td>
+<td> </td>
+<td> <code>rc-status --crashed</code> </td>
+<td> Check failed services
+</td>
+</tr>
+<tr>
+<td> <code>systemctl --all</code> </td>
+<td> </td>
+<td> <code>rc-update -v show</code> </td>
+<td> Display all available services.
+</td>
+</tr>
+<tr>
+<td> <code>systemctl (start, stop, restart, status) daemon.service</code> </td>
+<td> <code>rc.d (start, stop, restart) daemon</code> </td>
+<td> <code>rc-service daemon (start, stop, restart, status)</code> </td>
+<td> Change service state.
+</td>
+</tr>
+<tr>
+<td> <code>systemctl (enable, disable) daemon.service</code> </td>
+<td> <code>chkconfig daemon (on, off)</code> </td>
+<td> <code>rc-update (add, del) daemon</code> </td>
+<td> Turn service on or off.
+</td>
+</tr>
+<tr>
+<td> <code>systemctl daemon-reload</code> </td>
+<td> <code>chkconfig daemon --add</code> </td>
+<td> </td>
+<td> Create or modify configuration.
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Targets_table">Targets table</span></h3>
+<table class="wikitable">
+<tr>
+<th> systemd Target </th>
+<th> SysV Runlevel </th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> runlevel0.target, poweroff.target </td>
+<td> 0 </td>
+<td> Shut down the system.
+</td>
+</tr>
+<tr>
+<td> runlevel1.target, rescue.target </td>
+<td> 1, s, single </td>
+<td> Single user mode.
+</td>
+</tr>
+<tr>
+<td> runlevel2.target, runlevel4.target, multi-user.target </td>
+<td> 2, 4 </td>
+<td> User-defined/Site-specific runlevels. By default, identical to 3.
+</td>
+</tr>
+<tr>
+<td> runlevel3.target, multi-user.target </td>
+<td> 3 </td>
+<td> Multi-user, non-graphical. Users can usually login via multiple consoles or via the network.
+</td>
+</tr>
+<tr>
+<td> runlevel5.target, graphical.target </td>
+<td> 5 </td>
+<td> Multi-user, graphical. Usually has all the services of runlevel 3 plus a graphical login.
+</td>
+</tr>
+<tr>
+<td> runlevel6.target, reboot.target </td>
+<td> 6 </td>
+<td> Reboot
+</td>
+</tr>
+<tr>
+<td> emergency.target </td>
+<td> emergency </td>
+<td> Emergency shell
+</td>
+</tr>
+</table>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Init/Rosetta&amp;oldid=447423">https://wiki.archlinux.org/index.php?title=Init/Rosetta&amp;oldid=447423</a>"</li>
+					<li id="lastmod"> This page was last modified on 22 August 2016, at 16:40.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

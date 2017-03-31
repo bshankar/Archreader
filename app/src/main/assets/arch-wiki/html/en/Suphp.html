@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Suphp - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Suphp skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Suphp</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.suphp.org/Home.html">suPHP</a> is a tool <i>for executing PHP scripts with the permissions of their owners</i>. It consists of an Apache module (mod_suphp) and a setuid root binary (suphp) that is called by the Apache module to change the uid of the process executing the PHP interpreter.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>With suPHP you are able, for example, to manage php applications in user's home directories without worry about permissions problems (when creating directories, files or uploads)</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Additional_information"><span class="tocnumber">3</span> <span class="toctext">Additional information</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#suPHP_and_mod_php"><span class="tocnumber">4</span> <span class="toctext">suPHP and mod_php</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#suPHP_in_user_directories"><span class="tocnumber">4.1</span> <span class="toctext">suPHP in user directories</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p>Install suPHP from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/suphp/">suphp</a></span><sup><small>AUR</small></sup>
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>To activate <b>mod_suphp</b> for the appropriate Virtual Hosts  add a line like in your <code>/etc/http/conf/<b>http.conf</b></code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/http/conf/http.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#suPHP
+LoadModule suphp_module modules/mod_suphp.so
+</pre>
+<p>To use suPHP to parse PHP-Files you must add also this:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/http/conf/http.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ AddType application/x-httpd-php .php
+</pre>
+<p>Then, for actually turn on <b>mod_suphp</b> add this line:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/http/conf/http.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ suPHP_Engine on
+</pre>
+<p>Finally, you have to specify at least one <b>suPHP_AddHandler</b> directive, because <b>mod_suphp</b> by default handles no mime-type.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/http/conf/http.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+suPHP_AddHandler application/x-httpd-php
+</pre>
+<p>Finally your suPHP installation is complete. Before start using it you need to restart your HTTPd server by following command:
+</p>
+<pre>
+# systemctl restart httpd
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If these changes are made in global Apache-configuration file, this will activate <b>mod_suphp</b> for all Virtual Hosts..</div>
+<h3><span class="mw-headline" id="Additional_information">Additional information</span></h3>
+<p>Please note, that running mod_suphp and mod_php concurrently should be avoided. The same applies to CGI scripts which are run with webserver privileges.
+</p>
+<p>suPHP should only be used if you are using no CGI scripts or if all CGI scripts are run using suExec.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you use suPHP module instead of mod_php (php-apache) one, you won't be able to use phpMyadmin and some other applications because incompatibilities with php-cgi interpeter.</div>
+<h2><span class="mw-headline" id="suPHP_and_mod_php">suPHP and mod_php</span></h2>
+<p>In order to use suPHP along side mod_php (for use phpMyAdmin for instance). The only way to go is configure suPHP and mod_php in differents Virtual Hosts or Directories.
+</p>
+<h3><span class="mw-headline" id="suPHP_in_user_directories">suPHP in user directories</span></h3>
+<p>The following instructions intent to show how to configure suPHP just to work in users public_html directories and mod_php for everything else.
+</p>
+<p>First of all, you need to change the suPHP handler name to avoid confilcts with php_module. Change this line in <code>/etc/suphp/<b>suphp.conf</b></code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/suphp/suphp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[handlers]
+;Handler for php-scripts
+application/x-httpd-<b>su</b>php="php:/usr/bin/php-cgi"
+</pre>
+<p>Add or modify this line in your <code>/etc/http/conf/<b>http.conf</b></code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/http/conf/http.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#suPHP
+LoadModule suphp_module modules/mod_suphp.so
+</pre>
+<p>Then, in order to set the suPHP module for user directories, add this to your <code>/etc/http/conf/extra/<b>http-userdir.conf</b></code> file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/httpd/conf/extra/httpd-userdir.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+&lt;Directory "/home/*/public_html"&gt;
+...
+    DirectoryIndex index.php index.html
+    suPHP_Engine on
+    AddHandler application/x-httpd-suphp .php
+    suPHP_AddHandler application/x-httpd-suphp
+...
+&lt;/Directory&gt;
+</pre>
+<p>Finally you need to restart your HTTPd server by following command:
+</p>
+<pre>
+# systemctl restart httpd
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="../en/MySQL.html" title="MySQL">MySQL</a> - Article for MySQL</li>
+<li> <a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a> - Guide to setting up Apache, MySQL, and PHP.</li>
+<li> <a href="../en/PhpMyAdmin.html" title="PhpMyAdmin">PhpMyAdmin</a> - Web frontend for MySQL typically found in LAMP environments</li>
+<li> <a href="../en/Adminer.html" title="Adminer">Adminer</a> - A full-featured database management tool which is available for MySQL, PostgreSQL, SQLite, MS SQL and Oracle</li>
+<li> <a href="../en/Xampp.html" title="Xampp">Xampp</a> - Self contained web-server that supports PHP, Perl, and MySQL</li>
+<li> <a href="../en/Mod_perl.html" title="Mod perl">mod_perl</a> - Apache + Perl</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

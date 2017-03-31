@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Synchronization and backup programs - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Synchronization_and_backup_programs skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Synchronization and backup programs</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Full_system_backup_with_rsync.html" title="Full system backup with rsync">Full system backup with rsync</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Full_System_Backup_with_tar.html" title="Full System Backup with tar">Full System Backup with tar</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Disk_cloning.html" title="Disk cloning">Disk cloning</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/List_of_applications.html#File_sharing" title="List of applications">List of applications#File sharing</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/System_maintenance.html#Backup" title="System maintenance">System maintenance#Backup</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dotfiles.html#Version_control" title="Dotfiles">Dotfiles#Version control</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Snapper.html" title="Snapper">Snapper</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_recovery.html" title="File recovery">File recovery</a></li>
+</ul>
+</div>
+<p>This page lists and compares applications that synchronize data between two or more locations, and those that build on top of such functionality to make incremental copies of important data for backup purposes. Because of their relationship, the two groups share several traits that justify describing them in the same article.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Backup_overview"><span class="tocnumber">1</span> <span class="toctext">Backup overview</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Data_synchronization"><span class="tocnumber">2</span> <span class="toctext">Data synchronization</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Incremental_backups"><span class="tocnumber">3</span> <span class="toctext">Incremental backups</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#Single_machine"><span class="tocnumber">3.1</span> <span class="toctext">Single machine</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Chunk-based_increments"><span class="tocnumber">3.1.1</span> <span class="toctext">Chunk-based increments</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#File-based_increments"><span class="tocnumber">3.1.2</span> <span class="toctext">File-based increments</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Network_oriented"><span class="tocnumber">3.2</span> <span class="toctext">Network oriented</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Cloud_storage"><span class="tocnumber">4</span> <span class="toctext">Cloud storage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9">
+<a href="#Third-party_services"><span class="tocnumber">4.1</span> <span class="toctext">Third-party services</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Multi-service_clients"><span class="tocnumber">4.1.1</span> <span class="toctext">Multi-service clients</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Custom_infrastructure"><span class="tocnumber">4.2</span> <span class="toctext">Custom infrastructure</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#Version_control_systems"><span class="tocnumber">5</span> <span class="toctext">Version control systems</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Backup_overview">Backup overview</span></h2>
+<p>Having backups of important data is a necessary measure to take, since human and machine processing errors are very likely to generate corruption as time passes, and also the physical media where the data is stored is inevitably destined to fail. In order to choose the best program for one's own needs, the following aspects should be considered:
+</p>
+<ul>
+<li> The type of backup medium that is going to store the data, e.g. CD, DVD, remote server, external hard drive, etc.</li>
+<li> The planned frequency of backups, e.g. daily, weekly, monthly, etc.</li>
+<li> The features expected from the backup solution, e.g. compression, encryption, handles renames, etc.</li>
+<li> The planned method to restore backups if needed.</li>
+</ul>
+<h2><span class="mw-headline" id="Data_synchronization">Data synchronization</span></h2>
+<p>These applications simply keep directories synchronized between multiple locations/machines, in a "mirror" fashion. Nonetheless, most of them still allow storing and reverting to old revisions of modified or deleted files.
+</p>
+<p>See also <a href="https://en.wikipedia.org/wiki/Comparison_of_file_synchronization_software" class="extiw" title="wikipedia:Comparison of file synchronization software">Wikipedia:Comparison of file synchronization software</a>.
+</p>
+<p><b>Legend:</b>
+</p>
+<ul>
+<li> <b>Name</b>: the application name, linking to the official website.</li>
+<li> <b>Installation</b>: a link to the main ArchWiki article, if existing, or directly to the package pages.</li>
+<li> <b>Implementation</b>: the programming language, library, or utility that the application is based on.</li>
+<li> <b>Delta transfer</b>: only the modified <i>parts</i> of files are transferred.</li>
+<li> <b>Encrypted transfer</b>: data is encrypted by default when transferred over the network.</li>
+<li> <b>FS metadata</b>: file system permissions and attributes are synchronized.</li>
+<li> <b>Resumable</b>: the synchronization can be resumed without restarting it if interrupted.</li>
+<li> <b>Handles renames</b>: moved/renamed files are detected and not stored or transferred twice; it typically means that a checksum is computed for files or chunks thereof.</li>
+<li> <b>Version control</b>: the old version of files are backed up (<b>reverse incremental backup</b>).</li>
+<li> <b>Conflict resolution</b>: the application handles file conflicts, either automatically or interactively, i.e. it does not silently discard conflicting files.</li>
+<li> <b>Multidirectional</b>: <i>more</i> than 2 locations can be kept in sync together.</li>
+<li> <b>FS monitoring</b>: the application listens to file system events to trigger the synchronization.</li>
+<li> <b>CLI</b>: the application is command-line driven, i.e. it is scriptable.</li>
+<li> <b>Other interfaces</b>: the application has the specified user interfaces, e.g. GUI, TUI, or web-based.</li>
+<li> <b>Licence</b>: the licence of the server and client applications.</li>
+<li> <b>Other platforms</b>: supported operating systems other than Linux.</li>
+<li> <b>Active</b>: whether the project is currently maintained.</li>
+<li> <b>Specificity</b>: brief notes about special features that notably set the application apart from the others.</li>
+</ul>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Enter values in the cells marked with "?". Also replace the "Yes" with more specific values and references. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<table class="wikitable sortable">
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Version control
+</th>
+<th> Conflict resolution
+</th>
+<th> Multidirectional
+</th>
+<th> FS monitoring
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.getsync.com/">BitTorrent Sync</a>
+</td>
+<td> <a href="../en/BitTorrent_Sync.html" title="BitTorrent Sync">BitTorrent Sync</a>
+</td>
+<td> Closed source
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Web
+</td>
+<td> Proprietary freemium
+</td>
+<td> OS X, Windows, Android, iOS, Windows Phone, Amazon Kindle Fire, FreeBSD
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://freefilesync.sourceforge.net/">FreeFileSync</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/freefilesync/">freefilesync</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C++
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SFTP <a rel="nofollow" class="external autonumber" href="http://www.freefilesync.org/faq.php#features">[1]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://www.freefilesync.org/faq.php#features">[2]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://www.freefilesync.org/manual.php?topic=versioning">[3]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> GPL
+</td>
+<td> Windows, OS X
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://git-annex.branchable.com/">git-annex</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=git-annex">git-annex</a></span>
+</td>
+<td> Haskell, git
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync <a rel="nofollow" class="external autonumber" href="http://git-annex.branchable.com/transferring_data/">[4]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync <a rel="nofollow" class="external autonumber" href="http://git-annex.branchable.com/transferring_data/">[5]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">git remotes <a rel="nofollow" class="external autonumber" href="http://git-annex.branchable.com/sync/">[6]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">
+<a rel="nofollow" class="external text" href="http://git-annex.branchable.com/assistant/">git-annex assistant</a>
+</td>
+<td> GPLv3
+</td>
+<td> OS X, Android
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.opbyte.it/grsync/">Grsync</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grsync">grsync</a></span>
+</td>
+<td> rsync front-end
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK+
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/gutenye/gutbackup">gutbackup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gutbackup/">gutbackup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> rsync wrapper
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> MIT
+</td>
+<td>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://jotasync.trixon.se/">Jotasync</a>
+</td>
+<td> <small>not packaged? <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/?K=jotasync">search in AUR</a></small>
+</td>
+<td> Java gui for rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">limited
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Swing
+</td>
+<td> Apache v2
+</td>
+<td> OS X, Windows
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Integrated scheduler.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://luckybackup.sourceforge.net/index.html">luckyBackup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/luckybackup/">luckybackup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C++
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync <a rel="nofollow" class="external autonumber" href="http://luckybackup.sourceforge.net/features.html">[7]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync <a rel="nofollow" class="external autonumber" href="http://luckybackup.sourceforge.net/features.html">[8]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">limited <a rel="nofollow" class="external autonumber" href="http://luckybackup.sourceforge.net/manual.html#terminal">[9]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Qt
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">frozen <a rel="nofollow" class="external autonumber" href="http://luckybackup.sourceforge.net/index.html">[10]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.netpower.fr/osync">osync.sh</a>
+</td>
+<td> <small>not packaged? <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/?K=osync">search in AUR</a></small>
+</td>
+<td> Shell
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">optional <a rel="nofollow" class="external autonumber" href="https://github.com/deajan/osync#daemon-mode">[11]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> BSD
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.nongnu.org/rdiff-backup/">rdiff-backup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rdiff-backup">rdiff-backup</a></span>
+</td>
+<td> Python 2
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">preview changes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPL
+</td>
+<td> Win32
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://rsync.samba.org/">rsync</a>
+</td>
+<td> <a href="../en/Rsync.html" title="Rsync">rsync</a>
+</td>
+<td> C
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH or native protocol
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">
+<ul>
+<li> <code>--link-dest</code> with hard links <a rel="nofollow" class="external autonumber" href="http://www.ibm.com/developerworks/aix/library/au-spunix_rsync/index.html#backup">[12]</a>
+</li>
+<li> <code>--backup</code>
+</li>
+</ul>
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">preview changes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">grsync
+</td>
+<td> GPLv3
+</td>
+<td> Win32
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Standard install on all Linux distributions.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://sparkleshare.org/">SparkleShare</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sparkleshare">sparkleshare</a></span>
+</td>
+<td> C#
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> GPLv3
+</td>
+<td> Windows, OS X
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://syncthing.net/">Syncthing</a>
+</td>
+<td> <a href="../en/Syncthing.html" title="Syncthing">Syncthing</a>
+</td>
+<td> Go
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://docs.syncthing.net/users/faq.html#is-synchronization-fast">[13]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://docs.syncthing.net/users/security.html">[14]</a>
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">partial <a rel="nofollow" class="external autonumber" href="http://docs.syncthing.net/users/faq.html#what-things-are-synced">[15]</a>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://docs.syncthing.net/users/versioning.html">[16]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">renames one file <a rel="nofollow" class="external autonumber" href="https://docs.syncthing.net/users/faq.html#what-if-there-is-a-conflict">[17]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Web, GTK
+</td>
+<td> MPL v2
+</td>
+<td> Windows, OS X, Android, BSD, Solaris
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://synkron.sourceforge.net/">Synkron</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/synkron/">synkron</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C++
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Qt
+</td>
+<td> GPLv2
+</td>
+<td> Windows, OS X
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">
+<a rel="nofollow" class="external text" href="https://sourceforge.net/projects/synkron/">No</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://tasktools.org/projects/taskd.html">taskd</a>
+</td>
+<td> <a href="../en/Taskd.html" title="Taskd">Taskd</a>
+</td>
+<td> C++, python,
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> MIT
+</td>
+<td> Android
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.cis.upenn.edu/~bcpierce/unison/">Unison</a>
+</td>
+<td> <a href="../en/Unison.html" title="Unison">Unison</a>
+</td>
+<td> OCaml
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">partial <a rel="nofollow" class="external autonumber" href="http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#perms">[18]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">optional <a rel="nofollow" class="external autonumber" href="http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#speeding">[19]</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#backups">[20]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">interactive
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK2
+</td>
+<td> GPL
+</td>
+<td> Windows, OS X, FreeBSD, Android
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://www.cis.upenn.edu/~bcpierce/unison/status.html">[21]</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Version control
+</th>
+<th> Conflict resolution
+</th>
+<th> Multidirectional
+</th>
+<th> FS monitoring
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Incremental_backups">Incremental backups</span></h2>
+<p>Applications that can do incremental backups remember and take into account what data has been backed up during the last run (so-called "diffs") and eliminate the need to have duplicates of unchanged data. Restoring the data to a certain point in time would require locating the last full backup and all the incremental backups from then to the moment when it is supposed to be restored. This sort of backup is useful for those who do it very often.
+</p>
+<p>See also <a href="../en/Dotfiles.html#Version_control" title="Dotfiles">Dotfiles#Version control</a>.
+</p>
+<p><b>Legend:</b>
+</p>
+<ul>
+<li> <b>Name</b>: the application name, linking to the official website.</li>
+<li> <b>Installation</b>: a link to the main ArchWiki article, if existing, or directly to the package pages.</li>
+<li> <b>Implementation</b>: the programming language, library, or utility that the application is based on.</li>
+<li> <b>Compressed storage</b>: compression is used for storage.</li>
+<li> <b>Encrypted storage</b>: encryption is used for storage.</li>
+<li> <b>Delta transfer</b>: only the modified <i>parts</i> of files are transferred.</li>
+<li> <b>Encrypted transfer</b>: data is encrypted by default when transferred over a network.</li>
+<li> <b>FS metadata</b>: file system permissions and attributes are backed up.</li>
+<li> <b>Easy access</b>: the backup is stored plainly in the file system, or is mountable as such.</li>
+<li> <b>Resumable</b>: the backup can be resumed without restarting it if interrupted.</li>
+<li> <b>Handles renames</b>: moved/renamed files are detected and not stored or transferred twice; it typically means that a checksum is computed for files or chunks thereof.</li>
+<li> <b>CLI</b>: the application is command-line driven, i.e. it is scriptable.</li>
+<li> <b>Other interfaces</b>: the application has the specified user interfaces, e.g. GUI, TUI, or web-based.</li>
+<li> <b>Licence</b>: the licence of the server and client applications.</li>
+<li> <b>Other platforms</b>: supported operating systems other than Linux.</li>
+<li> <b>Active</b>: whether the project is currently maintained.</li>
+<li> <b>Specificity</b>: brief notes about special features that notably set the application apart from the others.</li>
+</ul>
+<h3><span class="mw-headline" id="Single_machine">Single machine</span></h3>
+<p>These applications are aimed at backing up data from the machine they are installed on, although the backup destination can be located on an external machine or storage media.
+</p>
+<h4><span class="mw-headline" id="Chunk-based_increments">Chunk-based increments</span></h4>
+<p>If a file is modified, these applications store only its changed <i>parts</i> at the next snapshot. Compared to <a href="#File-based_increments">#File-based increments</a> applications, these are more space-efficient, especially when large files receive small modifications; on the other hand, the archived snapshots have to be opened with the backup application that created them, since the files have to be reconstructed from the stored binary diffs.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Enter values in the cells marked with "?". Also replace the "Yes" with more specific values and references. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<table class="wikitable sortable">
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://areca.sourceforge.net/">Areca Backup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/areca/">areca</a></span><sup><small>AUR</small></sup>
+</td>
+<td> Java
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Zip, Zip64
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">AES128, AES256
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Pausing only
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> GPLv2
+</td>
+<td> Windows
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/jborg/attic/">Attic</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/attic/">attic</a></span><sup><small>AUR</small></sup>
+</td>
+<td> Python
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">AES256
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> BSD
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://borgbackup.readthedocs.org/en/stable/">BorgBackup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=borg">borg</a></span>
+</td>
+<td> Python (Attic fork)
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">lz4, zlib, lzma
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">AES256
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes<a rel="nofollow" class="external autonumber" href="http://borgbackup.readthedocs.org/en/stable/faq.html#which-file-types-attributes-etc-are-preserved">[22]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes<a rel="nofollow" class="external autonumber" href="http://borgbackup.readthedocs.org/en/stable/usage.html#borg-mount">[23]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes<a rel="nofollow" class="external autonumber" href="http://borgbackup.readthedocs.org/en/stable/faq.html#if-a-backup-stops-mid-way-does-the-already-backed-up-data-stay-there">[24]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">third party
+</td>
+<td> BSD
+</td>
+<td> *BSD, OS X
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://viric.name/cgi-bin/btar">btar</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/btar/">btar</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/btar">aur-mirror</a>]</sup>
+</td>
+<td> C
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Redundancy, indexed extraction, multicore compression, input and output serialisation, tolerance to partial archive errors.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://bup.github.io/">bup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bup">bup</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/bup-git/">bup-git</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C, Python, git
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Immature
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes<a rel="nofollow" class="external autonumber" href="https://bup.github.io/man/bup-fuse.html">[25]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">pick up where you left off <a rel="nofollow" class="external autonumber" href="https://github.com/bup/bup/blob/master/README.md#reasons-bup-is-awesome">[26]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">third party
+</td>
+<td> GPLv2
+</td>
+<td> Windows, OS X, NetBSD, Solaris
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Same storage format as git
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/emersion/bups">bups</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/bups/">bups</a></span><sup><small>AUR</small></sup>
+</td>
+<td> bup frontend
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Immature
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">pick up where you left off <a rel="nofollow" class="external autonumber" href="https://github.com/bup/bup/blob/master/README.md#reasons-bup-is-awesome">[27]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK 3
+</td>
+<td> MIT
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://launchpad.net/deja-dup">Déjà Dup</a>
+</td>
+<td> <a href="../en/Duplicity.html" title="Déjà Dup" class="mw-redirect">Déjà Dup</a>
+</td>
+<td> duplicity front-end
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK+
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Integrated into <a href="../en/GNOME/Files.html" title="GNOME Files" class="mw-redirect">GNOME Files</a>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.duplicati.com/">Duplicati</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/duplicati-latest/">duplicati-latest</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C#
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">scheduled for 2.0 release
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Pausing only
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> LGPL
+</td>
+<td> Windows
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.nongnu.org/duplicity/">Duplicity</a>
+</td>
+<td> <a href="../en/Duplicity.html" title="Duplicity">Duplicity</a>
+</td>
+<td> librsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">gzip
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">gpg
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Déjà Dup
+</td>
+<td> GPL
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.duply.net/">Duply</a>
+</td>
+<td> <a href="../en/Duply.html" title="Duply">Duply</a>
+</td>
+<td> duplicity front-end
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://kde-apps.org/content/show.php/Kup+Backup+System?content=147465">Kup Backup System</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kup">kup</a></span>
+</td>
+<td> rsync, bup front-end
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Immature
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">bup
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Qt
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://liw.fi/obnam/">obnam</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/obnam/">obnam</a></span><sup><small>AUR</small></sup>
+</td>
+<td> Python
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GnuPG
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">checkpoints every 100MB
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://zbackup.org/">ZBackup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zbackup/">zbackup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C++
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">LZMA, LZO
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">AES
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">planned <a rel="nofollow" class="external autonumber" href="https://github.com/zbackup/zbackup#improvements">[28]</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Kinda through tar
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Repository consists of immutable files.
+</td>
+</tr>
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+</table>
+<h4><span class="mw-headline" id="File-based_increments">File-based increments</span></h4>
+<p>If a file is modified, these applications store its new version entirely at the next snapshot. Compared to <a href="#Chunk-based_increments">#Chunk-based increments</a> applications, these are less space-efficient, especially when large files receive small modifications; on the other hand, often the archived snapshots can be opened without the need to have the backup application installed.
+</p>
+<p><b>Specific legend:</b>
+</p>
+<ul><li> <b>Hard links</b>: whether unmodified files are stored as hard links to previous versions.</li></ul>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Enter values in the cells marked with "?". Also replace the "Yes" with more specific values and references. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<table class="wikitable sortable">
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Hard links
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/bit-team/backintime">Back In Time</a>
+</td>
+<td> <a href="../en/Back_In_Time.html" title="Back In Time">Back In Time</a>
+</td>
+<td> Python, rsync, diff
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://backintime.le-web.org/documentation/">[29]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Qt
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://dar.linux.free.fr/">DAR</a> (Disk ARchive)
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dar/">dar</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C++
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">special archive format
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No <a rel="nofollow" class="external autonumber" href="http://dar.linux.free.fr/doc/Features.html">[30]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">DarGUI
+</td>
+<td> GPL
+</td>
+<td> Windows, Solaris, FreeBSD, NetBSD, MacOS X
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Automatic backup using <a href="../en/Cron.html" title="Cron">cron</a> is possible with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sarab/">sarab</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/sarab">aur-mirror</a>]</sup>.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://dargui.sourceforge.net/">DarGUI</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dargui/">dargui</a></span><sup><small>AUR</small></sup>
+</td>
+<td> DAR front-end
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No <a rel="nofollow" class="external autonumber" href="http://dar.linux.free.fr/doc/Features.html">[31]</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK
+</td>
+<td> GPL
+</td>
+<td> Windows
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://miek.nl/projects/hdup2/">hdup</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2016-07-11]</sup>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/hdup/">hdup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">bzip, gzip, lzop
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">gpg
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv2
+</td>
+<td>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> Multiple backup targets.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.scottlu.com/Content/Link-Backup.html">Link-Backup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/link-backup/">link-backup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> Python
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No <a rel="nofollow" class="external autonumber" href="http://www.scottlu.com/Content/Link-Backup.html">[32]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> MIT
+</td>
+<td>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> It copies itself to the server.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://github.com/miekg/rdup">rdup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/rdup/">rdup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> C
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">tar.gz
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">gpg, blowfish and others
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> Set of command-line tools.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.rsnapshot.org/">rsnapshot</a>
+</td>
+<td> <a href="../en/Rsnapshot.html" title="Rsnapshot">rsnapshot</a>
+</td>
+<td> rsync
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes <a rel="nofollow" class="external autonumber" href="http://rsnapshot.org/rsnapshot/docs/docbook/rest.html">[33]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv2
+</td>
+<td> Win32
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://launchpad.net/sbackup">sbackup</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sbackup/">sbackup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> Python
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">gzip, bzip2
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">SSH
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://launchpad.net/timeshift">TimeShift</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/timeshift/">timeshift</a></span><sup><small>AUR</small></sup>
+</td>
+<td> rsync
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">rsync
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GTK
+</td>
+<td> GPLv3
+</td>
+<td> Designed for full-system backups to dedicated devices.
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Hard links
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Network_oriented">Network oriented</span></h3>
+<p>These applications have been designed to centralize the backup of several machines connected to a network, through a server-client model. In general they are more complicated to deploy, compared to <a href="#Single_machine">#Single machine</a> solutions.
+</p>
+<p><b>Specific legend:</b>
+</p>
+<ul><li> <b>Increment type</b>: the strategy used to reduce used space by deduplicating data (i.e., besides compression).
+<ul>
+<li> <b>file-based</b>: if a file is modified, the entire new version is stored at each snapshot.
+<ul><li> <b>hard-links</b>: whether unmodified files are stored as hard links to previous versions.</li></ul>
+</li>
+<li> <b>chunk-based</b>: only the modified <i>parts</i> of files are stored at each snapshot.</li>
+</ul>
+</li></ul>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Enter values in the cells marked with "?". Also replace the "Yes" with more specific values and references. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<table class="wikitable sortable">
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Increment type
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://backuppc.sourceforge.net/index.html">BackupPC</a>
+</td>
+<td> <a href="../en/BackupPC.html" title="BackupPC">BackupPC</a>
+</td>
+<td> Perl
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> file-based, hard links <a rel="nofollow" class="external autonumber" href="http://backuppc.sourceforge.net/faq/BackupPC.html#Backup-basics">[34]</a>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Web
+</td>
+<td> GPLv2
+</td>
+<td> Any (no client needed)
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Identical files across backups of the same or different clients are stored only once.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.bacula.org">Bacula</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/?K=bacula-">bacula-*</a> in <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>
+</td>
+<td> C++
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> file-based <a rel="nofollow" class="external autonumber" href="http://burp.grke.org/why.html">[35]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GUI, Web
+</td>
+<td> AGPLv3
+</td>
+<td> Windows, OS X
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://burp.grke.org">burp</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/burp-backup/">burp-backup</a></span><sup><small>AUR</small></sup>
+</td>
+<td> librsync
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> chunk-based <a rel="nofollow" class="external autonumber" href="http://burp.grke.org/why.html">[36]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">
+<a rel="nofollow" class="external text" href="https://git.ziirish.me/ziirish/burp-ui">burp-ui</a>
+</td>
+<td> AGPLv3
+</td>
+<td> Windows
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://safekeep.sourceforge.net/">SafeKeep</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/safekeep/">safekeep</a></span><sup><small>AUR</small></sup>
+</td>
+<td> rdiff-backup
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> chunk-based <a rel="nofollow" class="external autonumber" href="http://safekeep.sourceforge.net/safekeep.html">[37]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPL
+</td>
+<td>
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> Integrates with <a href="../en/LVM.html" title="LVM">LVM</a> and databases to create consistent backups. Bandwidth throttling.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.snebu.com">Snebu</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/snebu/">snebu</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/snebu">aur-mirror</a>]</sup>
+</td>
+<td> C
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> ?
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> Supports arbitrary retention schedules.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="http://www.initzero.it/portal/soluzioni/software-open-source/synbak-universal-backup-system_2623.html">Synbak</a>
+</td>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=synbak">synbak</a></span>
+</td>
+<td> Multitool wrapper
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td style="text-align:center;"> ?
+</td>
+<td> ?
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Web
+</td>
+<td> GPLv3
+</td>
+<td>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Unifies several backup methods.
+</td>
+</tr>
+<tr>
+<td> <a rel="nofollow" class="external text" href="https://www.urbackup.org">UrBackup</a>
+</td>
+<td> <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/?K=urbackup">urbackup*</a> in <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>
+</td>
+<td> C++
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> file-based,hard-links and symlinks<a rel="nofollow" class="external autonumber" href="http://blog.urbackup.org/156/symbolically-linking-directories-during-incremental-file-backups">[38]</a>/chunk-based CoW-Snapshots<a rel="nofollow" class="external autonumber" href="http://blog.urbackup.org/83/file-backup-storage-with-btrfs-snapshots">[39]</a>
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes (client)
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">GUI, Web
+</td>
+<td> AGPLv3+
+</td>
+<td> Windows, macOS
+</td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+<td> Identical files across backups of the same or different clients are stored only once. Integrates with LVM, dattobd and btrfs for file system snapshots.
+</td>
+</tr>
+<tr>
+<th> Name
+</th>
+<th> Installation
+</th>
+<th> Implementation
+</th>
+<th> Compressed storage
+</th>
+<th> Encrypted storage
+</th>
+<th> Delta transfer
+</th>
+<th> Encrypted transfer
+</th>
+<th> FS metadata
+</th>
+<th> Easy access
+</th>
+<th> Resumable
+</th>
+<th> Handles renames
+</th>
+<th> Increment type
+</th>
+<th> CLI
+</th>
+<th> Other interfaces
+</th>
+<th> Licence
+</th>
+<th> Other platforms
+</th>
+<th> Active
+</th>
+<th> Specificity
+</th>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Cloud_storage">Cloud storage</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/List_of_applications.html#File_sharing" title="List of applications">List of applications#File sharing</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Remove the extra bullet points: the Wikipedia comparison table, and the respective webpages and Wikipedia articles do a better job at describing them. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="Third-party_services">Third-party services</span></h3>
+<p>See also <a href="https://en.wikipedia.org/wiki/Comparison_of_online_backup_services" class="extiw" title="wikipedia:Comparison of online backup services">Wikipedia:Comparison of online backup services</a>.
+</p>
+<ul><li> <b>Amazon S3</b> — Amazon Simple Storage Service (Amazon S3), provides developers and IT teams with secure, durable, highly-scalable object storage. Amazon S3 is easy to use, with a simple web service interface to store and retrieve any amount of data from anywhere on the web. With Amazon S3, you pay only for the storage you actually use. There is no minimum fee and no setup cost.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://aws.amazon.com/s3/">http://aws.amazon.com/s3/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=s3cmd">s3cmd</a></span>
+</dd></dl>
+<ul><li> <b>CloudBacko</b> — Enterprise-grade cloud backup tool for Linux, Mac and Windows.
+<ul>
+<li> Closed source. Free, Lite and Pro versions available.</li>
+<li> Written in Java.</li>
+<li> Encrypted backup to multiple cloud destinations. </li>
+<li> Supports multiple cloud destinations combined as one storage pool.</li>
+<li> No installation required in Free version.</li>
+<li> GUI frontend for Linux in Pro version.</li>
+<li> Virtual machine backup available in Pro version.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.cloudbacko.com/">http://www.cloudbacko.com/</a> || <small>not packaged? <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/">search in AUR</a></small>
+</dd></dl>
+<ul><li> <b><a href="../en/CrashPlan.html" title="CrashPlan">CrashPlan</a></b> — An online/offsite backup solution.
+<ul>
+<li> Unlimited online space for very reasonable pricing.</li>
+<li> Automatic and incremental backups to multiple destinations.</li>
+<li> Intuitive GUI.</li>
+<li> Offers encryption and de-duplication.</li>
+<li> Software is free for local use.</li>
+<li> Restore prevents simultaneous backing up</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.crashplan.com/">http://www.crashplan.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/crashplan/">crashplan</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Dropbox.html" title="Dropbox">Dropbox</a></b> — A popular file-sharing service.
+<ul>
+<li> A daemon monitors a specified directory, and uploads incremental changes to dropbox.com.  </li>
+<li> Changes automatically show up on your other computers.  </li>
+<li> Includes file sharing and a public directory.  </li>
+<li> You can recover deleted files.  </li>
+<li> Community written add-ons.  </li>
+<li> Free accounts have 2GB storage.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.dropbox.com">http://www.dropbox.com</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dropbox/">dropbox</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nautilus-dropbox/">nautilus-dropbox</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Google_Drive" class="extiw" title="wikipedia:Google Drive">Google Drive</a></b> — A file storage and synchronization service provided by Google.
+<ul>
+<li> Provides cloud storage, file sharing and collaborative editing.</li>
+<li> Multiple clients are available.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://drive.google.com">https://drive.google.com</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/google-drive-ocamlfuse/">google-drive-ocamlfuse</a></span><sup><small>AUR</small></sup> (free), <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/drive/">drive</a></span><sup><small>AUR</small></sup> (free), <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grive/">grive</a></span><sup><small>AUR</small></sup> (free), <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gdrivefs/">gdrivefs</a></span><sup><small>AUR</small></sup> (free), <a href="../en/Insync.html" title="Insync">insync</a> (non-free), <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gdrive/">gdrive</a></span><sup><small>AUR</small></sup> (free)</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/IDrive_Inc." class="extiw" title="wikipedia:IDrive Inc.">iDrive</a></b> — Universal Online Backup.
+<ul>
+<li> Multiple Device Backup.</li>
+<li> Online File Sync.  </li>
+<li> Real-Time Backup.  </li>
+<li> Backup and Access from Mobile Devices.  </li>
+<li> Remote Manage.  </li>
+<li> No GUI Front end for Linux, command line based. A wrapper script is available to make it easier to use.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.idrive.com/">https://www.idrive.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/idevsutil/">idevsutil</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/idevsutil">aur-mirror</a>]</sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/idrive-wrapper/">idrive-wrapper</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/idrive-wrapper">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Jungle_Disk" class="extiw" title="wikipedia:Jungle Disk">Jungle Disk</a></b> — An online backup tool that stores its data in Amazon S3 or Rackspace Cloud Files.
+<ul>
+<li> A GNOME Files extension.</li>
+<li> Only paid plans available.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.jungledisk.com/">http://www.jungledisk.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nautilus-jungledisk/">nautilus-jungledisk</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/nautilus-jungledisk">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Mega_(website)" class="extiw" title="wikipedia:Mega (website)">MEGA</a></b> — Successor to the MegaUpload file-sharing service.
+<ul>
+<li> Free accounts are 50GB with paid plans available for more space.</li>
+<li> Offers encryption and de-duplication.</li>
+<li> Usually accessed through its web interface but other tools exist.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://mega.co.nz">https://mega.co.nz</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/megatools/">megatools</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/megasync/">megasync</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/megafuse/">megafuse</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/megafuse">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b>Nutstore</b> — A cloud service that lets you sync and share files anywhere.
+<ul>
+<li> Multiple file folders sync.</li>
+<li> Service for Chinese users.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://jianguoyun.com/">http://jianguoyun.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nutstore/">nutstore</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>rsync.net</b> — Cloud storage for offsite backups.
+<ul>
+<li> ZFS filesystem, accessible with any SSH/SFTP/SCP tool, running on a UNIX system.</li>
+<li> Simple rsync synchronization with daily automatic ZFS snapshots.</li>
+<li> <a rel="nofollow" class="external text" href="http://www.rsync.net/products/attic.html">Special discounted price</a> if used with borg or attic.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.rsync.net/">http://www.rsync.net/</a> || <a href="../en/Rsync.html" title="Rsync">rsync</a>/<a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=borg">borg</a></span>/<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/attic/">attic</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/SpiderOak" class="extiw" title="wikipedia:SpiderOak">SpiderOak</a></b> — An online backup tool for Windows, Mac and Linux users to back up, share, sync, access and store their data.
+<ul>
+<li> Free account holds 2GB as a 60-day trial.</li>
+<li> Includes file sharing and a public directory.</li>
+<li> Incremental backup and sync are both supported.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://spideroak.com/">https://spideroak.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/spideroak-one/">spideroak-one</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Storage_Made_Easy" class="extiw" title="wikipedia:Storage Made Easy">Storage Made Easy</a></b> — Provides unified access to numerous cloud storage services, as well as its own storage.
+<ul>
+<li> Free and paid version available.</li>
+<li> Free account holds 5GB and allows access to up to three other cloud storage providers.</li>
+<li> Supports local directory via fuse, as well as web access.</li>
+<li> Supports many cloud storage services, such as Box, Dropbox, Google Drive, Onedrive, and others.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://storagemadeeasy.com/">http://storagemadeeasy.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/smestorage/">smestorage</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/smestorage">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b><a href="https://en.wikipedia.org/wiki/Tarsnap" class="extiw" title="wikipedia:Tarsnap">Tarsnap</a></b> — A secure online backup service for BSD, Linux, OS X, Solaris and Windows (through Cygwin).
+<ul>
+<li> Compressed encrypted backups to Amazon S3 Servers.</li>
+<li> Automate via <a href="../en/Cron.html" title="Cron">cron</a>.</li>
+<li> Incremental backups.</li>
+<li> Backup any files or directories.</li>
+<li> Command line only client.</li>
+<li> Pay only for usage (bandwidth and storage). </li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.tarsnap.com">http://www.tarsnap.com</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tarsnap">tarsnap</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Yandex_Disk.html" title="Yandex Disk">Yandex Disk</a></b> — Free cloud storage service created by Yandex.ru that gives you access to your photos, videos and documents from any internet-enabled device.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://disk.yandex.ru/">https://disk.yandex.ru/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/yandex-disk/">yandex-disk</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h4><span class="mw-headline" id="Multi-service_clients">Multi-service clients</span></h4>
+<ul><li> <b><a href="../en/Duplicity.html" title="Déjà Dup" class="mw-redirect">Déjà Dup</a></b> — A simple GTK+ backup program. It hides the complexity of doing backups the 'right way' (encrypted, off-site, and regular) and uses duplicity as the backend.
+<ul>
+<li> Automatic, timed backup configurable in GUI.</li>
+<li> Restore wizard.</li>
+<li> Integrated into the GNOME Files file manager.</li>
+<li> Inherits several features of duplicity.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://launchpad.net/deja-dup">https://launchpad.net/deja-dup</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=deja-dup">deja-dup</a></span>
+</dd></dl>
+<ul><li> <b>Duplicati</b> — Backup client that securely stores encrypted, incremental, compressed backups on cloud storage services and remote file servers. It works with Amazon S3, Windows Live SkyDrive, Google Drive (Google Docs), Rackspace Cloud Files or WebDAV, SSH, FTP (and many more). Duplicati is open source and free.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.duplicati.com/">http://www.duplicati.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/duplicati-latest/">duplicati-latest</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Duplicity.html" title="Duplicity">Duplicity</a></b> — A simple command-line utility which allows encrypted compressed incremental backup to nearly any storage.
+<ul>
+<li> Supports gpg encryption and signing.</li>
+<li> Supports gzip compression.</li>
+<li> Supports full or incremental backups, incremental backup stores only difference between new and old file.</li>
+<li> Supports pushing over <a rel="nofollow" class="external text" href="http://duplicity.nongnu.org/duplicity.1.html#sect7">many protocols</a>.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.nongnu.org/duplicity/">http://www.nongnu.org/duplicity/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=duplicity">duplicity</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Duply.html" title="Duply">Duply</a></b> — Front-end for duplicity which simplifies running it by:
+<ul>
+<li> keeping recurring settings in profiles per backup job;</li>
+<li> automated import/export of keys between profile and keyring;</li>
+<li> enabling batch operations eg. backup_verify_purge;</li>
+<li> executing pre/post scripts;</li>
+<li> precondition checking for flawless duplicity operation.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.duply.net/">http://www.duply.net/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/duply/">duply</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>rclone</b> — Rclone is a command line program to sync files and directories to and from Google Drive, Amazon S3, Openstack Swift / Rackspace cloud files / Memset Memstore, Dropbox, Google Cloud Storage and The local filesystem.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://rclone.org/">http://rclone.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rclone">rclone</a></span>
+</dd></dl>
+<h3><span class="mw-headline" id="Custom_infrastructure">Custom infrastructure</span></h3>
+<ul><li> <b>Cozy</b> — A personal cloud you can hack, host and delete.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://cozy.io">https://cozy.io</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cozy-standalone/">cozy-standalone</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cozy-nginx/">cozy-nginx</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cozy-apache/">cozy-apache</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/OpenStack.html" title="OpenStack">OpenStack</a></b> — Controls large pools of compute, storage, and networking resources throughout a datacenter, managed through a dashboard or via the OpenStack API. OpenStack works with popular enterprise and open source technologies making it ideal for heterogeneous infrastructure.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.openstack.org/">http://www.openstack.org/</a> || <small>not packaged? <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/">search in AUR</a></small>
+</dd></dl>
+<ul><li> <b><a href="../en/OwnCloud.html" title="OwnCloud">ownCloud</a></b> — Software suite that provides a location-independent storage area for data.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://owncloud.org/">http://owncloud.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=owncloud">owncloud</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Nextcloud.html" title="Nextcloud">Nextcloud</a></b> — Fork of ownCloud.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://nextcloud.com/">http://nextcloud.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nextcloud/">nextcloud</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Pydio.html" title="Pydio">Pydio</a></b> — Mature open source web application for file sharing and synchronization.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://pydio.com/">https://pydio.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pydio/">pydio</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b><a href="../en/Seafile.html" title="Seafile">Seafile</a></b> — Open source cloud storage system, with advanced support for file syncing, privacy protection and teamwork.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://seafile.com/">http://seafile.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/seafile-server/">seafile-server</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/seafile-client/">seafile-client</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/seafile-client-cli/">seafile-client-cli</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/seafile-client-qt5/">seafile-client-qt5</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: package not found]</sup>
+</dd></dl>
+<ul><li> <b>StackSync</b> — Open-source scalable Personal Cloud that can adapt to the necessities of organizations. It puts a special emphasis on security by encrypting data on the client side before it is sent to the server.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://stacksync.org/">http://stacksync.org/</a> || <small>not packaged? <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/">search in AUR</a></small>
+</dd></dl>
+<ul><li> <b>Syncany</b> — Cloud storage and filesharing application with a focus on security and abstraction of storage.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.syncany.org/">https://www.syncany.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/syncany/">syncany</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Version_control_systems">Version control systems</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/List_of_applications.html#Work_environment" title="List of applications">List_of_applications#Work_environment</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Also drop the extra bullets, the Wikipedia comparison table is much better than this. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Synchronization_and_backup_programs">Talk:Synchronization and backup programs#</a>)</div>
+</div>
+<p>These are traditionally used for keeping track of software development; but if you want to have a simple way to manage your config files in one directory, it might be a good solution.
+</p>
+<p>See also <a href="https://en.wikipedia.org/wiki/Comparison_of_revision_control_software" class="extiw" title="wikipedia:Comparison of revision control software">Wikipedia:Comparison of revision control software</a>.
+</p>
+<ul><li> <b><a href="../en/Bazaar.html" title="Bazaar">Bazaar</a></b> — A distributed version control system that helps you track project history over time and to collaborate easily with others.
+<ul>
+<li> Similar commands to Subversion.</li>
+<li> Supports working with or without a central server.</li>
+<li> Support for working with some other revision control systems</li>
+<li> Complete Unicode support.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://bazaar.canonical.com/en/">http://bazaar.canonical.com/en/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bzr">bzr</a></span>
+</dd></dl>
+<ul><li> <b>Darcs</b> — A distributed revision control system that was designed to replace traditional, centralized source control systems such as CVS and Subversion.
+<ul>
+<li> Offline mode.</li>
+<li> Easy branching and merging.</li>
+<li> Written in Haskell.</li>
+<li> Not very fast.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://darcs.net/">http://darcs.net/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=darcs">darcs</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Git.html" title="Git">Git</a></b> — A distributed revision control and source code management system with an emphasis on speed.
+<ul>
+<li> Very easy creation, merging, and deletion of branches.</li>
+<li> Nearly all operations are performed locally, giving it a huge speed advantage on centralized systems.</li>
+<li> Has a "staging area" or "index", this is an intermediate area where commits can be formatted and reviewed before completing the commit.</li>
+<li> Does not handle binary files very well.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://git-scm.com/">http://git-scm.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=git">git</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Mercurial.html" title="Mercurial">Mercurial</a></b> — A distributed version control system written in Python and similar in many ways to Git.
+<ul>
+<li> Platform independent.</li>
+<li> Support for <a rel="nofollow" class="external text" href="http://mercurial.selenic.com/wiki/UsingExtensions">extensions</a>.</li>
+<li> A set of commands consistent with Subversion.</li>
+<li> Supports tags.</li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://mercurial.selenic.com/">http://mercurial.selenic.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mercurial">mercurial</a></span>
+</dd></dl>
+<ul><li> <b><a href="../en/Subversion.html" title="Subversion">Subversion</a></b> — A full-featured centralized version control system originally designed to be a better CVS.
+<ul>
+<li> Renamed/copied/moved/removed files retain full revision history.</li>
+<li> Native support for binary files, with space-efficient binary-diff storage.</li>
+<li> Costs proportional to change size, not to data size.</li>
+<li> Allows arbitrary metadata ("properties") to be attached to any file or directory. </li>
+</ul>
+</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://subversion.apache.org/">http://subversion.apache.org/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=subversion">subversion</a></span>
+</dd></dl>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/List_of_backup_software" class="extiw" title="wikipedia:List of backup software">Wikipedia:List of backup software</a>
+</li>
+<li> <a href="https://en.wikipedia.org/wiki/Comparison_of_backup_software" class="extiw" title="wikipedia:Comparison of backup software">Wikipedia:Comparison of backup software</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.halfgaar.net/backing-up-unix">Backing up Linux and other Unix(-like) systems</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.askapache.com/security/mirror-using-rsync-ssh.html">Mirroring an Entire Site using Rsync over SSH</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.si-journal.org/index.php/JSI/article/view/205">Performance comparison of five remote incremental backup tools: Rsync, Rdiff-backup, Duplicity, Areca and Link-Backup</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.pointsoftware.ch/index.php/howto-local-and-remote-snapshot-backup-using-rsync-with-hard-links/">rsync-snapshot.sh</a> — Local and remote snapshot backup using rsync with hard links</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Data_compression_and_archiving.html" title="Category:Data compression and archiving">Data compression and archiving</a></li>
+<li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+<li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../en/Category:Pages_with_missing_package_links.html" title="Category:Pages with missing package links">Pages with missing package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

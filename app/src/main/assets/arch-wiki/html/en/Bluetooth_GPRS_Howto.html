@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Bluetooth GPRS Howto - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Bluetooth_GPRS_Howto skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Bluetooth GPRS Howto</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Bluetooth_GPRS_Howto">Talk:Bluetooth GPRS Howto#</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The article mentions rc.d scripts, initscripts are deprecated (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Bluetooth_GPRS_Howto">Talk:Bluetooth GPRS Howto#</a>)</div>
+</div>
+<p>This Howto will describe, how to set up a GPRS Internet connection using bluetooth device and compatible mobile phone.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Requirements"><span class="tocnumber">1</span> <span class="toctext">Requirements</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Instructions"><span class="tocnumber">2</span> <span class="toctext">Instructions</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Connection"><span class="tocnumber">3</span> <span class="toctext">Connection</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#pppd"><span class="tocnumber">3.1</span> <span class="toctext">pppd</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#wvdial"><span class="tocnumber">3.2</span> <span class="toctext">wvdial</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Use_Blueman_and_NetworkManager"><span class="tocnumber">4</span> <span class="toctext">Use Blueman and NetworkManager</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Use_Bluez_and_NetworkManager"><span class="tocnumber">5</span> <span class="toctext">Use Bluez and NetworkManager</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Requirements">Requirements</span></h2>
+<ol>
+<li> Linux compatible bluetooth device</li>
+<li> Bluetooth enabled mobile phone - I'm using Nokia N70</li>
+</ol>
+<h2><span class="mw-headline" id="Instructions">Instructions</span></h2>
+<ol>
+<li>Install bluez-utils, bluez-libs and dbus (install also ppp if you haven't): <pre>pacman -S bluez-utils bluez-libs dbus</pre>
+</li>
+<li>Start dbus and bluetooth service: <pre>/etc/rc.d/dbus start
+/etc/rc.d/bluetooth start</pre>
+</li>
+<li>Scan for nearby bluetooth devices: <pre>hcitool scan
+Scanning ...
+         00:19:79:89:13:8E      Penpen N70</pre>
+Now, mark that above address, it's the bluetooth hardware address of your mobile phone (provided that the name in the right matches what you have written in the phone).</li>
+<li>Scan, which channel is used for Dial-Up Networking: <pre>sdptool search --bdaddr 00:19:79:89:13:8E DUN
+Inquiring ...
+Searching for DUN on 00:19:79:89:13:8E ...
+Service Name: Dial-Up Networking
+Service RecHandle: 0x10007
+Service Class ID List:
+  "Dialup Networking" (0x1103)
+Protocol Descriptor List:
+  "L2CAP" (0x0100)
+  "RFCOMM" (0x0003)
+    Channel: 3
+Language Base Attr List:
+  code_ISO639: 0x454e
+  encoding:    0x6a
+  base_offset: 0x100
+Profile Descriptor List:
+  "Dialup Networking" (0x1103)
+    Version: 0x0100
+</pre>Now check the line beginning with "Channel:" - it contains the channel which is used for Dial-Up Network and it is <strong>not necessarily</strong> 1 and so is the case with my Nokia N70; my phone uses channel 3. Check also that you are reading the right results; the bluetooth hardware address must match your phone's.</li>
+<li>Now edit /etc/bluetooth/rfcomm.conf , first uncomment the rfcomm0 device section. Then add/change the lines as this (if necessary): <pre>bind yes;
+device 00:19:79:89:13:8E;
+channel 3;
+comment "GPRS dialup";</pre>Of course, you should use your device address and the appropriate channel.</li>
+<li>Edit the bluetooth conf file in /etc/conf.d to make the rfcomm start when bluetooth system is started: <pre>
+# Activate rfcomm ports (default: false)
+RFCOMM_ENABLE="true"</pre>
+</li>
+<li>Restart the bluetooth service: <pre>/etc/rc.d/bluetooth restart</pre>
+</li>
+<li>Look, whether the bluetooth device is bound to the phone. It should look like this: <pre>ls -l /dev/rfcomm0
+crw-rw---- 1 root tty 216, 0 2007-08-10 21:32 /dev/rfcomm0</pre>
+</li>
+<li>Now comes the interesting part. You see, there must be an agreed password for connecting to the phone's modem. This password is set up in the following way: Open up another root terminal and execute <pre>bluez-simple-agent</pre> (if there is an error concerning a .service file, just stop bluetoothd, restart dbus and start bluetooth again). This should give you a message saying the device is ready, do not do anything else here for now, but go to the first terminal and type in <pre>cat /dev/rfcomm0</pre> and press Return. Shortly after the phone should be asking for a code for pairing with the computer. Use whatever code you wish on the phone. Then in the bluez-simple-agent a prompt appears asking for this code. After you have entered it and cofirmed via Return you can CTRL-c it and close the terminal. The phone is now paired with the computer.</li>
+</ol>
+<h2><span class="mw-headline" id="Connection">Connection</span></h2>
+<h3><span class="mw-headline" id="pppd">pppd</span></h3>
+Edit the bottom of /etc/ppp/ip-up as following: <pre>echo -e "#generated by ip-up\nsearch local\nnameserver $DNS1\nnameserver $DNS2" &gt; /etc/resolv.conf
+chmod a+r /etc/resolv.conf</pre>This change is used to set correct DNS settings after connection.
+Now you need scripts to actually use the phone's modem and call your ISP. My ISP is the Finnish saunalahti, mainly because of it's predefined fee for unlimited data access. You must substitute saunalahti for your ISP accordingly through the rest of the document. First we edit the modem setup script for my isp. I'm using script named /etc/ppp/peers/saunalahti and having the following content: <pre>show-password 
+noauth
+/dev/rfcomm0
+115200
+connect /etc/ppp/peers/saunalahti-connect
+disconnect /etc/ppp/peers/saunalahti-disconnect
+defaultroute
+#replacedefaultroute
+noipdefault 
+#nodetach
+usepeerdns
+crtscts
+local
+ipcp-accept-local
+#lcp-echo-interval 0
+maxfail 10
+lcp-echo-failure 0
+lcp-echo-interval 0
+#lcp-max-configure 0
+#lcp-max-failure 10000
+#lcp-max-terminate 0
+#lcp-restart 30000 
+novj
+nobsdcomp
+novjccomp
+nopcomp
+noaccomp
+linkname saunalahti
+mtu 1500
+mru 1500</pre> Some remarks: You should possibly first uncomment the nodetach-option, so you can track, whether the call succeeds. Without the option you just get no confirmation. 
+<p>Some Carrier needs special username and password for connection. In this case you should add:
+</p>
+<pre>
+user "username"
+password "passwd"
+</pre>
+<p>A good list of Carrier's and ther username/password pairs can be found here: <a rel="nofollow" class="external free" href="http://wiki.openmoko.org/wiki/GPRS">http://wiki.openmoko.org/wiki/GPRS</a>
+</p>
+<p>The lines starting with "connect" and "disconnect" are locations for connect and disconnect chat scripts. Chat scripts are used to "talk" with the modem. Lets take a look at them next.
+</p>
+Now, we edit the connect script. Mine is at /etc/ppp/peers/saunalahti-connect and is like the following: <pre>#!/bin/sh
+exec chat                                               \
+        TIMEOUT         5                               \
+        ECHO            ON                              \
+        ABORT           '\nBUSY\r'                      \
+        ABORT           '\nERROR\r'                     \
+        ABORT           '\nNO ANSWER\r'                 \
+        ABORT           '\nNO CARRIER\r'                \
+        ABORT           '\nNO DIALTONE\r'               \
+        ABORT           '\nRINGING\r\n\r\nRINGING\r'    \
+        ''              \rAT                            \
+        TIMEOUT         12                              \
+        SAY             "Press CTRL-C to close the connection at any stage!"    \
+        SAY             "\ndefining PDP context...\n"   \
+        OK              ATH                             \
+        OK              ATE1                            \
+        OK              'AT+CGDCONT=1,"IP","internet.saunalahti","",0,0'        \
+        OK              ATD*99#                         \
+        TIMEOUT         22                              \
+        SAY             "\nwaiting for connect...\n"    \
+        CONNECT         ""                              \
+        SAY             "\nConnected." \
+        SAY             "\nIf the following ppp negotiations fail,\n"   \
+        SAY             "try restarting the phone.\n"</pre>Also some remarks about these: In the place of internet.saunalahti you should have your mobile operators access point name. That can be checked from Settings-&gt;Connection-&gt;Access points . Hilight the Internet access point and select edit. Go down to section "Access point name". There you have it. One more thing. The modem command "ATD*99#"'s number "*99#" is a special number (at least in Nokia phones) which is used to "call to Internet access point". Pretty clever I'd say; no fiddling around with actual numbers, let the phone handle everything behind the scenes.
+Edit the disconnect script (mine's is in /etc/ppp/peers/saunalahti-disconnect). You should have something like this: <pre>#!/bin/sh
+exec /usr/sbin/chat -V -s -S    \
+ABORT           "BUSY"          \
+ABORT           "ERROR"         \
+ABORT           "NO DIALTONE"   \
+SAY             "\nSending break to the modem\n"        \
+""              "\K"            \
+""              "\K"            \
+""              "\K"            \
+""              "+++ATH"        \
+""              "+++ATH"        \
+""              "+++ATH"        \
+SAY             "\nPDP context detached\n"</pre>
+Set executable atribute for files saunalahti-connect and saunalahti-disconnect<pre>chmod +x /etc/ppp/peers/saunalahti*connect</pre>
+Ok, you have completely set up bluetooth + gprs connection. Yay! Next thing to do is to test it. If you let the "nodetach" option uncommented in section 12, running (again, substitute yourisp for, well your ISP :) <pre>pon yourisp</pre> should return something like this: <pre>Press CTRL-C to close the connection at any stage!
+<p>defining PDP context...
+rAT
+OK
+ATH
+OK
+ATE1
+OK
+AT+CGDCONT=1,"IP","internet.saunalahti","",0,0
+OK
+waiting for connect...
+</p><p>ATD*99#
+CONNECT
+Connected.
+If the following ppp negotiations fail,
+try restarting the phone.
+</p><p>Serial connection established.
+Using interface ppp0
+Connect: ppp0 &lt;--&gt; /dev/rfcomm0
+kernel does not support PPP filtering
+Cannot determine ethernet address for proxy ARP
+local  IP address 85.77.231.188
+remote IP address 10.6.6.6
+primary   DNS address 195.197.54.100
+</p>
+secondary DNS address 195.74.0.47</pre> 
+<p>If the output is something similar, you have a working connection . If this is the case, you can press ctrl-c to abort the connection and uncomment the "nodetach" option from section 12. 
+</p>
+<p>Later when you want connection, you can just run 
+</p>
+<pre>pon yourisp</pre> 
+<p>and when disconnecting 
+</p>
+<pre>poff yourisp</pre>
+<p>You can add "dbus bluetooth" to the DAEMONS section in /etc/rc.conf so you can connect more easily after reboot (be aware that hal already starts dbus).
+All done, enjoy!
+</p>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="wvdial">wvdial</span></h3>
+<p>Bluez-simple-agent must be running in another terminal for this step even if you already paired your devices. Edit the file /etc/wvdial.conf and put the following line on it
+</p>
+<pre>
+[Dialer Defaults]
+Modem = /dev/modem
+Baud = 115200
+Init1 = ATZ
+Init2 = ATE0
+
+[Dialer pin]
+Init1 = AT+CPIN=YOURPIN
+
+[Dialer YOURISP]
+Modem = /dev/rfcomm0
+Init3 = AT+cgdcont=1,"IP","YOURISPAPN"
+Phone = *99***1#
+Stupid Mode = 1
+Username = username
+Password = password
+</pre>
+<p>Replace YOURISP/YOURPIN/YOURISPAPN/username/password with the right data and use 
+</p>
+<pre>
+# wvdial YOURISP
+</pre>
+<p>for connect, if you need to pass the PIN number, use
+</p>
+<pre>
+# wvdial pin
+</pre>
+<h2><span class="mw-headline" id="Use_Blueman_and_NetworkManager">Use Blueman and NetworkManager</span></h2>
+<p>As of blueman 1.02-1 and networkmanager 0.70-1, there is no need to edit any configuration files anymore, so that we can easily set up bluetooth GRPS dialup purely in GUI. Tested with Nokia N70.
+</p>
+<ol>
+<li> Click bluetooth applet and right click in blank area to select "Setup", then Bluetooth Manager will automatically search and setup devices for you, and you can choose to "connect to DialUp networking" if your device support this. After this, check out if you've got /dev/rfcomm0, if so you've got paired.</li>
+<li> Right click on nm-applet and choose "Edit Connections", choose Mobile Broadband tab, click "add" it will pop you up to choose a Mobile Broadband Connection, there you can see your bluetooth device.</li>
+<li> Edit properties of the connection, remember to change up to your own network setting. Normally, you only need to provide number and APN, leave others blank. And uncheck "Use authentication" in PPP tab, otherwise dialup would fail.</li>
+<li> Select and connect to dialup service just like other connection type with networkmanager.</li>
+</ol>
+<h2><span class="mw-headline" id="Use_Bluez_and_NetworkManager">Use Bluez and NetworkManager</span></h2>
+<p>You can set up a GPRS connection purely using GUI.  Install prerequisites:
+</p>
+<pre>
+# pacman -S modemmanager networkmanager bluez gnome-bluetooth gnome-control-center
+</pre>
+<p>Firstly, add your phone to the known devices list using gnome-bluetooth. This includes pairing the computer and the cell phone. Then run gnome-control-center and select "Bluetooth" section there. Choose your phone you have just added. In the right panel select "Acces the Internet using your mobile phone (DUN)". Follow the steps of determining correct mobile network operators.
+Restart the NetworkManager daemon. Now you will see "Mobile Broadband" section in the list of connections. Just click it to establish the connection. You can check for the configuration files (/etc/NetworkManager/system-connections/&lt;Mobile operator - connection name&gt;)
+</p>
+<pre>
+# cat /etc/NetworkManager/system-connections/&lt;Mobile operator - connection name&gt;
+
+[connection]
+id=&lt;Mobile operator - connection name&gt;
+uuid=434e7d89-94df-43dd-8d12-e7bb3cfcd98f
+type=bluetooth
+autoconnect=false
+
+[bluetooth]
+bdaddr=00:AA:BB:AA:XX:XX
+type=dun
+
+[gsm]
+number=*99#
+apn=internet
+
+[serial]
+baud=115200
+</pre>
+<p>Check for the newly created network interface (ppp0):
+</p>
+<pre># ip addr show dev ppp0
+</pre>
+<p>You should disable all other connections and check the routing table:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ip route</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         10.6.6.6        0.0.0.0         UG    0      0        0 ppp0
+10.6.6.6        0.0.0.0         255.255.255.255 UH    0      0        0 ppp0</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Bluetooth.html" title="Category:Bluetooth">Bluetooth</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

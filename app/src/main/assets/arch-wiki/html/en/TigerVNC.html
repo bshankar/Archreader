@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>TigerVNC - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-TigerVNC skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">TigerVNC</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/X11vnc.html" title="X11vnc">x11vnc</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://tigervnc.org/">TigerVNC</a> is an implementation of the <a href="https://en.wikipedia.org/wiki/VNC" class="extiw" title="wikipedia:VNC">VNC</a> protocol. This article focuses on the server functionality.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Running_vncserver_for_virtual_.28headless.29_sessions"><span class="tocnumber">2</span> <span class="toctext">Running vncserver for virtual (headless) sessions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Create_environment.2C_config.2C_and_password_files"><span class="tocnumber">2.1</span> <span class="toctext">Create environment, config, and password files</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Edit_the_environment_file"><span class="tocnumber">2.1.1</span> <span class="toctext">Edit the environment file</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Edit_the_optional_config_file"><span class="tocnumber">2.1.2</span> <span class="toctext">Edit the optional config file</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Starting_and_stopping_vncserver_via_systemd"><span class="tocnumber">2.2</span> <span class="toctext">Starting and stopping vncserver via systemd</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#User_mode"><span class="tocnumber">2.2.1</span> <span class="toctext">User mode</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#System_mode"><span class="tocnumber">2.2.2</span> <span class="toctext">System mode</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Multi-user_mode"><span class="tocnumber">2.2.3</span> <span class="toctext">Multi-user mode</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Running_vncserver_to_directly_control_the_local_display"><span class="tocnumber">3</span> <span class="toctext">Running vncserver to directly control the local display</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11">
+<a href="#Using_tigervnc.27s_x0vncserver"><span class="tocnumber">3.1</span> <span class="toctext">Using tigervnc's x0vncserver</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Starting_and_stopping_x0vncserver_via_systemd"><span class="tocnumber">3.1.1</span> <span class="toctext">Starting and stopping x0vncserver via systemd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13"><a href="#Using_x11vnc"><span class="tocnumber">3.2</span> <span class="toctext">Using x11vnc</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Connecting_to_vncserver"><span class="tocnumber">4</span> <span class="toctext">Connecting to vncserver</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Passwordless_authentication"><span class="tocnumber">4.1</span> <span class="toctext">Passwordless authentication</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Example_GUI-based_clients"><span class="tocnumber">4.2</span> <span class="toctext">Example GUI-based clients</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Accessing_vncserver_via_SSH_tunnels"><span class="tocnumber">5</span> <span class="toctext">Accessing vncserver via SSH tunnels</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#On_the_server"><span class="tocnumber">5.1</span> <span class="toctext">On the server</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#On_the_client"><span class="tocnumber">5.2</span> <span class="toctext">On the client</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Connecting_to_a_vncserver_from_Android_devices_over_SSH"><span class="tocnumber">5.3</span> <span class="toctext">Connecting to a vncserver from Android devices over SSH</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21">
+<a href="#Tips_and_tricks"><span class="tocnumber">6</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-22"><a href="#Connecting_to_an_OSX_system"><span class="tocnumber">6.1</span> <span class="toctext">Connecting to an OSX system</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Copying_clipboard_contents_from_the_remote_machine_to_the_local"><span class="tocnumber">6.2</span> <span class="toctext">Copying clipboard contents from the remote machine to the local</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Fix_for_no_mouse_cursor"><span class="tocnumber">6.3</span> <span class="toctext">Fix for no mouse cursor</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Recommended_security_settings"><span class="tocnumber">6.4</span> <span class="toctext">Recommended security settings</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Toggling_Fullscreen"><span class="tocnumber">6.5</span> <span class="toctext">Toggling Fullscreen</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Unable_to_type_less_than_character_.28.3C.29"><span class="tocnumber">6.6</span> <span class="toctext">Unable to type less than character (&lt;)</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tigervnc">tigervnc</a></span> package. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This packages provides the requisite vncserver, x0vncserver and also vncviewer.</div>
+<p>Vncserver provides two major remote control abilities:
+</p>
+<ol>
+<li> Virtual (headless) server which is similar to the standard X server, but has a virtual screen rather than a physical one.  The virtual server runs completely <i>parallel</i> to the physical X server should one be running.</li>
+<li> Direct control of the local X session(s) which do run on the physical monitor.</li>
+</ol>
+<h2><span class="mw-headline" id="Running_vncserver_for_virtual_.28headless.29_sessions">Running vncserver for virtual (headless) sessions</span></h2>
+<h3><span class="mw-headline" id="Create_environment.2C_config.2C_and_password_files">Create environment, config, and password files</span></h3>
+<p>Vncserver will create its initial environment, config, and user password file the first time it is run.  These will be stored in <code>~/.vnc</code> which will be created if not present.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vncserver</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+You will require a password to access your desktops.
+
+Password:
+Verify:
+
+New 'mars:1 (facade)' desktop is mars:1
+
+Creating default startup script /home/facade/.vnc/xstartup
+Starting applications specified in /home/facade/.vnc/xstartup
+Log file is /home/facade/.vnc/mars:1.log
+</pre>
+<p>Notice the :1 trailing the hostname.  This is indicating the TCP port number on which the virtual vncserver is running.  In this case, :1 is actually TCP port 5901 (5900+1).  Running <code>vncserver</code> a second time will create a second instance running on the next highest, free port, i.e 5902 (5900+2) which shall end in :2 as above.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Linux systems can have as many VNC servers as physical memory allows, all of which running in parallel to each other.</div>
+<p>Shutdown the vncserver by using the -kill switch:
+</p>
+<pre>$ vncserver -kill :1
+</pre>
+<h4><span class="mw-headline" id="Edit_the_environment_file">Edit the environment file</span></h4>
+<p>Vncserver sources <code>~/.vnc/xstartup</code> which functions like an <a href="../en/Xinit.html" title=".xinitrc" class="mw-redirect">.xinitrc</a> file. At a minimum, users should start a DE from this file.  For more, see: <a href="../en/General_recommendations.html#Desktop_environments" title="General recommendations">General recommendations#Desktop environments</a>.
+</p>
+<p>For example, starting lxqt:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vnc/xstartup</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+exec startlxqt
+</pre>
+<h4><span class="mw-headline" id="Edit_the_optional_config_file">Edit the optional config file</span></h4>
+<p>With the release of tigervnc 1.60-1, support for parsing options in <code>~/.vnc/config</code> has been implemented which obviates the need to call <code>vncserver</code> with command line switches.  The format is one option per line.  An example is provided:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vnc/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+## Supported server options to pass to vncserver upon invocation can be listed
+## in this file. See the following manpages for more: vncserver(1) Xvnc(1).
+## Several common ones are shown below. Uncomment and modify to your liking.
+##
+securitytypes=tlsvnc
+desktop=sandbox
+geometry=1200x700
+dpi=96
+localhost
+alwaysshared
+</pre>
+<h3><span class="mw-headline" id="Starting_and_stopping_vncserver_via_systemd">Starting and stopping vncserver via systemd</span></h3>
+<p>Systemd can manage the vncserver via a service in one of two modes using either a user or system service.  Both are presented below.
+</p>
+<h4><span class="mw-headline" id="User_mode">User mode</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In order to keep the vncserver alive when the user logs out (physically or via ssh), one must enable the linger option for loginctl like this: <code># loginctl enable-linger username</code> Failure to do so will result in the vncserver getting killed when the user logs off the machine.</div>
+<p>Start the service in usermode:
+</p>
+<pre>$ systemctl --user start vncserver@:1
+</pre>
+<p>Enable the service in usermode:
+</p>
+<pre>$ systemctl --user enable vncserver@:1
+</pre>
+<h4><span class="mw-headline" id="System_mode">System mode</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not run this service if your local area network is untrusted.</div>
+<p>Create <code>/etc/systemd/system/vncserver@<i>:1</i>.service</code>, where <code>:1</code> is the <code>$DISPLAY</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a>. 
+</p>
+<p>Modify the service by defining the user (<code>User=</code>) to run the server, and the desired <a href="../en/TigerVNC.html" title="Vncserver" class="mw-redirect">Vncserver</a> options (<code>usr/bin/vncserver %i -arg1 -arg2 -argn</code>).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/vncserver@<i>:1</i>.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=foo
+PAMName=login
+PIDFile=/home/foo/.vnc/%H:%i.pid
+ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i &gt; /dev/null 2&gt;&amp;1 || :'
+ExecStart=/usr/bin/vncserver -geometry 1440x900 -alwaysshared -fg %i
+ExecStop=/usr/bin/vncserver -kill %i
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>vncserver@<i>:1</i>.service</code> and optionally <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it to run at boot time/shutdown.
+</p>
+<h4><span class="mw-headline" id="Multi-user_mode">Multi-user mode</span></h4>
+<p>One can use systemd socket activation in combination with <a href="../en/Xdmcp.html" title="Xdmcp">XDMCP</a> to automatically spawn VNC servers for each user who attempts to login, so there is no need to set up one server/port per user.  This setup uses the display manager to authenticate users and login, so there is no need for VNC passwords. The downside is that users cannot leave a session running on the server and reconnect to it later.
+To get this running, first set up <a href="../en/Xdmcp.html" title="Xdmcp">XDMCP</a> and make sure the display manager is running.
+Then create:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/xvnc.socket</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+[Unit]
+Description=XVNC Server
+
+[Socket]
+ListenStream=5900
+Accept=yes
+
+[Install]
+WantedBy=sockets.target
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/xvnc@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+[Unit]
+Description=XVNC Per-Connection Daemon
+
+[Service]
+ExecStart=-/usr/bin/Xvnc -inetd -query localhost -geometry 1920x1080 -once -SecurityTypes=None
+User=nobody
+StandardInput=socket
+StandardError=syslog
+</pre>
+<p>Use systemctl to <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>xvnc.socket</code>. Now any number of users can get unique desktops by connecting to port 5900.
+</p>
+<p>If the VNC server is exposed to the internet, add the <code>-localhost</code> option to <code>Xvnc</code> in <code>xvnc@.service</code> and follow the instructions below about connecting over SSH (Note that the 'localhost' in <code>-query localhost</code> is not <code>-localhost</code>). Since we only select a user after connecting, the VNC server runs as user 'nobody' and uses xvnc directly instead of the 'vncserver' script, so any options in ~/.vnc are ignored.  Optionally <a href="../en/Autostarting.html" title="Autostart" class="mw-redirect">autostart</a> <code>vncconfig</code> so that the clipboard works (<code>vncconfig</code> exits immediately in non-VNC sessions). One way is to create:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xinit/xinitrc.d/99-vncconfig.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+#!/bin/sh
+vncconfig -nowin &amp;
+</pre>
+<h2><span class="mw-headline" id="Running_vncserver_to_directly_control_the_local_display">Running vncserver to directly control the local display</span></h2>
+<h3><span class="mw-headline" id="Using_tigervnc.27s_x0vncserver">Using tigervnc's x0vncserver</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tigervnc">tigervnc</a></span> provides the x0vncserver binary which allows direct control over a physical X session.  Invoke it like so:
+</p>
+<pre>$ x0vncserver -display :0 -passwordfile ~/.vnc/passwd
+</pre>
+<p>For more see
+</p>
+<pre>man x0vncserver
+</pre>
+<h4><span class="mw-headline" id="Starting_and_stopping_x0vncserver_via_systemd">Starting and stopping x0vncserver via systemd</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not run this service if your local area network is untrusted!</div>
+<p>In order to have a VNC Server runnning x0vncserver, which is the easiest way for most users to quickly have remote access to the current desktop, you can create a systemd unit.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This unit will only be useful if the user in the unit is currently running a X session.</div>
+<p>Create <code>/etc/systemd/system/x0vncserver.service</code> and modify it defining the user to run the server, and the desired options.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/x0vncserver.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=foo
+ExecStart=/usr/bin/sh -c '/usr/bin/x0vncserver -display :0 -rfbport 5900 -passwordfile /home/foo/.vnc/passwd &amp;'
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<h3><span class="mw-headline" id="Using_x11vnc">Using x11vnc</span></h3>
+<p>Another option is to use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=x11vnc">x11vnc</a></span> which has the advantage or disadvantage, depending on one's perspective, of requiring root to initiate the access.  For more, see: <a href="../en/X11vnc.html" title="X11vnc">X11vnc</a>.
+</p>
+<h2><span class="mw-headline" id="Connecting_to_vncserver">Connecting to vncserver</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>It is ill-advised to connect insecurely to a vncserver outside of the LAN; readers are encouraged read the rest of this article in its entirety if use cases require connections outside of one's LAN. That being said, TigerVNC <i>is encrypted by default</i> unless it is specifically instructed otherwise by setting SecurityTypes to a non-secure option, although this lacks identity verification and will not prevent MITM attack during the connection setup. X509Vnc is the recommended option for a secure connection.</div>
+<p>Any number of clients can connect to a vncserver.  A simple example is given below where vncserver is running on 10.1.10.2 on port 5901 (:1) in shorthand notation:
+</p>
+<pre>$ vncviewer 10.1.10.2:1
+</pre>
+<h3><span class="mw-headline" id="Passwordless_authentication">Passwordless authentication</span></h3>
+<p>The <code>-passwd</code> switch allows one to define the location of the server's <code>~/.vnc/passwd</code> file. It is expected that the user has access to this file on the server through <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a> or through physical access. In either case, place that file on the client's file system in a safe location, i.e. one that has read access ONLY to the expected user.
+</p>
+<pre>$ vncviewer -passwd /path/to/server-passwd-file
+</pre>
+<h3><span class="mw-headline" id="Example_GUI-based_clients">Example GUI-based clients</span></h3>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtk-vnc">gtk-vnc</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=krdc">krdc</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rdesktop">rdesktop</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vinagre">vinagre</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=remmina">remmina</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vncviewer-jar">vncviewer-jar</a></span>
+</li>
+</ul>
+<p>TigerVNC's vncviewer also has a simple GUI when run without any parameters:
+</p>
+<pre>$ vncviewer
+</pre>
+<h2><span class="mw-headline" id="Accessing_vncserver_via_SSH_tunnels">Accessing vncserver via SSH tunnels</span></h2>
+<p>An advantage of SSH tunneling is one does not need to open up another port to the outside, since the traffic is literally tunneled through the SSH port which the user already has open to the WAN.  It is highly recommended to use the <code>-localhost</code> switch when running vncserver with this method since this switch only allows connections <i>from the localhost</i> and by analogy, only by users physically ssh'ed and authenticated on the box.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>TigerVNC uses TLSVnc encryption by default, unless specifically instructed via the SecurityTypes parameter. Authentication and traffic is encrypted, but there is no identity verification. TigerVNC supports alternative encryption schemes such as X509Vnc that allows the client to verify the identity of the server.
+When the SecurityTypes on the server side is set to a non-secure option as high-priority (such as None, VncAuth, Plain, TLSNone, TLSPlain, X509None, X509Plain; which is ill-advised), it is not possible to use encryption.  In that case, one can tunnel the VNC over SSH.  When running vncviewer, it is a good idea to explicitly set SecurityTypes and not accept any unencrypted traffic.</div>
+<h3><span class="mw-headline" id="On_the_server">On the server</span></h3>
+<p>Below is an example invoking vncserver with the -localhost flag:
+</p>
+<pre>$ vncserver -geometry 1440x900 -alwaysshared -dpi 96 -localhost :1
+</pre>
+<p>Alternatively, simply add the "localhost" option as a single line in <code>~/.vnc/config</code>.  Below is the example above in this format:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.vnc.config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+
+## Supported server options to pass to vncserver upon invocation can be listed
+## in this file. See the following manpages for more: vncserver(1) Xvnc(1).
+## Several common ones are shown below. Uncomment and modify to your liking.
+##
+geometry=1200x700
+alwaysshared
+dpi=96
+localhost
+</pre>
+<h3><span class="mw-headline" id="On_the_client">On the client</span></h3>
+<p>With the server now only accepting connection from the localhost, connect to the box via ssh using the -L switch to enable tunnels.  For more on this feature, see the manpage for ssh itself.
+For example:
+</p>
+<pre>$ ssh 10.1.10.2 -L 5901:localhost:5901
+</pre>
+<p>This forwards the server port 5901 to the client box also on port 5901.  Note that one does not have to match the port numbers on the server and client.  For example:
+</p>
+<pre>$ ssh 10.1.10.2 -L 8900:localhost:5901
+</pre>
+<p>This forwards the server port 5901 to the client box on port 8900.  
+</p>
+<p>Once connected via SSH, leave that xterm or shell window open since it is acting as the secured tunnel to/from server.  To connect via this encrypted tunnel, simply point the vncviewer to the client port on the localhost.
+</p>
+<p>Using the matched ports on the server/client:
+</p>
+<pre>$ vncviewer localhost:1
+</pre>
+<p>Using different ports on the server/client:
+</p>
+<pre>$ vncviewer localhost:8900
+</pre>
+<h3><span class="mw-headline" id="Connecting_to_a_vncserver_from_Android_devices_over_SSH">Connecting to a vncserver from Android devices over SSH</span></h3>
+<p>To connect to a VNC Server over SSH using an Android device:
+</p>
+<pre>1. SSH server running on the machine to connect to.
+2. VNC server running on the machine to connect to. (Run server with -localhost flag as mentioned above)
+3. SSH client on the Android device (ConnectBot is a popular choice and will be used in this guide as an example).
+4. VNC client on the Android device (androidVNC).</pre>
+<p>Consider some dynamic DNS service for targets that do not have static IP addresses.
+</p>
+<p>In ConnectBot, type in the IP and connect to the desired machine. Tap the options key, select Port Forwards and add a new port:
+</p>
+<pre>Nickname: vnc
+Type: Local
+Source port: 5901
+Destination: 127.0.0.1:5901</pre>
+<p>Save that.
+</p>
+<p>In androidVNC:
+</p>
+<pre>Nickname: nickname
+Password: the password used to set up the VNC server
+Address: 127.0.0.1 (we are in local after connecting through SSH)
+Port: 5901</pre>
+<p>Connect.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Connecting_to_an_OSX_system">Connecting to an OSX system</span></h3>
+<p>See <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/AppleRemoteDesktop">https://help.ubuntu.com/community/AppleRemoteDesktop</a>. Tested with Remmina.
+</p>
+<h3><span class="mw-headline" id="Copying_clipboard_contents_from_the_remote_machine_to_the_local">Copying clipboard contents from the remote machine to the local</span></h3>
+<p>If copying from the remote machine to the local machine does not work, run autocutsel on the server, as mentioned below <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=101243">reference</a>:
+</p>
+<pre>$ autocutsel -fork
+</pre>
+<p>Now press F8 to display the VNC menu popup, and select <code>Clipboard: local -&gt; remote</code> option.
+</p>
+<p>One can put the above command in <code>~/.vnc/xstartup</code> to have it run automatically when vncserver is started.
+</p>
+<h3><span class="mw-headline" id="Fix_for_no_mouse_cursor">Fix for no mouse cursor</span></h3>
+<p>If no mouse cursor is visible when using <code>x0vncserver</code>, start vncviewer as follows:
+</p>
+<pre>$ vncviewer DotWhenNoCursor=1 &lt;server&gt;
+</pre>
+<p>Or put <code>DotWhenNoCursor=1</code> in the tigervnc configuration file, which is at <code>~/.vnc/default.tigervnc</code> by default.
+</p>
+<h3><span class="mw-headline" id="Recommended_security_settings">Recommended security settings</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If using ssh tunnels (i.e. <a href="#Accessing_vncserver_via_SSH_tunnels">#Accessing vncserver via SSH tunnels</a>), X509Vnc is not required since the encryption is handled by the sshd.</div>
+<p>SecurityTypes controls the preferred security algorithms. The default in the current version 1.5.0 is "X509Plain,TLSPlain,X509Vnc,TLSVnc,X509None,TLSNone,VncAuth,None". A more secure alternative is "X509Vnc,TLSVnc", which will disable all unencrypted data traffic.
+</p>
+<p>It is recommended to use X509Vnc, as TLSVnc lacks identity verification.
+</p>
+<pre>$ vncserver -x509key /path/to/key.pem -x509cert /path/to/cerm.pem -SecurityTypes X509Vnc :1
+</pre>
+<p>Issuing x509 certificates is beyond the scope of this guide. However, this is expected to be straightforward after the public launch of <a href="https://en.wikipedia.org/wiki/Let%27s_Encrypt" class="extiw" title="wikipedia:Let's Encrypt">Let's Encrypt</a>. Alternatively,  one can issue certificates using <a href="../en/OpenSSL.html" title="OpenSSL">OpenSSL</a> and manually share the keys between server and client using email for instance.
+</p>
+<h3><span class="mw-headline" id="Toggling_Fullscreen">Toggling Fullscreen</span></h3>
+<p>This can be done through vncclient's Menu. By default, vncclient's Menu Key is F8.
+</p>
+<h3><span class="mw-headline" id="Unable_to_type_less_than_character_.28.3C.29">Unable to type less than character (&lt;)</span></h3>
+<p>If pressing <code>&lt;</code> on a remote client emits the <code>&gt;</code> character, try remapping the incoming key <a rel="nofollow" class="external autonumber" href="https://insaner.com/blog/2013/05.html#20130422063137">[1]</a>:
+</p>
+<pre>$ x0vncserver -RemapKeys="0x3c-&gt;0x2c"
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../en/Category:Remote_desktop.html" title="Category:Remote desktop">Remote desktop</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

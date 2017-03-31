@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>CUPS/Troubleshooting - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-CUPS_Troubleshooting skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">CUPS/Troubleshooting</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/CUPS.html" title="CUPS">CUPS</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/CUPS.html" title="CUPS">CUPS</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/CUPS/Printer-specific_problems.html" title="CUPS/Printer-specific problems">CUPS/Printer-specific problems</a></li>
+</ul>
+</div>
+<p>This article covers all non-specific (ie, not related to any one printer) troubleshooting of CUPS and printing drivers (but not problems related to printer sharing), including methods of determining the exact nature of the problem, and of solving the identified problem. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Problems_resulting_from_upgrades"><span class="tocnumber">2</span> <span class="toctext">Problems resulting from upgrades</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#CUPS_stops_working"><span class="tocnumber">2.1</span> <span class="toctext">CUPS stops working</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#All_jobs_are_.22stopped.22"><span class="tocnumber">2.2</span> <span class="toctext">All jobs are "stopped"</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#All_jobs_are_.22The_printer_is_not_responding.22"><span class="tocnumber">2.3</span> <span class="toctext">All jobs are "The printer is not responding"</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#The_PPD_version_is_not_compatible_with_gutenprint"><span class="tocnumber">2.4</span> <span class="toctext">The PPD version is not compatible with gutenprint</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Printers_are_not_present_in_the_print_dialog_for_GTK3_applications"><span class="tocnumber">2.5</span> <span class="toctext">Printers are not present in the print dialog for GTK3 applications</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Networking_issues"><span class="tocnumber">3</span> <span class="toctext">Networking issues</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Unable_to_locate_printer"><span class="tocnumber">3.1</span> <span class="toctext">Unable to locate printer</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Old_CUPS_server"><span class="tocnumber">3.2</span> <span class="toctext">Old CUPS server</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#CUPS_identifies_printer_but_cannot_connect_to_it"><span class="tocnumber">3.3</span> <span class="toctext">CUPS identifies printer but cannot connect to it</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#USB_printers"><span class="tocnumber">4</span> <span class="toctext">USB printers</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Conflict_with_SANE"><span class="tocnumber">4.1</span> <span class="toctext">Conflict with SANE</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Conflict_with_usblp"><span class="tocnumber">4.2</span> <span class="toctext">Conflict with usblp</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#HP_issues"><span class="tocnumber">5</span> <span class="toctext">HP issues</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#CUPS:_.22.2Fusr.2Flib.2Fcups.2Fbackend.2Fhp_failed.22"><span class="tocnumber">5.1</span> <span class="toctext">CUPS: "/usr/lib/cups/backend/hp failed"</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#CUPS:_Job_is_shown_as_complete_but_the_printer_does_nothing"><span class="tocnumber">5.2</span> <span class="toctext">CUPS: Job is shown as complete but the printer does nothing</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#CUPS:_.27.22foomatic-rip.22_not_available.2Fstopped_with_status_3.27"><span class="tocnumber">5.3</span> <span class="toctext">CUPS: '"foomatic-rip" not available/stopped with status 3'</span></a></li>
+<li class="toclevel-2 tocsection-19">
+<a href="#CUPS:_.22Filter_failed.22"><span class="tocnumber">5.4</span> <span class="toctext">CUPS: "Filter failed"</span></a>
+<ul>
+<li class="toclevel-3 tocsection-20"><a href="#Bad_permissions"><span class="tocnumber">5.4.1</span> <span class="toctext">Bad permissions</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#Avahi_not_enabled"><span class="tocnumber">5.4.2</span> <span class="toctext">Avahi not enabled</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Out-of-date_plugin"><span class="tocnumber">5.4.3</span> <span class="toctext">Out-of-date plugin</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-23"><a href="#CUPS:_prints_only_an_empty_and_an_error-message_page_on_HP_LaserJet"><span class="tocnumber">5.5</span> <span class="toctext">CUPS: prints only an empty and an error-message page on HP LaserJet</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#HPLIP_3.13:_Plugin_is_installed.2C_but_HP_Device_Manager_complains_it_is_not"><span class="tocnumber">5.6</span> <span class="toctext">HPLIP 3.13: Plugin is installed, but HP Device Manager complains it is not</span></a></li>
+<li class="toclevel-2 tocsection-25">
+<a href="#hp-toolbox:_.22Unable_to_communicate_with_device.22"><span class="tocnumber">5.7</span> <span class="toctext">hp-toolbox: "Unable to communicate with device"</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#Permission_problem"><span class="tocnumber">5.7.1</span> <span class="toctext">Permission problem</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#Virtual_CDROM_printers"><span class="tocnumber">5.7.2</span> <span class="toctext">Virtual CDROM printers</span></a></li>
+<li class="toclevel-3 tocsection-28"><a href="#Networked_printers"><span class="tocnumber">5.7.3</span> <span class="toctext">Networked printers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-29"><a href="#hp-setup_asks_to_specify_the_PPD_file_for_the_discovered_printer"><span class="tocnumber">5.8</span> <span class="toctext">hp-setup asks to specify the PPD file for the discovered printer</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#hp-setup:_.22Qt.2FPyQt_4_initialization_failed.22"><span class="tocnumber">5.9</span> <span class="toctext">hp-setup: "Qt/PyQt 4 initialization failed"</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#hp-setup:_finds_the_printer_automatically_but_reports_.22Unable_to_communicate_with_device.22_when_printing_test_page_immediately_afterwards"><span class="tocnumber">5.10</span> <span class="toctext">hp-setup: finds the printer automatically but reports "Unable to communicate with device" when printing test page immediately afterwards</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Other"><span class="tocnumber">6</span> <span class="toctext">Other</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33">
+<a href="#Printer_.22Paused.22_or_.22Stopped.22_with_Status_.22Rendering_completed.22"><span class="tocnumber">6.1</span> <span class="toctext">Printer "Paused" or "Stopped" with Status "Rendering completed"</span></a>
+<ul>
+<li class="toclevel-3 tocsection-34"><a href="#Low_ink"><span class="tocnumber">6.1.1</span> <span class="toctext">Low ink</span></a></li>
+<li class="toclevel-3 tocsection-35"><a href="#Permission_issue"><span class="tocnumber">6.1.2</span> <span class="toctext">Permission issue</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-36"><a href="#Printing_fails_with_unauthorised_error"><span class="tocnumber">6.2</span> <span class="toctext">Printing fails with unauthorised error</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Unknown_supported_format:_application.2Fpostscript"><span class="tocnumber">6.3</span> <span class="toctext">Unknown supported format: application/postscript</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Print-Job_client-error-document-format-not-supported"><span class="tocnumber">6.4</span> <span class="toctext">Print-Job client-error-document-format-not-supported</span></a></li>
+<li class="toclevel-2 tocsection-39"><a href="#Unable_to_get_list_of_printer_drivers"><span class="tocnumber">6.5</span> <span class="toctext">Unable to get list of printer drivers</span></a></li>
+<li class="toclevel-2 tocsection-40"><a href="#lp:_Error_-_Scheduler_Not_Responding"><span class="tocnumber">6.6</span> <span class="toctext">lp: Error - Scheduler Not Responding</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#.22Using_invalid_Host.22_error_message"><span class="tocnumber">6.7</span> <span class="toctext">"Using invalid Host" error message</span></a></li>
+<li class="toclevel-2 tocsection-42"><a href="#Cannot_print_from_LibreOffice"><span class="tocnumber">6.8</span> <span class="toctext">Cannot print from LibreOffice</span></a></li>
+<li class="toclevel-2 tocsection-43"><a href="#Printer_output_shifted"><span class="tocnumber">6.9</span> <span class="toctext">Printer output shifted</span></a></li>
+<li class="toclevel-2 tocsection-44"><a href="#Printer_becomes_stuck_after_a_problem"><span class="tocnumber">6.10</span> <span class="toctext">Printer becomes stuck after a problem</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<p>The best way to get printing working is to set 'LogLevel' in <code>/etc/cups/cupsd.conf</code> to:
+</p>
+<pre>LogLevel debug
+</pre>
+<p>And then viewing the output from <code>/var/log/cups/error_log</code> like this:
+</p>
+<pre># tail -n 100 -f /var/log/cups/error_log
+</pre>
+<p>The characters at the left of the output stand for:
+</p>
+<ul>
+<li>D=Debug</li>
+<li>E=Error</li>
+<li>I=Information</li>
+<li>And so on</li>
+</ul>
+<p>These files may also prove useful:
+</p>
+<ul>
+<li>
+<code>/var/log/cups/page_log</code> -  Echoes a new entry each time a print is successful</li>
+<li>
+<code>/var/log/cups/access_log</code> - Lists all cupsd http1.1 server activity</li>
+</ul>
+<p>Of course, it is important to know how CUPS works if wanting to solve related issues:
+</p>
+<ol>
+<li> An application sends a .ps file (PostScript, a script language that details how the page will look) to CUPS when 'print' has been selected (this is the case with most programs).</li>
+<li> CUPS then looks at the printer's PPD file (printer description file) and figures out what filters it needs to use to convert the .ps file to a language that the printer understands (like PJL, PCL), usually GhostScript.</li>
+<li> GhostScript takes the input and figures out which filters it should use, then applies them and converts the .ps file to a format understood by the printer.</li>
+<li> Then it is sent to the back-end. For example, if the printer is connected to a USB port, it uses the USB back-end.</li>
+</ol>
+<p>Print a document and watch <code>error_log</code> to get a more detailed and correct image of the printing process.
+</p>
+<h2><span class="mw-headline" id="Problems_resulting_from_upgrades">Problems resulting from upgrades</span></h2>
+<p><i>Issues that appeared after CUPS and related program packages underwent a version increment</i>
+</p>
+<h3><span class="mw-headline" id="CUPS_stops_working">CUPS stops working</span></h3>
+<p>The chances are that a new configuration file is needed for the new version to work properly. Messages such as "404 - page not found" may result from trying to manage CUPS via localhost:631, for example.
+</p>
+<p>To use the new configuration, copy <code>/etc/cups/cupsd.conf.default</code> to <code>/etc/cups/cupsd.conf</code> (backup the old configuration if needed) and restart CUPS to employ the new settings.
+</p>
+<h3><span class="mw-headline" id="All_jobs_are_.22stopped.22">All jobs are "stopped"</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This seems a rather brute-force way of fixing this; maybe the printer is simply disabled? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>If all jobs sent to the printer become "stopped", delete the printer and add it again.
+Using the <a rel="nofollow" class="external text" href="http://localhost:631">CUPS web interface</a>, go to Printers &gt; Delete Printer.
+</p>
+<p>To check the printer's settings go to <i>Printers</i>, then <i>Modify Printer</i>. Copy down the information displayed, click 'Modify Printer' to proceed to the next page(s), and so on.
+</p>
+<h3><span class="mw-headline" id="All_jobs_are_.22The_printer_is_not_responding.22">All jobs are "The printer is not responding"</span></h3>
+<p>On networked printers, you should check that the name that CUPS uses as its connection URI resolves to the printer's IP via DNS, e.g.
+If your printer's connection looks like this:
+</p>
+<pre>lpd://BRN_020554/BINARY_P1
+</pre>
+<p>then the hostname 'BRN_020554' needs to resolve to the printer's IP from the server running CUPS
+</p>
+<h3><span class="mw-headline" id="The_PPD_version_is_not_compatible_with_gutenprint">The PPD version is not compatible with gutenprint</span></h3>
+<p>Run:
+</p>
+<pre># /usr/bin/cups-genppdupdate
+</pre>
+<p>And restart CUPS (as pointed out in gutenprint's post-install message)
+</p>
+<h3><span class="mw-headline" id="Printers_are_not_present_in_the_print_dialog_for_GTK3_applications">Printers are not present in the print dialog for GTK3 applications</span></h3>
+<p>A recent upgrade of GTK3 (3.22) requires the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gtk3-print-backends">gtk3-print-backends</a></span> package for printers to be listed in GTK3 print dialogs.
+This stops printing from applications like <a href="../../en/GNOME/Gedit.html" title="Gedit" class="mw-redirect">gedit</a> and <a href="../../en/Firefox.html" title="Firefox">Firefox</a>, but printers still appear in the CUPS web interface and lpstat, and you can print from the command line and GTK2 applications like GIMP.
+</p>
+<h2><span class="mw-headline" id="Networking_issues">Networking issues</span></h2>
+<h3><span class="mw-headline" id="Unable_to_locate_printer">Unable to locate printer</span></h3>
+<p>Even if CUPS can detect networked printers, you may still end up with an "Unable to locate printer" error when trying to print something. The solution to this problem is to enable Avahi's <a href="../../en/Avahi.html#Hostname_resolution" title="Avahi">.local hostname resolution</a>. See <a href="../../en/CUPS.html#Local_Network" title="CUPS">CUPS#Local Network</a> for details.
+</p>
+<h3><span class="mw-headline" id="Old_CUPS_server">Old CUPS server</span></h3>
+<p>As of CUPS version 1.6, the client defaults to IPP 2.0. If the server uses CUPS &lt;= 1.5 / IPP &lt;= 1.1, the client does not downgrade the protocol automatically and thus cannot communicate with the server. A workaround is to append the <code>version=1.1</code> option documented at <a rel="nofollow" class="external autonumber" href="https://www.cups.org/doc/network.html#TABLE2">[1]</a> to the URL.
+</p>
+<h3><span class="mw-headline" id="CUPS_identifies_printer_but_cannot_connect_to_it">CUPS identifies printer but cannot connect to it</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> No workaround or origin provided (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>Enable debug logging. If you see <code>Executing backend "/usr/lib/cups/backend/dnssd"...</code> over and over switch from dnssd to socket in the printer configuration.
+</p>
+<p>Example: <code>socket://192.168.11.6:9100</code>. The port number can be confirmed via <a href="../../en/Nmap.html" title="Nmap">nmap</a> or <code>telnet <i>your-printer-ip</i> 9100</code>.
+</p>
+<h2><span class="mw-headline" id="USB_printers">USB printers</span></h2>
+<h3><span class="mw-headline" id="Conflict_with_SANE">Conflict with SANE</span></h3>
+<p>If you are also running <a href="../../en/SANE.html" title="SANE">SANE</a>, it's possible that it is conflicting with CUPS. To fix this create a <a href="../../en/Udev.html" title="Udev">Udev</a> rule marking the device as matched by libsane:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/99-printer.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ATTRS{idVendor}=="<i>vendor id</i>", ATTRS{idProduct}=="<i>product id</i>", MODE="0664", GROUP="lp", ENV{libsane_matched}="yes"</pre>
+<h3><span class="mw-headline" id="Conflict_with_usblp">Conflict with usblp</span></h3>
+<p>USB printers can be accessed using two methods: The usblp kernel module and libusb. The former is the classic way. It is simple: data is sent to the printer by writing it to a device file as a simple serial data stream. Reading the same device file allows bi-di access, at least for things like reading out ink levels, status, or printer capability information (PJL). It works very well for simple printers, but for multi-function devices (printer/scanner) it is not suitable and manufacturers like HP supply their own backends. Source: <a rel="nofollow" class="external text" href="http://lists.linuxfoundation.org/pipermail/printing-architecture/2012/002412.html">here</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>As of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cups">cups</a></span> version 1.6.0, it should no longer be necessary to blacklist the <code>usblp</code> kernel module.
+If you find out this is the only way to fix a remaining issue please report this upstream to the CUPS bug tracker and maybe also get in contact with Till Kamppeter (Debian CUPS maintainer). See <a rel="nofollow" class="external text" href="http://cups.org/str.php?L4128">upstream bug</a> for more info.</div>
+<p>If you have problems getting your USB printer to work, you can try <a href="../../en/Kernel_modules.html#Blacklisting" title="Blacklisting" class="mw-redirect">blacklisting</a> the <code>usblp</code> <a href="../../en/Kernel_modules.html" title="Kernel module" class="mw-redirect">kernel module</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/blacklistusblp.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+blacklist usblp
+</pre>
+<p>Custom kernel users may need to manually load the <code>usbcore</code> <a href="../../en/Kernel_modules.html" title="Kernel module" class="mw-redirect">kernel module</a> before proceeding.
+</p>
+<p>Once the modules are installed, plug in the printer and check if the kernel detected it by running the following:
+</p>
+<pre># journalctl -e
+</pre>
+<p>or
+</p>
+<pre># dmesg
+</pre>
+<p>If you are using <code>usblp</code>, the output should indicate that the printer has been detected like so:
+</p>
+<pre>Feb 19 20:17:11 kernel: printer.c: usblp0: USB Bidirectional
+printer dev 2 if 0 alt 0 proto 2 vid 0x04E8 pid 0x300E
+Feb 19 20:17:11 kernel: usb.c: usblp driver claimed interface cfef3920
+Feb 19 20:17:11 kernel: printer.c: v0.13: USB Printer Device Class driver
+</pre>
+<p>If you blacklisted <code>usblp</code>, you will see something like:
+</p>
+<pre>usb 3-2: new full speed USB device using uhci_hcd and address 3
+usb 3-2: configuration #1 chosen from 1 choice
+</pre>
+<h2><span class="mw-headline" id="HP_issues">HP issues</span></h2>
+<p>See also <a href="../../en/CUPS/Printer-specific_problems.html#HP" title="CUPS/Printer-specific problems">CUPS/Printer-specific problems#HP</a>.
+</p>
+<h3><span class="mw-headline" id="CUPS:_.22.2Fusr.2Flib.2Fcups.2Fbackend.2Fhp_failed.22">CUPS: "/usr/lib/cups/backend/hp failed"</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Backend failures can be caused by many issues, and <a href="../../en/Avahi.html" title="Avahi">Avahi</a> should not be required (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>Make sure dbus is installed and running. If the error persists, try starting avahi-daemon.
+</p>
+<p>Try adding the printer as a Network Printer using the http:// protocol.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There might need to set permissions issues right.</div>
+<h3><span class="mw-headline" id="CUPS:_Job_is_shown_as_complete_but_the_printer_does_nothing">CUPS: Job is shown as complete but the printer does nothing</span></h3>
+<p>This happens on HP printers when you select the (old) hpijs driver (e.g. the Deskjet D1600 series). Use the hpcups driver instead.
+</p>
+<p>Some HP printers require their firmware to be downloaded from the computer every time the printer is switched on. If there is an issue with udev (or equivalent) and the firmware download rule is never fired, you may experience this issue.
+As a workaround, you can manually download the firmware to the printer. Ensure the printer is plugged in and switched on, then run
+</p>
+<pre>hp-firmware -n
+</pre>
+<h3><span class="mw-headline" id="CUPS:_.27.22foomatic-rip.22_not_available.2Fstopped_with_status_3.27">CUPS: '"foomatic-rip" not available/stopped with status 3'</span></h3>
+<p>If receiving any of the following error messages in <code>/var/log/cups/error_log</code> while using a HP printer, with jobs appearing to be processed while they all end up not being completed with their status set to 'stopped':
+</p>
+<pre>Filter "foomatic-rip" for printer <i>printer_name</i> not available: No such file or director
+</pre>
+<p>or:
+</p>
+<pre>PID <i>pid</i> (/usr/lib/cups/filter/foomatic-rip) stopped with status 3!
+</pre>
+<p>make sure <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hplip">hplip</a></span> has been <a href="../../en/Help:Reading.html#Installation_of_packages" title="Installed" class="mw-redirect">installed</a>.
+</p>
+<h3><span class="mw-headline" id="CUPS:_.22Filter_failed.22">CUPS: "Filter failed"</span></h3>
+<h4><span class="mw-headline" id="Bad_permissions">Bad permissions</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <code>chmod 666</code> on a system device sounds dubious to say the least (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>Change the permissions of the printer USB port. Get the bus and device number from <code>lsusb</code>, then set the permission using:
+</p>
+ <pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"> lsusb </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ Bus &lt;BUSID&gt; Device &lt;DEVID&gt;: ID &lt;PRINTERID&gt;:&lt;VENDOR&gt; Hewlett-Packard DeskJet D1360</pre>
+<p>Then substitute the provided device information to the 
+</p>
+<pre># chmod 0666 /dev/bus/usb/&lt;BUSID&gt;/&lt;DEVID&gt;
+</pre>
+<p>To make the persistent permission change that will be triggered automatically each time the computer is rebooted, add the following line.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/10-local.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">SUBSYSTEM=="usb", ATTRS{idVendor}=="&lt;VENDOR&gt;", ATTRS{idProduct}=="&lt;PRINTERID&gt;", GROUP="lp", MODE:="666"</pre>
+<p>Each system may vary, so consult <a href="../../en/Udev.html#List_attributes_of_a_device" title="Udev">udev#List attributes of a device</a> wiki page.
+</p>
+<h4><span class="mw-headline" id="Avahi_not_enabled">Avahi not enabled</span></h4>
+<p><a href="../../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a>, and <a href="../../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>avahi-daemon</code> service.
+</p>
+<h4><span class="mw-headline" id="Out-of-date_plugin">Out-of-date plugin</span></h4>
+<p>This error can also indicate that the plugin is out of date (version is mismatched).
+If you have installed <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/hplip-plugin/">hplip-plugin</a></span><sup><small>AUR</small></sup>, you will need to update the package.
+</p>
+<h3><span class="mw-headline" id="CUPS:_prints_only_an_empty_and_an_error-message_page_on_HP_LaserJet">CUPS: prints only an empty and an error-message page on HP LaserJet</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The bug was reported in 2012; is this still an issue? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>There is a bug that causes CUPS to fail when printing images on HP LaserJet (in my case 3380). The bug has been reported and fixed by <a rel="nofollow" class="external text" href="https://bugs.launchpad.net/ubuntu/+source/cups-filters/+bug/998087">Ubuntu</a>.
+The first page is empty, the second page contains the following error message:
+</p>
+<pre> ERROR:
+ invalidaccess
+ OFFENDING COMMAND:
+ filter
+ STACK:
+ /SubFileDecode
+ endstream
+ ...
+</pre>
+<p>In order to fix the issue, run the following command as root:
+</p>
+<pre># lpadmin -p <i>printer</i> -o pdftops-renderer-default=pdftops
+</pre>
+<h3><span class="mw-headline" id="HPLIP_3.13:_Plugin_is_installed.2C_but_HP_Device_Manager_complains_it_is_not">HPLIP 3.13: Plugin is installed, but HP Device Manager complains it is not</span></h3>
+<p>The issue might have to do with the file permission change that had been made to <code>/var/lib/hp/hplip.state</code>. To correct the issue, a simple <code>chmod 644 /var/lib/hp/hplip.state</code> and <code>chmod 755 /var/lib/hp</code> should be sufficient. For further information, please read this <a rel="nofollow" class="external text" href="https://bugs.launchpad.net/hplip/+bug/1131596">link</a>.
+</p>
+<h3><span class="mw-headline" id="hp-toolbox:_.22Unable_to_communicate_with_device.22">hp-toolbox: "Unable to communicate with device"</span></h3>
+<pre># hp-toolbox
+# error: Unable to communicate with device (code=12): hp:/usb/<i>printer id</i>
+</pre>
+<h4><span class="mw-headline" id="Permission_problem">Permission problem</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Presumably, hp-toolbox tries to access /dev/usb/* or /dev/lp, so it needs to be in the <code>lp</code> group. But why <code>sys</code>? And I can't seem to reproduce this... (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:CUPS/Troubleshooting">Talk:CUPS/Troubleshooting#</a>)</div>
+</div>
+<p>It may be needed to add the user to the <code>lp</code> and <code>sys</code> <a href="../../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">groups</a>.
+</p>
+<h4><span class="mw-headline" id="Virtual_CDROM_printers">Virtual CDROM printers</span></h4>
+<p>This can also be caused by printers such as the P1102 that provide a virtual CD-ROM drive for MS Windows drivers. The lp dev appears and then disappears. In that case, try the <b>usb-modeswitch</b> and <b>usb-modeswitch-data</b> packages, that lets one switch off the "Smart Drive" (udev rules included in said packages).
+</p>
+<h4><span class="mw-headline" id="Networked_printers">Networked printers</span></h4>
+<p>This can also occur with network attached printers using dynamic hostnames if the <a href="../../en/Avahi.html" title="Avahi">avahi-daemon</a> is not running. Another possibility is that <i>hp-setup</i> failed to locate the printer because the IP address of the the printer changed due to DHCP. If this is the case, consider adding a DHCP reservation for the printer in the DHCP server's configuration.
+</p>
+<h3><span class="mw-headline" id="hp-setup_asks_to_specify_the_PPD_file_for_the_discovered_printer">hp-setup asks to specify the PPD file for the discovered printer</span></h3>
+<p>Install and start CUPS before running hp-setup.
+</p>
+<h3><span class="mw-headline" id="hp-setup:_.22Qt.2FPyQt_4_initialization_failed.22">hp-setup: "Qt/PyQt 4 initialization failed"</span></h3>
+<p><a href="../../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-pyqt4">python-pyqt4</a></span>, which is an optdepend of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hplip">hplip</a></span>. Alternatively, to run hp-setup with the command line interface, use the <code>-i</code> flag.
+</p>
+<h3><span class="mw-headline" id="hp-setup:_finds_the_printer_automatically_but_reports_.22Unable_to_communicate_with_device.22_when_printing_test_page_immediately_afterwards">hp-setup: finds the printer automatically but reports "Unable to communicate with device" when printing test page immediately afterwards</span></h3>
+<p>This at least happens to hplip 3.13.5-2 for HP Officejet 6500A through local network connection. To solve the problem, specify the IP address of the HP printer for hp-setup to locate the printer.
+</p>
+<h2><span class="mw-headline" id="Other">Other</span></h2>
+<h3><span class="mw-headline" id="Printer_.22Paused.22_or_.22Stopped.22_with_Status_.22Rendering_completed.22">Printer "Paused" or "Stopped" with Status "Rendering completed"</span></h3>
+<h4><span class="mw-headline" id="Low_ink">Low ink</span></h4>
+<p>When low on ink, some printers will get stuck in "Rendering completed" status and, if it is a network printer, the printer may even become unreachable from CUPS' perspective despite being properly connected to the network. Replacing the low/depleted ink cartridge(s) in this setting will return the printer to "Ready" status and, if it is a network printer, will make the printer available to CUPS again.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you use third-party ink cartridges, the ink levels reported by the printer may be inaccurate. If you use third-party ink and your printer used to work fine but is now getting stuck on "Rendering completed" status, replace the ink cartridges regardless of the reported ink levels before trying other fixes.</div>
+<h4><span class="mw-headline" id="Permission_issue">Permission issue</span></h4>
+<p>Prior to <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cups">cups</a></span> 2.0.0-2, if the group set in the <code>Group</code> directive is also listed in the <code>SystemGroup</code> directive in <code>/etc/cups/cups-files.conf</code>, <code>cupsd</code> will instead run any helper programs with a group of <code>nobody</code>. However, the helpers may need to write to printer devices, which are created with user <code>root</code> and group <code>lp</code>, and will be unable to if they are run with a group of <code>nobody</code>, causing the print queue to become "Paused" or "Stopped".
+</p>
+<p>To fix this, ensure that the the <code>Group</code> directive is set to <code>lp</code>, and the <code>SystemGroup</code> directive does not include <code>lp</code>.
+</p>
+<p>Fixed in Arch with <a rel="nofollow" class="external autonumber" href="https://git.archlinux.org/svntogit/packages.git/commit/trunk?h=packages/cups&amp;id=c20b22f4f996cb08b1aa856d4c8991e869459eb2">[2]</a>.
+</p>
+<h3><span class="mw-headline" id="Printing_fails_with_unauthorised_error">Printing fails with unauthorised error</span></h3>
+<p>If a remote printer requests authentication CUPS will automatically add an <code>AuthInfoRequired</code> directive to the printer in <code>/etc/cups/printers.conf</code>. However, some graphical applications (for instance, some versions of <a href="../../en/LibreOffice.html" title="LibreOffice">LibreOffice</a> <a rel="nofollow" class="external autonumber" href="https://bugs.documentfoundation.org/show_bug.cgi?id=53029">[3]</a>) have no way to prompt for credentials, so printing fails.
+To fix this include the required username and password in the URI.
+See <a rel="nofollow" class="external autonumber" href="https://bugs.launchpad.net/ubuntu/+source/cups/+bug/283811">[4]</a>, <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=61826">[5]</a>,
+</p>
+<h3><span class="mw-headline" id="Unknown_supported_format:_application.2Fpostscript">Unknown supported format: application/postscript</span></h3>
+<p>Comment the lines:
+</p>
+<pre>application/octet-stream        application/vnd.cups-raw        0      -
+</pre>
+<p>from <code>/etc/cups/mime.convs</code>, and:
+</p>
+<pre>application/octet-stream
+</pre>
+<p>in <code>/etc/cups/mime.types</code>.
+</p>
+<h3><span class="mw-headline" id="Print-Job_client-error-document-format-not-supported">Print-Job client-error-document-format-not-supported</span></h3>
+<p>Try installing the foomatic packages and use a foomatic driver.
+</p>
+<h3><span class="mw-headline" id="Unable_to_get_list_of_printer_drivers">Unable to get list of printer drivers</span></h3>
+<p>(Also applicable to error "-1 not supported!")
+</p>
+<p>Try to remove Foomatic drivers or refer to <a href="../../en/CUPS/Printer-specific_problems.html#HPLIP_Driver" title="CUPS/Printer-specific problems">CUPS/Printer-specific problems#HPLIP Driver</a> for a workaround.
+</p>
+<h3><span class="mw-headline" id="lp:_Error_-_Scheduler_Not_Responding">lp: Error - Scheduler Not Responding</span></h3>
+<p>If you get this error, ensure <a href="../../en/CUPS.html" title="CUPS">CUPS</a> is running, the environmental variable <code>CUPS_SERVER</code> is unset, and that <code>/etc/cups/client.conf</code> is correct.
+</p>
+<h3><span class="mw-headline" id=".22Using_invalid_Host.22_error_message">"Using invalid Host" error message</span></h3>
+<p>Try adding <code>ServerAlias *</code> into <code>/etc/cups/cupsd.conf</code>.
+</p>
+<h3><span class="mw-headline" id="Cannot_print_from_LibreOffice">Cannot print from LibreOffice</span></h3>
+<p>If you can print a test page from the <a href="../../en/CUPS.html" title="CUPS">CUPS</a> web interface, but not from <a href="../../en/LibreOffice.html" title="LibreOffice">LibreOffice</a>, try to <a href="../../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=a2ps">a2ps</a></span> package.
+</p>
+<h3><span class="mw-headline" id="Printer_output_shifted">Printer output shifted</span></h3>
+<p>This seems to be caused by the wrong page size being set in <a href="../../en/CUPS.html" title="CUPS">CUPS</a>.
+</p>
+<h3><span class="mw-headline" id="Printer_becomes_stuck_after_a_problem">Printer becomes stuck after a problem</span></h3>
+<p>When an issue arises during printing, the printer in CUPS may become unresponsive. <code>lpq</code> reports that the printer <code>is not ready</code>. It can be reactivated using <code>cupsenable</code>. To automatically have CUPS reactivate the printer, change <a rel="nofollow" class="external text" href="https://www.cups.org/documentation.php/doc-1.6/ref-printers-conf.html#ErrorPolicy">ErrorPolicy</a> from the default <code>stop-printer</code> to <code>retry-current-job</code>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Printers.html" title="Category:Printers">Printers</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=CUPS/Troubleshooting&amp;oldid=454799">https://wiki.archlinux.org/index.php?title=CUPS/Troubleshooting&amp;oldid=454799</a>"</li>
+					<li id="lastmod"> This page was last modified on 23 October 2016, at 03:25.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

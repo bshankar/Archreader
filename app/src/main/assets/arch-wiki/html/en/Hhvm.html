@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Hhvm - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Hhvm skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Hhvm</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-document-new.png" class="image"><img alt="Tango-document-new.png" src="../File:Tango-document-new.png" width="48" height="48"></a><b>This article is a stub.</b><a href="../File:Tango-document-new.png" class="image"><img alt="Tango-document-new.png" src="../File:Tango-document-new.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> This document is a stub, please help to extend it. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hhvm">Talk:Hhvm#</a>)</div>
+</div>
+<p>HHVM, as authors declare, is an open-source virtual machine designed for executing programs written in Hack and PHP. HHVM uses a just-in-time (JIT) compilation approach to achieve superior performance while maintaining the development flexibility that PHP provides.
+</p>
+<p>HHVM runs much of the world’s existing PHP. Developers and hosts are adopting HHVM. We are aware of minor incompatibilities (please open issues when you find them), but we can run the top 20 Github PHP frameworks out of the box. The HHVM team, along with many wonderful community members, has made it a stated, high priority goal to run all existing PHP code existing out in the wild.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Running"><span class="tocnumber">2</span> <span class="toctext">Running</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Making_it_work_with_a_web_server"><span class="tocnumber">3</span> <span class="toctext">Making it work with a web server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Nginx"><span class="tocnumber">3.1</span> <span class="toctext">Nginx</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Lighttpd"><span class="tocnumber">3.2</span> <span class="toctext">Lighttpd</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/hhvm-git/">hhvm-git</a></span><sup><small>AUR</small></sup> in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h2><span class="mw-headline" id="Running">Running</span></h2>
+<p>To enable the HHVM service by default at start-up, run:
+</p>
+<pre># systemctl enable hhvm
+</pre>
+<p>To start the HHVM service, run:
+</p>
+<pre># systemctl start hhvm
+</pre>
+<p>With default configuration, HHVM serves fastcgi at localhost port 9000.
+</p>
+<h2><span class="mw-headline" id="Making_it_work_with_a_web_server">Making it work with a web server</span></h2>
+<h3><span class="mw-headline" id="Nginx">Nginx</span></h3>
+<p>Edit <code>/etc/nginx/nginx.conf</code> to serve <code>.php</code> files through HHVM via fastcgi:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+..
+location ~ \.php$ {
+   fastcgi_pass   127.0.0.1:9000;
+   fastcgi_index  index.php;
+   include        fastcgi.conf;
+}
+..
+</pre>
+<h3><span class="mw-headline" id="Lighttpd">Lighttpd</span></h3>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/lighttpd/lighttpd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+..
+fastcgi.server = (
+  ".php" =&gt; (
+     "localhost" =&gt; (
+       "host" =&gt; "127.0.0.1",
+       "port" =&gt; "9000",
+       "broken-scriptfilename" =&gt; "enable",
+    )
+  )
+)
+..
+</pre>
+<p>Restart <code>lighttpd.service</code> to apply any changes.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Programming_languages.html" title="Category:Programming languages">Programming languages</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_flagged_with_Template:Stub.html" title="Category:Pages flagged with Template:Stub">Pages flagged with Template:Stub</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

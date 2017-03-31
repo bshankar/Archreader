@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>dnsmasq - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dnsmasq skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">dnsmasq</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+<a rel="nofollow" class="external text" href="http://www.thekelleys.org.uk/dnsmasq/doc.html">dnsmasq</a> provides services as a DNS cacher and a DHCP server.  As a Domain Name Server (DNS) it can cache DNS queries to improve connection speeds to previously visited sites, and as a DHCP server dnsmasq can be used to provide internal IP addresses and routes to computers on a LAN.  Either or both of these services can be implemented.  dnsmasq is considered to be lightweight and easy to configure; it is designed for personal computer use or for use on a network with less than 50 computers. It also comes with a <a href="../en/PXE.html" title="PXE">PXE</a> server.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#DNS_cache_setup"><span class="tocnumber">3</span> <span class="toctext">DNS cache setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4">
+<a href="#DNS_addresses_file"><span class="tocnumber">3.1</span> <span class="toctext">DNS addresses file</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5">
+<a href="#resolv.conf"><span class="tocnumber">3.1.1</span> <span class="toctext">resolv.conf</span></a>
+<ul>
+<li class="toclevel-4 tocsection-6"><a href="#More_than_three_nameservers"><span class="tocnumber">3.1.1.1</span> <span class="toctext">More than three nameservers</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-7"><a href="#dhcpcd"><span class="tocnumber">3.1.2</span> <span class="toctext">dhcpcd</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#dhclient"><span class="tocnumber">3.1.3</span> <span class="toctext">dhclient</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9">
+<a href="#NetworkManager"><span class="tocnumber">3.2</span> <span class="toctext">NetworkManager</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Custom_configuration"><span class="tocnumber">3.2.1</span> <span class="toctext">Custom configuration</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#IPv6"><span class="tocnumber">3.2.2</span> <span class="toctext">IPv6</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Other_methods"><span class="tocnumber">3.2.3</span> <span class="toctext">Other methods</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13"><a href="#Test"><span class="tocnumber">3.3</span> <span class="toctext">Test</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#DHCP_server_setup"><span class="tocnumber">4</span> <span class="toctext">DHCP server setup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#Test_2"><span class="tocnumber">4.1</span> <span class="toctext">Test</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16"><a href="#TFTP_server_setup"><span class="tocnumber">5</span> <span class="toctext">TFTP server setup</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#PXE_setup"><span class="tocnumber">6</span> <span class="toctext">PXE setup</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#Start_the_daemon"><span class="tocnumber">7</span> <span class="toctext">Start the daemon</span></a></li>
+<li class="toclevel-1 tocsection-19">
+<a href="#Tips_and_tricks"><span class="tocnumber">8</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#Prevent_OpenDNS_redirecting_Google_queries"><span class="tocnumber">8.1</span> <span class="toctext">Prevent OpenDNS redirecting Google queries</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#View_leases"><span class="tocnumber">8.2</span> <span class="toctext">View leases</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Adding_a_custom_domain"><span class="tocnumber">8.3</span> <span class="toctext">Adding a custom domain</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Override_addresses"><span class="tocnumber">8.4</span> <span class="toctext">Override addresses</span></a></li>
+<li class="toclevel-2 tocsection-24">
+<a href="#More_than_one_instance"><span class="tocnumber">8.5</span> <span class="toctext">More than one instance</span></a>
+<ul>
+<li class="toclevel-3 tocsection-25"><a href="#Static"><span class="tocnumber">8.5.1</span> <span class="toctext">Static</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#Dynamic"><span class="tocnumber">8.5.2</span> <span class="toctext">Dynamic</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-27"><a href="#See_also"><span class="tocnumber">9</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>To configure dnsmasq, you need to edit <code>/etc/dnsmasq.conf</code>. The file contains extensive comments explaining its options. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>dnsmasq by default enables its DNS server. If you do not require it, you need to explicitly disable it by setting DNS port to <code>0</code>:
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">port=0</pre>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To check configuration file(s) syntax, execute:
+<pre>$ dnsmasq --test
+</pre>
+</div>
+<h2><span class="mw-headline" id="DNS_cache_setup">DNS cache setup</span></h2>
+<p>To set up dnsmasq as a DNS caching daemon on a single computer edit <code>/etc/dnsmasq.conf</code> and uncomment the <code>listen-address</code> directive, adding in the localhost IP address:
+</p>
+<pre>listen-address=127.0.0.1
+</pre>
+<p>To use this computer to listen on its LAN IP address for other computers on the network:
+</p>
+<pre>listen-address=192.168.1.1    # Example IP
+</pre>
+<p>It is recommended that you use a static LAN IP in this case.
+</p>
+<p>Multiple ip address settings:
+</p>
+<pre>listen-address=127.0.0.1,192.168.1.1 
+</pre>
+<h3><span class="mw-headline" id="DNS_addresses_file">DNS addresses file</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Resolv.conf.html" title="Resolv.conf">resolv.conf</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Same topic. Also note that most of this can also be done natively in <code>/etc/resolvconf.conf</code> using the <code>name_servers</code> and <code>name_servers_append</code> options. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dnsmasq">Talk:Dnsmasq#</a>)</div>
+</div>
+<p>After configuring dnsmasq, the DHCP client will need to prepend the localhost address to the known DNS addresses in <code>/etc/resolv.conf</code>.  This causes all queries to be sent to dnsmasq before trying to resolve them with an external DNS.  After the DHCP client is configured, the network will need to be restarted for changes to take effect.
+</p>
+<h4><span class="mw-headline" id="resolv.conf">resolv.conf</span></h4>
+<p>One option is a pure <code>resolv.conf</code> configuration. To do this, just make the first nameserver in <code>/etc/resolv.conf</code> point to localhost:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+nameserver 127.0.0.1
+# External nameservers
+...
+</pre>
+<p>Now DNS queries will be resolved first with dnsmasq, only checking external servers if dnsmasq cannot resolve the query. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dhcpcd">dhcpcd</a></span>, unfortunately, tends to overwrite <code>/etc/resolv.conf</code> by default, so if you use DHCP it is a good idea to protect <code>/etc/resolv.conf</code>. To do this, append <code>nohook resolv.conf</code> to the dhcpcd config file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dhcpcd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+nohook resolv.conf</pre>
+<p>It is also possible to write protect your resolv.conf:
+</p>
+<pre># chattr +i /etc/resolv.conf
+</pre>
+<h5><span class="mw-headline" id="More_than_three_nameservers">More than three nameservers</span></h5>
+<p>A limitation in the way Linux handles DNS queries is that there can only be a maximum of three nameservers used in <code>resolv.conf</code>. As a workaround, you can make localhost the only nameserver in <code>resolv.conf</code>, and then create a separate <code>resolv-file</code> for your external nameservers. First, create a new resolv file for dnsmasq:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/resolv.dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Google's nameservers, for example
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+</pre>
+<p>And then edit <code>/etc/dnsmasq.conf</code> to use your new resolv file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+resolv-file=/etc/resolv.dnsmasq.conf
+...
+</pre>
+<h4><span class="mw-headline" id="dhcpcd">dhcpcd</span></h4>
+<p><a href="../en/Dhcpcd.html" title="Dhcpcd">dhcpcd</a> has the ability to prepend or append nameservers to <code>/etc/resolv.conf</code> by creating (or editing) the <code>/etc/resolv.conf.head</code> and <code>/etc/resolv.conf.tail</code> files respectively:
+</p>
+<pre>echo "nameserver 127.0.0.1" &gt; /etc/resolv.conf.head
+</pre>
+<h4><span class="mw-headline" id="dhclient">dhclient</span></h4>
+<p>For <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dhclient">dhclient</a></span>, uncomment in <code>/etc/dhclient.conf</code>:
+</p>
+<pre>prepend domain-name-servers 127.0.0.1;
+</pre>
+<h3><span class="mw-headline" id="NetworkManager">NetworkManager</span></h3>
+<p><a href="../en/NetworkManager.html" title="NetworkManager">NetworkManager</a> has a plugin to enable DNS using dnsmasq. The advantages of this setup is that DNS lookups will be cached, shortening resolve times, and DNS lookups of VPN hosts will be routed to the relevant VPN's DNS servers (especially useful if you are connected to more than one VPN).
+</p>
+<p>Make sure <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span> has been installed, but has been disabled.  Then, edit <code>/etc/NetworkManager/NetworkManager.conf</code> and change the <code>dns</code> in the <code>[main]</code> section:
+</p>
+ <pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/NetworkManager.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[main]
+...
+dns=dnsmasq
+</pre>
+<p>Now restart NetworkManager or reboot.  NetworkManager will automatically start dnsmasq and add 127.0.0.1 to <code>/etc/resolv.conf</code>.  The actual DNS servers can be found in <code>/run/NetworkManager/resolv.conf</code>.  You can verify dnsmasq is being used by doing the same DNS lookup twice with <code>$ dig example.com</code> that can be installed with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bind-tools">bind-tools</a></span> and verifying the server and query times.
+</p>
+<h4><span class="mw-headline" id="Custom_configuration">Custom configuration</span></h4>
+<p>Custom configurations can be created for <i>dnsmasq</i> by creating configuration files in <code>/etc/NetworkManager/dnsmasq.d/</code>. For example, to change the size of the DNS cache (which is stored in RAM):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/dnsmasq.d/cache.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">cache-size=1000</pre>
+<h4><span class="mw-headline" id="IPv6">IPv6</span></h4>
+<p>Enabling <code>dnsmasq</code> in NetworkManager may break IPv6-only DNS lookups (i.e. <code>dig -6 [hostname]</code>) which would otherwise work. In order to resolve this, creating the following file will configure <i>dnsmasq</i> to also listen to the IPv6 loopback:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/dnsmasq.d/ipv6_listen.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">listen-address=::1</pre>
+<p>In addition, <code>dnsmasq</code> also does not prioritize upstream IPv6 DNS. Unfortunately NetworkManager does not do this (<a rel="nofollow" class="external text" href="https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/936712">Ubuntu Bug</a>). A workaround would be to disable IPv4 DNS in the NetworkManager config, assuming one exists
+</p>
+<h4><span class="mw-headline" id="Other_methods">Other methods</span></h4>
+<p>Another option is in NetworkManagers' settings (usually by right-clicking the applet) and entering settings manually. Setting up will depending on the type of front-end used; the process usually involves right-clicking on the applet, editing (or creating) a profile, and then choosing DHCP type as 'Automatic (specify addresses).' The DNS addresses will need to be entered and are usually in this form: <code>127.0.0.1, DNS-server-one, ...</code>.
+</p>
+<h3><span class="mw-headline" id="Test">Test</span></h3>
+<p>To do a lookup speed test choose a website that has not been visited since dnsmasq has been started (<i>dig</i> is part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bind-tools">bind-tools</a></span> package):
+</p>
+<pre>$ dig archlinux.org | grep "Query time"
+</pre>
+<p>Running the command again will use the cached DNS IP and result in a faster lookup time if dnsmasq is setup correctly:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dig archlinux.org | grep "Query time"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+;; Query time: 18 msec
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dig archlinux.org | grep "Query time"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+;; Query time: 2 msec
+</pre>
+<h2><span class="mw-headline" id="DHCP_server_setup">DHCP server setup</span></h2>
+<p>By default dnsmasq has the DHCP functionality turned off, if you want to use it you must turn it on in (<code>/etc/dnsmasq.conf</code>).  Here are the important settings:
+</p>
+<pre>
+# Only listen to routers' LAN NIC.  Doing so opens up tcp/udp port 53 to
+# localhost and udp port 67 to world:
+interface=&lt;LAN-NIC&gt;
+
+# dnsmasq will open tcp/udp port 53 and udp port 67 to world to help with
+# dynamic interfaces (assigning dynamic ips). Dnsmasq will discard world
+# requests to them, but the paranoid might like to close them and let the 
+# kernel handle them:
+bind-interfaces
+
+# Dynamic range of IPs to make available to LAN pc
+dhcp-range=192.168.111.50,192.168.111.100,12h
+
+# If you’d like to have dnsmasq assign static IPs, bind the LAN computer's
+# NIC MAC address:
+dhcp-host=aa:bb:cc:dd:ee:ff,192.168.111.50
+</pre>
+<h3><span class="mw-headline" id="Test_2">Test</span></h3>
+<p>From a computer that is connected to the one with dnsmasq on it, configure it to use DHCP for automatic IP address assignment, then attempt to log into the network normally.
+</p>
+<h2><span class="mw-headline" id="TFTP_server_setup">TFTP server setup</span></h2>
+<p>Create a directory for TFTP root (e.g. <code>/srv/tftp</code>) to put transferable files in.
+</p>
+<p>To use dnsmasq's TFTP secure mode <a href="../en/File_permissions_and_attributes.html#Changing_ownership" title="Chown" class="mw-redirect">chown</a> TFTP root and all files in it to <code>dnsmasq</code> user.
+</p>
+<p>Enable TFTP in <code>dnsmasq.conf</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+enable-tftp
+tftp-root=/srv/tftp
+tftp-secure
+</pre>
+<h2><span class="mw-headline" id="PXE_setup">PXE setup</span></h2>
+<p>PXE requires DHCP and TFTP servers, both functions can be provided by dnsmasq.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>dnsmasq can add PXE booting options to a network with an already running DHCP server:
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/dnsmasq.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">interface=<i>enp0s0</i>
+bind-dynamic
+dhcp-range=<i>192.168.0.1</i>,proxy</pre>
+</div>
+<ol>
+<li> set up <a href="#TFTP_server_setup">TFTP server</a> and <a href="#DHCP_server_setup">DHCP server</a>
+</li>
+<li> copy and configure a PXE compatible bootloader (e.g. <a href="../en/Syslinux.html#Pxelinux" title="Syslinux">PXELINUX</a>) on TFTP root</li>
+<li> enable PXE in <code>/etc/dnsmasq.conf</code>:</li>
+</ol>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li>file paths are relative to TFTP root</li>
+<li>if the file has a <code>.0</code> suffix, you must exclude the suffix in <code>pxe-service</code> options</li>
+</ul>
+</div>
+<p>To simply send one file:
+</p>
+<pre>dhcp-boot=lpxelinux.0
+</pre>
+<p>To send a file depending on client architecture:
+</p>
+<pre>pxe-service=x86PC, "PXELINUX (BIOS)", "bios/lpxelinux"
+pxe-service=X86-64_EFI, "PXELINUX (EFI)", "efi64/syslinux.efi"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In case <code>pxe-service</code> does not work (especially for UEFI-based clients), combination of <code>dhcp-match</code> and <code>dhcp-boot</code> can be used. See <a rel="nofollow" class="external text" href="https://tools.ietf.org/html/rfc4578#section-2.1">RFC4578</a> for more <code>client-arch</code> numbers for use with dhcp boot protocol.</div>
+<pre>dhcp-match=set:efi-x86_64,option:client-arch,7
+dhcp-match=set:efi-x86_64,option:client-arch,9
+dhcp-match=set:efi-x86,option:client-arch,6
+dhcp-match=set:bios,option:client-arch,0
+dhcp-boot=tag:efi-x86_64,"efi64/syslinux.efi"
+dhcp-boot=tag:efi-x86,"efi32/syslinux.efi"
+dhcp-boot=tag:bios,"bios/lpxelinux.0"
+</pre>
+<p>The rest is up to the bootloader.
+</p>
+<h2><span class="mw-headline" id="Start_the_daemon">Start the daemon</span></h2>
+<p><a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">Start/enable</a> <code>dnsmasq.service</code>.
+</p>
+<p>To see if dnsmasq started properly, check the system's journal:
+</p>
+<pre>$ journalctl -u dnsmasq</pre>
+<p>The network will also need to be restarted so the DHCP client can create a new <code>/etc/resolv.conf</code>.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Prevent_OpenDNS_redirecting_Google_queries">Prevent OpenDNS redirecting Google queries</span></h3>
+<p>To prevent OpenDNS from redirecting all Google queries to their own search server, add to <code>/etc/dnsmasq.conf</code>:
+</p>
+<pre>server=/www.google.com/&lt;ISP DNS IP&gt;</pre>
+<h3><span class="mw-headline" id="View_leases">View leases</span></h3>
+<pre>$ cat /var/lib/misc/dnsmasq.leases</pre>
+<h3><span class="mw-headline" id="Adding_a_custom_domain">Adding a custom domain</span></h3>
+<p>It is possible to add a custom domain to hosts in your (local) network:
+</p>
+<pre>local=/home.lan/
+domain=home.lan
+</pre>
+<p>In this example it is possible to ping a host/device (e.g. defined in your hosts file) as <code>hostname.home.lan</code>.
+</p>
+<p>Uncomment <code>expand-hosts</code> to add the custom domain to hosts entries:
+</p>
+<pre>expand-hosts
+</pre>
+<p>Without this setting, you will have to add the domain to entries of /etc/hosts.
+</p>
+<h3><span class="mw-headline" id="Override_addresses">Override addresses</span></h3>
+<p>In some cases, such as when operating a captive portal, it can be useful to resolve specific domains names to a hard-coded set of addresses. This is done with the <code>address</code> config:
+</p>
+<pre>address=/example.com/1.2.3.4
+</pre>
+<p>Furthermore, it's possible to return a specific address for all domain names that are not answered from <code>/etc/hosts</code> or DHCP by using a special wildcard:
+</p>
+<pre>address=/#/1.2.3.4
+</pre>
+<h3><span class="mw-headline" id="More_than_one_instance">More than one instance</span></h3>
+<p>If we want two or more dnsmasq servers works per interface(s).
+</p>
+<h4><span class="mw-headline" id="Static">Static</span></h4>
+<p>To do this staticly, server per interface, use <code>interface</code> and <code>bind-interface</code> options. This enforce start second dnsmasq.
+</p>
+<h4><span class="mw-headline" id="Dynamic">Dynamic</span></h4>
+<p>In this case we can exclude per interface and bind any others:
+</p>
+<pre>except-interface=lo
+bind-dynamic
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This is default in libvirt.</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.g-loaded.eu/2010/09/18/caching-nameserver-using-dnsmasq/">Caching Nameserver using dnsmasq, and a few other tips and tricks.</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Domain_Name_System.html" title="Category:Domain Name System">Domain Name System</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

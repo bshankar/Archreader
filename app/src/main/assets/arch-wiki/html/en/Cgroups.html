@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Cgroups - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Cgroups skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Cgroups</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Linux_Containers.html" title="Linux Containers">Linux Containers</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Systemd-nspawn.html" title="Systemd-nspawn">systemd-nspawn</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Docker.html" title="Docker">Docker</a></li>
+</ul>
+</div>
+<p><b>cgroups</b> (aka <b>control groups</b>) is a Linux kernel feature to limit, police and account the resource usage for a set of processes. Compared to other approaches like the 'nice' command or <code>/etc/security/limits.conf</code>, cgroups are more flexible as they can operate on (sub)sets of processes (possibly with different system users).
+</p>
+<p>Control groups can be used in multiple ways:
+</p>
+<ul>
+<li> By accessing the <code>cgroup</code> filesystem directly.</li>
+<li> Using the <code>cgm</code> client (part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cgmanager">cgmanager</a></span> package).</li>
+<li> Via tools like <code>cgcreate</code>, <code>cgexec</code> and <code>cgclassify</code> (part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libcgroup/">libcgroup</a></span><sup><small>AUR</small></sup> package).</li>
+<li> the "rules engine daemon", to automatically move certain users/groups/commands to groups (<code>/etc/cgrules.conf</code> and <code>/usr/lib/systemd/system/cgconfig.service</code>) (part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libcgroup/">libcgroup</a></span><sup><small>AUR</small></sup> package).</li>
+<li> through other software such as <a href="../en/Linux_Containers.html" title="Linux Containers">Linux Containers</a> (LXC) virtualization, tools like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=playpen">playpen</a></span> or systemd.</li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing"><span class="tocnumber">1</span> <span class="toctext">Installing</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Managing_Resource_Groups_with_Systemd"><span class="tocnumber">2</span> <span class="toctext">Managing Resource Groups with Systemd</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Simple_usage"><span class="tocnumber">3</span> <span class="toctext">Simple usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Ad-hoc_groups"><span class="tocnumber">3.1</span> <span class="toctext">Ad-hoc groups</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Persistent_group_configuration"><span class="tocnumber">3.2</span> <span class="toctext">Persistent group configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Useful_examples"><span class="tocnumber">4</span> <span class="toctext">Useful examples</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Matlab"><span class="tocnumber">4.1</span> <span class="toctext">Matlab</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Documentation"><span class="tocnumber">5</span> <span class="toctext">Documentation</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installing">Installing</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> any of:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libcgroup/">libcgroup</a></span><sup><small>AUR</small></sup> - set of standalone tools (<code>cgcreate</code>, <code>cgclassify</code>, persistence via <code>cgconfig.conf</code>).</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cgmanager">cgmanager</a></span> - simple client (<code>cgm</code>) that communicates with its daemon (<code>cgmanager</code>) to manage cgroups.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span> - for controlling resources of a systemd service.</li>
+</ul>
+<p>After installation of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cgmanager">cgmanager</a></span> package, you need to <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>cgmanager.service</code> before its <code>cgm</code> client can be used.
+</p>
+<h2><span class="mw-headline" id="Managing_Resource_Groups_with_Systemd">Managing Resource Groups with Systemd</span></h2>
+<p>You can <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>cgconfig</code> service with systemd. This gives you the capability to track more easily any errors in <code>cgconfig.conf</code>.
+</p>
+<h2><span class="mw-headline" id="Simple_usage">Simple usage</span></h2>
+<h3><span class="mw-headline" id="Ad-hoc_groups">Ad-hoc groups</span></h3>
+<p>One of the powers of cgroups is that you can create "ad-hoc" groups on the fly. You can even grant the privileges to create custom groups to regular users. <code>groupname</code> is the cgroup name:
+</p>
+<pre># cgcreate -a <i>user</i> -g memory,cpu:<i>groupname</i>
+</pre>
+<p>Alternatively, using <code>cgmanager</code> with user ID `1000` and system group <i>root</i> (GID 0):
+</p>
+<pre># cgm create memory <i>groupname</i>
+# cgm chown  memory <i>groupname</i> <i>1000</i> 0
+# cgm create cpu    <i>groupname</i>
+# cgm chown  cpu    <i>groupname</i> <i>1000</i> 0
+# # the above only makes 'cgroup.procs' and 'tasks' writable
+# chown <i>user</i> /sys/fs/cgroup/{memory,cpu}/<i>groupname</i>/*
+</pre>
+<p>Now all the tunables in the group <code>groupname</code> are writable by your user:
+</p>
+<pre>$ ls -l /sys/fs/cgroup/memory/<i>groupname</i>
+total 0
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 cgroup.event_control
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 cgroup.procs
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 cpu.rt_period_us
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 cpu.rt_runtime_us
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 cpu.shares
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 notify_on_release
+-rwxrwxr-x 1 user root 0 Sep 25 00:39 tasks
+</pre>
+<p>Cgroups are hierarchical, so you can create as many subgroups as you like. If a normal user wants to run a <code>bash</code> shell under a new subgroup called <code>foo</code>:
+</p>
+<pre>$ cgcreate -g memory,cpu:<b>groupname/foo</b>
+$ <b>cgexec</b>    -g memory,cpu:groupname/foo <b>bash</b>
+</pre>
+<p>Likewise, for <code>cgmanager</code>:
+</p>
+<pre>$ cgm create memory <b>groupname/foo</b>
+$ cgm create cpu    <b>groupname/foo</b>
+$ bash
+$ cgm movepid memory groupname/foo $pid_of_bash
+$ cgm movepid cpu    groupname/foo $pid_of_bash
+</pre>
+<p>To make sure (only meaningful for legacy (v1) cgroups):
+</p>
+<pre>$ cat /proc/self/cgroup
+11:memory:/groupname/foo
+6:cpu:/groupname/foo
+</pre>
+<p>A new subdirectory was created for this group. To limit the memory usage of all processes in this group to 10 MB, run the following:
+</p>
+<pre>$ echo 10000000 &gt; /sys/fs/cgroup/memory/groupname/foo/memory.limit_in_bytes
+</pre>
+<p>Alternative invocation with <code>cgmanager</code>:
+</p>
+<pre>$ cgm setvalue memory groupname/foo memory.limit_in_bytes 10000000
+</pre>
+<p>Note that the memory limit applies to RAM use only -- once tasks hit this limit, they will begin to swap. But it won't affect the performance of other processes significantly.
+</p>
+<p>Similarly you can change the CPU priority ("shares") of this group. By default all groups have 1024 shares. A group with 100 shares will get a ~10% portion of the CPU time:
+</p>
+<pre>$ echo 100 &gt; /sys/fs/cgroup/cpu/groupname/foo/cpu.shares
+</pre>
+<p>You can find more tunables or statistics by listing the cgroup directory.
+</p>
+<p>You can also change the cgroup of already running processes. To move all 'bash' commands to this group:
+</p>
+<pre>$ pidof bash
+13244 13266
+$ <b>cgclassify</b> -g memory,cpu:groupname/foo `pidof bash`
+$ cat /proc/13244/cgroup
+11:memory:/groupname/foo
+6:cpu:/groupname/foo
+</pre>
+<h3><span class="mw-headline" id="Persistent_group_configuration">Persistent group configuration</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>when using <a href="../en/Systemd.html" title="Systemd">Systemd</a> &gt; = 205 to manage cgroups, you can ignore this file entirely.
+</div>
+<p>If you want your cgroups to be created at boot, you can define them in <code>/etc/cgconfig.conf</code> instead. For example, the "groupname" has a permission for <code>$USER</code> and <i>users</i> of group <code>$GROUP</code> to manage limits and add tasks. A  <i>subgroup</i> "groupname/foo" group definitions would look like this: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/cgconfig.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">group <b>groupname</b> {
+  perm {
+# who can manage limits
+    admin {
+      uid = <b>$USER</b>;
+      gid = <b>$GROUP</b>;
+    }
+# who can add tasks to this group
+    task {
+      uid = <b>$USER</b>;
+      gid = <b>$GROUP</b>;
+    }
+  }
+# create this group in cpu and memory controllers
+  cpu { }
+  memory { }
+}
+
+group <b>groupname/foo</b> {
+  cpu {
+    <b>cpu.shares</b> = 100;
+  }
+  memory {
+    <b>memory.limit_in_bytes</b> = 10000000;
+  }
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li>Comments should begin at the start of a line! The <b>#</b> character for comments must appear as the first character of a line. Else, <i>cgconfigparser</i> will have problem parsing it but will only report <code>cgroup change of group failed</code> as the error, unless you started <i>cgconfig</i> with <a href="../en/Systemd.html" title="Systemd">Systemd</a>
+</li>
+<li>The permissions section is optional.</li>
+<li>The <code>/sys/fs/cgroup/</code> hierarchy directory containing all <i>controllers</i> sub-directories is already created and mounted at boot as a virtual file system. This gives the ability to create a new group entry with the <code><i>$CONTROLLER-NAME { }</i></code> command. If for any reason you want to create and mount hierachies in another place, you will then need to write a second entry in <code>/etc/cgconfig.conf</code> following this way :</li>
+</ul>
+<pre> mount {    
+   cpuset = /your/path/<i>groupname</i>;
+}
+</pre>
+<p>This is equivalent to these shell commands:
+</p>
+<pre><code> 
+# mkdir /your/path/<i>groupname</i>
+# mount -t /your/path -o cpuset <i>groupname</i> /your/path/<i>groupname</i></code>
+</pre>
+</div>
+<h2><span class="mw-headline" id="Useful_examples">Useful examples</span></h2>
+<h3><span class="mw-headline" id="Matlab">Matlab</span></h3>
+<p>Matlab does not have any protection against taking all your machine's memory or CPU. Launching a large calculation can thus trash your system. You could put the following in <code>/etc/cgconfig.conf</code> to protect from this (where <code>$USER</code> is your username):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/cgconfig.conf </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Prevent Matlab from taking all memory
+group matlab {
+    perm {
+        admin {
+            uid = <i>$USER</i>;
+        }
+        task {
+            uid = <i>$USER</i>;
+        }
+    }
+
+    cpuset {
+        cpuset.mems="0";
+        cpuset.cpus="0-5";
+    }
+    memory {
+# 5 GiB limit
+        memory.limit_in_bytes = 5368709120;
+    }
+}</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Do not forget to change $USER to the actual username Matlab will be run by.</div>
+<p>This cgroup will bind Matlab to cores 0 to 5 (e.g., if you have have 8, Matlab will only see 6) and cap its memory usage to 5 GiB. The "cpu" resource constraint can also be defined to prevent CPU usage, but you may find the "cpuset" constrain to be sufficient.
+</p>
+<p>Launch matlab like this:
+</p>
+<pre>$ cgexec -g memory,cpuset:matlab /opt/MATLAB/2012b/bin/matlab -desktop
+</pre>
+<p>Make sure to use the right path to the executable.
+</p>
+<h2><span class="mw-headline" id="Documentation">Documentation</span></h2>
+<ul>
+<li> For information on controllers and what certain switches and tunables mean, refer to <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/cgroups/">kernel's  Documentation/cgroup</a> (or install linux-docs and see <code>/usr/src/linux/Documentation/cgroup</code>
+</li>
+<li> A detailed and complete Resource Management Guide can be found in the <a rel="nofollow" class="external text" href="http://docs.fedoraproject.org/en-US/Fedora/17/html-single/Resource_Management_Guide/index.html#sec-How_Control_Groups_Are_Organized">fedora project documentation</a>.</li>
+</ul>
+<p>For commands and configuration files, see relevant man pages, e.g. <code>man cgcreate</code> or <code>man cgrules.conf</code>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li>
+<li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

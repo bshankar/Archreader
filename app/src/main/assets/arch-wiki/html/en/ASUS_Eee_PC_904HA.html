@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ASUS Eee PC 904HA - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ASUS_Eee_PC_904HA skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ASUS Eee PC 904HA</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installing_Arch"><span class="tocnumber">1</span> <span class="toctext">Installing Arch</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Custom_Kernel"><span class="tocnumber">2</span> <span class="toctext">Custom Kernel</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Wifi"><span class="tocnumber">2.1</span> <span class="toctext">Wifi</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Ethernet"><span class="tocnumber">2.2</span> <span class="toctext">Ethernet</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Sound.2FMicrophone"><span class="tocnumber">2.3</span> <span class="toctext">Sound/Microphone</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Video.2FLCD_backlight"><span class="tocnumber">2.4</span> <span class="toctext">Video/LCD backlight</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Webcam"><span class="tocnumber">2.5</span> <span class="toctext">Webcam</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Multimedia_Keys.2FHotkeys"><span class="tocnumber">2.6</span> <span class="toctext">Multimedia Keys/Hotkeys</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Notes"><span class="tocnumber">2.7</span> <span class="toctext">Notes</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h1><span class="mw-headline" id="Installing_Arch">Installing Arch</span></h1>
+<pre>With installation version 2008.06, wifi will not work after installing, and ethernet may not either. To be safe for now, you may want to download the Core installation image and transfer the latest kernel sources to your Eee through some means after installing Arch - reuse your USB stick. You could then proceed to compiling a custom kernel following the instructions on this page.
+</pre>
+<h1><span class="mw-headline" id="Custom_Kernel">Custom Kernel</span></h1>
+<p>Everything one needs to run a fully functional Eee 904HA is in the vanilla 2.6.28 kernel. You need no patches or any other fancy thing. The following will outline the bare essentials one would need in building a custom kernel. If you do not want to build most of this stuff as modules, don't, but module names are listed regardless for just-in-case rc.conf convenience.
+</p>
+<p>Several things require that you have the following enabled in the menuconfig:
+</p>
+<pre>General setup ---&gt;
+     [*] Prompt for development and/or incomplete code/drivers
+</pre>
+<h2><span class="mw-headline" id="Wifi">Wifi</span></h2>
+<pre>[*] Networking Support ---&gt;
+     [*] Wireless ---&gt;
+          [*] Generic IEEE 802.11 Networking Stack (mac80211)
+     &lt;*&gt; RF switch subsystem support ---&gt;
+          &lt;*&gt; Input layer to RF switch connector
+...
+Device drivers ---&gt;
+     [*] Networking device support ---&gt;
+          Wireless LAN ---&gt;
+               [*] Wireless LAN (IEEE 802.11)
+                    &lt;M&gt; Atheros 5xxx wireless cards support
+</pre>
+<p>Wifi card kernel module name: ath5k
+</p>
+<p>Your Wifi toggle hotkey will not work unless you have the above RF switch support.
+</p>
+<h2><span class="mw-headline" id="Ethernet">Ethernet</span></h2>
+<pre>Device drivers ---&gt;
+     [*] Networking device support ---&gt;
+          [*] Ethernet (1000 MBit) ---&gt;
+               &lt;M&gt; Atheros L1E Gigabit Ethernet support
+</pre>
+<p>Kernel module name: atl1e
+</p>
+<h2><span class="mw-headline" id="Sound.2FMicrophone">Sound/Microphone</span></h2>
+<pre>&lt;M&gt; Sound card support ---&gt;
+     &lt;M&gt; Advanced Linux Sound Architecture ---&gt;
+          [*] PCI sound devices ---&gt;
+               &lt;M&gt; Intel HD Audio
+                    [*] Build Realtek HD-audio codec support
+                    [ ] Aggressive power-saving on HD-audio
+                    (0)    Default time-out for HD-audio power-save mode
+</pre>
+<p>Kernel module name: snd-hda-intel
+</p>
+<p>If your Eee isn't regularly playing any sounds or music, you may be interested in enabling the Aggressive power-saving to power your sound off.
+</p>
+<h2><span class="mw-headline" id="Video.2FLCD_backlight">Video/LCD backlight</span></h2>
+<pre>Device Drivers ---&gt;
+     Graphics Support ---&gt;
+          &lt;M&gt; /dev/agpgart (AGP Support) ---&gt;
+               &lt;M&gt; Intel 440LX/BX/GX, I8xx and E7x05 chipset support
+          &lt;M&gt; Direct Rendering Manager (XFree86 4.1.0 and higher DRI support) ---&gt;
+               &lt;M&gt; Intel 830M, 845G, 852GM, 855GM, 865G
+               &lt;M&gt;    i915 driver
+          [*] Backlight &amp; LCD device support ---&gt;
+               &lt;*&gt; Lowlevel LCD controls
+               &lt;*&gt; Lowlevel Backlight controls
+</pre>
+<p>Video driver kernel module name: intel-agp
+</p>
+<p>Everything works out of the box when using this video driver. Xorg works fine without a xorg.conf, including DRI.
+</p>
+<h2><span class="mw-headline" id="Webcam">Webcam</span></h2>
+<pre>Device Drivers ---&gt;
+     Multimedia Devices ---&gt;
+          &lt;M&gt; Video For Linux
+          [*] Enable Video For Linux API 1 compatible Layer
+          [*] Video capture adapters ---&gt;
+               [*] Autoselect pertinent encoders/decoders and other helper chips
+               [*] V4L USB devices ---&gt;
+                    &lt;M&gt; USB Video Class (UVC)
+                    [*]    UVC input events device support
+</pre>
+<p>Kernel module name: uvcvideo
+</p>
+<h2><span class="mw-headline" id="Multimedia_Keys.2FHotkeys">Multimedia Keys/Hotkeys</span></h2>
+<p>The following driver will allow most (but not all at the time of writing, kernel 2.6.28) of your Fn hotkeys to work properly, including F8 through F12. Note that the LCD backlight buttons work without this driver. Maybe the Wifi toggle does too.
+</p>
+<pre>Device Drivers ---&gt;
+         Misc devices ---&gt;
+              &lt;M&gt; Eee PC Hotkey Driver
+     &lt;M&gt; Hardware Monitoring support ---&gt;
+</pre>
+<p>Yes, hardware monitoring support is required (module: hwmon - but would be loaded automatically when loading the hotkey module of course), as is the RF switch support from the Wifi section.
+</p>
+<p>Hotkey driver kernel module name: eeepc-laptop
+</p>
+<h2><span class="mw-headline" id="Notes">Notes</span></h2>
+<p>Do not enable any of the "ASUS Laptop" options you might find in ACPI or Misc devices menus (unless they're Eee specific, of course.) They do not pertain to Eees and will fail to load if built as modules and manually attempted.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:ASUS.html" title="Category:ASUS">ASUS</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

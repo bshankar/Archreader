@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Gitweb - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Gitweb skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Gitweb</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Gitweb is the default web interface provided with <a href="../en/Git.html" title="Git">git</a> itself and is the basis for other git scripts like <a href="../en/Cgit.html" title="Cgit">cgit</a>, <a href="../en/Gitosis.html" title="Gitosis">gitosis</a> and others.
+</p>
+<p>Gitweb actually supports fcgi natively, so you do not need to wrap it as a cgi script. <a rel="nofollow" class="external autonumber" href="http://repo.or.cz/w/alt-git.git?a=blob_plain;f=gitweb/INSTALL">[1]</a><a rel="nofollow" class="external autonumber" href="https://sixohthree.com/1402/running-gitweb-in-fastcgi-mode">[2]</a>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Apache_2.2"><span class="tocnumber">2.1</span> <span class="toctext">Apache 2.2</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Apache_2.4"><span class="tocnumber">2.1.1</span> <span class="toctext">Apache 2.4</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#Lighttpd"><span class="tocnumber">2.2</span> <span class="toctext">Lighttpd</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Nginx"><span class="tocnumber">2.3</span> <span class="toctext">Nginx</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Gitweb_config"><span class="tocnumber">2.4</span> <span class="toctext">Gitweb config</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Syntax_highlighting"><span class="tocnumber">2.5</span> <span class="toctext">Syntax highlighting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Adding_repositories"><span class="tocnumber">3</span> <span class="toctext">Adding repositories</span></a></li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#.22An_error_occurred_while_reading_CGI_reply_.28no_response_received.29.22_in_browser"><span class="tocnumber">4.1</span> <span class="toctext">"An error occurred while reading CGI reply (no response received)" in browser</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>To install gitweb you first have to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=git">git</a></span> and a webserver. Now, if you want to quickly test it, see the help of <code>git instaweb</code>. Otherwise, if you want a comprehensive setup, keep reading.
+</p>
+<p>For this example we use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> but you can also use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nginx">nginx</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lighttpd">lighttpd</a></span> or others.
+</p>
+<p>Next you need to link the current gitweb default to your webserver location. In this example the default folder locations are used:
+</p>
+<pre># ln -s /usr/share/gitweb /srv/http/gitweb
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may want to double check the server directory to make sure the symbolic links were made.</div>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Apache_2.2">Apache 2.2</span></h3>
+<p>Add the following to the end of your <code>/etc/httpd/conf/httpd.conf</code>
+</p>
+<pre>&lt;Directory "/srv/http/gitweb"&gt;
+   DirectoryIndex gitweb.cgi
+   Allow from all
+   AllowOverride all
+   Order allow,deny
+   Options ExecCGI
+   &lt;Files gitweb.cgi&gt;
+   SetHandler cgi-script
+   &lt;/Files&gt;
+   SetEnv  GITWEB_CONFIG  /etc/gitweb.conf
+&lt;/Directory&gt;
+</pre>
+<p>If using a virtualhosts configuration, add this to <code>/etc/httpd/conf/extra/httpd-vhosts.conf</code>
+</p>
+<pre>&lt;VirtualHost *:80&gt;
+    ServerName gitserver
+    DocumentRoot /var/www/gitweb
+    &lt;Directory /var/www/gitweb&gt;
+       Options ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+       AllowOverride All
+       order allow,deny
+       Allow from all
+       AddHandler cgi-script cgi
+       DirectoryIndex gitweb.cgi
+   &lt;/Directory&gt;
+&lt;/VirtualHost&gt;
+</pre>
+<p>You could also put the configuration in its own config file in <code>/etc/httpd/conf/extra/</code> but that is up to you to decide.
+</p>
+<h4><span class="mw-headline" id="Apache_2.4">Apache 2.4</span></h4>
+<p>For Apache 2.4 you need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mod_perl/">mod_perl</a></span><sup><small>AUR</small></sup> along with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=git">git</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span>.
+</p>
+<p>Create <code>/etc/httpd/conf/extra/httpd-gitweb.conf</code>
+</p>
+<pre>&lt;IfModule mod_perl.c&gt;
+    Alias /gitweb "/usr/share/gitweb"
+    &lt;Directory "/usr/share/gitweb"&gt;
+        DirectoryIndex gitweb.cgi
+        Require all granted
+        Options ExecCGI
+        AddHandler perl-script .cgi
+        PerlResponseHandler ModPerl::Registry
+        PerlOptions +ParseHeaders
+        SetEnv  GITWEB_CONFIG  /etc/gitweb.conf
+    &lt;/Directory&gt;
+&lt;/IfModule&gt;
+</pre>
+<p>Add the following line to the modules section of <code>/etc/httpd/conf/httpd.conf</code>
+</p>
+<pre>LoadModule perl_module modules/mod_perl.so
+</pre>
+<p>Add the following line to the end of <code>/etc/httpd/conf/httpd.conf</code>
+</p>
+<pre># gitweb configuration
+Include conf/extra/httpd-gitweb.conf
+</pre>
+<h3><span class="mw-headline" id="Lighttpd">Lighttpd</span></h3>
+<p>Add the following to <code>/etc/lighttpd/lighttpd.conf</code>:
+</p>
+<pre>server.modules += ( "mod_alias", "mod_cgi", "mod_redirect", "mod_setenv" )
+setenv.add-environment = ( "GITWEB_CONFIG" =&gt; "/etc/gitweb.conf" )
+url.redirect += ( "^/gitweb$" =&gt; "/gitweb/" )
+alias.url += ( "/gitweb/" =&gt; "/usr/share/gitweb/" )
+$HTTP["url"] =~ "^/gitweb/" {
+       cgi.assign = ( ".cgi" =&gt; "" )
+       server.indexfiles = ( "gitweb.cgi" )
+}
+</pre>
+<p>You may also need to add <code>".css" =&gt; "text/css"</code> to the <code>mimetype.assign</code> line for GitWeb to display properly.
+</p>
+<h3><span class="mw-headline" id="Nginx">Nginx</span></h3>
+<p>Append this location to your nginx configuration (you might want to change the location):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nginx/nginx.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+location /gitweb.cgi {
+    include fastcgi_params;
+    gzip off;
+    fastcgi_param   SCRIPT_FILENAME  /usr/share/gitweb/gitweb.cgi;
+    fastcgi_param   GITWEB_CONFIG  /etc/gitweb.conf;
+    fastcgi_pass    unix:/var/run/fcgiwrap.sock;
+}
+
+location / {
+    root /usr/share/gitweb;
+    index gitweb.cgi;
+}
+</pre>
+<p>If you follow <a href="../en/Nginx.html#CGI_implementation" title="Nginx">Nginx#CGI implementation</a>, try replacing <code>include fastcgi_params;</code> with <code>include fastcgi.conf;</code>.
+</p>
+<p>Additionally, we have to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=fcgiwrap">fcgiwrap</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=spawn-fcgi">spawn-fcgi</a></span> and modify the fcgiwrap service file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system/fcgiwrap.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Simple server for running CGI applications over FastCGI
+After=syslog.target network.target
+
+[Service]
+Type=forking
+Restart=on-abort
+PIDFile=/var/run/fcgiwrap.pid
+ExecStart=/usr/bin/spawn-fcgi -s /var/run/fcgiwrap.sock -P /var/run/fcgiwrap.pid -u http -g http -- /usr/sbin/fcgiwrap
+ExecStop=/usr/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>In the end, enable and restart the services:
+</p>
+<pre>systemctl enable nginx fcgiwrap
+systemctl start nginx fcgiwrap</pre>
+<h3><span class="mw-headline" id="Gitweb_config">Gitweb config</span></h3>
+<p>Next we need to make a gitweb config file. Open (or create if it does not exist) the file <code>/etc/gitweb.conf</code> and place this in it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/gitweb.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+our $git_temp = "/tmp";
+
+# The directories where your projects are. Must not end with a slash.
+our $projectroot = "/path/to/your/repositories"; 
+
+# Base URLs for links displayed in the web interface.
+our @git_base_url_list = qw(git://&lt;your_server&gt; http://git@&lt;your_server&gt;); 
+</pre>
+<p>To enable "blame" view (showing the author of each line in a source file), add the following line:
+</p>
+<pre>$feature{'blame'}{'default'} = [1];
+</pre>
+<p>Now the the configuration is done, please restart your webserver.
+For apache:
+</p>
+<pre>systemctl restart httpd 
+</pre>
+<p>Or for lighttpd:
+</p>
+<pre>systemctl restart lighttpd
+</pre>
+<h3><span class="mw-headline" id="Syntax_highlighting">Syntax highlighting</span></h3>
+<p>To enable syntax highlighting with Gitweb, you have to first install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=highlight">highlight</a></span> package:
+</p>
+<p>When highlight has been installed, simply add this line to your <code>gitweb.conf</code>:
+</p>
+<pre>$feature{'highlight'}{'default'} = [1];</pre>
+<p>Save the file and highlighting should now be enabled.
+</p>
+<h2><span class="mw-headline" id="Adding_repositories">Adding repositories</span></h2>
+<p>To add a repository go to your repository folder, make your repository like so:
+</p>
+<pre>mkdir my_repository.git
+git init --bare my_repository.git/
+cd my_repository.git/
+touch git-daemon-export-ok
+echo "Short project's description" &gt; description
+</pre>
+<p>Next open the <code>config</code> file and add this:
+</p>
+<pre>[gitweb]
+        owner = Your Name
+</pre>
+<p>This will fill in the "Owner" field in gitweb. It is not required.
+</p>
+<p>This assumes that you want to have this repository as "central" repository storage where you push your commits to so the git-daemon-export-ok and --bare are here to have minimal overhead and to allow the git daemon to be used on it.
+</p>
+<p>That is all for making a repository. You can now see it on your <a rel="nofollow" class="external free" href="http://localhost/gitweb">http://localhost/gitweb</a> (assuming everything went fine). You do not need to restart apache for new repositories since the gitweb cgi script simply reads your repository folder.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id=".22An_error_occurred_while_reading_CGI_reply_.28no_response_received.29.22_in_browser">"An error occurred while reading CGI reply (no response received)" in browser</span></h3>
+<p>When browsing <a rel="nofollow" class="external free" href="http://localhost/gitweb">http://localhost/gitweb</a>, there is only a one-line message as title.
+By running <code>gitweb.cgi</code> in command line as follows, we can get the complete error message (assuming you have symlinked <code>ln -s /usr/share/gitweb /srv/http</code>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ perl /srv/http/gitweb/gitweb.cgi</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Can't locate CGI.pm in @INC (you may need to install the CGI module) (@INC contains: /usr/lib/perl5/site_perl
+ /usr/share/perl5/site_perl /usr/lib/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib/perl5/core_perl 
+/usr/share/perl5/core_perl .) at gitweb/gitweb.cgi line 13.
+</pre>
+<p>To solve this issue, just install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=perl-cgi">perl-cgi</a></span>. There is also a bug report: <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/45431">FS#45431</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.howtoforge.com/how-to-install-a-public-git-repository-on-a-debian-server">How To Install A Public Git Repository On A Debian Server</a> — HowtoForge page used as the main source for this article.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Version_Control_System.html" title="Category:Version Control System">Version Control System</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

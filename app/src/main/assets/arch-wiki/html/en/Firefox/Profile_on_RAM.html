@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Firefox/Profile on RAM - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Firefox_Profile_on_RAM skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Firefox/Profile on RAM</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Firefox.html" title="Firefox">Firefox</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Assuming that there is memory to spare, placing <a href="../../en/Firefox.html" title="Firefox">Firefox</a>'s cache or complete profile to RAM offers significant advantages. Even though opting for the partial route is an improvement by itself, the latter can make Firefox even more responsive compared to its stock configuration. Benefits include, among others:
+</p>
+<ul>
+<li>reduced drive read/writes;</li>
+<li>heightened responsive feel;</li>
+<li>many operations within Firefox, such as quick search and history queries, are nearly instantaneous.</li>
+</ul>
+<p>To do so we can make use of a <a href="../../en/Tmpfs.html" title="Tmpfs">tmpfs</a>.
+</p>
+<p>Because data placed therein cannot survive a shutdown, a script responsible for syncing back to drive prior to system shutdown is necessary if persistence is desired (which is likely in the case of profile relocation). On the other hand, only relocating the cache is a quick, less inclusive solution that will slightly speed up user experience while emptying Firefox cache on every reboot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Cache is stored <b>separately</b> from Firefox default profiles' folder (<code>/home/$USER/.mozilla/firefox/</code>): it is found by default in <code>/home/$USER/.cache/mozilla/firefox/&lt;profile&gt;</code>. This is similar to what Chromium and other browsers do. Therefore, sections <a href="#Place_profile_in_RAM_using_tools">#Place profile in RAM using tools</a> and <a href="#Place_profile_in_RAM_manually">#Place profile in RAM manually</a> <b>don't deal</b> with cache relocating and syncing but only with profile adjustments. See the note at <a href="../../en/Profile-sync-daemon.html#Benefits_of_psd" title="Profile-sync-daemon">Profile-sync-daemon#Benefits of psd</a><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> for more details. <a href="../../en/Anything-sync-daemon.html" title="Anything-sync-daemon">Anything-sync-daemon</a> may be used to achieve the same thing as Option 2 for cache folders.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Relocate_cache_only_to_RAM"><span class="tocnumber">1</span> <span class="toctext">Relocate cache only to RAM</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Place_profile_in_RAM_using_tools"><span class="tocnumber">2</span> <span class="toctext">Place profile in RAM using tools</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Place_profile_in_RAM_manually"><span class="tocnumber">3</span> <span class="toctext">Place profile in RAM manually</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Before_you_start"><span class="tocnumber">3.1</span> <span class="toctext">Before you start</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#The_script"><span class="tocnumber">3.2</span> <span class="toctext">The script</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Automation"><span class="tocnumber">3.3</span> <span class="toctext">Automation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#cron_job"><span class="tocnumber">3.3.1</span> <span class="toctext">cron job</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Sync_at_login.2Flogout"><span class="tocnumber">3.3.2</span> <span class="toctext">Sync at login/logout</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Relocate_cache_only_to_RAM">Relocate cache only to RAM</span></h2>
+<p>When a page is loaded, it can be cached so it doesn't need to be downloaded to be redisplayed. For e-mail and news, messages and attachments are cached as well.
+Firefox can be configured to use only RAM as cache storage. Configuration files, bookmarks, extensions etc. will be written to drive as usual. For this:
+</p>
+<ul>
+<li> open <code>about:config</code> in the address bar</li>
+<li> set <code>browser.cache.disk.enable</code> to "false" (double click the line)</li>
+<li> verify that <code>browser.cache.memory.enable</code> is set to "true" (<a rel="nofollow" class="external text" href="http://kb.mozillazine.org/Browser.cache.memory.enable">default value</a>)</li>
+<li> add the entry (right click-&gt;new-&gt;integer) <code>browser.cache.memory.capacity</code> and set it to the amount of KB you'd like to spare, or to -1 for <a rel="nofollow" class="external text" href="http://kb.mozillazine.org/Browser.cache.memory.capacity#-1">automatic</a> cache size selection. (Skipping this step has the same effect as setting the value to -1.)</li>
+</ul>
+<p>Main disadvantages of this method are that the content of currently browsed webpages is lost if browser crashes or after a reboot, and that the settings need to be configured for each user individually.
+</p>
+<p>A workaround for the first drawback is to use <a href="../../en/Anything-sync-daemon.html" title="Anything-sync-daemon">anything-sync-daemon</a> or similar periodically-syncing script so that cache gets copied over to the drive on a regular basis.
+</p>
+<h2><span class="mw-headline" id="Place_profile_in_RAM_using_tools">Place profile in RAM using tools</span></h2>
+<p>Relocate the browser profile to <a href="../../en/Tmpfs.html" title="Tmpfs">tmpfs</a> so as to globally improve browser's responsiveness. Another benefit is a reduction in drive I/O operations, of which <a href="../../en/Solid_State_Drives.html#Locate_High-Use_Files_to_RAM" title="SSD" class="mw-redirect">SSDs benefit the most</a><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+<p>Use an active management script for maximal reliability and ease of use.  Several are available from the AUR.
+</p>
+<ul>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/profile-sync-daemon/">profile-sync-daemon</a></span><sup><small>AUR</small></sup> - refer to the <a href="../../en/Profile-sync-daemon.html" title="Profile-sync-daemon">Profile-sync-daemon</a> wiki article for additional info on it;</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/firefox-sync/">firefox-sync</a></span><sup><small>AUR</small></sup>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Place_profile_in_RAM_manually">Place profile in RAM manually</span></h2>
+<h3><span class="mw-headline" id="Before_you_start">Before you start</span></h3>
+<p>Before potentially compromising Firefox's profile, be sure to make a backup for quick restoration. Replace <code>xyz.default</code> as appropriate and use <code>tar</code> to make a backup:
+</p>
+<pre>$ tar zcvfp ~/firefox_profile_backup.tar.gz ~/.mozilla/firefox/<i>xyz.default</i>
+</pre>
+<h3><span class="mw-headline" id="The_script">The script</span></h3>
+<p><small><i>Adapted from <a rel="nofollow" class="external text" href="http://www.verot.net/firefox_tmpfs.htm">verot.net's Speed up Firefox with tmpfs</a></i></small>
+</p>
+<p>The script will first move Firefox's profile to a new static location, make a sub-directory in <code>/dev/shm</code>, softlink to it and later populate it with the contents of the profile. As before, replace the bold sections to suit. The only value that absolutely needs to be altered is, again, <code>xyz.default</code>.
+</p>
+<p>Be sure that <a href="../../en/Rsync.html" title="Rsync">rsync</a> is installed and save the script to <code>~/bin/firefox-sync</code>, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">firefox-sync</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+
+static=<i>main</i>
+link=<i>xyz.default</i>
+volatile=<i>/dev/shm/firefox-$USER</i>
+
+IFS=
+set -efu
+
+cd ~/.mozilla/firefox
+
+if [ ! -r $volatile ]; then
+	mkdir -m0700 $volatile
+fi
+
+if [ "$(readlink $link)" != "$volatile" ]; then
+	mv $link $static
+	ln -s $volatile $link
+fi
+
+if [ -e $link/.unpacked ]; then
+	rsync -av --delete --exclude .unpacked ./$link/ ./$static/
+else
+	rsync -av ./$static/ ./$link/
+	touch $link/.unpacked
+fi
+</pre>
+<p>Close Firefox, make the script executable and test it:
+</p>
+<pre>$ killall firefox firefox-bin
+$ chmod +x ~/bin/firefox-sync
+$ ~/bin/firefox-sync
+</pre>
+<p>Run Firefox again to gauge the results. The second time the script runs, it will then preserve the RAM profile by copying it back to disk.
+</p>
+<h3><span class="mw-headline" id="Automation">Automation</span></h3>
+<p>Seeing that forgetting to sync the profile can lead to disastrous results, automating the process seems like a logical course of action.
+</p>
+<h4><span class="mw-headline" id="cron_job">cron job</span></h4>
+<p>Manipulate the user's <a href="../../en/Cron.html" title="Cron">cron</a> table using <code>crontab</code>:
+</p>
+<pre>$ crontab -e
+</pre>
+<p>Add a line to start the script every 30 minutes,
+</p>
+<pre>*/30 * * * * <i>~/bin/firefox-sync</i>
+</pre>
+<p>or add the following to do so every 2 hours:
+</p>
+<pre>0 */2 * * * <i>~/bin/firefox-sync</i>
+</pre>
+<h4><span class="mw-headline" id="Sync_at_login.2Flogout">Sync at login/logout</span></h4>
+<p>Assuming <a href="../../en/Bash.html" title="Bash">bash</a> is being used, add the script to the login/logout files:
+</p>
+<pre>$ echo '<i>~/bin/firefox-sync</i>' | tee -a ~/.bash_logout ~/.bash_login &gt;/dev/null
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> You may wish to use <code>~/.bash_profile</code> instead of <code>~/.bash_login</code> as bash will only read the first of these if both exist and are readable.</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a href="../../en/Tmpfs.html" title="Tmpfs">tmpfs</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Web_browser.html" title="Category:Web browser">Web browser</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Firefox/Profile_on_RAM&amp;oldid=453683">https://wiki.archlinux.org/index.php?title=Firefox/Profile_on_RAM&amp;oldid=453683</a>"</li>
+					<li id="lastmod"> This page was last modified on 12 October 2016, at 09:13.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

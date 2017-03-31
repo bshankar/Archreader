@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>sysctl - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Sysctl skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">sysctl</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span><a href="https://en.wikipedia.org/wiki/sysctl" class="extiw" title="wikipedia:sysctl">sysctl</a> is a tool for examining and changing <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> at runtime (package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=procps-ng">procps-ng</a></span> in <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>). sysctl is implemented in procfs, the virtual process file system at <code>/proc/</code>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Configuration"><span class="tocnumber">1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Security"><span class="tocnumber">2</span> <span class="toctext">Security</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Networking"><span class="tocnumber">3</span> <span class="toctext">Networking</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Improving_performance"><span class="tocnumber">3.1</span> <span class="toctext">Improving performance</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#TCP.2FIP_stack_hardening"><span class="tocnumber">3.2</span> <span class="toctext">TCP/IP stack hardening</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Virtual_memory"><span class="tocnumber">4</span> <span class="toctext">Virtual memory</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#MDADM"><span class="tocnumber">5</span> <span class="toctext">MDADM</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">6</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Small_periodic_system_freezes"><span class="tocnumber">6.1</span> <span class="toctext">Small periodic system freezes</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>From version 207 and 21x, <a href="../en/Systemd.html" title="Systemd">systemd</a> only applies settings from <code>/etc/sysctl.d/*.conf</code> and <code>/usr/lib/sysctl.d/*.conf</code>. If you had customized <code>/etc/sysctl.conf</code>, you need to rename it as <code>/etc/sysctl.d/99-sysctl.conf</code>. If you had e.g. <code>/etc/sysctl.d/foo</code>, you need to rename is to <code>/etc/sysctl.d/foo.conf</code>.</div>
+<p>The <b>sysctl</b> preload/configuration file can be created at <code>/etc/sysctl.d/99-sysctl.conf</code>. For <a href="../en/Systemd.html" title="Systemd">systemd</a>, <code>/etc/sysctl.d/</code> and <code>/usr/lib/sysctl.d/</code> are drop-in directories for kernel sysctl parameters. The naming and source directory decide the order of processing, which is important since the last parameter processed may override earlier ones. For example, parameters in a <code>/usr/lib/sysctl.d/50-default.conf</code> will be overriden by equal parameters in <code>/etc/sysctl.d/50-default.conf</code> and any configuration file processed later from both directories. 
+</p>
+<p>To load all configuration files manually, execute 
+</p>
+<pre># sysctl --system 
+</pre>
+<p>which will also output the applied hierarchy. A single parameter file can also be loaded explicitly with 
+</p>
+<pre># sysctl -p <i>filename.conf</i>
+</pre>
+<p>See <a rel="nofollow" class="external text" href="http://0pointer.de/blog/projects/the-new-configuration-files">the new configuration files</a> and more specifically <a rel="nofollow" class="external text" href="http://0pointer.de/public/systemd-man/sysctl.d.html">systemd's sysctl.d man page</a> for more information.
+</p>
+<p>The parameters available are those listed under <code>/proc/sys/</code>. For example, the <code>kernel.sysrq</code> parameter refers to the file <code>/proc/sys/kernel/sysrq</code> on the file system. The <code>sysctl -a</code> command can be used to display all currently available values.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have the kernel documentation installed (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-docs">linux-docs</a></span>), you can find detailed information about sysctl settings in <code>/usr/lib/modules/$(uname -r)/build/Documentation/sysctl/</code>. It is highly recommended reading these before changing sysctl settings.</div>
+<p>Settings can be changed through file manipulation or using the <code>sysctl</code> utility. For example, to temporarily enable the <a href="https://en.wikipedia.org/wiki/Magic_SysRq_key" class="extiw" title="wikipedia:Magic SysRq key">magic SysRq key</a>:
+</p>
+<pre># sysctl kernel.sysrq=1
+</pre>
+<p>or:
+</p>
+<pre># echo "1" &gt; /proc/sys/kernel/sysrq
+</pre>
+<p>To preserve changes between reboots, add or modify the appropriate lines in <code>/etc/sysctl.d/99-sysctl.conf</code> or another applicable parameter file in <code>/etc/sysctl.d/</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Some parameters that can be applied may depend on kernel modules which in turn might not be loaded. For example parameters in <code>/proc/sys/net/bridge/*</code> depend on the <code>br_netfilter</code> module. If it is not loaded at runtime (or after a reboot), those will <i>silently</i> not be applied. See <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a>.</div>
+<h2><span class="mw-headline" id="Security">Security</span></h2>
+<p>See <a href="../en/Security.html#Kernel_hardening" title="Security">Security#Kernel hardening</a>.
+</p>
+<h2><span class="mw-headline" id="Networking">Networking</span></h2>
+<h3><span class="mw-headline" id="Improving_performance">Improving performance</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This may cause dropped frames with load-balancing and NATs, only use this for a server that communicates only over your local network.</div>
+<pre># reuse/recycle time-wait sockets
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_tw_recycle = 1
+</pre>
+<h3><span class="mw-headline" id="TCP.2FIP_stack_hardening">TCP/IP stack hardening</span></h3>
+<p>The following specifies a parameter set to tighten network security options of the kernel for the IPv4 protocol and related IPv6 parameters where an equivalent exists. 
+</p>
+<p>For some usecases, for example using the system as a <a href="../en/Router.html" title="Router">router</a>, other parameters may be useful or required as well. 
+</p>
+<pre>#### ipv4 networking and equivalent ipv6 parameters ####
+
+## TCP SYN cookie protection (default)
+## helps protect against SYN flood attacks
+## only kicks in when net.ipv4.tcp_max_syn_backlog is reached
+net.ipv4.tcp_syncookies = 1
+
+## protect against tcp time-wait assassination hazards
+## drop RST packets for sockets in the time-wait state
+## (not widely supported outside of linux, but conforms to RFC)
+net.ipv4.tcp_rfc1337 = 1
+
+## sets the kernels reverse path filtering mechanism to value 1(on)
+## will do source validation of the packet's recieved from all the interfaces on the machine
+## protects from attackers that are using ip spoofing methods to do harm
+net.ipv4.conf.all.rp_filter = 1
+net.ipv6.conf.all.rp_filter = 1
+
+## tcp timestamps
+## + protect against wrapping sequence numbers (at gigabit speeds)
+## + round trip time calculation implemented in TCP
+## - causes extra overhead and allows uptime detection by scanners like nmap
+## enable @ gigabit speeds
+net.ipv4.tcp_timestamps = 0
+#net.ipv4.tcp_timestamps = 1
+
+## log martian packets
+net.ipv4.conf.all.log_martians = 1
+
+## ignore echo broadcast requests to prevent being part of smurf attacks (default)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+## ignore bogus icmp errors (default)
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+## send redirects (not a router, disable it)
+net.ipv4.conf.all.send_redirects = 0
+
+## ICMP routing redirects (only secure)
+#net.ipv4.conf.all.secure_redirects = 1 (default)
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.all.accept_redirects=0
+net.ipv6.conf.default.accept_redirects=0
+net.ipv6.conf.all.accept_redirects=0</pre>
+<h2><span class="mw-headline" id="Virtual_memory">Virtual memory</span></h2>
+<p>There are several key parameters to tune the operation of the virtual memory (VM) subsystem of the Linux kernel and the writeout of dirty data to disk. See the <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/sysctl/vm.txt">Linux kernel documentation</a> for more information. For example:
+</p>
+<ul><li> <code>vm.dirty_ratio = 3</code> </li></ul>
+<dl><dd> Contains, as a percentage of total available memory that contains free pages and reclaimable pages, the number of pages at which a process which is generating disk writes will itself start writing out dirty data.</dd></dl>
+<ul><li> <code>vm.dirty_background_ratio = 2</code>
+</li></ul>
+<dl><dd> Contains, as a percentage of total available memory that contains free pages and reclaimable pages, the number of pages at which the background kernel flusher threads will start writing out dirty data.</dd></dl>
+<p>As noted in the comments for the parameters, one needs to consider the total amount of RAM when setting these values. For example, simplifying by taking the installed system RAM instead of available memory:
+</p>
+<ul>
+<li> Consensus is that setting <code>vm.dirty_ratio</code> to 10% of RAM is a sane value if RAM is say 1 GB (so 10% is 100 MB). But if the machine has much more RAM, say 16 GB (10% is 1.6 GB), the percentage may be out of proportion as it becomes several seconds of writeback on spinning disks. A more sane value in this case is 3 (3% of 16 GB is approximately 491 MB).</li>
+<li> Similarly, setting <code>vm.dirty_background_ratio</code> to 5 may be just fine for small memory values, but again, consider and adjust accordingly for the amount of RAM on a particular system.</li>
+</ul>
+<h2><span class="mw-headline" id="MDADM">MDADM</span></h2>
+<p>When the kernel performs a resync operation of a software raid device it tries not to create a high system load by restricting the speed of the operation. Using sysctl it is possible to change the lower and upper speed limit.
+</p>
+<pre># Set maximum and minimum speed of raid resyncing operations
+dev.raid.speed_limit_max = 10000
+dev.raid.speed_limit_min = 1000</pre>
+<p>If mdadm is compiled as a module <code>md_mod</code>, the above settings are available only after the module has been loaded. If the settings shall be loaded on boot via <code>/etc/sysctl.d</code>, the module <code>md_mod</code> may be loaded beforehand through <code>/etc/modules-load.d</code>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Small_periodic_system_freezes">Small periodic system freezes</span></h3>
+<p>Set dirty bytes to small enough value (for example 4M):
+</p>
+<pre>vm.dirty_background_bytes = 4194304
+vm.dirty_bytes = 4194304
+</pre>
+<p>Try to change <code>kernel.io_delay_type</code> (x86 only):
+</p>
+<ul>
+<li> 0 - IO_DELAY_TYPE_0X80</li>
+<li> 1 - IO_DELAY_TYPE_0XED</li>
+<li> 2 - IO_DELAY_TYPE_UDELAY</li>
+<li> 3 - IO_DELAY_TYPE_NONE</li>
+</ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> The <a rel="nofollow" class="external text" href="http://linux.die.net/man/8/sysctl">sysctl(8)</a> and <a rel="nofollow" class="external text" href="http://www.unixlore.net/cgi-bin/man/man2html?5+sysctl.conf">sysctl.conf(5)</a> man pages</li>
+<li> Linux kernel documentation (<code>&lt;kernel source dir&gt;/Documentation/sysctl/</code>)</li>
+<li> Kernel Documentation: <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt">IP Sysctl</a>
+</li>
+<li> SysCtl.conf Tweaked for Security and Cable Speed <a rel="nofollow" class="external autonumber" href="http://blog.gotux.net/code/config/sysctl/">[1]</a><sup>[<a href="https://en.wikipedia.org/wiki/Wikipedia:Link_rot" class="extiw" title="wikipedia:Wikipedia:Link rot">dead link</a> 2015-12-14]</sup>
+</li>
+<li> Kernel network parameters for sysctl <a rel="nofollow" class="external autonumber" href="http://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.kernel.html">[2]</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_dead_links.html" title="Category:Pages with dead links">Pages with dead links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

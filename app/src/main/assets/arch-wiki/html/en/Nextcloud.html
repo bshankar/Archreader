@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Nextcloud - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Nextcloud skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Nextcloud</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Several <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a> issues. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Nextcloud#Style_Improvement_Flag">Talk:Nextcloud#Style Improvement Flag</a>)</div>
+</div>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenSSL.html" title="OpenSSL">OpenSSL</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/MySQL.html" title="Mariadb" class="mw-redirect">mariadb</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OwnCloud.html" title="OwnCloud">ownCloud</a></li>
+</ul>
+</div>
+<p>From <a href="https://en.wikipedia.org/wiki/ownCloud" class="extiw" title="wikipedia:ownCloud">Wikipedia</a>: Nextcloud is functionally very similar to the widely used Dropbox, with the primary functional difference being that Nextcloud is free and open-source, and thereby allowing anyone to install and operate it without charge on a private server. In contrary to proprietary services like Dropbox, the open architecture allows adding additional functionality to the server in form of so-called applications.Nextcloud is an actively maintained fork of ownCloud.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Required_Packages"><span class="tocnumber">1.1</span> <span class="toctext">Required Packages</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Optional_Packages"><span class="tocnumber">1.2</span> <span class="toctext">Optional Packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#PHP_Configuration"><span class="tocnumber">2</span> <span class="toctext">PHP Configuration</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Setup_mariadb_and_nextcloud_DB"><span class="tocnumber">3</span> <span class="toctext">Setup mariadb and nextcloud DB</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Setup_Apache"><span class="tocnumber">4</span> <span class="toctext">Setup Apache</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Swithch_to_Cron_from_AJAX"><span class="tocnumber">5</span> <span class="toctext">Swithch to Cron from AJAX</span></a></li>
+<li class="toclevel-1 tocsection-8"><a href="#Enable_memcache"><span class="tocnumber">6</span> <span class="toctext">Enable memcache</span></a></li>
+<li class="toclevel-1 tocsection-9">
+<a href="#.28Optional.29_SSL_Setup_and_its_hardening_plus_SSL_hardening"><span class="tocnumber">7</span> <span class="toctext">(Optional) SSL Setup and its hardening plus SSL hardening</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Enable_SSL_with_a_self_signed_certificate"><span class="tocnumber">7.1</span> <span class="toctext">Enable SSL with a self signed certificate</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#SSL_hardening"><span class="tocnumber">7.2</span> <span class="toctext">SSL hardening</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Required_Packages">Required Packages</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php">php</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-apache">php-apache</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span> packages from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nextcloud/">nextcloud</a></span><sup><small>AUR</small></sup> package from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the required <a href="../en/PHP.html" title="PHP">PHP</a> modules packages: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-gd">php-gd</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-intl">php-intl</a></span> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-mcrypt">php-mcrypt</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> the <a href="../en/PHP.html#APCu" title="PHP">APCu</a> PHP module for memory caching: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=php-apcu">php-apcu</a></span>.
+</p>
+<h3><span class="mw-headline" id="Optional_Packages">Optional Packages</span></h3>
+<p>For file preview generation <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the following packages:
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span> and either <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libreoffice-still">libreoffice-still</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libreoffice-fresh">libreoffice-fresh</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/php-imagick/">php-imagick</a></span><sup><small>AUR</small></sup>  from the <a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a>.
+</p>
+<h2><span class="mw-headline" id="PHP_Configuration">PHP Configuration</span></h2>
+<p>Edit <code>/etc/php/php.ini</code> and uncomment the following required modules:
+</p>
+<pre>gd.so
+iconv.so
+xmlrpc.so
+zip.so
+</pre>
+<p>Also uncomment the following required modules for <a href="../en/MySQL.html" title="Mariadb" class="mw-redirect">mariadb</a>:
+</p>
+<pre>extension=pdo_mysql.so
+</pre>
+<p>Uncomment the following recommended <a href="../en/PHP.html" title="PHP">PHP</a> modules:
+</p>
+<pre>bz2.so
+curl.so
+intl.so
+mcrypt.so
+</pre>
+<p>Add the following to <code>open_basedir</code>:
+</p>
+<pre>/usr/share/webapps/nextcloud:/dev/urandom
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You may also need to add the <code>/tmp</code> directory in <code>open_basedir</code> if Apache only displays a blank page. Check <code>/var/log/httpd/error_log</code> file to confirm this problem</div>
+<h2><span class="mw-headline" id="Setup_mariadb_and_nextcloud_DB">Setup mariadb and nextcloud DB</span></h2>
+<p>Configure <a href="../en/MySQL.html" title="Mariadb" class="mw-redirect">mariadb</a>:
+</p>
+<pre># mysql_install_db –user=mysql –basedir=/usr –datadir=/var/lib/mysql
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>mariadb.service</code>.
+</p>
+<p>Secure <a href="../en/MySQL.html" title="Mariadb" class="mw-redirect">mariadb</a>:
+</p>
+<pre># mysql_secure_installation
+</pre>
+<p>Create <code>nextcloud</code> database:
+</p>
+<pre>$ mysql -u root -p
+</pre>
+<p>At the prompt, insert the following lines (make sure to enter them separately).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Change <code><i>username</i></code> and <code><i>password</i></code> to your specific values and note them down as you will need them later.</div>
+<pre>CREATE DATABASE IF NOT EXISTS nextcloud;
+CREATE USER ‘<i>username</i>’@’localhost’ IDENTIFIED BY ‘<i>password</i>’;
+GRANT ALL PRIVILEGES ON nextcloud.* TO ‘<i>username</i>’@’localhost’ IDENTIFIED BY ‘<i>password</i>’;
+quit
+</pre>
+<h2><span class="mw-headline" id="Setup_Apache">Setup Apache</span></h2>
+<p>Copy Nextcloud’s <a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a> configuration file to <a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a> configuration directory:
+</p>
+<pre># cp /etc/webapps/nextcloud/apache.example.conf /etc/httpd/conf/extra/nextcloud.conf
+</pre>
+<p>Edit <code>/etc/httpd/conf/httpd.conf</code> and:
+</p>
+<p>Comment the line:
+</p>
+<pre>#LoadModule mpm_event_module modules/mod_mpm_event.so
+</pre>
+<p>Uncomment the line:
+</p>
+<pre>LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+</pre>
+<p>After <code>LoadModule dir_module modules/mod_dir.so</code>, place the following module:
+</p>
+<pre>LoadModule php7_module modules/libphp7.so
+</pre>
+<p>At the end of the <code>Include</code> list place the following line:
+</p>
+<pre>Include conf/extra/php7_module.conf
+</pre>
+<p>At the end of the <code>LoadModule</code> list add the following line:
+</p>
+<pre>AddHandler php7-script php
+</pre>
+<p>At the bottom of <code>/etc/httpd/conf/httpd.conf</code> add the following line:
+</p>
+<pre>Include conf/extra/nextcloud.conf
+</pre>
+<p>Enable the following modules:
+</p>
+<pre>mod_rewrite
+headers
+env
+dir
+mime
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> service <code>httpd</code>
+</p>
+<h2><span class="mw-headline" id="Swithch_to_Cron_from_AJAX">Swithch to Cron from AJAX</span></h2>
+<p>Nextcloud requires scheduled execution of some tasks, and by default it archives this by using AJAX, however AJAX is the least reliable method, and it is recommended to use <a href="../en/Cron.html" title="Cron">Cron</a> instead.
+</p>
+<p>To do so, first install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=chrony">chrony</a></span>:
+</p>
+<pre># pacman -S chrony
+</pre>
+<p>Then create a job for <code>http</code> user:
+</p>
+<pre># crontab -u http -e
+</pre>
+<p>This would open editor, paste this:
+</p>
+<pre>*/15  *  *  *  * php -f /usr/share/webapps/nextcloud/cron.php
+</pre>
+<p>Save the file and exit. Now you should <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> <code>chrony.service</code>.
+</p>
+<p>You can verify that everything is set by running
+</p>
+<pre># crontab -u http -l
+</pre>
+<p>Finally, set Cron option in Nextcloud settings to Cron.
+</p>
+<h2><span class="mw-headline" id="Enable_memcache">Enable memcache</span></h2>
+<p>Enable memcache by uncommenting the following line in <code>/etc/php/conf.d/apcu.ini</code>:
+</p>
+<pre>extension=apcu.so
+</pre>
+<p>Log onto Nextcloud and set it up by pointing your browser to: <code><a rel="nofollow" class="external free" href="http://localhost/nextcloud">http://localhost/nextcloud</a></code>. Follow the on screen instructions to setup Nextcloud
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Remember to use the DB username/password you set up above</div>
+<p>After Nextcloud is set up, add the following line to <code>/usr/share/webapps/nextcloud/config/config.php</code>:
+</p>
+<pre>'memcache.local’ =&gt; ‘\OC\Memcache\APCu’,
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> <code>httpd</code> service.
+</p>
+<h2><span class="mw-headline" id=".28Optional.29_SSL_Setup_and_its_hardening_plus_SSL_hardening">(Optional) SSL Setup and its hardening plus SSL hardening</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>See the <a href="../en/b9f6f965120480bf1d159235e57f636c.html" title="Let's Encrypt" class="mw-redirect">Let's Encrypt</a> for details about free, automated ssl certificates.</div>
+<h3><span class="mw-headline" id="Enable_SSL_with_a_self_signed_certificate">Enable SSL with a self signed certificate</span></h3>
+<p>Edit <code>/etc/httpd/conf/httpd.conf</code> and uncomment the following lines:
+</p>
+<pre>LoadModule ssl_module modules/mod_ssl.so
+LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+Include conf/extra/httpd-ssl.conf
+</pre>
+<p>Still while in <code>/etc/httpd/conf/httpd.conf</code> add port <code>443</code> to your <code>Listen</code> ports:
+</p>
+<pre>Listen 443
+</pre>
+<p>Create the certificate issuing the following commands:
+</p>
+<pre># cd /etc/httpd/conf
+# openssl req -new -x509 -nodes -newkey rsa:4096 -keyout server.key -out server.crt -days 1095
+# chmod 400 server.key</pre>
+<h3><span class="mw-headline" id="SSL_hardening">SSL hardening</span></h3>
+<p>Edit <code>/etc/httpd/conf/extra/httpd-ssl.conf</code> and under the <code>VirtualHost:443</code> section add the following section:
+</p>
+<pre>&lt;IfModule mod_headers.c&gt;
+Header always set Strict-Transport-Security “max-age=15768000; includeSubDomains; preload”
+&lt;/IfModule&gt;
+</pre>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=apache">apache</a></span> <code>httpd</code> service.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>pam_mount - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Pam_mount skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">pam_mount</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See <a href="../en/Help:Style.html" title="Help:Style">Help:Style</a> and related. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Pam_mount">Talk:Pam mount#</a>)</div>
+</div>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Dm-crypt/Mounting_at_login.html" title="Dm-crypt/Mounting at login">dm-crypt/Mounting at login</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PAM.html" title="PAM">PAM</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://pam-mount.sourceforge.net/">pam_mount</a> can be used to automatically mount an encrypted home partition (encrypted with, for example, <a href="../en/Dm-crypt.html" title="LUKS" class="mw-redirect">LUKS</a> or <a href="../en/ECryptfs.html" title="ECryptfs">ECryptfs</a>) on user log in. 
+It will mount your /home (or whatever mount point you like) when you log in using your login manager or when logging in on console. The encrypted drive's passphrase should be the same as your linux user's password, so you do not have to type in two different passphrases to login.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Pam_mount can also unmount your partitions when you close your last session but this is currently not working due to the use of pam_systemd.so in the pam stack.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#General_Setup"><span class="tocnumber">1</span> <span class="toctext">General Setup</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Login_Manager_Configuration"><span class="tocnumber">2</span> <span class="toctext">Login Manager Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#SLiM"><span class="tocnumber">2.1</span> <span class="toctext">SLiM</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#GDM"><span class="tocnumber">2.2</span> <span class="toctext">GDM</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="General_Setup">General Setup</span></h2>
+<ol>
+<li>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pam_mount">pam_mount</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a>.</li>
+<li>Edit /etc/security/pam_mount.conf.xml as follows:</li>
+</ol>
+<p>Insert 2 new lines at the end of the file, but <b>before</b> the last closing tag, <i>&lt;/pam_mount&gt;</i>.
+Notes:
+</p>
+<ul>
+<li>USERNAME should be replaced with your linux-username.</li>
+<li>/dev/sdaX should be replaced with the corresponding device or container file.</li>
+<li>fstype="auto" can be changed to any &lt;type&gt; that is present in /usr/bin/mount.&lt;type&gt;. "auto" should work fine in most cases.  Use fstype="crypt" so that the loop device gets closed at logout for volumes needing it.</li>
+<li>Add mount options, if needed.</li>
+</ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/security/pam_mount.conf.xml</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"><b>&lt;volume user="USERNAME" fstype="auto" path="/dev/sdaX" mountpoint="/home" options="fsck,noatime" /&gt;</b>
+<b>&lt;mkmountpoint enable="1" remove="true" /&gt;</b>
+
+&lt;/pam_mount&gt;</pre>
+<h2><span class="mw-headline" id="Login_Manager_Configuration">Login Manager Configuration</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See <a href="../en/Talk:Pam_mount.html#system-auth_template_out_of_date" title="Talk:Pam mount">Talk:Pam_mount#system-auth template out of date</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Pam_mount#automatic_unmounting_and_systemd">Talk:Pam mount#automatic unmounting and systemd</a>)</div>
+</div>
+<p>In general, you have to edit configuration files in /etc/pam.d so that pam_mount will be called on login. The correct order of entries in each file is important. It is necessary to edit /etc/pam.d/system-auth as shown below. If you use a display manager (e.g., Slim or GDM) edit its file, too. Example configuration files follow, with the added lines in bold.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+
+auth      required  pam_env.so
+auth      required  pam_unix.so     try_first_pass nullok
+<b>auth      optional  pam_mount.so</b>
+auth      optional  pam_permit.so
+
+account   required  pam_unix.so
+account   optional  pam_permit.so
+account   required  pam_time.so
+
+<b>password  optional  pam_mount.so</b>
+password  required  pam_unix.so     try_first_pass nullok sha512 shadow
+password  optional  pam_permit.so
+
+<b>session   optional  pam_mount.so</b>
+session   required  pam_limits.so
+session   required  pam_env.so
+session   required  pam_unix.so
+session   optional  pam_permit.so</pre>
+<h3><span class="mw-headline" id="SLiM">SLiM</span></h3>
+<p>For <a href="../en/SLiM.html" title="SLiM">SLiM</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/slim</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+auth            requisite       pam_nologin.so
+auth            required        pam_env.so
+auth            required        pam_unix.so
+<b>auth            optional        pam_mount.so</b>
+account         required        pam_unix.so
+password        required        pam_unix.so
+<b>password        optional        pam_mount.so</b>
+session         required        pam_limits.so
+session         required        pam_unix.so
+<b>session         optional        pam_mount.so</b>
+session         optional        pam_loginuid.so
+session         optional        pam_ck_connector.so
+</pre>
+<h3><span class="mw-headline" id="GDM">GDM</span></h3>
+<p>Manual configuration for GDM is not needed, since it relies on <code>/etc/pam.d/system-auth</code>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

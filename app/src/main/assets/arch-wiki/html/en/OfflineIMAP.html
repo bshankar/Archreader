@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>OfflineIMAP - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-OfflineIMAP skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">OfflineIMAP</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Isync.html" title="Isync">isync</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Notmuch.html" title="Notmuch">notmuch</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Msmtp.html" title="Msmtp">msmtp</a></li>
+</ul>
+</div>
+<p><a rel="nofollow" class="external text" href="http://offlineimap.org/">OfflineIMAP</a> is a Python utility to sync mail from IMAP servers. It does not work with the POP3 protocol or mbox, and is usually paired with a MUA such as <a href="../en/Mutt.html" title="Mutt">Mutt</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Minimal"><span class="tocnumber">2.1</span> <span class="toctext">Minimal</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Selective_folder_synchronization"><span class="tocnumber">2.2</span> <span class="toctext">Selective folder synchronization</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Miscellaneous"><span class="tocnumber">4</span> <span class="toctext">Miscellaneous</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7">
+<a href="#Running_offlineimap_in_the_background"><span class="tocnumber">4.1</span> <span class="toctext">Running offlineimap in the background</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#systemd_service"><span class="tocnumber">4.1.1</span> <span class="toctext">systemd service</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9"><a href="#Automatic_mailbox_generation_for_mutt"><span class="tocnumber">4.2</span> <span class="toctext">Automatic mailbox generation for mutt</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Gmail_configuration"><span class="tocnumber">4.3</span> <span class="toctext">Gmail configuration</span></a></li>
+<li class="toclevel-2 tocsection-11">
+<a href="#Password_management"><span class="tocnumber">4.4</span> <span class="toctext">Password management</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#.netrc"><span class="tocnumber">4.4.1</span> <span class="toctext">.netrc</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Using_GPG"><span class="tocnumber">4.4.2</span> <span class="toctext">Using GPG</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Using_pass"><span class="tocnumber">4.4.3</span> <span class="toctext">Using pass</span></a></li>
+<li class="toclevel-3 tocsection-15">
+<a href="#Gnome_keyring"><span class="tocnumber">4.4.4</span> <span class="toctext">Gnome keyring</span></a>
+<ul>
+<li class="toclevel-4 tocsection-16"><a href="#Option_1:_using_gnomekeyring_Python_module"><span class="tocnumber">4.4.4.1</span> <span class="toctext">Option 1: using gnomekeyring Python module</span></a></li>
+<li class="toclevel-4 tocsection-17"><a href="#Option_2:_using_gnome-keyring-queryAUR_tool"><span class="tocnumber">4.4.4.2</span> <span class="toctext">Option 2: using <span>gnome-keyring-query</span><sup>AUR</sup> tool</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-18"><a href="#python2-keyring"><span class="tocnumber">4.4.5</span> <span class="toctext">python2-keyring</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Emacs_EasyPG"><span class="tocnumber">4.4.6</span> <span class="toctext">Emacs EasyPG</span></a></li>
+<li class="toclevel-3 tocsection-20"><a href="#KeePass_.2F_KeePassX"><span class="tocnumber">4.4.7</span> <span class="toctext">KeePass / KeePassX</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-21"><a href="#Kerberos_authentication"><span class="tocnumber">4.5</span> <span class="toctext">Kerberos authentication</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#Overriding_UI_and_autorefresh_settings"><span class="tocnumber">5.1</span> <span class="toctext">Overriding UI and autorefresh settings</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Folder_could_not_be_created"><span class="tocnumber">5.2</span> <span class="toctext">Folder could not be created</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#SSL_fingerprint_does_not_match"><span class="tocnumber">5.3</span> <span class="toctext">SSL fingerprint does not match</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Copying_message.2C_connection_closed"><span class="tocnumber">5.4</span> <span class="toctext">Copying message, connection closed</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-27"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=offlineimap">offlineimap</a></span>. For a development version, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/offlineimap-git/">offlineimap-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Offlineimap is distributed with two default configuration files, which are both located in <code>/usr/share/offlineimap/</code>. <code>offlineimap.conf</code> contains every setting and is thorougly documented. Alternatively, <code>offlineimap.conf.minimal</code> is not commented and only contains a small number of settings (see: <a href="#Minimal">Minimal</a>).
+</p>
+<p>Copy one of the default configuration files to <code>~/.offlineimaprc</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Writing a comment after an option/value on the same line is invalid syntax, hence take care that comments are placed on their own separate line.</div>
+<h3><span class="mw-headline" id="Minimal">Minimal</span></h3>
+<p>The following file is a commented version of <code>offlineimap.conf.minimal</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[general]
+# List of accounts to be synced, separated by a comma.
+accounts = main
+
+[Account main]
+# Identifier for the local repository; e.g. the maildir to be synced via IMAP.
+localrepository = main-local
+# Identifier for the remote repository; i.e. the actual IMAP, usually non-local.
+remoterepository = main-remote
+# Status cache. Default is plain, which eventually becomes huge and slow.
+status_backend = sqlite
+
+[Repository main-local]
+# Currently, offlineimap only supports maildir and IMAP for local repositories.
+type = Maildir
+# Where should the mail be placed?
+localfolders = ~/Maildir
+
+[Repository main-remote]
+# Remote repos can be IMAP or Gmail, the latter being a preconfigured IMAP.
+type = IMAP
+remotehost = host.domain.tld
+remoteuser = username
+</pre>
+<h3><span class="mw-headline" id="Selective_folder_synchronization">Selective folder synchronization</span></h3>
+<p>For synchronizing only certain folders, you can use a <a rel="nofollow" class="external text" href="http://offlineimap.org/doc/nametrans.html#folderfilter">folderfilter</a> in the <b>remote</b> section of the account in <code>~/.offlineimaprc</code>. For example, the following configuration will only synchronize the folders <code>Inbox</code> and <code>Sent</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Repository main-remote]
+# Synchronize only the folders Inbox and Sent:
+folderfilter = lambda foldername: foldername in ["Inbox", "Sent"]
+...</pre>
+<p>For more options, see the <a rel="nofollow" class="external text" href="http://offlineimap.org/doc/nametrans.html#folderfilter">official documentation</a>.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Before running offlineimap, create any parent directories that were allocated to local repositories:
+</p>
+<pre>$ mkdir ~/Maildir
+</pre>
+<p>Now, run the program:
+</p>
+<pre>$ offlineimap
+</pre>
+<p>Mail accounts will now be synced. If anything goes wrong, take a closer look at the error messages. OfflineIMAP is usually very verbose about problems; partly because the developers did not bother with taking away tracebacks from the final product.
+</p>
+<h2><span class="mw-headline" id="Miscellaneous">Miscellaneous</span></h2>
+<h3><span class="mw-headline" id="Running_offlineimap_in_the_background">Running offlineimap in the background</span></h3>
+<p>Most other mail transfer agents assume that the user will be using the tool as a <a href="../en/Daemons.html" title="Daemon" class="mw-redirect">daemon</a> by making the program sync periodically by default. In offlineimap, there are a few settings that control backgrounded tasks.
+</p>
+<p>Confusingly, they are spread thin all-over the configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# In the general section
+[general]
+# Controls how many accounts may be synced simultaneously
+maxsyncaccounts = 1
+
+# In the account identifier
+[Account main]
+# Minutes between syncs
+autorefresh = 0.5
+# Quick-syncs do not update if the only changes were to IMAP flags.
+# autorefresh=0.5 together with quick=10 yields
+# 10 quick refreshes between each full refresh, with 0.5 minutes between every 
+# refresh, regardless of type.
+quick = 10
+
+# In the remote repository identifier
+[Repository main-remote]
+# Instead of closing the connection once a sync is complete, offlineimap will
+# send empty data to the server to hold the connection open. A value of 60
+# attempts to hold the connection for a minute between syncs (both quick and
+# autorefresh).This setting has no effect if autorefresh and holdconnectionopen
+# are not both set.
+keepalive = 60
+# OfflineIMAP normally closes IMAP server connections between refreshes if
+# the global option autorefresh is specified.  If you wish it to keep the
+# connection open, set this to true. This setting has no effect if autorefresh
+# is not set.
+holdconnectionopen = yes
+</pre>
+<h4><span class="mw-headline" id="systemd_service">systemd service</span></h4>
+<p>When configured to run background jobs, offlineimap can be managed with the following systemd service:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/offlineimap@.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Start offlineimap as a daemon
+Requires=network-online.target
+After=network.target
+
+[Service]
+User=%i
+ExecStart=/usr/bin/offlineimap
+KillSignal=SIGUSR2
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>offlineimap@<i>user</i>.service</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If your configuration involves <a href="../en/D-Bus.html" title="D-Bus">D-Bus</a> operations, e.g. <a href="#Gnome_keyring">#Gnome keyring</a>, you should adapt this service for systemd user instance as described in <a href="../en/Systemd/User.html" title="Systemd/User">systemd/User</a> instead of using it directly. This approach is necessary to set the <code>DBUS_SESSION_BUS_ADDRESS</code> variable correctly.</div>
+<h3><span class="mw-headline" id="Automatic_mailbox_generation_for_mutt">Automatic mailbox generation for mutt</span></h3>
+<p><a href="../en/Mutt.html" title="Mutt">Mutt</a> cannot be simply pointed to an IMAP or maildir directory and be expected to guess which subdirectories happen to be the mailboxes, yet offlineimap can generate a muttrc fragment containing the mailboxes that it syncs.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[mbnames]
+enabled = yes
+filename = ~/.mutt/mailboxes
+header = "mailboxes "
+peritem = "+%(accountname)s/%(foldername)s"
+sep = " "
+footer = "\n"
+</pre>
+<p>Then add the following lines to <code>~/.mutt/muttrc</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.mutt/muttrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# IMAP: offlineimap
+set folder = "~/Mail"
+source ~/.mutt/mailboxes
+set spoolfile = "+account/INBOX"
+set record = "+account/Sent\ Items"
+set postponed = "+account/Drafts"
+</pre>
+<p><code>account</code> is the name you have given to your IMAP account in <code>~/.offlineimaprc</code>.
+</p>
+<h3><span class="mw-headline" id="Gmail_configuration">Gmail configuration</span></h3>
+<p>This remote repository is configured specifically for Gmail support, substituting folder names in uppercase for lowercase, among other small additions. Keep in mind that this configuration does not sync the <i>All Mail</i> folder, since it is usually unnecessary and skipping it prevents bandwidth costs:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Repository gmail-remote]
+type = Gmail
+remoteuser = user@gmail.com
+remotepass = password
+nametrans = lambda foldername: re.sub ('^\[gmail\]', 'bak',
+                               re.sub ('sent_mail', 'sent',
+                               re.sub ('starred', 'flagged',
+                               re.sub (' ', '_', foldername.lower()))))
+folderfilter = lambda foldername: foldername not in ['[Gmail]/All Mail']
+# Necessary as of OfflineIMAP 6.5.4
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> If you have Gmail set to another language, the folder names may appear translated too, e.g. "verzonden_berichten" instead of "sent_mail".</li>
+<li> After version 6.3.5, offlineimap also creates remote folders to match your local ones. Thus you may need a nametrans rule for your local repository too that reverses the effects of this nametrans rule. If you don't want to make a reverse nametrans rule, you can disable remote folder creation by putting this in your remote configuration: <code>createfolders = False</code>
+</li>
+<li> As of 1 October 2012 gmail SSL certificate fingerprint is not always the same. This prevents from using <code>cert_fingerprint</code> and makes the <code>sslcacertfile</code> way a better solution for the SSL verification (see <a href="#SSL_fingerprint_does_not_match">#SSL fingerprint does not match</a>).</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="Password_management">Password management</span></h3>
+<h4><span class="mw-headline" id=".netrc">.netrc</span></h4>
+<p>Add the following lines to your <code>~/.netrc</code>:
+</p>
+<pre>machine hostname.tld
+    login [your username]
+    password [your password]
+</pre>
+<p>Do not forget to give the file appropriate rights like 600 or 700:
+</p>
+<pre>$ chmod 600 ~/.netrc
+</pre>
+<h4><span class="mw-headline" id="Using_GPG">Using GPG</span></h4>
+<p>GNU Privacy Guard can be used for storing a password in an encrypted file. First set up <a href="../en/GnuPG.html" title="GnuPG">GnuPG</a> and then follow the steps in this section. It is assumed that you can use your GPG private key <a href="../en/GnuPG.html#gpg-agent" title="GnuPG">without entering a password</a> all the time.
+</p>
+<p>First type in the password for the email account in a plain text file. Do this in a secure directory with <code>700</code> permissions located on a <a href="../en/Tmpfs.html" title="Tmpfs">tmpfs</a> to avoid writing the unencrypted password to the disk. Then encrypt the file with your private key:
+</p>
+<pre>$ gpg --default-recipient-self -e <i>/path/to/plain/password</i>
+</pre>
+<p>Remove the plain text file since it is no longer needed. Move the encrypted file to the final location, e.g. <code>~/.offlineimappass.gpg</code>.
+</p>
+<p>Now create a python function that will decrypt the password:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimap.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#! /usr/bin/env python2
+from subprocess import check_output
+
+def get_pass():
+    return check_output("gpg -dq ~/.offlineimappass.gpg", shell=True).strip("\n")</pre>
+<p>Load this file from <code>~/.offlineimaprc</code> and specify the defined function:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[general]
+# Path to file with arbitrary Python code to be loaded
+pythonfile = ~/.offlineimap.py
+...
+
+[Repository <i>example</i>]
+# Decrypt and read the encrypted password
+remotepasseval = get_pass()
+...</pre>
+<h4><span class="mw-headline" id="Using_pass">Using pass</span></h4>
+<p><a href="../en/Pass.html" title="Pass">pass</a> is a simple password manager from the command line based on GPG.
+</p>
+<p>First create a password for your email account(s):
+</p>
+<pre>$ pass insert Mail/<i>account</i>
+</pre>
+<p>Now create a python function that will decrypt the password:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimap.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#! /usr/bin/env python2
+from subprocess import check_output
+
+def get_pass(account):
+    return check_output("pass Mail/" + account, shell=True).splitlines()[0]</pre>
+<p>This is an example for a multi-account setup. You can customize the argument to <i>pass</i> as defined previously.
+</p>
+<p>Load this file from <code>~/.offlineimaprc</code> and specify the defined function: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[general]
+# Path to file with arbitrary Python code to be loaded
+pythonfile = ~/.offlineimap.py
+...
+
+[Repository Gmail]
+# Decrypt and read the encrypted password
+remotepasseval = get_pass("Gmail")
+...</pre>
+<h4><span class="mw-headline" id="Gnome_keyring">Gnome keyring</span></h4>
+<p>In configuration for remote repositories the remoteusereval/remotepasseval fields can be set to custom python code that evaluates to the username/password. The code can be a call to a function defined in a Python script pointed to by 'pythonfile' config field. Create <code>~/.offlineimap.py</code> according to either of the two options below and use it in the configuration:
+</p>
+<pre>
+[general]
+pythonfile = ~/.offlineimap.py
+
+[Repository examplerepo]
+type = IMAP
+remotehost = mail.example.com
+remoteusereval = get_username("examplerepo")
+remotepasseval = get_password("examplerepo")
+</pre>
+<h5><span class="mw-headline" id="Option_1:_using_gnomekeyring_Python_module">Option 1: using gnomekeyring Python module</span></h5>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2-gnomekeyring">python2-gnomekeyring</a></span>. Then:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimap.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#! /usr/bin/env python2
+
+import gnomekeyring as gkey
+
+def set_credentials(repo, user, pw):
+    KEYRING_NAME = "offlineimap"
+    attrs = { "repo": repo, "user": user }
+    keyring = gkey.get_default_keyring_sync()
+    gkey.item_create_sync(keyring, gkey.ITEM_NETWORK_PASSWORD,
+        KEYRING_NAME, attrs, pw, True)
+
+def get_credentials(repo):
+    keyring = gkey.get_default_keyring_sync()
+    attrs = {"repo": repo}
+    items = gkey.find_items_sync(gkey.ITEM_NETWORK_PASSWORD, attrs)
+    return (items[0].attributes["user"], items[0].secret)
+
+def get_username(repo):
+    return get_credentials(repo)[0]
+def get_password(repo):
+    return get_credentials(repo)[1]
+
+if __name__ == "__main__":
+    import sys
+    import os
+    import getpass
+    if len(sys.argv) != 3:
+        print "Usage: %s &lt;repository&gt; &lt;username&gt;" \
+            % (os.path.basename(sys.argv[0]))
+        sys.exit(0)
+    repo, username = sys.argv[1:]
+    password = getpass.getpass("Enter password for user '%s': " % username)
+    password_confirmation = getpass.getpass("Confirm password: ")
+    if password != password_confirmation:
+        print "Error: password confirmation does not match"
+        sys.exit(1)
+    set_credentials(repo, username, password)
+</pre>
+<p>To set the credentials, run this script from a shell.
+</p>
+<h5><span class="mw-headline" id="Option_2:_using_gnome-keyring-queryAUR_tool">Option 2: using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gnome-keyring-query/">gnome-keyring-query</a></span><sup><small>AUR</small></sup> tool</span></h5>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimap.py</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#! /usr/bin/env python2
+# executes gnome-keyring-query get passwd
+# and returns the output
+
+import locale
+from subprocess import Popen, PIPE
+
+encoding = locale.getdefaultlocale()[1]
+
+def get_password(p):
+    (out, err) = Popen(["gnome-keyring-query", "get", p], stdout=PIPE).communicate()
+    return out.decode(encoding).strip()
+</pre>
+<h4><span class="mw-headline" id="python2-keyring">python2-keyring</span></h4>
+<p>There is a general solution that should work for any keyring. Install <a rel="nofollow" class="external text" href="http://pypi.python.org/pypi/keyring">python2-keyring</a> from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>, then change  your ~/.offlineimaprc to say something like:
+</p>
+<pre>
+[general]
+pythonfile = /home/user/offlineimap.py
+...
+[Repository RemoteEmail]
+remoteuser = username@host.net
+remotepasseval = keyring.get_password("offlineimap","username@host.net")
+...
+</pre>
+<p>and somewhere in ~/offlineimap.py add <code>import keyring</code>. Now all you have to do is set your password, like so:
+</p>
+<pre>$ python2 
+&gt;&gt;&gt; import keyring
+&gt;&gt;&gt; keyring.set_password("offlineimap","username@host.net", "MYPASSWORD")</pre>
+<p>and it will grab the password from your (kwallet/gnome-) keyring instead of having to keep it in plaintext or enter it each time.
+</p>
+<h4><span class="mw-headline" id="Emacs_EasyPG">Emacs EasyPG</span></h4>
+<p>See <a rel="nofollow" class="external free" href="http://www.emacswiki.org/emacs/OfflineIMAP#toc2">http://www.emacswiki.org/emacs/OfflineIMAP#toc2</a>
+</p>
+<h4><span class="mw-headline" id="KeePass_.2F_KeePassX">KeePass / KeePassX</span></h4>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python2-keepass-git/">python2-keepass-git</a></span><sup><small>AUR</small></sup> from the AUR, then add the following to your offlineimap.py file:
+</p>
+<pre>
+#! /usr/bin/env python2
+import os, getpass
+from keepass import kpdb
+ 
+def get_keepass_pw(dbpath, title="", username=""):
+    if os.path.isfile(dbpath):
+        db = kpdb.Database(dbpath, getpass.getpass("Master password for '" + dbpath +    "': "))
+        for entry in db.entries:
+            if (entry.title == title) and (entry.username == username):
+                return entry.password
+    else:
+        print "Error: '" + dbpath + "' does not exist."
+        return
+
+</pre>
+<p>(Credit to aki--aki: <a rel="nofollow" class="external free" href="https://gist.github.com/aki--aki/5180359">https://gist.github.com/aki--aki/5180359</a>)
+</p>
+<p>Next, edit your ~/.offlineimaprc:
+</p>
+<pre>
+[general]
+# VVV Set this path correctly VVV
+pythonfile = /home/user/offlineimap.py
+...
+[Repository RemoteEmail]
+remoteuser = username@host.net
+# Set the DB path as well as the title and username of the specific entry you'd like to use.
+# This will prompt you on STDIN at runtime for the kdb master password.
+remotepasseval = get_keepass_pw("/path/to/database.kdb", title="&lt;entry title&gt;", username="&lt;entry username&gt;")
+...
+</pre>
+<p>Note that as-is, this does not support KDBs with keyfiles, only KDBs with password-only auth.
+</p>
+<h3><span class="mw-headline" id="Kerberos_authentication">Kerberos authentication</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/python2-kerberos/">python2-kerberos</a></span><sup><small>AUR</small></sup> from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> and do not specify remotepass in your .offlineimaprc. 
+OfflineImap figure out the reset all if have a valid Kerberos TGT. 
+If you have 'maxconnections', it will fail for some connection. Comment 'maxconnections' out will solve this problem.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Overriding_UI_and_autorefresh_settings">Overriding UI and autorefresh settings</span></h3>
+<p>For the sake of troubleshooting, it is sometimes convenient to launch offlineimap with a more verbose UI, no background syncs and perhaps even a debug level:
+</p>
+<pre>$ offlineimap [ -o ] [ -d &lt;debug_type&gt; ] [ -u &lt;ui&gt; ]
+</pre>
+<dl>
+<dt>-o</dt>
+<dd>Disable autorefresh, keepalive, etc.</dd>
+</dl>
+<dl>
+<dt>-d &lt;debug_type&gt;</dt>
+<dd>Where <i>&lt;debug_type&gt;</i> is one of <code>imap</code>, <code>maildir</code> or <code>thread</code>. Debugging imap and maildir are, by far, the most useful.</dd>
+</dl>
+<dl>
+<dt>-u &lt;ui&gt;</dt>
+<dd>Where <i>&lt;ui&gt;</i> is one of <code>CURSES.BLINKENLIGHTS</code>, <code>TTY.TTYUI</code>, <code>NONINTERACTIVE.BASIC</code>, <code>NONINTERACTIVE.QUIET</code> or <code>MACHINE.MACHINEUI</code>. TTY.TTYUI is sufficient for debugging purposes.</dd>
+</dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>More recent versions use the following for &lt;ui&gt;: <code>blinkenlights</code>, <code>ttyui</code>, <code>basic</code>, <code>quiet</code> or <code>machineui</code>.</div>
+<h3><span class="mw-headline" id="Folder_could_not_be_created">Folder could not be created</span></h3>
+<p>In version 6.5.3, offlineimap gained the ability to create folders in the remote repository, as described <a rel="nofollow" class="external text" href="http://comments.gmane.org/gmane.mail.imap.offlineimap.general/4784">here</a>.
+</p>
+<p>This can lead to errors of the following form when using <code>nametrans</code> on the remote repository:
+</p>
+<pre>ERROR: Creating folder bar on repository foo-remote
+  Folder 'bar'[foo-remote] could not be created. Server responded: ('NO', ['[ALREADYEXISTS] Duplicate folder name bar (Failure)'])
+</pre>
+<p>The solution is to provide an inverse <code>nametrans</code> lambda for the local repository, e.g.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.offlineimaprc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Repository foo-local]
+nametrans = lambda foldername: foldername.replace('bar', 'BAR')
+
+[Repository foo-remote]
+nametrans = lambda foldername: foldername.replace('BAR', 'bar')
+</pre>
+<ul>
+<li> For working out the correct inverse mapping. the output of <code>offlineimap --info</code> should help.</li>
+<li> After updating the mapping, it may be necessary to remove all of the folders under <code>$HOME/.offlineimap/</code> for the affected accounts.</li>
+</ul>
+<h3><span class="mw-headline" id="SSL_fingerprint_does_not_match">SSL fingerprint does not match</span></h3>
+<pre>ERROR: Server SSL fingerprint 'keykeykey' for hostname 'example.com' does not match configured fingerprint. Please verify and set 'cert_fingerprint' accordingly if not set yet.
+</pre>
+<p>To solve this, add to <code>~/.offlineimaprc</code> (in the same section as <code>ssl = yes</code>) one of the following:
+</p>
+<ul><li> either add <code>cert_fingerprint</code>, with the certificate fingerprint of the remote server. This checks whether the remote server certificate matches the given fingerprint.</li></ul>
+<pre>cert_fingerprint = keykeykey
+</pre>
+<ul><li> or add <code>sslcacertfile</code> with the path to the system CA certificates file. Needs <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ca-certificates">ca-certificates</a></span> installed. This validates the remote ssl certificate chain against the Certification Authorities in that file.</li></ul>
+<pre>sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+</pre>
+<h3><span class="mw-headline" id="Copying_message.2C_connection_closed">Copying message, connection closed</span></h3>
+<pre>ERROR: Copying message -2 [acc: email] connection closed
+Folder sent [acc: email]: ERROR: while syncing sent [account email] connection closed
+</pre>
+<p>Cause of this can be creation of same message both locally and on server. This happens if your email provider automatically saves sent mails to same folder as your local client. If you encounter this, disable save of sent messages in your local client.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://lists.alioth.debian.org/mailman/listinfo/offlineimap-project">Official OfflineIMAP mailing list</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://pbrisbin.com/posts/mutt_gmail_offlineimap/">Mutt + Gmail + Offlineimap</a> - An outline of brisbin's simple gmail/mutt setup using cron to keep offlineimap syncing.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Email_clients.html" title="Category:Email clients">Email clients</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>MySQL - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-MySQL skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">MySQL</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PhpMyAdmin.html" title="PhpMyAdmin">phpMyAdmin</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Adminer.html" title="Adminer">Adminer</a></li>
+</ul>
+</div>
+<p>MySQL is a widely spread, multi-threaded, multi-user SQL database. For more information about features, see the <a rel="nofollow" class="external text" href="http://www.mysql.com/">official homepage</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>MariaDB is now officially Arch Linux's default implementation of MySQL. It is recommended for all users to <a href="#Upgrade_from_Oracle_MySQL_to_MariaDB">upgrade</a> to MariaDB. Oracle MySQL was dropped to the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. See <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/mariadb-replaces-mysql-in-repositories/">the announcement</a>.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Upgrade_from_Oracle_MySQL_to_MariaDB"><span class="tocnumber">1.1</span> <span class="toctext">Upgrade from Oracle MySQL to MariaDB</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Add_user"><span class="tocnumber">2.1</span> <span class="toctext">Add user</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Configuration_files"><span class="tocnumber">2.2</span> <span class="toctext">Configuration files</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Grant_remote_access"><span class="tocnumber">2.3</span> <span class="toctext">Grant remote access</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Disable_remote_access"><span class="tocnumber">2.4</span> <span class="toctext">Disable remote access</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Enable_auto-completion"><span class="tocnumber">2.5</span> <span class="toctext">Enable auto-completion</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Using_UTF-8"><span class="tocnumber">2.6</span> <span class="toctext">Using UTF-8</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Using_a_TMPFS_for_tmpdir"><span class="tocnumber">2.7</span> <span class="toctext">Using a TMPFS for tmpdir</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Time_zone_tables"><span class="tocnumber">2.8</span> <span class="toctext">Time zone tables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Database_maintenance"><span class="tocnumber">3</span> <span class="toctext">Database maintenance</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Upgrade_databases_on_major_releases"><span class="tocnumber">3.1</span> <span class="toctext">Upgrade databases on major releases</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Checking.2C_optimizing_and_repairing_databases"><span class="tocnumber">3.2</span> <span class="toctext">Checking, optimizing and repairing databases</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Backup"><span class="tocnumber">4</span> <span class="toctext">Backup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#Compression"><span class="tocnumber">4.1</span> <span class="toctext">Compression</span></a></li>
+<li class="toclevel-2 tocsection-17">
+<a href="#Non-interactive"><span class="tocnumber">4.2</span> <span class="toctext">Non-interactive</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#Example_script"><span class="tocnumber">4.2.1</span> <span class="toctext">Example script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Holland_Backup"><span class="tocnumber">4.3</span> <span class="toctext">Holland Backup</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#MySQL_daemon_cannot_start"><span class="tocnumber">5.1</span> <span class="toctext">MySQL daemon cannot start</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Unable_to_run_mysql_upgrade_because_MySQL_cannot_start"><span class="tocnumber">5.2</span> <span class="toctext">Unable to run mysql_upgrade because MySQL cannot start</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Reset_the_root_password"><span class="tocnumber">5.3</span> <span class="toctext">Reset the root password</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Check_and_repair_all_tables"><span class="tocnumber">5.4</span> <span class="toctext">Check and repair all tables</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Optimize_all_tables"><span class="tocnumber">5.5</span> <span class="toctext">Optimize all tables</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#OS_error_22_when_running_on_ZFS"><span class="tocnumber">5.6</span> <span class="toctext">OS error 22 when running on ZFS</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#Cannot_login_through_CLI.2C_but_phpmyadmin_works_well"><span class="tocnumber">5.7</span> <span class="toctext">Cannot login through CLI, but phpmyadmin works well</span></a></li>
+<li class="toclevel-2 tocsection-28"><a href="#MySQL_binary_logs_are_taking_up_huge_disk_space"><span class="tocnumber">5.8</span> <span class="toctext">MySQL binary logs are taking up huge disk space</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-29"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a rel="nofollow" class="external text" href="https://mariadb.org/">MariaDB</a> is the <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/mariadb-replaces-mysql-in-repositories/">default implementation</a> of MySQL in Arch Linux, provided with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span> package.
+</p>
+<p>Alternative implementations are:
+</p>
+<ul><li> <b>Oracle MySQL</b> — An implementation by Oracle Corporation.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://www.mysql.com/">https://www.mysql.com/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mysql/">mysql</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>Percona Server</b> — An implementation by Percona LLC.</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://www.percona.com/software/percona-server/">http://www.percona.com/software/percona-server/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=percona-server">percona-server</a></span>
+</dd></dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> If the database (in <code>/var/lib/mysql</code>) resides on a <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a> file system, you should consider disabling <a href="../en/Btrfs.html#Copy-On-Write_.28CoW.29" title="Btrfs">Copy-on-Write</a> for the directory before creating any database.</li>
+<li> If the database resides on a <a href="../en/ZFS.html" title="ZFS">ZFS</a> file system, you should consult <a href="../en/ZFS.html#Database" title="ZFS">ZFS#Database</a> before creating any database.</li>
+</ul>
+</div>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span>, afterwards run the following command <b>before starting</b> the <code>mariadb.service</code>:
+</p>
+<pre># mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+</pre>
+<p>Now the <code>mariadb.service</code> can be started and/or enabled with <a href="../en/Systemd.html#Using_units" title="Systemd">systemd</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you use something other than <code>/var/lib/mysql</code> for datadir, you need to <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">edit</a> <code>mariadb.service</code> and append the same <code>--datadir</code> parameter to the <code>ExecStart</code> line.</div>
+<p>The following command will interactively guide you through a number of recomended security measures at the database level:
+</p>
+<pre># mysql_secure_installation
+</pre>
+<p>To simplify administration, you might want to install a front-end such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dbeaver/">dbeaver</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mysql-workbench">mysql-workbench</a></span>, <a href="../en/Adminer.html" title="Adminer">Adminer</a> or <a href="../en/PhpMyAdmin.html" title="PhpMyAdmin">phpMyAdmin</a>. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mysql-workbench">mysql-workbench</a></span> is not completely compatible with MariaDB but can be used for basic tasks.
+</p>
+<h3><span class="mw-headline" id="Upgrade_from_Oracle_MySQL_to_MariaDB">Upgrade from Oracle MySQL to MariaDB</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It could be necessary to remove the following files from <code>/var/lib/mysql</code> : <code>ib_logfile0</code>, <code>ib_logfile1</code> and <code>aria_log_control</code>, before restarting the daemon in the following procedure.</div>
+<p>See <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/mariadb-replaces-mysql-in-repositories/">the announcement</a> for the procedure to follow.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>Once you have started the MySQL server and added a root account, you may want to change the default configuration.
+</p>
+<p>To log in as <code>root</code> on the MySQL server, use the following command:
+</p>
+<pre>$ mysql -u root -p
+</pre>
+<h3><span class="mw-headline" id="Add_user">Add user</span></h3>
+<p>Creating a new user takes two steps: create the user; grant privileges. In the below example, the user <i>monty</i> with <i>some_pass</i> as password is being created, then granted full permissions to the database <i>mydb</i>: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+MariaDB&gt; CREATE USER 'monty'@'localhost' IDENTIFIED BY 'some_pass';
+MariaDB&gt; GRANT ALL PRIVILEGES ON mydb.* TO 'monty'@'localhost';
+MariaDB&gt; FLUSH PRIVILEGES;
+MariaDB&gt; quit</pre>
+<h3><span class="mw-headline" id="Configuration_files">Configuration files</span></h3>
+<p><i>MariaDB</i> configuration options are read from the following files in the given order (according to <code>mysqld --help --verbose </code> output):
+</p>
+<pre>/etc/my.cnf /etc/mysql/my.cnf ~/.my.cnf
+</pre>
+<p>Depending on the scope of the changes you want to make (system-wide, user-only...), use the corresponding file. See <a rel="nofollow" class="external text" href="https://mariadb.com/kb/en/mariadb/documentation/getting-started/starting-and-stopping-mariadb/mysqld-configuration-files-and-groups/">this entry</a> of the KnowledgeBase for more information.
+</p>
+<h3><span class="mw-headline" id="Grant_remote_access">Grant remote access</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This is not considered as best practice and may cause security issues. Consider using <a href="../en/Secure_Shell.html" title="Secure Shell">Secure Shell</a>, <a href="../en/TigerVNC.html" title="VNC" class="mw-redirect">VNC</a> or <a href="../en/Category:Virtual_Private_Network.html" title="Category:Virtual Private Network">VPN</a>, if you want to maintain the MySQL-server outside and/or inside your LAN.</div>
+<p>If you want to access your MySQL server from other LAN hosts, you have to edit the following lines in <code>/etc/mysql/my.cnf</code>:
+</p>
+<pre>[mysqld]
+   ...
+   #skip-networking
+   bind-address = &lt;some ip-address&gt;
+   ...
+</pre>
+<p>Grant any MySQL user remote access (example for root):
+</p>
+<pre>$ mysql -u root -p
+</pre>
+<p>Check current users with remote access privileged:
+</p>
+<pre>SELECT User, Host FROM mysql.user WHERE Host &lt;&gt; 'localhost';
+</pre>
+<p>Now grant remote access for your user (here root)::
+</p>
+<pre>GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.1.%' IDENTIFIED BY 'my_optional_remote_password' WITH GRANT OPTION;
+</pre>
+<p>You can change the '%' wildcard to a specific host if you like. The password can be different from user's main password.
+</p>
+<h3><span class="mw-headline" id="Disable_remote_access">Disable remote access</span></h3>
+<p>The MySQL server is accessible from the network by default. If MySQL is only needed for the localhost, you can improve security by not listening on TCP port 3306. To refuse remote connections, uncomment the following line in <code>/etc/mysql/my.cnf</code>:
+</p>
+<pre>skip-networking
+</pre>
+<p>You will still be able to log in from the localhost.
+</p>
+<h3><span class="mw-headline" id="Enable_auto-completion">Enable auto-completion</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Enabling this feature can make the client initialization longer.</div>
+<p>The MySQL client completion feature is disabled by default. To enable it system-wide edit <code>/etc/mysql/my.cnf</code>, and replace <code>no-auto-rehash</code> by <code>auto-rehash</code>. Completion will be enabled next time you run the MySQL client.
+</p>
+<h3><span class="mw-headline" id="Using_UTF-8">Using UTF-8</span></h3>
+<p>In the <code>/etc/mysql/my.cnf</code> file section under the <code>mysqld</code> group, add:
+</p>
+<pre>
+[mysqld]
+init_connect                = 'SET collation_connection = utf8_general_ci,NAMES utf8'
+collation_server            = utf8_general_ci
+character_set_client        = utf8
+character_set_server        = utf8
+</pre>
+<h3><span class="mw-headline" id="Using_a_TMPFS_for_tmpdir">Using a TMPFS for tmpdir</span></h3>
+<p>The directory used by MySQL for storing temporary files is named <i>tmpdir</i>. For example, it is used to perform disk based large sorts, as well as for internal and explicit temporary tables.
+</p>
+<p>Create the directory with appropriate permissions:
+</p>
+<pre># mkdir -pv /var/lib/mysqltmp
+# chown mysql:mysql /var/lib/mysqltmp
+</pre>
+<p>Find the id and gid of the <code>mysql</code> user and group:
+</p>
+<pre>$ id mysql
+uid=27(mysql) gid=27(mysql) groups=27(mysql)
+</pre>
+<p>Add to your <code>/etc/fstab</code> file.
+</p>
+<pre> tmpfs   /var/lib/mysqltmp   tmpfs   rw,gid=27,uid=27,size=100M,mode=0750,noatime   0 0
+</pre>
+<p>Add to your <code>/etc/mysql/my.cnf</code> file under the <code>mysqld</code> group:
+</p>
+<pre> tmpdir      = /var/lib/mysqltmp
+</pre>
+<p>Then reboot or ( shutdown mysql, mount the tmpdir, start mysql ).
+</p>
+<h3><span class="mw-headline" id="Time_zone_tables">Time zone tables</span></h3>
+<p>Although time zone tables are created during the installation, they are not automatically populated. They need to be populated if you are planning on using CONVERT_TZ() in SQL queries.
+</p>
+<p>To populate the time zone tables with all the time zones:
+</p>
+<pre>$ mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root -p mysql
+</pre>
+<p>Optionally, you may populate the table with specific time zone files:
+</p>
+<pre>$ mysql_tzinfo_to_sql &lt;timezone_file&gt; &lt;timezone_name&gt; | mysql -u root -p mysql
+</pre>
+<h2><span class="mw-headline" id="Database_maintenance">Database maintenance</span></h2>
+<h3><span class="mw-headline" id="Upgrade_databases_on_major_releases">Upgrade databases on major releases</span></h3>
+<p>Upon a major version release of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span> (for example mariadb-10.1.10-1 to mariadb-10.1.18-1), it is wise to upgrade databases:
+</p>
+<pre>$ mysql_upgrade -u root -p
+</pre>
+<h3><span class="mw-headline" id="Checking.2C_optimizing_and_repairing_databases">Checking, optimizing and repairing databases</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mariadb">mariadb</a></span> ships with <code>mysqlcheck</code> which can be used to check, repair, and optimize tables within databases from the shell.  See the mysqlcheck man page for more.  Several command tasks are shown:
+</p>
+<p>To check all tables in all databases:
+</p>
+<pre>$ mysqlcheck --all-databases -u root -p -c
+</pre>
+<p>To analyze all tables in all databases:
+</p>
+<pre>$ mysqlcheck --all-databases -u root -p -a
+</pre>
+<p>To repair all tables in all databases:
+</p>
+<pre>$ mysqlcheck --all-databases -u root -p -r
+</pre>
+<p>To optimize all tables in all databases:
+</p>
+<pre>$ mysqlcheck --all-databases -u root -p -o
+</pre>
+<h2><span class="mw-headline" id="Backup">Backup</span></h2>
+<p>There are various <a rel="nofollow" class="external text" href="https://mariadb.com/kb/en/mariadb/documentation/backing-up-and-restoring/">tools and strategies</a> to back up your databases.
+</p>
+<p>If you are using the default InnoDB storage engine, a <a rel="nofollow" class="external text" href="https://mariadb.com/kb/en/mariadb/documentation/clients-and-utilities/backup-restore-and-import/mysqldump/#examples">suggested</a> way of backing up all your bases online while provisioning for <a rel="nofollow" class="external text" href="https://dev.mysql.com/doc/refman/5.6/en/password-security-user.html">point-in-time recovery</a> (also known as “roll-forward,” when you need to restore an old backup and replay the changes that happened since that backup) is to execute the following command:
+</p>
+<pre>$ mysqldump --single-transaction --flush-logs --master-data=2 --all-databases -u root -p &gt; all_databases.sql
+</pre>
+<p>This will prompt for <b>MariaDB's</b> root user's password, which was defined during database <a href="#Configuration">#Configuration</a>.
+</p>
+<p>Specifying the password on the command line is <a rel="nofollow" class="external text" href="https://dev.mysql.com/doc/refman/5.6/en/password-security-user.html">strongly discouraged</a>, as it exposes it to discovery by other users through the use of <code>ps aux</code> or other techniques. Instead, the aforementioned command will prompt for the specified user's password, concealing it away.
+</p>
+<h3><span class="mw-headline" id="Compression">Compression</span></h3>
+<p>As SQL tables can get pretty large, it is recommended to pipe the output of the aforementioned command in a compression utility like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gzip">gzip</a></span>:
+</p>
+<pre>$ mysqldump --single-transaction --flush-logs --master-data=2 --all-databases -u root -p | gzip &gt; all_databases.sql.gz
+</pre>
+<p>Decompressing the backup thus created and reloading it in the server is achieved by doing:
+</p>
+<pre>$ gunzip all_databases.sql.gz | mysql -u root -p
+</pre>
+<p>This will recreate and repopulate all the databases previously backed up (see <a rel="nofollow" class="external text" href="https://stackoverflow.com/questions/23180963/restore-all-mysql-database-from-a-all-database-sql-gz-file#comment35453351_23180977">this</a> or <a rel="nofollow" class="external text" href="http://www.linuxquestions.org/questions/linux-server-73/how-to-restore-mysqldump-all-databases-backup-892922/">this</a>).
+</p>
+<h3><span class="mw-headline" id="Non-interactive">Non-interactive</span></h3>
+<p>If you want to setup non-interactive backup script for use in <a href="../en/Cron.html" title="Cron">cron</a> jobs or <a href="../en/Systemd/Timers.html" title="Systemd/cron functionality" class="mw-redirect">systemd timers</a>, see <a rel="nofollow" class="external text" href="https://dev.mysql.com/doc/refman/5.6/en/option-files.html">option files</a> and <a rel="nofollow" class="external text" href="https://stackoverflow.com/a/9293090">this illustration</a> for <i>mysqldump</i>.
+</p>
+<p>Basically you should add the following section to the relevant <a href="#Configuration_files">configuration file</a>:
+</p>
+<pre>
+[mysqldump]
+user=mysqluser
+password=secret
+</pre>
+<p>Mentioning a user here is optional, but doing so will free you from having to mention it on the command line.
+</p>
+<h4><span class="mw-headline" id="Example_script">Example script</span></h4>
+<p>The database can be dumped to a file for easy backup. The following shell script will do this for you, creating a <code>db_backup.gz</code> file in the same directory as the script, containing your database dump:
+</p>
+<pre>
+#!/bin/bash
+
+THISDIR=$(dirname $(readlink -f "$0"))
+
+mysqldump --single-transaction --flush-logs --master-data=2 --all-databases \
+ | gzip &gt; $THISDIR/db_backup.gz
+echo 'purge master logs before date_sub(now(), interval 7 day);' | mysql
+</pre>
+<p>See also the official <code>mysqldump</code> page in the <a rel="nofollow" class="external text" href="http://dev.mysql.com/doc/refman/5.6/en/mysqldump.html">MySQL</a> and <a rel="nofollow" class="external text" href="https://mariadb.com/kb/en/mariadb/documentation/clients-and-utilities/backup-restore-and-import/mysqldump">MariaDB</a> manuals.
+</p>
+<h3><span class="mw-headline" id="Holland_Backup">Holland Backup</span></h3>
+<p>A python-based software package named <a rel="nofollow" class="external text" href="http://hollandbackup.org/">Holland Backup</a> is available in <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> to automate all of the backup work. It supports direct mysqldump, LVM snapshots to tar files (mysqllvm), LVM snapshots with mysqldump (mysqldump-lvm), and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xtrabackup">xtrabackup</a></span> methods to extract the data. The Holland framework supports a multitude of options and is highly configurable to address almost any backup situation.
+</p>
+<p>The main <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/holland/">holland</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/holland-common/">holland-common</a></span><sup><small>AUR</small></sup> packages provide the core framework; one of the sub-packages (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/holland-mysqldump/">holland-mysqldump</a></span><sup><small>AUR</small></sup>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/holland-mysqllvm/">holland-mysqllvm</a></span><sup><small>AUR</small></sup> and/or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/holland-xtrabackup/">holland-xtrabackup</a></span><sup><small>AUR</small></sup> must be installed for full operation. Example configurations for each method are in the <code>/usr/share/doc/holland/examples/</code> directory and can be copied to <code>/etc/holland/backupsets/</code>, as well as using the <code>holland mk-config</code> command to generate a base config for a named provider.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="MySQL_daemon_cannot_start">MySQL daemon cannot start</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Complete mess, needs several sections (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:MySQL">Talk:MySQL#</a>)</div>
+</div>
+<p>If MySQL fails to start and there is no entry in the log files, you might want to check the permissions of files in the directories <code>/var/lib/mysql</code> and <code>/var/lib/mysql/mysql</code>. If the owner of files in these directories is not <code>mysql:mysql</code>, you should do the following:
+</p>
+<pre># chown mysql:mysql /var/lib/mysql -R
+</pre>
+<p>If you run into permission problems despite having followed the above, ensure that your <code>my.cnf</code> is copied to <code>/etc/</code>:
+</p>
+<pre># cp /etc/mysql/my.cnf /etc/my.cnf
+</pre>
+<p>Now try and start the daemon.
+</p>
+<p>If you get these messages in your <code>/var/lib/mysql/hostname.err</code>:
+</p>
+<pre>[ERROR] Can't start server : Bind on unix socket: Permission denied
+[ERROR] Do you already have another mysqld server running on socket: /var/run/mysqld/mysqld.sock ?
+[ERROR] Aborting
+</pre>
+<p>the permissions of <code>/var/run/mysqld</code> could be the culprit.
+</p>
+<pre># chown mysql:mysql /var/run/mysqld -R
+</pre>
+<p>If you run mysqld and the following error appears:
+</p>
+<pre>Fatal error: Can’t open and lock privilege tables: Table ‘mysql.host’ doesn’t exist
+</pre>
+<p>Run the following command from the <code>/usr</code> directory to install the default tables:
+</p>
+<pre># cd /usr
+# mysql_install_db --user=mysql --ldata=/var/lib/mysql/
+</pre>
+<p>If you have datadir in /home /root or /run/user or a subdirectory of those, from 10.1.16 onwards, due to enhanced security, you need to move your datadir to a path or <a href="../en/Systemd.html#Editing_provided_units" title="Edit" class="mw-redirect">edit</a> <code>mysqld.service</code> to change the default
+</p>
+<pre># ProtectHome=true
+</pre>
+<p>to:
+</p>
+<pre># ProtectHome=false
+</pre>
+<h3><span class="mw-headline" id="Unable_to_run_mysql_upgrade_because_MySQL_cannot_start">Unable to run mysql_upgrade because MySQL cannot start</span></h3>
+<p>Try run MySQL in safemode:
+</p>
+<pre># mysqld_safe --datadir=/var/lib/mysql/
+</pre>
+<p>And then run:
+</p>
+<pre># mysql_upgrade -u root -p
+</pre>
+<h3><span class="mw-headline" id="Reset_the_root_password">Reset the root password</span></h3>
+<p>Stop <code>mariadb.service</code>. Issue the following command:
+</p>
+<pre># mysqld_safe --skip-grant-tables &amp;
+</pre>
+<p>Connect to the mysql server. Issue the following command:
+</p>
+<pre># mysql -u root mysql
+</pre>
+<p>Change root password:
+</p>
+<pre>mysql&gt; use mysql;
+mysql&gt; UPDATE mysql.user SET Password=PASSWORD('MyNewPass') WHERE User='root';
+mysql&gt; FLUSH PRIVILEGES;
+mysql&gt; exit
+</pre>
+<p>Start <code>mariadb.service</code>.
+</p>
+<h3><span class="mw-headline" id="Check_and_repair_all_tables">Check and repair all tables</span></h3>
+<p>Check and auto repair all tables in all databases, <a rel="nofollow" class="external text" href="http://dev.mysql.com/doc/refman/5.7/en/mysqlcheck.html">see more</a>:
+</p>
+<pre># mysqlcheck -A --auto-repair -u root -p
+</pre>
+<h3><span class="mw-headline" id="Optimize_all_tables">Optimize all tables</span></h3>
+<p>Forcefully optimize all tables, automatically fixing table errors that may come up.
+</p>
+<pre># mysqlcheck -A --auto-repair -f -o -u root -p
+</pre>
+<h3><span class="mw-headline" id="OS_error_22_when_running_on_ZFS">OS error 22 when running on ZFS</span></h3>
+<p>If you are using <a href="../en/ZFS.html" title="ZFS">ZFS</a> and get the following error:
+</p>
+<pre>InnoDB: Operating system error number 22 in a file operation.
+</pre>
+<p>You need to disable aio_writes by adding a line to the mysqld-section in /etc/mysql/my.cnf 
+</p>
+<pre>[mysqld]
+...
+innodb_use_native_aio = 0
+</pre>
+<p>However, if the post install scripts failed because of the above issue, MySQL/MariaDB might be in an invalid state. To recover from this state, execute the following:
+</p>
+<pre>rm -rf /var/lib/mysql/*
+mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+chown -R mysql:mysql /var/lib/mysql &amp;&gt;/dev/null
+/usr/bin/systemd-tmpfiles --create mysql.conf
+</pre>
+<p>After which MySQL/MariaDB should be installed correctly.
+</p>
+<h3><span class="mw-headline" id="Cannot_login_through_CLI.2C_but_phpmyadmin_works_well">Cannot login through CLI, but phpmyadmin works well</span></h3>
+<p>This may happen if you are using a long (&gt;70-75) password.
+As for 5.5.36, for some reason, mysql CLI cannot handle that much characters in readline mode.
+So, if you are planning to use the recommended password input mode:
+</p>
+<pre>$ mysql -u &lt;user&gt; -p
+Password:
+</pre>
+<p>consider changing the password to smaller one.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You still can log in by specifying the password as an argument to mysql command.
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This behavior is considered dangerous, because your password might leak, for example, to the logs. Use it only in case of emergency and do not forget to change password right afterwards.</div>
+<pre>$ mysql -u &lt;user&gt; -p"&lt;some-very-strong-password&gt;"
+</pre>
+</div>
+<h3><span class="mw-headline" id="MySQL_binary_logs_are_taking_up_huge_disk_space">MySQL binary logs are taking up huge disk space</span></h3>
+<p>By default, mysqld creates binary log files in <code>/var/lib/mysql</code>. This is useful for replication master server or data recovery. But these binary logs can eat up your disk space. If you do not plan to use replication or data recovery features, you may disable binary logging by commenting out these lines in <code>/etc/mysql/my.cnf</code>:
+</p>
+<pre>#log-bin=mysql-bin
+#binlog_format=mixed
+</pre>
+<p>Or you could limit the size of the logfile like this:
+</p>
+<pre>expire_logs_days = 10
+max_binlog_size  = 100M
+</pre>
+<p>Alternatively, you can purge some binary logs in <code>/var/lib/mysql</code> to free up disk space with this command:
+</p>
+<pre># mysql -u root -p"PASSWORD" -e "PURGE BINARY LOGS TO 'mysql-bin.0000xx';"
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://mariadb.org/">MariaDB Official Website</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://mariadb.com/kb/en/">MariaDB knowledge Base</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://dev.mysql.com/doc/">MySQL documentation </a>
+</li>
+<li> <a href="../en/Apache_HTTP_Server.html" title="Apache HTTP Server">Apache HTTP Server</a> - ArchWiki article on the Apache HTTP Server</li>
+<li> <a href="../en/PHP.html" title="PHP">PHP</a> - ArchWiki article on PHP.</li>
+<li> <a rel="nofollow" class="external text" href="http://www.askapache.com/mysql/performance-tuning-mysql.html">MySQL Performance Tuning Scripts and Know-How</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Database_management_systems.html" title="Category:Database management systems">Database management systems</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SpeedTouch ADSL Modem - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SpeedTouch_ADSL_Modem skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SpeedTouch ADSL Modem</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Written like a blog post (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SpeedTouch_ADSL_Modem">Talk:SpeedTouch ADSL Modem#</a>)</div>
+</div>
+<p>This article will hopefully enable you to connect to the internet using your SpeedTouch modem. If you did not already know, the process is not exactly easy, and this guide is here to help you.
+</p>
+<p>Obviously, this has been built using my own experience (with a SpeedTouch 330) and knowledge from elsewhere. If you feel anything should be contributed, feel free to add or edit any information you see fit.
+</p>
+<p>If you are like me, you will probably want to connect when you first finish installing Arch Linux. This means you will require another internet-connected computer, or a Windows installation to proceed with downloading the necessary files.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#The_Files..."><span class="tocnumber">1</span> <span class="toctext">The Files...</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Installing_everything..."><span class="tocnumber">2</span> <span class="toctext">Installing everything...</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Initial_Configuration"><span class="tocnumber">3</span> <span class="toctext">Initial Configuration</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Further_Configuration"><span class="tocnumber">4</span> <span class="toctext">Further Configuration</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Further_Information"><span class="tocnumber">5</span> <span class="toctext">Further Information</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="The_Files...">The Files...</span></h2>
+<p>The kernel driver that is used by the SpeedTouch modem will not work without some firmware. To find out which firmware you need, run the following command:
+</p>
+<pre>awk '/4061/ { print $5 }' /proc/bus/usb/devices
+</pre>
+<p>Which should give you the revision number of your modem. If your modem is revision <b>0</b> or <b>2</b> you will need the <b>KQD6_3.012</b> file. If your modem is revision <b>4</b>, then you will require the <b>ZZZL_3.012</b> file. Both of these files can be located in this tarball <a rel="nofollow" class="external text" href="http://www.speedtouch.com/download/drivers/USB/SpeedTouch330_firmware_3012.zip">here</a>.
+</p>
+<p>You will, later, need the firmware-extractor too, which can be found <a rel="nofollow" class="external text" href="http://www.linux-usb.org/SpeedTouch/firmware/firmware-extractor">here</a>.
+</p>
+<p>Finally you should check <a rel="nofollow" class="external text" href="http://www.linux-usb.org/SpeedTouch/faq/index.html#q12">this</a> page to find out the VPI/VCI numbers for your country or ISP.
+</p>
+<p>Now you have everything, save a copy of this guide too (in text helps), and copy everything to a USB flash drive, floppy disk (if it fits), or a USB external hard drive, so you can use them while offline.
+</p>
+<p><b>NOTE:</b> Unzip isn't supported in a basic Arch Linux installation, you should unzip any .zip files using another computer or operating system first.
+</p>
+<h2><span class="mw-headline" id="Installing_everything...">Installing everything...</span></h2>
+<p>Boot into your Arch Linux installation. You should now copy everything to your home directory. Mount the drive, cp, etc, you'll know what to do.
+</p>
+<p>I assume a speedtouch folder has been created in your home directory containing these files, and that you are currently in that folder.
+</p>
+<p>You should also change to root user for the time of installing and configuring your modem:
+</p>
+<pre>su
+[password]
+</pre>
+<p>Now in that folder, you should have firmware-extractor, and your choice of firmware depending on your modem (KQD6_3.012 or ZZZL_3.012). You will need to split the firmware with the following command:
+</p>
+<p>For revision 0 or 2:
+</p>
+<pre>chmod +x firmware-extractor &amp;&amp; firmware-extractor KQD6_3.012
+</pre>
+<p>For revision 4:
+</p>
+<pre>chmod +x firmware-extractor &amp;&amp; firmware-extractor ZZZL_3.012
+</pre>
+<p>If all went well, you should now have two new files in your directory: speedtch-1.bin and speedtch-2.bin.
+</p>
+<p>Now (as root remember), copy the firmware to the right place:
+</p>
+<pre>cp speedtch* /lib/firmware
+</pre>
+<p>Now your firmware is installed! Continue to 'Initial Configuration' for more information.
+</p>
+<h2><span class="mw-headline" id="Initial_Configuration">Initial Configuration</span></h2>
+<p>We need to create a secrets file, containing the username and password you usually dial with.
+This could either be pap-secrets or chap-secrets. Not knowing, we will create both, as it does no harm.
+</p>
+<p>Create a file (I used nano) with the following text, making sure you amend it with your information:
+</p>
+<pre>"username@isp" "*" "password"
+</pre>
+<p>(This line needs to be in exactly the same layout as above, just change what is in the first and last set of quotation marks.)
+</p>
+<p>Save it as secrets in your speedtouch folder. Now you will need to place it in the correct places:
+</p>
+<pre>install -m 600 secrets /etc/ppp/chap-secrets &amp;&amp;
+install -m 600 secrets /etc/ppp/pap-secrets
+</pre>
+<p>Next, we need a ppp configuration file. For PPP over ATM, use this template. Remember to change your username, and your VPI/VCI numbers!
+</p>
+<pre>noipdefault
+defaultroute
+user 'username@isp'
+noauth
+updetach
+usepeerdns
+plugin pppoatm.so
+0.00 # Change these!
+
+### If the firmware loads but pppd won't
+### connect, uncomment this option to make
+### pppd be more verbose in the system log 
+
+# debug
+
+### For more details (and more options)
+### Read man pppd
+
+</pre>
+<p>Save and call the file speedtch. Now install it to the correct place:
+</p>
+<pre>install -m 600 speedtch /etc/ppp/peers
+</pre>
+<p>Create a final symlink:
+</p>
+<pre>cp /etc/resolv.conf /etc/ppp
+ln -sf /etc/ppp/resolv.conf /etc/resolv.conf
+</pre>
+<p>And your connection setup is done!
+</p>
+<p>You can now connect using:
+</p>
+<pre>pppd call speedtch
+</pre>
+<p>Refer to 'Further Configuration' for more Arch-specific information.
+</p>
+<h2><span class="mw-headline" id="Further_Configuration">Further Configuration</span></h2>
+<p>We will need to set up the connection to start on boot. This involves creating some scripts.
+</p>
+<p>This is the method I used. It works for me, and should work for you. Some alternative methods could probably be used. But I do not know them!
+</p>
+<p>Anyway, create a file called start_internet with the following content:
+</p>
+<pre>
+#!/bin/sh
+# Speedtouch connection script
+
+count=0
+while [[ $((count++)) -lt 40 ]]
+do
+  sync=$(dmesg | grep 'ADSL line is up')
+  if [ ! -z "$sync" ]
+  then
+    pppd call speedtch
+    exit 0
+  fi
+  sleep 1
+done
+echo "The SpeedTouch firmware did not load"
+exit 1
+</pre>
+<p>Now install this to the /usr/bin directory:
+</p>
+<pre>chmod +x start_internet &amp;&amp;
+cp start_internet /usr/bin/
+</pre>
+<p>Now we will create another script. Save this as speedtouch:
+</p>
+<pre>#!/bin/bash 
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+case "$1" in
+  start)
+    stat_busy "Starting SpeedTouch Connection"
+    start_internet &amp;&gt;/dev/null
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      add_daemon speedtch
+      stat_done
+    fi
+    ;;
+  stop)
+    stat_busy "Stopping SpeedTouch Connection"
+    poff speedtch &amp;&gt;/dev/null
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      rm_daemon speedtch
+      stat_done
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    echo "usage: $0 {start|stop|restart}"  
+esac
+exit 0
+</pre>
+<p>Install this in the directory /etc/rc.d:
+</p>
+<pre>chmod +x speedtouch &amp;&amp;
+cp speedtouch /etc/rc.d/
+</pre>
+<p>Now edit your rc.conf:
+</p>
+<pre>nano /etc/rc.conf
+</pre>
+<p>In the daemons line, add speedtouch after network. Eg:
+</p>
+<pre>DAEMONS=(syslog-ng network speedtch firestarter netfs crond alsa hal fam)
+</pre>
+<p>Right. All configuration files are there. Delete anything you do not need from your home directory (scripts etc.), double check everything is in place, and reboot.
+</p>
+<p>As it starts up, your modem should automatically sync, and you should automatically be connected.
+</p>
+<p>Now, any connection management can be used with /etc/rc.d/speedtouch:
+</p>
+<pre>/etc/rc.d/speedtouch start
+/etc/rc.d/speedtouch stop
+/etc/rc.d/speedtouch restart
+</pre>
+<h2><span class="mw-headline" id="Further_Information">Further Information</span></h2>
+<p>A lot of this guide used information from <a rel="nofollow" class="external free" href="http://www.linux-usb.org">http://www.linux-usb.org</a>. Visit there for more information.
+</p>
+<p>This guide doesn't use PPPoE. I will add this when I have more time.
+</p>
+<p>Any comments or questions, try the discussion page.
+</p>
+<p>Hope you found this helpful and feel free to improve it!
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Modems.html" title="Category:Modems">Modems</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

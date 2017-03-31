@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Software RAID and LVM - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Software_RAID_and_LVM skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Software RAID and LVM</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/RAID.html" title="RAID">RAID</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/LVM.html" title="LVM">LVM</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Installing_with_Fake_RAID.html" title="Installing with Fake RAID">Installing with Fake RAID</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Convert_a_single_drive_system_to_RAID.html" title="Convert a single drive system to RAID">Convert a single drive system to RAID</a></li>
+</ul>
+</div>
+<p>This article will provide an example of how to install and configure Arch Linux with a software RAID or Logical Volume Manager (LVM). The combination of <a href="../en/RAID.html" title="RAID">RAID</a> and <a href="../en/LVM.html" title="LVM">LVM</a> provides numerous features with few caveats compared to just using RAID.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Introduction"><span class="tocnumber">1</span> <span class="toctext">Introduction</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Swap_space"><span class="tocnumber">1.1</span> <span class="toctext">Swap space</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#MBR_vs._GPT"><span class="tocnumber">1.2</span> <span class="toctext">MBR vs. GPT</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Boot_loader"><span class="tocnumber">1.3</span> <span class="toctext">Boot loader</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Load_kernel_modules"><span class="tocnumber">2.1</span> <span class="toctext">Load kernel modules</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Prepare_the_hard_drives"><span class="tocnumber">2.2</span> <span class="toctext">Prepare the hard drives</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Install_gdisk"><span class="tocnumber">2.2.1</span> <span class="toctext">Install gdisk</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#Partition_hard_drives"><span class="tocnumber">2.2.2</span> <span class="toctext">Partition hard drives</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Clone_partitions_with_sgdisk"><span class="tocnumber">2.2.3</span> <span class="toctext">Clone partitions with sgdisk</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11">
+<a href="#RAID_installation"><span class="tocnumber">2.3</span> <span class="toctext">RAID installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Synchronization"><span class="tocnumber">2.3.1</span> <span class="toctext">Synchronization</span></a></li>
+<li class="toclevel-3 tocsection-13">
+<a href="#Scrubbing"><span class="tocnumber">2.3.2</span> <span class="toctext">Scrubbing</span></a>
+<ul>
+<li class="toclevel-4 tocsection-14"><a href="#General_Notes_on_Scrubbing"><span class="tocnumber">2.3.2.1</span> <span class="toctext">General Notes on Scrubbing</span></a></li>
+<li class="toclevel-4 tocsection-15"><a href="#RAID1_and_RAID10_Notes_on_Scrubbing"><span class="tocnumber">2.3.2.2</span> <span class="toctext">RAID1 and RAID10 Notes on Scrubbing</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-16">
+<a href="#LVM_installation"><span class="tocnumber">2.4</span> <span class="toctext">LVM installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-17"><a href="#Create_physical_volumes"><span class="tocnumber">2.4.1</span> <span class="toctext">Create physical volumes</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Create_the_volume_group"><span class="tocnumber">2.4.2</span> <span class="toctext">Create the volume group</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Create_logical_volumes"><span class="tocnumber">2.4.3</span> <span class="toctext">Create logical volumes</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-20"><a href="#Update_RAID_configuration"><span class="tocnumber">2.5</span> <span class="toctext">Update RAID configuration</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#Prepare_hard_drive"><span class="tocnumber">2.6</span> <span class="toctext">Prepare hard drive</span></a></li>
+<li class="toclevel-2 tocsection-22">
+<a href="#Configure_system"><span class="tocnumber">2.7</span> <span class="toctext">Configure system</span></a>
+<ul>
+<li class="toclevel-3 tocsection-23"><a href="#mkinitcpio.conf"><span class="tocnumber">2.7.1</span> <span class="toctext">mkinitcpio.conf</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-24"><a href="#Conclusion"><span class="tocnumber">2.8</span> <span class="toctext">Conclusion</span></a></li>
+<li class="toclevel-2 tocsection-25">
+<a href="#Install_the_bootloader_on_the_Alternate_Boot_Drives"><span class="tocnumber">2.9</span> <span class="toctext">Install the bootloader on the Alternate Boot Drives</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#Syslinux"><span class="tocnumber">2.9.1</span> <span class="toctext">Syslinux</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#GRUB_legacy"><span class="tocnumber">2.9.2</span> <span class="toctext">GRUB legacy</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-28"><a href="#Archive_your_filesystem_partition_scheme"><span class="tocnumber">2.10</span> <span class="toctext">Archive your filesystem partition scheme</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-29"><a href="#Management"><span class="tocnumber">3</span> <span class="toctext">Management</span></a></li>
+<li class="toclevel-1 tocsection-30"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Introduction">Introduction</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Be sure to review the <a href="../en/RAID.html" title="RAID">RAID</a> article and be aware of all applicable warnings, particularly if you select RAID5.</div>
+<p>Although <a href="../en/RAID.html" title="RAID">RAID</a> and <a href="../en/LVM.html" title="LVM">LVM</a> may seem like analogous technologies they each present unique features. This article uses an example with three similar 1TB SATA hard drives. The article assumes that the drives are accessible as <code>/dev/sda</code>, <code>/dev/sdb</code>, and <code>/dev/sdc</code>. If you are using IDE drives, for maximum performance make sure that each drive is a master on its own separate channel.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>It is good practice to ensure that only the drives involved in the installation are attached while performing the installation.</div>
+<table border="1" width="100%" style="text-align:center;">
+<tr>
+<td width="150px" align="left"> <b>LVM Logical Volumes</b>
+</td>
+<td>
+<code>/</code>
+</td>
+<td>
+<code>/var</code>
+</td>
+<td>
+<code>/swap</code>
+</td>
+<td>
+<code>/home</code>
+</td>
+</tr>
+</table>
+<table border="1" width="100%" style="text-align:center;">
+<tr>
+<td width="150px" align="left"> <b>LVM Volume Groups</b>
+</td>
+<td>
+<code>/dev/VolGroupArray</code>
+</td>
+</tr>
+</table>
+<table border="1" width="100%" style="text-align:center;">
+<tr>
+<td width="150px" align="left"> <b>RAID Arrays</b>
+</td>
+<td>
+<code>/dev/md0</code>
+</td>
+<td>
+<code>/dev/md1</code>
+</td>
+</tr>
+</table>
+<table border="1" width="100%" style="text-align:center;">
+<tr>
+<td width="150px" align="left"> <b>Physical Partitions</b>
+</td>
+<td>
+<code>/dev/sda1</code>
+</td>
+<td>
+<code>/dev/sdb1</code>
+</td>
+<td>
+<code>/dev/sdc1</code>
+</td>
+<td>
+<code>/dev/sda2</code>
+</td>
+<td>
+<code>/dev/sdb2</code>
+</td>
+<td>
+<code>/dev/sdc2</code>
+</td>
+</tr>
+</table>
+<table border="1" width="100%" style="text-align:center;">
+<tr>
+<td width="150px" align="left"> <b>Hard Drives</b>
+</td>
+<td>
+<code>/dev/sda</code>
+</td>
+<td>
+<code>/dev/sdb</code>
+</td>
+<td>
+<code>/dev/sdc</code>
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="Swap_space">Swap space</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you want extra performance, just let the kernel use distinct swap partitions as it does striping by default.</div>
+<p>Many tutorials treat the swap space differently, either by creating a separate RAID1 array or a LVM logical volume. Creating the swap space on a separate array is not intended to provide additional redundancy, but instead, to prevent a corrupt swap space from rendering the system inoperable, which is more likely to happen when the swap space is located on the same partition as the root directory.
+</p>
+<h3><span class="mw-headline" id="MBR_vs._GPT">MBR vs. GPT</span></h3>
+<p>See also <a href="https://en.wikipedia.org/wiki/GUID_Partition_Table" class="extiw" title="wikipedia:GUID Partition Table">Wikipedia:GUID Partition Table</a>.
+</p>
+<p>The widespread <a href="../en/Partitioning.html#Master_Boot_Record" title="Master Boot Record" class="mw-redirect">Master Boot Record</a> (MBR) partitioning scheme, dating from the early 1980s, imposed limitations which affected the use of modern hardware. <a href="../en/Partitioning.html#GUID_Partition_Table" title="GUID Partition Table" class="mw-redirect">GUID Partition Table</a> (GPT) is a new standard for the layout of the partition table based on the <a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface" class="extiw" title="wikipedia:Unified Extensible Firmware Interface">UEFI</a> specification derived from Intel. Although GPT provides a significant improvement over a MBR, it does require the additional step of creating an additional partition at the beginning of each disk for GRUB2 (see: <a href="../en/GRUB.html#GUID_Partition_Table_.28GPT.29_specific_instructions" title="GRUB">GRUB#GUID_Partition_Table_.28GPT.29_specific_instructions</a>).
+</p>
+<h3><span class="mw-headline" id="Boot_loader">Boot loader</span></h3>
+<p>This tutorial will use <a href="../en/Syslinux.html" title="Syslinux">SYSLINUX</a> instead of <a href="../en/GRUB.html" title="GRUB">GRUB</a>. GRUB when used in conjunction with <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a> requires an additional <a href="../en/GRUB.html#GPT_specific_instructions" title="GRUB">BIOS Boot Partition</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>. 
+</p>
+<p>GRUB supports the default style of metadata currently created by mdadm (i.e. 1.2) when combined with an initramfs, which has replaced in Arch Linux with <a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>. SYSLINUX only supports version 1.0, and therefore requires the <code>--metadata=1.0</code> option.
+</p>
+<p>Some boot loaders (e.g. <a href="../en/GRUB_Legacy.html" title="GRUB Legacy">GRUB Legacy</a>, <a href="../en/LILO.html" title="LILO">LILO</a>) will not support any 1.x metadata versions, and instead require the older version, 0.90. If you would like to use one of those boot loaders make sure to add the option <code>--metadata=0.90</code> to the <code>/boot</code> array during <a href="#RAID_installation">RAID installation</a>.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Obtain the latest installation media and boot the Arch Linux installer as outlined in <a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Category:Getting and installing Arch</a>.
+</p>
+<h4><span class="mw-headline" id="Load_kernel_modules">Load kernel modules</span></h4>
+<p>Enter another TTY terminal by typing <code>Alt</code>+<code>F2</code>. Load the appropriate RAID (e.g. <code>raid0</code>, <code>raid1</code>, <code>raid5</code>, <code>raid6</code>, <code>raid10</code>) and LVM (i.e. <code>dm-mod</code>) modules. The following example makes use of RAID1 and RAID5.
+</p>
+<pre># modprobe raid1
+# modprobe raid5
+# modprobe dm-mod
+</pre>
+<h3><span class="mw-headline" id="Prepare_the_hard_drives">Prepare the hard drives</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If your hard drives are already prepared and all you want to do is activate RAID and LVM jump to <a href="#Activate_existing_RAID_devices_and_LVM_volumes">Activate existing RAID devices and LVM volumes</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>. This can be achieved with alternative partitioning software (see: <a rel="nofollow" class="external text" href="http://yannickloth.be/blog/2010/08/01/installing-archlinux-with-software-raid1-encrypted-filesystem-and-lvm2/">Article</a>).</div>
+<p>Each hard drive will have a 100MB <code>/boot</code> partition, 2048MB <code>/swap</code> partition, and a <code>/</code> partition that takes up the remainder of the disk.
+</p>
+<p>The boot partition must be RAID1; i.e it cannot be striped (RAID0) or RAID5, RAID6, etc.. This is because GRUB does not have RAID drivers. Any other level will prevent your system from booting. Additionally, if there is a problem with one boot partition, the boot loader can boot normally from the other two partitions in the <code>/boot</code> array.
+</p>
+<h4><span class="mw-headline" id="Install_gdisk">Install gdisk</span></h4>
+<p>Since most disk partitioning software (i.e. fdisk and sfdisk) does not support GPT you will need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span> to set the partition type of the boot loader partitions.
+</p>
+<p>Update the <a href="../en/Pacman.html" title="Pacman">pacman</a> database:
+</p>
+<pre>$ pacman-db-upgrade
+</pre>
+<p>Refresh the package list:
+</p>
+<pre>$ pacman -Syy
+</pre>
+<p>Install <b>gptfdisk</b>.
+</p>
+<h4><span class="mw-headline" id="Partition_hard_drives">Partition hard drives</span></h4>
+<p>We will use <code>gdisk</code> to create three partitions on each of the three hard drives (i.e. <code>/dev/sda</code>, <code>/dev/sdb</code>, <code>/dev/sdc</code>):
+</p>
+<pre>   Name        Flags      Part Type  FS Type          [Label]        Size (MB)
+-------------------------------------------------------------------------------
+   sda1        Boot        Primary   linux_raid_m                       100.00  # /boot
+   sda2                    Primary   linux_raid_m                      2000.00  # /swap
+   sda3                    Primary   linux_raid_m                     97900.00  # /
+</pre>
+<p>Open <code>gdisk</code> with the first hard drive:
+</p>
+<pre># gdisk /dev/sda
+</pre>
+<p>and type the following commands at the prompt:
+</p>
+<ol>
+<li> Add a new partition: <code>n</code>
+</li>
+<li> Select the default partition number: <code>Enter</code>
+</li>
+<li> Use the default for the first sector: <code>Enter</code>
+</li>
+<li> For <code>sda1</code> and <code>sda2</code> type the appropriate size in MB (i.e. <code>+100MB</code> and <code>+2048M</code>). For <code>sda3</code> just hit <code>Enter</code> to select the remainder of the disk.</li>
+<li> Select <code>Linux RAID</code> as the partition type: <code>fd00</code>
+</li>
+<li> Write the table to disk and exit: <code>w</code>
+</li>
+</ol>
+<p>Repeat this process for <code>/dev/sdb</code> and <code>/dev/sdc</code> or use the alternate <code>sgdisk</code> method below. You may need to reboot to allow the kernel to recognize the new tables.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Make sure to create the same exact partitions on each disk. If a group of partitions of different sizes are assembled to create a RAID partition, it will work, but <i>the redundant partition will be in multiples of the size of the smallest partition</i>, leaving the unallocated space to waste.</div>
+<h4><span class="mw-headline" id="Clone_partitions_with_sgdisk">Clone partitions with sgdisk</span></h4>
+<p>If you are using GPT, then you can use <code>sgdisk</code> to clone the partition table from <code>/dev/sda</code> to the other two hard drives:
+</p>
+<pre>$ sgdisk --backup=table /dev/sda
+$ sgdisk --load-backup=table /dev/sdb
+$ sgdisk --load-backup=table /dev/sdc
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> When using this method to clone the partition table of an active drive onto a replacement drive for the same system (e.g. RAID drive replacement), use <code> sgdisk -G /dev/&lt;newDrive&gt;</code> to re-randomise the UUID of the disk and partitions to ensure they are unique.</div>
+<h3><span class="mw-headline" id="RAID_installation">RAID installation</span></h3>
+<p>After creating the physical partitions, you are ready to setup the <b>/boot</b>, '<b>/swap</b>, and <b>/</b> arrays with <code>mdadm</code>. It is an advanced tool for RAID management that will be used to create a <code>/etc/mdadm.conf</code> within the installation environment.
+</p>
+<p>Create the <b>/</b> array at <code>/dev/md0</code>:
+</p>
+<pre># mdadm --create /dev/md0 --level=5 --raid-devices=3 /dev/sd[abc]3
+</pre>
+<p>Create the <b>/swap</b> array at <code>/dev/md1</code>:
+</p>
+<pre># mdadm --create /dev/md1 --level=1 --raid-devices=3 /dev/sd[abc]2
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If the only reason you are using RAID is to prevent stored data loss (i.e. you're not concerned about some running applications crashing in the event of a disk failure), then there is no reason to RAID the swap partitions -- you can use them as multiple individual swap partitions.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you plan on installing a boot loader that does not support the 1.x version of RAID metadata make sure to add the <code>--metadata=0.90</code> option to the following command.</div>
+<p>Create the <b>/boot</b> array at <code>/dev/md2</code>:
+</p>
+<pre># mdadm --create /dev/md2 --level=1 --raid-devices=3 --metadata=1.0 /dev/sd[abc]1
+</pre>
+<h4><span class="mw-headline" id="Synchronization">Synchronization</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to avoid the initial resync with new hard drives add the <code>--assume-clean</code> flag.</div>
+<p>After you create a RAID volume, it will synchronize the contents of the physical partitions within the array. You can monitor the progress by refreshing the output of <code>/proc/mdstat</code> ten times per second with:
+</p>
+<pre># watch -n .1 cat /proc/mdstat
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Follow the synchronization in another TTY terminal by typing <code>Alt+F3</code> and then execute the above command.</div>
+<p>Further information about the arrays is accessible with:
+</p>
+<pre># mdadm --misc --detail /dev/md[012] | less
+</pre>
+<p>Once synchronization is complete the <code>State</code> line should read <code>clean</code>. Each device in the table at the bottom of the output should read <code>spare</code> or  <code>active sync</code> in the <code>State</code> column. <code>active sync</code> means each device is actively in the array.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since the RAID synchronization is transparent to the file-system you can proceed with the installation and reboot your computer when necessary.</div>
+<h4><span class="mw-headline" id="Scrubbing">Scrubbing</span></h4>
+<p>It is good practice to regularly run data <a href="https://en.wikipedia.org/wiki/Data_scrubbing" class="extiw" title="wikipedia:Data scrubbing">scrubbing</a> to check for and fix errors.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Depending on the size/configuration of the array, a scrub may take multiple hours to complete.</div>
+<p>To initiate a data scrub:
+</p>
+<pre># echo check &gt; /sys/block/md0/md/sync_action
+</pre>
+<p>As with many tasks/items relating to mdadm, the status of the scrub can be queried:
+</p>
+<pre># cat /proc/mdstat
+</pre>
+<p>Example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/mdstat</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Personalities : [raid6] [raid5] [raid4] [raid1] 
+md0 : active raid1 sdb1[0] sdc1[1]
+      3906778112 blocks super 1.2 [2/2] [UU]
+      [&gt;....................]  check =  4.0% (158288320/3906778112) finish=386.5min speed=161604K/sec
+      bitmap: 0/30 pages [0KB], 65536KB chunk
+</pre>
+<p>To stop a currently running data scrub safely:
+</p>
+<pre># echo idle &gt; /sys/block/md0/md/sync_action
+</pre>
+<p>When the scrub is complete, admins may check how many blocks (if any) have been flagged as bad:
+</p>
+<pre># cat /sys/block/md0/md/mismatch_cnt
+</pre>
+<p>The check operation scans the drives for bad sectors and mismatches. Bad sectors are automatically repaired. If it finds mismatches, i.e., good sectors that contain bad data (the data in a sector does not agree with what the data from another disk indicates that it should be, for example the parity block + the other data blocks would cause us to think that this data block is incorrect), then no action is taken, but the event is logged (see below).  This "do nothing" allows admins to inspect the data in the sector and the data that would be produced by rebuilding the sectors from redundant information and pick the correct data to keep.
+</p>
+<h5><span class="mw-headline" id="General_Notes_on_Scrubbing">General Notes on Scrubbing</span></h5>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Users may alternatively echo <b>repair</b> to /sys/block/md0/md/sync_action but this is ill-advised since if a mismatch in the data is encountered, it would be automatically updated to be consistent. The danger is that we really don't know whether it's the parity or the data block that's correct (or which data block in case of RAID1). It's luck-of-the-draw whether or not the operation gets the right data instead of the bad data.</div>
+<p>It is a good idea to set up a cron job as root to schedule a periodic scrub. See <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/raid-check/">raid-check</a></span><sup><small>AUR</small></sup> which can assist with this.
+</p>
+<h5><span class="mw-headline" id="RAID1_and_RAID10_Notes_on_Scrubbing">RAID1 and RAID10 Notes on Scrubbing</span></h5>
+<p>Due to the fact that RAID1 and RAID10 writes in the kernel are unbuffered, an array can have non-0 mismatch counts even when the array is healthy.  These non-0 counts will only exist in transient data areas where they don't pose a problem.  However, since we can't tell the difference between a non-0 count that is just in transient data or a non-0 count that signifies a real problem.  This fact is a source of false positives for RAID1 and RAID10 arrays.  It is however recommended to still scrub to catch and correct any bad sectors there might be in the devices.
+</p>
+<h3><span class="mw-headline" id="LVM_installation">LVM installation</span></h3>
+<p>This section will convert the two RAIDs into physical volumes (PVs). Then combine those PVs into a volume group (VG). The VG will then be divided into logical volumes (LVs) that will act like physical partitions (e.g. <code>/</code>, <code>/var</code>, <code>/home</code>). If you did not understand that make sure you read the <a href="../en/LVM.html#Introduction" title="LVM">LVM Introduction</a> section.
+</p>
+<h4><span class="mw-headline" id="Create_physical_volumes">Create physical volumes</span></h4>
+<p>Make the RAIDs accessible to LVM by converting them into physical volumes (PVs) using the following command. Repeat this action for each of the RAID arrays created above.
+</p>
+<pre># pvcreate /dev/md0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This might fail if you are creating PVs on an existing Volume Group. If so you might want to add <code>-ff</code> option.</div>
+<p>Confirm that LVM has added the PVs with: 
+</p>
+<pre># pvdisplay
+</pre>
+<h4><span class="mw-headline" id="Create_the_volume_group">Create the volume group</span></h4>
+<p>Next step is to create a volume group (VG) on the PVs.
+</p>
+<p>Create a volume group (VG) with the first PV:
+</p>
+<pre># vgcreate VolGroupArray /dev/md0
+</pre>
+<p>Confirm that LVM has added the VG with: 
+</p>
+<pre># vgdisplay
+</pre>
+<h4><span class="mw-headline" id="Create_logical_volumes">Create logical volumes</span></h4>
+<p>In this example we will create separate <code>/</code>, <code>/var</code>, <code>/swap</code>, <code>/home</code> LVs. The LVs will be accessible as <code>/dev/mapper/VolGroupArray-&lt;lvname&gt;</code> or <code>/dev/VolGroupArray/&lt;lvname&gt;</code>.
+</p>
+<p>Create a <b>/</b> LV:
+</p>
+<pre># lvcreate -L 20G VolGroupArray -n lvroot
+</pre>
+<p>Create a <b>/var</b> LV:
+</p>
+<pre># lvcreate -L 15G VolGroupArray -n lvvar
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you would like to add the swap space to the LVM create a <code>/swap</code> LV with the <code>-C y</code> option, which creates a contiguous partition, so that your swap space does not get partitioned over one or more disks nor over non-contiguous physical extents:
+<pre># lvcreate -C y -L 2G VolGroupArray -n lvswap
+</pre>
+</div>
+<p>Create a <b>/home</b> LV that takes up the remainder of space in the VG:
+</p>
+<pre># lvcreate -l +100%FREE VolGroupArray -n lvhome
+</pre>
+<p>Confirm that LVM has created the LVs with:
+</p>
+<pre># lvdisplay
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can start out with relatively small logical volumes and expand them later if needed. For simplicity, leave some free space in the volume group so there is room for expansion.</div>
+<h3><span class="mw-headline" id="Update_RAID_configuration">Update RAID configuration</span></h3>
+<p>Since the installer builds the initrd using <code>/etc/mdadm.conf</code> in the target system, you should update that file with your RAID configuration. The original file can simply be deleted because it  contains comments on how to fill it correctly, and that is something mdadm can do automatically for you. So let us delete the original and have mdadm create you a new one with the current setup:
+</p>
+<pre># mdadm --examine --scan &gt; /etc/mdadm.conf
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Read the note in the <a href="../en/RAID.html#Update_configuration_file" title="RAID">Update configuration file</a> section about ensuring that you write to the correct <code>mdadm.conf</code> file from within the installer.</div>
+<h3><span class="mw-headline" id="Prepare_hard_drive">Prepare hard drive</span></h3>
+<p>Follow the directions outlined the in <a href="../en/Installation_guide.html" title="Installation" class="mw-redirect">Installation</a> section until you reach the <i>Prepare Hard Drive</i> section. Skip the first two steps and navigate to the <i>Manually Configure block devices, filesystems and mountpoints</i> page. Remember to only configure the PVs (e.g. <code>/dev/mapper/VolGroupArray-lvhome</code>) and <b>not</b> the actual disks (e.g. <code>/dev/sda1</code>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><code>mkfs.xfs</code> will not align the chunk size and stripe size for optimum performance (see: <a rel="nofollow" class="external text" href="http://www.linuxpromagazine.com/Issues/2009/108/RAID-Performance">Optimum RAID</a>).</div>
+<h3><span class="mw-headline" id="Configure_system">Configure system</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Follow the steps in the <a href="../en/LVM.html#Important" title="LVM">LVM#Important</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> section before proceeding with the installation.</div>
+<h4><span class="mw-headline" id="mkinitcpio.conf">mkinitcpio.conf</span></h4>
+<p><a href="../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a> can use a hook to assemble the arrays on boot. For more information see <a href="../en/Mkinitcpio.html#Using_RAID" title="Mkinitcpio">mkinitcpio Using RAID</a>.
+</p>
+<ol>
+<li> Add the <code>dm_mod</code> module to the <code>MODULES</code> list in <code>/etc/mkinitcpio.conf</code>.</li>
+<li> Add the <code>mdadm_udev</code> and <code>lvm2</code> hooks to the <code>HOOKS</code> list in <code>/etc/mkinitcpio.conf</code> after <code>udev</code>.</li>
+</ol>
+<h3><span class="mw-headline" id="Conclusion">Conclusion</span></h3>
+<p>Once it is complete you can safely reboot your machine:
+</p>
+<pre># reboot
+</pre>
+<h3><span class="mw-headline" id="Install_the_bootloader_on_the_Alternate_Boot_Drives">Install the bootloader on the Alternate Boot Drives</span></h3>
+<p>Once you have successfully booted your new system for the first time, you will want to install the bootloader onto the other two disks (or on the other disk if you have only 2 HDDs) so that, in the event of disk failure, the system can be booted from any of the remaining drives (e.g. by switching the boot order in the BIOS).  The method depends on the bootloader system you're using:
+</p>
+<h4><span class="mw-headline" id="Syslinux">Syslinux</span></h4>
+<p>Log in to your new system as root and do:
+</p>
+<pre># /usr/sbin/syslinux-install_update -iam
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For this to work with <a href="../en/Partitioning.html#GUID_Partition_Table" title="GPT" class="mw-redirect">GPT</a>, the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gptfdisk">gptfdisk</a></span> package is needed as the backend for setting the boot flag.</div>
+<p>Syslinux will deal with installing the bootloader to the MBR on each of the members of the RAID array:
+</p>
+<pre>Detected RAID on /boot - installing Syslinux with --raid
+Syslinux install successful
+</pre>
+<pre>Attribute Legacy Bios Bootable Set - /dev/sda1
+Attribute Legacy Bios Bootable Set - /dev/sdb1
+Installed MBR (/usr/lib/syslinux/gptmbr.bin) to /dev/sda
+Installed MBR (/usr/lib/syslinux/gptmbr.bin) to /dev/sdb
+</pre>
+<h4><span class="mw-headline" id="GRUB_legacy">GRUB legacy</span></h4>
+<p>Log in to your new system as root and do:
+</p>
+<pre># grub
+grub&gt; device (hd0) /dev/sdb
+grub&gt; root (hd0,0)
+grub&gt; setup (hd0)
+grub&gt; device (hd0) /dev/sdc
+grub&gt; root (hd0,0)
+grub&gt; setup (hd0)
+grub&gt; quit
+</pre>
+<h3><span class="mw-headline" id="Archive_your_filesystem_partition_scheme">Archive your filesystem partition scheme</span></h3>
+<p>Now that you are done, it is worth taking a second to archive off the partition state of each of your drives. This guarantees that it will be trivially easy to replace/rebuild a disk in the event that one fails. You do this with the <code>sfdisk</code> tool and the following steps:
+</p>
+<pre># mkdir /etc/partitions
+# sfdisk --dump /dev/sda &gt;/etc/partitions/disc0.partitions
+# sfdisk --dump /dev/sdb &gt;/etc/partitions/disc1.partitions
+# sfdisk --dump /dev/sdc &gt;/etc/partitions/disc2.partitions
+</pre>
+<h2><span class="mw-headline" id="Management">Management</span></h2>
+<p>For further information on how to maintain your software RAID or LVM review the <a href="../en/RAID.html" title="RAID">RAID</a> and <a href="../en/LVM.html" title="LVM">LVM</a> aritcles.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://yannickloth.be/blog/2010/08/01/installing-archlinux-with-software-raid1-encrypted-filesystem-and-lvm2/">Setup Arch Linux on top of raid, LVM2 and encrypted partitions</a> by Yannick Loth</li>
+<li> <a rel="nofollow" class="external text" href="http://stackoverflow.com/questions/237434/raid-verses-lvm">RAID vs. LVM</a> on <a href="https://en.wikipedia.org/wiki/Stack_Overflow" class="extiw" title="wikipedia:Stack Overflow">Stack Overflow</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://serverfault.com/questions/217666/what-is-better-lvm-on-raid-or-raid-on-lvm">What is better LVM on RAID or RAID on LVM?</a> on <a href="https://en.wikipedia.org/wiki/Server_Fault" class="extiw" title="wikipedia:Server Fault">Server Fault</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.gagme.com/greg/linux/raid-lvm.php">Managing RAID and LVM with Linux (v0.5)</a> by Gregory Gulik</li>
+<li> <a rel="nofollow" class="external text" href="http://www.gentoo.org/doc/en/gentoo-x86+raid+lvm2-quickinstall.xml">Gentoo Linux x86 with Software Raid and LVM2 Quick Install Guide</a>
+</li>
+<li> 2011-09-08 - Arch Linux - <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=126172">LVM &amp; RAID (1.2 metadata) + SYSLINUX</a>
+</li>
+<li> 2011-04-20 - Arch Linux - <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=965357">Software RAID and LVM questions</a>
+</li>
+<li> 2011-03-12 - Arch Linux - <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=114965">Some newbie questions about installation, LVM, grub, RAID</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

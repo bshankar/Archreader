@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ClamAV - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ClamAV skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ClamAV</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.clamav.net">Clam AntiVirus</a> is an open source (GPL) anti-virus toolkit for UNIX.  It provides a number of utilities including a flexible and scalable multi-threaded daemon, a command line scanner and advanced tool for automatic database updates. Because ClamAV's main use is on file/mail servers for Windows desktops it primarily detects Windows viruses and malware.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Updating_database"><span class="tocnumber">2</span> <span class="toctext">Updating database</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Starting_the_daemon"><span class="tocnumber">3</span> <span class="toctext">Starting the daemon</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Testing_the_software"><span class="tocnumber">4</span> <span class="toctext">Testing the software</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Adding_more_databases.2Fsignatures_repositories"><span class="tocnumber">5</span> <span class="toctext">Adding more databases/signatures repositories</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Scan_for_viruses"><span class="tocnumber">6</span> <span class="toctext">Scan for viruses</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Using_the_milter"><span class="tocnumber">7</span> <span class="toctext">Using the milter</span></a></li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Troubleshooting"><span class="tocnumber">8</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Error:_Clamd_was_NOT_notified"><span class="tocnumber">8.1</span> <span class="toctext">Error: Clamd was NOT notified</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Error:_No_supported_database_files_found"><span class="tocnumber">8.2</span> <span class="toctext">Error: No supported database files found</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Error:_Can.27t_create_temporary_directory"><span class="tocnumber">8.3</span> <span class="toctext">Error: Can't create temporary directory</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>ClamAV can be <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installed</a> with package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=clamav">clamav</a></span>.
+</p>
+<h2><span class="mw-headline" id="Updating_database">Updating database</span></h2>
+<p>Update the virus definitions with:
+</p>
+<pre># freshclam
+</pre>
+<p>The database files are saved in:
+</p>
+<pre>/var/lib/clamav/daily.cvd
+/var/lib/clamav/main.cvd
+/var/lib/clamav/bytecode.cvd
+</pre>
+<p>The virus definition updater service is called <code>freshclamd.service</code>. Consider starting it and enabling it to start at boot so that the virus definitions are kept recent.
+</p>
+<h2><span class="mw-headline" id="Starting_the_daemon">Starting the daemon</span></h2>
+<p>Consider updating the database before starting the service for the first time or you will run into troubles/errors which will prevent ClamAV to start correctly.
+</p>
+<p>The service is called <code>clamd.service</code>. <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> it or <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it to start at boot. You will need to run <code>freshclam</code> prior to starting the service.
+</p>
+<h2><span class="mw-headline" id="Testing_the_software">Testing the software</span></h2>
+<p>In order to make sure ClamAV and the definitions are installed correctly, scan the <a rel="nofollow" class="external text" href="http://www.eicar.org/86-0-Intended-use.html">EICAR test file</a> (a harmless signature with no virus code) with clamscan.
+</p>
+<pre>$ curl <a rel="nofollow" class="external free" href="http://www.eicar.org/download/eicar.com.txt">http://www.eicar.org/download/eicar.com.txt</a> | clamscan -
+</pre>
+<p>The output <b>must</b> include:
+</p>
+<pre>stdin: Eicar-Test-Signature FOUND
+</pre>
+<p>Otherwise; read the Troubleshooting part or ask for help in the <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/">Arch Forums</a>.
+</p>
+<h2><span class="mw-headline" id="Adding_more_databases.2Fsignatures_repositories">Adding more databases/signatures repositories</span></h2>
+<p>ClamAV can use databases/signature from other repositories or security vendors. 
+</p>
+<p>To add the most important ones in a single step install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/clamav-unofficial-sigs/">clamav-unofficial-sigs</a></span><sup><small>AUR</small></sup> and configure it in <code>/etc/clamav-unofficial-sigs/user.conf</code>.
+</p>
+<p>This will add signatures/databases from e.g. MalwarePatrol, SecuriteInfo, Yara, Linux Malware Detect,...
+</p>
+<h2><span class="mw-headline" id="Scan_for_viruses">Scan for viruses</span></h2>
+<p><code>clamscan</code> can be used to scan certain files, home directory, or an entire system:
+</p>
+<pre>$ clamscan myfile
+$ clamscan --recursive --infected /home # or -r -i
+$ clamscan --recursive --infected --exclude-dir='^/sys|^/dev' /
+</pre>
+<p>If you would like <code>clamscan</code> to remove the infected file add to the command the <code>--remove</code> option, or you can use <code>--move=/dir</code> to quarantine them.
+</p>
+<p>You may also want for <code>clamscan</code> to scan larger files, in that case append the options <code>--max-filesize=2000M</code> and <code>--max-scansize=2000M</code> to the command. Where the size 2000M may be replaced as necessary.
+</p>
+<p>Using the <code>-l /path/to/file</code> option will print the <code>clamscan</code> logs to a text  file for locating reported infections.
+</p>
+<h2><span class="mw-headline" id="Using_the_milter">Using the milter</span></h2>
+<p>Copy <code>/etc/clamav/clamav-milter.conf.sample</code> to <code>/etc/clamav/clamav-milter.conf</code> and adjust it to your needs. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/clamav/clamav-milter.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+MilterSocket /run/clamav/clamav-milter.sock
+MilterSocketMode 660
+FixStaleSocket yes
+User clamav
+PidFile /run/clamav/clamav-milter.pid
+TemporaryDirectory /tmp
+ClamdSocket unix:/var/lib/clamav/clamd.sock
+LogSyslog yes
+LogInfected Basic
+</pre>
+<p>Create <code>/etc/systemd/system/clamav-milter.service</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/clamav-milter.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description='ClamAV Milter'
+After=clamd.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/clamav-milter --config-file /etc/clamav/clamav-milter.conf
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Enable and start the service.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Error:_Clamd_was_NOT_notified">Error: Clamd was NOT notified</span></h3>
+<p>If you get the following messages after running freshclam:
+</p>
+<pre>
+WARNING: Clamd was NOT notified: Cannot connect to clamd through 
+/var/lib/clamav/clamd.sock connect(): No such file or directory
+</pre>
+<p>Add a sock file for ClamAV:
+</p>
+<pre>
+# touch /var/lib/clamav/clamd.sock
+# chown clamav:clamav /var/lib/clamav/clamd.sock
+</pre>
+<p>Then, edit <code>/etc/clamav/clamd.conf</code> - uncomment this line:
+</p>
+<pre>LocalSocket /var/lib/clamav/clamd.sock
+</pre>
+<p>Save the file and <a href="../en/Daemons.html" title="Daemons">restart the daemon</a>
+</p>
+<h3><span class="mw-headline" id="Error:_No_supported_database_files_found">Error: No supported database files found</span></h3>
+<p>If you get the next error when starting the daemon:
+</p>
+<pre>
+LibClamAV Error: cli_loaddb(): No supported database files found
+in /var/lib/clamav ERROR: Not supported data format
+</pre>
+<p>This happens because of mismatch between <code>/etc/freshclam.conf</code> setting <code>DatabaseDirectory</code> and <code>/etc/clamd.conf</code> setting <code>DatabaseDirectory</code>.
+<code>/etc/freshclam.conf</code> pointing to <code>/var/lib/clamav</code>, but <code>/etc/clamd.conf</code> (default directory) pointing to <code>/usr/share/clamav</code>, or other directory. Edit in <code>/etc/clamd.conf</code> and replace with the same DatabaseDirectory like in <code>/etc/freshclam.conf</code>. After that clamav will start up succesfully.
+</p>
+<h3><span class="mw-headline" id="Error:_Can.27t_create_temporary_directory">Error: Can't create temporary directory</span></h3>
+<p>If you get the following error, along with a 'HINT' containing a UID and a GID number:
+</p>
+<pre># can't create temporary directory
+</pre>
+<p>Correct permissions:
+</p>
+<pre># chown UID:GID /var/lib/clamav &amp; chmod 755 /var/lib/clamav
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

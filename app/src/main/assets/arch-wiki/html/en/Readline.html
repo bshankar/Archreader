@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Readline - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Readline skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Readline</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>Readline</b> is a library by the <a href="../en/GNU_Project.html" title="GNU Project">GNU Project</a>, used by <a href="../en/Bash.html" title="Bash">Bash</a> and other CLI-interface programs to edit and interact with the command line. Before reading this page please refer to the library home <a rel="nofollow" class="external text" href="http://www.gnu.org/s/readline/">page</a> as only subtle configuration will be introduced here. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Editing_mode"><span class="tocnumber">1</span> <span class="toctext">Editing mode</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Fast_word_movement"><span class="tocnumber">2</span> <span class="toctext">Fast word movement</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#History"><span class="tocnumber">3</span> <span class="toctext">History</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Faster_completion"><span class="tocnumber">4</span> <span class="toctext">Faster completion</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Macros"><span class="tocnumber">5</span> <span class="toctext">Macros</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Disabling_control_echo"><span class="tocnumber">6</span> <span class="toctext">Disabling control echo</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Editing_mode">Editing mode</span></h2>
+<p>By default Readline uses Emacs style shortcuts for interacting with command line. However, vi style editing interface is also supported. Either way, rich sets of shortcut keys are provided for editing <a href="../en/Keyboard_without_cursor_keys.html" title="Keyboard without cursor keys">without using the far-away cursor keys</a>.
+</p>
+<p>If you are a <a href="../en/Vim.html" title="Vi" class="mw-redirect">vi</a> or <a href="../en/Vim.html" title="Vim">vim</a> user, you may want to put the following line in your <code>~/.inputrc</code> to enable vi-like keybindings in all Readline based programs:
+</p>
+<pre>set editing-mode vi
+</pre>
+<p>Alternatively, you can set it only for Bash by adding the following line to <code>~/.bashrc</code>:
+</p>
+<pre>set -o vi
+</pre>
+<p>You may find either <a rel="nofollow" class="external text" href="http://www.catonmat.net/download/bash-vi-editing-mode-cheat-sheet.pdf">vi</a> or <a rel="nofollow" class="external text" href="http://www.catonmat.net/download/readline-emacs-editing-mode-cheat-sheet.pdf">emacs</a> cheat sheets useful.
+</p>
+<h2><span class="mw-headline" id="Fast_word_movement">Fast word movement</span></h2>
+<p><a href="../en/Xterm.html" title="Xterm">Xterm</a> supports moving between words with <code>Ctrl+Left</code> and <code>Ctrl+Right</code> <a rel="nofollow" class="external text" href="http://stackoverflow.com/a/7783928">by default</a>. To achieve this effect with other terminal emulators, find the correct <a rel="nofollow" class="external text" href="http://wiki.bash-hackers.org/scripting/terminalcodes">terminal codes</a>, and bind them to <code>backward-word</code> and <code>forward-word</code> in <code>~/.inputrc</code>.
+</p>
+<p>For example, for <a href="../en/Rxvt-unicode.html" title="Urxvt" class="mw-redirect">urxvt</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.inputrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+"\eOd": backward-word
+"\eOc": forward-word</pre>
+<h2><span class="mw-headline" id="History">History</span></h2>
+<p>Usually, pressing the up arrow key will cause the last command to be shown regardless of the command that has been typed so far. However, users may find it more practical to list only past commands that match the current input.
+</p>
+<p>For example, if the user has typed the following commands:
+</p>
+<ul>
+<li> <code>ls /usr/src/linux-2.6.15-ARCH/kernel/power/Kconfig</code>
+</li>
+<li> <code>who</code>
+</li>
+<li> <code>mount</code>
+</li>
+<li> <code>man mount</code>
+</li>
+</ul>
+<p>In this situation, when typing <code>ls</code> and pressing the up arrow key, current input will be replaced with <code>man mount</code>, the last performed command. If the history search has been enabled, only past commands beginning with <code>ls</code> (the current input) will be shown, in this case <code>ls /usr/src/linux-2.6.15-ARCH/kernel/power/Kconfig</code>.
+</p>
+<p>You can enable the history search mode by adding the following lines to <code>/etc/inputrc</code> or <code>~/.inputrc</code>:
+</p>
+<pre>"\e[A":history-search-backward
+"\e[B":history-search-forward
+</pre>
+<p>If you are using vi mode, you can add the following lines to <code>~/.inputrc</code> (from <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=428760#p428760">this post</a>):
+</p>
+<pre>set editing-mode vi
+$if mode=vi
+set keymap vi-command
+# these are for vi-command mode
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+set keymap vi-insert
+# these are for vi-insert mode
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+$endif
+</pre>
+<p>If you chose to add these lines to <code>~/.inputrc</code>, it is recommended that you also add the following line at the beginning of this file to avoid strange things like <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=112537">this</a>:
+</p>
+<pre>$include /etc/inputrc
+</pre>
+<p>Alternatively, one can use reverse-search-history (incremental search) by pressing <code>Ctrl+R</code>, which does not search based on previous input but instead jumps backwards in the history buffer as commands are typed in a search term. Pressing <code>Ctrl+R</code> again during this mode will display the previous line in the buffer that matches the current search term, while pressing <code>Ctrl+G</code> (abort) will cancel the search and restore the current input line. So in order to search through all previous <code>mount</code> commands, press <code>Ctrl+R</code>, type 'mount' and keep pressing <code>Ctrl+R</code> until the desired line is found.
+</p>
+<p>The forward equivalent to this mode is called forward-search-history and is bound to <code>Ctrl+S</code> by default. Beware that most terminals override <code>Ctrl+S</code> to suspend execution until <code>Ctrl+Q</code> is entered. (This is called XON/XOFF flow control). For activating forward-search-history, either disable flow control by issuing:
+</p>
+<pre>$ stty -ixon
+</pre>
+<p>or use a different key in <code>inputrc</code>. For example, to use <code>Alt+S</code> which is not bound by default:
+</p>
+<pre>"\es":forward-search-history
+</pre>
+<h2><span class="mw-headline" id="Faster_completion">Faster completion</span></h2>
+<p>When performing tab completion, a single tab attempts to partially complete the current word. If no partial completions are possible, a double tab shows all possible completions.
+</p>
+<p>The double tab can be changed to a single tab by setting
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.inputrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+set show-all-if-unmodified on
+</pre>
+<p>Or you can set it such that a single tab will perform both steps: partially complete the word <i>and</i> show all possible completions if it is still ambiguous:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.inputrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+set show-all-if-ambiguous on
+</pre>
+<h2><span class="mw-headline" id="Macros">Macros</span></h2>
+<p>Readline also supports binding keys to keyboard macros. For simple example, run this command in Bash:
+</p>
+<pre>bind '"\ew":"\C-e # macro"'
+</pre>
+<p>or add the part within single quotes to inputrc:
+</p>
+<pre>"\ew":"\C-e # macro"
+</pre>
+<p>Now type a line and press <code>Alt</code>+<code>W</code>. Readline will act as though <code>Ctrl+E</code> (end-of-line) had been pressed, appended with '<code> # macro</code>'.
+</p>
+<p>Use any of the existing keybindings within a readline macro, which can be quite useful to automate frequently used idioms. For example, this one makes <code>Ctrl+Alt+L</code> append "| less" to the line and run it (<code>Ctrl+M</code> is equivalent to <code>Enter</code>):
+</p>
+<pre>"\e\C-l":"\C-e | less\C-m"
+</pre>
+<p>The next one prefixes the line with 'yes |' when pressing <code>Ctrl+Alt+Y</code>, confirming any yes/no question the command might ask:
+</p>
+<pre>"\e\C-y":"\C-ayes | \C-m"
+</pre>
+<p>This example wraps the line in <code>su -c ''</code>, if <code>Alt+S</code> is pressed:
+</p>
+<pre>"\es":"\C-a su -c '\C-e'\C-m"
+</pre>
+<p>This example prefixes the line with <code>sudo </code>, if <code>Alt+S</code> is pressed.  It's safer because it won't input the <code>Enter</code> key.
+</p>
+<pre>"\es":"\C-asudo \C-e"
+</pre>
+<p>As a last example, quickly send a command in the background with <code>Ctrl+Alt+B</code>, discarding all of its output:
+</p>
+<pre>"\e\C-b":"\C-e &gt; /dev/null 2&gt;&amp;1 &amp;\C-m"
+</pre>
+<h2><span class="mw-headline" id="Disabling_control_echo">Disabling control echo</span></h2>
+<p>Due to an update to <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=readline">readline</a></span>, the terminal now echoes <code>^C</code> after <code>Ctrl+C</code> is pressed. For users who wish to disable this, simply add the following to <code>~/.inputrc</code>:
+</p>
+<pre>set echo-control-characters off
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Command_shells.html" title="Category:Command shells">Command shells</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

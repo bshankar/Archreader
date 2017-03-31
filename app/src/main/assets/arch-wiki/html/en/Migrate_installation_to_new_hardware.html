@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Migrate installation to new hardware - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Migrate_installation_to_new_hardware skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Migrate installation to new hardware</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-document-new.png" class="image"><img alt="Tango-document-new.png" src="../File:Tango-document-new.png" width="48" height="48"></a><b>This article is a stub.</b><a href="../File:Tango-document-new.png" class="image"><img alt="Tango-document-new.png" src="../File:Tango-document-new.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the first argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Migrate_installation_to_new_hardware">Talk:Migrate installation to new hardware#</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Mentions rc.conf and uses links to wiki articles that don't exist anymore. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Migrate_installation_to_new_hardware">Talk:Migrate installation to new hardware#</a>)</div>
+</div>
+<p>This article discusses the steps required for moving an Arch Linux system to new hardware. The goal is to achieve the same ArchLinux installation, as far as installed software and configuration is concerned.
+</p>
+<p>There are two different approaches to migrating an installation:
+</p>
+<ol>
+<li> <i>Bottom to Top</i>: Install a fresh Arch Linux system on the new hardware, afterwards restore the installed packages and configuration files.</li>
+<li> <i>Top to Bottom</i>: Clone the old harddrive to the new harddrive, or place the old harddrive into the new system; modify configuration files where necessary.</li>
+</ol>
+<p>Which way you choose depends heavily on how the new system differs from your old and how exact you want to reproduce the system.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Some of the following instructions can be dangerous: you are advised to backup all of your important data on the old system before continuing.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Bottom_to_Top"><span class="tocnumber">1</span> <span class="toctext">Bottom to Top</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#On_the_old_system"><span class="tocnumber">1.1</span> <span class="toctext">On the old system</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#What_software.3F"><span class="tocnumber">1.1.1</span> <span class="toctext">What software?</span></a></li>
+<li class="toclevel-3 tocsection-4"><a href="#Copy_to_some_backup_space."><span class="tocnumber">1.1.2</span> <span class="toctext">Copy to some backup space.</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5">
+<a href="#On_the_new_system"><span class="tocnumber">1.2</span> <span class="toctext">On the new system</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Wiki_articles"><span class="tocnumber">1.2.1</span> <span class="toctext">Wiki articles</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Copy_from_backup_space"><span class="tocnumber">1.2.2</span> <span class="toctext">Copy from backup space</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Install_software"><span class="tocnumber">1.2.3</span> <span class="toctext">Install software</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Top_to_Bottom"><span class="tocnumber">2</span> <span class="toctext">Top to Bottom</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10">
+<a href="#Move_the_system_to_the_new_HDDs"><span class="tocnumber">2.1</span> <span class="toctext">Move the system to the new HDDs</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Update_fstab"><span class="tocnumber">2.1.1</span> <span class="toctext">Update fstab</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-12"><a href="#Reconfigure_the_bootloader"><span class="tocnumber">2.2</span> <span class="toctext">Reconfigure the bootloader</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Regenerate_kernel_image"><span class="tocnumber">2.3</span> <span class="toctext">Regenerate kernel image</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Update_the_graphic_drivers"><span class="tocnumber">2.4</span> <span class="toctext">Update the graphic drivers</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Reconfigure_audio"><span class="tocnumber">2.5</span> <span class="toctext">Reconfigure audio</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Reconfigure_network"><span class="tocnumber">2.6</span> <span class="toctext">Reconfigure network</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Bottom_to_Top">Bottom to Top</span></h2>
+<h3><span class="mw-headline" id="On_the_old_system">On the old system</span></h3>
+<h4><span class="mw-headline" id="What_software.3F">What software?</span></h4>
+<pre>$ pacman -Qqe | grep -vx "$(pacman -Qqm)" &gt; Packages
+$ pacman -Qqm &gt; Packages.aur
+</pre>
+<p>gives you a nice list of explicitly installed packages. Don't forget the software <i>not</i> installed through pacman (also see <a href="../en/Arch_User_Repository.html#Why_has_foo_disappeared_from_the_AUR.3F" title="Arch User Repository">AUR FAQ</a>). You may also use the following script to give you a better overview of the binaries and libraries installed unbeknownst to pacman (e. g. installed via Steam, Desura or using their own install methods):
+</p>
+<pre>find / -regextype posix-extended -regex "/(sys|srv|proc)|.*/\.ccache/.*" -prune -o -type f \
+-exec bash -c 'file "{}" | grep -E "(32|64)-bit"' \; | \
+awk -F: '{print $1}' | \
+while read -r bin; \
+do pacman -Qo "$bin" &amp;&gt;/dev/null || echo "$bin"; \
+done
+</pre>
+<h4><span class="mw-headline" id="Copy_to_some_backup_space.">Copy to some backup space.</span></h4>
+<ul>
+<li> You can consider backing up /var/cache/pacman/pkg if you do not change architectures (example:  from x86 to x86_64)</li>
+<li> /etc should be backed up, in order to peek if necessary.</li>
+</ul>
+<h3><span class="mw-headline" id="On_the_new_system">On the new system</span></h3>
+<h4><span class="mw-headline" id="Wiki_articles">Wiki articles</span></h4>
+<ul>
+<li> Read some Wiki articles concerning new hardware, for examples your new <a href="../en/Solid_State_Drives.html" title="SSD" class="mw-redirect">SSD</a>.</li>
+<li> Stick to the well-written installation guidelines here in this wiki. Since you are experienced, the <a href="../en/Installation_guide.html" title="Installation guide">Installation guide</a> could be enough. </li>
+<li> Try to configure as much as possible sticking to <i>current</i> wiki articles and forum posts. </li>
+</ul>
+<h4><span class="mw-headline" id="Copy_from_backup_space">Copy from backup space</span></h4>
+<ul>
+<li> Copy the pacman cache to var/cache/pacman/pkg</li>
+<li> Don't forget to edit /etc/pacman.d/mirrorlist</li>
+</ul>
+<h4><span class="mw-headline" id="Install_software">Install software</span></h4>
+<p>As root, grab a cup of coffee and execute:
+</p>
+<pre># xargs -a Packages pacman -S --noconfirm --needed
+</pre>
+<h2><span class="mw-headline" id="Top_to_Bottom">Top to Bottom</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Migrating_between_architectures.html" title="Migrating Between Architectures Without Reinstalling" class="mw-redirect">Migrating Between Architectures Without Reinstalling</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> <span style="color:red;">please use the second argument of the template to provide more detailed indications.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Migrate_installation_to_new_hardware">Talk:Migrate installation to new hardware#</a>)</div>
+</div>
+<ul><li>See these forum threads:
+<ul>
+<li><a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?id=71038">https://bbs.archlinux.org/viewtopic.php?id=71038</a></li>
+<li><a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=543214">https://bbs.archlinux.org/viewtopic.php?pid=543214</a></li>
+</ul>
+</li></ul>
+<h3><span class="mw-headline" id="Move_the_system_to_the_new_HDDs">Move the system to the new HDDs</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are planning to keep the hard drive where the system is already installed, you can skip this section.</div>
+<p>There are two fundamental methods for copying data between two disks, cloning an entire disk, and copying single files. For details see <a href="../en/Disk_cloning.html" title="Disk cloning">Disk cloning</a>. If you want to clone the entire disk, it is required to use a live cd to do so.
+</p>
+<p>At the same time there are many different methods for how to transport the data between the two drives:
+</p>
+<ul>
+<li>Connect origin and destination HDDs to the same computer, either the old or the new one. Data link: old HDD -&gt; computer -&gt; new HDD.</li>
+<li>Make use of temporary storage devices like external HDDs, or cloud backups. Data link: old HDD -&gt; old computer -&gt; storage -&gt; new computer -&gt; new HDD.</li>
+<li>Transfer data over network, for example with <a href="../en/Rsync.html" title="Rsync">rsync</a>. Data link: old HDD -&gt; old computer -&gt; network -&gt; new computer -&gt; new HDD.</li>
+</ul>
+<p>For the first two options, consider that you might need adapters to connect the HDDs (PATA-&gt;SATA, USB-HDD-Cases, etc.), and choose a connection that is sufficiently fast.
+The last two options require you to use a live system on the new computer, as it is not possible to boot from the new harddrive at this point.
+</p>
+<h4><span class="mw-headline" id="Update_fstab">Update fstab</span></h4>
+<ul>
+<li>using /dev paths: this should change depending on how the new drives are connected to the mainboard, on the BIOS and on the new partitions scheme</li>
+<li>using fs labels: should be safe</li>
+<li>using UUIDs</li>
+</ul>
+<h3><span class="mw-headline" id="Reconfigure_the_bootloader">Reconfigure the bootloader</span></h3>
+<ul>
+<li>because of:
+<ul>
+<li>new HDD and partitions configuration</li>
+<li>new BIOS configuration</li>
+</ul>
+</li>
+<li>GRUB allows to edit entries with 'e'</li>
+<li>use a live system?</li>
+<li>update framebuffer mode (if new gpu)</li>
+</ul>
+<h3><span class="mw-headline" id="Regenerate_kernel_image">Regenerate kernel image</span></h3>
+<ul>
+<li>initially the Fallback image could work</li>
+<li>regenerate image
+<ul><li>mkinitcpio -p linux</li></ul>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Update_the_graphic_drivers">Update the graphic drivers</span></h3>
+<ul><li>if changed driver (e.g. from ATI to NVIDIA) can uninstall the old drivers</li></ul>
+<h3><span class="mw-headline" id="Reconfigure_audio">Reconfigure audio</span></h3>
+<ul><li>alsamixer volume
+<ul><li>save settings</li></ul>
+</li></ul>
+<h3><span class="mw-headline" id="Reconfigure_network">Reconfigure network</span></h3>
+<ul><li>if need to change hostname:
+<ul>
+<li><a href="../en/Network_configuration.html#Set_the_hostname" title="Network configuration">hostnamectl</a></li>
+<li>/etc/hosts</li>
+<li>other apps using hostname: synergy, nut (network ups tools)
+<ul><li>"<code># grep -Ri 'hostname' /etc</code>" should give some hints on the files to be updated</li></ul>
+</li>
+</ul>
+</li></ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li><a href="../en/Disk_cloning.html" title="Disk cloning">Disk cloning</a></li>
+<li><a href="../en/Migrating_between_architectures.html" title="Migrating Between Architectures Without Reinstalling" class="mw-redirect">Migrating Between Architectures Without Reinstalling</a></li>
+<li><a href="../en/Moving_an_existing_install_into_(or_out_of)_a_virtual_machine.html" title="Moving an existing install into (or out of) a virtual machine">Moving an existing install into (or out of) a virtual machine</a></li>
+<li><a rel="nofollow" class="external text" href="http://positon.org/clone-a-linux-system-install-to-another-computer">Howto clone a linux system</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li>
+<li><a href="../en/Category:System_recovery.html" title="Category:System recovery">System recovery</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_flagged_with_Template:Stub.html" title="Category:Pages flagged with Template:Stub">Pages flagged with Template:Stub</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

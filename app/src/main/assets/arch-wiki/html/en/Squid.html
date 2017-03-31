@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Squid - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Squid skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Squid</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <span style="color:red;">please use the first argument of the template to provide a brief explanation.</span> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Squid">Talk:Squid#</a>)</div>
+</div>
+<p>From the squid <a rel="nofollow" class="external text" href="http://www.squid-cache.org">website</a>:
+</p>
+<dl><dd>Squid is a caching proxy for the Web supporting HTTP, HTTPS, FTP, and more. It reduces bandwidth and improves response times by caching and reusing frequently-requested web pages. Squid has extensive access controls and makes a great server accelerator. It runs on Unix and Windows and is licensed under the GNU GPL.</dd></dl>
+<p>While squid works wonderfully in large corporations and schools, it can also benefit the home user too. However, if you're looking for a more lightweight single-user proxy, you should try <a href="../en/Polipo.html" title="Polipo">Polipo</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Accessing_services_on_local_hostnames"><span class="tocnumber">3</span> <span class="toctext">Accessing services on local hostnames</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Starting"><span class="tocnumber">4</span> <span class="toctext">Starting</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Content_Filtering"><span class="tocnumber">5</span> <span class="toctext">Content Filtering</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Frontend"><span class="tocnumber">6</span> <span class="toctext">Frontend</span></a></li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Ad_blocking_with_adzapper"><span class="tocnumber">7</span> <span class="toctext">Ad blocking with adzapper</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Installation_2"><span class="tocnumber">7.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Configuration_2"><span class="tocnumber">7.2</span> <span class="toctext">Configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Anti-virus_layer"><span class="tocnumber">8</span> <span class="toctext">Anti-virus layer</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Installing_dependencies"><span class="tocnumber">8.1</span> <span class="toctext">Installing dependencies</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Configuration_3"><span class="tocnumber">8.2</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Testing"><span class="tocnumber">8.3</span> <span class="toctext">Testing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Transparent_web_proxy"><span class="tocnumber">9</span> <span class="toctext">Transparent web proxy</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#iptables"><span class="tocnumber">9.1</span> <span class="toctext">iptables</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Shorewall"><span class="tocnumber">9.2</span> <span class="toctext">Shorewall</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-17">
+<a href="#HTTP_Authentication"><span class="tocnumber">10</span> <span class="toctext">HTTP Authentication</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#NTLM"><span class="tocnumber">10.1</span> <span class="toctext">NTLM</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19">
+<a href="#Troubleshooting"><span class="tocnumber">11</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#Squid_needs_to_be_restarted_after_boot"><span class="tocnumber">11.1</span> <span class="toctext">Squid needs to be restarted after boot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21"><a href="#Additional_Resources"><span class="tocnumber">12</span> <span class="toctext">Additional Resources</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=squid">squid</a></span> available in the <a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>By default, the cache directories will be created in <code>/var/cache/squid</code>, and the appropriate permissions set up for those directories. However, for greater control, we need to delve into <code>/etc/squid/squid.conf</code>.
+</p>
+<p>Everything is well commented, but if you want to strip the comments out you should run:
+</p>
+<pre>sed -i "/^#/d;/^ *$/d" /etc/squid/squid.conf
+</pre>
+<p>The following options might be of some use to you. If you do not have the option present in your configuration file, add it!
+</p>
+<ul><li> <code>http_port</code> - Sets the port that Squid binds to on your local machine. You can have Squid bind to multiple ports by specifying multiple http_port lines. By default, Squid binds to port 3128.</li></ul>
+<pre>http_port 3128
+http_port 3129
+</pre>
+<ul><li> <code>http_access</code> - This is an access control list for who is allowed to use the proxy. By default only localhost is allowed to access the proxy. For testing purposes, you may want to change the option <code>http_access deny all</code> to <code>http_access allow all</code>, which will allow anyone to connect to your proxy. If you wanted to just allow access to your subnet, you can do:</li></ul>
+<pre>acl ip_acl src 192.168.1.0/24
+http_access allow ip_acl
+http_access deny all
+</pre>
+<ul><li>
+<code>cache_mgr</code> - This is the email address of the cache manager.</li></ul>
+<pre>cache_mgr squid.admin@example.com
+</pre>
+<ul><li>
+<code>shutdown_lifetime</code> - Specifies how long Squid should wait when its service is asked to stop. If you're running squid on your desktop PC, you may want to set this to something short.</li></ul>
+<pre>shutdown_lifetime 10 seconds
+</pre>
+<ul><li>
+<code>cache_mem</code> - This is how much memory you want Squid to use to keep objects in memory rather than writing them to disk. Squid's total memory usage will exceed this! By default this is 8MB, so you might want to increase it if you have lots of RAM available.</li></ul>
+<pre>cache_mem 64 MB
+</pre>
+<ul><li>
+<code>visible_hostname</code> - hostname that will be shown in status/error messages</li></ul>
+<pre>visible_hostname cerberus
+</pre>
+<ul>
+<li>
+<code>cache_peer</code> - If you want your Squid to go through another proxy server, rather than directly out to the Internet, you need to specify it here.</li>
+<li>
+<code>login</code> - Use this option if the parent proxy requires authentication.</li>
+<li>
+<code>never_direct</code> - Tells the cache to never go direct to the internet to retrieve a page. You will want this if you have set the option above.</li>
+</ul>
+<pre>cache_peer 10.1.1.100 parent 8080 0 no-query default login=user:password
+never_direct allow all
+</pre>
+<ul><li>
+<code>maximum_object_size</code> - The largest size of a cached object. By default this is 4 MB, so if you have a lot of disk space you will want to increase the size of it to something reasonable.</li></ul>
+<pre>maximum_object_size 10 MB
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>After defining a new cache_dir it maybe necessary to initialize the caches directory structure with this command: <code>squid -zN</code> -z for Create missing swap directories and -N for No daemon mode. </div>
+<ul><li>
+<code>cache_dir</code> - This is your cache directory, where all the cached files are stored. There are many options here, but the format should generally go like:</li></ul>
+<pre>cache_dir &lt;storage type&gt; &lt;directory&gt; &lt;size in MB&gt; 16 256
+</pre>
+<p>So, in the case of a school's internet proxy:
+</p>
+<pre>cache_dir diskd /cache0 200000 16 256
+</pre>
+<p>If you change the cache directory from defaults, you must set the correct permissions on the cache directory before starting Squid, else it won't be able to create its cache directories and will fail to start.
+</p>
+<h2><span class="mw-headline" id="Accessing_services_on_local_hostnames">Accessing services on local hostnames</span></h2>
+<p>If you plan to access web servers on the LAN using hostnames that are not fully-defined (e.g. <code><a rel="nofollow" class="external free" href="http://mywebapp">http://mywebapp</a></code>), you may need to enable the <code>dns_defnames</code> option.  Without this option, Squid will make a DNS request for the hostname verbatim (<code>mywebapp</code>), which may fail, depending on your LAN's DNS setup.  With the option enabled, Squid will append any domain configured in <code>/etc/resolv.conf</code> when making the request (e.g. <code>mywebapp.company.local</code>).
+</p>
+<pre>
+dns_defnames on
+</pre>
+<h2><span class="mw-headline" id="Starting">Starting</span></h2>
+<p>Once you have finished your configuration, you should check that your configuration file is correct:
+</p>
+<pre># squid -k check
+</pre>
+<p>Then create your cache directories:
+</p>
+<pre># squid -z
+</pre>
+<p>Then you can <a href="../en/Systemd.html#Using_units" title="Start/enable" class="mw-redirect">start/enable</a> <code>squid.service</code>.
+</p>
+<h2><span class="mw-headline" id="Content_Filtering">Content Filtering</span></h2>
+<p>If you're looking for a content filtering solution to work with Squid, you should check out the very powerful <a href="../en/DansGuardian.html" title="DansGuardian">DansGuardian</a>.
+</p>
+<h2><span class="mw-headline" id="Frontend">Frontend</span></h2>
+<p>If you'd like a web-based frontend for managing Squid, <a href="../en/Webmin.html" title="Webmin">Webmin</a> is your best bet.
+</p>
+<h2><span class="mw-headline" id="Ad_blocking_with_adzapper">Ad blocking with adzapper</span></h2>
+<p>Adzapper is a plugin for Squid. It catches ads of all sorts (even Flash animations) and replaces them with an image of your choice, so the layout of the page isn't altered very much. 
+</p>
+<h3><span class="mw-headline" id="Installation_2">Installation</span></h3>
+<p>Adzapper is no longer in the community repository, but it can be found in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration_2">Configuration</span></h3>
+<pre>echo "redirect_program /usr/bin/adzapper.wrapper" &gt;&gt; /etc/squid/squid.conf
+</pre>
+<p>(squid 2.6.STABLE13-1)
+</p>
+<pre>echo "url_rewrite_program /usr/bin/adzapper.wrapper" &gt;&gt; /etc/squid/squid.conf
+echo "url_rewrite_children 10" &gt;&gt; /etc/squid/squid.conf
+</pre>
+<p>If you want, you can configure adzapper to your liking. The configuration out of the box works wonderfully well though.
+</p>
+<pre>nano /etc/adzapper/adzapper.conf
+</pre>
+<h2><span class="mw-headline" id="Anti-virus_layer">Anti-virus layer</span></h2>
+<p>Adding Anti-virus capabilities to Squid is done using the HAVP program to interface it with ClamAV.
+</p>
+<h3><span class="mw-headline" id="Installing_dependencies">Installing dependencies</span></h3>
+<p>Follow <a href="../en/ClamAV.html" title="ClamAV">ClamAV</a> to install ClamAV on your system. When it is installed, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/havp/">havp</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/havp">aur-mirror</a>]</sup> from <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration_3">Configuration</span></h3>
+<p>Once HAVP is installed, create a user group for the HAVP instance:
+</p>
+<pre>useradd havp
+</pre>
+<p>Change the owner of the antivirus logs and temporary file-testing directories to havp :
+</p>
+<pre>chown -R havp:havp /var/run/havp
+chown -R havp:havp /var/log/havp
+</pre>
+<p>Add the mandatory lock option to your filesystem (needed by HAVP) : In your /etc/fstab, modify :
+</p>
+<pre>[...] / ext3 defaults 1 1
+</pre>
+<p>to :
+</p>
+<pre>[...] / ext3 defaults,mand 1 1
+</pre>
+<p>Then reload your filesystem :
+</p>
+<pre>mount -o remount /
+</pre>
+<p>Add this info in your /etc/squid/squid.conf :
+</p>
+<pre>cache_peer 127.0.0.1 parent 8080 0 no-query no-digest no-netdb-exchange default
+cache_peer_access 127.0.0.1 allow all
+</pre>
+<p>Make sure your port in your /etc/havp/havp.config matches the cache_peer port in /etc/squid/squid.conf.
+</p>
+<h3><span class="mw-headline" id="Testing">Testing</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the <code>squid.service</code> systemd unit and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>havp.service</code> systemd unit. <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> both systemd units to have them launch at boot.
+</p>
+<p>You can try the antivirus capabilities with a test virus (not a real virus) available <a rel="nofollow" class="external text" href="http://www.eicar.org/anti_virus_test_file.htm">here</a>.
+</p>
+<h2><span class="mw-headline" id="Transparent_web_proxy">Transparent web proxy</span></h2>
+<p>Transparency happens by redirecting all www requests eth0 picks up, to Squid. You'll need to indicate Squid that it is running like a transparent web proxy by adding the <code>intercept</code> (for squid 3.2) parameter to the <code>http_port</code> option:
+</p>
+<pre> http_port 3128 <b>intercept</b>
+</pre>
+<h3><span class="mw-headline" id="iptables">iptables</span></h3>
+<p>From a terminal with root privileges, run: 
+</p>
+<pre># gid=`id -g proxy`
+# iptables -t nat -A OUTPUT -p tcp --dport 80 -m owner --gid-owner $gid -j ACCEPT
+# iptables -t nat -A OUTPUT -p tcp --dport 80 -j DNAT --to-destination SQUIDIP:3128
+# iptables-save &gt; /etc/iptables/iptables.rules
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>iptables.service</code> systemd unit.
+</p>
+<p>Replace SQUIDIP with the public IP(s) which squid may use for its listening port and outbound connections.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using a content filtering solution, you should put the port for it, not the Squid port, and you need to remove the <code>intercept</code> option in the http_port line.</div>
+<h3><span class="mw-headline" id="Shorewall">Shorewall</span></h3>
+<p>Edit /etc/shorewall/rules and add
+</p>
+<pre>REDIRECT	loc	3128	tcp	www # redirect to Squid on port 3128
+ACCEPT		$FW	net	tcp	www # allow Squid to fetch the www content
+</pre>
+<p>Restart the <code>shorewall</code> systemd unit.
+</p>
+<h2><span class="mw-headline" id="HTTP_Authentication">HTTP Authentication</span></h2>
+<p>Squid can be configured to require a user and password in order to use it. We will use <a href="https://en.wikipedia.org/wiki/Digest_access_authentication" class="extiw" title="wikipedia:Digest access authentication">digest http auth</a>
+</p>
+<p>First create a users file with <code>htdigest -c /etc/squid/users MyRealm username</code>. Enter a password when prompted.
+</p>
+<p>Then add these lines to your <code>squid.conf</code>:
+</p>
+<pre>   auth_param digest program /usr/lib/squid/digest_file_auth -c /etc/squid/users
+   auth_param digest children 5
+   auth_param digest realm MyRealm
+   
+   acl users proxy_auth REQUIRED
+   http_access allow users
+</pre>
+<p>And restart squid. Now you will be prompted to enter a username and password when accessing the proxy.
+</p>
+<p>You can add more users with <code>htdigest /etc/squid/users MyRealm newuser</code>. You probably would like to install Apache package, which contains <code>htdigest</code> tool.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Be aware that <code>http_access</code> rules cascade, so you need to set them in the desired order.</div>
+<h3><span class="mw-headline" id="NTLM">NTLM</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>NTLM is deprecated and has security problems.</div>
+<p>Set up <a href="../en/Samba.html" title="Samba">samba</a> and winbindd and test it with
+</p>
+<pre> ntlm_auth --username=DOMAIN\\user
+</pre>
+<p>Grant r-x access to /var/cache/samba/winbindd_privileged/ directory for squid user/group
+</p>
+<p>Then add something like this to squid.conf:
+</p>
+<pre> auth_param ntlm program /usr/bin/ntlm_auth --helper-protocol=squid-2.5-ntlmssp
+ auth_param ntlm children 5
+ auth_param ntlm max_challenge_reuses 0
+ auth_param ntlm max_challenge_lifetime 2 minutes
+ auth_param ntlm keep_alive off
+</pre>
+<pre> acl ntlm_users proxy_auth REQUIRED
+ http_access allow ntlm_users
+ http_access deny all
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Squid_needs_to_be_restarted_after_boot">Squid needs to be restarted after boot</span></h3>
+<p>If you are using both squid and NetworkManager, the following error means that squid is launched before the wifi connection is enabled by NetworkManager (<code>/etc/resolv.conf</code> is empty).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/var/log/squid/cache.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Warning: Could not find any nameservers. Trying to use localhost 
+Please check your /etc/resolv.conf file
+or use the 'dns_nameservers' option in squid.conf.</pre>
+<p>You can:
+</p>
+<ul>
+<li> Enable <a href="../en/NetworkManager.html#Enable_NetworkManager_Wait_Online" title="NetworkManager">NetworkManager-wait-online.service</a> systemd unit.</li>
+<li> Using <a href="../en/NetworkManager.html#Network_services_with_NetworkManager_dispatcher" title="NetworkManager">NetworkManager dispatcher</a> instead of systemd to start squid</li>
+</ul>
+<p><a href="../en/Systemd.html#Using_units" title="Disable" class="mw-redirect">Disable</a> the <code>squid.service</code> systemd unit.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/dispatcher.d/10_squid</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">if [ $1 == 'wlp2s0' ]
+then
+    if [ $2 == 'up' ]
+    then
+        systemctl start squid
+    else
+        systemctl stop squid
+    fi
+fi</pre>
+<p><code>sudo chmod u+x /etc/NetworkManager/dispatcher.d/10_squid</code>
+</p>
+<h2><span class="mw-headline" id="Additional_Resources">Additional Resources</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://archive.is/oOdiT">Elite Proxy Config Example(cached)</a> (<a rel="nofollow" class="external text" href="https://web.archive.org/web/20130425134032/http://gotux.net/arch-linux/squid-proxy-server/">cache-two</a>)</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../en/Category:Proxy_servers.html" title="Category:Proxy servers">Proxy servers</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

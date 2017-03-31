@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Mouse acceleration - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Mouse_acceleration skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Mouse acceleration</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mouse_buttons.html" title="Mouse buttons">Mouse buttons</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Mouse_polling_rate.html" title="Mouse polling rate">Mouse polling rate</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Configuration depends on the input driver, libinput can be used in <a href="../en/Xorg.html" title="Xorg">Xorg</a>. Each subsection should explicitly state which driver is assumed. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Mouse_acceleration">Talk:Mouse acceleration#</a>)</div>
+</div>
+<p>Setting the mouse acceleration depends on the windowing protocol you are using: either <a href="../en/Xorg.html" title="Xorg">Xorg</a> or <a href="../en/Wayland.html" title="Wayland">Wayland</a>. 
+</p>
+<ul><li> On <a href="../en/Xorg.html" title="Xorg">Xorg</a>, there are several ways of setting mouse acceleration</li></ul>
+<dl><dd><ul>
+<li> by editing Xorg configuration files</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-server-utils">xorg-server-utils</a></span> which provides <i>xset</i> and <i>xinput</i>
+</li>
+<li> and configuration interfaces common in <a href="../en/Desktop_environment.html" title="Desktop environments" class="mw-redirect">desktop environments</a>.</li>
+</ul></dd></dl>
+<ul><li> If you are using <a href="../en/Wayland.html" title="Wayland">Wayland</a>, the events are controlled via <a href="../en/Libinput.html" title="Libinput">libinput</a>. It is the compositor's job to expose the settings brought by libinput. There is currently not standard way to change settings across compositors.<a rel="nofollow" class="external autonumber" href="https://www.reddit.com/r/gnome/comments/3upay2/wayland_where_are_the_mouse_acceleration_options/">[1]</a>
+</li></ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Setting_mouse_acceleration"><span class="tocnumber">1</span> <span class="toctext">Setting mouse acceleration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#In_Xorg_configuration"><span class="tocnumber">1.1</span> <span class="toctext">In Xorg configuration</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Using_xset"><span class="tocnumber">1.2</span> <span class="toctext">Using xset</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Using_xinput"><span class="tocnumber">1.3</span> <span class="toctext">Using xinput</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Configuration_example"><span class="tocnumber">1.4</span> <span class="toctext">Configuration example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Disabling_mouse_acceleration"><span class="tocnumber">2</span> <span class="toctext">Disabling mouse acceleration</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Setting_mouse_acceleration">Setting mouse acceleration</span></h2>
+<h3><span class="mw-headline" id="In_Xorg_configuration">In Xorg configuration</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Don't use comments in code blocks, provide more description in the wiki text instead. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Mouse_acceleration">Talk:Mouse acceleration#</a>)</div>
+</div>
+<p>See <code>man xorg.conf</code> for details.
+</p>
+<p>Examples:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-acceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "My Mouse"
+	MatchIsPointer "yes"
+# set the following to 1 1 0 respectively to disable acceleration.
+	Option "AccelerationNumerator" "2"
+	Option "AccelerationDenominator" "1"
+	Option "AccelerationThreshold" "4"
+EndSection</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-deceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "My Mouse"
+	MatchIsPointer "yes"
+# some curved deceleration
+#	Option "AdaptiveDeceleration" "2"
+# linear deceleration (mouse speed reduction)
+	Option "ConstantDeceleration" "2"
+EndSection</pre>
+<p>You can also assign settings to specific hardware by using "MatchProduct", "MatchVendor" and other matches inside class sections. Run <code>lsusb</code> to find out the product name and vendor to match:
+</p>
+<pre>$ lsusb -v | grep -e idProduct -e idVendor
+</pre>
+<p>If you are unable to identify your device, try running <code>xinput list</code>. Some devices the use Logitech Unifying Recceiver share the same USB connection therefore, the mouse don't appear using <code>lsusb</code>
+</p>
+<h3><span class="mw-headline" id="Using_xset">Using xset</span></h3>
+<p>To get the current values, use:
+</p>
+<pre>$ xset q | grep -A 1 Pointer
+</pre>
+<p>To set new values, type:
+</p>
+<pre>$ xset m <i>acceleration</i> <i>threshold</i>
+</pre>
+<p>where <i>acceleration</i> defines how many times faster the cursor will move than the default speed. <i>threshold</i> is the velocity required for acceleration to become effective, usually measured in device units per 10ms. <i>acceleration</i> can be a fraction, so if you want to slow down the mouse you can use 1/2, 1/3, 1/4, ... if you want to make it faster you can use 2/1, 3/1, 4/1, ... 
+</p>
+<p><i>Threshold</i> defines the point at which acceleration should occur in pixels per 10 ms. If threshold is zero, e.g. if you use: 
+</p>
+<pre>$ xset m 3/2 0
+</pre>
+<p>as suggested in the man page, then acceleration is treated as "the exponent of a more natural and continuous formula."
+</p>
+<p>To get the default settings back:
+</p>
+<pre>$ xset m default
+</pre>
+<p>For more info see <code>man xset</code>.
+</p>
+<p>Commands may be stored in <a href="../en/Xinit.html" title="Xinitrc" class="mw-redirect">Xinitrc</a> or <a href="../en/Xprofile.html" title="Xprofile">Xprofile</a>. Alternatively, create a <a href="../en/Desktop_entries.html" title="Desktop entry" class="mw-redirect">Desktop entry</a> in <code>.config/autostart</code>:
+</p>
+<pre>[Desktop Entry]
+Name=Disable mouse acceleration
+Exec=xset m 0 0
+Type=Application
+</pre>
+<p>This technique may be more desirable than employing the xorg configuration technique described above; latter may interfere with setting mouse speed in a display manager.
+</p>
+<h3><span class="mw-headline" id="Using_xinput">Using xinput</span></h3>
+<p>First, get a list of devices plugged in (ignore any virtual pointers):
+</p>
+<pre>$ xinput list
+</pre>
+<p>Take note of the ID. You may also use the full name in commands if the ID is prone to changing.
+</p>
+<p>Get a list of available properties and their current values available for modification with
+</p>
+<pre>$ xinput list-props 9
+</pre>
+<p>where <code>9</code> is the ID of the device you wish to use. Or
+</p>
+<pre>$ xinput list-props <i>mouse brand</i>
+</pre>
+<p>where <i>mouse brand</i> is the name of your mouse given by <code>$ xinput list</code>
+</p>
+<p>Example, changing the property of <code>Constant Deceleration</code> to 2:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xinput list-props 9</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Device '<i>mouse brand</i>':
+       Device Enabled (121):   1
+       Device Accel Profile (240):     0
+       Device Accel Constant Deceleration (241):       1.000000
+       Device Accel Adaptive Deceleration (243):       1.000000
+       Device Accel Velocity Scaling (244):    10.000000
+</pre>
+<pre>$ xinput --set-prop '<i>mouse brand</i>' 'Device Accel Constant Deceleration' 2
+</pre>
+<p>To make it permanent, edit xorg configuration (see above) or add commands to <a href="../en/Xprofile.html" title="Xprofile">xprofile</a>. The latter won't affect speed in a <a href="../en/Display_manager.html" title="Display manager">Display manager</a>.
+</p>
+<h3><span class="mw-headline" id="Configuration_example">Configuration example</span></h3>
+<p>You may need to resort to using more than one method to achieve your desired mouse settings. Here's what I did to configure a generic optical mouse:
+First, slow down the default movement speed 3 times so that it's more precise.
+</p>
+<pre>$ xinput --set-prop 9 'Device Accel Constant Deceleration' 3 &amp;
+</pre>
+<p>Then, enable acceleration and make it 3 times faster after moving past 6 units.
+</p>
+<pre>$ xset mouse 3 6 &amp;
+</pre>
+<p>If you are satisfied of the results, store the preceding commands in <code>~/.xinitrc</code>.
+</p>
+<h2><span class="mw-headline" id="Disabling_mouse_acceleration">Disabling mouse acceleration</span></h2>
+<p>Mouse acceleration has changed dramatically in recent X server versions; using <code>xset</code> to disable acceleration doesn't work as it used to and is not recommended anymore.
+</p>
+<p>Recent changes on <code>PointerAcceleration</code> can be read <a rel="nofollow" class="external text" href="http://xorg.freedesktop.org/wiki/Development/Documentation/PointerAcceleration#Introduction">here</a>.
+</p>
+<p>To completely disable any sort of acceleration/deceleration, create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-acceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "My Mouse"
+	MatchIsPointer "yes"
+	Option "AccelerationProfile" "-1"
+	Option "AccelerationScheme" "none"
+	Option "AccelSpeed" "-1"
+EndSection</pre>
+<p>and restart X.
+</p>
+<p>Since <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libinput">libinput</a></span>-1.1.0-1 and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-input-libinput">xf86-input-libinput</a></span>-0.15.0-1 you can use a flat acceleration profile which will give a 1:1 mapping of physical to virtual mouse movements. To enable it put this in the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/50-mouse-acceleration.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Section "InputClass"
+	Identifier "My Mouse"
+	Driver "libinput"
+	MatchIsPointer "yes"
+	Option "AccelProfile" "flat"
+EndSection</pre>
+<p>and restart X.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The speed setting <code>libinput Accel Speed</code> is the same as before, taking values in the [-1, 1] range. The Speed setting is a fraction that is added (or subtracted) to 100%, e.g. -0.3 is 70% of the normal speed, and 0.5 is 150%. For example, to adjust the mouse speed down to 50%, use <code>xinput --set-prop 8 'libinput Accel Speed' -0.5</code>.</div>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Mice.html" title="Category:Mice">Mice</a></li>
+<li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

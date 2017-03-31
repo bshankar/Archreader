@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Network Security Services - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Network_Security_Services skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Network Security Services</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>Network Security Services (NSS)</b> is a set of libraries designed to support cross-platform development of security-enabled client and server applications.
+</p>
+<p>Applications built with NSS can support <a href="https://en.wikipedia.org/wiki/SSL" class="extiw" title="wikipedia:SSL">SSL</a> v2 and v3, <a href="https://en.wikipedia.org/wiki/TLS" class="extiw" title="wikipedia:TLS">TLS</a>, <a href="https://en.wikipedia.org/wiki/PKCS" class="extiw" title="wikipedia:PKCS">PKCS</a> #5, #7, <a href="https://en.wikipedia.org/wiki/PKCS_11" class="extiw" title="wikipedia:PKCS 11">PKCS #11</a>, <a href="https://en.wikipedia.org/wiki/PKCS_12" class="extiw" title="wikipedia:PKCS 12">PKCS #12</a>, <a href="https://en.wikipedia.org/wiki/S/MIME" class="extiw" title="wikipedia:S/MIME">S/MIME</a>, <a href="https://en.wikipedia.org/wiki/X.509" class="extiw" title="wikipedia:X.509">X.509</a> v3 certificates, and other security standards.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Certificate_management"><span class="tocnumber">2</span> <span class="toctext">Certificate management</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#List_certificate_DB"><span class="tocnumber">2.1</span> <span class="toctext">List certificate DB</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Import_certificate"><span class="tocnumber">2.2</span> <span class="toctext">Import certificate</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Edit_certificate"><span class="tocnumber">2.3</span> <span class="toctext">Edit certificate</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Delete_certificate"><span class="tocnumber">2.4</span> <span class="toctext">Delete certificate</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nss">nss</a></span>, available in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<h2><span class="mw-headline" id="Certificate_management">Certificate management</span></h2>
+<p>Use <i>certutil</i> utility provided with NSS to manage your certificates.
+</p>
+<h3><span class="mw-headline" id="List_certificate_DB">List certificate DB</span></h3>
+<p>To get list of all certificates:
+</p>
+<pre>$ certutil -d sql:$HOME/.pki/nssdb -L
+</pre>
+<p>To get details about certificate:
+</p>
+<pre>$ certutil -d sql:$HOME/.pki/nssdb -L -n <i>certificate_nickname</i>
+</pre>
+<h3><span class="mw-headline" id="Import_certificate">Import certificate</span></h3>
+<p>To add a certificate specify the <code>-A</code> option:
+</p>
+<pre>$ certutil -d sql:$HOME/.pki/nssdb -A -t "<i>TRUSTARGS</i>" -n <i>certificate_nickname</i> -i <i>/path/to/cert/filename</i>
+</pre>
+<p>The <code>TRUSTARGS</code> are three strings of zero or more alphabetic characters, separated by commas, for example: <code>"TCu,Cu,Tuw"</code>. They define how the certificate should be trusted for SSL, email, and object signing, and are explained in the <a rel="nofollow" class="external text" href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html#1034193">certutil docs</a> or <a rel="nofollow" class="external text" href="https://blogs.oracle.com/meena/entry/notes_about_trust_flags">Meena's blog post</a> on trust flags.
+</p>
+<p>To add a personal certificate and private key for SSL client authentication use the command:
+</p>
+<pre>$ pk12util -d sql:$HOME/.pki/nssdb -i <i>/path/to/PKCS12/cert/filename.p12</i>
+</pre>
+<p>This will import a personal certificate and private key stored in a PKCS #12 file. The <code>TRUSTARGS</code> of the personal certificate will be set to <code>"u,u,u"</code>.
+</p>
+<h3><span class="mw-headline" id="Edit_certificate">Edit certificate</span></h3>
+<p>Call <i>certutil</i> with <code>-M</code> option to edit the certificate. For example, to edit the <code>TRUSTARGS</code>:
+</p>
+<pre>$ certutil -d sql:$HOME/.pki/nssdb -M -t "<i>TRUSTARGS</i>" -n <i>certificate_nickname</i>
+</pre>
+<h3><span class="mw-headline" id="Delete_certificate">Delete certificate</span></h3>
+<p>Use <code>-D</code> option to remove the certificate:
+</p>
+<pre>$ certutil -d sql:$HOME/.pki/nssdb -D -n <i>certificate_nickname</i>
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.mozilla.org/projects/security/pki/nss/">Network Security Services</a> on mozilla.org.</li>
+<li> <a rel="nofollow" class="external text" href="http://www.mozilla.org/projects/security/pki/nss/tools/certutil.html#1034193">Using the Certificate Database Tool</a> on mozilla.org.</li>
+<li> <a rel="nofollow" class="external text" href="http://code.google.com/p/chromium/wiki/LinuxCertManagement">Certificate management</a> on Chromium help.</li>
+<li> <a rel="nofollow" class="external text" href="http://blogs.oracle.com/meena/entry/notes_about_trust_flags">Managing Certificate Trust flags in NSS Database</a> on Meena's blog.</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Internet_applications.html" title="Category:Internet applications">Internet applications</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

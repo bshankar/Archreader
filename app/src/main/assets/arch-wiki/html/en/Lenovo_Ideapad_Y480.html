@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Lenovo Ideapad Y480 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Lenovo_Ideapad_Y480 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Lenovo Ideapad Y480</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The Lenovo IdeaPad Y480 is compatible with Arch Linux for the most part. However there are some tidbits we need to tweak in depending on our needs. This article, like many others in this wiki, assumes the user has already read through the <a href="../en/Installation_guide.html" title="Beginner's Guide" class="mw-redirect">Beginner's Guide</a> and related articles and has installed most, if not all, of the needed drivers. We will focus mostly on tweaking the system.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Intel_graphics"><span class="tocnumber">1</span> <span class="toctext">Intel graphics</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#NVIDIA_graphics"><span class="tocnumber">2</span> <span class="toctext">NVIDIA graphics</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Low_ALSA_Audio"><span class="tocnumber">3</span> <span class="toctext">Low ALSA Audio</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Removing_the_WWAN.2FWLAN_Whitelist"><span class="tocnumber">4</span> <span class="toctext">Removing the WWAN/WLAN Whitelist</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Intel_graphics">Intel graphics</span></h2>
+<p>This machine has two video cards, an Intel HD 4000 integrated chip and a discrete NVIDIA Geforce 640M LE.
+</p>
+<p>If you only wish to disable the NVIDIA video card and only use the Intel chip for improved battery life, lower temperatures, or less complexity, you can simply install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-intel">xf86-video-intel</a></span> and then  enter the BIOS and on the "Configuration" tab, change "Graphic Device" from "Switchable Graphic" to "UMA Graphic". If these options are not there, you may need to update the BIOS.  This will leave the NVIDIA card without consuming power.
+</p>
+<h2><span class="mw-headline" id="NVIDIA_graphics">NVIDIA graphics</span></h2>
+<p>The Intel video card cannot be disabled in the BIOS, so the NVIDIA Optimus technology residing in the machine must be configured in order to access the NVIDIA graphics. See the wiki page on <a href="../en/NVIDIA_Optimus.html" title="NVIDIA Optimus">NVIDIA Optimus</a> for an in-depth description of the process.
+</p>
+<h2><span class="mw-headline" id="Low_ALSA_Audio">Low ALSA Audio</span></h2>
+<p>Compared to the audio volume in a Windows OS with the correct Realtek HD drivers, the sound volume in Arch Linux is rather low even with the current ALSA drivers. This is due to ALSA not correctly identifying the sound card's model. We can fix this by adding in <code>/etc/modprobe.d/alsa.conf</code> the following:
+</p>
+<pre>options snd-hda-intel model=ideapad
+</pre>
+<h2><span class="mw-headline" id="Removing_the_WWAN.2FWLAN_Whitelist">Removing the WWAN/WLAN Whitelist</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Unlocking the BIOS should be done with utmost care. The user is responsible for any failure in their system.</div>
+<p>According to a <a rel="nofollow" class="external text" href="http://forum.techinferno.com/lenovo-ibm/2260-lenovo-y580-y480-unlocked-bios-versions.html#post29839">techinferno post</a> (Original post <a rel="nofollow" class="external text" href="http://forum.techinferno.com/lenovo-ibm/2260-lenovo-y580-y480-unlocked-bios-versions.html">here</a>) the BIOS contains a whitelist of wwan/wlan cards. In order to install a wireless card not listed in the whitelist, we need to download and install an unlocked BIOS which can be found <a rel="nofollow" class="external text" href="http://forum.techinferno.com/downloads.php?do=cat&amp;id=11">here</a>. Once installed, the whitelist will be removed and a lot of hidden BIOS options for tweaking the system will be available. 
+</p>
+<p>The provided BIOS package from the <a rel="nofollow" class="external text" href="http://forum.techinferno.com/downloads.php?do=cat&amp;id=11">downloads page</a> will not install unmodified due to missing a PTDIS parameter in the platform.ini in the third line. The resulting line should be:
+</p>
+<pre>SwitchString=ACEN DCEN CPVER:[1] FHRST RESSEN PTDIS
+</pre>
+<p>A working download can be found <a rel="nofollow" class="external text" href="https://drive.google.com/folderview?id=0BzueXo1sGj4uaFhDakZLZUFJaXc&amp;usp=sharing">here</a>
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Lenovo.html" title="Category:Lenovo">Lenovo</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dynamic Disks - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dynamic_Disks skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dynamic Disks</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Dynamic Disks is a technology from Microsoft and Veritas Software (now owned by Symantec) that brings LVM and mdadm functionality to Windows.  Dynamic Disks first appeared in Windows 2000, but the concept existed in a different implementation under Windows NT Server 4.0.  This feature has been limited to the Professional, Enterprise and/or Server versions of Windows until Windows 7, wherein Home Premium users can create Simple (single partition), Spanned (JBOD), or Striped (RAID0) volumes.  Unlike LVM and mdadm, Dynamic Disks always take up the entire disk.  If the Dynamic Disk uses MBR partitions, one large partition will hold the data while metadata is stored outside the partition at the end of the disk.  If the Dynamic Disk uses GPT partitions, two partition will be used -- a small one at the beginning to hold the metadata and a large one for the data taking up the remainder of the disk space.
+</p>
+<h2><span class="mw-headline" id="Uses_Under_Arch_Linux">Uses Under Arch Linux</span></h2>
+<p><a href="../en/LVM.html" title="LVM">LVM</a> and <a href="../en/RAID.html" title="Mdadm" class="mw-redirect">mdadm</a> are the preferred tools under Arch Linux.  However, if the system is being dual-booted with Windows, Windows will not be able to read these setups.  The usual course then is to attempt to use <a href="../en/Installing_with_Fake_RAID.html" title="Fakeraid" class="mw-redirect">fakeraid</a> using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dmraid">dmraid</a></span> or to use network storage.  However, network storage retrieval will be capped to 1Gb/s (119MiB/s) and getting RAID drivers loaded on an existing Windows installation can be daunting (if not impossible) if the Windows OS partition is installed on a drive that's on the very controller that you want to switch from AHCI to RAID.  Even if you have a spare AHCI controller card, your system may not have enough space to hold two Option ROMs.
+</p>
+<h2><span class="mw-headline" id="Installing_Support_for_Dynamic_Disks">Installing Support for Dynamic Disks</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This tool will only give you the ability to use Dynamic Disks in Arch Linux.  For all other tasks, you will have to use Windows' Logical Disk Manager.</div>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ldmtool/">ldmtool</a></span><sup><small>AUR</small></sup>  package.  Once installed, <code>ldmtool</code> can be used to query and mount Dynamic Disks.
+</p>
+<p>To find all disk groups:
+</p>
+<pre># ldmtool scan
+</pre>
+<p>To find what volumes a disk group contains:
+</p>
+<pre># ldmtool show diskgroup {diskgroup UUID}
+</pre>
+<p>To create individual device mappers:
+</p>
+<pre># ldmtool create volume {volume name}
+</pre>
+<p>To create device mappers for all volumes in a disk group:
+</p>
+<pre># ldmtool create volume {diskgroup UUID}
+</pre>
+<p>To create device mappers for all volumes in all discovered disk groups:
+</p>
+<pre># ldmtool create all
+</pre>
+<h2><span class="mw-headline" id="System_Integration">System Integration</span></h2>
+<p>To get Dynamic Disks to behave like filesystems natively supported by the Linux kernel, use this systemd unit:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/ldmtool.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Windows Dynamic Disk Mount
+Before=local-fs-pre.target
+DefaultDependencies=no
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/ldmtool create all
+[Install]
+WantedBy=local-fs-pre.target
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>ldmtool.service</code>.
+</p>
+<p>Once this setup is complete, you can add entries to <code>/etc/fstab</code> that reference Dynamic Disk volumes and have those mounted like any other volume.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

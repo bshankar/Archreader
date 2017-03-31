@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SFTP chroot - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SFTP_chroot skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SFTP chroot</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>OpenSSH 4.9+ includes a built-in chroot for sftp, but requires a few tweaks to the normal install.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Change_chroot_directory_rights"><span class="tocnumber">2.1</span> <span class="toctext">Change chroot directory rights</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Fixing_path_for_authorized_keys"><span class="tocnumber">2.2</span> <span class="toctext">Fixing path for authorized_keys</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Adding_new_chrooted_users"><span class="tocnumber">2.3</span> <span class="toctext">Adding new chrooted users</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Logging"><span class="tocnumber">3</span> <span class="toctext">Logging</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Create_sub_directory"><span class="tocnumber">3.1</span> <span class="toctext">Create sub directory</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Syslog-ng_configuration"><span class="tocnumber">3.2</span> <span class="toctext">Syslog-ng configuration</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#sshd_configuration"><span class="tocnumber">3.3</span> <span class="toctext">sshd configuration</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Restart_service"><span class="tocnumber">3.4</span> <span class="toctext">Restart service</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Testing_your_chroot"><span class="tocnumber">4</span> <span class="toctext">Testing your chroot</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#Write_access_to_chroot_dir"><span class="tocnumber">6</span> <span class="toctext">Write access to chroot dir</span></a></li>
+<li class="toclevel-1 tocsection-14"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>This package is available in the core repository. To install it, run 
+</p>
+<pre># pacman -S openssh
+</pre>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>First, we need to create the <code>sftponly</code> group
+</p>
+<pre># groupadd sftponly 
+</pre>
+<p>Following changes to the SSH daemon configure permissions for the <code>sftponly</code> group
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Match Group sftponly
+  ChrootDirectory %h
+  ForceCommand internal-sftp
+  AllowTcpForwarding no
+  PermitTunnel no
+  X11Forwarding no
+</pre>
+<p>Or for a single user:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Match User username
+  ChrootDirectory %h
+  ForceCommand internal-sftp
+  AllowTcpForwarding no
+  PermitTunnel no
+  X11Forwarding no
+</pre>
+<h3><span class="mw-headline" id="Change_chroot_directory_rights">Change chroot directory rights</span></h3>
+<p>The chroot directory must be owned by root. 
+</p>
+<pre> # chown root:root /home/username
+</pre>
+<p>Add the '<i>sftponly</i> group to each user with remote access rights
+</p>
+<pre> # gpasswd -a USER sftponly
+</pre>
+<h3><span class="mw-headline" id="Fixing_path_for_authorized_keys">Fixing path for authorized_keys</span></h3>
+<p>With the standard path of <i>AuthorizedKeysFile</i>, the public key authentication will fail for chrooted-users. To fix this, we set the <i>AuthorizedKeysFile</i> to a root-owned, non-worldwritable directory and move existing users' keys.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This has the side effect of improving overall security with the tradeoff of root intervention for revocation in case a user changes their key or their key gets lost or stolen.</div>
+<pre>AuthorizedKeysFile      /etc/ssh/authorized_keys/%u
+</pre>
+<p>Create <i>authorized_keys</i> directory and move existing users' authorized_keys:
+</p>
+<pre># mkdir /etc/ssh/authorized_keys
+# bash -c 'for user in /home/*; do mv ${user}/.ssh/authorized_keys /etc/ssh/authorized_keys/${user#/home/}; done'
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Be careful during this step not to lock yourself out of the machine you're working on. Always have a secondary method of access, such as an additional ssh session open or console access should things go awry</div>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> <code>sshd.service</code>.
+</p>
+<h3><span class="mw-headline" id="Adding_new_chrooted_users">Adding new chrooted users</span></h3>
+<p>If using the group method above, ensure all sftp users are put in the appropriate group, i.e.:
+</p>
+<pre># usermod -g sftponly username
+</pre>
+<p>Also, set their shell to <i>/usr/bin/false</i> to prevent a normal ssh login:
+</p>
+<pre># usermod -s /bin/false username
+</pre>
+<p>Their chroot will be the same as their home directory. The permissions are not the same as a normal home, though. Their home directory must be owned as root and not writable by another user or group. This includes the path leading to the directory.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See e.g <a rel="nofollow" class="external free" href="https://bugs.archlinux.org/task/21981">https://bugs.archlinux.org/task/21981</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SFTP_chroot">Talk:SFTP chroot#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Make sure that <i>/bin/false</i> exists in <i>/etc/shells</i> as well. Otherwise the login will fail with an <i>invalid password error</i>. </div>
+<p>Note that since this is only for sftp, a proper chroot environment with a shell and <i>/dev</i> doesn't need to be created. However, if you would like to log access, follow the instructions in the logging section below.
+</p>
+<h2><span class="mw-headline" id="Logging">Logging</span></h2>
+<p>The user will not be able to access <code>/dev/log</code>. This can be seen by running <code>strace</code> on the process once the user connects and attempts to download a file. 
+</p>
+<h3><span class="mw-headline" id="Create_sub_directory">Create sub directory</span></h3>
+<p>Create the sub-directory <code>dev</code> in the <code>ChrootDirectory</code>, for example:
+</p>
+<pre> sudo mkdir /usr/local/chroot/theuser/dev
+ sudo chmod 755 /usr/local/chroot/theuser/dev
+</pre>
+<p><code>syslog-ng</code> will create the device <code>/usr/local/chroot/theuser/dev/log</code> once configured.
+</p>
+<h3><span class="mw-headline" id="Syslog-ng_configuration">Syslog-ng configuration</span></h3>
+<p>Add to <code>/etc/syslog-ng/syslog-ng.conf</code> a new source for the log and add the configuration, for example change the section:
+</p>
+<pre>source src {
+  unix-dgram("/dev/log");
+  internal();
+  file("/proc/kmsg");
+};
+</pre>
+<p>to:
+</p>
+<pre>source src {
+  unix-dgram("/dev/log");
+  internal();
+  file("/proc/kmsg");
+  unix-dgram("/usr/local/chroot/theuser/dev/log");
+};
+</pre>
+<p>and append:
+</p>
+<pre>#sftp configuration
+destination sftp { file("/var/log/sftp.log"); };
+filter f_sftp { program("internal-sftp"); };
+log { source(src); filter(f_sftp); destination(sftp); };
+</pre>
+<p>(Optional) If you'd like to similarly log SSH messages to it's own file:
+</p>
+<pre>#sshd configuration
+destination ssh { file("/var/log/ssh.log"); };
+filter f_ssh { program("sshd"); };
+log { source(src); filter(f_ssh); destination(ssh); };
+</pre>
+<p>(From <a href="../en/Syslog-ng.html#Move_log_to_another_file" title="Syslog-ng">Syslog-ng#Move log to another file</a>)
+</p>
+<h3><span class="mw-headline" id="sshd_configuration">sshd configuration</span></h3>
+<p>Edit <code>/etc/ssh/sshd_config</code> to replace all instances of <code>internal-sftp</code> with <code>internal-sftp -f AUTH -l VERBOSE</code>
+</p>
+<h3><span class="mw-headline" id="Restart_service">Restart service</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> service <code>syslog-ng</code> and <code>sshd</code>.
+</p>
+<p><code>/usr/local/chroot/theuser/dev/log</code> should now exist.
+</p>
+<h2><span class="mw-headline" id="Testing_your_chroot">Testing your chroot</span></h2>
+<pre># ssh username@localhost
+</pre>
+<p>should refuse the connection or fail on login. The response varies, possibly due to the version of OpenSSH used.
+</p>
+<pre># sftp username@localhost
+</pre>
+<p>should place you in the chroot'd environment.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>Error while trying to connect 
+</p>
+<pre>Write failed: Broken pipe                                                                                               
+Couldn't read packet: Connection reset by peer
+</pre>
+<p>If you also find similar message in /var/log/auth.log
+</p>
+<pre>sshd[12399]: fatal: bad ownership or modes for chroot directory component "/path/of/chroot/directory/"  
+</pre>
+<p>This is a <code>ChrootDirectory</code> ownership problem.  sshd will reject SFTP connections to accounts that are set to chroot into any directory that has ownership/permissions that sshd considers insecure.  sshd's strict ownership/permissions requirements dictate that every directory in the chroot path must be owned by root and only writable by the owner.  So, for example, if the chroot environment is /home must be owned by root.
+See below for possible alternatives.
+</p>
+<p>The reason for this is to <a rel="nofollow" class="external text" href="http://lists.mindrot.org/pipermail/openssh-unix-dev/2009-May/027651.html">prevent a user from escalating their privileges</a> and becoming root, escaping the chroot environment.
+</p>
+<p>If chroot environment is in user's home directory, make sure user have access to it's home directory, or user would not be able to access it's publickey, produce following error 
+</p>
+<pre>Permission denied (publickey).
+</pre>
+<h2><span class="mw-headline" id="Write_access_to_chroot_dir">Write access to chroot dir</span></h2>
+<p>As above, if a user is able to write to the chroot directory then it is possible for them to escalate their privileges to root and escape the chroot.  One way around this is to give the user two home directories - one "real" home they can write to, and one SFTP home that is locked down to keep sshd happy and your system secure.  By using <code>mount --bind</code> you can make the real home directory appear as a subdirectory inside the SFTP home directory, allowing them full access to their real home directory.
+</p>
+<p>This can also be used to achieve other goals.  For example, a user's home directory can be locked down per the sshd chroot rules, and bind mounts used to provide users access to other directories:
+</p>
+<pre># mkdir /home/user/web
+# mount --bind /srv/web/example.com /home/user/web
+</pre>
+<p>Optional add an entry to <code>/etc/fstab</code>:
+</p>
+<pre># echo '/srv/web/example.com/ /home/user/web        none    bind' &gt;&gt; /etc/fstab
+</pre>
+<p>Now the user can log in with SFTP, they are chrooted to <code>/home/user</code>, but they see a folder called "web" they can access to manipulate files on a web site (assuming they have correct permissions in <code>/srv/web/example.com</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="http://www.minstrel.org.uk/papers/sftp/">http://www.minstrel.org.uk/papers/sftp/builtin/</a></li>
+<li><a rel="nofollow" class="external free" href="http://www.openbsd.org/cgi-bin/man.cgi?query=sshd_config">http://www.openbsd.org/cgi-bin/man.cgi?query=sshd_config</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_Transfer_Protocol.html" title="Category:File Transfer Protocol">File Transfer Protocol</a></li>
+<li><a href="../en/Category:Secure_Shell.html" title="Category:Secure Shell">Secure Shell</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

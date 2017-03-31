@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Intel GMA 500 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Intel_GMA_500 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Intel GMA 500</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Intel_graphics.html" title="Intel graphics">Intel graphics</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Xorg.html" title="Xorg">Xorg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/MPlayer.html" title="MPlayer">MPlayer</a></li>
+</ul>
+</div>
+<p>The <b>Intel GMA 500</b> series, also known by its codename <b>Poulsbo</b> or <b><a rel="nofollow" class="external text" href="http://ark.intel.com/Product.aspx?id=35444">Intel System Controller Hub US15W</a></b>, is a family of integrated video adapters based on the PowerVR SGX 535 graphics core. It is typically found on boards for the Atom Z processor series. Features include hardware decoding capability of up to 720p/1080i video content in various state-of-the-art codecs, e.g. H.264.
+</p>
+<p>As the PowerVR SGX 535 graphics core was developed by Imagination Technologies and then licensed by Intel, the standard opensource <a href="../en/Intel_graphics.html" title="Intel" class="mw-redirect">Intel</a> drivers do not work with this hardware. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Kernel.27s_gma500_gfx_module"><span class="tocnumber">1</span> <span class="toctext">Kernel's gma500_gfx module</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Modesetting_driver_and_dual_monitor_Setup"><span class="tocnumber">2</span> <span class="toctext">Modesetting driver and dual monitor Setup</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Troubleshooting"><span class="tocnumber">3</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Poor_video_performance"><span class="tocnumber">3.1</span> <span class="toctext">Poor video performance</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Fix_suspend"><span class="tocnumber">3.2</span> <span class="toctext">Fix suspend</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Old_fbdev_driver_.28default.29"><span class="tocnumber">3.2.1</span> <span class="toctext">Old fbdev driver (default)</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#modesetting_xorg_driver"><span class="tocnumber">3.2.2</span> <span class="toctext">modesetting xorg driver</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Set_backlight_brightness"><span class="tocnumber">3.3</span> <span class="toctext">Set backlight brightness</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Memory_allocation_optimization"><span class="tocnumber">3.4</span> <span class="toctext">Memory allocation optimization</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#SDL_fullscreen_viewport_is_too_large.2Fsmall"><span class="tocnumber">3.5</span> <span class="toctext">SDL fullscreen viewport is too large/small</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Kernel.27s_gma500_gfx_module">Kernel's gma500_gfx module</span></h2>
+<p>The Linux kernel includes the <code>gma500_gfx</code> module which should work out of the box.
+</p>
+<p>To check if the driver is loaded, run and verify that <code>gma500_gfx</code> is listed in the output:
+</p>
+<pre>$ lsmod | grep gma
+</pre>
+<p><b>Advantages</b>
+</p>
+<ul>
+<li> Native resolution (1366x768) with early KMS (tested on Asus Eee 1101HA)</li>
+<li> Up to date kernel and Xorg</li>
+<li> 2D acceleration</li>
+<li> Works out of the box</li>
+</ul>
+<p><b>Disadvantages</b>
+</p>
+<ul>
+<li> Some are unable to get native resolution (e.g 1366x768)</li>
+<li> No 3D acceleration possible</li>
+<li> Poor multimedia performance (use mplayer with x11 or sdl so fullscreen video will be quite slow)</li>
+</ul>
+<h2><span class="mw-headline" id="Modesetting_driver_and_dual_monitor_Setup">Modesetting driver and dual monitor Setup</span></h2>
+<p>To setup different resolution for external monitor using <a href="../en/Xrandr.html" title="Xrandr">xrandr</a>, xf86-video-modesetting provided by package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-server">xorg-server</a></span> from official repo is needed. After installing, an <a href="../en/Xorg.html" title="Xorg">Xorg</a> file is needed to setup the driver. Use this for device section:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/20-gpudriver.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ Section "Device"
+    Identifier "gma500_gfx"
+    Driver     "modesetting"
+    Option     "SWCursor"       "ON" 
+ EndSection
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The above configuration file will replace the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xf86-video-fbdev">xf86-video-fbdev</a></span> driver. If you want to revert back, just replace <code>modesetting</code> with <code>fbdev</code>.</div>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Poor_video_performance">Poor video performance</span></h3>
+<p>If you have problems playing 720p and 1080i videos, yes, that's normal while there are not accelerated XV drivers. But you can improve it up to the point of going well and smoothly for most videos (even HD ones) with these tricks:
+</p>
+<ol>
+<li> always use <a href="../en/MPlayer.html" title="MPlayer">MPlayer</a> or any variant/gui. <a href="../en/VLC_media_player.html" title="VLC" class="mw-redirect">VLC</a> and others are usually much more slower.</li>
+<li> When possible, Use multithreaded decoding with mplayer (Many Atom CPUs can) &amp; framedropping <code>mplayer -lavdopts threads=4 -framedrop yourvideofile.avi</code>
+</li>
+<li> use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lqx/">linux-lqx</a></span><sup><small>AUR</small></sup> as it is a very good performance kernel. Edit PKGBUILD so you can do <code>menuconfig</code> and make sure you select your processor and remove generic optimizations for other processors. (<a href="../en/Kernels.html" title="Kernel" class="mw-redirect">About kernels</a>)</li>
+</ol>
+<h3><span class="mw-headline" id="Fix_suspend">Fix suspend</span></h3>
+<h4><span class="mw-headline" id="Old_fbdev_driver_.28default.29">Old fbdev driver (default)</span></h4>
+<p>If suspend does not work, there are various quirk options you can try. First, make sure that you have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pm-utils">pm-utils</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pm-quirks">pm-quirks</a></span> <a href="../en/Pacman.html" title="Pacman">installed</a>. See the manpage for pm-suspend for a list of them all. One that has been reported to help is <code>quirk-vbemode-restore</code>, which saves and restores the current VESA mode.
+</p>
+<p>To test it, open a terminal and use the following command
+</p>
+<pre># pm-suspend --quirk-vbemode-restore 
+</pre>
+<p>That should suspend your system. If you are able to resume, you'll want to use this option every time you suspend.
+</p>
+<pre># echo "ADD_PARAMETERS='--quirk-vbemode-restore'" &gt; /etc/pm/config.d/gma500 
+</pre>
+<p>If you are not able to resume and you get a black screen instead, try the above quirk command with only <b>one dash</b>
+</p>
+<pre># pm-suspend -quirk-vbemode-restore 
+</pre>
+<p>If this also fails, you might try removing pm-utils's video resume script, so that it's not run when you resume the machine. 
+</p>
+<pre># cd /usr/lib/pm-utils/sleep.d
+# mv 99video ~
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> If you stuck with a black screen after resume, be aware that besides the black screen, your system works fine. Instead of hard rebooting, you could try to blindly reboot your system, since the last thing you used before suspend was the terminal. Alternatively, if you have ssh enabled on your machine you could do it remotely.</div>
+<h4><span class="mw-headline" id="modesetting_xorg_driver">modesetting xorg driver</span></h4>
+<p>On some machines, when using modesetting driver the screen gets messed up with random data. Although the computer still works, you must go to a console and kill X or reboot "blindly". This is not optimal, so here is a solution:
+</p>
+<p>First, see your available screens and modes running <code>xrandr</code>:
+</p>
+<pre>
+ # xrandr
+ Screen 0: minimum 320 x 200, current 1280 x 720, maximum 2048 x 2048
+ LVDS-0 connected 1280x720+0+0 222mm x 125mm
+   1280x720       60.0*+
+ HDMI-0 connected 1280x720+0+0 531mm x 298mm
+   1920x1080      60.0 +
+   1680x1050      59.9  
+   1680x945       60.0  
+   1400x1050      74.9     59.9  
+   1600x900       60.0  
+   1280x1024      75.0     60.0  
+   1440x900       75.0     59.9  
+   1280x960       60.0  
+   1366x768       60.0  
+   1360x768       60.0  
+   1280x800       74.9     59.9  
+   1152x864       75.0  
+   1280x768       74.9     60.0  
+   1280x720       60.0* 
+   1024x768       75.1     70.1     60.0  
+   1024x576       60.0  
+   832x624        74.6  
+   800x600        72.2     75.0     60.3     56.2  
+   848x480        60.0  
+   640x480        72.8     75.0     60.0  
+   720x400        70.1
+</pre>
+<p>Edit or create (giving executive permissions) <code>/etc/pm/sleep.d/99xrandr</code>, writing the correct names and modes for your solution:
+</p>
+<pre>
+ #!/bin/sh
+ #
+ # turn off and on the screens so we force to clean video data
+ case "$1" in
+ hibernate|||suspend)
+ xrandr --output LVDS-0 --off
+ xrandr --output HDMI-0 --off
+ ;;
+ thaw|||resume)
+ xrandr --output LVDS-0 --off
+ xrandr --output HDMI-0 --off
+ xrandr --output LVDS-0 --mode 1280x720
+ /usr/local/bin/brillo-
+ ;;
+ *) exit $NA
+ ;;
+ esac
+</pre>
+<p>In my case, I turn off both screens, and turn on only the main screen upon awakening. Feel free to customize to your needs.
+On some machines, the screen turns on by default even when the system was put to sleep with the screen turned off, so you need to turn it off twice.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> This only works if you call <code>pm-suspend</code> or <code>pm-hibernate</code> inside <a href="../en/Xorg.html" title="X" class="mw-redirect">X</a>. If it is called from a daemon or a tty, it won't work.</div>
+<h3><span class="mw-headline" id="Set_backlight_brightness">Set backlight brightness</span></h3>
+<p>All that is needed to set the brightness is sending a number (0-100) to <code>/sys/class/backlight/psblvds/brightness</code>. This obviously requires sysfs to be enabled in the kernel, as it is in the Arch Linux kernel. To set display to minimal brightness, issue this command as root:
+</p>
+<pre># echo 0 &gt; /sys/class/backlight/psb-bl/brightness
+</pre>
+<p>Or, for full luminosity:
+</p>
+<pre># echo 100 &gt; /sys/class/backlight/psb-bl/brightness
+</pre>
+<p>A very short script is available to do this with less typing written by <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=813074#p813074">mulenmar</a>.
+</p>
+<pre>#! /bin/sh
+sudo sh -c "echo $1 &gt; /sys/class/backlight/psb-bl/brightness"
+</pre>
+<p>Simply save it as brightness.sh, and give it executable permissions. Then you can use it like so:
+</p>
+<p>Set brightness to minimum:
+</p>
+<pre>./brightness.sh 0
+</pre>
+<p>Set brightness to half:
+</p>
+<pre>./brightness.sh 50
+</pre>
+<p>Sudo may obviously ask for your password, so you have to be in the sudoers file. A variation of this script can be found <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=1143245#p1143245">here</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If changing <code>/sys/class/backlight/psblvds/brightness</code> does not work, you may need to add <code>acpi_osi=Linux acpi_backlight=vendor</code> to your <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.  After rebooting, a new folder will appear under <code>/sys/class/backlight/</code>; making changes to the <code>brightness</code> file in that folder should work.  For example, in some Asus netbooks the backlight can be controlled by writing a value (0-10) to <code>/sys/class/backlight/eeepc-wmi/brightness</code>.</div>
+<h3><span class="mw-headline" id="Memory_allocation_optimization">Memory allocation optimization</span></h3>
+<p>You can often improve performance by limiting the amount of RAM used by the system so that there will be more available for the videocard. If you have 1GB RAM use <code>mem=896mb</code> or if you have 2GB RAM use <code>mem=1920mb</code>. Add them to your <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a>.
+</p>
+<h3><span class="mw-headline" id="SDL_fullscreen_viewport_is_too_large.2Fsmall">SDL fullscreen viewport is too large/small</span></h3>
+<p>If X segfaults before you even have a SDL app running, see <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/35187">FS#35187</a>.
+</p>
+<p>The Shuttle XS36VL computer has a VGA, HDMI and DVI-D port. For some reason, <i>xrandr</i> sees some non-existing ports:
+</p>
+<pre>
+$ xrandr -q
+Screen 0: minimum 320 x 200, current 1024 x 768, maximum 2048 x 2048
+VGA-0 connected 1024x768+0+0 (normal left inverted right x axis y axis) 337mm x 270mm
+   1280x1024      60.0 +   75.0  
+   1024x768       75.1     70.1     60.0* 
+   832x624        74.6  
+   800x600        72.2     75.0     60.3     56.2  
+   640x480        72.8     75.0     66.7     60.0  
+   720x400        70.1  
+LVDS-0 connected 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768       60.0*+
+   960x720        60.0  
+   928x696        60.1  
+   896x672        60.0  
+   800x600        60.0     60.3     56.2  
+   700x525        60.0  
+   640x512        60.0  
+   640x480        60.0     59.9  
+   512x384        60.0  
+   400x300        60.3     56.3  
+   320x240        60.1  
+DVI-0 disconnected (normal left inverted right x axis y axis)
+DisplayPort-0 disconnected (normal left inverted right x axis y axis)
+DVI-1 disconnected (normal left inverted right x axis y axis)
+DisplayPort-1 disconnected (normal left inverted right x axis y axis)
+</pre>
+<p>In the xrandr output, <b>+</b> means <i>Preferred mode</i>, <b>*</b> means the <i>current mode</i>. In this case, only VGA-0 is really connected physically. LVDS-0 seems rubbish as <code>xrandr --output LVDS-0 --mode 640x480</code> has no effect on the physical output. However, this configuration does affect the ability of SDL (and other?) programs to display full-screen. To allow SDL programs to display with a correct viewport, one has to disable the LVDS-0 output:
+</p>
+<pre>
+$ xrandr --output LVDS-0 --off
+...
+LVDS-0 connected (normal left inverted right x axis y axis)
+
+...
+</pre>
+<p>After doing so, <code>qemu -full-screen</code> works for me.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.kriptopolis.org/arch-linux-03#comment-66066">An experience about configuring Poulsbo (Spanish)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://wiki.ubuntu.com/HardwareSupportComponentsVideoCardsPoulsbo/">Ubuntu Wiki</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://ubuntuforums.org/showthread.php?t=1984236">Ubuntu Forums</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blog.bodhizazen.net/linux/ubuntu-12-04-gma500-poulsbo-boot-options/">Ubuntu 12.04 gma500 (poulsbo) boot options (blog post)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=78719">Poulsbo Discussion in Arch BBS</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Graphics.html" title="Category:Graphics">Graphics</a></li>
+<li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

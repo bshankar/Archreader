@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Migrating between architectures - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Migrating_between_architectures skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Migrating between architectures</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page documents two potential methods of migrating installed systems between i686 (32-bit) and x86_64 (64-bit) architectures, in either direction. The methods avoid a <i>complete</i> reinstall (i.e. wiping the hard drive). One method uses a liveCD, the other modifies the system from within.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Technically this process still involves "reinstalling" since every package on the system must be replaced. These methods simply attempt to preserve as much as they can from your existing system.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Unless explicitly stated, all these methods are <b>untested</b> and may irreparably damage your system. Continue at your own risk.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#General_preparation"><span class="tocnumber">1</span> <span class="toctext">General preparation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Confirm_64-bit_architecture"><span class="tocnumber">1.1</span> <span class="toctext">Confirm 64-bit architecture</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Disk_space"><span class="tocnumber">1.2</span> <span class="toctext">Disk space</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Power_supply"><span class="tocnumber">1.3</span> <span class="toctext">Power supply</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Fallback_packages"><span class="tocnumber">1.4</span> <span class="toctext">Fallback packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Method_1:_using_the_Arch_LiveCD"><span class="tocnumber">2</span> <span class="toctext">Method 1: using the Arch LiveCD</span></a></li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Method_2:_from_a_running_system"><span class="tocnumber">3</span> <span class="toctext">Method 2: from a running system</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8">
+<a href="#Package_preparation"><span class="tocnumber">3.1</span> <span class="toctext">Package preparation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Cache_old_packages"><span class="tocnumber">3.1.1</span> <span class="toctext">Cache old packages</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Install_busybox"><span class="tocnumber">3.1.2</span> <span class="toctext">Install busybox</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Change_Pacman_architecture"><span class="tocnumber">3.1.3</span> <span class="toctext">Change Pacman architecture</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Download_new_packages"><span class="tocnumber">3.1.4</span> <span class="toctext">Download new packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13">
+<a href="#Package_installation"><span class="tocnumber">3.2</span> <span class="toctext">Package installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Install_kernel_.2864-bit.29"><span class="tocnumber">3.2.1</span> <span class="toctext">Install kernel (64-bit)</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Install_lib32-glibc"><span class="tocnumber">3.2.2</span> <span class="toctext">Install lib32-glibc</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Reboot"><span class="tocnumber">3.2.3</span> <span class="toctext">Reboot</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#Switch_to_Console_Terminal"><span class="tocnumber">3.2.4</span> <span class="toctext">Switch to Console Terminal</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#Install_Pacman"><span class="tocnumber">3.2.5</span> <span class="toctext">Install Pacman</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Install_remaining_packages"><span class="tocnumber">3.2.6</span> <span class="toctext">Install remaining packages</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Cleanup"><span class="tocnumber">4</span> <span class="toctext">Cleanup</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Makepkg_compiler_flags"><span class="tocnumber">4.1</span> <span class="toctext">Makepkg compiler flags</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#Busybox"><span class="tocnumber">5.1</span> <span class="toctext">Busybox</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Lib32-glibc"><span class="tocnumber">5.2</span> <span class="toctext">Lib32-glibc</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#KDE_does_not_start_after_switching_from_32bit_to_64bit"><span class="tocnumber">5.3</span> <span class="toctext">KDE does not start after switching from 32bit to 64bit</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#Mutt_issues_with_cache_enabled"><span class="tocnumber">5.4</span> <span class="toctext">Mutt issues with cache enabled</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-27"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="General_preparation">General preparation</span></h2>
+<h3><span class="mw-headline" id="Confirm_64-bit_architecture">Confirm 64-bit architecture</span></h3>
+<p>If you are already running x86_64 but want to install i686 this is not relevant and you can skip this step.
+</p>
+<p>In order to run 64-bit software, you must have a 64-bit capable CPU.  Most modern CPUs are capable of running 64-bit software. You may check your CPU with the following command:
+</p>
+<pre>grep --color -w lm /proc/cpuinfo
+</pre>
+<p>For CPUs that support x86_64, this will return the <code>lm</code> flag (“long mode”) highlighted. Beware that <i>lahf_lm</i> is a different flag and does not indicate 64-bit capability itself.
+</p>
+<h3><span class="mw-headline" id="Disk_space">Disk space</span></h3>
+<p>You should be prepared for <code>/var/cache/pacman/pkg</code> to grow approximately twice its current size during the migration. This is assumes only packages that are currently installed are in the cache, as if “pacman -Sc” (clean) was recently run. The disk space increase is due to duplication between the i686 and x86_64 versions of each package.
+</p>
+<p>If you have not enough disk, please use <a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a> to resize the relevant partition, or mount another partition to <i>/var/cache/pacman</i>.
+</p>
+<p>Please do not remove packages of the old architecture from the cache until the system is fully operating in the new architecture. Removing the packages too early may leave you unable to fall back and revert changes.
+</p>
+<h3><span class="mw-headline" id="Power_supply">Power supply</span></h3>
+<p>The migration may take a substantial amount of time, and it would be inconvenient to interrupt the process. You should plan on at least an hour, depending on the number and size of your installed packages and internet connection speed (although you can download everything before starting the critical part). Please make sure you are connected to a stable power source, preferably with some sort of failover or battery backup.
+</p>
+<h3><span class="mw-headline" id="Fallback_packages">Fallback packages</span></h3>
+<p>If the migration fails halfway through, there are packages that can help sort out the situation, but they should be installed before the main packages are migrated. More details about using them under <a href="#Troubleshooting">#Troubleshooting</a> below.
+</p>
+<p>One package is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=busybox">busybox</a></span>, which can be used to revert changes. It is statically linked and does not depend on any libraries. The 32-bit (i686) version should be installed.
+</p>
+<p>Another package is <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lib32-glibc">lib32-glibc</a></span>, from the <a href="../en/Multilib.html" title="Multilib">Multilib</a> x86_64 repository.  It is probably only useful when migrating <i>away</i> from 32 bits; in any case you may safely skip this package.  You can use the package to run 32 bit programs by explicitly calling <code>/lib/ld-linux.so.2</code>.
+</p>
+<h2><span class="mw-headline" id="Method_1:_using_the_Arch_LiveCD">Method 1: using the Arch LiveCD</span></h2>
+<ol>
+<li> Download, burn and boot the 64-bit Arch ISO LiveCD.</li>
+<li> Configure your network on the LiveCD.</li>
+<li> Mount your existing installation. For example: <code>mount /dev/sda1 /mnt</code>.</li>
+<li> Edit the LiveCD <code>/etc/pacman.conf</code> repositories to match the existing <code>/mnt/etc/pacman.conf</code> repositories.</li>
+<li> Use the following commands to update the local pacman database and clear the cache directory.</li>
+</ol>
+<pre> # pacman --root /mnt -Syy
+ # pacman --root /mnt -Scc
+</pre>
+<dl><dd>6. You might first re-install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group alone, then install any package that triggered an install error, identified using <code>pacman --root /mnt -Qo &lt;error file&gt;</code>.  Then repeat the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group install, until it installs cleanly without errors.</dd></dl>
+<pre> # pacman --root /mnt -S base
+</pre>
+<dl><dd>7. Use the following command to get a list of all your installed packages and then reinstall them.</dd></dl>
+<pre> # pacman --root /mnt -Qnq | pacman --root /mnt -S -
+</pre>
+<dl><dd>8. You could run the command twice, because many packages fail to run their post-install scripts first time. This is due to sed, grep, perl, etc. being of the wrong architecture.  Or you can make note of any individual package-re-install that throws an error and then go back after the upgrade completes to re-install just those packages.  Also, if you see an error about not enough disk space, you can filter the package list alphabetically and upgrade in stages, with for instance <code>...| grep '$[a-k]' |...</code>, then perhaps <code>'$l'</code> and <code>'$[m-z]'</code>.  In this case you would also have to run <code>pacman --root /mnt -Scc</code> after each install stage to free disk space.</dd></dl>
+<dl><dd>9. Finally, run </dd></dl>
+<pre> # arch-chroot /mnt 
+ # mkinitcpio -p linux
+</pre>
+<dl><dd>10. Also, see if your boot loader needs to be migrated.  For instance:</dd></dl>
+<pre> # grub-install --recheck /dev/sda
+</pre>
+<dl><dd>11. After rebooting to your new 64-bit system, edit and then move <code>/etc/makepkg.conf.pacnew</code> to <code>/etc/makepkg.conf</code>, to migrate the cpu architecture.  Then rebuild the "foreign" packages, which will include packages from the AUR.</dd></dl>
+<dl><dd> You might first want to remove certain orphaned foreign packages before trying to rebuild them.  Run this command to find out what 32-bit binaries you still have and reinstall them:</dd></dl>
+<pre> $ pacman -Qo `find /usr/bin -type f -exec bash -c 'file "{}" | grep 32-bit' \; | cut -d':' -f1` | cut -d' ' -f5 | sort | uniq | tee list
+</pre>
+<h2><span class="mw-headline" id="Method_2:_from_a_running_system">Method 2: from a running system</span></h2>
+<p>Ensure that your system is fully updated and functioning before proceeding.
+</p>
+<pre># pacman -Syu
+</pre>
+<h3><span class="mw-headline" id="Package_preparation">Package preparation</span></h3>
+<h4><span class="mw-headline" id="Cache_old_packages">Cache old packages</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have any packages installed from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> or third-party repositories without new architecture availability, pacman will let you know it cannot find a suitable replacement.  Make a list of these packages so you may re-install them after the update process and then remove them using <code>pacman -Rsn package_name</code>.</div>
+<p>If you do not have all your installed packages in your cache, download them (for the old architecture) for fallback purposes.
+</p>
+<pre># pacman -Qqn | pacman -Sw -
+</pre>
+<p>or use bacman from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pacman">pacman</a></span> package to generate them.
+</p>
+<h4><span class="mw-headline" id="Install_busybox">Install busybox</span></h4>
+<p>If you are migrating from 32 bits to 64 bits, now is the time to install 32-bit <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=busybox">busybox</a></span>.
+</p>
+<pre># pacman -S busybox
+</pre>
+<h4><span class="mw-headline" id="Change_Pacman_architecture">Change Pacman architecture</span></h4>
+<p>Edit the <i>/etc/pacman.conf</i> file and change <i>Architecture</i> from <code>auto</code> to the new value. These <i>sed</i> commands may be used:
+</p>
+<p>Migrating to x86_64:
+</p>
+<pre># sed -i  '/^Architecture =/s/auto/x86_64/' /etc/pacman.conf
+</pre>
+<p>and for i686:
+</p>
+<pre># sed -i  '/^Architecture =/s/auto/i686/' /etc/pacman.conf
+</pre>
+<p>Make sure the server lists in <i>/etc/pacman.conf</i> and <i>/etc/pacman.d/mirrorlist</i> use <i>$arch</i> instead of explicitly specifying <i>i686</i> or <i>x86_64</i>. Now force Pacman to synchronize with the new repositories:
+</p>
+<pre># pacman -Syy                     # force sync new architecture repositories
+</pre>
+<h4><span class="mw-headline" id="Download_new_packages">Download new packages</span></h4>
+<p>Download the new architecture versions of all our currently installed packages:
+</p>
+<pre># pacman -Sw $(pacman -Qqn|sed '/^lib32-/ d')  # download new package versions
+</pre>
+<p>If migrating to 32 bits, install the 32-bit <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=busybox">busybox</a></span> fallback now that Pacman has been configured with the 32-bit architecture.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not install the <i>lib32-glibc</i> package now. After a <i>ldconfig</i>, when you install <i>linux</i>, the generated image will have libraries like <i>librt.so</i> in '<code>/usr/lib32</code>, where binaries during boot will not search, resulting in a boot failure.</div>
+<h3><span class="mw-headline" id="Package_installation">Package installation</span></h3>
+<h4><span class="mw-headline" id="Install_kernel_.2864-bit.29">Install kernel (64-bit)</span></h4>
+<p>Upgrading the kernel to 64 bits (x86_64) is safe and straightforward: 32 bit and 64 bit applications run equally well under a 64-bit kernel.
+For migration <i>away</i> from 64 bits, leave the 64-bit kernel installed and running for now and skip this step.
+</p>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> package.
+</p>
+<pre># pacman -S linux
+</pre>
+<h4><span class="mw-headline" id="Install_lib32-glibc">Install lib32-glibc</span></h4>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lib32-glibc">lib32-glibc</a></span> fallback. You will need to add the <a href="../en/Multilib.html" title="Multilib">multilib</a> repository in <code>/etc/pacman.conf</code> if you have not done so already.
+</p>
+<pre># pacman -S lib32-glibc
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If this fails due to an existing file from a differently named package, use pacman's <code>--force</code> option.</div>
+<h4><span class="mw-headline" id="Reboot">Reboot</span></h4>
+<p>Verify that you are running the x86_64 architecture:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ uname -m</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+x86_64
+</pre>
+<h4><span class="mw-headline" id="Switch_to_Console_Terminal">Switch to Console Terminal</span></h4>
+<p>Switch to a text-mode virtual console (e.g. Ctrl+Alt+F1) for the rest of the process, if possible.  If you receive an error trying to use the 1st console, use the 2nd one (Ctrl-Alt+F2) instead. Pseudo-terminals like SSH should work, but direct access is recommended as a precaution.  There will be several packages removed and replaced during the update process that may cause X11 desktops to become unstable and leave your system in an unbootable state.
+</p>
+<h4><span class="mw-headline" id="Install_Pacman">Install Pacman</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Once you start updating pacman and its dependencies it must not be interrupted! Pacman and all of its dependencies must be installed at the same time in a single command line.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Immediately following this command only Busybox, Bash and Pacman will be executable until the other packages are migrated below. If you are using sudo, you should obtain root previlige prior to next command</div>
+<p>Use pactree to install Pacman and all its dependencies:
+</p>
+<pre># pactree -l pacman | pacman -S -
+</pre>
+<p>Errors may be printed but they will not cause a problem as long as Pacman works.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>You must not reboot your system until the following commands have been completed. If you failed to do so, you should continue installing by <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chrooting</a> from another linux environment(e.g. from live install medium)</div>
+<h4><span class="mw-headline" id="Install_remaining_packages">Install remaining packages</span></h4>
+<p>Install all of the previously downloaded replacements for the new architecture. (Go get a drink and make a sandwich; this could take a while.)
+</p>
+<pre># pacman -Qqn | pacman -S -
+</pre>
+<p>If some packages did not install correctly, you should now be able to reinstall them successfully; if you are lazy, you can just re-run the last command to reinstall everything.
+</p>
+<p>For migration away from 64 bits, you may want to skip installing a 32-bit kernel in the commands above, since the old 64-bit kernel will still run 32-bit programs.
+</p>
+<p>After this step the migration in either direction should be complete and it should be safe to reboot the computer.
+</p>
+<p>However, if you have any AUR packages on your system, you must reinstall all of them.  A list of those can be obtained by executing:
+</p>
+<pre>$ pacman -Qqm
+</pre>
+<h2><span class="mw-headline" id="Cleanup">Cleanup</span></h2>
+<p>You are now free to remove <b>busybox</b> and <i>lib32-glibc</i>.
+</p>
+<h4><span class="mw-headline" id="Makepkg_compiler_flags">Makepkg compiler flags</span></h4>
+<p>During the upgrade the new version of <code>/etc/makepkg.conf</code> may be stored as <code>/etc/makepkg.conf.pacnew</code>. If so, you will have to replace the old version or modify it in order to compile anything with <a href="../en/Makepkg.html" title="Makepkg">makepkg</a> in the future.
+</p>
+<pre># mv /etc/makepkg.conf /etc/makepkg.conf.backup &amp;&amp; mv /etc/makepkg.conf.pacnew /etc/makepkg.conf
+</pre>
+<p>It might also be a good idea to just get a list of "new" additions to <code>/etc</code>.  You can get a list with the following command:
+</p>
+<pre># find /etc/ -type f -name \*.pac\*
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>During the upgrade, when glibc is replaced by the new architecture version, old architecture versions of many programs will not run. If problems occur, you can solve them with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=busybox">busybox</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lib32-glibc">lib32-glibc</a></span>.
+</p>
+<h3><span class="mw-headline" id="Busybox">Busybox</span></h3>
+<p>In Arch, Busybox is statically linked; it can run without any libraries. There are many commands available to you. For example, to extract an i686 version of Pacman from a cached package:
+</p>
+<pre># busybox tar xf /var/cache/pacman/pkg/pacman-3.3.2-1-i686.pkg.tar.gz -C &lt;some folder&gt;
+</pre>
+<h3><span class="mw-headline" id="Lib32-glibc">Lib32-glibc</span></h3>
+<p>Example run 32 bit <code>/bin/ls</code>:
+</p>
+<pre># /lib/ld-linux.so.2 /bin/ls
+</pre>
+<h3><span class="mw-headline" id="KDE_does_not_start_after_switching_from_32bit_to_64bit">KDE does not start after switching from 32bit to 64bit</span></h3>
+<p>KDE will crash when starting after switching from 32bit to 64bit. The cause are some leftover cached files from the 32 bit KDE packages in /var/tmp To fix this remove all kdecache folders in with
+</p>
+<pre># rm -rf /var/tmp/kdecache-*
+</pre>
+<h3><span class="mw-headline" id="Mutt_issues_with_cache_enabled">Mutt issues with cache enabled</span></h3>
+<p>If, after completion, you find that mutt hangs on opening mail folders, try renaming the cache directory. If this works, the renamed one can be deleted as mutt will have recreated a new one.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li><a href="../en/Migrate_installation_to_new_hardware.html" title="Migrate installation to new hardware">Migrate installation to new hardware</a></li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

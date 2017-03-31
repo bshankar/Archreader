@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Ruby Gem package guidelines - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Ruby_Gem_package_guidelines skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Ruby Gem package guidelines</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="toc" style="display:block; text-align: center; margin-bottom: 1em;">
+<b><a href="../en/Creating_packages.html" title="Creating packages">Package creation guidelines</a></b>
+<hr>
+<p><a href="../en/CLR_package_guidelines.html" title="CLR package guidelines">CLR</a> – <a href="../en/Cross-compiling_tools_package_guidelines.html" title="Cross-compiling tools package guidelines">Cross</a> – <a href="../en/Eclipse_plugin_package_guidelines.html" title="Eclipse plugin package guidelines">Eclipse</a> – <a href="../en/Free_Pascal_package_guidelines.html" title="Free Pascal package guidelines">Free Pascal</a> – <a href="../en/GNOME_package_guidelines.html" title="GNOME package guidelines">GNOME</a> – <a href="../en/Go_package_guidelines.html" title="Go package guidelines">Go</a> – <a href="../en/Haskell_package_guidelines.html" title="Haskell package guidelines">Haskell</a> – <a href="../en/Java_package_guidelines.html" title="Java package guidelines">Java</a> – <a href="../en/KDE_package_guidelines.html" title="KDE package guidelines">KDE</a> – <a href="../en/Kernel_module_package_guidelines.html" title="Kernel module package guidelines">Kernel</a> – <a href="../en/Lisp_package_guidelines.html" title="Lisp package guidelines">Lisp</a> – <a href="../en/MinGW_package_guidelines.html" title="MinGW package guidelines">MinGW</a> – <a href="../en/Node.js_package_guidelines.html" title="Node.js package guidelines">Node.js</a> – <a href="../en/Nonfree_applications_package_guidelines.html" title="Nonfree applications package guidelines">Nonfree</a> – <a href="../en/OCaml_package_guidelines.html" title="OCaml package guidelines">OCaml</a> – <a href="../en/Perl_package_guidelines.html" title="Perl package guidelines">Perl</a> – <a href="../en/PHP_package_guidelines.html" title="PHP package guidelines">PHP</a> – <a href="../en/Python_package_guidelines.html" title="Python package guidelines">Python</a> – <strong class="selflink">Ruby</strong> – <a href="../en/VCS_package_guidelines.html" title="VCS package guidelines">VCS</a> – <a href="../en/Web_application_package_guidelines.html" title="Web application package guidelines">Web</a> – <a href="../en/Wine_package_guidelines.html" title="Wine package guidelines">Wine</a>
+</p>
+</div>
+<p>Writing <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILDs</a> for software written in <a href="../en/Ruby.html" title="Ruby">Ruby</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Package_naming"><span class="tocnumber">1</span> <span class="toctext">Package naming</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Versioned_packages"><span class="tocnumber">1.1</span> <span class="toctext">Versioned packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Examples"><span class="tocnumber">2</span> <span class="toctext">Examples</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Notes"><span class="tocnumber">3</span> <span class="toctext">Notes</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Quarry"><span class="tocnumber">3.1</span> <span class="toctext">Quarry</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Gotchas"><span class="tocnumber">4</span> <span class="toctext">Gotchas</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Package_contains_reference_to_.24pkgdir"><span class="tocnumber">4.1</span> <span class="toctext">Package contains reference to $pkgdir</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Automation"><span class="tocnumber">5</span> <span class="toctext">Automation</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Package_naming">Package naming</span></h2>
+<p>For libraries, use <code>ruby-$gemname</code>. For applications, use the program name. In either case, the name should be entirely lowercase.
+</p>
+<p>Always use <code>ruby-</code> prefix even if <code>$gemname</code> already starts with word <code>ruby</code>. It is needed to avoid future name clashes in case if a gem with shorter name appear. It also makes names more easily parseble by tools (think about PKGBUILD generators/version or dependency checkers, etc...). Examples: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ruby-ruby-protocol-buffers/">ruby-ruby-protocol-buffers</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/ruby-ruby-protocol-buffers">aur-mirror</a>]</sup>.
+</p>
+<h3><span class="mw-headline" id="Versioned_packages">Versioned packages</span></h3>
+<p>If you need to add a versioned package then use <code>ruby-$gemname-$version</code>, e.g. <code>ruby-builder-3.2.1</code>. So rubygem dependency <code>builder=3.2.1</code> will turn into <code>ruby-builder-3.2.1</code> Arch package.
+</p>
+<p>In case if you need to resolve "approximately greater" dependency <code>~&gt;</code> then package should use version without the last part, e.g. rubygem dependency <code>builder~&gt;3.2.1</code> will turn into <code>ruby-builder-3.2</code>. An exception for this rule is when "approximately greater" dependency matches the latest version of the gem - in this case avoid introducing a new versioned package and use just <code>ruby-$gemname</code> instead (the HEAD version).
+</p>
+<p>Another problem with versioned packages is that it can conflict with other versions, e.g. because the packages install the same files in <code>/usr/bin</code>. One solution for this problem is that versioned packages should not install such files - only HEAD version package can do this.
+</p>
+<h2><span class="mw-headline" id="Examples">Examples</span></h2>
+<p>For examples, please see <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ruby-rethinkdb/">ruby-rethinkdb</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/ruby-rethinkdb">aur-mirror</a>]</sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ruby-json_pure/">ruby-json_pure</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ruby-hpricot">ruby-hpricot</a></span>.
+</p>
+<h2><span class="mw-headline" id="Notes">Notes</span></h2>
+<p>Add <code>--verbose</code> to <b>gem</b> arguments to receive additional information in case of troubles.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Usage of <code>--no-user-install</code> <b>gem</b> argument is mandatory since latest Ruby versions (See <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/28681">FS#28681</a> for details).</div>
+<h3><span class="mw-headline" id="Quarry">Quarry</span></h3>
+<p>As an alternative to manually managing gemfiles, you might also want to consider quarry, a non-official repository of pre-built binary arch packages. See <a href="../en/Ruby.html#Quarry" title="Quarry" class="mw-redirect">Quarry</a> for details.
+</p>
+<h2><span class="mw-headline" id="Gotchas">Gotchas</span></h2>
+<h3><span class="mw-headline" id="Package_contains_reference_to_.24pkgdir">Package contains reference to $pkgdir</span></h3>
+<p>Sometimes when you build the package you can see following warning <code>WARNING: Package contains reference to $pkgdir</code>. Some packed files contain absolute path of directory where you built the package. To find these files run <code>cd pkg &amp;&amp; grep -R "$(pwd)" .</code> Most likely the reason will be hardcoded path in <code>.../ext/Makefile</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>folder <code>ext</code> contains native extension code usually written in C. During the package installation rubygems generates a Makefile using <code>mkmf</code> library. Then <code>make</code> is called, it compiles a shared library and copies one to <code>lib</code> gem directory.</div>
+<p>After <code>gem install</code> is over the <code>Makefile</code> is not needed anymore. In fact none of the files in <code>ext</code> is needed and it can be completely removed by adding <code>rm -rf "$pkgdir/$_gemdir/gems/$_gemname-$pkgver/ext"</code> to <code>package()</code> function.
+</p>
+<h2><span class="mw-headline" id="Automation">Automation</span></h2>
+<p>The gem installation can be automated completely with the tool <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pacgem/">pacgem</a></span><sup><small>AUR</small></sup> which creates a temporary PKGBUILD, calls <a href="../en/Makepkg.html" title="Makepkg">makepkg</a> and <a href="../en/Namcap.html" title="Namcap">namcap</a>. The resulting package is then installed with <code>sudo pacman</code>.
+</p>
+<p>There is also <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gem2arch/">gem2arch</a></span><sup><small>AUR</small></sup> tools which aid in automating the process of creating a ruby gem PKGBUILD. Make sure to manually check the PKGBUILD after generation.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

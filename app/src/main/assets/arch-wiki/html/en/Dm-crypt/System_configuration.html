@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>dm-crypt/System configuration - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dm-crypt_System_configuration skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">dm-crypt/System configuration</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Dm-crypt.html" title="Dm-crypt">Dm-crypt</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Aggregate here all the generic information on system configuration from the other sub-articles of <a href="../../en/Dm-crypt.html" title="Dm-crypt">Dm-crypt</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dm-crypt/System_configuration">Talk:Dm-crypt/System configuration#</a>)</div>
+</div>
+<p>Back to <a href="../../en/Dm-crypt.html" title="Dm-crypt">Dm-crypt</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If in need to remotely unlock root or other early-boot filesystems (headless machine, distant servers...), follow  the specific instructions from <a href="../../en/Dm-crypt/Specialties.html#Remote_unlocking_of_the_root_.28or_other.29_partition" title="Dm-crypt/Specialties">Dm-crypt/Specialties#Remote unlocking of encrypted root</a>.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#mkinitcpio"><span class="tocnumber">1</span> <span class="toctext">mkinitcpio</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Boot_loader"><span class="tocnumber">2</span> <span class="toctext">Boot loader</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Using_encrypt_hook"><span class="tocnumber">2.1</span> <span class="toctext">Using encrypt hook</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#cryptdevice"><span class="tocnumber">2.1.1</span> <span class="toctext">cryptdevice</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#root"><span class="tocnumber">2.1.2</span> <span class="toctext">root</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#resume"><span class="tocnumber">2.1.3</span> <span class="toctext">resume</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#cryptkey"><span class="tocnumber">2.1.4</span> <span class="toctext">cryptkey</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#crypto"><span class="tocnumber">2.1.5</span> <span class="toctext">crypto</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9">
+<a href="#Using_sd-encrypt_hook"><span class="tocnumber">2.2</span> <span class="toctext">Using sd-encrypt hook</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#luks.uuid"><span class="tocnumber">2.2.1</span> <span class="toctext">luks.uuid</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#luks.name"><span class="tocnumber">2.2.2</span> <span class="toctext">luks.name</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#luks.options"><span class="tocnumber">2.2.3</span> <span class="toctext">luks.options</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#luks.key"><span class="tocnumber">2.2.4</span> <span class="toctext">luks.key</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#crypttab"><span class="tocnumber">3</span> <span class="toctext">crypttab</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15">
+<a href="#Mounting_at_boot_time"><span class="tocnumber">3.1</span> <span class="toctext">Mounting at boot time</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#Mounting_a_stacked_blockdevice"><span class="tocnumber">3.1.1</span> <span class="toctext">Mounting a stacked blockdevice</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="mkinitcpio">mkinitcpio</span></h2>
+<p>When encrypting a system it is necessary to regenerate the initial ramdisk after properly configuring <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>. Depending on the particular scenarios, a subset of the following hooks will have to be enabled:
+</p>
+<ul>
+<li> <code>encrypt</code>: always needed when encrypting the root partition, or a partition that needs to be mounted <i>before</i> root. It is not needed in all the other cases, as system initialization scripts like <code>/etc/crypttab</code> take care of unlocking other encrypted partitions. This hook must be placed <i>after</i> the <code>udev</code> hook, if that is used.</li>
+<li> <code>sd-encrypt</code>: systemd version of <code>encrypt</code> hook and used instead of <code>encrypt</code> hook. Must be used with <code>systemd</code> hook.</li>
+<li> <code>keymap</code>: provides support for foreign keymaps for typing encryption passwords; it must come <i>before</i> the <code>encrypt</code> hook. Setting your keymap is done in <a href="../../en/Keyboard_configuration_in_console.html#Persistent_configuration" title="Keymap" class="mw-redirect"><code>/etc/vconsole.conf</code></a>.</li>
+<li> <code>keyboard</code>: needed to make USB keyboards work in early userspace.</li>
+</ul>
+<p>Other hooks needed should be clear from other manual steps followed during the installation of the system.
+</p>
+<h2><span class="mw-headline" id="Boot_loader">Boot loader</span></h2>
+<p>In order to enable booting an encrypted root partition, a subset of the following kernel parameters need to be set. See <a href="../../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> for instructions specific to your <a href="../../en/Boot_loader.html" title="Boot loader" class="mw-redirect">boot loader</a>. 
+</p>
+<p>For example using <a href="../../en/GRUB.html#Root_partition" title="GRUB">GRUB</a> the relevant parameters are best added to <code>/etc/default/grub</code> before generating the boot configuration. See also <a href="../../en/GRUB.html#Warning_when_installing_in_chroot" title="GRUB">GRUB#Warning when installing in chroot</a> as another point to be aware of when installing the GRUB loader.
+</p>
+<p>The kernel parameters you need to specify depend on whether or not you are using the <code>encrypt</code> hook or the <code>sd-encrypt</code> hook.
+</p>
+<h3><span class="mw-headline" id="Using_encrypt_hook">Using encrypt hook</span></h3>
+<h4><span class="mw-headline" id="cryptdevice">cryptdevice</span></h4>
+<p>This parameter will make the system prompt for the passphrase to unlock the device containing the encrypted root on a cold boot. It is parsed by the <code>encrypt</code> hook to identify which device contains the encrypted system:
+</p>
+<pre>cryptdevice=<i>device</i>:<i>dmname</i>
+</pre>
+<ul>
+<li> <code><i>device</i></code> is the path to the device backing the encrypted device. Usage of <a href="../../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a> is advisable.</li>
+<li> <code><i>dmname</i></code> is the <b>d</b>evice-<b>m</b>apper name given to the device after decryption, which will be available as <code>/dev/mapper/<i>dmname</i></code>.</li>
+<li> If a LVM contains the <a href="../../en/Dm-crypt/Encrypting_an_entire_system.html#LUKS_on_LVM" title="Dm-crypt/Encrypting an entire system">encrypted root</a>, the LVM gets activated first and the volume group containing the logical volume of the encrypted root serves as <i>device</i>. It is then followed by the respective volume group to be mapped to root. The parameter follows the form of <code>cryptdevice=<i>/dev/vgname/lvname</i>:<i>dmname</i></code>.</li>
+</ul>
+<h4><span class="mw-headline" id="root">root</span></h4>
+<p>The <code>root=</code> parameter specifies the <code><i>device</i></code> of the actual (decrypted) root file system:
+</p>
+<pre>root=<i>device</i>
+</pre>
+<ul>
+<li> If the file system is formatted directly on the decrypted device file this will be <code>/dev/mapper/<i>dmname</i></code>.</li>
+<li> If a LVM gets activated first and contains an <a href="../../en/Dm-crypt/Encrypting_an_entire_system.html#LUKS_on_LVM" title="Dm-crypt/Encrypting an entire system">encrypted logical rootvolume</a>, the above form applies as well. </li>
+<li> If the root file system is contained in a logical volume of a fully <a href="../../en/Dm-crypt/Encrypting_an_entire_system.html#LVM_on_LUKS" title="Encrypted LVM" class="mw-redirect">encrypted LVM</a>, the device mapper for it will be in the general form of <code>root=/dev/mapper/<i>volumegroup</i>-<i>logicalvolume</i></code>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>This parameter is not needed to be specified manually when using <a href="../../en/GRUB.html" title="GRUB">GRUB</a>. Executing <i>grub-mkconfig</i> is meant to determine the correct UUID of the decrypted root filesystem and specify it in the generated <code>grub.cfg</code> automatically.</div>
+<h4><span class="mw-headline" id="resume">resume</span></h4>
+<pre>resume=<i>device</i>
+</pre>
+<ul><li> <code><i>device</i></code> is the device file of the decrypted (swap) filesystem used for suspend2disk. If swap is on a separate partition, it will be in the form of <code>/dev/mapper/swap</code>. See also <a href="../../en/Dm-crypt/Swap_encryption.html" title="Dm-crypt/Swap encryption">Dm-crypt/Swap encryption</a>.</li></ul>
+<h4><span class="mw-headline" id="cryptkey">cryptkey</span></h4>
+<p>This parameter specifies the location of a keyfile and is required by the <code><i>encrypt</i></code> hook for reading such a keyfile to unlock the <code><i>cryptdevice</i></code> (unless a key is in the default location, see below). It can have three parameter sets, depending on whether the keyfile exists as a file in a particular device, a bitstream starting on a specific location, or a file in the initramfs. 
+</p>
+<p>For a file in a device the format is:
+</p>
+<pre>cryptkey=<i>device</i>:<i>fstype</i>:<i>path</i>
+</pre>
+<ul>
+<li> <code><i>device</i></code> is the raw block device where the key exists.</li>
+<li> <code><i>fstype</i></code> is the filesystem type of <code><i>device</i></code> (or auto).</li>
+<li> <code><i>path</i></code> is the absolute path of the keyfile within the device.</li>
+</ul>
+<p>Example: <code>cryptkey=/dev/usbstick:vfat:/secretkey</code>
+</p>
+<p>For a bitstream on a device the key's location is specified with the following: 
+</p>
+<pre>cryptkey=<i>device</i>:<i>offset</i>:<i>size</i> 
+</pre>
+<p>where the offset is in bytes and the size in bits. Example: <code>cryptkey=/dev/sdZ:0:512</code> reads a 512 bit keyfile starting at the beginning of the device. 
+</p>
+<p>For a file <a href="../../en/Mkinitcpio.html#BINARIES_and_FILES" title="Mkinitcpio">included</a> in the initramfs the format is<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/encrypt_hook?h=packages/cryptsetup#n14">[1]</a>:
+</p>
+<pre>cryptkey=rootfs:<i>path</i>
+</pre>
+<p>Example: <code>cryptkey=rootfs:/secretkey</code>
+</p>
+<p>Also note that if <code>cryptkey</code> is not specified, it defaults to <code>/crypto_keyfile.bin</code> (in the initramfs).<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/encrypt_hook?h=packages/cryptsetup#n8">[2]</a>
+</p>
+<p>See also <a href="../../en/Dm-crypt/Device_encryption.html#Keyfiles" title="Dm-crypt/Device encryption">Dm-crypt/Device encryption#Keyfiles</a>.
+</p>
+<h4><span class="mw-headline" id="crypto">crypto</span></h4>
+<p>This parameter is specific to pass <i>dm-crypt</i> plain mode options to the <i>encrypt</i> hook. 
+</p>
+<p>It takes the form
+</p>
+<pre>crypto=&lt;hash&gt;:&lt;cipher&gt;:&lt;keysize&gt;:&lt;offset&gt;:&lt;skip&gt;</pre>
+<p>The arguments relate directly to the <i>cryptsetup</i> options. See <a href="../../en/Dm-crypt/Device_encryption.html#Encryption_options_for_plain_mode" title="Dm-crypt/Device encryption">Dm-crypt/Device encryption#Encryption options for plain mode</a>.
+</p>
+<p>For a disk encrypted with just <i>plain</i> default options, the <code>crypto</code> arguments must be specified, but each entry can be left blank: 
+</p>
+<pre>crypto=::::</pre>
+<p>A specific example of arguments is  
+</p>
+<pre>crypto=sha512:twofish-xts-plain64:512:0:</pre>
+<h3><span class="mw-headline" id="Using_sd-encrypt_hook">Using sd-encrypt hook</span></h3>
+<p>In all of the following <code>luks</code> can be replaced with <code>rd.luks</code>. <code>luks</code> parameters are honored by both the main system and initrd. <code>rd.luks</code> parameters are only honored by the initrd. See <span class="plainlinks archwiki-template-man" title="$ man 8 systemd-cryptsetup-generator"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/systemd-cryptsetup-generator.8.html">systemd-cryptsetup-generator(8)</a></span> for more options and more details.
+</p>
+<h4><span class="mw-headline" id="luks.uuid">luks.uuid</span></h4>
+<pre>luks.uuid=<i>UUID</i>
+</pre>
+<p>Specify the UUID of the device to be decrypted on boot with this flag. If the UUID is in <code>/etc/crypttab</code>, the options listed there will be used.
+</p>
+<h4><span class="mw-headline" id="luks.name">luks.name</span></h4>
+<pre>luks.name=<i>cryptroot</i>
+</pre>
+<p>Specify the name of the mapped device after the LUKS partition is open. For example, specifying <code>cryptroot</code> causes the unlocked device to be located at <code>/dev/mapper/cryptroot</code>. If this is not specified the mapped device will be located at <code>/dev/mapper/luks-<i>UUID</i></code> where <i>UUID</i> is the UUID of the LUKS partition.
+</p>
+<p>This is equivalent to the second parameter of <code>encrypt</code>'s <code>cryptdevice</code>.
+</p>
+<h4><span class="mw-headline" id="luks.options">luks.options</span></h4>
+<pre>luks.options=UUID=<i>options</i>
+</pre>
+<p>or
+</p>
+<pre>luks.options=<i>options</i>
+</pre>
+<p>Specify options for the device listed after <code>UUID</code> or, if not specified, for all UUIDs not specified elsewhere (e.g., cryptab).
+</p>
+<p>This is roughly equivalent to the third parameter of <code>encrypt</code>'s <code>cryptdevice</code>.
+</p>
+<h4><span class="mw-headline" id="luks.key">luks.key</span></h4>
+<pre>luks.key=<i>mykeyfile</i>
+</pre>
+<p>Specify the location of a password file used to decrypt the device specified in <code>luks.UUID</code>. There is no default location like there is with the <code>encrypt</code> hook parameter <code>cryptkey</code>.
+</p>
+<h2><span class="mw-headline" id="crypttab">crypttab</span></h2>
+<p>The <code>/etc/crypttab</code> (encrypted device table) file is similar to the <a href="../../en/Fstab.html" title="Fstab">fstab</a> file and contains a list of encrypted devices to be unlocked during system boot up. This file can be used for automatically mounting encrypted swap devices or secondary file systems.
+</p>
+<p><code>crypttab</code> is read <i>before</i> <code>fstab</code>, so that dm-crypt containers can be unlocked before the file system inside is mounted. Note that <code>crypttab</code> is read <i>after</i> the system has booted up, therefore it is not a replacement for unlocking encrypted partitions by using <a href="#mkinitcpio">mkinitcpio</a> hooks and <a href="#Boot_loader">boot loader options</a> as in the case of <a href="../../en/Dm-crypt/Encrypting_an_entire_system.html" title="Dm-crypt/Encrypting an entire system">encrypting the root partition</a>. <code>crypttab</code> processing at boot time is made by the <code>systemd-cryptsetup-generator</code> automatically.
+</p>
+<p>See the <code>crypttab</code> <a rel="nofollow" class="external text" href="http://linux.die.net/man/5/crypttab">man page</a> for details, read below for some examples, and the <a href="#Mounting_at_boot_time">#Mounting at boot time</a> section for instructions on how to use UUIDs to mount an encrypted device. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>There are issues with <a href="../../en/Systemd.html" title="Systemd">systemd</a> when processing <code>crypttab</code> entries for <i>dm-crypt</i> <a href="../../en/Dm-crypt/Device_encryption.html#Encryption_options_for_plain_mode" title="Dm-crypt/Device encryption">plain mode</a> (<code>--type plain</code>) devices: 
+<ul><li> For <code>--type plain</code> devices with a keyfile, it is necessary to add the <code>hash=plain</code> option to crypttab due to a <a rel="nofollow" class="external text" href="https://bugs.freedesktop.org/show_bug.cgi?id=52630">systemd incompatibility</a>. <b>Do not</b> use <code>systemd-cryptsetup</code> manually for device creation to work around it.</li></ul>
+<ul><li> It may be further required to add the <code>plain</code> option explicitly to force <code>systemd-cryptsetup</code> to recognize a <code>--type plain</code>) device at boot. <a rel="nofollow" class="external text" href="https://github.com/systemd/systemd/issues/442">GitHub issue in question.</a>
+</li></ul>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ # Example crypttab file. Fields are: name, underlying device, passphrase, cryptsetup options.
+
+ # Mount /dev/lvm/swap re-encrypting it with a fresh key each reboot
+ swap	/dev/lvm/swap	/dev/urandom	swap,cipher=aes-xts-plain64,size=256
+
+ # Mount /dev/lvm/tmp as /dev/mapper/tmp using plain dm-crypt with a random passphrase, making its contents unrecoverable after it is dismounted.
+ tmp	/dev/lvm/tmp	/dev/urandom	tmp,cipher=aes-xts-plain64,size=256 
+
+ # Mount /dev/lvm/home as /dev/mapper/home using LUKS, and prompt for the passphrase at boot time.
+ home   /dev/lvm/home
+
+ # Mount /dev/sdb1 as /dev/mapper/backup using LUKS, with a passphrase stored in a file.
+ backup /dev/sdb1       /home/alice/backup.key
+</pre>
+<h3><span class="mw-headline" id="Mounting_at_boot_time">Mounting at boot time</span></h3>
+<p>If you want to mount an encrypted drive at boot time, enter the device's UUID in <code>/etc/crypttab</code>. You get the UUID (partition) by using the command <code>lsblk -f</code> and adding it to <code>crypttab</code> in the form:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/crypttab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ externaldrive         UUID=2f9a8428-ac69-478a-88a2-4aa458565431        none    luks,timeout=180
+</pre>
+<p>The first parameter is your preferred device mapper's name for the encrypted drive. The option <code>none</code> will trigger a prompt during boot to type the passphrase for unlocking the partition. The <code>timeout</code> option defines a timeout in seconds for entering the decryption password during boot.
+</p>
+<p>A <a href="../../en/Dm-crypt/Device_encryption.html#Keyfiles" title="Dm-crypt/Device encryption">keyfile</a> can also be set up and referenced instead of <code>none</code>. This results in an automatic unlocking, if the keyfile is accessible during boot. Since LUKS offers the option to have multiple keys, the chosen option can also be changed later.
+</p>
+<p>Use the device mapper's name you've defined in <code>/etc/crypttab</code> in <code>/etc/fstab</code> as follows:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ /dev/mapper/externaldrive      /mnt/backup               ext4    defaults,errors=remount-ro  0  2
+</pre>
+<p>Since <code>/dev/mapper/externaldrive</code> already is the result of a unique partition mapping, there is no need to specify an UUID for it. In any case, the mapper with the filesystem will have a different UUID than the partition it is encrypted in.
+</p>
+<h4><span class="mw-headline" id="Mounting_a_stacked_blockdevice">Mounting a stacked blockdevice</span></h4>
+<p>The systemd generators also automatically process stacked block devices at boot. 
+</p>
+<p>For example, you can create a <a href="../../en/RAID.html" title="RAID">RAID</a> setup, use cryptsetup on it and create an <a href="../../en/LVM.html" title="LVM">LVM</a> logical volume with respective filesystem inside the encrypted block device. A resulting: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+─sdXX                  linux_raid_member    
+│ └─md0                 crypto_LUKS   
+│   └─cryptedbackup     LVM2_member 
+│     └─vgraid-lvraid   ext4              /mnt/backup
+└─sdYY                  linux_raid_member    
+  └─md0                 crypto_LUKS       
+    └─cryptedbackup     LVM2_member 
+      └─vgraid-lvraid   ext4              /mnt/backup
+</pre>
+<p>will ask for the passphrase and mount automatically at boot. 
+</p>
+<p>Given you specify the correct corresponding crypttab (e.g. UUID for the <code>crypto_LUKS</code> device) and fstab (<code>/dev/mapper/vgraid-lvraid</code>) entries, there is no need to add additional mkinitcpio hooks/configuration, because <code>/etc/crypttab</code> processing applies to non-root mounts only. One exception is when the <code>mdadm_udev</code> hook is used <i>already</i> (e.g. for the root device). In this case <code>/etc/madadm.conf</code> and the initramfs need updating to achieve the correct root raid is picked first.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../../en/Category:Encryption.html" title="Category:Encryption">Encryption</a></li>
+<li><a href="../../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Dm-crypt/System_configuration&amp;oldid=452485">https://wiki.archlinux.org/index.php?title=Dm-crypt/System_configuration&amp;oldid=452485</a>"</li>
+					<li id="lastmod"> This page was last modified on 30 September 2016, at 16:23.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

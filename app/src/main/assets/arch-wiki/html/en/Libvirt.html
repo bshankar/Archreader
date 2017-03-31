@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>libvirt - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Libvirt skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">libvirt</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">Category:Hypervisors</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/PCI_passthrough_via_OVMF.html" title="PCI passthrough via OVMF">PCI passthrough via OVMF</a></li>
+</ul>
+</div>
+<p>Libvirt is collection of software that provides a convenient way to manage virtual machines and other virtualization functionality, such as storage and network interface management. These software pieces include a long term stable C API, a daemon (libvirtd), and a command line utility (virsh). A primary goal of libvirt is to provide a single way to manage multiple different virtualization providers/hypervisors, such as the <a href="../en/QEMU.html" title="QEMU">KVM/QEMU</a>, <a href="../en/Xen.html" title="Xen">Xen</a>, <a href="../en/Linux_Containers.html" title="LXC" class="mw-redirect">LXC</a>, <a rel="nofollow" class="external text" href="http://openvz.org">OpenVZ</a> or <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a> <a href="../en/Category:Hypervisors.html" title="Category:Hypervisors">hypervisors</a> (<a rel="nofollow" class="external text" href="http://libvirt.org/drivers.html">among others</a>).
+</p>
+<p>Some of the major libvirt features are:
+</p>
+<ul>
+<li>
+<b>VM management</b>: Various domain lifecycle operations such as start, stop, pause, save, restore, and migrate. Hotplug operations for many device types including disk and network interfaces, memory, and cpus.</li>
+<li>
+<b>Remote machine support</b>: All libvirt functionality is accessible on any machine running the libvirt daemon, including remote machines. A variety of network transports are supported for connecting remotely, with the simplest being SSH, which requires no extra explicit configuration.</li>
+<li>
+<b>Storage management</b>: Any host running the libvirt daemon can be used to manage various types of storage: create file images of various formats (qcow2, vmdk, raw, ...), mount NFS shares, enumerate existing LVM volume groups, create new LVM volume groups and logical volumes, partition raw disk devices, mount iSCSI shares, and much more.</li>
+<li>
+<b>Network interface management</b>: Any host running the libvirt daemon can be used to manage physical and logical network interfaces. Enumerate existing interfaces, as well as configure (and create) interfaces, bridges, vlans, and bond devices.</li>
+<li>
+<b>Virtual NAT and Route based networking</b>: Any host running the libvirt daemon can manage and create virtual networks. Libvirt virtual networks use firewall rules to act as a router, providing VMs transparent access to the host machines network.</li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Server"><span class="tocnumber">1.1</span> <span class="toctext">Server</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Client"><span class="tocnumber">1.2</span> <span class="toctext">Client</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5">
+<a href="#Set_up_authentication"><span class="tocnumber">2.1</span> <span class="toctext">Set up authentication</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Using_polkit"><span class="tocnumber">2.1.1</span> <span class="toctext">Using polkit</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Authenticate_with_file-based_permissions"><span class="tocnumber">2.1.2</span> <span class="toctext">Authenticate with file-based permissions</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Daemon"><span class="tocnumber">2.2</span> <span class="toctext">Daemon</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Unencrypt_TCP.2FIP_sockets"><span class="tocnumber">2.3</span> <span class="toctext">Unencrypt TCP/IP sockets</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Access_virtual_machines_using_their_hostnames"><span class="tocnumber">2.4</span> <span class="toctext">Access virtual machines using their hostnames</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Test"><span class="tocnumber">3</span> <span class="toctext">Test</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Management"><span class="tocnumber">4</span> <span class="toctext">Management</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#virsh"><span class="tocnumber">4.1</span> <span class="toctext">virsh</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Storage_pools"><span class="tocnumber">4.2</span> <span class="toctext">Storage pools</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Create_a_new_pool_using_virsh"><span class="tocnumber">4.2.1</span> <span class="toctext">Create a new pool using virsh</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#Create_a_new_pool_using_virt-manager"><span class="tocnumber">4.2.2</span> <span class="toctext">Create a new pool using virt-manager</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-17">
+<a href="#Storage_volumes"><span class="tocnumber">4.3</span> <span class="toctext">Storage volumes</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#Create_a_new_volume_with_virsh"><span class="tocnumber">4.3.1</span> <span class="toctext">Create a new volume with virsh</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#virt-manager_backing_store_type_bug"><span class="tocnumber">4.3.2</span> <span class="toctext">virt-manager backing store type bug</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-20">
+<a href="#Domains"><span class="tocnumber">4.4</span> <span class="toctext">Domains</span></a>
+<ul>
+<li class="toclevel-3 tocsection-21"><a href="#Create_a_new_domain_using_virt-install"><span class="tocnumber">4.4.1</span> <span class="toctext">Create a new domain using virt-install</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Create_a_new_domain_using_virt-manager"><span class="tocnumber">4.4.2</span> <span class="toctext">Create a new domain using virt-manager</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Manage_a_domain"><span class="tocnumber">4.4.3</span> <span class="toctext">Manage a domain</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-24"><a href="#Networks"><span class="tocnumber">4.5</span> <span class="toctext">Networks</span></a></li>
+<li class="toclevel-2 tocsection-25">
+<a href="#Snapshots"><span class="tocnumber">4.6</span> <span class="toctext">Snapshots</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#Create_a_snapshot"><span class="tocnumber">4.6.1</span> <span class="toctext">Create a snapshot</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-27"><a href="#Other_management"><span class="tocnumber">4.7</span> <span class="toctext">Other management</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-28"><a href="#Python_connectivity_code"><span class="tocnumber">5</span> <span class="toctext">Python connectivity code</span></a></li>
+<li class="toclevel-1 tocsection-29">
+<a href="#UEFI_Support"><span class="tocnumber">6</span> <span class="toctext">UEFI Support</span></a>
+<ul>
+<li class="toclevel-2 tocsection-30"><a href="#OVMF_-_QEMU_workaround"><span class="tocnumber">6.1</span> <span class="toctext">OVMF - QEMU workaround</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-31"><a href="#PulseAudio"><span class="tocnumber">7</span> <span class="toctext">PulseAudio</span></a></li>
+<li class="toclevel-1 tocsection-32"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Because of its daemon/client architecture, libvirt needs only be installed on the machine which will host the virtualized system. Note that the server and client can be the same physical machine.
+</p>
+<h3><span class="mw-headline" id="Server">Server</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span> package, as well as at least one hypervisor:
+</p>
+<ul><li> The <a rel="nofollow" class="external text" href="http://libvirt.org/drvqemu.html">libvirt KVM/QEMU driver</a> is the primary <i>libvirt</i> driver and if <a href="../en/QEMU.html#Enabling_KVM" title="QEMU">KVM is enabled</a>, fully virtualized, hardware accelerated guests will be available. See the <a href="../en/QEMU.html" title="QEMU">QEMU</a> article for more informations.</li></ul>
+<ul><li> Other <a rel="nofollow" class="external text" href="http://libvirt.org/drivers.html">supported hypervisors</a> include <a href="../en/Linux_Containers.html" title="LXC" class="mw-redirect">LXC</a>, <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a> and <a href="../en/Xen.html" title="Xen">Xen</a>. See the respective articles for installation instructions. With respect to  <code>libvirtd</code> installation note: 
+<ul>
+<li> The <a rel="nofollow" class="external text" href="http://libvirt.org/drvlxc.html">libvirt LXC driver</a> has no dependency on the <a href="../en/Linux_Containers.html" title="LXC" class="mw-redirect">LXC</a> userspace tools provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lxc">lxc</a></span>, therefore there is no need to install the package if planning on using the driver.</li>
+<li> <a href="../en/Xen.html" title="Xen">Xen</a> support is available, but not by default. You need to use the <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> to modify <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span>'s <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILD</a> and build it without the <code>--without-xen</code> option. As VirtualBox in turn has no planned stable support for Xen, you might as well replace it with <code>--without-vbox</code>.</li>
+</ul>
+</li></ul>
+<p>For network connectivity, install: 
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ebtables">ebtables</a></span> <b>and</b> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span> for the <a rel="nofollow" class="external text" href="http://wiki.libvirt.org/page/VirtualNetworking#The_default_configuration">default</a> NAT/DHCP networking.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bridge-utils">bridge-utils</a></span> for bridged networking.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openbsd-netcat">openbsd-netcat</a></span> for remote management over <a href="../en/Secure_Shell.html" title="SSH" class="mw-redirect">SSH</a>.</li>
+</ul>
+<h3><span class="mw-headline" id="Client">Client</span></h3>
+<p>The client is the user interface that will be used to manage and access the virtual machines.
+</p>
+<ul>
+<li> <i>virsh</i> is a command line program for managing and configuring domains; it is included in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span> package.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-manager">virt-manager</a></span> is a graphical user interface for managing virtual machines.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virtviewer">virtviewer</a></span> is a lightweight interface for interacting with the graphical display of virtualized guest OS.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gnome-boxes">gnome-boxes</a></span> is a simple GNOME 3 application to access remote or virtual systems.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/virt-manager-qt5/">virt-manager-qt5</a></span><sup><small>AUR</small></sup>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libvirt-sandbox/">libvirt-sandbox</a></span><sup><small>AUR</small></sup> is an application sandbox toolkit.</li>
+</ul>
+<p>A list of libvirt-compatible software can be found <a rel="nofollow" class="external text" href="http://libvirt.org/apps.html">here</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>For <i><b>system</b></i>-level administration (i.e. global settings and image-<i>volume</i> location), libvirt minimally requires <a href="#Set_up_authentication">setting up authorization</a>, and <a href="#Daemon">starting the daemon</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For user-<i><b>session</b></i> administration, daemon setup and configuration is <i>not</i> required; authorization, however, is limited to local abilities; the front-end will launch a local instance of the <b>libvirtd</b> daemon.</div>
+<h3><span class="mw-headline" id="Set_up_authentication">Set up authentication</span></h3>
+<p>From <a rel="nofollow" class="external text" href="http://libvirt.org/auth.html#ACL_server_config">libvirt: Connection authentication</a>:
+</p>
+<dl><dd>The libvirt daemon allows the administrator to choose the authentication mechanisms used for client connections on each network socket independently. This is primarily controlled via the libvirt daemon master config file in <code>/etc/libvirt/libvirtd.conf</code>. Each of the libvirt sockets can have its authentication mechanism configured independently. There is currently a choice of <code>none</code>, <code>polkit</code> and <code>sasl</code>. </dd></dl>
+<p>Because <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span> pulls <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=polkit">polkit</a></span> as a dependency during installation, <a href="#Using_polkit">polkit</a> is used as the default value for the <code>unix_sock_auth</code> parameter (<a rel="nofollow" class="external text" href="http://libvirt.org/auth.html#ACL_server_polkit">source</a>). <a href="#Authenticate_with_file-based_permissions">File-based permissions</a> remain nevertheless available.
+</p>
+<h4><span class="mw-headline" id="Using_polkit">Using polkit</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>A system reboot may be required before authenticating with <code>polkit</code> works correctly.</div>
+<p>The <i>libvirt</i> daemon provides two <a href="../en/Polkit.html#Actions" title="Polkit">polkit actions</a> in <code>/usr/share/polkit-1/actions/org.libvirt.unix.policy</code>:
+</p>
+<ul>
+<li> <code>org.libvirt.unix.manage</code> for full management access (RW daemon socket), and</li>
+<li> <code>org.libvirt.unix.monitor</code> for monitoring only access (read-only socket).</li>
+</ul>
+<p>The default policy for the RW daemon socket will require to authenticate as an admin. This is akin to <a href="../en/Sudo.html" title="Sudo">sudo</a> auth, but does not require that the client application ultimately run as root. Default policy will still allow any application to connect to the RO socket.
+</p>
+<p>Arch defaults to consider anybody in the <code>wheel</code> group as an administrator: this is defined in <code>/etc/polkit-1/rules.d/50-default.rules</code> (see <a href="../en/Polkit.html#Administrator_identities" title="Polkit">Polkit#Administrator identities</a>). Therefore there is no need to create a new group and rule file <b>if your user is a member of the <code>wheel</code> group</b>: upon connection to the RW socket (e.g. via <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-manager">virt-manager</a></span>) you will be prompted for your user's password.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Prompting for a password relies on the presence of an <a href="../en/Polkit.html#Authentication_agents" title="Polkit">authentication agent</a> on the system. Console users may face an issue with the default <code>pkttyagent</code> agent which may or may not work properly.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to configure passwordless authentication, see <a href="../en/Polkit.html#Bypass_password_prompt" title="Polkit">Polkit#Bypass password prompt</a>.</div>
+<p>As of libvirt 1.2.16 (commit:<a rel="nofollow" class="external autonumber" href="http://libvirt.org/git/?p=libvirt.git;a=commit;h=e94979e901517af9fdde358d7b7c92cc055dd50c">[1]</a>), members of the <code>libvirt</code> group have passwordless access to the RW daemon socket by default. The easiest way to ensure your user has access is to ensure the libvirt group exists and they are a member of it. If you wish to change the group authorized to access the RW daemon socket to be the kvm group, create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/polkit-1/rules.d/50-libvirt.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/* Allow users in kvm group to manage the libvirt
+daemon without authentication */
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.libvirt.unix.manage" &amp;&amp;
+        subject.isInGroup("kvm")) {
+            return polkit.Result.YES;
+    }
+});
+</pre>
+<p>Then <a href="../en/Users_and_groups.html#Other_examples_of_user_management" title="Users and groups">add yourself</a> to the <code>kvm</code> group and relogin. Replace <i>kvm</i> with any group of your preference just make sure it exists and that your user is a member of it (see <a href="../en/Users_and_groups.html" title="Users and groups">Users and groups</a> for more information).
+</p>
+<p>Do not forget to relogin for group changes to take effect.
+</p>
+<h4><span class="mw-headline" id="Authenticate_with_file-based_permissions">Authenticate with file-based permissions</span></h4>
+<p>To define file-based permissions for users in the <i>libvirt</i> group to manage virtual machines, uncomment and define:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/libvirt/libvirtd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#unix_sock_group = "libvirt"
+#unix_sock_ro_perms = "0777"  # set to 0770 to deny non-group libvirt users
+#unix_sock_rw_perms = "0770"
+#auth_unix_ro = "none"
+#auth_unix_rw = "none"
+</pre>
+<p>While some guides mention changed permissions of certain libvirt directories to ease management, keep in mind permissions are lost on package update.  To edit these system directories, root user is expected.
+</p>
+<h3><span class="mw-headline" id="Daemon">Daemon</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> both <code>libvirtd.service</code> and <code>virtlogd.service</code>. Optionally <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>libvirtd.service</code>. There is no need to enable <code>virtlogd.service</code>, since <code>libvirtd.service</code>, when enabled, also enables the <code>virtlogd.socket</code> and <code>virtlockd.socket</code> <a href="../en/Systemd.html#Using_units" title="Systemd">units</a>.
+</p>
+<h3><span class="mw-headline" id="Unencrypt_TCP.2FIP_sockets">Unencrypt TCP/IP sockets</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This method is used to help remote domain, connection speed for trusted networks.  This is the least secure connection method.  This should <i>only</i> be used for testing or use over a secure, private, and trusted network. SASL is not enabled here, so all TCP traffic is <i>cleartext</i>. For real world use <i>always</i> enable SASL.</div>
+<p>Edit <code>/etc/libvirt/libvirtd.conf</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/libvirt/libvirtd.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+listen_tls = 0
+listen_tcp = 1
+auth_tcp=none
+</pre>
+<p>It is also necessary to start the server in listening mode by editing <code>/etc/conf.d/libvirtd</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/conf.d/libvirtd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">LIBVIRTD_ARGS="--listen"</pre>
+<h3><span class="mw-headline" id="Access_virtual_machines_using_their_hostnames">Access virtual machines using their hostnames</span></h3>
+<p>For host access to guests on non-isolated, bridged networks, enable the <code>libvirt</code> NSS module provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span>.
+</p>
+<p>Edit <code>/etc/nsswitch.conf</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/nsswitch.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+hosts: files libvirt dns myhostname
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>While commands such as <code>ping</code> and <code>ssh</code> should work with virtual machine hostnames, commands such as <code>host</code> and <code>nslookup</code> may fail or produce unexpected results because they rely on DNS. Use <code>getent hosts &lt;vm-hostname&gt;</code> instead.</div>
+<h2><span class="mw-headline" id="Test">Test</span></h2>
+<p>To test if libvirt is working properly on a <i>system</i> level:
+</p>
+<pre>$ virsh -c qemu:///system
+</pre>
+<p>To test if libvirt is working properly for a user-<i>session</i>:
+</p>
+<pre>$ virsh -c qemu:///session
+</pre>
+<h2><span class="mw-headline" id="Management">Management</span></h2>
+<p>Libvirt management is done mostly with three tools: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-manager">virt-manager</a></span> (GUI), <code>virsh</code>, and <code>guestfish</code> (which is part of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libguestfs/">libguestfs</a></span><sup><small>AUR</small></sup>).
+</p>
+<h3><span class="mw-headline" id="virsh">virsh</span></h3>
+<p>The virsh program is for managing guest <i>domains</i> (virtual machines) and works well for scripting, virtualization administration.  Though most virsh commands require root privileges to run due to the communication channels used to talk to the hypervisor, typical management, creation, and running of domains (like that done with VirtualBox) can be done as a regular user.
+</p>
+<p>Virsh includes an interactive terminal that can be entered if no commands are passed (options are allowed though): <code>virsh</code>.  The interactive terminal has support for tab completion.
+</p>
+<p>From the command line:
+</p>
+<pre>$ virsh [option] &lt;command&gt; [argument]...
+</pre>
+<p>From the interactive terminal:
+</p>
+<pre>virsh # &lt;command&gt; [argument]...
+</pre>
+<p>Help is available:
+</p>
+<pre>$ virsh help [option*] or [group-keyword*]
+</pre>
+<h3><span class="mw-headline" id="Storage_pools">Storage pools</span></h3>
+<p>A pool is a location where storage <i>volumes</i> can be kept.  What libvirt defines as <i>volumes</i> others may define as "virtual disks" or "virtual machine images".  Pool locations may be a directory, a network filesystem, or partition (this includes a <a href="../en/LVM.html" title="LVM">LVM</a>).  Pools can be toggled active or inactive and allocated for space.
+</p>
+<p>On the <i>system</i>-level, <code>/var/lib/libvirt/images/</code> will be activated by default; on a user-<i>session</i>, <code>virt-manager</code> creates <code>$HOME/VirtualMachines</code>.
+</p>
+<p>Print active and inactive storage pools:
+</p>
+<pre>$ virsh pool-list --all
+</pre>
+<h4><span class="mw-headline" id="Create_a_new_pool_using_virsh">Create a new pool using virsh</span></h4>
+<p>If wanted to <i>add</i> a storage pool, here are examples of the command form, adding a directory, and adding a LVM volume:
+</p>
+<pre>$ virsh pool-define-as name type [source-host] [source-path] [source-dev] [source-name] [&lt;target&gt;] [--source-format format]
+$ virsh pool-define-as <i>poolname</i> dir - - - - /home/<i>username</i>/.local/libvirt/images
+$ virsh pool-define-as <i>poolname</i> fs - -  <i>/dev/vg0/images</i> - <i>mntpoint</i>
+</pre>
+<p>The above command defines the information for the pool, to build it:
+</p>
+<pre>$ virsh pool-build     <i>poolname</i>
+$ virsh pool-start     <i>poolname</i>
+$ virsh pool-autostart <i>poolname</i>
+</pre>
+<p>To remove it:
+</p>
+<pre>$ virsh pool-undefine  <i>poolname</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>For LVM storage pools:
+<ul>
+<li> It is a good practice to dedicate a volume group to the storage pool only. </li>
+<li> Choose a LVM volume group that differs from the pool name, otherwise when the storage pool is deleted the LVM group will be too.</li>
+</ul>
+</div>
+<h4><span class="mw-headline" id="Create_a_new_pool_using_virt-manager">Create a new pool using virt-manager</span></h4>
+<p>First, connect to a hypervisor (e.g. QEMU/KVM <i>system</i>, or user-<i>session</i>).  Then, right-click on a connection and select <i>Details</i>; select the <i>Storage</i> tab, push the <i>+</i> button on the lower-left, and follow the wizard.
+</p>
+<h3><span class="mw-headline" id="Storage_volumes">Storage volumes</span></h3>
+<p>Once the pool has been created, volumes can be created inside the pool.  <i>If building a new domain (virtual machine), this step can be skipped as a volume can be created in the domain creation process.</i>
+</p>
+<h4><span class="mw-headline" id="Create_a_new_volume_with_virsh">Create a new volume with virsh</span></h4>
+<p>Create volume, list volumes, resize, and delete:
+</p>
+<pre>$ virsh vol-create-as      <i>poolname</i> <i>volumename</i> 10GiB --format aw|bochs|raw|qcow|qcow2|vmdk
+$ virsh vol-upload  --pool <i>poolname</i> <i>volumename</i> <i>volumepath</i>
+$ virsh vol-list           <i>poolname</i>
+$ virsh vol-resize  --pool <i>poolname</i> <i>volumename</i> 12GiB
+$ virsh vol-delete  --pool <i>poolname</i> <i>volumename</i>
+$ virsh vol-dumpxml --pool <i>poolname</i> <i>volumename</i>  # for details.
+</pre>
+<h4><span class="mw-headline" id="virt-manager_backing_store_type_bug">virt-manager backing store type bug</span></h4>
+<p>On newer versions of <code>virt-manager</code> you can now specify a backing store to use when creating a new disk. This is very useful, in that you can have new domains be based on base images saving you both time and disk space when provisioning new virtual systems. There is a bug (<a rel="nofollow" class="external free" href="https://bugzilla.redhat.com/show_bug.cgi?id=1235406">https://bugzilla.redhat.com/show_bug.cgi?id=1235406</a>) in the current version of <code>virt-manager</code> which causes <code>virt-manager</code> to choose the wrong type of the backing image in the case where the backing image is a <code>qcow2</code> type. In this case, it will errantly pick the backing type as <code>raw</code>. This will cause the new image to be unable to read from the backing store, and effectively remove the utility of having a backing store at all.
+</p>
+<p>There is a workaround for this issue. <code>qemu-img</code> has long been able to do this operation directly. If you wish to have a backing store for your new domain before this bug is fixed, you may use the following command.
+</p>
+<pre>$ qemu-img create -f qcow2 -o backing_file=&lt;path to backing image&gt;,backing_fmt=qcow2 &lt;disk name&gt; &lt;disk size&gt;
+</pre>
+<p>Then you can use this image as the base for your new domain and it will use the backing store as a COW volume saving you time and disk space.
+</p>
+<h3><span class="mw-headline" id="Domains">Domains</span></h3>
+<p>Virtual machines are called <i>domains</i>.  If working from the command line, use <code>virsh</code> to list, create, pause, shutdown domains, etc.  <code>virt-viewer</code> can be used to view domains started with <code>virsh</code>.  Creation of domains is typically done either graphically with <code>virt-manager</code> or with <code>virt-install</code> (a command line program installed as part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-install">virt-install</a></span> package).
+</p>
+<p>Creating a new domain typically involves using some installation media, such as an <code>.iso</code> from the storage pool or an optical drive.
+</p>
+<p>Print active and inactive domains:
+</p>
+<pre># virsh list --all
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a href="../en/SELinux.html" title="SELinux">SELinux</a> has a built-in exemption for libvirt that allows volumes in <code>/var/lib/libvirt/images/</code> to be accessed.  If using SELinux and there are issues with the volumes, ensure that volumes are in that directory, or ensure that other storage pools are correctly labeled.</div>
+<h4><span class="mw-headline" id="Create_a_new_domain_using_virt-install">Create a new domain using virt-install</span></h4>
+<p>For an extremely detailed domain (virtual machine) setup, it is easier to <a href="#Create_a_new_domain_using_virt-manager">#Create a new domain using virt-manager</a>.  However, basics can easily be done with <code>virt-install</code> and still run quite well.  Minimum specifications are <code>--name</code>, <code>--memory</code>, guest storage (<code>--disk</code>, <code>--filesystem</code>, or <code>--nodisks</code>), and an install method (generally an <code>.iso</code> or CD). See <code>man virt-install</code> for more details and information about unlisted options.
+</p>
+<p>Arch Linux install (two GiB, qcow2 format volume create; user-networking):
+</p>
+<pre>$ virt-install  \
+  --name arch-linux_testing \
+  --memory 1024             \ 
+  --vcpus=2,maxvcpus=4      \
+  --cpu host                \
+  --cdrom $HOME/Downloads/arch-linux_install.iso \
+  --disk size=2,format=qcow2  \
+  --network user            \
+  --virt-type kvm
+</pre>
+<p>Fedora testing (Xen hypervisor, non-default pool, do not originally view):
+</p>
+<pre>$ virt-install  \
+  --connect xen:///     \
+  --name fedora-testing \
+  --memory 2048         \
+  --vcpus=2             \
+  --cpu=host            \
+  --cdrom /tmp/fedora20_x84-64.iso      \
+  --os-type=linux --os-variant=fedora20 \
+  --disk pool=testing,size=4            \
+  --network bridge=br0                  \
+  --graphics=vnc                        \
+  --noautoconsole
+$ virt-viewer --connect xen:/// fedora-testing
+</pre>
+<p>Windows:
+</p>
+<pre>$ virt-install \
+  --name=windows7           \
+  --memory 2048             \
+  --cdrom /dev/sr0          \
+  --os-variant=win7         \
+  --disk /mnt/storage/domains/windows7.qcow2,size=20GiB \
+  --network network=vm-net  \
+  --graphics spice
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Run <code>osinfo-query --fields=name,short-id,version os</code> to get argument for <code>--os-variant</code>; this will help define some specifications for the domain.  However, <code>--memory</code> and <code>--disk</code> will need to be entered; one can look within the appropriate <code>/usr/share/libosinfo/db/oses/<i>os</i>.xml</code> if needing these specifications.  After installing, it will likely be preferable to install the <a rel="nofollow" class="external text" href="http://www.spice-space.org/download.html">Spice Guest Tools</a> that include the <a rel="nofollow" class="external text" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Virtualization_Host_Configuration_and_Guest_Installation_Guide/form-Virtualization_Host_Configuration_and_Guest_Installation_Guide-Para_virtualized_drivers-Mounting_the_image_with_virt_manager.html">VirtIO drivers</a>. For a Windows VirtIO network driver there is also <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/virtio-win/">virtio-win</a></span><sup><small>AUR</small></sup>. These drivers are referenced by a <code>&lt;model type='virtio' /&gt;</code> in the guest's <code>.xml</code> configuration section for the device. A bit more information can also be found on the <a href="../en/QEMU.html#Preparing_a_Windows_guest" title="QEMU">QEMU article</a>.</div>
+<p>Import existing volume:
+</p>
+<pre>$ virt-install  \
+  --name demo  \
+  --memory 512 \
+  --disk /home/user/VMs/mydisk.img \
+  --import
+</pre>
+<h4><span class="mw-headline" id="Create_a_new_domain_using_virt-manager">Create a new domain using virt-manager</span></h4>
+<p>First, connect to the hypervisor (e.g. QEMU/KVM <i>system</i> or user <i>session</i>), right click on a connection and select <i>New</i>, and follow the wizard.
+</p>
+<ul>
+<li> On the <i>fourth step</i>, de-selecting <i>Allocate entire disk now</i> will make setup quicker and can save disk space in the interum; <i>however</i>, it may cause volume fragmentation over time.</li>
+<li> On the <i>fifth step</i>, open <i>Advanced options</i> and make sure that <i>Virt Type</i> is set to <i>kvm</i> (this is usually the preferred method).  If additional hardware setup is required, select the <i>Customize configuration before install</i> option.</li>
+</ul>
+<h4><span class="mw-headline" id="Manage_a_domain">Manage a domain</span></h4>
+<p>Start a domain:
+</p>
+<pre>$ virsh start <i>domain</i>
+$ virt-viewer --connect qemu:///session <i>domain</i>
+</pre>
+<p>Gracefully attempt to shutdown a domain; force off a domain:
+</p>
+<pre>$ virsh shutdown <i>domain</i>
+$ virsh destroy  <i>domain</i>
+</pre>
+<p>Autostart domain on libvirtd start:
+</p>
+<pre>$ virsh autostart <i>domain</i>
+$ virsh autostart <i>domain</i> --disable
+</pre>
+<p>Shutdown domain on host shutdown:
+</p>
+<dl><dd> Running domains can be automatically suspended/shutdown at host shutdown using the <code>libvirt-guests.service</code> systemd service. This same service will resume/startup the suspended/shutdown domain automatically at host startup.  Read <code>/etc/conf.d/libvirt-guests</code> for service options.</dd></dl>
+<p>Edit a domain's XML configuration:
+</p>
+<pre>$ virsh edit <i>domain</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Virtual Machines started directly by QEMU are not managable by libvirt tools.</div>
+<h3><span class="mw-headline" id="Networks">Networks</span></h3>
+<p>A <a rel="nofollow" class="external text" href="https://jamielinux.com/docs/libvirt-networking-handbook/">decent overview of libvirt networking</a>.
+</p>
+<p>By default, when the <code>libvirtd</code> systemd service is started, a NAT bridge is created called <i>default</i> to allow external network connectivity (warning see: <a href="#.22default.22_network_bug">#"default" network bug</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>). For other network connectivity needs, four network types exist that can be created to connect a domain to:
+</p>
+<ul>
+<li> bridge — a virtual device; shares data directly with a physical interface.  Use this if the host has <i>static</i> networking, it does not need to connect other domains, the domain requires full inbound and outbound trafficking, and the domain is running on a <i>system</i>-level. See <a href="../en/Network_bridge.html" title="Network bridge">Network bridge</a> on how to add a bridge additional to the default one. After creation, it needs to be specified in the respective guest's <code>.xml</code> configuration file.  </li>
+<li> network — a virtual network; has ability to share with other domains.  Use a virtual network if the host has <i>dynamic</i> networking (e.g. NetworkManager), or using wireless.</li>
+<li> macvtap — connect directly to a host physical interface.</li>
+<li> user — local ability networking.  Use this only for a user <i>session</i>.</li>
+</ul>
+<p><code>virsh</code> has the ability to create networking with numerous options for most users, however, it is easier to create network connectivity with a graphic user interface (like <code>virt-manager</code>), or to do so on <a href="#Create_a_new_domain_using_virt-install">creation with virt-install</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>libvirt handles DHCP and DNS with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dnsmasq">dnsmasq</a></span>, launching a separate instance for every virtual network.  It also adds iptables rules for proper routing, and enables the <code>ip_forward</code> kernel parameter. This also means that having dnsmasq running on the host system is not necessary to support libvirt requirements (and could interfere with libvirt dnsmasq instances).</div>
+<h3><span class="mw-headline" id="Snapshots">Snapshots</span></h3>
+<p>Snapshots take the disk, memory, and device state of a domain at a point-of-time, and save it for future use.  They have many uses, from saving a "clean" copy of an OS image to saving a domain's state before a potentially destructive operation.  Snapshots are identified with a unique name.
+</p>
+<p>Snapshots are saved within the volume itself and the volume must be the format: qcow2 or raw.  Snapshots use deltas so they have the potentiality to not take much space.
+</p>
+<h4><span class="mw-headline" id="Create_a_snapshot">Create a snapshot</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Some of this data appears to be dated. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Libvirt">Talk:Libvirt#</a>)</div>
+</div>
+<p>Once a snapshot is taken it is saved as a new block device and the original snapshot is taken offline.  Snapshots can be chosen from and also merged into another (even without shutting down the domain).
+</p>
+<p>Print a running domain's volumes (running domains can be printed with <code>virsh list</code>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># virsh domblklist <i>domain</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ Target     Source
+ ------------------------------------------------
+ vda        /vms/domain.img
+</pre>
+<p>To see a volume's physical properties:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># qemu-img info /vms/domain.img</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ image: /vms/domain.img
+ file format: qcow2
+ virtual size: 50G (53687091200 bytes)
+ disk size: 2.1G
+ cluster_size: 65536
+</pre>
+<p>Create a disk-only snapshot (the option <code>--atomic</code> will prevent the volume from being modified if snapshot creation fails):
+</p>
+<pre># virsh snapshot-create-as <i>domain</i> snapshot1 --disk-only --atomic
+</pre>
+<p>List snapshots:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># virsh snapshot-list <i>domain</i></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ Name                 Creation Time             State
+ ------------------------------------------------------------
+ snapshot1           2012-10-21 17:12:57 -0700 disk-snapshot
+</pre>
+<p>One can they copy the original image with <code>cp --sparse=true</code> or <code>rsync -S</code> and then merge the the original back into snapshot:
+</p>
+<pre># virsh blockpull --domain <i>domain</i> --path /vms/<i>domain</i>.snapshot1
+</pre>
+<p><code>domain.snapshot1</code> becomes a new volume.  After this is done the original volume (<code>domain.img</code> and snapshot metadata can be deleted.   The <code>virsh blockcommit</code> would work opposite to <code>blockpull</code> but it seems to be currently under development (including <code>snapshot-revert feature</code>, scheduled to be released sometime next year.
+</p>
+<h3><span class="mw-headline" id="Other_management">Other management</span></h3>
+<p>Connect to non-default hypervisor:
+</p>
+<pre>$ virsh --connect xen:///
+virsh # uri
+xen:///
+</pre>
+<p>Connect to the QEMU hypervisor over SSH; and the same with logging:
+</p>
+<pre>$ virsh --connect qemu+ssh://<i>username</i>@<i>host</i>/system
+$ LIBVIRT_DEBUG=1 virsh --connect qemu+ssh://<i>username</i>@<i>host</i>/system
+</pre>
+<p>Connect a graphic console over SSH:
+</p>
+<pre>$ virt-viewer  --connect qemu+ssh://<i>username</i>@<i>host</i>/system <i>domain</i>
+$ virt-manager --connect qemu+ssh://<i>username</i>@<i>host</i>/system <i>domain</i>
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are having problems connecting to a remote RHEL server (or anything other than Arch, really), try the two workarounds mentioned in <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/30748">FS#30748</a> and <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/22068">FS#22068</a>.</div>
+<p>Connect to the VirtualBox hypervisor (<i>VirtualBox support in libvirt is not stable yet and may cause libvirtd to crash</i>):
+</p>
+<pre>$ virsh --connect vbox:///system
+</pre>
+<p>Network configurations:
+</p>
+<pre>$ virsh -c qemu:///system net-list --all
+$ virsh -c qemu:///system net-dumpxml default
+</pre>
+<h2><span class="mw-headline" id="Python_connectivity_code">Python connectivity code</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt-python">libvirt-python</a></span> package provides a <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2">python2</a></span> API in <code>/usr/lib/python2.7/site-packages/libvirt.py</code>.
+</p>
+<p>General examples are given in <code>/usr/share/doc/libvirt-python-<i>your_libvirt_version</i>/examples/</code>
+</p>
+<p>Unofficial example using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu">qemu</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span>:
+</p>
+<pre>#! /usr/bin/env python2
+# -*- coding: utf-8 -*-
+import socket
+import sys
+import libvirt
+if (__name__ == "__main__"):
+   conn = libvirt.open("qemu+ssh://xxx/system")
+   print "Trying to find node on xxx"
+   domains = conn.listDomainsID()
+   for domainID in domains:
+       domConnect = conn.lookupByID(domainID)
+       if domConnect.name() == 'xxx-node':
+           print "Found shared node on xxx with ID " + str(domainID)
+           domServ = domConnect
+           break
+</pre>
+<h2><span class="mw-headline" id="UEFI_Support">UEFI Support</span></h2>
+<p>Libvirt can suport UEFI virtual machines through QEMU and <a rel="nofollow" class="external text" href="https://github.com/tianocore/edk2">OVMF</a>.
+</p>
+<p>Currently this is possible in Arch Linux through a workaround. <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/index.php?do=details&amp;action=details.addvote&amp;task_id=47101">This ovmf packaging bug</a> needs to be resolved for this to work out of the box or with minimal configuration of <code>/etc/libvirt/qemu.conf</code>.
+</p>
+<h3><span class="mw-headline" id="OVMF_-_QEMU_workaround">OVMF - QEMU workaround</span></h3>
+<ul>
+<li> Build <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ovmf">ovmf</a></span> from the <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> with <code>makepkg</code>.</li>
+<li> Copy the <code>OVMF_CODE.fd</code> and <code>OVMF_VARS.fd</code> files either for 64 or 32 bit to the default qemu location.</li>
+</ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/libvirt/qemu.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#nvram = [
+#   "/usr/share/OVMF/OVMF_CODE.fd:/usr/share/OVMF/OVMF_VARS.fd",
+#   "/usr/share/OVMF/OVMF_CODE.secboot.fd:/usr/share/OVMF/OVMF_VARS.fd",
+#   "/usr/share/AAVMF/AAVMF_CODE.fd:/usr/share/AAVMF/AAVMF_VARS.fd"
+#]
+
+</pre>
+<pre># mkdir /usr/share/OVMF
+# cp src/edk2/Build/OvmfX64/RELEASE_GCC49/FV/OVMF_CODE.fd src/edk2/Build/OvmfX64/RELEASE_GCC49/FV/OVMF_VARS.fd /usr/share/OVMF/ 
+</pre>
+<ul><li> Restart <code>libvirtd</code>
+</li></ul>
+<pre> # systemctl stop libvirtd
+ # systemctl start libvirtd
+</pre>
+<p>Now you are ready to create a uefi virtual machine. Create a new virtual machine through <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-manager">virt-manager</a></span>. When you get to the final page of the 'New VM' wizard, do the following: 
+</p>
+<ul>
+<li> Click 'Customize before install', then select 'Finish'</li>
+<li> On the 'Overview' screen, Change the 'Firmware' field to select the 'UEFI x86_64' option.</li>
+<li> Click 'Begin Installation'</li>
+<li> The boot screen you'll see should use linuxefi commands to boot the installer, and you should be able to run efibootmgr inside that system, to verify that you're running an UEFI OS. </li>
+</ul>
+<p>For more information about this, refer to <a rel="nofollow" class="external text" href="https://fedoraproject.org/wiki/Using_UEFI_with_QEMU">this fedora wiki page</a>.
+</p>
+<h2><span class="mw-headline" id="PulseAudio">PulseAudio</span></h2>
+<p>The PulseAudio daemon normally runs under your regular user account, and will only accept connections from the same user. This can be a problem if QEMU is being run as root through <strong class="selflink">libvirt</strong>. To run QEMU as a regular user, edit <code>/etc/libvirt/qemu.conf</code> and set the <code>user</code> option to your username.
+</p>
+<pre>user = "dave"
+</pre>
+<p>You will also need to tell QEMU to use the PulseAudio backend and identify the server to connect to. Add the following section to your domain configuration using <code>virsh edit</code>.
+</p>
+<pre> &lt;qemu:commandline&gt;
+   &lt;qemu:env name='QEMU_AUDIO_DRV' value='pa'/&gt;
+   &lt;qemu:env name='QEMU_PA_SERVER' value='/run/user/1000/pulse/native'/&gt;
+ &lt;/qemu:commandline&gt;
+</pre>
+<p><code>1000</code> is your user id. Change it if necessary.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://libvirt.org/drvqemu.html">Official libvirt web site</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Deployment_and_Administration_Guide/index.html">Red Hat  Virtualization Deployment and Administration Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Tuning_and_Optimization_Guide/index.html">Red Hat Virtualization Tuning and Optimization Guide</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://docs.slackware.com/howtos:general_admin:kvm_libvirt">Slackware KVM and libvirt</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www-01.ibm.com/support/knowledgecenter/linuxonibm/liaat/liaatkvm.htm">IBM KVM</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://jamielinux.com/docs/libvirt-networking-handbook/">libvirt Networking Handbook</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

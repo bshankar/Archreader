@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Mullvad - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Mullvad skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Mullvad</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Mullvad is a VPN service based in Sweden which operates <a href="../en/OpenVPN.html" title="OpenVPN">OpenVPN</a> and PPTP servers. This article explains how to set up an OpenVPN connection to Mullvad.
+</p>
+<h2><span class="mw-headline" id="Configuring_OpenVPN">Configuring OpenVPN</span></h2>
+<p>Mullvad supply their own client but it can also be used with a manual configuration of Openvpn.
+Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openvpn">openvpn</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openresolv">openresolv</a></span>. Download the Mullvad OpenVPN configuration files from <a rel="nofollow" class="external text" href="http://mullvad.net/en/openvpn_conf.php">Mullvad</a> and unzip into /etc/openvpn. Rename mullvad_linux.conf:
+</p>
+<pre># mv /etc/openvpn/mullvad_linux.conf /etc/openvpn/mullvad.conf
+</pre>
+<p>In order to use the nameservers supplied by the VPN, a script needs to be called when starting and stopping OpenVPN to update resolvconf with the correct servers.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/update-resolv-conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+#
+# Parses DHCP options from openvpn to update resolv.conf
+# To use set as 'up' and 'down' script in your openvpn *.conf:
+# up /etc/openvpn/update-resolv-conf
+# down /etc/openvpn/update-resolv-conf
+#
+# Used snippets of resolvconf script by Thomas Hood &lt;jdthood@yahoo.co.uk&gt;
+# and Chris Hanson
+# Licensed under the GNU GPL.  See /usr/share/common-licenses/GPL.
+# 07/2013 colin@daedrum.net Fixed intet name
+# 05/2006 chlauber@bnc.ch
+#
+# Example envs set from openvpn:
+# foreign_option_1='dhcp-option DNS 193.43.27.132'
+# foreign_option_2='dhcp-option DNS 193.43.27.133'
+# foreign_option_3='dhcp-option DOMAIN be.bnc.ch'
+# foreign_option_4='dhcp-option DOMAIN-SEARCH bnc.local'
+
+RESOLVCONF=/usr/bin/resolvconf
+
+case $script_type in
+
+up)
+  for optionname in ${!foreign_option_*} ; do
+    option="${!optionname}"
+    echo $option
+    part1=$(echo "$option" | cut -d " " -f 1)
+    if [ "$part1" == "dhcp-option" ] ; then
+      part2=$(echo "$option" | cut -d " " -f 2)
+      part3=$(echo "$option" | cut -d " " -f 3)
+      if [ "$part2" == "DNS" ] ; then
+        IF_DNS_NAMESERVERS="$IF_DNS_NAMESERVERS $part3"
+      fi
+      if [[ "$part2" == "DOMAIN" || "$part2" == "DOMAIN-SEARCH" ]] ; then
+        IF_DNS_SEARCH="$IF_DNS_SEARCH $part3"
+      fi
+    fi
+  done
+  R=""
+  if [ "$IF_DNS_SEARCH" ]; then
+    R="search "
+    for DS in $IF_DNS_SEARCH ; do
+      R="${R} $DS"
+    done
+  R="${R}
+"
+  fi
+
+  for NS in $IF_DNS_NAMESERVERS ; do
+    R="${R}nameserver $NS
+"
+  done
+  #echo -n "$R" | $RESOLVCONF -x -p -a "${dev}"
+  echo -n "$R" | $RESOLVCONF -x -a "${dev}.inet"
+  ;;
+down)
+  $RESOLVCONF -d "${dev}.inet"
+  ;;
+esac
+</pre>
+<p>Make it executable:
+</p>
+<pre># chmod +x /etc/openvpn/update-resolv-conf
+</pre>
+<p>The VPN can then be <a href="../en/Systemd.html#Using_units" title="Enabled" class="mw-redirect">controlled</a> through <code>openvpn@mullvad.service</code>.
+</p>
+<h2><span class="mw-headline" id="Mullvad_Client">Mullvad Client</span></h2>
+<p>Mullvad also supply their own <a rel="nofollow" class="external text" href="https://mullvad.net/en/download/">graphical client</a>, packaged as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mullvad/">mullvad</a></span><sup><small>AUR</small></sup>.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:VPN_providers.html" title="Category:VPN providers">VPN providers</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

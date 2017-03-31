@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>NFS - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-NFS skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">NFS</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/NFS/Troubleshooting.html" title="NFS/Troubleshooting">NFS/Troubleshooting</a></li>
+</ul>
+</div>
+<p>From <a href="https://en.wikipedia.org/wiki/Network_File_System" class="extiw" title="wikipedia:Network File System">Wikipedia</a>: 
+</p>
+<dl><dd> <i>Network File System (NFS) is a distributed file system protocol originally developed by Sun Microsystems in 1984, allowing a user on a client computer to access files over a network in a manner similar to how local storage is accessed.</i>
+</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Server"><span class="tocnumber">2.1</span> <span class="toctext">Server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Starting_the_server"><span class="tocnumber">2.1.1</span> <span class="toctext">Starting the server</span></a></li>
+<li class="toclevel-3 tocsection-5">
+<a href="#Miscellaneous"><span class="tocnumber">2.1.2</span> <span class="toctext">Miscellaneous</span></a>
+<ul>
+<li class="toclevel-4 tocsection-6"><a href="#Optional_configuration"><span class="tocnumber">2.1.2.1</span> <span class="toctext">Optional configuration</span></a></li>
+<li class="toclevel-4 tocsection-7"><a href="#Static_ports_for_NFSv3"><span class="tocnumber">2.1.2.2</span> <span class="toctext">Static ports for NFSv3</span></a></li>
+<li class="toclevel-4 tocsection-8"><a href="#NFSv2_compatibility"><span class="tocnumber">2.1.2.3</span> <span class="toctext">NFSv2 compatibility</span></a></li>
+<li class="toclevel-4 tocsection-9"><a href="#Firewall_configuration"><span class="tocnumber">2.1.2.4</span> <span class="toctext">Firewall configuration</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10">
+<a href="#Client"><span class="tocnumber">2.2</span> <span class="toctext">Client</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#Error_from_systemd"><span class="tocnumber">2.2.1</span> <span class="toctext">Error from systemd</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Manual_mounting"><span class="tocnumber">2.2.2</span> <span class="toctext">Manual mounting</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Mount_using_.2Fetc.2Ffstab"><span class="tocnumber">2.2.3</span> <span class="toctext">Mount using /etc/fstab</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Mount_using_.2Fetc.2Ffstab_with_systemd"><span class="tocnumber">2.2.4</span> <span class="toctext">Mount using /etc/fstab with systemd</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Mount_using_autofs"><span class="tocnumber">2.2.5</span> <span class="toctext">Mount using autofs</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#Performance_tuning"><span class="tocnumber">3.1</span> <span class="toctext">Performance tuning</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Automounting_shares_with_systemd-networkd"><span class="tocnumber">3.2</span> <span class="toctext">Automounting shares with systemd-networkd</span></a></li>
+<li class="toclevel-2 tocsection-19">
+<a href="#Automatic_mount_handling"><span class="tocnumber">3.3</span> <span class="toctext">Automatic mount handling</span></a>
+<ul>
+<li class="toclevel-3 tocsection-20"><a href="#Cron"><span class="tocnumber">3.3.1</span> <span class="toctext">Cron</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#systemd.2FTimers"><span class="tocnumber">3.3.2</span> <span class="toctext">systemd/Timers</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Mount_at_startup_via_systemd"><span class="tocnumber">3.3.3</span> <span class="toctext">Mount at startup via systemd</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#NetworkManager_dispatcher"><span class="tocnumber">3.3.4</span> <span class="toctext">NetworkManager dispatcher</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-24"><a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Both client and server only require the <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">installation</a> of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nfs-utils">nfs-utils</a></span> package.
+</p>
+<p>It is <b>highly</b> recommended to use a time sync daemon such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ntp">ntp</a></span> on all nodes to keep client/server clocks in sync.  Without accurate clocks on all nodes, NFS can introduce unwanted delays. The <a href="../en/Network_Time_Protocol_daemon.html" title="Network Time Protocol daemon">Network Time Protocol daemon</a> is recommended to sync both the server and the clients to the highly accurate NTP servers available on the Internet.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nfs-utils">nfs-utils</a></span> for Arch Linux ARM starting with update 1.3.2-4 (possibly earlier) has been reported by one user to behave differently from the x86_64 or i686 package. See the discussion page for a recipe for client mounts.</div>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Server">Server</span></h3>
+<p>NFS needs to see the list of shares (referred to as "exports" from here on out), which are defined in <code>/etc/exports</code> in order to serve-up the content.  The NFS root directory can be any directory on the file system.  In the interest of security, it is recommended to use an NFS export root which will keep users limited to that mount point only.  The following example illustrates this concept.
+</p>
+<p>Any NFS shares defined in <code>/etc/exports</code> are relative to the NFS root.  In this example, the NFS root will be <code>/srv/nfs4</code> and we are sharing <code>/mnt/music</code>.
+</p>
+<pre># mkdir -p /srv/nfs4/music /mnt/music
+</pre>
+<p>Read/Write permissions must be set on the music directory so clients may write to it. 
+</p>
+<p>Now mount the actual target share, <code>/mnt/music</code> to the directory under the NFS root via the mount --bind command:
+</p>
+<pre># mount --bind /mnt/music /srv/nfs4/music
+</pre>
+<p>To make it stick across server reboots, add the bind mount to <code>fstab</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/mnt/music /srv/nfs4/music  none   bind   0   0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><a href="../en/ZFS.html" title="ZFS">ZFS</a> filesystems require special handling of bindmounts, see <a href="../en/ZFS.html#Bindmount" title="ZFS">ZFS#Bindmount</a>.</div>
+<p>Add directories to be shared and an ip address or hostname(s) of client machines that will be allowed to mount them in <code>exports</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/exports</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+/srv/nfs4/ 192.168.1.0/24(rw,fsid=root,no_subtree_check)
+/srv/nfs4/music 192.168.1.0/24(rw,no_subtree_check,nohide) # note the nohide option which is applied to mounted directories on the file system.
+</pre>
+<p>Users need-not open the share to the entire subnet; one can specify a single IP address or hostname as well.
+</p>
+<p>For more information about all available options see <code>man 5 exports</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Modifying <code>/etc/exports</code> while the server is running will require a re-export for changes to take effect as noted by the upstream comments in <code>/etc/exports</code>:
+<pre># exportfs -rav
+</pre>
+</div>
+<h4><span class="mw-headline" id="Starting_the_server">Starting the server</span></h4>
+<a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>nfs-server.service</code>. The <code>rpcbind.service</code> is also needed for older V2 and V3 exports. To run a V4-only setup, be sure to explicitly disable V2 and V3 using <a rel="nofollow" class="external autonumber" href="https://bbs.archlinux.org/viewtopic.php?id=193629">[1]</a>: <pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysconfig/nfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">RPCNFSDARGS="-N 2 -N 3"</pre>
+<p>otherwise the <code>rpcbind.service</code> is required.
+</p>
+<h4><span class="mw-headline" id="Miscellaneous">Miscellaneous</span></h4>
+<h5><span class="mw-headline" id="Optional_configuration">Optional configuration</span></h5>
+<p><code>/etc/sysconfig/nfs</code> holds optional configurations for options to pass to rpc.nfsd, rpc.mountd, or rpc.svcgssd.  Users setting up a simple configuration may not need to edit this file.
+</p>
+<h5><span class="mw-headline" id="Static_ports_for_NFSv3">Static ports for NFSv3</span></h5>
+<p>Users needing support for NFSv3 clients, may wish to consider using static ports. By default, for NFSv3 operation <code>rpc.statd</code> and <code>lockd</code> use random ephemeral ports; in order to allow NFSv3 operations through a firewall static ports need to be defined. Edit <code>/etc/sysconfig/nfs</code> to set <code>STATDARGS</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysconfig/nfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">STATDARGS="-p 32765 -o 32766 -T 32803"</pre>
+<p>The <code>rpc.mountd</code> should consult <code>/etc/services</code> and bind to the same static port 20048 under normal operation; however, if it needs to be explicity defined edit <code>/etc/sysconfig/nfs</code> to set <code>RPCMOUNTDARGS</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/sysconfig/nfs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">RPCMOUNTDARGS="-p 20048"</pre>
+<p>After making these changes, several services need to be restarted; the first writes the configuration options out to <code>/run/sysconfig/nfs-utils</code> (see <code>/usr/lib/systemd/scripts/nfs-utils_env.sh</code>), the second restarts <code>rpc.statd</code> with the new ports, the last reloads <code>lockd</code> (kernel module) with the new ports. <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> these services now: <code>nfs-config</code>, <code>rpcbind</code>, <code>rpc-statd</code>, and <code>nfs-server</code>.
+</p>
+<p>After the restarts, use <code>rpcinfo -p</code> on the server to examine the static ports are as expected. Using <code>rpcinfo -p &lt;server IP&gt;</code> from the client should reveal the exact same static ports.
+</p>
+<h5><span class="mw-headline" id="NFSv2_compatibility">NFSv2 compatibility</span></h5>
+<p>Users needing to support clients using NFSv2 (for example U-Boot), should set RPCNFSDARGS="-V 2" in /etc/sysconfig/nfs.
+</p>
+<h5><span class="mw-headline" id="Firewall_configuration">Firewall configuration</span></h5>
+<p>To enable access through a firewall, tcp and udp ports 111, 2049, and 20048 need to be opened when using the default configuration; use <code>rpcinfo -p</code> to examine the exact ports in use on the server. To configure this for <a href="../en/Iptables.html" title="Iptables">iptables</a>, execute this commands:
+</p>
+<pre># iptables -A INPUT -p tcp -m tcp --dport 111 -j ACCEPT
+# iptables -A INPUT -p tcp -m tcp --dport 2049 -j ACCEPT
+# iptables -A INPUT -p tcp -m tcp --dport 20048 -j ACCEPT
+# iptables -A INPUT -p udp -m udp --dport 111 -j ACCEPT
+# iptables -A INPUT -p udp -m udp --dport 2049 -j ACCEPT
+# iptables -A INPUT -p udp -m udp --dport 20048 -j ACCEPT
+</pre>
+<p>To have this configuration load on every system start, edit <code>/etc/iptables/iptables.rules</code> to include the following lines:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/iptables/iptables.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+-A INPUT -p tcp -m tcp --dport 111 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 2049 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 20048 -j ACCEPT
+-A INPUT -p udp -m udp --dport 111 -j ACCEPT
+-A INPUT -p udp -m udp --dport 2049 -j ACCEPT
+-A INPUT -p udp -m udp --dport 20048 -j ACCEPT
+</pre>
+<p>The previous commands can be saved by executing:
+</p>
+<pre># iptables-save &gt; /etc/iptables/iptables.rules
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This command will <b>override</b> the current iptables start configuration with the current iptables configuration!</div>
+<p>If using NFSv3 and the above listed static ports for <code>rpc.statd</code> and <code>lockd</code> these also need to be added to the configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/iptables/iptables.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+-A INPUT -p tcp -m tcp --dport 32765 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 32803 -j ACCEPT
+-A INPUT -p udp -m udp --dport 32765 -j ACCEPT
+-A INPUT -p udp -m udp --dport 32803 -j ACCEPT
+</pre>
+<p>If using V4-only setup, only tcp port 2049 need to be opened. Therefore only one line needed.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/iptables/iptables.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+-A INPUT -p tcp -m tcp --dport 2049 -j ACCEPT
+</pre>
+<p>To apply changes, <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> <code>iptables.service</code>.
+</p>
+<h3><span class="mw-headline" id="Client">Client</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>rpcbind.service</code>,<code>nfs-client.target</code> and <code>remote-fs.target</code> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> them to start at boot.
+</p>
+<p>Users intending to use NFS4 with Kerberos, also need to <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>rpc-gssd.service</code>. Setting up <code>/etc/krb5.keytab /etc/krb5.conf</code> are beyond the scope of this article.
+</p>
+<h4><span class="mw-headline" id="Error_from_systemd">Error from systemd</span></h4>
+<p>Users experiencing the following may consider turning off the service using system's masking feature: "Dependency failed for pNFS block layout mapping daemon."
+</p>
+<p>Example:
+</p>
+<pre># systemctl mask nfs-blkmap.service
+</pre>
+<h4><span class="mw-headline" id="Manual_mounting">Manual mounting</span></h4>
+<p>For NFSv3 use this command to show the server's exported file systems:
+</p>
+<pre>$ showmount -e servername
+</pre>
+<p>For NFSv4 mount the root NFS directory and look around for available mounts:
+</p>
+<pre>$ mount server:/ /mountpoint/on/client
+</pre>
+<p>Then mount omitting the server's NFS export root: 
+</p>
+<pre># mount -t nfs -o vers=4 servername:/music /mountpoint/on/client
+</pre>
+<p>If mount fails try including the server's export root (required for Debian/RHEL/SLES, some distributions need <code>-t nfs4</code> instead of <code>-t nfs</code>):
+</p>
+<pre># mount -t nfs -o vers=4 servername:/full/path/to/music /mountpoint/on/client
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Server name needs to be a valid hostname (not just IP address). Otherwise mounting of remote share will hang.</div>
+<h4><span class="mw-headline" id="Mount_using_.2Fetc.2Ffstab">Mount using /etc/fstab</span></h4>
+<p>Using <a href="../en/Fstab.html" title="Fstab">fstab</a> is useful for a server which is always on, and the NFS shares are available whenever the client boots up. Edit <code>/etc/fstab</code> file, and add an appropriate line reflecting the setup. Again, the server's NFS export root is omitted.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+servername:/music   /mountpoint/on/client   nfs   rsize=8192,wsize=8192,timeo=14,_netdev	0 0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Consult the <i>NFS</i> and <i>mount</i> man pages for more mount options.</div>
+<p>Some additional mount options to consider are include:
+</p>
+<dl>
+<dt> rsize and wsize</dt>
+<dd> The <code>rsize</code> value is the number of bytes used when reading from the server. The <code>wsize</code> value is the number of bytes used when writing to the server. The default for both is 1024, but using higher values such as 8192 can improve throughput.  This is not universal.  It is recommended to test after making this change, see <a href="#Performance_tuning">#Performance tuning</a>.</dd>
+</dl>
+<dl>
+<dt> timeo</dt>
+<dd> The <code>timeo</code> value is the amount of time, in tenths of a second, to wait before resending a transmission after an RPC timeout. After the first timeout, the timeout value is doubled for each retry for a maximum of 60 seconds or until a major timeout occurs. If connecting to a slow server or over a busy network, better performance can be achieved by increasing this timeout value. </dd>
+</dl>
+<dl>
+<dt> _netdev</dt>
+<dd> The <code>_netdev</code> option tells the system to wait until the network is up before trying to mount the share. systemd assumes this for NFS, but anyway it is good practice to use it for all types of networked file systems</dd>
+</dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Setting the sixth field (fs_passno) to a nonzero value may lead to unexpected behaviour, e.g. hangs when the systemd automount waits for a check which will never happen.</div>
+<h4><span class="mw-headline" id="Mount_using_.2Fetc.2Ffstab_with_systemd">Mount using /etc/fstab with systemd</span></h4>
+<p>Another method is using the systemd <code>automount</code> service. This is a better option than <code>_netdev</code>, because it remounts the network device quickly when the connection is broken and restored. As well, it solves the problem from autofs, see the example below:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">servername:/home   <i>/mountpoint/on/client</i>  nfs  noauto,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=1min 0 0</pre>
+<p>One might have to reboot the client to make systemd aware of the changes to fstab. Alternatively, try <a href="../en/Systemd.html#Using_units" title="Systemd">reloading</a> systemd and restarting <code><i>mountpoint-on-client</i>.automount</code> to reload the <code>/etc/fstab</code> configuration.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> The <code>noauto</code> mount option will not mount the NFS share until it is accessed: use <code>auto</code> for it to be available immediately. <br> If experiencing any issues with the mount failing due to the network not being up/available, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>NetworkManager-wait-online.service</code>. It will ensure that <code>network.target</code> has all the links available prior to being active.</li>
+<li> The <code>users</code> mount option would allow user mounts, but be aware it implies further options as <code>noexec</code> for example.</li>
+<li> The <code>x-systemd.idle-timeout=1min</code> option will unmount the NFS share automatically after 1 minute of non-use. Good for laptops which might suddenly disconnect from the network.</li>
+<li> If shutdown/reboot holds too long because of NFS,  <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>NetworkManager-wait-online.service</code> to ensure that NetworkManager is not exited before the NFS volumes are unmounted. You may also try to add the <code>x-systemd.requires=network.target</code> mount option if shutdown takes too long. </li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Users trying to automount a NFS-share via systemd which is mounted the same way on the server may experience a freeze when handling larger amounts of data.</div>
+<h4><span class="mw-headline" id="Mount_using_autofs">Mount using autofs</span></h4>
+<p>Using <a href="../en/Autofs.html" title="Autofs">autofs</a> is useful when multiple machines want to connect via NFS; they could both be clients as well as servers. The reason this method is preferable over the earlier one is that if the server is switched off, the client will not throw errors about being unable to find NFS shares. See <a href="../en/Autofs.html#NFS_network_mounts" title="Autofs">autofs#NFS network mounts</a> for details.
+</p>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<h3><span class="mw-headline" id="Performance_tuning">Performance tuning</span></h3>
+<p>In order to get the most out of NFS, it is necessary to tune the <code>rsize</code> and <code>wsize</code> mount options to meet the requirements of the network configuration.
+</p>
+<h3><span class="mw-headline" id="Automounting_shares_with_systemd-networkd">Automounting shares with systemd-networkd</span></h3>
+<p>Users making use of systemd-networkd might notice nfs mounts the fstab are not mounted when booting; errors like the following are common:
+</p>
+<pre>mount[311]: mount.nfs4: Network is unreachable
+</pre>
+<p>The solution is simple; force systemd to wait for the network to be completely configured by <a href="../en/Systemd.html#Using_units" title="Enabling" class="mw-redirect">enabling</a> <code>systemd-networkd-wait-online.service</code>. In theory this slows down the boot-process because less services run in parallel.
+</p>
+<h3><span class="mw-headline" id="Automatic_mount_handling">Automatic mount handling</span></h3>
+<p>This trick is useful for laptops that require nfs shares from a local wireless network. If the nfs host becomes unreachable, the nfs share will be unmounted to hopefully prevent system hangs when using the hard mount option. See <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1260240#p1260240">https://bbs.archlinux.org/viewtopic.php?pid=1260240#p1260240</a>
+</p>
+<p>Make sure that the NFS mount points are correctly indicated in <code>/etc/fstab</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /etc/fstab</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+lithium:/mnt/data           /mnt/data	        nfs noauto,noatime,rsize=32768,wsize=32768 0 0
+lithium:/var/cache/pacman   /var/cache/pacman	nfs noauto,noatime,rsize=32768,wsize=32768 0 0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You must use hostnames in <code>/etc/fstab</code> for this to work, not IP addresses.</div>
+<p>The <code>noauto</code> mount option tells systemd not to automatically mount the shares at boot. systemd would otherwise attempt to mount the nfs shares that may or may not exist on the network causing the boot process to appear to stall on a blank screen.
+</p>
+<p>In order to mount NFS shares with non-root users the <code>user</code> option has to be added. 
+</p>
+<p>Create the <code>auto_share</code> script that will be used by <i>cron</i> or <i>systemd/Timers</i> to use ICMP ping to check if the NFS host is reachable:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/auto_share</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+
+function net_umount {
+  umount -l -f $1 &amp;&gt;/dev/null
+}
+
+function net_mount {
+  mountpoint -q $1 || mount $1
+}
+
+NET_MOUNTS=$(sed -e '/^.*#/d' -e '/^.*:/!d' -e 's/\t/ /g' /etc/fstab | tr -s " ")$'\n'b
+
+printf %s "$NET_MOUNTS" | while IFS= read -r line
+do
+  SERVER=$(echo $line | cut -f1 -d":")
+  MOUNT_POINT=$(echo $line | cut -f2 -d" ")
+
+  # Check if server already tested
+  if [[ "${server_ok[@]}" =~ "${SERVER}" ]]; then
+    # The server is up, make sure the share are mounted
+    net_mount $MOUNT_POINT
+  elif [[ "${server_notok[@]}" =~ "${SERVER}" ]]; then
+    # The server could not be reached, unmount the share
+    net_umount $MOUNT_POINT
+  else
+    # Check if the server is reachable
+    ping -c 1 "${SERVER}" &amp;&gt;/dev/null
+
+    if [ $? -ne 0 ]; then
+      server_notok[${#Unix[@]}]=$SERVER
+      # The server could not be reached, unmount the share
+      net_umount $MOUNT_POINT
+    else
+      server_ok[${#Unix[@]}]=$SERVER
+      # The server is up, make sure the share are mounted
+      net_mount $MOUNT_POINT
+    fi
+  fi
+done
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you want to test using a TCP probe instead of ICMP ping (default is tcp port 2049 in NFS4) then replace the line:
+<pre> # Check if the server is reachable
+ ping -c 1 "${SERVER}" &amp;&gt;/dev/null
+</pre>
+<p>with:
+</p>
+<pre> # Check if the server is reachable
+ timeout 1 bash -c ": &lt; /dev/tcp/${SERVER}/2049"
+</pre>
+in the <code>auto_share</code> script above.</div>
+<pre># chmod +x /usr/local/bin/auto_share
+</pre>
+<p>Create a cron entry or a systemd/Timers timer to check every minute if the server of the shares are reachable.
+</p>
+<h4><span class="mw-headline" id="Cron">Cron</span></h4>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># crontab -e</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+* * * * * /usr/local/bin/auto_share
+</pre>
+<h4><span class="mw-headline" id="systemd.2FTimers">systemd/Timers</span></h4>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># /etc/systemd/system/auto_share.timer</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Check the network mounts
+
+[Timer]
+OnCalendar=*-*-* *:*:00
+
+[Install]
+WantedBy=timer.target
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># /etc/systemd/system/auto_share.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Check the network mounts
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/auto_share
+</pre>
+<pre># systemctl enable auto_share.timer
+</pre>
+<h4><span class="mw-headline" id="Mount_at_startup_via_systemd">Mount at startup via systemd</span></h4>
+<p>A systemd unit file can also be used to mount the NFS shares at startup. The unit file is not necessary if NetworkManager is installed and configured on the client system. See <a href="#NetworkManager_dispatcher">#NetworkManager dispatcher</a>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/auto_share.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=NFS automount
+After=syslog.target network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/auto_share
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p>Now <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the <code>auto_share.service</code>.
+</p>
+<h4><span class="mw-headline" id="NetworkManager_dispatcher">NetworkManager dispatcher</span></h4>
+<p>In addition to the method described previously, <a href="../en/NetworkManager.html#Network_services_with_NetworkManager_dispatcher" title="NetworkManager">NetworkManager</a> can also be configured to run a script on network status change: <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">Enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the <code>NetworkManager-dispatcher.service</code>.
+</p>
+<p>The easiest method for mount shares on network status change is to just symlink to the <code>auto_share</code> script:
+</p>
+<pre># ln -s /usr/local/bin/auto_share /etc/NetworkManager/dispatcher.d/30-nfs.sh
+</pre>
+<p>However, in that particular case unmounting will happen only after the network connection has already been disabled, which is unclean and may result in effects like freezing of KDE Plasma applets. 
+</p>
+<p>The following script safely unmounts the NFS shares before the relevant network connection is disabled by listening for the <code>pre-down</code> and <code>vpn-pre-down</code> events:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This script ignores mounts with the noauto option.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/dispatcher.d/30-nfs.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+
+# Find the connection UUID with "nmcli con show" in terminal.
+# All NetworkManager connection types are supported: wireless, VPN, wired...
+WANTED_CON_UUID="CHANGE-ME-NOW-9c7eff15-010a-4b1c-a786-9b4efa218ba9"
+
+if [[ "$CONNECTION_UUID" == "$WANTED_CON_UUID" ]]; then
+    
+    # Script parameter $1: NetworkManager connection name, not used
+    # Script parameter $2: dispatched event
+    
+    case "$2" in
+        "up")
+            mount -a -t nfs4,nfs 
+            ;;
+        "pre-down");&amp;
+        "vpn-pre-down")
+            umount -l -a -t nfs4,nfs &gt;/dev/null
+            ;;
+    esac
+fi
+</pre>
+<p>Make the script executable with <a href="../en/File_permissions_and_attributes.html#Changing_permissions" title="Chmod" class="mw-redirect">chmod</a> and create a symlink inside <code>/etc/NetworkManager/dispatcher.d/pre-down</code> to catch the <code>pre-down</code> events:
+</p>
+<pre># ln -s /etc/NetworkManager/dispatcher.d/30-nfs.sh /etc/NetworkManager/dispatcher.d/pre-down.d/30-nfs.sh
+</pre>
+<p>The above script can be modified to mount different shares (even other than NFS) for different connections.
+</p>
+<p>See also: <a href="../en/NetworkManager.html#Use_dispatcher_to_handle_mounting_of_CIFS_shares" title="NetworkManager">NetworkManager#Use dispatcher to handle mounting of CIFS shares</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>There is a dedicated article <a href="../en/NFS/Troubleshooting.html" title="NFS Troubleshooting" class="mw-redirect">NFS Troubleshooting</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> See also <a href="../en/Avahi.html" title="Avahi">Avahi</a>, a Zeroconf implementation which allows automatic discovery of NFS shares.</li>
+<li> HOWTO: <a href="../en/Diskless_system.html" title="Diskless network boot NFS root" class="mw-redirect">Diskless network boot NFS root</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.aix.prftungd/doc/prftungd/nfs_perf.htm">NFS Performance Management</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://blogs.msdn.com/sfu/archive/2008/04/14/all-well-almost-about-client-for-nfs-configuration-and-performance.aspx">Microsoft Services for Unix NFS Client info</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://blogs.oracle.com/jag/entry/nfs_on_snow_leopard">NFS on Snow Leopard</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li>
+<li><a href="../en/Category:Network_sharing.html" title="Category:Network sharing">Network sharing</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

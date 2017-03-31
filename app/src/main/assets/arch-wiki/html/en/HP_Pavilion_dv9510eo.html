@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>HP Pavilion dv9510eo - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-HP_Pavilion_dv9510eo skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">HP Pavilion dv9510eo</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Wireless"><span class="tocnumber">2</span> <span class="toctext">Wireless</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Sound"><span class="tocnumber">3</span> <span class="toctext">Sound</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Xorg"><span class="tocnumber">4</span> <span class="toctext">Xorg</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#USB_Auto_Mounting"><span class="tocnumber">5</span> <span class="toctext">USB Auto Mounting</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Other"><span class="tocnumber">6</span> <span class="toctext">Other</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Untested"><span class="tocnumber">7</span> <span class="toctext">Untested</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Unlike many distributions' install processes, you do not need to change any boot parameters in order to install arch on this laptop.
+</p>
+<h2><span class="mw-headline" id="Wireless">Wireless</span></h2>
+<p>In order to use <a href="../en/Wireless_network_configuration.html" title="Wireless" class="mw-redirect">wireless</a>, install the b43-firmware package from AUR, and add "b43" to your MODULES array in <a href="../en/SysVinit.html" title="Rc.conf" class="mw-redirect">rc.conf</a>
+Following the rest of the <a href="../en/Wireless_network_configuration.html" title="Wireless Setup" class="mw-redirect">wireless setup</a> guide to suit my needs worked for me.
+</p>
+<h2><span class="mw-headline" id="Sound">Sound</span></h2>
+<p>when installing <a href="../en/Advanced_Linux_Sound_Architecture.html" title="ALSA" class="mw-redirect">ALSA</a>, add the following lines /etc/modprobe.d/modprobe.conf
+</p>
+<pre>alias snd-card-0 snd_hda_intel
+alias sount-slot-0 snd_hda_intel
+</pre>
+<p>For a long time I had issues with the headphone jack on this laptop: the speaker wouldn't mute out when I inserted a headphone.
+Thankfully , this seems to work flawlessly with this ALSA version.
+</p>
+<h2><span class="mw-headline" id="Xorg">Xorg</span></h2>
+<p>Install <a href="../en/Xorg.html" title="Xorg">Xorg</a> and the <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a> drivers. 
+I had some strange issues with some files being truncated, I do not know whether this was a problem with the server or with my network connection, but I a similiar installation on another laptop, so I just scp'd them over. 
+You may or may not have these issues.
+Also be sure to install the xf86-input-synaptics package.
+</p>
+<p>Run nvidia-xconfig once you have the nvidia drivers installed correctly. You might need to edit the screen section in your xorg.conf in order to get the correct screen resolution. <b>Note</b> mvidia-auto-select didn't recognize the full resolution for me, so I had to manually add 1440x1050, which is the maxx resolution.
+</p>
+<p><br>
+</p>
+<pre>Section "Screen"
+    Identifier     "Screen0"
+    Device         "Device0"
+    Monitor        "Monitor0"
+    DefaultDepth    24
+    SubSection     "Display"
+        Modes       "1440x1050" "nvidia-auto-select"
+        Depth       24
+    EndSubSection
+EndSection
+</pre>
+<p><br>
+See the <a href="../en/HP_Pavilion_dv9500.html" title="HP Pavilion dv9500">HP Pavilion dv9500</a> wiki page to get the hotkeys and <a href="../en/Touchpad_Synaptics.html" title="Synaptics" class="mw-redirect">synaptics</a> touchpad working in x.
+</p>
+<h2><span class="mw-headline" id="USB_Auto_Mounting">USB Auto Mounting</span></h2>
+<p>I think I read somewhere that this is a problem with the new hal, that a lot of people are having problems auto mounting their USB devices in X since upgrading. A useful alternative which I used is to use <a href="../en/Udev.html" title="Udev">Udev</a> to auto-mount your USB devices. See the section on auto mounting USB storage devices on the Udev wiki page or copy the following configured code.
+</p>
+<pre>#/etc/udev/rules.d/10-usb.rules
+KERNEL=="sd[b-z]", NAME="%k", SYMLINK+="usbhd-%k", GROUP="users", OPTIONS="last_rule"
+ACTION=="add", KERNEL=="sd[b-z][0-9]", SYMLINK+="usbhd-%k", GROUP="users", NAME="%k"
+ACTION=="add", KERNEL=="sd[b-z][0-9]", RUN+="/bin/mkdir -p /media/usbhd-%k"
+ACTION=="add", KERNEL=="sd[b-z][0-9]", RUN+="/bin/ln -s /media/usbhd-%k /mnt/usbhd-%k"
+ACTION=="add", KERNEL=="sd[b-z][0-9]", PROGRAM=="/lib/udev/vol_id -t %N", RESULT=="vfat", RUN+="/bin/mount -t vfat -o   rw,noauto,flush,quiet,nodev,nosuid,noexec,noatime,dmask=000,fmask=111 /dev/%k /media/usbhd-%k", OPTIONS="last_rule"
+ACTION=="add", KERNEL=="sd[b-z][0-9]", RUN+="/bin/mount -t auto -o rw,noauto,sync,dirsync,noexec,nodev,noatime /dev/%k /media/usbhd-%k", OPTIONS="last_rule"
+ACTION=="remove", KERNEL=="sd[b-z][0-9]", RUN+="/bin/rm -f /mnt/usbhd-%k"
+ACTION=="remove", KERNEL=="sd[b-z][0-9]", RUN+="/bin/umount -l /media/usbhd-%k"
+ACTION=="remove", KERNEL=="sd[b-z][0-9]", RUN+="/bin/rmdir /media/usbhd-%k", OPTIONS="last_rule"
+</pre>
+<p>You can do the same for the SD card reader:
+</p>
+<pre>#/etc/udev/rules.d/11-sd.rules
+KERNEL=="mmcblk[0-9]", NAME="%k", SYMLINK+="sd-%k", GROUP="users", OPTIONS="last_rule"
+ACTION=="add", KERNEL=="mmcblk[0-9]p[0-9]", SYMLINK+="sd-%k", GROUP="users", NAME="%k"
+ACTION=="add", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/mkdir -p /media/sd-%k"
+ACTION=="add", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/ln -s /media/sd-%k /mnt/sd-%k"
+ACTION=="add", KERNEL=="mmcblk[0-9]p[0-9]", PROGRAM=="/lib/udev/vol_id -t %N", RESULT=="vfat", RUN+="/bin/mount -t vfat -o rw,noauto,flush,quiet,nodev,nosuid,noexec,noatime,dmask=000,fmask=111 /dev/%k /media/sd-%k", OPTIONS="last_rule"
+ACTION=="add", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/mount -t auto -o rw,noauto,sync,dirsync,noexec,nodev,noatime /dev/%k /media/sd-%k", OPTIONS="last_rule"
+ACTION=="remove", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/rm -f /mnt/sd-%k"
+ACTION=="remove", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/umount -l /media/sd-%k"
+ACTION=="remove", KERNEL=="mmcblk[0-9]p[0-9]", RUN+="/bin/rmdir /media/sd-%k", OPTIONS="last_rule"
+</pre>
+<h2><span class="mw-headline" id="Other">Other</span></h2>
+<p>The SD card reader works, but in X the device might not be auto-mounted.
+</p>
+<p>Additionally, the IR remote seems to work out of the box also!
+</p>
+<h2><span class="mw-headline" id="Untested">Untested</span></h2>
+<p>Bluetooth,
+HDMI,
+Modem,
+Fingerprint reader
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:HP.html" title="Category:HP">HP</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

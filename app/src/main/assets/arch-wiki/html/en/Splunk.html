@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Splunk - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Splunk skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Splunk</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Splunk is a proprietary data mining product. <a href="https://en.wikipedia.org/wiki/Splunk" class="extiw" title="wikipedia:Splunk">From Wikipedia</a>:
+</p>
+<dl>
+<dd>Splunk is software to search, monitor and analyze machine-generated data by applications, systems and IT infrastructure at scale via a web-style interface. Splunk captures, indexes and correlates real-time data in a searchable repository from which it can generate graphs, reports, alerts, dashboards and visualizations.</dd>
+<dd>Splunk aims to make machine data accessible across an organization and identifies data patterns, provides metrics, diagnoses problems and provides intelligence for business operation. Splunk is a horizontal technology used for application management, security and compliance, as well as business and web analytics.</dd>
+</dl>
+<p>Splunk is licensed based on MB of data indexed per day. The free license allows up to 500 MB of data per day, but it is missing a few features such as access control, alerts / monitoring and PDF generation
+</p>
+<p>Splunk provides a fairly high-level search interface to data. Raw data is parsed by sets of regular expressions (many of them built-in) to extract fields; these fields then allow a query language that has fairly unique semantics but will be recognisable to user familiar with SQL or other structured data querying languages.
+</p>
+<p>Splunk's online documentation is open to the public and reasonably comprehensive. Much of it is in Unix-like man pages, particularly for the search and configuration reference files. This article will focus on lesser known features or failures of Splunk, and how to run it healthily in Arch Linux.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Manual"><span class="tocnumber">1.1</span> <span class="toctext">Manual</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Running_Splunk"><span class="tocnumber">2</span> <span class="toctext">Running Splunk</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Performance"><span class="tocnumber">3</span> <span class="toctext">Performance</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Search_Semantics"><span class="tocnumber">3.1</span> <span class="toctext">Search Semantics</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Distributed_Environment"><span class="tocnumber">3.2</span> <span class="toctext">Distributed Environment</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Indexing"><span class="tocnumber">3.3</span> <span class="toctext">Indexing</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Debugging_and_Administration"><span class="tocnumber">4</span> <span class="toctext">Debugging and Administration</span></a></li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Custom_Commands"><span class="tocnumber">5</span> <span class="toctext">Custom Commands</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10"><a href="#Configuration"><span class="tocnumber">5.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Library_API"><span class="tocnumber">5.2</span> <span class="toctext">Library API</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>There is now a <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/splunk/">splunk</a></span><sup><small>AUR</small></sup> package in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> which will create the <code>splunk</code> user and group, install Splunk, and install a systemd unit file.
+</p>
+<p>There is also a <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/splunkforwarder/">splunkforwarder</a></span><sup><small>AUR</small></sup> package which will install the Splunk Universal Forwarder.
+</p>
+<h3><span class="mw-headline" id="Manual">Manual</span></h3>
+<p>Log into <a rel="nofollow" class="external text" href="http://www.splunk.com">splunk.com</a> to get the download link for Splunk or the Splunk Universal Forwarder and wget it:
+</p>
+<pre>$ wget -O splunk.tgz &lt;url goes here&gt;
+</pre>
+<p>Extract the tarball:
+</p>
+<pre>$ tar -xvf splunk.tgz
+</pre>
+<p>For a simple deployment, it is conventional to move the extracted directory to <code>/opt/</code>.
+</p>
+<p>Splunk's installation directory is commonly referred to as $SPLUNKHOME. You may set it in <code>.bashrc</code> and add it to your path:
+</p>
+<pre>export SPLUNK_HOME =/opt/splunk
+export PATH=$SPLUNK_HOME/bin:$PATH
+</pre>
+<p>It has a reasonably robust CLI interface, and all the configuration is stored in <code>.ini</code> style configuration files.
+</p>
+<h2><span class="mw-headline" id="Running_Splunk">Running Splunk</span></h2>
+<p>Splunk has two main components: the <code>splunkd</code> daemon and the <code>splunkweb</code> service, a <code>cherrypy</code> web application.
+</p>
+<p>If using the AUR package, you can run both by <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">starting</a> the systemd <code>splunk</code> service.
+</p>
+<p>Alternatively run with the Splunk binary:
+</p>
+<pre># splunk start
+</pre>
+<h2><span class="mw-headline" id="Performance">Performance</span></h2>
+<p>The conventional wisdom in the Splunk community is that Splunk's performance is heavily IO-bound, but this may be an assumption based on traditional use cases for Splunk. There are certain powerful operations with a single-threaded implementation that spend most of their time occupying a single core while barely hitting the disk.
+</p>
+<p>It is easy to see what Splunk is doing if you monitor these:
+</p>
+<pre>$ iostat -d -x 5
+$ top
+</pre>
+<p>A sign that you have a bottleneck caused by Splunk's implementation details - rather than your own hardware - is a pattern where you mostly see a single core at 100% with little-to-no disk usage, with sporadic spikes of activity by splunkd on an extra core as it hits the disk for more events.
+</p>
+<p>If you are having trouble getting Splunk to utilise your hardware, consider the following factors:
+</p>
+<h3><span class="mw-headline" id="Search_Semantics">Search Semantics</span></h3>
+<p>Much of Splunk's search functionality is powered a <a href="https://en.wikipedia.org/wiki/Mapreduce" class="extiw" title="wikipedia:Mapreduce">MapReduce</a> implementation. It is powerful and very useful in a distributed environment, but the high-level search language abstractions can mask a number of mistakes that essentially force a <code>reduce</code> operation early in the pipeline, which removes Splunk's ability to parallelise its operations, whether in a distributed environment or on a single instance.
+</p>
+<p>A simple rule of thumb is that any operation which (in a naive implementation) would need to see every 'event' to do its work will not be parallelised. This applies particularly to the <a rel="nofollow" class="external text" href="http://docs.splunk.com/Documentation/Splunk/latest/SearchReference/transaction">transaction</a> command, which is one of Splunk's most useful features.
+</p>
+<h3><span class="mw-headline" id="Distributed_Environment">Distributed Environment</span></h3>
+<p>Splunk is designed to be run in a distributed environment; the assumption is generally that each instance is on a separate machine, but on a machine with four or more logical cores and a fast disk (such as a solid-state drive), it is possible to improve performance significantly by setting up several Splunk instances.
+</p>
+<p>If you run multiple Splunk instances on a single machine, there are a couple of settings you need to pay attention to:
+</p>
+<ul>
+<li> serverName - in the [general] stanza of <code>server.conf</code>
+</li>
+<li> mgmthostport and httpport for splunkd and splunkweb respectively - in the [settings] stanza of <code>web.conf</code>
+</li>
+</ul>
+<p>You may set up a third instance as a 'search head' which dispatches searches to the indexers ('search peers'), or you can set both indexers to be aware of the other.
+</p>
+<p>If you are using a dedicated search head, you may as well disable the web interface on the indexers:
+</p>
+<pre> # splunk disable webserver
+ # splunk restart
+</pre>
+<h3><span class="mw-headline" id="Indexing">Indexing</span></h3>
+<p>Multiple indexers means splitting the data between them. Either set up their <code>inputs.conf</code> to monitor different subsets of your source data, or set up a separate 'forwarder' instance that uses the auto load-balancing features to round-robin between them.
+</p>
+<p>Do not try to make two indexers read from the same index via a static path in <code>indexes.conf</code> or a symlink - this will push responsibility for deduplicating results onto the search head and mitigate the advantage of distributing the work in the first place.
+</p>
+<h2><span class="mw-headline" id="Debugging_and_Administration">Debugging and Administration</span></h2>
+<p>Splunk's <a rel="nofollow" class="external text" href="http://docs.splunk.com/Documentation/Splunk/latest/Admin/Aboutthecli">CLI</a> is under-utilised.
+</p>
+<p>It is very useful for debugging your config files:
+</p>
+<pre># splunk btool props list
+</pre>
+<p>Or for adding one-off files for testing, rather than having to configure <code>inputs.conf</code> to monitor a directory:
+</p>
+<pre># splunk add oneshot &lt;file&gt; -sourcetype mysourcetype -host myhost -index myindex
+</pre>
+<p>Take care to use a special test index when testing - it is generally not possible to remove data from an indexing once it has been added without wiping it entirely.
+</p>
+<h2><span class="mw-headline" id="Custom_Commands">Custom Commands</span></h2>
+<p>Per <a rel="nofollow" class="external text" href="http://docs.splunk.com/Documentation/Splunk/latest/Developer/SearchScripts">this</a>, Splunk allows the user to call out to arbitary Python or Perl scripts during the search pipeline. This is useful for overcoming the limitations of Splunk's framework, looking up external data sources, and so on. It is also a shortcut to building macros that will automatically push data to other locations or perform arbitrary jobs outside of what Splunk is capable of.
+</p>
+<p>The Splunk documentation, as well as the interface, is sprinkled with warnings that using custom commands will seriously affect search performance. In reality, as long as the search command is not doing something stupid, a custom command generally has a very low footprint, and is executed in a separate process that can use CPU and memory resources while Splunk is mostly bound to a single core. Splunk will repeatedly spawn custom commands with chunks of the data (unless <code>streaming = false</code>, in which case the command gets the entire data set) and do its own work while waiting for the external script to output its results and exit.
+</p>
+<p>Splunk comes with a pre-packaged Python 2.7.2 binary, and will not execute commands with the system Python installation. This can make it difficult to use packages installed via <code>pip</code> or <code>easy_install</code>, or your own libraries.
+</p>
+<p>There is nothing to stop you from using calls like <code>fork</code> and/or <code>execv</code> to get around this limitation and load the system Python installation. Alternatively, use it to process the data in a faster environment, whether with a compiled program or just a faster Python interpreter such as pypy.
+</p>
+<h3><span class="mw-headline" id="Configuration">Configuration</span></h3>
+<p>The guide to <a rel="nofollow" class="external text" href="http://docs.splunk.com/Documentation/Splunk/latest/Admin/commandsconf">commands.conf</a> is somewhat misleading. In particular:
+</p>
+<pre>streaming = [true|false]
+ * Specify whether the command is streamable.
+ * Defaults to false.
+</pre>
+<p>The 'streaming' here actually just tells Splunk whether it is safe for it to repeatedly spawn your command with arbitrarily-sized (often in the realm of 50K rows) discrete chunks of the data it is passing through; it will not tell the default <code>splunk.Intersplunk</code> library to actually provide a streaming interface to the data as you work with it.
+</p>
+<h3><span class="mw-headline" id="Library_API">Library API</span></h3>
+<p>There is no real documentation for the Splunk library available to the built-in interpreter. Try inspecting the module directly:
+</p>
+<pre>$SPLUNK_HOME/bin/splunk cmd python
+#(in python interpreter)
+import splunk.Intersplunk
+help(splunk.Intersplunk)
+</pre>
+<p>The source for splunk.Intersplunk shows that it essentially parses the entire set of input from the process' stdin before offering the data to the command as such. Unless the command needs to have the entire data set to do its work - generally only a small subset of use cases - this is extremely inefficient.
+</p>
+<p>The library is easy to replace. The data passed in from Splunk contains several header lines with <code>key</code>:<code>value</code> pairs, followed by a newline, followed by a header row and the data proper. In Python, read in the header rows and store or discard them then use a <code>csv.Reader</code> or <code>csv.DictReader</code> object - to handle the data a row at a time, with a <code>csv.Writer</code> or <code>csv.DictWriter</code> to push resulting rows back into the Splunk search pipeline.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Applications.html" title="Category:Applications">Applications</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

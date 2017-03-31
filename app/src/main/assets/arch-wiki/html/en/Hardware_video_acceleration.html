@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Hardware video acceleration - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Hardware_video_acceleration skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Hardware video acceleration</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/XvMC.html" title="XvMC">XvMC</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> I only have an Intel card so I wasn't able to test this out on AMD/NVIDIA. Please correct me in those places. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hardware_video_acceleration">Talk:Hardware video acceleration#</a>)</div>
+</div>
+<p>Hardware video acceleration makes it possible for the video card to decode/encode video, thus offloading the CPU and saving power.
+</p>
+<p>There are several ways to achieve this on Linux:
+</p>
+<ul>
+<li> <b><a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/vaapi">Video Acceleration API</a></b> (VA-API) is a specification and open source library to provide both hardware accelerated video encoding and decoding, developed by Intel.</li>
+<li> <b><a rel="nofollow" class="external text" href="http://http.download.nvidia.com/XFree86/vdpau/doxygen/html/">Video Decode and Presentation API for Unix</a></b> (VDPAU) is an open source library and API to offload portions of the video decoding process and video post-processing to the GPU video-hardware, developed by NVIDIA.</li>
+<li> X-Video Motion Compensation (<a href="../en/XvMC.html" title="XvMC">XvMC</a>) is an extension for the X.Org Server, allowing video programs to offload portions of the video decoding process to the GPU video-hardware.</li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Support"><span class="tocnumber">1</span> <span class="toctext">Support</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Formats"><span class="tocnumber">1.1</span> <span class="toctext">Formats</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Software"><span class="tocnumber">1.2</span> <span class="toctext">Software</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Installing_VA-API"><span class="tocnumber">2.1</span> <span class="toctext">Installing VA-API</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Installing_VDPAU"><span class="tocnumber">2.2</span> <span class="toctext">Installing VDPAU</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Verification"><span class="tocnumber">3</span> <span class="toctext">Verification</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Verifying_VA-API"><span class="tocnumber">3.1</span> <span class="toctext">Verifying VA-API</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Verifying_VDPAU"><span class="tocnumber">3.2</span> <span class="toctext">Verifying VDPAU</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Configuration"><span class="tocnumber">4</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Configuring_VA-API"><span class="tocnumber">4.1</span> <span class="toctext">Configuring VA-API</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Configuring_VDPAU"><span class="tocnumber">4.2</span> <span class="toctext">Configuring VDPAU</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Failed_to_open_VDPAU_backend"><span class="tocnumber">5.1</span> <span class="toctext">Failed to open VDPAU backend</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#VA-API_vaInitialize_failed"><span class="tocnumber">5.2</span> <span class="toctext">VA-API vaInitialize failed</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Support">Support</span></h2>
+<h3><span class="mw-headline" id="Formats">Formats</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> I haven't found a usable list for <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-mesa-driver">libva-mesa-driver</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libvdpau-amdgpu-pro/">libvdpau-amdgpu-pro</a></span><sup><small>AUR</small></sup>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hardware_video_acceleration">Talk:Hardware video acceleration#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To choose the correct driver see <a href="#Installation">#Installation</a>.</div>
+<table class="wikitable" style="width: 100%">
+<caption> VA-API
+</caption>
+<tr>
+<th>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-mesa-driver">libva-mesa-driver</a></span>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libva-xvba-driver/">libva-xvba-driver</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/libva-xvba-driver">aur-mirror</a>]</sup>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span>
+</th>
+</tr>
+<tr>
+<th> MPEG2 decoding
+</th>
+<td> GMA 4500 and newer
+</td>
+<td> <center>?</center>
+</td>
+<td> Radeon HD 4000 and newer
+</td>
+<td rowspan="4"> <center>See VDPAU.</center>
+</td>
+</tr>
+<tr>
+<th> MPEG4 decoding
+</th>
+<td> <center>✗</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> Radeon HD 6000 and newer
+</td>
+</tr>
+<tr>
+<th> H.264 decoding
+</th>
+<td> GMA 4500<sup>1</sup>, Ironlake Graphics and newer
+</td>
+<td> <center>?</center>
+</td>
+<td> Radeon HD 4000 and newer
+</td>
+</tr>
+<tr>
+<th> VC1 decoding
+</th>
+<td> Sandy Bridge Graphics and newer
+</td>
+<td> <center>?</center>
+</td>
+<td> Radeon HD 4000 and newer
+</td>
+</tr>
+<tr>
+<th> MPEG2 encoding
+</th>
+<td> Ivy Bridge Graphics and newer
+</td>
+<td> <center>?</center>
+</td>
+<td> <center>✗</center>
+</td>
+<td> <center>✗</center>
+</td>
+</tr>
+<tr>
+<th> H.264 encoding
+</th>
+<td> Sandy Bridge Graphics and newer
+</td>
+<td> <center>?</center>
+</td>
+<td> <center>✗</center>
+</td>
+<td> <center>✗</center>
+</td>
+</tr>
+</table>
+<table class="wikitable" style="width: 100%">
+<caption> VDPAU
+</caption>
+<tr>
+<th>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa-vdpau">mesa-vdpau</a></span>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libvdpau-amdgpu-pro/">libvdpau-amdgpu-pro</a></span><sup><small>AUR</small></sup>
+</th>
+<th> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span>
+</th>
+</tr>
+<tr>
+<th> MPEG2 decoding
+</th>
+<td> Radeon 9500 and newer, GeForce 8 and newer
+</td>
+<td> <center>✗<sup>2</sup>
+</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> GeForce 8 and newer
+</td>
+</tr>
+<tr>
+<th> MPEG4 decoding
+</th>
+<td> Radeon HD 6000 and newer, GeForce 200 and newer
+</td>
+<td> <center>✗<sup>2</sup>
+</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> GeForce 200 and newer
+</td>
+</tr>
+<tr>
+<th> H.264 decoding
+</th>
+<td> Radeon HD 4000 and newer, GeForce 8 and newer
+</td>
+<td> <center>See VA-API.</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> GeForce 8 and newer
+</td>
+</tr>
+<tr>
+<th> VC1 decoding
+</th>
+<td> Radeon HD 4000 and newer, GeForce 8<sup>3</sup> and newer
+</td>
+<td> <center>✗<sup>2</sup>
+</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> GeForce 8<sup>3</sup> and newer
+</td>
+</tr>
+<tr>
+<th> HEVC (H.265) decoding
+</th>
+<td> <center>✗</center>
+</td>
+<td> <center>✗<sup>2</sup>
+</center>
+</td>
+<td> <center>?</center>
+</td>
+<td> GeForce 900<sup>4</sup> and newer
+</td>
+</tr>
+</table>
+<ul>
+<li> <sup>1</sup> Supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libva-intel-driver-g45-h264/">libva-intel-driver-g45-h264</a></span><sup><small>AUR</small></sup> instead.</li>
+<li> <sup>2</sup> As of version 0.3, the VA GL driver doesn't support any other hardware decoder than H.264.</li>
+<li> <sup>3</sup> <a href="https://en.wikipedia.org/wiki/Nvidia_PureVideo" class="extiw" title="wikipedia:Nvidia PureVideo">Except</a> GeForce 8800 Ultra, 8800 GTX, 8800 GTS (320/640 MB).</li>
+<li> <sup>4</sup> Except GeForce GTX 970 and GTX 980.</li>
+</ul>
+<p>The features supported by your GPU may vary. To see what your GPU supports see <a href="#Verification">#Verification</a>.
+</p>
+<p>Regarding the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libvdpau-amdgpu-pro/">libvdpau-amdgpu-pro</a></span><sup><small>AUR</small></sup> package, see also:
+<a rel="nofollow" class="external text" href="https://support.amd.com/en-us/kb-articles/Pages/AMDGPU-PRO-Beta-Driver-for-Vulkan-Release-Notes.aspx">AMD Radeon™ Software AMD GPU-PRO Beta Driver – Linux® for Vulkan™ Release Notes</a>.  Loosely, this VDPAU driver is for the Radeon R9 family.
+</p>
+<h3><span class="mw-headline" id="Software">Software</span></h3>
+<table class="wikitable" style="width: 100%">
+<tr>
+<th>
+</th>
+<th> VA-API
+</th>
+<th> VDPAU
+</th>
+</tr>
+<tr>
+<th> <a href="../en/GStreamer.html" title="GStreamer">GStreamer</a>
+</th>
+<td> ✓ (with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gstreamer-vaapi">gstreamer-vaapi</a></span>, see <a href="../en/GStreamer.html#Hardware_acceleration" title="GStreamer">GStreamer#Hardware acceleration</a>)
+</td>
+<td> ✓ (with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gst-plugins-bad">gst-plugins-bad</a></span>, see <a href="../en/GStreamer.html#Hardware_acceleration" title="GStreamer">GStreamer#Hardware acceleration</a>)
+</td>
+</tr>
+<tr>
+<th> <a href="../en/VLC_media_player.html" title="VLC media player">VLC media player</a>
+</th>
+<td> ✓ (see <a href="../en/VLC_media_player.html#Hardware_acceleration_support" title="VLC media player">VLC media player#Hardware acceleration support</a>)
+</td>
+<td> ✓ (see <a href="../en/VLC_media_player.html#Hardware_acceleration_support" title="VLC media player">VLC media player#Hardware acceleration support</a>)
+</td>
+</tr>
+<tr>
+<th> <a href="../en/Mpv.html" title="Mpv">mpv</a>
+</th>
+<td> ✓ (see <a href="../en/Mpv.html#Hardware_Decoding" title="Mpv">mpv#Hardware Decoding</a>)
+</td>
+<td> ✓ (see <a href="../en/Mpv.html#Hardware_Decoding" title="Mpv">mpv#Hardware Decoding</a>)
+</td>
+</tr>
+<tr>
+<th> <a href="../en/MPlayer.html" title="MPlayer">MPlayer</a>
+</th>
+<td> ✓ (with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mplayer-vaapi/">mplayer-vaapi</a></span><sup><small>AUR</small></sup>, see <a href="../en/MPlayer.html#Enabling_VA-API" title="MPlayer">MPlayer#Enabling VA-API</a>)
+</td>
+<td> ✓ (see <a href="../en/MPlayer.html#Enabling_VDPAU" title="MPlayer">MPlayer#Enabling VDPAU</a>)
+</td>
+</tr>
+<tr>
+<th> <a href="../en/Browser_plugins.html#Flash_Player" title="Flash" class="mw-redirect">Flash</a>
+</th>
+<td> ✓ (with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span>, see <a href="../en/Browser_plugins.html#Configuration" title="Flash" class="mw-redirect">Flash#Configuration</a>)
+</td>
+<td> ✓ (see <a href="../en/Browser_plugins.html#Configuration" title="Flash" class="mw-redirect">Flash#Configuration</a>)
+</td>
+</tr>
+<tr>
+<th> <a href="../en/Kodi.html" title="Kodi">Kodi</a>
+</th>
+<td> ✓
+</td>
+<td> ✓
+</td>
+</tr>
+<tr>
+<th> <a href="../en/Firefox.html" title="Firefox">Firefox</a>
+</th>
+<td colspan="2"> ✗ <a rel="nofollow" class="external autonumber" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1210726">[1]</a> <a rel="nofollow" class="external autonumber" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1210727">[2]</a> <a rel="nofollow" class="external autonumber" href="https://bugzilla.mozilla.org/show_bug.cgi?id=563206">[3]</a>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The <a href="../en/AMDGPU.html" title="AMDGPU">AMDGPU</a> driver is not mentioned. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hardware_video_acceleration">Talk:Hardware video acceleration#</a>)</div>
+</div>
+<p>The choice varies depending on your video card vendor:
+</p>
+<ul>
+<li> For Intel Graphics use VA-API.</li>
+<li> For NVIDIA cards use VDPAU.</li>
+<li> For AMD cards you can use both (with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa">mesa</a></span>).</li>
+</ul>
+<p>There are also two specific types of drivers for VA-API and VDPAU:
+</p>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span>, which uses VDPAU as a backend for VA-API.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span>, which uses VA-API as a backend for VDPAU.</li>
+</ul>
+<p>For pre-2007 cards see <a href="../en/XvMC.html" title="XvMC">XvMC</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>It is recommended to install and configure both VA-API and VDPAU to achieve support in different scenarios, e.g. <a href="../en/Browser_plugins.html#Flash_Player" title="Flash" class="mw-redirect">Flash</a> doesn't support VA-API but can use the VDPAU VA-API backend.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do not use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span> together as it will create an (infinite) loop between VA-API and VDPAU, which will result in something either really bad or really fun. But if you try it anyway please share your experiences.</div>
+<h3><span class="mw-headline" id="Installing_VA-API">Installing VA-API</span></h3>
+<p><b>Open source drivers:</b>
+</p>
+<ul>
+<li> <a href="../en/ATI.html" title="ATI">AMD</a> Radeon 9500 and newer GPUs are supported by either <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-mesa-driver">libva-mesa-driver</a></span> with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa">mesa</a></span> or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span> (see <a href="#Installing_VDPAU">#Installing VDPAU</a>).</li>
+<li> <a href="../en/Intel_graphics.html" title="Intel" class="mw-redirect">Intel</a> GMA 4500 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-intel-driver">libva-intel-driver</a></span> with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa">mesa</a></span>.
+<ul><li> To get better support on GMA 4500 consider using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libva-intel-driver-g45-h264/">libva-intel-driver-g45-h264</a></span><sup><small>AUR</small></sup> instead, see <a href="../en/Intel_graphics.html#H.264_decoding_on_GMA_4500" title="Intel" class="mw-redirect">Intel#H.264 decoding on GMA 4500</a> for instructions and caveats.</li></ul>
+</li>
+<li> <a href="../en/Nouveau.html" title="Nouveau">NVIDIA</a> GeForce 8 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span> (see <a href="#Installing_VDPAU">#Installing VDPAU</a>).</li>
+</ul>
+<p><b>Proprietary drivers:</b>
+</p>
+<ul>
+<li> <a href="../en/AMD_Catalyst.html" title="AMD Catalyst">AMD</a> Radeon HD 4000 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/libva-xvba-driver/">libva-xvba-driver</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/libva-xvba-driver">aur-mirror</a>]</sup>. It uses the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/catalyst-utils/">catalyst-utils</a></span><sup><small>AUR</small></sup> driver for Radeon HD 5000 series and newer, and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/catalyst-total-hd234k/">catalyst-total-hd234k</a></span><sup><small>AUR</small></sup> for Radeon HD 4000 series.</li>
+<li> <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a> GeForce 8 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span> (see <a href="#Installing_VDPAU">#Installing VDPAU</a>).</li>
+</ul>
+<h3><span class="mw-headline" id="Installing_VDPAU">Installing VDPAU</span></h3>
+<p><b>Open source drivers:</b>
+</p>
+<ul>
+<li> <a href="../en/ATI.html" title="ATI">AMD</a> Radeon 9500 and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa-vdpau">mesa-vdpau</a></span>.</li>
+<li> <a href="../en/Intel_graphics.html" title="Intel" class="mw-redirect">Intel</a> GMA 4500 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span> (see <a href="#Installing_VA-API">#Installing VA-API</a>).</li>
+<li> <a href="../en/Nouveau.html" title="Nouveau">NVIDIA</a> GeForce 8 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mesa-vdpau">mesa-vdpau</a></span>. It <a rel="nofollow" class="external text" href="http://nouveau.freedesktop.org/wiki/VideoAcceleration/#firmware">requires</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nouveau-fw/">nouveau-fw</a></span><sup><small>AUR</small></sup>, which contains the required firmware to operate that is presently extracted from the NVIDIA binary driver.</li>
+</ul>
+<p><b>Proprietary drivers:</b>
+</p>
+<ul>
+<li> <a href="../en/AMD_Catalyst.html" title="AMD Catalyst">AMD</a> Radeon HD 4000 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span> (see <a href="#Installing_VA-API">#Installing VA-API</a>).</li>
+<li> <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a> GeForce 400 series and newer GPUs are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-utils">nvidia-utils</a></span>.
+<ul><li> GeForce 8/9 and GeForce 100-300 series are supported by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-340xx-utils">nvidia-340xx-utils</a></span>.</li></ul>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Verification">Verification</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> <a href="../en/Mpv.html#Hardware_Decoding" title="Mpv">mpv</a> is great for testing hardware acceleration in practice.</div>
+<h3><span class="mw-headline" id="Verifying_VA-API">Verifying VA-API</span></h3>
+<p>Verify the settings for VA-API by running <code>vainfo</code>, which is provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva">libva</a></span>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vainfo</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+libva info: VA-API version 0.39.0
+libva info: va_getDriverName() returns 0
+libva info: Trying to open /usr/lib/dri/i965_drv_video.so
+libva info: Found init function __vaDriverInit_0_39
+libva info: va_openDriver() returns 0
+vainfo: VA-API version: 0.39 (libva 1.7.0)
+vainfo: Driver version: Intel i965 driver for Intel(R) Sandybridge Mobile - 1.7.0
+vainfo: Supported profile and entrypoints
+      VAProfileMPEG2Simple            : VAEntrypointVLD
+      VAProfileMPEG2Main              : VAEntrypointVLD
+      VAProfileH264ConstrainedBaseline: VAEntrypointVLD
+      VAProfileH264ConstrainedBaseline: VAEntrypointEncSlice
+      VAProfileH264Main               : VAEntrypointVLD
+      VAProfileH264Main               : VAEntrypointEncSlice
+      VAProfileH264High               : VAEntrypointVLD
+      VAProfileH264High               : VAEntrypointEncSlice
+      VAProfileH264StereoHigh         : VAEntrypointVLD
+      VAProfileVC1Simple              : VAEntrypointVLD
+      VAProfileVC1Main                : VAEntrypointVLD
+      VAProfileVC1Advanced            : VAEntrypointVLD
+      VAProfileNone                   : VAEntrypointVideoProc
+</pre>
+<p><i>VAEntrypointVLD</i> means that your card is capable to decode this format, <i>VAEntrypointEncSlice</i> means that you can encode to this format.
+</p>
+<p>In this example the <code>i965</code> driver is used, as you can see in this line:
+</p>
+<pre>libva info: Trying to open /usr/lib/dri/<b>i965</b>_drv_video.so</pre>
+<h3><span class="mw-headline" id="Verifying_VDPAU">Verifying VDPAU</span></h3>
+<p>You can verify that the VDPAU driver is loaded correctly using <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vdpauinfo">vdpauinfo</a></span>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ vdpauinfo | grep "Information string:"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Information string: NVIDIA VDPAU Driver Shared Library  364.19  Tue Apr 19 14:14:26 PDT 2016
+</pre>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Configuring_VA-API">Configuring VA-API</span></h3>
+<p>The <a rel="nofollow" class="external text" href="http://www.freedesktop.org/wiki/Software/vaapi/#driversback-endsthatimplementva-api">driver</a> for  VA-API is autodetected. To determine which one is used see <a href="#Verification">#Verification</a>. You can override it by setting the <code>LIBVA_DRIVER_NAME</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a>:
+</p>
+<ul>
+<li> For Intel Graphics use <code>i965</code>.</li>
+<li> For NVIDIA use <code>vdpau</code>.</li>
+<li> For AMD use either <code>gallium</code> (for <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-mesa-driver">libva-mesa-driver</a></span>) or <code>vdpau</code> (for <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-vdpau-driver">libva-vdpau-driver</a></span>).</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can find the installed drivers in <code>/usr/lib/dri/</code>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since version 12.0.1 <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libva-mesa-driver">libva-mesa-driver</a></span> provides <code>radeonsi</code> instead of <code>gallium</code>.</div>
+<h3><span class="mw-headline" id="Configuring_VDPAU">Configuring VDPAU</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> When does <code>VDPAU_DRIVER</code> <i>need</i> to be set? So far I only know about Intel and Catalyst (because of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span>), it should work correctly with other cards. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Hardware_video_acceleration">Talk:Hardware video acceleration#</a>)</div>
+</div>
+<p>The driver for use with VDPAU is auto-detected, but you may need to override it by using the <code>VDPAU_DRIVER</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a>.
+</p>
+<p>The correct driver name depends on your setup:
+</p>
+<ul>
+<li> For Intel Graphics or AMD Catalyst you <a href="#Failed_to_open_VDPAU_backend">need</a> to set it to <code>va_gl</code>.</li>
+<li> For the open source AMD/ATI driver set it to the proper driver version depending on your GPU (see below).</li>
+<li> For NVIDIA's proprietary version set it to <code>nvidia</code>.</li>
+</ul>
+<p>The driver name can determined by running:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ grep -i vdpau ~/.local/share/xorg/Xorg.0.log</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+(II) RADEON(0): [DRI2] VDPAU driver: r300
+</pre>
+<p>In this case you want to set <code>VDPAU_DRIVER=r300</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can find the installed drivers in <code>/usr/lib/vdpau/</code>.</div>
+<p>For hybrid setups (both NVIDIA and AMD), it may be necessary to <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">set</a> <code>DRI_PRIME=1</code>. For more information see <a href="../en/PRIME.html" title="PRIME">PRIME</a>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Failed_to_open_VDPAU_backend">Failed to open VDPAU backend</span></h3>
+<p>This happens when you use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvdpau-va-gl">libvdpau-va-gl</a></span> without overriding <code>VDPAU_DRIVER</code>. VDPAU doesn't know what driver to use in this case for some reason and guesses wrongly. See <a href="#Configuring_VDPAU">#Configuring VDPAU</a>.
+</p>
+<p>However you may want to configure your media player to use VA-API instead, getting far better results. See <a href="#Software">#Software</a>.
+</p>
+<h3><span class="mw-headline" id="VA-API_vaInitialize_failed">VA-API vaInitialize failed</span></h3>
+<p>If vainfo gives you this error:
+</p>
+<pre>
+libva info: va_openDriver() returns -1
+vaInitialize failed with error code -1 (unknown libva error),exit
+</pre>
+<p>You may need to set the <code>LIBVA_DRIVER_NAME</code> environment variable to <code>vdpau</code> or <code>gallium</code>, see <a href="#Configuring_VA-API">#Configuring VA-API</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Graphics.html" title="Category:Graphics">Graphics</a></li>
+<li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

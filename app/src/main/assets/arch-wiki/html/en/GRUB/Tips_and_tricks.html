@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>GRUB/Tips and tricks - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GRUB_Tips_and_tricks skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">GRUB/Tips and tricks</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/GRUB.html" title="GRUB">GRUB</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#GUI_configuration_tools"><span class="tocnumber">1</span> <span class="toctext">GUI configuration tools</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Visual_configuration"><span class="tocnumber">2</span> <span class="toctext">Visual configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Setting_the_framebuffer_resolution"><span class="tocnumber">2.1</span> <span class="toctext">Setting the framebuffer resolution</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#915resolution_hack"><span class="tocnumber">2.2</span> <span class="toctext">915resolution hack</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Background_image_and_bitmap_fonts"><span class="tocnumber">2.3</span> <span class="toctext">Background image and bitmap fonts</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Theme"><span class="tocnumber">2.4</span> <span class="toctext">Theme</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Menu_colors"><span class="tocnumber">2.5</span> <span class="toctext">Menu colors</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Hidden_menu"><span class="tocnumber">2.6</span> <span class="toctext">Hidden menu</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Disable_framebuffer"><span class="tocnumber">2.7</span> <span class="toctext">Disable framebuffer</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#Booting_ISO9660_image_file_directly_via_GRUB"><span class="tocnumber">3</span> <span class="toctext">Booting ISO9660 image file directly via GRUB</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#Persistent_block_device_naming"><span class="tocnumber">4</span> <span class="toctext">Persistent block device naming</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Using_labels"><span class="tocnumber">5</span> <span class="toctext">Using labels</span></a></li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Password_protection_of_GRUB_menu"><span class="tocnumber">6</span> <span class="toctext">Password protection of GRUB menu</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Password_protection_of_GRUB_edit_and_console_options_only"><span class="tocnumber">6.1</span> <span class="toctext">Password protection of GRUB edit and console options only</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#Hide_GRUB_unless_the_Shift_key_is_held_down"><span class="tocnumber">7</span> <span class="toctext">Hide GRUB unless the Shift key is held down</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#Combining_the_use_of_UUIDs_and_basic_scripting"><span class="tocnumber">8</span> <span class="toctext">Combining the use of UUIDs and basic scripting</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#Manually_creating_grub.cfg"><span class="tocnumber">9</span> <span class="toctext">Manually creating grub.cfg</span></a></li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Multiple_entries"><span class="tocnumber">10</span> <span class="toctext">Multiple entries</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Disable_submenu"><span class="tocnumber">10.1</span> <span class="toctext">Disable submenu</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Recall_previous_entry"><span class="tocnumber">10.2</span> <span class="toctext">Recall previous entry</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#Changing_the_default_menu_entry"><span class="tocnumber">10.3</span> <span class="toctext">Changing the default menu entry</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Boot_non-default_entry_only_once"><span class="tocnumber">10.4</span> <span class="toctext">Boot non-default entry only once</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23"><a href="#Play_a_tune"><span class="tocnumber">11</span> <span class="toctext">Play a tune</span></a></li>
+<li class="toclevel-1 tocsection-24"><a href="#Manual_configuration_of_core_image_for_early_boot"><span class="tocnumber">12</span> <span class="toctext">Manual configuration of core image for early boot</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="GUI_configuration_tools">GUI configuration tools</span></h2>
+<p>Following package may be installed:
+</p>
+<ul><li> <b>grub-customizer</b> — GTK+ customizer for GRUB or BURG</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://launchpad.net/grub-customizer">https://launchpad.net/grub-customizer</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grub-customizer/">grub-customizer</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>grub2-editor</b> — KDE4 control module for configuring the GRUB bootloader</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://kde-apps.org/content/show.php?content=139643">http://kde-apps.org/content/show.php?content=139643</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grub2-editor/">grub2-editor</a></span><sup><small>AUR</small></sup><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/grub2-editor">aur-mirror</a>]</sup>
+</dd></dl>
+<ul><li> <b>grub2-editor-frameworks</b> — Unofficial KF5 port of grub2-editor</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="https://github.com/maz-1/grub2-editor">https://github.com/maz-1/grub2-editor</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/grub2-editor-frameworks/">grub2-editor-frameworks</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<ul><li> <b>startupmanager</b> — GUI app for changing the settings of GRUB Legacy, GRUB, Usplash and Splashy (<a rel="nofollow" class="external text" href="https://launchpad.net/startup-manager/+announcement/8300">abandonned</a>)</li></ul>
+<dl><dd>
+<a rel="nofollow" class="external free" href="http://sourceforge.net/projects/startup-manager/">http://sourceforge.net/projects/startup-manager/</a> || <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/startupmanager/">startupmanager</a></span><sup><small>AUR</small></sup>
+</dd></dl>
+<h2><span class="mw-headline" id="Visual_configuration">Visual configuration</span></h2>
+<p>In GRUB it is possible, by default, to change the look of the menu. Make sure to initialize, if not done already, GRUB graphical terminal, gfxterm, with proper video mode, gfxmode, in GRUB. This can be seen in the section <a href="../../en/GRUB.html#.22No_suitable_mode_found.22_error" title="GRUB">GRUB#"No suitable mode found" error</a>. This video mode is passed by GRUB to the linux kernel via 'gfxpayload' so any visual configurations need this mode in order to be in effect.
+</p>
+<h3><span class="mw-headline" id="Setting_the_framebuffer_resolution">Setting the framebuffer resolution</span></h3>
+<p>GRUB can set the framebuffer for both GRUB itself and the kernel. The old <code>vga=</code> way is deprecated. The preferred method is editing <code>/etc/default/grub</code> as the following sample:
+</p>
+<pre>GRUB_GFXMODE=1024x768x32
+GRUB_GFXPAYLOAD_LINUX=keep
+</pre>
+<p>Multiple resolutions can be specified, including the default <code>auto</code>, so it is recommended that you edit the line to resemble <code>GRUB_GFXMODE=&lt;desired resolution&gt;,&lt;fallback such as 1024x768&gt;,auto</code>. For more information, refer to <a rel="nofollow" class="external text" href="https://www.gnu.org/software/grub/manual/html_node/gfxmode.html#gfxmode">the GRUB gfxmode documentation</a>. The <a rel="nofollow" class="external text" href="https://www.gnu.org/software/grub/manual/html_node/gfxpayload.html#gfxpayload">gfxpayload</a> property will make sure the kernel keeps the resolution.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Only the modes supported by the graphics card via <a href="https://en.wikipedia.org/wiki/VESA_BIOS_Extensions" class="extiw" title="wikipedia:VESA BIOS Extensions">VESA BIOS Extensions</a> can be used. To view the list of supported modes, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hwinfo">hwinfo</a></span> and run <code>hwinfo --framebuffer</code> as root. Alternatively, enter the GRUB command line and run the command <code>videoinfo</code>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Make sure to run <code>grub-mkconfig -o /boot/grub/grub.cfg</code> after making changes.</div>
+<p>If this method does not work for you, the deprecated <code>vga=</code> method will still work. Just add it next to the <code>"GRUB_CMDLINE_LINUX_DEFAULT="</code> line in <code>/etc/default/grub</code> for example: <code>"GRUB_CMDLINE_LINUX_DEFAULT="quiet splash vga=792"</code> will give you a <code>1024x768</code> resolution.
+</p>
+<h3><span class="mw-headline" id="915resolution_hack">915resolution hack</span></h3>
+<p>Some times for Intel graphic adapters neither <code># hwinfo --framebuffer</code> nor <code>videoinfo</code> will show you the desired resolution. In this case you can use <code>915resolution</code> hack. This hack will temporarily modify video BIOS and add needed resolution. See <a rel="nofollow" class="external text" href="http://915resolution.mango-lang.org/">915resolution's home page</a>. The package can be found here: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/915resolution/">915resolution</a></span><sup><small>AUR</small></sup>
+</p>
+<p>First you need to find a video mode which will be modified later. For that we need the GRUB command shell:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">sh:grub&gt; 915resolution -l</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Intel 800/900 Series VBIOS Hack : version 0.5.3
+[...]
+<b>Mode 30</b> : 640x480, 8 bits/pixel
+[...]
+</pre>
+<p>Next, we overwrite the <code>Mode 30</code> with <code>1440x900</code> resolution:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/grub.d/00_header</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[...]
+<b>915resolution 30 1440 900  # Inserted line</b>
+set gfxmode=${GRUB_GFXMODE}
+[...]
+</pre>
+<p>Lastly we need to set <code>GRUB_GFXMODE</code> as described earlier, regenerate <code>grub.cfg</code> and reboot to test changes.
+</p>
+<h3><span class="mw-headline" id="Background_image_and_bitmap_fonts">Background image and bitmap fonts</span></h3>
+<p>GRUB comes with support for background images and bitmap fonts in <code>pf2</code> format. The unifont font is included in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=grub">grub</a></span> package under the filename <code>unicode.pf2</code>, or, as only ASCII characters under the name <code>ascii.pf2</code>.
+</p>
+<p>Image formats supported include tga, png and jpeg, providing the correct modules are loaded. The maximum supported resolution depends on your hardware.
+</p>
+<p>Make sure you have set up the proper <a href="#Setting_the_framebuffer_resolution">framebuffer resolution</a>.
+</p>
+<p>Edit <code>/etc/default/grub</code> like this:
+</p>
+<pre>GRUB_BACKGROUND="/boot/grub/myimage"
+#GRUB_THEME="/path/to/gfxtheme"
+GRUB_FONT="/path/to/font.pf2"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have installed GRUB on a separate partition, <code>/boot/grub/myimage</code> automatically becomes <code>/grub/myimage</code> in <code>grub.cfg</code>.</div>
+<p><a href="../../en/GRUB.html#Generate_the_main_configuration_file" title="GRUB">Re-generate</a> <code>grub.cfg</code> to apply the changes. If adding the splash image was successful, the user will see <code>"Found background image..."</code> in the terminal as the command is executed. If this phrase is not seen, the image information was probably not incorporated into the <code>grub.cfg</code> file.
+</p>
+<p>If the image is not displayed, check:
+</p>
+<ul>
+<li> The path and the filename in <code>/etc/default/grub</code> are correct</li>
+<li> The image is of the proper size and format (tga, png, 8-bit jpg)</li>
+<li> The image was saved in the RGB mode, and is not indexed</li>
+<li> The console mode is not enabled in <code>/etc/default/grub</code>
+</li>
+<li> The command <code>grub-mkconfig</code> must be executed to place the background image information into the <code>/boot/grub/grub.cfg</code> file</li>
+<li> The <code>grub-mkconfig</code> scripts won't quote the file name in <code>grub.cfg</code> so make sure it does not contain spaces</li>
+</ul>
+<h3><span class="mw-headline" id="Theme">Theme</span></h3>
+<p>Here is an example for configuring Starfield theme which was included in GRUB package.
+</p>
+<p>Edit <code>/etc/default/grub</code>
+</p>
+<pre>GRUB_THEME="/usr/share/grub/themes/starfield/theme.txt"
+</pre>
+<p><a href="../../en/GRUB.html#Generate_the_main_configuration_file" title="GRUB">Re-generate</a> <code>grub.cfg</code> to apply the changes. If configuring the theme was successful, you will see <code>Found theme: /usr/share/grub/themes/starfield/theme.txt</code> in the terminal.
+</p>
+<p>Your splash image will usually not be displayed when using a theme.
+</p>
+<h3><span class="mw-headline" id="Menu_colors">Menu colors</span></h3>
+<p>You can set the menu colors in GRUB. The available colors for GRUB can be found in <a rel="nofollow" class="external text" href="https://www.gnu.org/software/grub/manual/html_node/Theme-file-format.html">the GRUB Manual</a>.
+Here is an example:
+</p>
+<p>Edit <code>/etc/default/grub</code>:
+</p>
+<pre>GRUB_COLOR_NORMAL="light-blue/black"
+GRUB_COLOR_HIGHLIGHT="light-cyan/blue"
+</pre>
+<h3><span class="mw-headline" id="Hidden_menu">Hidden menu</span></h3>
+<p>One of the unique features of GRUB is hiding/skipping the menu and showing it by holding <code>Esc</code> when needed. You can also adjust whether you want to see the timeout counter.
+</p>
+<p>Edit <code>/etc/default/grub</code> as you wish. Here are the lines you need to add to enable this feature, the timeout has been set to five seconds and to be shown to the user:
+</p>
+<pre>GRUB_TIMEOUT=5
+GRUB_TIMEOUT_STYLE='countdown'
+</pre>
+<p>GRUB_TIMEOUT is how many seconds before displaying menu.
+</p>
+<h3><span class="mw-headline" id="Disable_framebuffer">Disable framebuffer</span></h3>
+<p>Users who use NVIDIA proprietary driver might wish to disable GRUB's framebuffer as it can cause problems with the binary driver.
+</p>
+<p>To disable framebuffer, edit <code>/etc/default/grub</code> and uncomment the following line:
+</p>
+<pre>GRUB_TERMINAL_OUTPUT=console
+</pre>
+<p>Another option if you want to keep the framebuffer in GRUB is to revert to text mode just before starting the kernel. To do that modify the variable in <code>/etc/default/grub</code>:
+</p>
+<pre>GRUB_GFXPAYLOAD_LINUX=text
+</pre>
+<h2><span class="mw-headline" id="Booting_ISO9660_image_file_directly_via_GRUB">Booting ISO9660 image file directly via GRUB</span></h2>
+<p>GRUB supports booting from ISO images directly via loopback devices, see <a href="../../en/Multiboot_USB_drive.html#Using_GRUB_and_loopback_devices" title="Multiboot USB drive">Multiboot USB drive#Using GRUB and loopback devices</a> for examples.
+</p>
+<h2><span class="mw-headline" id="Persistent_block_device_naming">Persistent block device naming</span></h2>
+<p>One naming scheme for <a href="../../en/Persistent_block_device_naming.html" title="Persistent block device naming">Persistent block device naming</a> is the use of globally unique UUIDs to detect partitions instead of the "old" <code>/dev/sd*</code>. Advantages are covered up in the above linked article. 
+</p>
+<p>Persistent naming via file system UUIDs are used by default in GRUB. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>/boot/grub.cfg</code> file needs regeneration with the new UUID in <code>/etc/default/grub</code> every time a relevant file system is resized or recreated. Remember this when modifying partitions &amp; file systems with a Live-CD.</div>
+<p>Whether to use UUIDs is controlled by an option in <code>/etc/default/grub</code>:
+</p>
+<pre>GRUB_DISABLE_LINUX_UUID=true
+</pre>
+<h2><span class="mw-headline" id="Using_labels">Using labels</span></h2>
+<p>It is possible to use labels, human-readable strings attached to file systems, by using the <code>--label</code> option to <code>search</code>. First of all, label your existing partition:
+</p>
+<pre># tune2fs -L <i>LABEL</i> <i>PARTITION</i>
+</pre>
+<p>Then, add an entry using labels. An example of this:
+</p>
+<pre>menuentry "Arch Linux, session texte" {
+  search --label --set=root archroot
+  linux /boot/vmlinuz-linux root=/dev/disk/by-label/archroot ro
+  initrd /boot/initramfs-linux.img
+}
+</pre>
+<h2><span class="mw-headline" id="Password_protection_of_GRUB_menu">Password protection of GRUB menu</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If someone has physical access to your machine and is able to boot a live USB/disk (<i>i.e.</i>, BIOS allows booting from an external disk), it's fairly trivial for one to modify GRUB configuration files to bypass this if <code>/boot</code> resides on an unencrypted partition. See <a href="../../en/GRUB.html#Encryption" title="GRUB">GRUB#Encryption</a> and <a href="../../en/Security.html#Disk_encryption" title="Security">Security#Disk encryption</a>.</div>
+<p>If you want to secure GRUB so it is not possible for anyone to change boot parameters or use the command line, you can add a user/password combination to GRUB's configuration files. To do this, run the command <code>grub-mkpasswd-pbkdf2</code>. Enter a password and confirm it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">grub-mkpasswd-pbkdf2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[...]
+Your PBKDF2 is grub.pbkdf2.sha512.10000.C8ABD3E93C4DFC83138B0C7A3D719BC650E6234310DA069E6FDB0DD4156313DA3D0D9BFFC2846C21D5A2DDA515114CF6378F8A064C94198D0618E70D23717E82.509BFA8A4217EAD0B33C87432524C0B6B64B34FBAD22D3E6E6874D9B101996C5F98AB1746FE7C7199147ECF4ABD8661C222EEEDB7D14A843261FFF2C07B1269A
+</pre>
+<p>Then, add the following to <code>/etc/grub.d/40_custom</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/grub.d/40_custom</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">set superusers="<b>username</b>"
+password_pbkdf2 <b>username</b> <b>&lt;password&gt;</b></pre>
+<p>where <code>&lt;password&gt;</code> is the string generated by <code>grub-mkpasswd_pbkdf2</code>.
+</p>
+<p>Regenerate your configuration file. Your GRUB command line, boot parameters and all boot entries are now protected.
+</p>
+<p>This can be relaxed and further customized with more users as described in the "Security" part of <a rel="nofollow" class="external text" href="https://www.gnu.org/software/grub/manual/grub.html#Security">the GRUB manual</a>.
+</p>
+<h3><span class="mw-headline" id="Password_protection_of_GRUB_edit_and_console_options_only">Password protection of GRUB edit and console options only</span></h3>
+<p>Adding <code>--unrestricted</code> to a menu entry will allow any user to boot the OS while preventing the user from editing the entry and preventing access to the grub command console.
+Only a superuser or users specified with the <code>--user</code> switch will be able to edit the menu entry.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/boot/grub/grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">menuentry 'Arch Linux' --unrestricted --class arch --class gnu-linux --class os ...</pre>
+<h2><span class="mw-headline" id="Hide_GRUB_unless_the_Shift_key_is_held_down">Hide GRUB unless the Shift key is held down</span></h2>
+<p>In order to achieve the fastest possible boot, instead of having GRUB wait for a timeout, it is possible for GRUB to hide the menu, unless the <code>Shift</code> key is held down during GRUB's start-up.
+</p>
+<p>In order to achieve this, you should add the following line to <code>/etc/default/grub</code>:
+</p>
+<pre> GRUB_FORCE_HIDDEN_MENU="true"
+</pre>
+<p>Then create the file in <a rel="nofollow" class="external autonumber" href="https://gist.githubusercontent.com/anonymous/8eb2019db2e278ba99be/raw/257f15100fd46aeeb8e33a7629b209d0a14b9975/gistfile1.sh">[1]</a>, make it exectuable, and regenerate the grub configuration:
+</p>
+<pre># chmod a+x /etc/grub.d/31_hold_shift
+# grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This setup uses keystatus to detect keypress event so it may not work on some machines.</div>
+<h2><span class="mw-headline" id="Combining_the_use_of_UUIDs_and_basic_scripting">Combining the use of UUIDs and basic scripting</span></h2>
+<p>If you like the idea of using UUIDs to avoid unreliable BIOS mappings or are struggling with GRUB's syntax, here is an example boot menu item that uses UUIDs and a small script to direct GRUB to the proper disk partitions for your system. All you need to do is replace the UUIDs in the sample with the correct UUIDs for your system. The example applies to a system with a boot and root partition. You will obviously need to modify the GRUB configuration if you have additional partitions:
+</p>
+<pre>
+menuentry "Arch Linux 64" {
+    # Set the UUIDs for your boot and root partition respectively
+    set the_boot_uuid=ece0448f-bb08-486d-9864-ac3271bd8d07
+    set the_root_uuid=c55da16f-e2af-4603-9e0b-03f5f565ec4a
+
+    # (Note: This may be the same as your boot partition)
+
+    # Get the boot/root devices and set them in the root and grub_boot variables
+    search --fs-uuid $the_root_uuid --set=root
+    search --fs-uuid $the_boot_uuid --set=grub_boot
+
+    # Check to see if boot and root are equal.
+    # If they are, then append /boot to $grub_boot (Since $grub_boot is actually the root partition)
+    if [ $the_boot_uuid == $the_root_uuid ] ; then
+        set grub_boot=($grub_boot)/boot
+    else
+        set grub_boot=($grub_boot)
+    fi
+
+    # $grub_boot now points to the correct location, so the following will properly find the kernel and initrd
+    linux $grub_boot/vmlinuz-linux root=/dev/disk/by-uuid/$the_root_uuid ro
+    initrd $grub_boot/initramfs-linux.img
+}
+</pre>
+<h2><span class="mw-headline" id="Manually_creating_grub.cfg">Manually creating grub.cfg</span></h2>
+<p>A basic GRUB config file uses the following options:
+</p>
+<ul>
+<li> <code>(hd<i>X</i>,<i>Y</i>)</code> is the partition <i>Y</i> on disk <i>X</i>, partition numbers starting at 1, disk numbers starting at 0</li>
+<li> <code>set default=<i>N</i></code> is the default boot entry that is chosen after timeout for user action</li>
+<li> <code>set timeout=<i>M</i></code> is the time <i>M</i> to wait in seconds for a user selection before default is booted</li>
+<li> <code>menuentry "title" {entry options}</code> is a boot entry titled <code>title</code>
+</li>
+<li> <code>set root=(hd<i>X</i>,<i>Y</i>)</code> sets the boot partition, where the kernel and GRUB modules are stored (boot need not be a separate partition, and may simply be a directory under the "root" partition (<code>/</code>)</li>
+</ul>
+<h2><span class="mw-headline" id="Multiple_entries">Multiple entries</span></h2>
+<h3><span class="mw-headline" id="Disable_submenu">Disable submenu</span></h3>
+<p>If you have multiple kernels installed, say linux and linux-lts, by default <code>grub-mkconfig</code> groups them in a submenu. If you do not like this behaviour you can go back to one single menu by adding the following line to <code>/etc/default/grub</code>:
+</p>
+<pre> GRUB_DISABLE_SUBMENU=y
+</pre>
+<h3><span class="mw-headline" id="Recall_previous_entry">Recall previous entry</span></h3>
+<p>GRUB can remember the last entry you booted from and use this as the default entry to boot from next time. This is useful if you have multiple kernels (i.e., the current Arch one and the LTS kernel as a fallback option) or operating systems. To do this, edit <code>/etc/default/grub</code> and change the value of <code>GRUB_DEFAULT</code>:
+</p>
+<pre>GRUB_DEFAULT=saved
+</pre>
+<p>This ensures that GRUB will default to the saved entry. To enable saving the selected entry, add the following line to <code>/etc/default/grub</code>:
+</p>
+<pre>GRUB_SAVEDEFAULT=true
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Manually added menu items, e.g. Windows in <code>/etc/grub.d/40_custom</code> or <code>/boot/grub/custom.cfg</code>, will need <code>savedefault</code> added.</div>
+<h3><span class="mw-headline" id="Changing_the_default_menu_entry">Changing the default menu entry</span></h3>
+<p>To change the default selected entry, edit <code>/etc/default/grub</code> and change the value of <code>GRUB_DEFAULT</code>:
+</p>
+<p>Using numbers :
+</p>
+<pre>GRUB_DEFAULT=0
+</pre>
+<p>Grub identifies entries in generated menu counted from zero. That means 0 for the first entry which is the default value, 1 for the second and so on.
+</p>
+<p>Or using menu titles :
+</p>
+<pre>GRUB_DEFAULT='Arch Linux, with Linux core repo kernel'
+</pre>
+<h3><span class="mw-headline" id="Boot_non-default_entry_only_once">Boot non-default entry only once</span></h3>
+<p>The command <code>grub-reboot</code> is very helpful to boot another entry than the default only once. GRUB loads the entry passed in the first command line argument, when the system is rebooted the next time. Most importantly GRUB returns to loading the default entry for all future booting. Changing the configuration file or selecting an entry in the GRUB menu is not necessary.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This requires <code>GRUB_DEFAULT=saved</code> in <code>/etc/default/grub</code> (and then regenerating <code>grub.cfg</code>) or, in case of hand-made <code>grub.cfg</code>, the line <code>set default="${saved_entry}"</code>.</div>
+<h2><span class="mw-headline" id="Play_a_tune">Play a tune</span></h2>
+<p>You can play a tune through the PC-speaker while booting by modifying the variable <code>GRUB_INIT_TUNE</code>. For example, to play Berlioz's extract from Sabbath Night of Symphonie Fantastique you can add the following: (bassoon part):
+</p>
+<p><code>GRUB_INIT_TUNE="312 262 3 247 3 262 3 220 3 247 3 196 3 220 3 220 3 262 3 262 3 294 3 262 3 247 3 220 3 196 3 247 3 262 3 247 5 220 1 220 5"</code>
+</p>
+<p>For information on this, you can look at <code>info grub -n play</code>.
+</p>
+<h2><span class="mw-headline" id="Manual_configuration_of_core_image_for_early_boot">Manual configuration of core image for early boot</span></h2>
+<p>If you require a special keymap or other complex steps that GRUB is not able to configure automatically in order to make <code>/boot</code> available to the GRUB environment, you can generate a core image yourself. On UEFI systems, the core image is the <code>grubx64.efi</code> file that is loaded by the firmware on boot. Building your own core image will allow you to embed any modules required for very early boot, as well as a configuration script to bootstrap GRUB.
+</p>
+<p>Firstly, taking as an example a requirement for the <code>dvorak</code> keymap embedded in early-boot in order to enter a password for a crypted <code>/boot</code> on a UEFI system:
+</p>
+<p>Determine from the generated <code>/boot/grub/grub.cfg</code> file what modules are required in order to mount the crypted <code>/boot</code>. For instance, under your <code>menuentry</code> you should see lines similar to:
+</p>
+<pre>insmod diskfilter cryptodisk luks gcry_rijndael gcry_rijndael gcry_sha256
+insmod ext2
+cryptomount -u 1234abcdef1234abcdef1234abcdef
+set root='cryptouuid/1234abcdef1234abcdef1234abcdef'</pre>
+<p>Take note of all of those modules: they'll need to be included in the core image. Now, create a tarball containing your keymap. This will be bundled in the core image as a memdisk:
+</p>
+<pre>
+# ckbcomp dvorak | grub-mklayout &gt; dvorak.gkb
+# tar cf memdisk.tar dvorak.gkb
+</pre>
+<p>Now create a configuration file to be used in the GRUB core image. This is in the same format as your regular grub config, but need contain only a few lines to find and load the main config file on the <code>/boot</code> partition:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">early-grub.cfg</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">root=(memdisk)
+prefix=($root)/
+
+terminal_input at_keyboard
+keymap /dvorak.gkb
+
+cryptomount -u 1234abcdef1234abcdef1234abcdef
+set root='cryptouuid/1234abcdef1234abcdef1234abcdef'
+set prefix=($root)/grub
+
+configfile grub.cfg</pre>
+<p>Finally, generate the core image, listing all of the modules determined to be required in the generated <code>grub.cfg</code>, along with any modules used in the <code>early-grub.cfg</code> script. The example above needs <code>memdisk</code>, <code>tar</code>, <code>at_keyboard</code>, <code>keylayouts</code> and <code>configfile</code>.
+</p>
+<pre># grub-mkimage -c early-grub.cfg -o grubx64.efi -O x86_64-efi -m memdisk.tar diskfilter cryptodisk luks gcry_rijndael gcry_sha256 ext2 memdisk tar at_keyboard keylayouts configfile
+</pre>
+<p>The generated EFI core image can now be used in the same way as the image that is generated automatically by <code>grub-install</code>: place it in your EFI partition and enable it with <code>efibootmgr</code>, or configure as appropriate for your system firmware.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Boot_loaders.html" title="Category:Boot loaders">Boot loaders</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=GRUB/Tips_and_tricks&amp;oldid=453637">https://wiki.archlinux.org/index.php?title=GRUB/Tips_and_tricks&amp;oldid=453637</a>"</li>
+					<li id="lastmod"> This page was last modified on 11 October 2016, at 20:56.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

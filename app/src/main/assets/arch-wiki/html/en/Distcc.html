@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Distcc - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Distcc skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Distcc</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/TORQUE.html" title="TORQUE">TORQUE</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Slurm.html" title="Slurm">Slurm</a></li>
+</ul>
+</div>
+<p>Distcc is a program to distribute builds of C, C++, Objective C or Objective C++ code across several machines on a network. It should always generate the same results as a local build, is simple to install and use, and is usually much faster than a local compile. The cool part is one can use it together with native Arch build tools such as makepkg.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Terms"><span class="tocnumber">1</span> <span class="toctext">Terms</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Getting_started"><span class="tocnumber">2</span> <span class="toctext">Getting started</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Configuration"><span class="tocnumber">3</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Slaves"><span class="tocnumber">3.1</span> <span class="toctext">Slaves</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Master"><span class="tocnumber">3.2</span> <span class="toctext">Master</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#For_use_with_makepkg"><span class="tocnumber">3.2.1</span> <span class="toctext">For use with makepkg</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#For_use_without_makepkg"><span class="tocnumber">3.2.2</span> <span class="toctext">For use without makepkg</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Compile"><span class="tocnumber">4</span> <span class="toctext">Compile</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#With_makepkg"><span class="tocnumber">4.1</span> <span class="toctext">With makepkg</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Without_makepkg"><span class="tocnumber">4.2</span> <span class="toctext">Without makepkg</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Monitoring_progress"><span class="tocnumber">5</span> <span class="toctext">Monitoring progress</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#.22Cross_Compiling.22_with_distcc"><span class="tocnumber">6</span> <span class="toctext">"Cross Compiling" with distcc</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13">
+<a href="#X86"><span class="tocnumber">6.1</span> <span class="toctext">X86</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14">
+<a href="#Chroot_method_.28preferred.29"><span class="tocnumber">6.1.1</span> <span class="toctext">Chroot method (preferred)</span></a>
+<ul>
+<li class="toclevel-4 tocsection-15"><a href="#Add_port_numbers_to_DISTCC_HOSTS_on_the_i686_chroot"><span class="tocnumber">6.1.1.1</span> <span class="toctext">Add port numbers to DISTCC_HOSTS on the i686 chroot</span></a></li>
+<li class="toclevel-4 tocsection-16"><a href="#Invoke_makepkg_from_the_Native_Environment"><span class="tocnumber">6.1.1.2</span> <span class="toctext">Invoke makepkg from the Native Environment</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-17"><a href="#Multilib_GCC_method_.28not_recommended.29"><span class="tocnumber">6.1.2</span> <span class="toctext">Multilib GCC method (not recommended)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-18">
+<a href="#Other_architectures"><span class="tocnumber">6.2</span> <span class="toctext">Other architectures</span></a>
+<ul>
+<li class="toclevel-3 tocsection-19"><a href="#Arch_ARM"><span class="tocnumber">6.2.1</span> <span class="toctext">Arch ARM</span></a></li>
+<li class="toclevel-3 tocsection-20"><a href="#Additional_toolchains"><span class="tocnumber">6.2.2</span> <span class="toctext">Additional toolchains</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21">
+<a href="#Troubleshooting"><span class="tocnumber">7</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-22"><a href="#Journalctl"><span class="tocnumber">7.1</span> <span class="toctext">Journalctl</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#code_110"><span class="tocnumber">7.2</span> <span class="toctext">code 110</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Adjust_log_level"><span class="tocnumber">7.3</span> <span class="toctext">Adjust log level</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Failure_work_with_CMake_or_other_tools"><span class="tocnumber">7.4</span> <span class="toctext">Failure work with CMake or other tools</span></a></li>
+<li class="toclevel-2 tocsection-26">
+<a href="#Limit_HDD.2FSSD_usage"><span class="tocnumber">7.5</span> <span class="toctext">Limit HDD/SSD usage</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#Relocate_.24HOME.2F.distcc"><span class="tocnumber">7.5.1</span> <span class="toctext">Relocate $HOME/.distcc</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Terms">Terms</span></h2>
+<dl>
+<dt> master</dt>
+<dd> The master is the computer which initiates the compilation.</dd>
+<dt> slaves</dt>
+<dd> The slave(s) accept compilation requests send by the master.</dd>
+</dl>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Both master and slave(s) machines need to be running distcc.</div>
+<h2><span class="mw-headline" id="Getting_started">Getting started</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=distcc">distcc</a></span> package from <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a> on all PCs in the cluster:
+</p>
+<p>For other distros, or even OSes including Windows through using Cygwin, refer to the <a rel="nofollow" class="external text" href="http://distcc.samba.org/doc.html">distcc docs</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Slaves">Slaves</span></h3>
+<p>The configuration for the slaves is stored in <code>/etc/conf.d/distccd</code>. The available command line options are listed in the <a rel="nofollow" class="external text" href="http://distcc.googlecode.com/svn%20...%20%3Cdiv%20class=/trunk/doc/web/man/distccd_1.html">distcc manual</a>. At a minimum, configure the allowed address ranges in <a href="https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing" class="extiw" title="wikipedia:Classless Inter-Domain Routing">CIDR</a> format:
+</p>
+<pre>DISTCC_ARGS="--allow 192.168.0.0/24"
+</pre>
+<p>A nice tool for converting address ranges to CIDR format can be found here: <a rel="nofollow" class="external text" href="http://www.ipaddressguide.com/cidr">CIDR Utility Tool</a>.
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a> <code>distccd.service</code> on every participating slave. To have <code>distccd.service</code> start at boot-up, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> it on every participating machine.
+</p>
+<h3><span class="mw-headline" id="Master">Master</span></h3>
+<h4><span class="mw-headline" id="For_use_with_makepkg">For use with makepkg</span></h4>
+<p>Edit <code>/etc/makepkg.conf</code> in the following three sections:
+</p>
+<ol>
+<li> BUILDENV has distcc unbanged i.e. without exclamation point.</li>
+<li> Uncomment the <i>DISTCC_HOSTS</i> line and add the IP addresses of the slaves then a slash and the number of threads they are to use.  The subsequent IP address/threads should be separated by a white space.  This list is ordered from most powerful to least powerful (processing power).</li>
+<li> Adjust the MAKEFLAGS variable to correspond to the number of sum of the number of individual values specified for the max threads per server.  In the example below, this is 5+3+3=11.  If users specify more than this sum, the extra theoretical thread(s) will be blocked by distcc and appear as such in monitoring utils such as <i>distccmon-text</i> described below.</li>
+</ol>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is common practice although optional to define the number of threads as the number of physical core+hyperhtreaded cores (if they exist) plus 1.  Do this on a per-server basis, NOT in the MAKEFLAGS!</div>
+<p>Example using relevant lines:
+</p>
+<pre>BUILDENV=(distcc fakeroot color !ccache check !sign)
+MAKEFLAGS="-j11"
+DISTCC_HOSTS="192.168.0.2/5 192.168.0.3/3 192.168.0.4/3"
+</pre>
+<p>If users wish to use distcc through SSH, add an "@" symbol in front of the IP address in this section.  If key-based auth is not setup on the systems, set the DISTCC_SSH variable to ignore checking for authenticated hosts, i.e. DISTCC_SSH="ssh -i"
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Make sure that neither the <b>CFLAGS</b> and <b>CXXFLAGS</b> have -march=native set or else distccd will not distribute work to other machines!  Using the Arch defaults for these variables is recommended.</div>
+<h4><span class="mw-headline" id="For_use_without_makepkg">For use without makepkg</span></h4>
+<p>The minimal configuration for distcc on the master includes the setting of the available slaves. This can either be done by setting the addresses in the environment variable <code>DISTCC_HOSTS</code> or in either of the configuration files <code>$DISTCC_HOSTS</code>, <code>$DISTCC_DIR/hosts</code>, <code>~/.distcc/hosts</code> or <code>/etc/distcc/hosts</code>.
+</p>
+<p>Example for setting the slave address using <code>DISTCC_HOSTS</code>:
+</p>
+<pre>$ export DISTCC_HOSTS="192.168.0.3,lzo,cpp 192.168.0.4,lzo,cpp"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This is a white space separated list.</div>
+<p>Example for setting the slave addresses in the hosts configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.distcc/hosts</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+192.168.0.3,lzo,cpp 192.168.0.4,lzo,cpp
+</pre>
+<p>Instead of explicitly listing the server addresses one can also use the avahi zeroconf mode. To use this mode <code>+zeroconf</code> must be in place instead of the server addresses and the distcc daemons on the slaves have to be started using the <code>--zeroconf</code> option. Note that this option does not support the pump mode!
+</p>
+<p>The examples add the following options to the address:
+</p>
+<ul>
+<li> <code>lzo</code>: Enables LZO compression for this TCP or SSH host (slave).</li>
+<li> <code>cpp</code>: Enables distcc-pump mode for this host (slave). Note: the build command must be wrapped in the pump script in order to start the include server.</li>
+</ul>
+<p>A description for the pump mode can be found here: <a rel="nofollow" class="external text" href="http://distcc.googlecode.com/svn%20...%20%3Cdiv%20class=/trunk/doc/web/man/distcc_1.html#TOC_8">HOW DISTCC-PUMP MODE WORKS</a> and <a rel="nofollow" class="external text" href="http://google-opensource.blogspot.de/2008/08/distccs-pump-mode-new-design-for.html">distcc's pump mode: A New Design for Distributed C/C++ Compilation </a>
+</p>
+<p>To use distcc-pump mode for a slave, users must start the compilation using the pump script otherwise the compilation will fail.
+</p>
+<h2><span class="mw-headline" id="Compile">Compile</span></h2>
+<h3><span class="mw-headline" id="With_makepkg">With makepkg</span></h3>
+<p>Compile via makepkg as normal.
+</p>
+<h3><span class="mw-headline" id="Without_makepkg">Without makepkg</span></h3>
+<p>To compile a source file using the distcc pump mode, use the following command:
+</p>
+<pre>$ pump distcc g++ -c hello_world.cpp
+</pre>
+<p>In this case the pump script will execute distcc which in turn calls g++ with "-c hello_world.cpp" as parameter.
+</p>
+<p>To compile a Makefile project, first find out which variables are set by the compiler. For example in gzip-1.6,  one can find the following line in the Makefile: <code>CC = gcc -std=gnu99</code>. Normally the variables are called <code>CC</code> for C projects and <code>CXX</code> for C++ projects. To compile the project using distcc it would look like this:
+</p>
+<pre>$ wget <a rel="nofollow" class="external free" href="ftp://ftp.gnu.org/pub/gnu/gzip/gzip-1.6.tar.xz">ftp://ftp.gnu.org/pub/gnu/gzip/gzip-1.6.tar.xz</a>
+$ tar xf gzip-1.6.tar.xz
+$ cd gzip-1.6
+$ ./configure
+$ pump make -j2 CC="distcc gcc -std=gnu99"
+</pre>
+<p>This example would compile gzip using distcc's pump mode with two compile threads. For the correct <code>-j</code> setting have a look at <a rel="nofollow" class="external text" href="https://cdn.rawgit.com/distcc/distcc/master/doc/web/faq.html">What -j level to use?</a>
+</p>
+<h2><span class="mw-headline" id="Monitoring_progress">Monitoring progress</span></h2>
+<p>Progress can be monitored via several methods.
+</p>
+<ol>
+<li>distccmon-text</li>
+<li>tailing log file</li>
+</ol>
+<p>Invoke distccmon-text to check on compilation status:
+</p>
+<pre>$ distccmon-text
+29291 Preprocess  probe_64.c                                 192.168.0.2[0]
+30954 Compile     apic_noop.c                                192.168.0.2[0]
+30932 Preprocess  kfifo.c                                    192.168.0.2[0]
+30919 Compile     blk-core.c                                 192.168.0.2[1]
+30969 Compile     i915_gem_debug.c                           192.168.0.2[3]
+30444 Compile     block_dev.c                                192.168.0.3[1]
+30904 Compile     compat.c                                   192.168.0.3[2]
+30891 Compile     hugetlb.c                                  192.168.0.3[3]
+30458 Compile     catalog.c                                  192.168.0.4[0]
+30496 Compile     ulpqueue.c                                 192.168.0.4[2]
+30506 Compile     alloc.c                                    192.168.0.4[0]
+</pre>
+<p>One can have this program run continuously by using watch or by appending a space followed by integer to the command which corresponds to the number of sec to wait for a repeat query:
+</p>
+<pre>$ watch distccmon-text
+</pre>
+<p>or
+</p>
+<pre>$ distccmon-text 2
+</pre>
+<p>One can also simply tail <code>/var/log/messages.log</code> on daemon:
+</p>
+<pre># tail -f /var/log/messages.log
+</pre>
+<h2><span class="mw-headline" id=".22Cross_Compiling.22_with_distcc">"Cross Compiling" with distcc</span></h2>
+<h3><span class="mw-headline" id="X86">X86</span></h3>
+<p>There are currently two methods from which to select to have the ability of distcc distribution of tasks over a cluster building i686 packages from a native x86_64 environment.  Neither is ideal, but to date, there are the only two methods documented on the wiki.
+</p>
+<p>An ideal setup is one that uses the unmodified ARCH packages for distccd running only once one each node regardless of building from the native environment or from within a chroot AND one that works with makepkg.  Again, this Utopian setup is not currently known.
+</p>
+<p>A <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=129762">discussion thread</a> has been started on the topic; feel free to contribute.
+</p>
+<h4><span class="mw-headline" id="Chroot_method_.28preferred.29">Chroot method (preferred)</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This method works, but is not very elegant requiring duplication of distccd on all nodes AND need to have a 32-bit chroots on all nodes.</div>
+<p>Assuming the user has a <a href="../en/Install_bundled_32-bit_system_in_64-bit_system.html" title="Install bundled 32-bit system in Arch64" class="mw-redirect">32-bit chroot</a> setup and configured on <b>each node</b> of the distcc cluster, the strategy is to have two separate instances of distccd running on different ports on each node -- one runs in the native x86_64 environment and the other in the x86 chroot on a modified port.  Start makepkg via a <a href="../en/Install_bundled_32-bit_system_in_64-bit_system.html#Schroot" title="Install bundled 32-bit system in 64-bit system">schroot command</a> invoking makepkg.
+</p>
+<h5><span class="mw-headline" id="Add_port_numbers_to_DISTCC_HOSTS_on_the_i686_chroot">Add port numbers to DISTCC_HOSTS on the i686 chroot</span></h5>
+<p>Append the port number defined eariler (3692) to each of the hosts in <code>/opt/arch32/etc/makepkg.conf</code> as follows:
+</p>
+<pre>DISTCC_HOSTS="192.168.1.101/5:3692 192.168.1.102/5:3692 192.168.1.103/3:3692"
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This only needs to be setup on the "master" i686 chroot.  Where "master" is defined as the one from which the compilation will take place.</div>
+<h5><span class="mw-headline" id="Invoke_makepkg_from_the_Native_Environment">Invoke makepkg from the Native Environment</span></h5>
+<p>Setup <a href="../en/Install_bundled_32-bit_system_in_64-bit_system.html#Executing_32-bit_applications_from_a_64-bit_environment" title="Install bundled 32-bit system in Arch64" class="mw-redirect">schroot</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> on the native x86_64 environment.  Invoke makepkg to build an i686 package from the native x86_64 environment, simply by:
+</p>
+<pre>$ schroot -p -- makepkg -src
+</pre>
+<h4><span class="mw-headline" id="Multilib_GCC_method_.28not_recommended.29">Multilib GCC method (not recommended)</span></h4>
+<p>See <a href="../en/Makepkg.html#Build_32-bit_packages_on_a_64-bit_system" title="Makepkg">Makepkg#Build 32-bit packages on a 64-bit system</a>.
+</p>
+<h3><span class="mw-headline" id="Other_architectures">Other architectures</span></h3>
+<h4><span class="mw-headline" id="Arch_ARM">Arch ARM</span></h4>
+<p>When building on an Arch ARM device, the developers <i>highly</i> recommend using the official project toolchains.
+</p>
+<ul>
+<li><a rel="nofollow" class="external text" href="https://archlinuxarm.org/builder/xtools/x-tools8.tar.xz">ARMv8</a></li>
+<li><a rel="nofollow" class="external text" href="https://archlinuxarm.org/builder/xtools/x-tools7h.tar.xz">ARMv7l hard</a></li>
+<li><a rel="nofollow" class="external text" href="https://archlinuxarm.org/builder/xtools/x-tools6h.tar.xz">ARMv6l hard</a></li>
+<li><a rel="nofollow" class="external text" href="https://archlinuxarm.org/builder/xtools/x-tools.tar.xz">ARMv5te soft</a></li>
+</ul>
+<p>Extract the toolchain corresponding to the requisite architecture somewhere on the <b>slave filesystem</b> and edit <code>/etc/conf.d/distccd</code> adjusting the PATH to allow the toolchain to be used.
+</p>
+<p>Example with the toolchair extracted to <code>/mnt/data</code>:
+</p>
+<pre>PATH=/mnt/data/x-tools8/aarch64-unknown-linux-gnueabi/bin:$PATH
+</pre>
+<p>To read in the configuration file, <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> <code>distcc.service</code>.
+</p>
+<p>Optionally link it to your user's homedir if planning to build without makepkg.
+Example:
+</p>
+<pre>$ ln -s /mnt/data/x-tools8 x-tools8
+</pre>
+<h4><span class="mw-headline" id="Additional_toolchains">Additional toolchains</span></h4>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://embtoolkit.org/">EmbToolkit</a>: Tool for creating cross compilation tool chain; supports ARM and MIPS architectures; supports building of an LLVM based tool chain</li>
+<li> <a rel="nofollow" class="external text" href="http://crosstool-ng.org/">crosstool-ng</a>: Similar to EmbToolkit; supports more architectures (see website for more information)</li>
+<li> <a rel="nofollow" class="external text" href="https://www.linaro.org/downloads/">Linaro</a>: Provides tool chains for ARM development</li>
+</ul>
+<p>The <code>EmbToolkit</code> provides a nice graphical configuration menu (<code>make xconfig</code>) for configuring the tool chain.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Journalctl">Journalctl</span></h3>
+<p>Use <code>journalctl</code> to find out what was going wrong:
+</p>
+<pre>$ journalctl $(which distccd) -e --since "5 min ago"
+</pre>
+<h3><span class="mw-headline" id="code_110">code 110</span></h3>
+<p>Make sure that the tool chain works for the user account under which the distcc daemon process gets started (default is nobody). The following will test if the tool chain works for user nobody. In <code>/etc/passwd</code> change the login for the nobody user to the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /etc/passwd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+nobody:x:99:99:nobody:/:/bin/bash
+...
+</pre>
+<p>Then cd into the directory containing the cross compiler binaries and try to execute the compiler:
+</p>
+<pre># su nobody
+$ ./gcc --version
+bash: ./gcc: Permission denied
+</pre>
+<p>Users experiencing this error should make sure that groups permissions as described in <a href="#Other_architectures">#Other architectures</a> are correctly in setup.
+</p>
+<p>Make sure to change back <code>/etc/passwd</code> to its original state after these modifications.
+</p>
+<p>Alternatively, use sudo without changing the shell in /etc/passwd.
+</p>
+<pre> # sudo -u nobody gcc --version
+</pre>
+<h3><span class="mw-headline" id="Adjust_log_level">Adjust log level</span></h3>
+<p>By default, distcc will log to <code>/var/log/messages.log</code> as it goes along.  One trick (actually recommended in the distccd manpage) is to log to an alternative file directly.  Again, one can locate this in RAM via /tmp.  Another trick is to lower to log level of minimum severity of error that will be included in the log file.  Useful if only wanting to see error messages rather than an entry for each connection.  LEVEL can be any of the  standard syslog levels, and in particular critical, error, warning, notice, info, or debug.
+</p>
+<p>Either call distcc with the arguments mentioned here on the master or appended it to DISTCC_ARGS in <code>/etc/conf.d/distccd</code> on the slaves:
+</p>
+<pre>DISTCC_ARGS="--allow 192.168.0.0/24 --log-level error --log-file /tmp/distccd.log"
+</pre>
+<h3><span class="mw-headline" id="Failure_work_with_CMake_or_other_tools">Failure work with CMake or other tools</span></h3>
+<p>CMake sometimes pass <a rel="nofollow" class="external text" href="http://gcc.gnu.org/wiki/Response_Files">"response file"</a> to gcc, but the distcc cannot deal with it.
+There is a <a rel="nofollow" class="external text" href="http://code.google.com/p/distcc/issues/detail?id=85&amp;q=response">patch file</a>, but it has not been applied to upstream code.
+Users encountering this problem, can source this file or use the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/distcc-rsp/">distcc-rsp</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/distcc-rsp">aur-mirror</a>]</sup> package.
+</p>
+<h3><span class="mw-headline" id="Limit_HDD.2FSSD_usage">Limit HDD/SSD usage</span></h3>
+<h4><span class="mw-headline" id="Relocate_.24HOME.2F.distcc">Relocate $HOME/.distcc</span></h4>
+<p>By default, distcc creates <code>$HOME/.distcc</code> which stores transient relevant info as it serves up work for nodes to compile.  Create a directory named <i>.distcc</i> in RAM such as /tmp and soft link to it in $HOME.  This will avoid needless HDD read/writes and is particularly important for SSDs.
+</p>
+<pre>$ mv $HOME/.distcc /tmp
+$ ln -s /tmp/.distcc $HOME/.distcc
+</pre>
+<p>Use systemd to re-create this directory on a reboot (the soft link will remain until it is manually removed like any other file):
+</p>
+<p>Create the following tmpfile.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/tmpfs-create.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+d /tmp/.distcc 0755 &lt;username&gt; users -
+</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li>
+<li><a href="../en/Category:Distributed_computing.html" title="Category:Distributed computing">Distributed computing</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+<li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

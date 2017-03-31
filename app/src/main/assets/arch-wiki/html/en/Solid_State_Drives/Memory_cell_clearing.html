@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Solid State Drives/Memory cell clearing - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Solid_State_Drives_Memory_cell_clearing skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Solid State Drives/Memory cell clearing</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Solid_State_Drives.html" title="Solid State Drives">Solid State Drives</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Solid_State_Drives.html" title="Solid State Drives">Solid State Drives</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Securely_wipe_disk.html" title="Securely wipe disk">Securely wipe disk</a></li>
+</ul>
+</div>
+<p>On occasion, users may wish to completely reset an SSD's cells to the same virgin state they were manufactured, thus restoring it to its <a rel="nofollow" class="external text" href="http://www.anandtech.com/storage/showdoc.aspx?i=3531&amp;p=8">factory default write performance</a>. Write performance is known to degrade over time even on SSDs with native TRIM support. TRIM only safeguards against file deletes, not replacements such as an incremental save.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Back up ALL data of importance prior to continuing! Using this procedure will destroy ALL data on the SSD and render it unrecoverable by even data recovery services! Users will have to repartition the device and restore the data after completing this procedure!</li>
+<li> Do <b>not</b> proceed with this if the target drive isn't connected directly to a SATA interface. Issuing the Secure Erase command on a drive connected via USB or a SAS/RAID card could potentially brick the drive!</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Following information has been taken from the official ATA wiki page<a rel="nofollow" class="external autonumber" href="https://ata.wiki.kernel.org/index.php/ATA_Secure_Erase">[1]</a>.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Step_1_-_Make_sure_the_drive_security_is_not_frozen"><span class="tocnumber">1</span> <span class="toctext">Step 1 - Make sure the drive security is not frozen</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Dell_Systems"><span class="tocnumber">1.1</span> <span class="toctext">Dell Systems</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3"><a href="#Step_2_-_Enable_security_by_setting_a_user_password"><span class="tocnumber">2</span> <span class="toctext">Step 2 - Enable security by setting a user password</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Step_3_-_Issue_the_ATA_Secure_Erase_command"><span class="tocnumber">3</span> <span class="toctext">Step 3 - Issue the ATA Secure Erase command</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Tips"><span class="tocnumber">4</span> <span class="toctext">Tips</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Step_1_-_Make_sure_the_drive_security_is_not_frozen">Step 1 - Make sure the drive security is not frozen</span></h2>
+<p>Issue the following command:
+</p>
+<pre># hdparm -I /dev/sdX
+</pre>
+<p>If the command output shows "frozen" one cannot continue to the next step. Some BIOSes block the ATA Secure Erase command by issuing a "SECURITY FREEZE" command to "freeze" the drive before booting an operating system.
+</p>
+<p>A possible solution is to simply suspend the system.  Upon waking up, it is likely that the freeze will be lifted.  If unsuccessful, one can try hot-(re)plug the data cable (which might crash the kernel). If hot-(re)plugging the SATA data cable crashes the kernel try letting the operating system fully boot up, then quickly hot-(re)plug both the SATA power and data cables. If hot-(re)plugging of SATA cables still crashes the kernel, make sure that AHCI is enabled in the BIOS (AHCI allows hot-(re)plugging operations without a crash). Using a USB-to-SATA adapter is an option if it supports hotplugging. One can also use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hdparm">hdparm</a></span> via USB.
+</p>
+<h3><span class="mw-headline" id="Dell_Systems">Dell Systems</span></h3>
+<p>If the command output shows "frozen", you may be able to work around it by:
+</p>
+<ol>
+<li> Reboot into the Dell BIOS by pressing F2 on startup.</li>
+<li> Set the Internal HDD Password in the BIOS.</li>
+<li> Apply the changes and reboot.</li>
+<li> When prompted for the password by Dell Security Manager, press Escape rather than entering it.  The drive will remain locked but not frozen.</li>
+<li> Skip to Step 3 below.</li>
+</ol>
+<h2><span class="mw-headline" id="Step_2_-_Enable_security_by_setting_a_user_password">Step 2 - Enable security by setting a user password</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When the user password is set the drive will be locked after next power cycle denying normal access until unlocked with the correct password.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you have a Lenovo laptop, do <b>not</b> reboot it after this step. Certain variants of Lenovo's BIOS are susceptible to use a deviating algorithm for calculating the encryption key. After startup the machine will not be able to connect the SSD drive.<a rel="nofollow" class="external autonumber" href="https://jbeekman.nl/blog/2015/03/lenovo-thinkpad-hdd-password/">[2]</a>
+</div>
+<p>Any password will do, as this should only be temporary. After the secure erase the password will be set back to NULL. In this example, the password is "PasSWorD" as shown:
+</p>
+<pre># hdparm --user-master u --security-set-pass PasSWorD /dev/sdX
+security_password="PasSWorD"
+/dev/sdX:
+Issuing SECURITY_SET_PASS command, password="PasSWorD", user=user, mode=high
+</pre>
+<p>As a sanity check, issue the following command
+</p>
+<pre># hdparm -I /dev/sdX
+</pre>
+<p>The command output should display "enabled":
+</p>
+<pre>Security: 
+        Master password revision code = 65534
+                supported
+                enabled
+        not     locked
+        not     frozen
+        not     expired: security count
+                supported: enhanced erase
+        Security level high
+        2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<h2><span class="mw-headline" id="Step_3_-_Issue_the_ATA_Secure_Erase_command">Step 3 - Issue the ATA Secure Erase command</span></h2>
+<p>The final step is to issue the secure erase command, instructing the device's bios to erase its contents. Note for the device used in this example, earlier output states: 
+</p>
+<pre>2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.
+</pre>
+<p>As per ATA specification the <i>enhanced</i> security erase (<code>--security-erase-enhanced</code>) performs a more elaborate wipe. If the estimated completion time for both commands is equal, it indicates the drive manufacturer shortcut the specification and uses the same erase function for both. A short time (like 2 minutes) in turn indicates the device is self-encrypting and its bios function will wipe the internal encryption key instead of overwriting all data cells.<a rel="nofollow" class="external autonumber" href="http://security.stackexchange.com/questions/62253/what-is-the-difference-between-ata-secure-erase-and-security-erase-how-can-i-en">[3]</a> 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Triple check that the correct drive designation is used. There is <b>no turning back</b> once the command is confirmed. You have been warned.</div>
+<pre># hdparm --user-master u --security-erase PasSWorD /dev/sdX
+</pre>
+<p>Wait until the command completes. This example output shows it took about 40 seconds for an Intel X25-M 80GB SSD.
+</p>
+<pre>security_password="PasSWorD"
+/dev/sdX:
+Issuing SECURITY_ERASE command, password="PasSWorD", user=user
+0.000u 0.000s 0:39.71 0.0%      0+0k 0+0io 0pf+0w
+</pre>
+<p>The drive is now erased. After a successful erasure the drive security should automatically be set to disabled (thus no longer requiring a password for access). Verify this by running the following command:
+</p>
+<pre># hdparm -I /dev/sdX
+</pre>
+<p>The command output should display "not enabled": 
+</p>
+<pre>Security: 
+        Master password revision code = 65534
+                supported
+        not     enabled
+        not     locked
+        not     frozen
+        not     expired: security count
+                supported: enhanced erase
+        2min for SECURITY ERASE UNIT. 2min for ENHANCED SECURITY ERASE UNIT.</pre>
+<h2><span class="mw-headline" id="Tips">Tips</span></h2>
+<p>See the <a href="../../en/GRUB/EFI_examples.html" title="GRUB EFI Examples" class="mw-redirect">GRUB EFI Examples</a> for hardware-specific instructions to get GRUB EFI working following a wipe.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Storage.html" title="Category:Storage">Storage</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Solid_State_Drives/Memory_cell_clearing&amp;oldid=446714">https://wiki.archlinux.org/index.php?title=Solid_State_Drives/Memory_cell_clearing&amp;oldid=446714</a>"</li>
+					<li id="lastmod"> This page was last modified on 15 August 2016, at 12:35.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

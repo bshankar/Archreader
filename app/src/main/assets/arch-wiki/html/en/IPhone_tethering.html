@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>iPhone tethering - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-IPhone_tethering skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">iPhone tethering</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/IPod.html" title="IPod">IPod</a></li>
+</ul>
+</div>
+<p>Unless disabled by your provider, it's possible to share your iPhone's 3G data connection over WiFi, USB and Bluetooth without needing to jailbreak. WiFi requires no additional configuration provided your computer can connect to wireless networks, and you'll find instructions for USB and Bluetooth below.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Tethering_over_USB"><span class="tocnumber">1</span> <span class="toctext">Tethering over USB</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Tethering_over_USB_using_Personal_Hotspot"><span class="tocnumber">1.1</span> <span class="toctext">Tethering over USB using Personal Hotspot</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3"><a href="#Using_systemd-networkd_with_udev"><span class="tocnumber">1.1.1</span> <span class="toctext">Using systemd-networkd with udev</span></a></li>
+<li class="toclevel-3 tocsection-4">
+<a href="#Troubleshooting"><span class="tocnumber">1.1.2</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-4 tocsection-5"><a href="#The_iPhone_appears_in_the_device_list_but_it_doesn.27t_connect"><span class="tocnumber">1.1.2.1</span> <span class="toctext">The iPhone appears in the device list but it doesn't connect</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Tethering_over_Bluetooth"><span class="tocnumber">2</span> <span class="toctext">Tethering over Bluetooth</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Hardware_Requirements"><span class="tocnumber">2.1</span> <span class="toctext">Hardware Requirements</span></a></li>
+<li class="toclevel-2 tocsection-8">
+<a href="#Setup"><span class="tocnumber">2.2</span> <span class="toctext">Setup</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Gnome.2FXFCE"><span class="tocnumber">2.2.1</span> <span class="toctext">Gnome/XFCE</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#netcfg"><span class="tocnumber">2.2.2</span> <span class="toctext">netcfg</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Tethering_over_USB">Tethering over USB</span></h2>
+<h3><span class="mw-headline" id="Tethering_over_USB_using_Personal_Hotspot">Tethering over USB using Personal Hotspot</span></h3>
+<p>Tethering natively over USB is the optimal choice as it provides a more stable connection and uses less batteries than bluetooth or wifi.
+</p>
+<p>To tether your iPhone over USB, you will need to install these packages: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=usbmuxd">usbmuxd</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libimobiledevice">libimobiledevice</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ifuse">ifuse</a></span>.
+</p>
+<p>Then ensure the ipheth module is loaded (currently included in the default and LTS Archlinux kernels)
+</p>
+<pre># modprobe ipheth
+</pre>
+<p>Assuming everything's gone smoothly so far, enable <b>Personal Hotspot</b> on your iPhone and plug it into your computer. At this point you'll have a new ethernet device available, but connecting through it might not work quite yet; for some reason, the <b>ipheth</b> module only works when the iPhone's filesystem has been mounted by <b>ifuse</b>, so unless your system did it automatically when you plugged your iPhone in, you'll need to do it manually:
+</p>
+<pre># ifuse /path/to/mountpoint
+</pre>
+<p>To manually unmount it later, run:
+</p>
+<pre># fusermount -u /path/to/mountpoint
+</pre>
+<p>Once your iPhone's filesystem is mounted, you should be able to use any <a href="../en/List_of_applications.html#Network_Managers" title="List of applications">network manager</a> to connect to the internet through the new iPhone ethernet device just like you would any other ethernet connection.
+</p>
+<h4><span class="mw-headline" id="Using_systemd-networkd_with_udev">Using systemd-networkd with udev</span></h4>
+<p>Using <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a> you can simply adjust the networking to use the iphone as the gateway.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/udev/rules.d/90-iphone-tethering.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# Execute pairing program when appropriate
+ACTION=="add|remove", SUBSYSTEM=="net", ATTR{idVendor}=="05ac", ENV{ID_USB_DRIVER}=="ipheth", SYMLINK+="iphone", RUN+="/usr/bin/systemctl restart systemd-networkd.service"
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/network/enp0s26u1u2c4i2.network</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Match]
+Name=enp0s26u1u2c4i2
+
+[Network]
+DHCP=ipv4
+</pre>
+<p><i>enp0s26u1u2c4i2</i> being the name of the network device that is created from the iphone.
+</p>
+<h4><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h4>
+<h5><span class="mw-headline" id="The_iPhone_appears_in_the_device_list_but_it_doesn.27t_connect">The iPhone appears in the device list but it doesn't connect</span></h5>
+<p>Its possible that you may need to connect your iPhone and pair it with your computer before connecting in some circumstances (iPhones using a PIN unlock?):
+</p>
+<pre># idevicepair pair
+</pre>
+<h2><span class="mw-headline" id="Tethering_over_Bluetooth">Tethering over Bluetooth</span></h2>
+<p>Tethering over Bluetooth will drain the batteries relatively quickly, but simultaneous charging from an USB port works well.
+</p>
+<h3><span class="mw-headline" id="Hardware_Requirements">Hardware Requirements</span></h3>
+<ul>
+<li> iPhone running OS 3.0 with tethering enabled. See Settings &gt; General &gt; Network and turn on the tethering option.</li>
+<li> Bluetooth Adapter or similar, preferably with EDR(Enhanced Data Rate) for acceptable speeds. Tested with a Belkin F8T016NE.</li>
+</ul>
+<h3><span class="mw-headline" id="Setup">Setup</span></h3>
+<p>See the main article <a href="../en/Bluetooth.html" title="Bluetooth">Bluetooth</a> and setup the bluetooth daemon.
+</p>
+<h4><span class="mw-headline" id="Gnome.2FXFCE">Gnome/XFCE</span></h4>
+<p>Install the <a href="../en/Blueman.html" title="Blueman">Blueman</a> GTK+ Bluetooth manager.
+</p>
+<p>A Bluetooth icon should appear in your notification area. Note: the icon may not appear if bluetooth was not turned on at startup. Click it, and search for nearby devices, adding your iPhone (note, you may need to have the Bluetooth setting screen up on your iPhone for discovery to work).
+</p>
+<p>Once the iPhone has been added to the devices list, open the Device menu and select pair. This will require the usual entering of a PIN on the computer then the iPhone. Now open the Device menu again, and choose Network Access &gt; Network Access Point. If everything goes well, blueman reports a success and the status bar on your iPhone should glow blue, indicating a successful tether.
+</p>
+<p>Blueman will have created a new network interface, typically bnep0. To connect to it, run the following as root.
+</p>
+<pre># dhcpcd bnep0
+</pre>
+<h4><span class="mw-headline" id="netcfg">netcfg</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <i>netcfg</i> has been superseded by <a href="../en/Netctl.html" title="Netctl">netctl</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:IPhone_tethering">Talk:IPhone tethering#</a>)</div>
+</div>
+<p>Alternatively,  you can create a <a href="../en/Netctl.html" title="Netcfg" class="mw-redirect">netcfg</a> network profile to allow easy tethering from the command line,  without requiring <a href="../en/Blueman.html" title="Blueman">Blueman</a> or Gnome.  Assuming an already paired iPhone with address '00:00:DE:AD:BE:EF',  simply create a profile in /etc/network.d called - for example - 'tether':
+</p>
+<pre> CONNECTION="ethernet"
+ DESCRIPTION="Ethernet via pand tethering to iPhone"
+ INTERFACE="bnep0"
+ IPHONE="00:00:DE:AD:BE:EF"
+ PRE_UP="pand -E -S -c ${IPHONE} -e ${INTERFACE} -n 2&gt;/dev/null"
+ POST_DOWN="pand -k ${IPHONE}"
+ IP="dhcp"
+</pre>
+<p>Then,  either as root or using sudo,  execute:
+</p>
+<pre># netcfg tether
+</pre>
+<p>To bring the interface down and un-tether:
+</p>
+<pre># netcfg down tether
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Network_sharing.html" title="Category:Network sharing">Network sharing</a></li>
+<li><a href="../en/Category:Mobile_devices.html" title="Category:Mobile devices">Mobile devices</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

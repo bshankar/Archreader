@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Radicale - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Radicale skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Radicale</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/DAViCal.html" title="DAViCal">DAViCal</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Kcaldav.html" title="Kcaldav">Kcaldav</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/AgenDAV.html" title="AgenDAV">AgenDAV</a></li>
+</ul>
+</div>
+<p>Radicale is a server designed to support the CalDav and CardDav protocols.  It is based on Python 2.6-3.5.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Integration"><span class="tocnumber">2.1</span> <span class="toctext">Integration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Client_support"><span class="tocnumber">3</span> <span class="toctext">Client support</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/radicale/">radicale</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>The main configuration file is located at <code> /etc/radicale/config</code>.
+</p>
+<p>Many of the configuration options can be changed by command-line:
+</p>
+<pre>$radicale --help
+</pre>
+<h3><span class="mw-headline" id="Integration">Integration</span></h3>
+<p>Radicale can be integrated with HTTP webservers like Apache which support the mod_wgsi interface.
+This causes several options for the configuration of Radicale to be ignored, including: hosts, daemon, pid, ssl, certificate, key, protocol and ciphers keys in the [server] section of the config.
+Install the radicale module in the python path and write the .wgsi file (to document root).
+</p>
+<pre># import radicale
+# radicale.log.start()
+# application = radicale.Application()</pre>
+<p>The next step is to set up a virtual host for radicale.
+An example:
+</p>
+<pre>&lt;VirtualHost *:80&gt;
+    ServerName cal.yourdomain.org
+
+    WSGIDaemonProcess radicale user=http group=http threads=1
+    WSGIScriptAlias / /srv/http/radicale.wsgi
+
+    &lt;Directory /var/www&gt;
+        WSGIProcessGroup radicale
+        WSGIApplicationGroup %{GLOBAL}
+        AllowOverride None
+        Order allow,deny
+        allow from all
+    &lt;/Directory&gt;
+&lt;/VirtualHost&gt;</pre>
+<h2><span class="mw-headline" id="Client_support">Client support</span></h2>
+<p>Since it uses the CalDav and CardDav protocols, it should support most clients.  Currently, the officially supported list is this:
+</p>
+<ul>
+<li> <a href="../en/Thunderbird.html#Lightning_-_Calendar" title="Thunderbird">Thunderbird#Lightning - Calendar</a>
+</li>
+<li> <a href="../en/GNOME/Evolution.html" title="GNOME/Evolution">GNOME/Evolution</a>
+</li>
+<li> KOrganizer <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=korganizer">korganizer</a></span>
+</li>
+<li> InfCloud <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/infcloud/">infcloud</a></span><sup><small>AUR</small></sup>, CalDavZAP <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/caldavzap/">caldavzap</a></span><sup><small>AUR</small></sup>, CardDavMATE <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/carddavmate/">carddavmate</a></span><sup><small>AUR</small></sup>
+</li>
+<li> syncEvolution <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/syncevolution/">syncevolution</a></span><sup><small>AUR</small></sup>
+</li>
+<li> aCal, ContactSync, CalendarSync, CalDAV-Sync CardDAV-Sync and DAVdroid for Google Android</li>
+<li> Apple iOS</li>
+<li> Mac OSX Calendar/Contacts</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

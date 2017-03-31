@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Building 32-bit packages on a 64-bit system - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Building_32-bit_packages_on_a_64-bit_system skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Building 32-bit packages on a 64-bit system</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<h2><span class="mw-headline" id="Build_32-bit_packages_in_a_64-bit_environment">Build 32-bit packages in a 64-bit environment</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=devtools">devtools</a></span> is needed. Because of circular dependencies, you may need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span> at the same time.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using or plan to use either <a href="../en/Install_bundled_32-bit_system_in_64-bit_system.html" title="Install bundled 32-bit system in Arch64" class="mw-redirect">Install bundled 32-bit system in Arch64</a> you will need to use a different directory other than /opt/arch32 since this tutorial will conflict with the directory chosen in the other articles.</div>
+<p>This example uses mkarchroot to create the chroot environment. First, create /opt/arch32 or another directory of your choice. The next steps is to copy your existing pacman.conf and makepkg.conf file to /opt/arch32 or your chosen directory. In the following tutorial, substitute /opt/arch32 with your chosen directory if you decide to use a different directory.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you have customized either makepkg.conf or pacman.conf, then you will need to use the standard pacman.conf and makepkg.conf files.  Also make sure your /etc/pacman.d/mirrorlist contains the $arch variable instead of x86_64 or i686</div>
+<p><b>Edit your /opt/arch32/pacman.conf</b>
+</p>
+<p>Change <code>Architecture = auto</code> to <code>Architecture = i686</code>.
+</p>
+<p>You will also need to comment out any multi-lib repos.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><i>Thanks to Remy Oudompheng to pointing this out.</i>  devtools (version 0.9.10 in [testing]) contains a ready-to-use /usr/share/devtools/makepkg-i686.conf.  If you decide to use this conf file, you can skip the next step.  You will need to copy /usr/share/devtools/makepkg-i686.conf to /opt/arch32/makepkg.conf if you decide to use devtools[from testing].</div>
+<p><b>Edit /opt/arch32/makepkg.conf</b>
+</p>
+<pre>Change CARCH="x86_64" <b>to</b> <i>CARCH="i686"</i>
+CHOST="x86_64-unknown-linux-gnu" <b>to</b> CHOST="i686-unknown-linux-gnu".
+CFLAGS="-march=x86_64 -mtune=generic -O2 -pipe" <b>to</b> CFLAGS="-march=i686 -mtune=generic -O2 -pipe" .
+CXXFLAGS="-march=x86_64 -mtune=generic -O2 -pipe" <b>to</b> CXXFLAGS="-march=i686 -mtune=generic -O2 -pipe" .
+</pre>
+<p>After the changes have been made, you will need to create another directory, I created /aur as mine. 
+</p>
+<p><b>Next run:</b>
+</p>
+<pre>sudo mkarchroot -C /opt/arch32/pacman.conf -M /opt/arch32/makepkg.conf &lt;chrootdir&gt;/root base base-devel 
+</pre>
+<p>If you create the /aur directory like mine you would run 
+</p>
+<pre><i>sudo mkarchroot -C /opt/arch32/pacman.conf -M /opt/arch32/makepkg.conf /aur/root base base-devel</i>
+</pre>
+<p>You will need to edit /aur/copy/etc/pacman.d/mirrorlist and select which mirrors to use.
+</p>
+<p>Now you can use makechrootpkg to build i686 packages like this:
+</p>
+<pre># makechrootpkg -r /aur/
+</pre>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

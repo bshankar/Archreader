@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>KDE Wallet - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-KDE_Wallet skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">KDE Wallet</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://utils.kde.org/projects/kwalletmanager/">KDE Wallet Manager</a> is a tool to manage the passwords on your KDE Plasma system. By using the KWallet subsystem it not only allows you to keep your own secrets but also to access and manage the passwords of every application that integrates with KWallet.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Unlock_KDE_Wallet_automatically_on_login"><span class="tocnumber">1</span> <span class="toctext">Unlock KDE Wallet automatically on login</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Using_the_KDE_Wallet_to_store_ssh_keys"><span class="tocnumber">2</span> <span class="toctext">Using the KDE Wallet to store ssh keys</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#KDE_Wallet_for_Firefox"><span class="tocnumber">3</span> <span class="toctext">KDE Wallet for Firefox</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#KDE_Wallet_for_Chrome_and_Chromium"><span class="tocnumber">4</span> <span class="toctext">KDE Wallet for Chrome and Chromium</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Unlock_KDE_Wallet_automatically_on_login">Unlock KDE Wallet automatically on login</span></h2>
+<p>If your KWallet password is the same as your username password, you can unlock your wallet automatically on login.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kwallet-pam">kwallet-pam</a></span> package.
+Then edit your login manager pam file and add the lines under their corresponding sections:
+</p>
+<pre>-auth            optional        pam_kwallet5.so
+-session         optional        pam_kwallet5.so auto_start</pre>
+<p>For <a href="../en/LightDM.html" title="LightDM">LightDM</a>, for example, edit <code>/etc/pam.d/lightdm</code> and <code>/etc/pam.d/lightdm-greeter</code> files:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/lightdm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#%PAM-1.0
+auth            include         system-login
+-auth            optional        pam_kwallet5.so
+
+account         include         system-login
+
+password        include         system-login
+
+session         include         system-login
+-session         optional        pam_kwallet5.so auto_start</pre>
+<p>For <a href="../en/SDDM.html" title="SDDM">SDDM</a>, just edit the sddm file like this to get kwallet5 to auto-unlock:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sddm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">auth            include         system-login
+-auth            optional        pam_kwallet5.so
+account         include         system-login
+password        include         system-login
+session         include         system-login
+-session         optional        pam_kwallet5.so</pre>
+<p>After restarting your wallet should unlock automatically if your user password is the same as your KWallet password.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Currently, kwallet-pam has at least two limitations: first, it's not compatible with <a href="../en/GnuPG.html" title="GnuPG">GnuPG</a> keys, so KDE Wallet must use the standard blowfish encryption. Also, the wallet name must be "kdewallet" (that's the default name). If, for some reason, you create a new wallet, you need to use this name (so you will probably need to rename the old wallet too).</div>
+<h2><span class="mw-headline" id="Using_the_KDE_Wallet_to_store_ssh_keys">Using the KDE Wallet to store ssh keys</span></h2>
+<p>First, make sure that you have an <a href="../en/SSH_keys.html#SSH_agents" title="SSH agent" class="mw-redirect">SSH agent</a> running.
+</p>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ksshaskpass">ksshaskpass</a></span> package.
+</p>
+<p><a href="../en/Help:Reading.html#Append,_add,_create,_edit" title="Create" class="mw-redirect">Create</a> an autostart file and mark it executable with <a href="../en/File_permissions_and_attributes.html#Changing_permissions" title="Chmod" class="mw-redirect">chmod</a>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/autostart-scripts/ssh-add.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+ssh-add &lt;/dev/null
+</pre>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a><b>This article or section is a candidate for moving to <a href="../en/KDE.html#Autostarting_applications" title="KDE">KDE#Autostarting applications</a>.</b><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> General autostarting instructions belong there (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:KDE_Wallet">Talk:KDE Wallet#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The above ssh-add.sh script will only add the default key <code>~/.ssh/id_rsa</code>. Assuming you have different SSH keys named <code>key1</code>, <code>key2</code>, <code>key3</code> in <code>~/.ssh/</code>, you may add them automatically on login by changing the above script to:
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/autostart-scripts/ssh-add.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+ssh-add $HOME/.ssh/key1 $HOME/.ssh/key2 $HOME/.ssh/key3 &lt;/dev/null
+</pre>
+</div>
+<p>You also have to set the <code>SSH_ASKPASS</code> environment variable in your /etc/profile or ~/.bash_profile:
+</p>
+<pre>
+export SSH_ASKPASS="/usr/bin/ksshaskpass"
+</pre>
+<p>It will ask for your password and unlock your SSH keys. Upon restart your SSH keys should be unlocked once you give your kwallet password. 
+</p>
+<p>To add a new key and store the password with kwallet use the following command
+</p>
+<pre>$ ssh-add /path/to/new/key &lt;/dev/null
+</pre>
+<p>and append the key to the list of keys in <code>~/.config/autostart-scripts/ssh-add.sh</code> as explained above to have it unlocked upon providing the kwallet password.
+</p>
+<h2><span class="mw-headline" id="KDE_Wallet_for_Firefox">KDE Wallet for Firefox</span></h2>
+<p>There is an addon to make Firefox store passwords with <a rel="nofollow" class="external text" href="https://addons.mozilla.org/addon/kde5-wallet-password-integrati/">KDE5 Wallet</a>.
+</p>
+<h2><span class="mw-headline" id="KDE_Wallet_for_Chrome_and_Chromium">KDE Wallet for Chrome and Chromium</span></h2>
+<p>Chrome/Chromium has built in wallet integration. To enable it, run Chromium with the <code>--password-store=kwallet</code> or <code>--password-store=detect</code> argument. To make the change persistent, see <a href="../en/Chromium/Tips_and_tricks.html#Making_flags_persistent" title="Chromium/Tips and tricks">Chromium/Tips and tricks#Making_flags_persistent</a>. (Setting CHROMIUM_USER_FLAGS will not work.)
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://www.dennogumi.org/2014/04/unlocking-kwallet-with-pam/">Unlocking KWallet with PAM</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:KDE.html" title="Category:KDE">KDE</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Move.html" title="Category:Pages or sections flagged with Template:Move">Pages or sections flagged with Template:Move</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

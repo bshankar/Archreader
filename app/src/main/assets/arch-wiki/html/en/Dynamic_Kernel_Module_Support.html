@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dynamic Kernel Module Support - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dynamic_Kernel_Module_Support skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dynamic Kernel Module Support</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>From <a href="https://en.wikipedia.org/wiki/Dynamic_Kernel_Module_Support" class="extiw" title="wikipedia:Dynamic Kernel Module Support">Wikipedia</a>:
+</p>
+<dl><dd> <b>Dynamic Kernel Module Support</b> (<b>DKMS</b>) is a program/framework that enables generating Linux kernel modules whose sources generally reside outside the kernel source tree. The concept is to have DKMS modules automatically rebuilt when a new kernel is installed.</dd></dl>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Effects"><span class="tocnumber">1</span> <span class="toctext">Effects</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Upgrades"><span class="tocnumber">3</span> <span class="toctext">Upgrades</span></a></li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Usage"><span class="tocnumber">4</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#List_modules"><span class="tocnumber">4.1</span> <span class="toctext">List modules</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Rebuild_modules"><span class="tocnumber">4.2</span> <span class="toctext">Rebuild modules</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Remove_modules"><span class="tocnumber">4.3</span> <span class="toctext">Remove modules</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#DKMS_package_creation"><span class="tocnumber">5</span> <span class="toctext">DKMS package creation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Package_name"><span class="tocnumber">5.1</span> <span class="toctext">Package name</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Dependencies"><span class="tocnumber">5.2</span> <span class="toctext">Dependencies</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Build_source_location"><span class="tocnumber">5.3</span> <span class="toctext">Build source location</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Patching"><span class="tocnumber">5.4</span> <span class="toctext">Patching</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Module_loading_automatically_in_.install"><span class="tocnumber">5.5</span> <span class="toctext">Module loading automatically in .install</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#namcap_output"><span class="tocnumber">5.6</span> <span class="toctext">namcap output</span></a></li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Example"><span class="tocnumber">5.7</span> <span class="toctext">Example</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#PKGBUILD"><span class="tocnumber">5.7.1</span> <span class="toctext">PKGBUILD</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#dkms.conf"><span class="tocnumber">5.7.2</span> <span class="toctext">dkms.conf</span></a></li>
+<li class="toclevel-3 tocsection-18"><a href="#.install"><span class="tocnumber">5.7.3</span> <span class="toctext">.install</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Effects">Effects</span></h2>
+<p>The <i>positive effect</i> of using DKMS is that modules are often able to be rebuilt when the kernel is upgrading. This means that a user does not have to wait for a company, project, or package maintainer to release a new version of the module. 
+</p>
+<p>Since the introduction of <a href="../en/Pacman.html#Hooks" title="Pacman">Pacman#Hooks</a>, the rebuilt of the modules is handled automatically when a kernel is upgraded. See also <a href="#Upgrades">#Upgrades</a>.
+</p>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dkms">dkms</a></span> package and the headers for your kernel (for the standard kernel this would be <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span>).
+</p>
+<p>A good number of modules that lie outside the kernel source tree have a DKMS variant; a few are hosted in the <a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?&amp;q=dkms">official repositories</a>, most are found in the <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/?SeB=n&amp;K=dkms">AUR</a>.  Listed below are a few of the software packages that have a DKMS variant with additional links to dedicated sections where available:
+</p>
+<ul>
+<li> <a href="../en/AMD_Catalyst.html" title="AMD Catalyst">AMD Catalyst</a>: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/catalyst-dkms/">catalyst-dkms</a></span><sup><small>AUR</small></sup>
+</li>
+<li> <a href="../en/NVIDIA.html" title="NVIDIA">NVIDIA</a>:
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-dkms">nvidia-dkms</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nvidia-304xx-dkms">nvidia-304xx-dkms</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nvidia-173xx-dkms/">nvidia-173xx-dkms</a></span><sup><small>AUR</small></sup>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nvidia-96xx-dkms/">nvidia-96xx-dkms</a></span><sup><small>AUR</small></sup>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/nvidia-grsec-dkms/">nvidia-grsec-dkms</a></span><sup><small>AUR</small></sup>
+</li>
+</ul>
+</li>
+<li> <a href="../en/VirtualBox.html" title="VirtualBox">VirtualBox</a>:
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virtualbox-host-dkms">virtualbox-host-dkms</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virtualbox-guest-dkms">virtualbox-guest-dkms</a></span>
+</li>
+</ul>
+</li>
+<li> <a href="../en/VMware.html" title="VMware">VMware</a>, section <a href="../en/VMware.html#Using_DKMS_to_manage_the_modules" title="VMware">VMware#Using DKMS to manage the modules</a>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Upgrades">Upgrades</span></h2>
+<p>Though the rebuilt of the DKMS modules is usually seamless during a kernel upgrade, it may still happen that the rebuilt fails. You should pay extra attention to pacman's output! This applies in particular if the system relies on the DKMS module to boot successfully and/or if you use DKMS with a custom kernel not in the <a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a>. 
+</p>
+<p>To deal with changes in the kernel, fix bugs, or add necessary features consider upgrading the DKMS package before rebooting.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Usage for invoking DKMS manually.
+</p>
+<p>Tab-completion is available by doing:
+</p>
+<pre># source /usr/share/bash-completion/completions/dkms
+</pre>
+<h3><span class="mw-headline" id="List_modules">List modules</span></h3>
+<p>To list the current status of modules, versions and kernels within the tree:
+</p>
+<pre># dkms status
+</pre>
+<h3><span class="mw-headline" id="Rebuild_modules">Rebuild modules</span></h3>
+<p>Rebuild all modules for the currently running kernel:
+</p>
+<pre># dkms autoinstall
+</pre>
+<p>or for a specific kernel:
+</p>
+<pre># dkms autoinstall -k 3.16.4-1-ARCH
+</pre>
+<p>To build a <i>specific</i> module for the currently running kernel:
+</p>
+<pre># dkms install -m nvidia -v 334.21
+</pre>
+<p>or simply:
+</p>
+<pre># dkms install nvidia/334.21
+</pre>
+<p>To build a module for <i>all</i> kernels:
+</p>
+<pre># dkms install nvidia/334.21 --all
+</pre>
+<h3><span class="mw-headline" id="Remove_modules">Remove modules</span></h3>
+<p>To remove a module (old ones are not automatically removed):
+</p>
+<pre># dkms remove -m nvidia -v 331.49 --all
+</pre>
+<p>or simply:
+</p>
+<pre># dkms remove nvidia/331.49 --all
+</pre>
+<p>If the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dkms">dkms</a></span> is removed the information regarding previous module build files is lost. If this is the case, go through <code>/usr/lib/modules/KERNELVERSION-ARCH</code> and delete or files and directories no longer in use.
+</p>
+<h2><span class="mw-headline" id="DKMS_package_creation">DKMS package creation</span></h2>
+<p>Here are some guidelines to follow when creating a DKMS package.
+</p>
+<h3><span class="mw-headline" id="Package_name">Package name</span></h3>
+<p>DKMS packages are named by appending "<i>-dkms</i>" to the original package name.
+</p>
+<p>The variable <code>$_pkgname</code> is often used below <code>$pkgname</code> to describe the package name minus the "<i>-dkms</i>" suffix (e.g. <code>_pkgname=${pkgname%-*}</code>). This is useful to help keep similarities between the original package PKGBUILD and the DKMS variant.
+</p>
+<h3><span class="mw-headline" id="Dependencies">Dependencies</span></h3>
+<p>Dependencies should be inherited from the original version with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dkms">dkms</a></span> added and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span> removed (as it is listed by the dkms package as <i>optional</i>).
+</p>
+<h3><span class="mw-headline" id="Build_source_location">Build source location</span></h3>
+<p>Build sources should go into (this is the default build directory for DKMS):
+</p>
+<pre>/usr/src/<i>PACKAGE_NAME</i>-<i>PACKAGE_VERSION</i>
+</pre>
+<p>In the package directory, a DKMS configuration tells DKMS how to build the module (<code>dkms.conf</code>), including the variables <code>PACKAGE_NAME</code> and <code>PACKAGE_VERSION</code>.
+</p>
+<ul>
+<li> <code>PACKAGE_NAME</code> - the actual project name (usually <code>$_pkgname</code> or <code>$_pkgbase</code>). </li>
+<li> <code>PACKAGE_VERSION</code> - by convention this should also be the <code>$pkgver</code>.</li>
+</ul>
+<h3><span class="mw-headline" id="Patching">Patching</span></h3>
+<p>The sources can be patched either directly in the PKGBUILD or through <code>dkms.conf</code>.
+</p>
+<h3><span class="mw-headline" id="Module_loading_automatically_in_.install">Module loading automatically in .install</span></h3>
+<p>Loading and unloading modules should be left to the user.  Consider the possibility a module may crash when loaded.
+</p>
+<h3><span class="mw-headline" id="namcap_output">namcap output</span></h3>
+<p><a href="../en/Namcap.html" title="Namcap">namcap</a> (which attempts to check for common mistakes and non-standard decisions in a package) is good practice to use at least once on <i>any</i> package; however, it has not yet been updated for DKMS specific guidelines.
+</p>
+<p>For example, DKMS uses <code>/usr/src/</code> by default, but Namcap believes this to be a non-standard directory, a little contrary to its <a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard" class="extiw" title="wikipedia:Filesystem Hierarchy Standard">reference</a>.
+</p>
+<h3><span class="mw-headline" id="Example">Example</span></h3>
+<p>Here is an example package that edits <code>dkms.conf</code> according to the package name and version.
+</p>
+<h4><span class="mw-headline" id="PKGBUILD">PKGBUILD</span></h4>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">PKGBUILD</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># Maintainer: foo &lt;foo(at)gmail(dot)com&gt;
+# Contributor: bar &lt;bar(at)gmai(dot)com&gt;
+
+_pkgbase=amazing
+pkgname=amazing-dkms
+pkgver=1
+pkgrel=1
+pkgdesc="The Amazing kernel modules (DKMS)"
+arch=('i686' 'x86_64')
+url="<a rel="nofollow" class="external free" href="https://www.amazing.com/">https://www.amazing.com/</a>"
+license=('GPL2')
+depends=('dkms')
+conflicts=("${_pkgbase}")
+install=${pkgname}.install
+source=("${url}/files/tarball.tar.gz"
+        'dkms.conf'
+        'linux-3.14.patch')
+md5sums=(<i>use 'updpkgsums'</i>)
+
+build() {
+  cd ${_pkgbase}-${pkgver}
+
+  # Patch
+  patch -p1 -i "${srcdir}"/linux-3.14.patch
+
+  # Build
+  msg2 "Starting ./configure..."
+  ./configure
+
+  msg2 "Starting make..."
+  make
+}
+
+package() {
+  # Install
+  msg2 "Starting make install..."
+  make DESTDIR="${pkgdir}" install
+
+  # Copy dkms.conf
+  install -Dm644 dkms.conf "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/dkms.conf
+
+  # Set name and version
+  sed -e "s/@_PKGBASE@/${_pkgbase}/" \
+      -e "s/@PKGVER@/${pkgver}/" \
+      -i "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/dkms.conf
+
+  # Copy sources (including Makefile)
+  cp -r ${_pkgbase}/* "${pkgdir}"/usr/src/${_pkgbase}-${pkgver}/
+}</pre>
+<h4><span class="mw-headline" id="dkms.conf">dkms.conf</span></h4>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">dkms.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PACKAGE_NAME="@_PKGBASE@"
+PACKAGE_VERSION="@PKGVER@"
+MAKE[0]="make --uname_r=$kernelver"
+CLEAN="make clean"
+BUILT_MODULE_NAME[0]="@_PKGBASE@"
+DEST_MODULE_LOCATION[0]="/kernel/drivers/misc"
+AUTOINSTALL="yes"</pre>
+<h4><span class="mw-headline" id=".install">.install</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Those actions where moved to pacman hooks AFAIK. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dynamic_Kernel_Module_Support">Talk:Dynamic Kernel Module Support#</a>)</div>
+</div>
+<p>Instead of <code>depmod</code> now <code>dkms install</code> can be used (it depends on <code>dkms build</code>, which depends on <code>dkms add</code>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">amazing-dkms.install</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+# old version (without -$pkgrel): ${1%%-*}
+# new version (without -$pkgrel): ${2%%-*}
+
+post_install() {
+    dkms install <i>amazing</i>/${1%%-*}
+}
+
+pre_upgrade() {
+    pre_remove ${2%%-*}
+}
+
+post_upgrade() {
+    post_install ${1%%-*}
+}
+
+pre_remove() {
+    dkms remove <i>amazing</i>/${1%%-*} --all
+}
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>To keep DKMS packages closer to their non-DKMS counterparts: avoid cluttering up package files with DKMS-specific stuff (e.g. version numbers that need updating).</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.linuxjournal.com/article/6896">Linux Journal: Exploring Dynamic Kernel Module Support</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

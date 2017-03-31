@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Core utilities - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Core_utilities skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Core utilities</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Bash.html" title="Bash">Bash</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Zsh.html" title="Zsh">Zsh</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/General_recommendations.html" title="General recommendations">General recommendations</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GNU_Project.html" title="GNU Project">GNU Project</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Sudo.html" title="Sudo">sudo</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Cron.html" title="Cron">cron</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Man_page.html" title="Man page">man page</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Securely_wipe_disk.html#shred" title="Securely wipe disk">Securely wipe disk#shred</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/File_permissions_and_attributes.html" title="File permissions and attributes">File permissions and attributes</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Color_output_in_console.html" title="Color output in console">Color output in console</a></li>
+</ul>
+</div>
+<p>This article deals with so-called <i>core</i> utilities on a GNU/Linux system, such as <i>less</i>, <i>ls</i>, and <i>grep</i>. The scope of this article includes, but is not limited to, those utilities included with the GNU <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=coreutils">coreutils</a></span> package. What follows are various tips and tricks and other helpful information related to these utilities.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Basic_commands"><span class="tocnumber">1</span> <span class="toctext">Basic commands</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#cat"><span class="tocnumber">2</span> <span class="toctext">cat</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#dd"><span class="tocnumber">3</span> <span class="toctext">dd</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#grep"><span class="tocnumber">4</span> <span class="toctext">grep</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#find"><span class="tocnumber">5</span> <span class="toctext">find</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#iconv"><span class="tocnumber">6</span> <span class="toctext">iconv</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Convert_a_file_in_place"><span class="tocnumber">6.1</span> <span class="toctext">Convert a file in place</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#ip"><span class="tocnumber">7</span> <span class="toctext">ip</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#locate"><span class="tocnumber">8</span> <span class="toctext">locate</span></a></li>
+<li class="toclevel-1 tocsection-10">
+<a href="#less"><span class="tocnumber">9</span> <span class="toctext">less</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Vim_as_alternative_pager"><span class="tocnumber">9.1</span> <span class="toctext">Vim as alternative pager</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-12">
+<a href="#ls"><span class="tocnumber">10</span> <span class="toctext">ls</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Long_format"><span class="tocnumber">10.1</span> <span class="toctext">Long format</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#File_names_containing_spaces_enclosed_in_quotes"><span class="tocnumber">10.2</span> <span class="toctext">File names containing spaces enclosed in quotes</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="#lsblk"><span class="tocnumber">11</span> <span class="toctext">lsblk</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="#mkdir"><span class="tocnumber">12</span> <span class="toctext">mkdir</span></a></li>
+<li class="toclevel-1 tocsection-17"><a href="#mv"><span class="tocnumber">13</span> <span class="toctext">mv</span></a></li>
+<li class="toclevel-1 tocsection-18"><a href="#od"><span class="tocnumber">14</span> <span class="toctext">od</span></a></li>
+<li class="toclevel-1 tocsection-19"><a href="#pv"><span class="tocnumber">15</span> <span class="toctext">pv</span></a></li>
+<li class="toclevel-1 tocsection-20"><a href="#rm"><span class="tocnumber">16</span> <span class="toctext">rm</span></a></li>
+<li class="toclevel-1 tocsection-21"><a href="#sed"><span class="tocnumber">17</span> <span class="toctext">sed</span></a></li>
+<li class="toclevel-1 tocsection-22"><a href="#seq"><span class="tocnumber">18</span> <span class="toctext">seq</span></a></li>
+<li class="toclevel-1 tocsection-23"><a href="#ss"><span class="tocnumber">19</span> <span class="toctext">ss</span></a></li>
+<li class="toclevel-1 tocsection-24"><a href="#tar"><span class="tocnumber">20</span> <span class="toctext">tar</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#which"><span class="tocnumber">21</span> <span class="toctext">which</span></a></li>
+<li class="toclevel-1 tocsection-26"><a href="#wipefs"><span class="tocnumber">22</span> <span class="toctext">wipefs</span></a></li>
+<li class="toclevel-1 tocsection-27"><a href="#See_also"><span class="tocnumber">23</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Basic_commands">Basic commands</span></h2>
+<p>The following table lists basic shell commands every Linux user should be familiar with. Commands in <b>bold</b> are part of the shell, others are separate programs called from the shell. See the below sections and <i>Related articles</i> for details.
+</p>
+<table class="wikitable">
+<tr>
+<th> Command
+</th>
+<th> Description
+</th>
+<th> Manual page
+</th>
+<th> Example
+</th>
+</tr>
+<tr>
+<td> man
+</td>
+<td> Show manual page for a command
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 7 man"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man7/man.7.html">man(7)</a></span>
+</td>
+<td> man ed
+</td>
+</tr>
+<tr>
+<td> <b>cd</b>
+</td>
+<td> Change directory
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 cd"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/cd.1.html">cd(1)</a></span>
+</td>
+<td> cd /etc/pacman.d
+</td>
+</tr>
+<tr>
+<td> mkdir
+</td>
+<td> Create a directory
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 mkdir"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/mkdir.1.html">mkdir(1)</a></span>
+</td>
+<td> mkdir ~/newfolder
+</td>
+</tr>
+<tr>
+<td> rmdir
+</td>
+<td> Remove empty directory
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 rmdir"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/rmdir.1.html">rmdir(1)</a></span>
+</td>
+<td> rmdir ~/emptyfolder
+</td>
+</tr>
+<tr>
+<td> rm
+</td>
+<td> Remove a file
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 rm"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/rm.1.html">rm(1)</a></span>
+</td>
+<td> rm ~/file.txt
+</td>
+</tr>
+<tr>
+<td> rm -r
+</td>
+<td> Remove directory and contents
+</td>
+<td>
+</td>
+<td> rm -r ~/.cache
+</td>
+</tr>
+<tr>
+<td> ls
+</td>
+<td> List files
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 ls"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ls.1.html">ls(1)</a></span>
+</td>
+<td> ls *.mkv
+</td>
+</tr>
+<tr>
+<td> ls -a
+</td>
+<td> List hidden files
+</td>
+<td>
+</td>
+<td> ls -a /home/archie
+</td>
+</tr>
+<tr>
+<td> ls -al
+</td>
+<td> List hidden files and file properties
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> mv
+</td>
+<td> Move a file
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 mv"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/mv.1.html">mv(1)</a></span>
+</td>
+<td> mv ~/compressed.zip ~/archive/compressed2.zip
+</td>
+</tr>
+<tr>
+<td> cp
+</td>
+<td> Copy a file
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 cp"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/cp.1.html">cp(1)</a></span>
+</td>
+<td> cp ~/.bashrc ~/.bashrc.bak
+</td>
+</tr>
+<tr>
+<td> chmod +x
+</td>
+<td> Make a file executable
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 chmod"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/chmod.1.html">chmod(1)</a></span>
+</td>
+<td> chmod +x ~/.local/bin/myscript.sh
+</td>
+</tr>
+<tr>
+<td> cat
+</td>
+<td> Show file contents
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 cat"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/cat.1.html">cat(1)</a></span>
+</td>
+<td> cat /etc/hostname
+</td>
+</tr>
+<tr>
+<td> strings
+</td>
+<td> Show printable characters in binary files
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 strings"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/strings.1.html">strings(1)</a></span>
+</td>
+<td> strings /usr/bin/free
+</td>
+</tr>
+<tr>
+<td> find
+</td>
+<td> Search for a file
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 find"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/find.1.html">find(1)</a></span>
+</td>
+<td> find ~ -name myfile
+</td>
+</tr>
+<tr>
+<td> mount
+</td>
+<td> Mount a partition
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 mount"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/mount.8.html">mount(8)</a></span>
+</td>
+<td> mount /dev/sdc1 /media/usb
+</td>
+</tr>
+<tr>
+<td> df -h
+</td>
+<td> Show remaining space on all partitions
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 df"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/df.1.html">df(1)</a></span>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> ps -A
+</td>
+<td> Show all running processes
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 ps"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ps.1.html">ps(1)</a></span>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> killall
+</td>
+<td> Kill all running instances of a process
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 1 killall"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/killall.1.html">killall(1)</a></span>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td> ss -at
+</td>
+<td> Display a list of open TCP sockets
+</td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ss"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ss.8.html">ss(8)</a></span>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="cat">cat</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/cat_(Unix)" class="extiw" title="wikipedia:cat (Unix)">cat</a> is a standard Unix utility that concatenates and lists files.
+</p>
+<ul><li> Because <i>cat</i> is not a built-in shell, on many occasions you may find it more convenient to use a <a href="https://en.wikipedia.org/wiki/Redirection_(computing)" class="extiw" title="wikipedia:Redirection (computing)">redirection</a>, for example in scripts, or if you care a lot about performance. In fact <code>&lt; <i>file</i></code> does the same as <code>cat <i>file</i></code>.</li></ul>
+<ul><li> <i>cat</i> is able to work with multiple lines:</li></ul>
+<pre>
+$ cat &lt;&lt; EOF &gt;&gt; <i>path/file</i>
+<i>first line</i>
+...
+<i>last line</i>
+EOF
+</pre>
+<p>Alternatively, using <code>printf</code>:
+</p>
+<pre>
+$ printf '%s\n' 'first line' ... 'last line'
+</pre>
+<ul><li> If you need to list file lines in reverse order, there is a utility called <a href="https://en.wikipedia.org/wiki/tac_(Unix)" class="extiw" title="wikipedia:tac (Unix)">tac</a> (<i>cat</i> reversed).</li></ul>
+<h2><span class="mw-headline" id="dd">dd</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/dd_(Unix)" class="extiw" title="wikipedia:dd (Unix)">dd</a> is a utility for Unix and Unix-like operating systems whose primary purpose is to convert and copy a file.
+</p>
+<p>Similarly to <i>cp</i>, by default <i>dd</i> makes a bit-to-bit copy of the file, but with lower-level I/O flow control features.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>By default, <i>dd</i> outputs nothing until the task has finished. To monitor the progress of the operation, add the <code>status=progress</code> option to the command.</div>
+<p>'dd' can be used to:
+</p>
+<ul>
+<li> <a href="../en/Disk_cloning.html#Using_dd" title="Disk cloning">drive-related</a> tasks:
+<ul>
+<li> Create an image.</li>
+<li> Write an image.</li>
+<li> Clone whole drive, or partition.</li>
+<li> Wipe drive or partition.</li>
+<li> Erase partition table or boot sector.</li>
+<li> Backup boot sector.</li>
+<li> Restore system.</li>
+</ul>
+</li>
+<li> Get stream from device, <code>dd /dev/random</code>, or some input device.</li>
+<li> Create load on CPU (example: <code>dd if=/dev/zero of=/dev/null</code>).</li>
+<li> Create load on disk (example: <code>dd if=/dev/zero of=/<i>path</i>/<i>testfile</i> bs=<i>number_of</i>G count=<i>times</i> oflag=<i>fdatasync</i></code>).</li>
+<li> Create I/O load on disk (many rapid read/writes) (example above with little block size (<code>bs</code>) and big amount of cycles (<code>count</code>) and needed <code>oflag</code>, based on what and how you want to test).</li>
+<li> As a backup utility or part of solution.</li>
+<li> Convert a file to upper/lower case.</li>
+</ul>
+<p>For more information see <span class="plainlinks archwiki-template-man" title="$ man 1 dd"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/dd.1.html">dd(1)</a></span> or the <a rel="nofollow" class="external text" href="http://www.gnu.org/software/coreutils/dd">full documentation</a>.
+</p>
+<h2><span class="mw-headline" id="grep">grep</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/grep" class="extiw" title="wikipedia:grep">grep</a> (from <a href="https://en.wikipedia.org/wiki/ed" class="extiw" title="wikipedia:ed">ed</a>'s <i>g/re/p</i>, <i>global/regular expression/print</i>) is a command line text search utility originally written for Unix. The <i>grep</i> command searches files or standard input for lines matching a given regular expression, and prints these lines to the program's standard output.
+</p>
+<ul>
+<li> Remember that <i>grep</i> handles files, so a construct like <code>cat <i>file</i> | grep <i>pattern</i></code> is replaceable with <code>grep <i>pattern</i> <i>file</i></code>
+</li>
+<li> There are <i>grep</i> alternatives optimized for VCS source code, such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=the_silver_searcher">the_silver_searcher</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ack">ack</a></span>.</li>
+<li> To include file line numbers in the output, use the <code>-n</code> option. </li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Some commands send their output to <span class="plainlinks archwiki-template-man" title="$ man 3 stderr"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man3/stderr.3.html">stderr(3)</a></span>, and grep has no apparent effect. In this case, redirect <i>stderr</i> to <i>stdout</i> with <code><i>command</i> 2&gt;&amp;1 | grep <i>args</i></code> or (for Bash 4) <code><i>command</i> |&amp; grep <i>args</i></code>. See also <a rel="nofollow" class="external text" href="http://www.tldp.org/LDP/abs/html/io-redirection.html">I/O Redirection</a>.</div>
+<p>For color support, see <a href="../en/Color_output_in_console.html#grep" title="Color output in console">Color output in console#grep</a>.
+</p>
+<h2><span class="mw-headline" id="find">find</span></h2>
+<p><i>find</i> is part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=findutils">findutils</a></span> package, which belongs to the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> package group. 
+</p>
+<p>One would probably expect a <i>find</i> command to take as argument a file name and search the filesystem for files matching that name. For a program that does exactly that see <a href="#locate">#locate</a> below. 
+</p>
+<p>Instead, find takes a set of directories and matches each file under them against a set of expressions. This design allows for some very powerful "one-liners" that would not be possible using the "intuitive" design described above. See <a rel="nofollow" class="external text" href="http://mywiki.wooledge.org/UsingFind">UsingFind</a> for usage details.
+</p>
+<h2><span class="mw-headline" id="iconv">iconv</span></h2>
+<p><i>iconv</i> converts the encoding of characters from one codeset to another.
+</p>
+<p>The following command will convert the file <code>foo</code> from ISO-8859-15 to UTF-8 saving it to <code>foo.utf</code>:
+</p>
+<pre>$ iconv -f ISO-8859-15 -t UTF-8 foo &gt;foo.utf
+</pre>
+<p>See <code>man iconv</code> for more details.
+</p>
+<h3><span class="mw-headline" id="Convert_a_file_in_place">Convert a file in place</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=recode">recode</a></span> instead of iconv if you do not want to touch the mtime.</div>
+<p>Unlike <a href="#sed">sed</a>, <i>iconv</i> does not provide an option to convert a file in place. However, <code>sponge</code> can be used to handle it, it comes with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=moreutils">moreutils</a></span>.
+</p>
+<pre>$ iconv -f WINDOWS-1251 -t UTF-8 foobar.txt | sponge foobar.txt
+</pre>
+<p>See <code>man sponge</code> for details.
+</p>
+<h2><span class="mw-headline" id="ip">ip</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/Iproute2" class="extiw" title="wikipedia:Iproute2">ip</a> allows you to show information about network devices, IP addresses, routing tables, and other objects in the Linux <a href="https://en.wikipedia.org/wiki/Internet_Protocol" class="extiw" title="wikipedia:Internet Protocol">IP</a> software stack. By appending various commands, you can also manipulate or configure most of these objects.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <i>ip</i> utility is provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iproute2">iproute2</a></span> package, which is included in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group.</div>
+<table class="wikitable">
+<tr>
+<th> Object </th>
+<th> Purpose </th>
+<th> Manual page
+</th>
+</tr>
+<tr>
+<td> ip addr </td>
+<td> protocol address management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-address">ip-address(8)</span>
+</td>
+</tr>
+<tr>
+<td> ip addrlabel </td>
+<td> protocol address label management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-addrlabel"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-addrlabel.8.html">ip-addrlabel(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip l2tp </td>
+<td> tunnel Ethernet over IP (L2TPv3) </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-l2tp"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-l2tp.8.html">ip-l2tp(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip link </td>
+<td> network device configuration </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-link">ip-link(8)</span>
+</td>
+</tr>
+<tr>
+<td> ip maddr </td>
+<td> multicast addresses management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-maddress"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-maddress.8.html">ip-maddress(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip monitor </td>
+<td> watch for netlink messages </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-monitor"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-monitor.8.html">ip-monitor(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip mroute </td>
+<td> multicast routing cache management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-mroute"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-mroute.8.html">ip-mroute(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip mrule </td>
+<td> rule in multicast routing policy db </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> ip neigh </td>
+<td> neighbour/ARP tables management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-neighbour"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-neighbour.8.html">ip-neighbour(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip netns </td>
+<td> process network namespace management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-netns"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-netns.8.html">ip-netns(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip ntable </td>
+<td> neighbour table configuration </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-ntable"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-ntable.8.html">ip-ntable(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip route </td>
+<td> routing table management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-route">ip-route(8)</span>
+</td>
+</tr>
+<tr>
+<td> ip rule </td>
+<td> routing policy database management </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-rule"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-rule.8.html">ip-rule(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip tcp_metrics </td>
+<td> management for TCP Metrics </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-tcp_metrics"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-tcp_metrics.8.html">ip-tcp_metrics(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip tunnel </td>
+<td> tunnel configuration </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-tunnel"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-tunnel.8.html">ip-tunnel(8)</a></span>
+</td>
+</tr>
+<tr>
+<td> ip tuntap </td>
+<td> manage TUN/TAP devices </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> ip xfrm </td>
+<td> manage IPsec policies </td>
+<td> <span class="plainlinks archwiki-template-man" title="$ man 8 ip-xfrm"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ip-xfrm.8.html">ip-xfrm(8)</a></span>
+</td>
+</tr>
+</table>
+<p>The <code>help</code> command is available for all objects. For example, typing <code>ip addr help</code> will show you the command syntax available for the address object. For advanced usage see the <a rel="nofollow" class="external text" href="http://www.policyrouting.org/iproute2.doc.html">iproute2 documentation</a>.
+</p>
+<p>The <a href="../en/Network_configuration.html" title="Network configuration">Network configuration</a> article shows how the <i>ip</i> command is used in practice for various common tasks.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You might be familiar with the <a href="https://en.wikipedia.org/wiki/ifconfig" class="extiw" title="wikipedia:ifconfig">ifconfig</a> command, which was used in older versions of Linux for interface configuration. It is now deprecated in Arch Linux; you should use <i>ip</i> instead. </div>
+<h2><span class="mw-headline" id="locate">locate</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mlocate">mlocate</a></span> package. After installation a script is automatically scheduled to run a daily task to update its database. You can also manually run <i>updatedb</i> as root at any time. By default, paths such as <code>/media</code> and <code>/mnt</code> are ignored, so <i>locate</i> may not discover files on external devices. See <span class="plainlinks archwiki-template-man" title="$ man 1 updatedb"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/updatedb.1.html">updatedb(1)</a></span> for details.
+</p>
+<p>The <i>locate</i> command is a common Unix tool for quickly finding files by name. It offers speed improvements over the <a href="https://en.wikipedia.org/wiki/Find" class="extiw" title="wikipedia:Find">find</a> tool by searching a pre-constructed database file, rather than the filesystem directly. The downside of this approach is that changes made since the construction of the database file cannot be detected by <i>locate</i>. This problem is minimised by regular, typically scheduled use of the <i>updatedb</i> command, which (as the name suggests) updates the database.
+</p>
+<p>Before <i>locate</i> can be used, the database will need to be created. To do this, execute <code>updatedb</code> as root.
+</p>
+<p>See also <a rel="nofollow" class="external text" href="http://jvns.ca/blog/2015/03/05/how-the-locate-command-works-and-lets-rewrite-it-in-one-minute/">How locate works and rewrite it in one minute</a>.
+</p>
+<h2><span class="mw-headline" id="less">less</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> less is a complex beast, and this section should explain some of the basic less commands (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Core_utilities">Talk:Core utilities#</a>)</div>
+</div>
+<a href="https://en.wikipedia.org/wiki/less_(Unix)" class="extiw" title="wikipedia:less (Unix)">less</a> is a terminal pager program used to view the contents of a text file one screen at a time. Whilst similar to other pagers such as <a href="https://en.wikipedia.org/wiki/more_(command)" class="extiw" title="wikipedia:more (command)">more</a> and <a href="https://en.wikipedia.org/wiki/pg_(Unix)" class="extiw" title="wikipedia:pg (Unix)">pg</a>, <i>less</i> offers a more advanced interface and complete <a rel="nofollow" class="external text" href="http://www.greenwoodsoftware.com/less/faq.html">feature-set</a>.
+<p>See <a href="../en/List_of_applications.html#Terminal_pagers" title="List of applications">List of applications#Terminal pagers</a> for alternatives.
+</p>
+<h3><span class="mw-headline" id="Vim_as_alternative_pager">Vim as alternative pager</span></h3>
+<p><a href="../en/Vim.html" title="Vim">Vim</a> includes a script to view the content of text files, compressed files, binaries, directories. Add the following line to your shell configuration file to use it as a pager:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">alias less='/usr/share/vim/vim74/macros/less.sh'</pre>
+<p>There is also an alternative to <i>less.sh</i> macro, which may work as the <code>PAGER</code> environment variable. Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vimpager">vimpager</a></span> and add the following to your shell configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.bashrc</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">export PAGER='vimpager'
+alias less=$PAGER</pre>
+<p>Now programs that use the <code>PAGER</code> environment variable, like <a href="../en/Git.html" title="Git">git</a>, will use <i>vim</i> as pager.
+</p>
+<h2><span class="mw-headline" id="ls">ls</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/ls" class="extiw" title="wikipedia:ls">ls</a> lists directory contents.
+</p>
+<p>See <code>info ls</code> or <a rel="nofollow" class="external text" href="http://www.gnu.org/software/coreutils/manual/html_node/ls-invocation.html#ls-invocation">the online manual</a> for more information.
+</p>
+<h3><span class="mw-headline" id="Long_format">Long format</span></h3>
+<p>The <code>-l</code> option displays some metadata, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /path/to/directory</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+total 128
+drwxr-xr-x 2 archie users  4096 Jul  5 21:03 Desktop
+drwxr-xr-x 6 archie users  4096 Jul  5 17:37 Documents
+drwxr-xr-x 2 archie users  4096 Jul  5 13:45 Downloads
+-rw-rw-r-- 1 archie users  5120 Jun 27 08:28 customers.ods
+-rw-r--r-- 1 archie users  3339 Jun 27 08:28 todo
+-rwxr-xr-x 1 archie users  2048 Jul  6 12:56 myscript.sh
+</pre>
+<p>The <code>total</code> value represents the total disk allocation for the files in the directory, by default in number of blocks.
+</p>
+<p>Below, each file and subdirectory is represented by a line divided into 7 metadata fields, in the following order:
+</p>
+<ul>
+<li> type and permissions:
+<ul>
+<li> the first character is the entry type, see <code>info ls -n "What information is listed"</code> for an explanation of all the possible types; for example:
+<ul>
+<li> <code>-</code> denotes a normal file;</li>
+<li> <code>d</code> denotes a directory, i.e. a folder containing other files or folders;</li>
+<li> <code>p</code> denotes a named pipe (aka FIFO);</li>
+<li> <code>l</code> denotes a symbolic link;</li>
+</ul>
+</li>
+<li> the remaining characters are the entry's <a href="../en/File_permissions_and_attributes.html" title="Permissions" class="mw-redirect">permissions</a>;</li>
+</ul>
+</li>
+<li> number of <a href="https://en.wikipedia.org/wiki/Hard_link" class="extiw" title="wikipedia:Hard link">hard links</a> for the entity; files will have at least 1, i.e. the showed reference itself; folders will have at least 2: the showed reference, the self-referencing <code>.</code> entry, and then a <code>..</code> entry in each of its subfolders;</li>
+<li> owner <a href="../en/Users_and_groups.html" title="User" class="mw-redirect">user</a> name;</li>
+<li> <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a> name;</li>
+<li> size;</li>
+<li> last modification timestamp;</li>
+<li> entity name.</li>
+</ul>
+<h3><span class="mw-headline" id="File_names_containing_spaces_enclosed_in_quotes">File names containing spaces enclosed in quotes</span></h3>
+<p>By default, file and directory names that contain spaces are displayed surrounded by single quotes. To change this behavior use the <code>-N</code> or <code>--quoting-style=literal</code> options. Alternatively, set the <code>QUOTING_STYLE</code> <a href="../en/Environment_variables.html" title="Environment variable" class="mw-redirect">environment variable</a> to <code>literal</code>. <a rel="nofollow" class="external autonumber" href="https://unix.stackexchange.com/questions/258679/why-is-ls-suddenly-surrounding-items-with-spaces-in-single-quotes">[1]</a>
+</p>
+<h2><span class="mw-headline" id="lsblk">lsblk</span></h2>
+<p><span class="plainlinks archwiki-template-man" title="$ man 8 lsblk"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/lsblk.8.html">lsblk(8)</a></span> will show all available <a href="https://en.wikipedia.org/wiki/Device_file#Block_devices" class="extiw" title="w:Device file">block devices</a> along with their partitioning schemes, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lsblk -f</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+NAME   FSTYPE   LABEL       UUID                                 MOUNTPOINT
+sda
+├─sda1 vfat                 C4DA-2C4D                            /boot
+├─sda2 swap                 5b1564b2-2e2c-452c-bcfa-d1f572ae99f2 [SWAP]
+└─sda3 ext4                 56adc99b-a61e-46af-aab7-a6d07e504652 /
+</pre>
+<p>The beginning of the device name specifies the type of block device. Most modern storage devices (e.g. hard disks, <a href="../en/Solid_State_Drives.html" title="SSD" class="mw-redirect">SSDs</a> and USB flash drives) are recognised as SCSI disks (<code>sd</code>). The type is followed by a lower-case letter starting from <code>a</code> for the first device (<code>sda</code>), <code>b</code> for the second device (<code>sdb</code>), and so on. <i>Existing</i> partitions on each device will be listed with a number starting from <code>1</code> for the first partition (<code>sda1</code>), <code>2</code> for the second (<code>sda2</code>), and so on. In the example above, only one device is available (<code>sda</code>), and that device has three partitions (<code>sda1</code> to <code>sda3</code>), each with a different <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a>.
+</p>
+<p>Other common block device types include for example <code>mmcblk</code> for memory cards and <code>nvme</code> for <a href="../en/Solid_State_Drives/NVMe.html" title="Solid State Drives/NVMe">NVMe</a> devices. Unknown types can be searched in the <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/devices.txt">kernel documentation</a>.
+</p>
+<h2><span class="mw-headline" id="mkdir">mkdir</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/mkdir" class="extiw" title="wikipedia:mkdir">mkdir</a> makes directories.
+</p>
+<p>To create a directory and its whole hierarchy, the <code>-p</code> switch is used, otherwise an error is printed. As users are supposed to know what they want, <code>-p</code> switch may be used as a default:
+</p>
+<pre>alias mkdir='mkdir -p -v'
+</pre>
+<p>The <code>-v</code> switch make it verbose.
+</p>
+<p>Changing mode of a just created directory using <i>chmod</i> is not necessary as the <code>-m</code> option lets you define the access permissions.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you just want a temporary directory, a better alternative may be <a href="https://en.wikipedia.org/wiki/Temporary_file" class="extiw" title="wikipedia:Temporary file">mktemp</a>: <code>mktemp -p</code>.</div>
+<h2><span class="mw-headline" id="mv">mv</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/mv" class="extiw" title="wikipedia:mv">mv</a> moves and renames files and directories.
+</p>
+<p>To limit potential damage caused by the command, use an alias:
+</p>
+<pre>alias mv='timeout 8 mv -iv'
+</pre>
+<p>This alias suspends <i>mv</i> after eight seconds, asks confirmation to delete three or more files, lists the operations in progress and does not store itself in the shell history file if the shell is configured to ignore space starting commands.
+</p>
+<h2><span class="mw-headline" id="od">od</span></h2>
+<p>The <a href="https://en.wikipedia.org/wiki/od_(Unix)" class="extiw" title="wikipedia:od (Unix)">od</a> (<i>o</i>ctal <i>d</i>ump) command is useful for visualizing data that is not in a human-readable format, like the executable code of a program, or the contents of an unformatted device. See the <a rel="nofollow" class="external text" href="http://www.gnu.org/software/coreutils/manual/html_node/od-invocation.html#od-invocation">manual</a> for more information.
+</p>
+<h2><span class="mw-headline" id="pv">pv</span></h2>
+<p>You can use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pv">pv</a></span> (<i>pipe viewer</i>) to monitor the progress of data through a pipeline, for example:
+</p>
+<pre># dd if=<i>/source/filestream</i> | pv -<i>monitor_options</i> -s <i>size_of_file</i> | dd of=<i>/destination/filestream</i>
+</pre>
+<p>In most cases <code>pv</code> functions as a drop-in replacement for <code>cat</code>.
+</p>
+<h2><span class="mw-headline" id="rm">rm</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/rm_(Unix)" class="extiw" title="wikipedia:rm (Unix)">rm</a> removes files or directories.
+</p>
+<p>To limit potential damage caused by the command, use an alias:
+</p>
+<pre>alias rm='timeout 3 rm -Iv --one-file-system'
+</pre>
+<p>This alias suspends <i>rm</i> after three seconds, asks confirmation to delete three or more files, lists the operations in progress, does not involve more than one file systems and does not store itself in the shell history file if the shell is configured to ignore space starting commands. Substitute <code>-I</code> with <code>-i</code> if you prefer to confirm even for one file.
+</p>
+<p>Zsh users may want to put <code>noglob</code> before <code>timeout</code> to avoid implicit expansions.
+</p>
+<p>To remove directories known to be empty, use <i>rmdir</i> as it fails in case of files inside the target.
+</p>
+<h2><span class="mw-headline" id="sed">sed</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/sed" class="extiw" title="wikipedia:sed">sed</a> is stream editor for filtering and transforming text.
+</p>
+<p>Here is a handy <a rel="nofollow" class="external text" href="http://sed.sourceforge.net/sed1line.txt">list</a> of <i>sed</i> one-liners examples.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>More powerful alternatives are <a href="https://en.wikipedia.org/wiki/AWK" class="extiw" title="wikipedia:AWK">AWK</a> and even <a href="https://en.wikipedia.org/wiki/Perl" class="extiw" title="wikipedia:Perl">Perl</a> language.</div>
+<h2><span class="mw-headline" id="seq">seq</span></h2>
+<p><i>seq</i> prints a sequence of numbers. Shell built-in alternatives are available, so it is good practice to use them as explained on <a href="https://en.wikipedia.org/wiki/Seq_(Unix)" class="extiw" title="wikipedia:Seq (Unix)">Wikipedia</a>.
+</p>
+<h2><span class="mw-headline" id="ss">ss</span></h2>
+<p><i>ss</i> is a utility to investigate network ports and is part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iproute2">iproute2</a></span> package in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base/">base</a></span> group. It has a similar functionality to the <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/deprecation-of-net-tools/">deprecated</a> netstat utility. 
+</p>
+<p>Common usage includes:
+</p>
+<p>Display all TCP Sockets with service names:
+</p>
+<pre>$ ss -at
+</pre>
+<p>Display all TCP Sockets with port numbers:
+</p>
+<pre>$ ss -atn
+</pre>
+<p>Display all UDP Sockets:
+</p>
+<pre>$ ss -au
+</pre>
+<p>For more information see <span class="plainlinks archwiki-template-man" title="$ man 8 ss"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/ss.8.html">ss(8)</a></span> or <a rel="nofollow" class="external text" href="http://www.cyberciti.biz/files/ss.html">introductory examples</a>.
+</p>
+<h2><span class="mw-headline" id="tar">tar</span></h2>
+<p>As an early Unix archiving format, .tar files—known as "tarballs"—are widely used for packaging in Unix-like operating systems. Both <a href="../en/Pacman.html" title="Pacman">pacman</a> and <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> packages are compressed tarballs, and Arch uses <a href="../en/GNU_Project.html" title="GNU Project">GNU's</a> <i>tar</i> program by default. 
+</p>
+<p>For .tar archives, <i>tar</i> by default will extract the file according to its extension:
+</p>
+<pre>$ tar xvf <i>file.EXTENSION</i>
+</pre>
+<p>Forcing a given format:
+</p>
+<table class="wikitable">
+<tr>
+<th>File Type    </th>
+<th> Extraction Command
+</th>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tar</code>     </td>
+<td> <code>tar xvf <i>file</i>.tar</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tgz</code>     </td>
+<td> <code>tar xvzf <i>file</i>.tgz</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tar.gz</code>  </td>
+<td> <code>tar xvzf <i>file</i>.tar.gz</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tar.bz</code>  </td>
+<td> <code>bzip -cd <i>file</i>.bz | tar xvf -</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tar.bz2</code> </td>
+<td> <code>tar xvjf <i>file</i>.tar.bz2</code><br> <code>bzip2 -cd <i>file</i>.bz2 | tar xvf -</code>
+</td>
+</tr>
+<tr>
+<td>
+<code><i>file</i>.tar.xz</code>  </td>
+<td> <code>tar xvJf <i>file</i>.tar.xz</code><br> <code>xz -cd <i>file</i>.xz | tar xvf -</code>
+</td>
+</tr>
+</table>
+<p>The construction of some of these <i>tar</i> arguments may be considered legacy, but they are still useful when performing specific operations. See its <a href="../en/Man_page.html" title="Man page">man page</a> with <code>man tar</code> for details.
+</p>
+<h2><span class="mw-headline" id="which">which</span></h2>
+<p><a href="https://en.wikipedia.org/wiki/Which_(Unix)" class="extiw" title="wikipedia:Which (Unix)">which</a> shows the full path of shell commands. In the following example the full path of <code>ssh</code> is used as an argument for <code>journalctl</code>:
+</p>
+<pre># journalctl $(which sshd)
+</pre>
+<h2><span class="mw-headline" id="wipefs">wipefs</span></h2>
+<p><i>wipefs</i> can list or erase <a href="../en/File_systems.html" title="File system" class="mw-redirect">file system</a>, <a href="../en/RAID.html" title="RAID">RAID</a> or <a href="../en/Partitioning.html" title="Partition" class="mw-redirect">partition-table</a> signatures (magic strings) from the specified device. It does not erase the file systems themselves nor any other data from the device.
+</p>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 8 wipefs"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man8/wipefs.8.html">wipefs(8)</a></span> for more information.
+</p>
+<p>For example, to erase all signatures from the device <code>/dev/sdb</code> and create a signature backup <code>~/wipefs-sdb-<i>offset</i>.bak</code> file for each signature:
+</p>
+<pre># wipefs --all --backup /dev/sdb
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.reddit.com/r/commandline/comments/19garq/a_sampling_of_coreutils_120/">A sampling of coreutils</a> <a rel="nofollow" class="external text" href="http://www.reddit.com/r/commandline/comments/19ge6v/a_sampling_of_coreutils_2040/">, part 2</a> <a rel="nofollow" class="external text" href="http://www.reddit.com/r/commandline/comments/19j1w3/a_sampling_of_coreutils_4060/">, part 3</a> - Overview of commands in coreutils</li>
+<li> <a rel="nofollow" class="external text" href="http://www.gnu.org/software/coreutils/manual/coreutils.html">GNU Coreutils online documentation</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linuxquestions.org/questions/linux-newbie-8/learn-the-dd-command-362506/">Learn the DD command</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:System_administration.html" title="Category:System administration">System administration</a></li>
+<li><a href="../en/Category:Command_shells.html" title="Category:Command shells">Command shells</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

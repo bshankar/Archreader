@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>OpenDMARC - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-OpenDMARC skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">OpenDMARC</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Domain-based Message Authentication, Reporting and Conformance (DMARC) is a policy for mail transfer, which is already supported by some common mail providers.
+It depends on <a href="../en/SPF.html" title="SPF">SPF</a> and <a href="../en/OpenDKIM.html" title="OpenDKIM">DKIM</a>.
+DMARC provides and a policy for outgoing mail and checks incoming mails for compliance with that policy.
+The policy is published via a DNS TXT record. It is explained in section <a href="#Record">Record</a>.
+Validation is done in a daemon. Its configuration is explained in section <a href="#Validator">Validator</a>.
+For more info see the <a rel="nofollow" class="external text" href="https://datatracker.ietf.org/doc/draft-kucherawy-dmarc-base/">draft</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Record"><span class="tocnumber">1</span> <span class="toctext">Record</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Validator"><span class="tocnumber">2</span> <span class="toctext">Validator</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Installation"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Basic_configuration"><span class="tocnumber">2.2</span> <span class="toctext">Basic configuration</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Postfix_integration"><span class="tocnumber">2.3</span> <span class="toctext">Postfix integration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Security"><span class="tocnumber">3</span> <span class="toctext">Security</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#Weblinks"><span class="tocnumber">4</span> <span class="toctext">Weblinks</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Record">Record</span></h2>
+<p>An example Record looks like this: <code>v=DMARC1;p=quarantine;pct=100;rua=mailto:postmaster@example.org;ruf=mailto:forensik@example.org;adkim=s;aspf=r</code>.
+It is entered as TXT record on the <code>_dmarc</code>-Subdomain of your domain.
+</p>
+<table class="wikitable">
+<tr>
+<th> Tag Name </th>
+<th>	Purpose </th>
+<th>	Sample
+</th>
+</tr>
+<tr>
+<td>v	</td>
+<td> Protocol version	</td>
+<td> v=DMARC1
+</td>
+</tr>
+<tr>
+<td>pct	</td>
+<td> Percentage of messages subjected to filtering	</td>
+<td> pct=20
+</td>
+</tr>
+<tr>
+<td>ruf	</td>
+<td> Reporting URI for forensic reports	</td>
+<td> ruf=<a rel="nofollow" class="external free" href="mailto:authfail@example.com">mailto:authfail@example.com</a>
+</td>
+</tr>
+<tr>
+<td>rua	</td>
+<td> Reporting URI of aggregate reports	</td>
+<td> rua=<a rel="nofollow" class="external free" href="mailto:aggrep@example.com">mailto:aggrep@example.com</a>
+</td>
+</tr>
+<tr>
+<td>p	</td>
+<td> Policy for organizational domain	</td>
+<td> p=quarantine
+</td>
+</tr>
+<tr>
+<td>sp	</td>
+<td> Policy for subdomains of the	</td>
+<td> sp=reject
+</td>
+</tr>
+<tr>
+<td>adkim	</td>
+<td> Alignment mode for DKIM	</td>
+<td> adkim=s
+</td>
+</tr>
+<tr>
+<td>aspf	</td>
+<td> Alignment mode for SPF	</td>
+<td> aspf=r
+</td>
+</tr>
+<tr>
+<td>fo     </td>
+<td> Forensic report options      </td>
+<td> fo=1
+</td>
+</tr>
+<tr>
+<td>rf     </td>
+<td> Reporting format. either afrf or iodef </td>
+<td> rf=afrf
+</td>
+</tr>
+<tr>
+<td>ri     </td>
+<td> Reporting interval of aggregate reports. Often disregarded </td>
+<td> ri=86400
+</td>
+</tr>
+</table>
+<p>The alignment modes for DKIM and SPF can be s for strict and r for relaxed, where the latter allows a subdomain in the From header while the former does not.
+The policies for domain (p) and subdomain might be one of <code>monitor</code>, <code>quarantine</code> or <code>reject</code>.
+The forensic report option are "0" to generate reports if all underlying authentication mechanisms fail to produce a DMARC pass result, "1" to generate reports if any mechanisms fail, "d" to generate report if DKIM signature failed to verify, "s" if SPF failed.
+</p>
+<h2><span class="mw-headline" id="Validator">Validator</span></h2>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=opendmarc">opendmarc</a></span>.
+</p>
+<h3><span class="mw-headline" id="Basic_configuration">Basic configuration</span></h3>
+<p>Main configuration file is <code>/etc/opendmarc/opendmarc.conf</code>
+</p>
+<ul><li> Copy/move the sample configuration file <code>/etc/opendmarc/opendmarc.conf.sample</code> to <code>/etc/opendmarc/opendmarc.conf</code> and change the following options:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/opendmarc/opendmarc.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Socket                  unix:/run/opendmarc/dmarc.sock
+UserID                  opendmarc
+</pre>
+<p>If you want to run your DMARC-Validator on a different machine, you should change the Socket field to <code>inet:9999@10.0.0.4</code> with a sample host listening at at port 9999 for an optional client 10.0.0.4 (can be omitted, listens on 0.0.0.0 then).
+</p>
+<ul><li> Enable and start the <code>opendmarc.service</code>. Read <a href="../en/Daemons.html" title="Daemons">Daemons</a> for more information.</li></ul>
+<h3><span class="mw-headline" id="Postfix_integration">Postfix integration</span></h3>
+<p>Add the following lines to <code>main.cf</code>:
+</p>
+<pre> non_smtpd_milters = unix:/run/opendkim/dkim.sock, unix:/run/opendmarc/dmarc.sock
+ smtpd_milters = unix:/run/opendkim/dkim.sock, unix:/run/opendmarc/dmarc.sock
+</pre>
+<p>and make sure, that you DMARC is after DKIM milter.
+</p>
+<h2><span class="mw-headline" id="Security">Security</span></h2>
+<p>The daemon can drop privileges on its on, as configured above with the <code>UserID</code>. As the daemon does not need root privileges, it can be started with the right user as well.
+To accomplish that, use the following systemd unit file. The <code>UserID</code> statement should then be commented out of the config.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/opendmarc.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=OpenDMARC daemon
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+User=opendmarc
+Group=postfix
+ExecStart=/usr/bin/opendmarc -c /etc/opendkim/opendmarc.conf
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<h2><span class="mw-headline" id="Weblinks">Weblinks</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="https://dmarcian.com/dmarc-inspector/">DMARC Inspector</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

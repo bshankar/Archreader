@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Microcode - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Microcode skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Microcode</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Processor manufacturers release stability and security updates to the processor <a href="https://en.wikipedia.org/wiki/Microcode" class="extiw" title="wikipedia:Microcode">microcode</a>. While microcode can be updated through the BIOS, the Linux kernel is also able to apply these updates during boot. These updates provide bug fixes that can be critical to the stability of your system. Without these updates, you may experience spurious crashes or unexpected system halts that can be difficult to track down.
+</p>
+<p>Users of CPUs belonging to the Intel Haswell and Broadwell processor families in particular must install these microcode updates to ensure system stability. But all Intel users should install the updates as a matter of course.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Enabling_Intel_microcode_updates"><span class="tocnumber">2</span> <span class="toctext">Enabling Intel microcode updates</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#GRUB"><span class="tocnumber">2.1</span> <span class="toctext">GRUB</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Automatic_method"><span class="tocnumber">2.1.1</span> <span class="toctext">Automatic method</span></a></li>
+<li class="toclevel-3 tocsection-5"><a href="#Manual_method"><span class="tocnumber">2.1.2</span> <span class="toctext">Manual method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#systemd-boot"><span class="tocnumber">2.2</span> <span class="toctext">systemd-boot</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#EFI_boot_stub_.2F_EFI_handover"><span class="tocnumber">2.3</span> <span class="toctext">EFI boot stub / EFI handover</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#rEFInd"><span class="tocnumber">2.4</span> <span class="toctext">rEFInd</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Syslinux"><span class="tocnumber">2.5</span> <span class="toctext">Syslinux</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#LILO"><span class="tocnumber">2.6</span> <span class="toctext">LILO</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="#Verifying_that_microcode_got_updated_on_boot"><span class="tocnumber">3</span> <span class="toctext">Verifying that microcode got updated on boot</span></a></li>
+<li class="toclevel-1 tocsection-12">
+<a href="#Which_CPUs_accept_microcode_updates"><span class="tocnumber">4</span> <span class="toctext">Which CPUs accept microcode updates</span></a>
+<ul>
+<li class="toclevel-2 tocsection-13"><a href="#Detecting_available_microcode_update"><span class="tocnumber">4.1</span> <span class="toctext">Detecting available microcode update</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14"><a href="#Enabling_Intel_early_microcode_loading_in_custom_kernels"><span class="tocnumber">5</span> <span class="toctext">Enabling Intel early microcode loading in custom kernels</span></a></li>
+<li class="toclevel-1 tocsection-15"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>For AMD processors the microcode updates are available in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-firmware">linux-firmware</a></span>, which is installed as part of the base system. No further action is needed.
+</p>
+<p>For Intel processors, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span> package, and continue reading.
+</p>
+<h2><span class="mw-headline" id="Enabling_Intel_microcode_updates">Enabling Intel microcode updates</span></h2>
+<p>Microcode must be loaded by the bootloader. Because of the wide variability in users' early-boot configuration, Intel microcode updates may not be triggered automatically by Arch's default configuration. Many AUR kernels have followed the path of the official Arch kernels in this regard.
+</p>
+<p>These updates must be enabled by adding <code>/boot/intel-ucode.img</code> as the <b>first initrd in the bootloader config file</b>. This is in addition to the normal initrd file. See below for instructions for common bootloaders.
+</p>
+<h3><span class="mw-headline" id="GRUB">GRUB</span></h3>
+<h4><span class="mw-headline" id="Automatic_method">Automatic method</span></h4>
+<p><i>grub-mkconfig</i> will automatically detect the microcode update and configure <a href="../en/GRUB.html" title="GRUB">GRUB</a> appropriately. After installing the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span> package, users are directed to regenerate the GRUB config to activate loading the microcode update by running:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<h4><span class="mw-headline" id="Manual_method">Manual method</span></h4>
+<p>Alternatively, users that manage their GRUB config file manually can add <code>/intel-ucode.img</code> or <code>/boot/intel-ucode.img</code> to <code>grub.cfg</code> as follows:
+</p>
+<pre>[...]
+    echo	'Loading initial ramdisk ...'
+    initrd	/intel-ucode.img /initramfs-linux.img
+[...]
+</pre>
+<p>Repeat it for each menu entry.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This file will automatically be overwritten by <code>/usr/bin/grub-mkconfig</code> during certain updates negating the changes. It is strongly recommended to use the configuration directory in <code>/etc/grub.d/</code> to manage your GRUB configuration needs.</div>
+<h3><span class="mw-headline" id="systemd-boot">systemd-boot</span></h3>
+<p>Use the <code>initrd</code> option twice in <code>/boot/loader/entries/<i>entry</i>.conf</code>:
+</p>
+<pre>title   Arch Linux
+linux   /vmlinuz-linux
+initrd  /intel-ucode.img
+initrd  /initramfs-linux.img
+options ...
+</pre>
+<p>If you do not mount the ESP to <code>/boot</code>, copy <code>/boot/intel-ucode.img</code> to your <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>.
+</p>
+<h3><span class="mw-headline" id="EFI_boot_stub_.2F_EFI_handover">EFI boot stub / EFI handover</span></h3>
+<p>Append two <code>initrd=</code> options:
+</p>
+<pre>initrd=/intel-ucode.img initrd=/initramfs-linux.img</pre>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> What does this do, why isn't the above enough and why/how is it specific to this particular section? (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Microcode">Talk:Microcode#</a>)</div>
+</div>
+<p>For kernels that have been generated as a single file containing all initrd, cmdline and kernel, first generate the initrd to integrate by creating a new one as follows: 
+</p>
+<pre>cat /boot/intel-ucode.img /boot/initramfs-linux.img &gt; my_new_initrd
+objcopy ... --add-section .initrd=my_new_initrd</pre>
+<h3><span class="mw-headline" id="rEFInd">rEFInd</span></h3>
+<p>Edit boot options in <code>/boot/refind_linux.conf</code> as per EFI boot stub above, example:
+</p>
+<pre>"Boot with standard options" "rw root=UUID=(...) quiet initrd=/boot/intel-ucode.img initrd=/boot/initramfs-linux.img"
+</pre>
+<p>Users employing <a href="../en/REFInd.html#Manual_boot_stanzas" title="REFInd">manual stanzas</a> in <code><i>esp</i>/EFI/refind/refind.conf</code> to define the kernels should simply add <code>initrd=/intel-ucode.img</code> or <code>/boot/intel-ucode.img</code> as required to the options line, and not in the main part of the stanza.
+</p>
+<h3><span class="mw-headline" id="Syslinux">Syslinux</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There must be no spaces between the <code>intel-ucode</code> and <code>initramfs-linux</code> initrd files. The period signs also do not signify any shorthand or missing code; the <code>INITRD</code> line must be exactly as illustrated below.</div>
+<p>Multiple initrd's can be separated by commas in <code>/boot/syslinux/syslinux.cfg</code>:
+</p>
+<pre>LABEL arch
+    MENU LABEL Arch Linux
+    LINUX ../vmlinuz-linux
+    INITRD ../intel-ucode.img,../initramfs-linux.img
+    APPEND <i>&lt;your kernel parameters&gt;</i>
+</pre>
+<h3><span class="mw-headline" id="LILO">LILO</span></h3>
+<p>LILO and potentially other old bootloaders do not support multiple initrd images. In that case, <code>intel-ucode</code> and <code>initramfs-linux</code> will have to be merged into one image.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>The merged image must be recreated after each kernel update!</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The additional image, in this case <code>intel-ucode</code> must not be compressed. Otherwise, the kernel might complain that it can only find garbage in the uncompressed image and fail to boot.</div>
+<p><code>intel-ucode.img</code> should be a cpio archive, as in this case. It is advised to check whether the archive is compressed after each microcode update, as there is no guarantee that the image will stay non-compressed in the future.
+In order to check whether <code>intel-ucode</code> is compressed, you can use the <code>file</code> command:
+</p>
+<pre>$ file /boot/intel-ucode.img 
+/boot/intel-ucode.img: ASCII cpio archive (SVR4 with no CRC)
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The order is important. The original image <code>initramfs-linux</code> must be concatenated <b>on top</b> of the <code>intel-ucode</code> image.</div>
+<p>To merge both images into one image named <code>initramfs-merged.img</code>, the following command can be used:
+</p>
+<pre># cat /boot/intel-ucode.img /boot/initramfs-linux.img &gt; /boot/initramfs-merged.img
+</pre>
+<p>Now, edit <code>/etc/lilo.conf</code> to load the new image.
+</p>
+<pre>[...]
+   initrd=/boot/initramfs-merged.img
+[...]
+</pre>
+<p>And run <code>lilo</code> as root:
+</p>
+<pre># lilo
+</pre>
+<h2><span class="mw-headline" id="Verifying_that_microcode_got_updated_on_boot">Verifying that microcode got updated on boot</span></h2>
+<p>Use <code>/usr/bin/dmesg</code> to see if the microcode has been updated:
+</p>
+<pre>$ dmesg | grep microcode
+</pre>
+<p>On Intel systems one should see something similar to the following, indicating that microcode is updated early:
+</p>
+<pre>[    0.000000] CPU0 microcode updated early to revision 0x1b, date = 2014-05-29
+[    0.221951] CPU1 microcode updated early to revision 0x1b, date = 2014-05-29
+[    0.242064] CPU2 microcode updated early to revision 0x1b, date = 2014-05-29
+[    0.262349] CPU3 microcode updated early to revision 0x1b, date = 2014-05-29
+[    0.507267] microcode: CPU0 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507272] microcode: CPU1 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507276] microcode: CPU2 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507281] microcode: CPU3 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507286] microcode: CPU4 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507292] microcode: CPU5 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507296] microcode: CPU6 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507300] microcode: CPU7 sig=0x306a9, pf=0x2, revision=0x1b
+[    0.507335] microcode: Microcode Update Driver: v2.00 &lt;tigran@aivazian.fsnet.co.uk&gt;, Peter Oruba
+</pre>
+<p>It is entirely possible, particularly with newer hardware, that there is no microcode update for the CPU. In that case, the output may look like this:
+</p>
+<pre>[    0.292893] microcode: CPU0 sig=0x306c3, pf=0x2, revision=0x1c
+[    0.292899] microcode: CPU1 sig=0x306c3, pf=0x2, revision=0x1c
+[    0.292906] microcode: CPU2 sig=0x306c3, pf=0x2, revision=0x1c
+[    0.292912] microcode: CPU3 sig=0x306c3, pf=0x2, revision=0x1c
+[    0.292956] microcode: Microcode Update Driver: v2.00 &lt;tigran@aivazian.fsnet.co.uk&gt;, Peter Oruba
+</pre>
+<p>On AMD systems microcode is updated a bit later in the boot process, so the output would look something like this:
+</p>
+<pre>[    0.807879] microcode: CPU0: patch_level=0x01000098
+[    0.807888] microcode: CPU1: patch_level=0x01000098
+[    0.807983] microcode: Microcode Update Driver: v2.00 &lt;tigran@aivazian.fsnet.co.uk&gt;, Peter Oruba
+[   16.150642] microcode: CPU0: new patch_level=0x010000c7
+[   16.150682] microcode: CPU1: new patch_level=0x010000c7
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The date displayed does not correspond to the version of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span> package installed. It does show the last time Intel updated the microcode that corresponds to the specific hardware being updated.</div>
+<h2><span class="mw-headline" id="Which_CPUs_accept_microcode_updates">Which CPUs accept microcode updates</span></h2>
+<p>Users may consult either Intel or AMD at the following links to see if a particular model is supported:
+</p>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.amd64.org/microcode.html">AMD's Operating System Research Center</a>.</li>
+<li> <a rel="nofollow" class="external text" href="https://downloadcenter.intel.com/download/24661">Intel's download center</a>.</li>
+</ul>
+<h3><span class="mw-headline" id="Detecting_available_microcode_update">Detecting available microcode update</span></h3>
+<p>It is possible to find out if the <code>intel-ucode.img</code> contains a microcode image for the running CPU with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/iucode-tool/">iucode-tool</a></span><sup><small>AUR</small></sup>.
+</p>
+<ul>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=intel-ucode">intel-ucode</a></span> (changing initrd is not required for detection)</li>
+<li> Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/iucode-tool/">iucode-tool</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>
+</li>
+<li> <code># modprobe cpuid</code>
+</li>
+<li> <code># bsdtar -Oxf /boot/intel-ucode.img | iucode_tool -tb -lS - </code>
+</li>
+</ul>
+<dl><dd>(extract microcode image and search it for your cpuid)</dd></dl>
+<ul>
+<li> If an update is available, it should show up below <i>selected microcodes</i>
+</li>
+<li> The microcode might already be in your vendor bios and not show up loading in dmesg. Compare to the current microcode running <code>grep microcode /proc/cpuinfo</code>
+</li>
+</ul>
+<h2><span class="mw-headline" id="Enabling_Intel_early_microcode_loading_in_custom_kernels">Enabling Intel early microcode loading in custom kernels</span></h2>
+<p>In order for early loading to work in custom kernels, "CPU microcode loading support" needs to be compiled into the kernel, NOT compiled as a module. This will enable the "Early load microcode" prompt which should be set to "Y".
+</p>
+<pre>CONFIG_BLK_DEV_INITRD=Y
+CONFIG_MICROCODE=y
+CONFIG_MICROCODE_INTEL=Y
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://flossexperiences.wordpress.com/2013/11/17/updating-microcodes/">Updating microcodes</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://inertiawar.com/microcode/">Notes on Intel Microcode updates</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.kernel.org/doc/Documentation/x86/early-microcode.txt">Kernel early microcode</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.anandtech.com/show/8376/intel-disables-tsx-instructions-erratum-found-in-haswell-haswelleep-broadwelly">Erratum found in Haswell/Broadwell</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://gitlab.com/iucode-tool/iucode-tool">Technical details</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:CPU.html" title="Category:CPU">CPU</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

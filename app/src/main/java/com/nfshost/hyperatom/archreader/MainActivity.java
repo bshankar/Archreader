@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        MainContentFragment fragment = new MainContentFragment();
+        ContentFragment fragment = new ContentFragment();
         fragmentTransaction.add(R.id.content_main_linear_layout, fragment);
         fragmentTransaction.commit();
     }

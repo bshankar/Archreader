@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Invoiceplane - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Invoiceplane skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Invoiceplane</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://invoiceplane.com">InvoicePlane</a> is a self-hosted open source application for managing your quotes, invoices, clients and payments.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Database"><span class="tocnumber">2.1</span> <span class="toctext">Database</span></a></li>
+<li class="toclevel-2 tocsection-4">
+<a href="#Web_Server"><span class="tocnumber">2.2</span> <span class="toctext">Web Server</span></a>
+<ul>
+<li class="toclevel-3 tocsection-5"><a href="#Apache"><span class="tocnumber">2.2.1</span> <span class="toctext">Apache</span></a></li>
+<li class="toclevel-3 tocsection-6"><a href="#Lighttpd"><span class="tocnumber">2.2.2</span> <span class="toctext">Lighttpd</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Nginx"><span class="tocnumber">2.2.3</span> <span class="toctext">Nginx</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-8"><a href="#Installation_wizard"><span class="tocnumber">2.3</span> <span class="toctext">Installation wizard</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9"><a href="#Localization"><span class="tocnumber">3</span> <span class="toctext">Localization</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/invoiceplane/">invoiceplane</a></span><sup><small>AUR</small></sup> package.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Database">Database</span></h3>
+<p>Here is an example on how you could setup a database for Invoiceplane with <a href="../en/MySQL.html" title="MariaDB" class="mw-redirect">MariaDB</a> called <code>invoiceplane</code> for the user <code>invoiceplane</code> identified by the password <code>password</code>:
+</p>
+<pre>
+CREATE DATABASE invoiceplane;
+GRANT ALL PRIVILEGES ON invoiceplane.* TO invoiceplane@'localhost' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;
+</pre>
+<h3><span class="mw-headline" id="Web_Server">Web Server</span></h3>
+<h4><span class="mw-headline" id="Apache">Apache</span></h4>
+<p>Create the <a href="../en/Apache_HTTP_Server.html" title="Apache" class="mw-redirect">Apache</a> configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/httpd/conf/extra/invoiceplane.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Alias /invoiceplane "/usr/share/webapps/invoiceplane"
+&lt;Directory "/usr/share/webapps/invoiceplane"&gt;
+    DirectoryIndex index.php
+    AllowOverride All
+    Options FollowSymlinks
+    Require all granted
+&lt;/Directory&gt;
+</pre>
+<p>And include it in <code>/etc/httpd/conf/httpd.conf</code>:
+</p>
+<pre># InvoicePlane configuration
+Include conf/extra/invoiceplane.conf
+</pre>
+<h4><span class="mw-headline" id="Lighttpd">Lighttpd</span></h4>
+<p>Make an alias for invoiceplane in your <a href="../en/Lighttpd.html" title="Lighttpd">Lighttpd</a> configuration.
+</p>
+<pre> alias.url = ( "/invoiceplane" =&gt; "/usr/share/webapps/invoiceplane/")
+</pre>
+<p>Then enable mod_alias, mod_fastcgi and mod_cgi in your config ( server.modules section )
+</p>
+<h4><span class="mw-headline" id="Nginx">Nginx</span></h4>
+<p>To get invoiceplane working with your <a href="../en/Nginx.html" title="Nginx">nginx</a> setup, first take note of the root of the server you want to use. Supposing it is <code>/srv/http</code>, now create a symlink:
+</p>
+<pre> # ln -s /usr/share/webapps/invoiceplane/ /srv/http/invoiceplane
+</pre>
+<h3><span class="mw-headline" id="Installation_wizard">Installation wizard</span></h3>
+<p>Once database and webserver have been setup, visit the installation wizard page at <a rel="nofollow" class="external free" href="http://your-invoiceplane-domain.com/index.php/setup">http://your-invoiceplane-domain.com/index.php/setup</a> and follow the instructions.
+</p>
+<h2><span class="mw-headline" id="Localization">Localization</span></h2>
+<p>If you want to choose a different language than English visit <a rel="nofollow" class="external text" href="https://wiki.invoiceplane.com/en/1.0/system/translation-localization">Translation / Localization</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://invoiceplane.com">Offical web page</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://github.com/InvoicePlane/InvoicePlane/wiki">Documentation</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Office.html" title="Category:Office">Office</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

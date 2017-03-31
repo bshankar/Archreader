@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Security - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Security skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Security</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This page documents progress on fixing/implementing non-CVE security-related bugs and features.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Service_Isolation"><span class="tocnumber">1</span> <span class="toctext">Service Isolation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#User.2FGroup"><span class="tocnumber">1.1</span> <span class="toctext">User/Group</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#PrivateDevices"><span class="tocnumber">1.2</span> <span class="toctext">PrivateDevices</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#PrivateNetwork"><span class="tocnumber">1.3</span> <span class="toctext">PrivateNetwork</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#PrivateTmp"><span class="tocnumber">1.4</span> <span class="toctext">PrivateTmp</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#ReadOnly.2FReadWrite"><span class="tocnumber">1.5</span> <span class="toctext">ReadOnly/ReadWrite</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#NetworkManager_.2F_wpa_supplicant"><span class="tocnumber">1.6</span> <span class="toctext">NetworkManager / wpa_supplicant</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#World-readable.2Fwriteable_directories"><span class="tocnumber">2</span> <span class="toctext">World-readable/writeable directories</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Replacing_setuid_with_capabilities"><span class="tocnumber">3</span> <span class="toctext">Replacing setuid with capabilities</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#kernel_hardening"><span class="tocnumber">4</span> <span class="toctext">kernel hardening</span></a></li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Compiler_.2F_linker_hardening"><span class="tocnumber">5</span> <span class="toctext">Compiler / linker hardening</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12">
+<a href="#Packages_not_respecting_flags"><span class="tocnumber">5.1</span> <span class="toctext">Packages not respecting flags</span></a>
+<ul>
+<li class="toclevel-3 tocsection-13"><a href="#Tangible_attack_surface"><span class="tocnumber">5.1.1</span> <span class="toctext">Tangible attack surface</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Seemingly_no_tangible_attack_surface"><span class="tocnumber">5.1.2</span> <span class="toctext">Seemingly no tangible attack surface</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-15"><a href="#Full_RELRO"><span class="tocnumber">5.2</span> <span class="toctext">Full RELRO</span></a></li>
+<li class="toclevel-2 tocsection-16">
+<a href="#PIE"><span class="tocnumber">5.3</span> <span class="toctext">PIE</span></a>
+<ul>
+<li class="toclevel-3 tocsection-17"><a href="#Example"><span class="tocnumber">5.3.1</span> <span class="toctext">Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-18"><a href="#hardening-wrapper"><span class="tocnumber">5.4</span> <span class="toctext">hardening-wrapper</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#non-root_X"><span class="tocnumber">6</span> <span class="toctext">non-root X</span></a></li>
+<li class="toclevel-1 tocsection-20">
+<a href="#grsecurity"><span class="tocnumber">7</span> <span class="toctext">grsecurity</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21">
+<a href="#kernel"><span class="tocnumber">7.1</span> <span class="toctext">kernel</span></a>
+<ul>
+<li class="toclevel-3 tocsection-22"><a href="#use_upstream_features_when_possible"><span class="tocnumber">7.1.1</span> <span class="toctext">use upstream features when possible</span></a></li>
+<li class="toclevel-3 tocsection-23"><a href="#Enable_privileged_user_namespaces"><span class="tocnumber">7.1.2</span> <span class="toctext">Enable <i>privileged</i> user namespaces</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Enable_KASLR_and_hide_symbols"><span class="tocnumber">7.1.3</span> <span class="toctext">Enable KASLR and hide symbols</span></a></li>
+<li class="toclevel-3 tocsection-25"><a href="#CONFIG_GRKERNSEC_PROC.3Dn"><span class="tocnumber">7.1.4</span> <span class="toctext">CONFIG_GRKERNSEC_PROC=n</span></a></li>
+<li class="toclevel-3 tocsection-26"><a href="#CONFIG_GRKERNSEC_SYSCTL_ON.3Dn"><span class="tocnumber">7.1.5</span> <span class="toctext">CONFIG_GRKERNSEC_SYSCTL_ON=n</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#disable_Yama"><span class="tocnumber">7.1.6</span> <span class="toctext">disable Yama</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-28"><a href="#PaX"><span class="tocnumber">7.2</span> <span class="toctext">PaX</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-29"><a href="#See_also"><span class="tocnumber">8</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Service_Isolation">Service Isolation</span></h2>
+<p>Green cells indicate a security feature is implemented, and red cells indicate the lack of a feature. If it's not possible to implement a feature without losing functionality (even if off-by-default), a reason is given instead. This also applies to features that are simply not useful, such as PrivateTmp for services without any usage of <code>/tmp</code> as these can be handled with InaccessibleDirectories.
+</p>
+<p>A red cell without a link to an issue report indicates that research/testing is required in order to either mark it as not possible or report an issue. 
+</p>
+<table class="wikitable" style="text-align:center">
+
+<tr>
+<th> Package </th>
+<th> Service </th>
+<th> User </th>
+<th> Group </th>
+<th> PrivateDevices </th>
+<th> PrivateNetwork </th>
+<th> PrivateTmp
+</th>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=chrony">chrony</a></span> </td>
+<td> <code>chrony.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">chrony </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">chrony </td>
+<td> can use <code>/dev/rtc</code> </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cronie">cronie</a></span> </td>
+<td> <code>cronie.service</code> </td>
+<td> root (jobs) </td>
+<td> root (jobs) </td>
+<td> jobs </td>
+<td> jobs </td>
+<td> jobs
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lighttpd">lighttpd</a></span> </td>
+<td> <code>lighttpd.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">http </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">http </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> </td>
+<td> <code>paxd.service</code> </td>
+<td> root (xattrs) </td>
+<td> root (xattrs) </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> not used
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pdnsd">pdnsd</a></span> </td>
+<td> <code>pdnsd.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">pdnsd </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">pdnsd </td>
+<td> can use <code>/dev/isdninfo</code> </td>
+<td> n/a </td>
+<td> not used
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=polipo">polipo</a></span> </td>
+<td> <code>polipo.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">polipo </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">polipo </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=polkit">polkit</a></span> </td>
+<td> <code>polkit.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">polkitd </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">polkitd </td>
+<td> rules </td>
+<td> rules </td>
+<td> rules
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=privoxy">privoxy</a></span> </td>
+<td> <code>privoxy.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">privoxy </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">privoxy </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=networkmanager">networkmanager</a></span> </td>
+<td> <code>NetworkManager.service</code> </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">root </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">root </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nginx">nginx</a></span> </td>
+<td> <code>nginx.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">http </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">http </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td rowspan="2"> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ntp">ntp</a></span> </td>
+<td> <code>ntpdate.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">ntp </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">ntp </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+</tr>
+<tr>
+<td> <code>ntpd.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">ntp </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">ntp </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tor">tor</a></span> </td>
+<td> <code>tor.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">tor </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">tor </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> n/a </td>
+<td> not used
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tinyproxy">tinyproxy</a></span> </td>
+<td> <code>tinyproxy.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">tinyproxy </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">tinyproxy </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=transmission-cli">transmission-cli</a></span> </td>
+<td> <code>transmission.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">transmission </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">transmission </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wpa_supplicant">wpa_supplicant</a></span> </td>
+<td> <code>wpa_supplicant.service</code> </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">root </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">root </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=znc">znc</a></span> </td>
+<td> <code>znc.service</code> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">znc </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">znc </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> n/a </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No
+</td>
+</tr>
+</table>
+<h3><span class="mw-headline" id="User.2FGroup">User/Group</span></h3>
+<p>In nearly every case, services should use an unprivileged user rather than running as root. Some cases may require the use of capabilities like CAP_NET_ADMIN or CAP_NET_BIND_SERVICE. Some exceptions are cron daemons, since they need to run scripts as root and anything needing CAP_SYS_ADMIN or a similar capability essentially equivalent to root access.
+</p>
+<p>It is <b>not</b> appropriate to run services as <code>nobody</code>. If this user is shared among more than one service, then they are vulnerable to each other. For example, consider a caching dns server (pdnsd) running as nobody alongside ntpd running as nobody. If ntpd is compromised via a vulnerability, all the attacker should be able to do is mess with the time. However, thanks to the use of <code>nobody</code> they will be able to intercept/modify all dns requests and alter the persistent cache.
+</p>
+<h3><span class="mw-headline" id="PrivateDevices">PrivateDevices</span></h3>
+<p>If there is absolutely no usage of <code>/dev/</code>, then <code>InaccessibleDirectories</code> combined with <code>DevicePolicy=strict</code> is a valid alternative.
+</p>
+<p><a rel="nofollow" class="external free" href="https://fedoraproject.org/wiki/Changes/PrivateDevicesAndPrivateNetwork">https://fedoraproject.org/wiki/Changes/PrivateDevicesAndPrivateNetwork</a>
+</p>
+<h3><span class="mw-headline" id="PrivateNetwork">PrivateNetwork</span></h3>
+<p>This can be used for any service without a need for network communication beyond sockets provided through socket activation.
+</p>
+<p><a rel="nofollow" class="external free" href="https://fedoraproject.org/wiki/Changes/PrivateDevicesAndPrivateNetwork">https://fedoraproject.org/wiki/Changes/PrivateDevicesAndPrivateNetwork</a>
+</p>
+<h3><span class="mw-headline" id="PrivateTmp">PrivateTmp</span></h3>
+<p>This should only be used if a service needs to make use of <code>/tmp</code>. Bash makes extensive use of <code>/tmp</code> for stuff like here documents, so any shell usage is enough to make it worthwhile.
+</p>
+<p><a rel="nofollow" class="external free" href="https://fedoraproject.org/wiki/Features/ServicesPrivateTmp">https://fedoraproject.org/wiki/Features/ServicesPrivateTmp</a>
+</p>
+<h3><span class="mw-headline" id="ReadOnly.2FReadWrite">ReadOnly/ReadWrite</span></h3>
+<p>systemd has some basic MAC capabilities (InaccessibleDirectories, ReadWriteDirectories, ReadOnlyDirectories), but is limited to directories since it's based on bind mounts in a mount namespace. These features do not currently have the ability to recurse into submounts, causing the increase in security to be misleading. It doesn't appear that a whitelist model will work yet either, so it's far from providing true isolation at this point.
+</p>
+<h3><span class="mw-headline" id="NetworkManager_.2F_wpa_supplicant">NetworkManager / wpa_supplicant</span></h3>
+<p>It might be possible to drop nearly all capabilities other than CAP_NET_ADMIN. Of course, if these need CAP_SYS_ADMIN for something there's no point.
+</p>
+<h2><span class="mw-headline" id="World-readable.2Fwriteable_directories">World-readable/writeable directories</span></h2>
+<p>Many packages have unnecessarily world-readable directories, and some even have unnecessarily world-writeable ones. These permissions should be tightened up.
+</p>
+<ul><li> <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/39808">FS#39808</a> - [lighttpd] /var/{cache,log}/lighttpd should not be world-readable</li></ul>
+<h2><span class="mw-headline" id="Replacing_setuid_with_capabilities">Replacing setuid with capabilities</span></h2>
+<p>This is a scratch space tracking which packages still include setuid binaries and replacing these with capabilities where possible. Reducing setuid to CAP_SYS_ADMIN or any capabilities allowing escalation to root access is not very useful (at least without MAC/RBAC backing it up), so it will not be covered (yet?).
+</p>
+<ul>
+<li> <s><a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/39686">FS#39686</a> - [inetutils] rsh, rcp and rlogin should use cap_net_bind_service, not setuid</s>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sudo">sudo</a></span> - requires setuid</li>
+</ul>
+<h2><span class="mw-headline" id="kernel_hardening">kernel hardening</span></h2>
+<ul>
+<li> CONFIG_SECURITY_DMESG_RESTRICT (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/39685">FS#39685</a> - closed, not implemented)</li>
+<li> kptr_restrict=1 (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/34323">FS#34323</a> - closed, not implemented)</li>
+<li> CONFIG_RANDOMIZE_BASE (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/41463">FS#41463</a> - closed, not implemented)</li>
+<li> higher CONFIG_DEFAULT_MMAP_MIN_ADDR (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/41260">FS#41260</a> - implemented)</li>
+<li> RO/NX protections for loadable kernel modules (<a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/41347">FS#41347</a> - implemented)</li>
+</ul>
+<h2><span class="mw-headline" id="Compiler_.2F_linker_hardening">Compiler / linker hardening</span></h2>
+<p>The current globally enabled hardening flags:
+</p>
+<ul>
+<li> CPPFLAGS: -D_FORTIFY_SOURCE=2</li>
+<li> CFLAGS/CXXFLAGS: -fstack-protector-strong --param=ssp-buffer-size=4</li>
+<li> LDFLAGS: -z relro</li>
+</ul>
+<h3><span class="mw-headline" id="Packages_not_respecting_flags">Packages not respecting flags</span></h3>
+<h4><span class="mw-headline" id="Tangible_attack_surface">Tangible attack surface</span></h4>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=john">john</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43232">FS#43232</a>
+</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gpsd">gpsd</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43233">FS#43233</a></s>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bzip2">bzip2</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43231">FS#43231</a>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=festival">festival</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43229">FS#43229</a>
+</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=zita-alsa-pcmi">zita-alsa-pcmi</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43230">FS#43230</a></s> - rebuild</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=zita-resampler">zita-resampler</a></span></s> - rebuild</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mpv">mpv</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43235">FS#43235</a></s> - hardening-wrapper</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ffmpeg">ffmpeg</a></span></s> - hardening-wrapper</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=ghostscript">ghostscript</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43234">FS#43234</a>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=zip">zip</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43236">FS#43236</a>
+</li>
+<li> <s><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=unrar">unrar</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43237">FS#43237</a></s> - hardening-wrapper</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python">python</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2">python2</a></span> - <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/43246">FS#43246</a>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=imagemagick">imagemagick</a></span> - missing SSP even with hardening-wrapper, needs to be investigated</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=graphicsmagick">graphicsmagick</a></span> - missing SSP even with hardening-wrapper, needs to be investigated</li>
+</ul>
+<h4><span class="mw-headline" id="Seemingly_no_tangible_attack_surface">Seemingly no tangible attack surface</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It would be nice if these were fixed but it doesn't seem worth filing bugs for them.</div>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dmidecode">dmidecode</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=boost">boost</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gcc">gcc</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libcap">libcap</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=glew">glew</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dmenu">dmenu</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gsl">gsl</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hdparm">hdparm</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lm_sensors">lm_sensors</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lsof">lsof</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=procinfo-ng">procinfo-ng</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=nethogs">nethogs</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/qtchooser/">qtchooser</a></span><sup><small>AUR</small></sup>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rust">rust</a></span>
+</li>
+</ul>
+<h3><span class="mw-headline" id="Full_RELRO">Full RELRO</span></h3>
+<p>Arch passes <code>-z relro</code> to the linker in the default <code>LDFLAGS</code>, causing many internal ELF data sections to be marked read-only. However, passing <code>-z now</code> to disable lazy relocations is required to make all of these sections read-only and prevent gaining control of the process solely via modifications of the existing data. This will cause a loss in initial start-up performance, but it is negligible for most binaries.
+</p>
+<p>Packages with this enabled by default via upstream build flags:
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This is likely far from a complete list. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:DeveloperWiki:Security">Talk:DeveloperWiki:Security#</a>)</div>
+</div>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=chromium">chromium</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=colord">colord</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=playpen">playpen</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu">qemu</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=upower">upower</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tor">tor</a></span>
+</li>
+</ul>
+<h3><span class="mw-headline" id="PIE">PIE</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/ASLR" class="extiw" title="wikipedia:ASLR">ASLR</a> is enabled by default, and a stronger implementation is available in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span>. Data and code addresses in dynamic libraries are always randomized because these are always <a href="https://en.wikipedia.org/wiki/Position_independent_code" class="extiw" title="wikipedia:Position independent code">position independent code</a>. However, executables are not position independent by default and cannot take advantage of ASLR. This also applies to important ELF data like the GOT/PLT where many library functions will be referenced, so ASLR is essentially useless without PIE. Passing <code>-fPIE</code> (or <code>-fPIC</code>) while compiling and <code>-pie</code> while linking will enable PIE, but these cannot simply be default flags because it will break libraries.
+</p>
+<p>Packages with this enabled by default via upstream build flags:
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> This is likely far from a complete list. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:DeveloperWiki:Security">Talk:DeveloperWiki:Security#</a>)</div>
+</div>
+<ul>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=colord">colord</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=chromium">chromium</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cups">cups</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=playpen">playpen</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu">qemu</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sudo">sudo</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=upower">upower</a></span>
+</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tor">tor</a></span>
+</li>
+</ul>
+<h4><span class="mw-headline" id="Example">Example</span></h4>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">aslr.c</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#include &lt;stdio.h&gt;
+
+static void foo() {}
+static int bar = 5;
+
+int main(void) {
+    int baz = 5;
+    printf("function: %p, library function: %p, data: %p, stack: %p\n", foo, &amp;printf, &amp;bar, &amp;baz);
+    return 0;
+}</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ gcc -o aslr aslr.c; for i in $(seq 1 10); do ./aslr; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff909cac1c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fffee85453c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff0d05a1ec
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff6e250bbc
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff4889ec7c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff0eb22b5c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fffdce51a0c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fff8c42db5c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fffce276c2c
+function: 0x400506, library function: 0x4003e0, data: 0x600998, stack: 0x7fffedbb9ffc
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ gcc -fPIE -o aslr aslr.c; for i in $(seq 1 10); do ./aslr; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+function: 0x400516, library function: 0x7f1e55a3e150, data: 0x6009c0, stack: 0x7fff7ce9317c
+function: 0x400516, library function: 0x7ffae3294150, data: 0x6009c0, stack: 0x7fff428a8e1c
+function: 0x400516, library function: 0x7f39c4ed6150, data: 0x6009c0, stack: 0x7fffdb57db5c
+function: 0x400516, library function: 0x7f8e4fccd150, data: 0x6009c0, stack: 0x7ffffd46bd3c
+function: 0x400516, library function: 0x7f885508b150, data: 0x6009c0, stack: 0x7fffe7bf69cc
+function: 0x400516, library function: 0x7ffa9a05f150, data: 0x6009c0, stack: 0x7ffff89fdfac
+function: 0x400516, library function: 0x7ffe6114d150, data: 0x6009c0, stack: 0x7fff888accdc
+function: 0x400516, library function: 0x7f30f1893150, data: 0x6009c0, stack: 0x7fff2cfcb6bc
+function: 0x400516, library function: 0x7fd9e91dc150, data: 0x6009c0, stack: 0x7fff91c0062c
+function: 0x400516, library function: 0x7fdf4c136150, data: 0x6009c0, stack: 0x7fff7f96928c
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ gcc -fPIE -pie -o aslr aslr.c; for i in $(seq 1 10); do ./aslr; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+function: 0x7f35659b4770, library function: 0x7f3565433150, data: 0x7f3565bb4c38, stack: 0x7ffff3de9a4c
+function: 0x7f173ab2b770, library function: 0x7f173a5aa150, data: 0x7f173ad2bc38, stack: 0x7fffa0e7b12c
+function: 0x7ff59b960770, library function: 0x7ff59b3df150, data: 0x7ff59bb60c38, stack: 0x7fffaca2f8cc
+function: 0x7f557c39e770, library function: 0x7f557be1d150, data: 0x7f557c59ec38, stack: 0x7fff9127b98c
+function: 0x7f1bc8f53770, library function: 0x7f1bc89d2150, data: 0x7f1bc9153c38, stack: 0x7fff75d767ac
+function: 0x7f8af81e8770, library function: 0x7f8af7c67150, data: 0x7f8af83e8c38, stack: 0x7fff4bb7856c
+function: 0x7f8be8334770, library function: 0x7f8be7db3150, data: 0x7f8be8534c38, stack: 0x7fffcf8b33cc
+function: 0x7f3c246a5770, library function: 0x7f3c24124150, data: 0x7f3c248a5c38, stack: 0x7fffb25d8ccc
+function: 0x7fa457c39770, library function: 0x7fa4576b8150, data: 0x7fa457e39c38, stack: 0x7fffc92d85fc
+function: 0x7f1dffbb8770, library function: 0x7f1dff637150, data: 0x7f1dffdb8c38, stack: 0x7fffd2bfff2c</pre>
+<h3><span class="mw-headline" id="hardening-wrapper">hardening-wrapper</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=hardening-wrapper">hardening-wrapper</a></span> package wraps C and C++ compilers in order to enable the chosen hardening flags by default for all builds. A wrapper (or patched toolchain) is a hard requirement for enabling PIE for all packages, because different flags need to be passed depending on whether an executable or library is being compiled. Enabling PIE by default on x86_64 should be pursued, and this is likely the best way to do it.
+</p>
+<h2><span class="mw-headline" id="non-root_X">non-root X</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-server">xorg-server</a></span> package now ships with <code>/usr/bin/Xorg</code> as a wrapper script, calling the <code>/usr/bin/Xorg.wrap</code> setuid binary and dropping privileges if possible (video driver with <a href="../en/Kernel_mode_setting.html" title="KMS" class="mw-redirect">KMS</a>). To decrease the attack surface, the setuid should be split into a separate package and added as a dependency to drivers without rootless X support. The script is already set up to fall back to <code>/usr/bin/Xorg.bin</code> if the wrapper is unavailable.
+</p>
+<p><a rel="nofollow" class="external text" href="https://bugs.archlinux.org/task/41257">FS#41257</a>
+</p>
+<h2><span class="mw-headline" id="grsecurity">grsecurity</span></h2>
+<p>See <a href="../en/Grsecurity.html" title="Grsecurity">grsecurity</a> for most of the documentation. This section only covers ongoing packaging issues and the rationale behind certain choices.
+</p>
+<h3><span class="mw-headline" id="kernel">kernel</span></h3>
+<p>The kernel configuration will follow the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span> package's kernel configuration to the extent possible. The grsecurity patch set occasionally lags a bit behind the standard kernel so there may be minor differences due to the version.
+</p>
+<p>The default sysctl.d configuration file will not touch any flags outside of the kernel.grsecurity/kernel.pax namespaces. There should be no configuration changes creating an impact on the system when booting into a kernel without grsecurity/pax support.
+</p>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://projects.archlinux.org/svntogit/community.git/tree/trunk/config?h=packages/linux-grsec">i686 configuration</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://projects.archlinux.org/svntogit/community.git/tree/trunk/config.x86_64?h=packages/linux-grsec">x86_64 configuration</a>
+</li>
+</ul>
+<h4><span class="mw-headline" id="use_upstream_features_when_possible">use upstream features when possible</span></h4>
+<p>Some grsecurity features have made their way upstream in one form or another. These can be preferred over the grsecurity-specific versions since backwards compatibility isn't a concern.
+</p>
+<ul>
+<li> kernel.grsecurity.dmesg (CONFIG_GRKERNSEC_DMESG=y) -&gt; kernel.dmesg_restrict (CONFIG_SECURITY_DMESG_RESTRICT=y)</li>
+<li> kernel.grsecurity.linking_restrictions (CONFIG_GRKERNSEC_LINK=y) -&gt; fs.protected_hardlinks, fs.protected_symlinks (set by /usr/lib/sysctl.d/50-default.conf from <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd">systemd</a></span>)</li>
+</ul>
+<h4><span class="mw-headline" id="Enable_privileged_user_namespaces">Enable <i>privileged</i> user namespaces</span></h4>
+<p>The <code>CONFIG_USER_NS</code> configuration option is set, but grsecurity disallows unprivileged user namespaces so it doesn't introduce a security hole.
+</p>
+<h4><span class="mw-headline" id="Enable_KASLR_and_hide_symbols">Enable KASLR and hide symbols</span></h4>
+<p>The vanilla kernel doesn't enable KASLR (yet), but there's no disadvantage to enabling it for <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span>. It only randomizes the base address to one of 256 locations, so building a custom kernel for unique symbol addresses is still required for <code>CONFIG_GRKERNSEC_HIDESYM</code> to be a truly valuable exploit mitigation.
+</p>
+<h4><span class="mw-headline" id="CONFIG_GRKERNSEC_PROC.3Dn">CONFIG_GRKERNSEC_PROC=n</span></h4>
+<p>The protection for /proc cannot be toggled dynamically and breaks too much out-of-the-box. It also doesn't mix well with containers because it's global rather than a setting for each process namespace. The upstream <code>hidepid</code> and <code>gid</code> mount options for /proc provide the core functionality with per-namespace granularity, but lack some of the auxiliary information hiding.
+</p>
+<h4><span class="mw-headline" id="CONFIG_GRKERNSEC_SYSCTL_ON.3Dn">CONFIG_GRKERNSEC_SYSCTL_ON=n</span></h4>
+<p>This causes the flags to be disabled by default, as they will be enabled in a standard sysctl configuration instead. Otherwise, there is unavoidable audit spam in early boot (timechange, mount).
+</p>
+<h4><span class="mw-headline" id="disable_Yama">disable Yama</span></h4>
+<p>An equivalent to ptrace_scope is built-in to grsecurity, so there is no need for this.
+</p>
+<h3><span class="mw-headline" id="PaX">PaX</span></h3>
+<p>The kernel will only be compiled with supported for the extended attribute PaX flags. The ELF flags are not always a working solution, and it's much simpler if there is only one place to look for these. With only <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-grsec">linux-grsec</a></span> installed, <code>kernel.pax.softmode = 1</code> is set to disable the userspace mitigations. Installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=paxd">paxd</a></span> sets <code>kernel.pax.softmode = 0</code> and it automatically applies the common set of PaX exceptions whenever a Pacman transaction occurs.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a href="../en/CVE.html" title="CVE-2014" class="mw-redirect">CVE-2014</a>
+</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki.html" title="Category:DeveloperWiki">DeveloperWiki</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Kernels/Traditional compilation - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Kernels_Traditional_compilation skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Kernels/Traditional compilation</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Kernels.html" title="Kernels">Kernels</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This article is an introduction to building custom kernels from <b>kernel.org sources</b>.  This method of compiling kernels is the traditional method common to all distributions.  It can be, depending on your background, more complicated than using the <a href="../../en/Kernels/Arch_Build_System.html" title="Kernels/Arch Build System">Kernels/Arch Build System</a>. Consider the <a href="../../en/Arch_Build_System.html" title="Arch Build System">Arch Build System</a> tools are developed and maintained to make repeatable compilation tasks efficient and safe.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Preparation"><span class="tocnumber">1</span> <span class="toctext">Preparation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Install_the_core_packages"><span class="tocnumber">1.1</span> <span class="toctext">Install the core packages</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Create_a_kernel_compilation_directory"><span class="tocnumber">1.2</span> <span class="toctext">Create a kernel compilation directory</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Download_the_kernel_source"><span class="tocnumber">1.3</span> <span class="toctext">Download the kernel source</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Unpack_the_kernel_source"><span class="tocnumber">1.4</span> <span class="toctext">Unpack the kernel source</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7">
+<a href="#Kernel_configuration"><span class="tocnumber">2.1</span> <span class="toctext">Kernel configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#A._Default_Arch_configuration"><span class="tocnumber">2.1.1</span> <span class="toctext">A. Default Arch configuration</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="#B._Generated_configuration"><span class="tocnumber">2.1.2</span> <span class="toctext">B. Generated configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="#Advanced_configuration"><span class="tocnumber">2.2</span> <span class="toctext">Advanced configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11">
+<a href="#Compilation_and_installation"><span class="tocnumber">3</span> <span class="toctext">Compilation and installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="#Compile_the_kernel"><span class="tocnumber">3.1</span> <span class="toctext">Compile the kernel</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Compile_the_modules"><span class="tocnumber">3.2</span> <span class="toctext">Compile the modules</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Copy_the_kernel_to_.2Fboot_directory"><span class="tocnumber">3.3</span> <span class="toctext">Copy the kernel to /boot directory</span></a></li>
+<li class="toclevel-2 tocsection-15">
+<a href="#Make_initial_RAM_disk"><span class="tocnumber">3.4</span> <span class="toctext">Make initial RAM disk</span></a>
+<ul>
+<li class="toclevel-3 tocsection-16"><a href="#Automated_preset_method"><span class="tocnumber">3.4.1</span> <span class="toctext">Automated preset method</span></a></li>
+<li class="toclevel-3 tocsection-17"><a href="#Manual_method"><span class="tocnumber">3.4.2</span> <span class="toctext">Manual method</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-18"><a href="#Copy_System.map"><span class="tocnumber">3.5</span> <span class="toctext">Copy System.map</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19"><a href="#Bootloader_configuration"><span class="tocnumber">4</span> <span class="toctext">Bootloader configuration</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Preparation">Preparation</span></h2>
+<p>It is not necessary (or recommended) to use the root account or root privileges (i.e. via <a href="../../en/Sudo.html" title="Sudo">Sudo</a>) for kernel preparation.
+</p>
+<h3><span class="mw-headline" id="Install_the_core_packages">Install the core packages</span></h3>
+<p>Install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span> package group, which contains necessary packages such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=make">make</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gcc">gcc</a></span>. It is also recommended to install the following packages, as listed in the default Arch kernel <a rel="nofollow" class="external text" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/linux">PKGBUILD</a>: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xmlto">xmlto</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=docbook-xsl">docbook-xsl</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=kmod">kmod</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=inetutils">inetutils</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=bc">bc</a></span>
+</p>
+<h3><span class="mw-headline" id="Create_a_kernel_compilation_directory">Create a kernel compilation directory</span></h3>
+<p>It is recommended to create a separate build directory for your kernel(s). In this example, the directory <code>kernelbuild</code> will be created in the <code>home</code> directory:
+</p>
+<pre>$ mkdir ~/kernelbuild
+</pre>
+<h3><span class="mw-headline" id="Download_the_kernel_source">Download the kernel source</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> <a href="../../en/Systemd.html" title="Systemd">systemd</a> requires kernel version 3.11 and above (4.2 and above for unified <a href="../../en/Cgroups.html" title="Cgroups">cgroups</a> hierarchy support). See <code>/usr/share/systemd/README</code> for more information.</div>
+<p>Download the kernel source from <a rel="nofollow" class="external free" href="http://www.kernel.org">http://www.kernel.org</a>. This should be the <a href="https://en.wikipedia.org/wiki/Tar_(computing)" class="extiw" title="wikipedia:Tar (computing)">tarball</a> (<code>tar.xz</code>) file for your chosen kernel. 
+</p>
+<p>It can be downloaded by simply right-clicking the <code>tar.xz</code> link in your browser and selecting <code>Save Link As...</code>, or any other number of ways via alternative graphical or command-line tools that utilise HTTP, <a href="../../en/List_of_applications/Internet.html#FTP" title="Ftp" class="mw-redirect">FTP</a>, <a href="../../en/Rsync.html" title="Rsync">RSYNC</a>, or <a href="../../en/Git.html" title="Git">Git</a>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> It is a good idea to verify the PGP signature of any downloaded kernel tarball. This ensures that it is legitimate and helps to build the Web of Trust. See <a rel="nofollow" class="external text" href="http://kernel.org/signature.html#using-gnupg-to-verify-kernel-signatures">kernel.org/signature</a>.</div>
+<p>In the following command-line example, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wget">wget</a></span> has been installed and is used inside the <code>~/kernelbuild</code> directory to obtain kernel 4.7.2:
+</p>
+<pre>$ cd ~/kernelbuild
+$ wget <a rel="nofollow" class="external free" href="https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.7.2.tar.xz">https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.7.2.tar.xz</a>
+</pre>
+<p>If <code>wget</code> was not used inside the build directory, it will be necessary to move the tarball into it, e.g.
+</p>
+<pre>$ mv /path/to/linux-4.7.2.tar.xz ~/kernelbuild/
+</pre>
+<h3><span class="mw-headline" id="Unpack_the_kernel_source">Unpack the kernel source</span></h3>
+<p>Within the build directory, unpack the kernel tarball:
+</p>
+<pre>$ tar -xvJf linux-4.7.2.tar.xz
+</pre>
+<p>To finalise the preparation, ensure that the kernel tree is absolutely clean; do not rely on the source tree being clean after unpacking. To do so, first change into the new kernel source directory created, and then run the <code>make mrproper</code> command:
+</p>
+<pre>$ cd linux-4.7.2/
+$ make clean &amp;&amp; make mrproper
+</pre>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>This is the most crucial step in customizing the default kernel to reflect your computer's precise specifications. Kernel configuration is set in its <code>.config</code> file, which includes the use of <a href="../../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a>. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> It is not necessary to use the root account or root privileges at this stage.</div>
+<p>By setting the options in <code>.config</code> properly, your kernel and computer will function most efficiently. 
+</p>
+<h3><span class="mw-headline" id="Kernel_configuration">Kernel configuration</span></h3>
+<p>You can choose from two options to set your kernel configuration:
+</p>
+<ul>
+<li> A. Use the default Arch settings from an official kernel (recommended)</li>
+<li> B. Generate a configuration file which matches the currently running kernel's configuration. (useful if you want to customize your kernel settings further)</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Especially if you choose option **B**, you will be prompted to manually configure your kernel with tools described in <code>Advanced Configuration</code>.</div> 
+<h4><span class="mw-headline" id="A._Default_Arch_configuration">A. Default Arch configuration</span></h4>
+<p>This method will create a <code>.config</code> file for the custom kernel using the default Arch kernel settings. Ensure that a stock Arch kernel is running and use the following command inside the custom kernel source directory:
+</p>
+<pre>$ zcat /proc/config.gz &gt; .config
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>If you are compiling a kernel using your current <code>.config</code> file, do not forget to rename your kernel version in the <code> General Setup ---&gt;</code> option using one of the user interfaces listed later. If you skip this, there is the risk of overwriting one of your existing kernels by mistake.</div>
+<h4><span class="mw-headline" id="B._Generated_configuration">B. Generated configuration</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Plug in all devices that you expect to use on the system if using this method.</div>
+<p>Since kernel 2.6.32, the <code>localmodconfig</code> command will create a <code>.config</code> file for the custom kernel by disabling any and all options not currently in use by the running kernel <i>at the time</i>. In other words, it will only enable the options currently being used.
+</p>
+<p>While this minimalist approach will result in a highly streamlined and efficient configuration tailored specifically for your system, there are drawbacks, such as the potential inability of the kernel to support newer hardware, peripherals, or other features. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Again, ensure that all devices you expect to use have been connected to (and detected by) your system before running the following command</div>
+<pre>$ make localmodconfig
+</pre>
+<h3><span class="mw-headline" id="Advanced_configuration">Advanced configuration</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Unless you want to see a lot of extra messages when booting and shutting down with the custom kernel, it is a good idea to deactivate the relevant debugging options.</div>
+<p>There are several tools available to fine-tune the kernel configuration, which provide an alternative to otherwise spending hours manually configuring each and every one of the options available during compilation. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> Those tools listed below will provide you with three configuration options for each kernel feature: <code>y</code>  for enabled, <code>n</code> for disabled, and <code>m</code> for enabled as kernel module (loaded when necessary).</div>
+<p>Those tools are:
+</p>
+<ul>
+<li> <code>make menuconfig</code>: Command-line ncurses interface superseded by <code>nconfig</code>
+</li>
+<li> <code>make nconfig</code>: Newer ncurses interface for the command-line</li>
+<li> <code>make xconfig</code>: User-friendly graphical interface that requires <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=packagekit-qt4">packagekit-qt4</a></span><sup>[<a href="../../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: package not found]</sup> to be installed as a dependency. This is the recommended method - especially for less experienced users - as it is easier to navigate, and information about each option is also displayed.</li>
+<li> <code>make gconfig</code>: Graphical configuration similar to xconfig but using gtk.</li>
+</ul>
+<p>The chosen method should be run inside the kernel source directory, and all will either create a new <code>.config</code> file, or overwrite an existing one where present.  All optional configurations will be automatically enabled, although any newer configuration options (i.e. with an older kernel <code>.config</code>) may not be automatically selected.
+</p>
+<p>Once the changes have been made save the <code>.config</code> file. It is a good idea to make a backup copy outside the source directory.  You may need to do this multiple times before you get all the options right. 
+</p>
+<p>If unsure, only change a few options between compilations.  If you cannot boot your newly built kernel, see the list of necessary config items <a rel="nofollow" class="external text" href="https://www.archlinux.org/news/users-of-unofficial-kernels-must-enable-devtmpfs-support/">here</a>. 
+</p>
+<p>Running <code>$ lspci -k #</code>  from liveCD lists names of kernel modules in use.  Most importantly, you must maintain CGROUPS support.  This is necessary for <a href="../../en/Systemd.html" title="Systemd">systemd</a>.
+</p>
+<h2><span class="mw-headline" id="Compilation_and_installation">Compilation and installation</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you want to have <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=gcc">gcc</a></span> optimize for your processor's instruction sets, edit <code>arch/x86/Makefile</code> (i686) or <code>arch/x86_64/Makefile</code> (86_64) within the kernel source directory:
+<ul>
+<li> Look for <code>CONFIG_MK8,CONFIG_MPSC,CONFIG_MCORE2,CONFIG_MATOM,CONFIG_GENERIC_CPU</code> that you have chosen in <code>Processor type and features &gt; Processor Family</code>
+</li>
+<li> Change the call cc-options flag to <code>-march=native</code> to the one that you have selected in Processor Family, e.g. <code>cflags-$(CONFIG_MK8) += $(call cc-option,-march=native)</code>. This is probably the best way to compile with <code>-march=native</code> as it works.</li>
+</ul>
+<ul><li> Note: For 32bit Kernels, you need to edit <code>arch/x86/Makefile_32.cpu</code> instead and set <code>-march=native</code> for your processor.</li></ul>
+</div>
+<h3><span class="mw-headline" id="Compile_the_kernel">Compile the kernel</span></h3>
+<p>Compilation time will vary from as little as fifteen minutes to over an hour, depending on your kernel configuration and processor capability. See <a href="../../en/Makepkg.html#MAKEFLAGS" title="Makepkg">Makeflags</a> for details. Once the <code>.config</code> file has been set for the custom kernel, within the source directory run the following command to compile:
+</p>
+<pre>$ make
+</pre>
+<h3><span class="mw-headline" id="Compile_the_modules">Compile the modules</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>From this step onwards, commands must be either run as root or with root privileges. If not, they will fail.</div>
+<p>Once the kernel has been compiled, the modules for it must follow. As root or with root privileges, run the following command to do so:
+</p>
+<pre># make modules_install
+</pre>
+<p>This will copy the compiled modules into <code>/lib/modules/&lt;kernel version&gt;-&lt;config local version&gt;</code>. For example, for kernel version 3.18 installed above, they would be copied to <code>/lib/modules/3.18.28-ARCH</code>. This keeps the modules for individual kernels used separated.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If your system requires modules which are not distributed with the regular Linux kernel, you need to compile them for your custom kernel when it is finished. Such modules are typically those which you explicitly installed seperately for your running system. See <a href="../../en/NVIDIA.html#Custom_kernel" title="NVIDIA">NVIDIA#Custom kernel</a> for an example.</div>
+<h3><span class="mw-headline" id="Copy_the_kernel_to_.2Fboot_directory">Copy the kernel to /boot directory</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Ensure that the <code>bzImage</code> kernel file has been copied from the appropriate directory for your system architecture. See below.</div>
+<p>The kernel compilation process will generate a compressed <code>bzImage</code> (big zImage) of that kernel, which must be copied to the <code>/boot</code> directory and renamed in the process. Provided the name is prefixed with <code>vmlinuz-</code>, you may name the kernel as you wish. In the examples below, the installed and compiled 3.18 kernel has been copied over and renamed to <code>vmlinuz-linux318</code>:
+</p>
+<ul><li> 32-bit (i686) kernel:</li></ul>
+<pre># cp -v arch/x86/boot/bzImage /boot/vmlinuz-linux318
+</pre>
+<ul><li> 64-bit (x86_64) kernel:</li></ul>
+<pre># cp -v arch/x86_64/boot/bzImage /boot/vmlinuz-linux318
+</pre>
+<h3><span class="mw-headline" id="Make_initial_RAM_disk">Make initial RAM disk</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You are free to name the initramfs image file whatever you wish when generating it. However, it is recommended to use the <code>linux&lt;major revision&gt;&lt;minor revision&gt;</code> convention. For example, the name 'linux318' was given as '3' is the major revision and '18' is the minor revision of the 3.18 kernel. This convention will make it easier to maintain multiple kernels, regularly use mkinitcpio, and build third-party modules.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you are using the LILO bootloader and it cannot communicate with the kernel device-mapper driver, you have to run <code>modprobe dm-mod</code> first.</div>
+<p>If you do not know what making an initial RAM disk is, see <a href="https://en.wikipedia.org/wiki/Initrd" class="extiw" title="wikipedia:Initrd">Initramfs on Wikipedia</a> and <a href="../../en/Mkinitcpio.html" title="Mkinitcpio">mkinitcpio</a>. 
+</p>
+<h4><span class="mw-headline" id="Automated_preset_method">Automated preset method</span></h4>
+<p>An existing <a href="../../en/Mkinitcpio.html#Image_creation_and_activation" title="Mkinitcpio">mkinitcpio preset</a> can be copied and modified so that the custom kernel initramfs images can be generated in the same way as for an official kernel. This is useful where intending to recompile the kernel (e.g. where updated). In the example below, the preset file for the stock Arch kernel will be copied and modified for kernel 3.18, installed above.
+</p>
+<p>First, copy the existing preset file, renaming it to match the name of the custom kernel specified as a suffix to <code>/boot/vmlinuz-</code> when copying the <code>bzImage</code> (in this case, <code>linux318</code>):
+</p>
+<pre># cp /etc/mkinitcpio.d/linux.preset /etc/mkinitcpio.d/linux318.preset
+</pre>
+<p>Second, edit the file and amend for the custom kernel. Note (again) that the <code>ALL_kver=</code> parameter also matches the name of the custom kernel specified when copying the <code>bzImage</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.d/linux318.preset</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+ALL_kver="/boot/vmlinuz-linux318"
+...
+default_image="/boot/initramfs-linux318.img"
+...
+fallback_image="/boot/initramfs-linux318-fallback.img"</pre>
+<p>Finally, generate the initramfs images for the custom kernel in the same way as for an official kernel:
+</p>
+<pre># mkinitcpio -p linux318
+</pre>
+<h4><span class="mw-headline" id="Manual_method">Manual method</span></h4>
+<p>Rather than use a preset file, mkinitcpio can also be used to generate an initramfs file manually. The syntax of the command is:
+</p>
+<pre># mkinitcpio -k &lt;kernelversion&gt; -g /boot/initramfs-&lt;file name&gt;.img
+</pre>
+<ul>
+<li> <code>-k</code> (--kernel &lt;kernelversion&gt;): Specifies the modules to use when generating the initramfs image. The <code>&lt;kernelversion&gt;</code> name will be the same as the name of the custom kernel source directory (and the modules directory for it, located in <code>/usr/lib/modules/</code>).</li>
+<li> <code>-g</code> (--generate &lt;filename&gt;): Specifies the name of the initramfs file to generate in the <code>/boot</code> directory. Again, using the naming convention mentioned above is recommended.</li>
+</ul>
+<p>For example, the command for the 3.18 custom kernel installed above would be:
+</p>
+<pre># mkinitcpio -k linux-3.18.28 -g /boot/initramfs-linux318.img
+</pre>
+<h3><span class="mw-headline" id="Copy_System.map">Copy System.map</span></h3>
+<p>The <code>System.map</code> file is not required for booting Linux. It is a type of "phone directory" list of functions in a particular build of a kernel. The <code>System.map</code> contains a list of kernel symbols (i.e function names, variable names etc) and their corresponding addresses. This "symbol-name to address mapping" is used by:
+</p>
+<ul>
+<li> Some processes like klogd, ksymoops etc</li>
+<li> By OOPS handler when information has to be dumped to the screen during a kernel crash (i.e info like in which function it has crashed).</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> UEFI partitions are formatted using FAT32, which does not support symlinks.</div>
+<p>If your <code>/boot</code> is on a filesystem which supports symlinks (i.e., not FAT32), copy <code>System.map</code> to <code>/boot</code>, appending your kernel's name to the destination file.  Then create a symlink from <code>/boot/System.map</code> to point to <code>/boot/System.map-YourKernelName</code>:
+</p>
+<pre># cp System.map /boot/System.map-YourKernelName
+# ln -sf /boot/System.map-YourKernelName /boot/System.map
+</pre>
+<p>After completing all steps above, you should have the following 3 files and 1 soft symlink in your <code>/boot</code> directory along with any other previously existing files:
+</p>
+<ul>
+<li> Kernel: <code>vmlinuz-YourKernelName</code>
+</li>
+<li> Initramfs: <code>Initramfs-YourKernelName.img</code>
+</li>
+<li> System Map: <code>System.map-YourKernelName</code>
+</li>
+<li> System Map kernel symlink</li>
+</ul>
+<h2><span class="mw-headline" id="Bootloader_configuration">Bootloader configuration</span></h2>
+<p>Add an entry for your new kernel in your bootloader's configuration file - see <a href="../../en/GRUB.html" title="GRUB">GRUB</a>, <a href="../../en/LILO.html" title="LILO">LILO</a>, <a href="../../en/GRUB.html" title="GRUB2" class="mw-redirect">GRUB2</a>, <a href="../../en/Syslinux.html" title="Syslinux">Syslinux</a>, <a href="../../en/Systemd-boot.html" title="Systemd-boot">systemd-boot</a> or <a href="../../en/REFInd.html" title="REFInd">REFInd</a> for examples. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> Kernel sources include a script to automate the process for LILO: <code>$ arch/x86/boot/install.sh</code>. Remember to type <code>lilo</code> as root at the prompt to update it.</div>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Kernels/Traditional_compilation&amp;oldid=453917">https://wiki.archlinux.org/index.php?title=Kernels/Traditional_compilation&amp;oldid=453917</a>"</li>
+					<li id="lastmod"> This page was last modified on 14 October 2016, at 14:53.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

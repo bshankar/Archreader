@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PKGBUILD - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PKGBUILD skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PKGBUILD</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_packaging_standards.html" title="Arch packaging standards">Arch packaging standards</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_Build_System.html" title="Arch Build System">Arch Build System</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Creating_packages.html" title="Creating packages">Creating packages</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/.SRCINFO.html" title=".SRCINFO">.SRCINFO</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Category:Package_development.html" title="Category:Package development">Category:Package development</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman/Tips_and_tricks.html" title="Pacman tips" class="mw-redirect">Pacman tips</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_User_Repository.html" title="Arch User Repository">Arch User Repository</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Makepkg.html" title="Makepkg">makepkg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman.html" title="Pacman">pacman</a></li>
+</ul>
+</div>
+<p>This article discusses variables definable by the maintainer in a PKGBUILD. For information on the PKGBUILD functions and creating packages in general, refer to <a href="../en/Creating_packages.html" title="Creating packages">Creating packages</a>. Also read <code>man PKGBUILD</code>.
+</p>
+<p>A PKGBUILD is a shell script containing the build information required by <a href="../en/Arch_Linux.html" title="Arch Linux">Arch Linux</a> packages.
+</p>
+<p>Packages in Arch Linux are built using the <a href="../en/Makepkg.html" title="Makepkg">makepkg</a> utility. When <i>makepkg</i> is run, it searches for a <code>PKGBUILD</code> file in the current directory and follows the instructions therein to either compile or otherwise acquire the files to build a package archive (<code><i>pkgname</i>.pkg.tar.xz</code>). The resulting package contains binary files and installation instructions, readily installable with <a href="../en/Pacman.html" title="Pacman">pacman</a>.
+</p>
+<p>Mandatory variables are <code>pkgname</code>, <code>pkgver</code>, <code>pkgrel</code>, and <code>arch</code>. <code>license</code> is not strictly necessary to build a package, but is recommended for any PKGBUILDs shared with others, as <i>makepkg</i> will produce a warning if not present.
+</p>
+<p>It is a common practice to define the variables in the PKGBUILD in same order as given here. However, this is not mandatory, as long as correct <a href="../en/Bash.html" title="Bash">Bash</a> syntax is used.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Package_name"><span class="tocnumber">1</span> <span class="toctext">Package name</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#pkgbase"><span class="tocnumber">1.1</span> <span class="toctext">pkgbase</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#pkgname"><span class="tocnumber">1.2</span> <span class="toctext">pkgname</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Version"><span class="tocnumber">2</span> <span class="toctext">Version</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#pkgver"><span class="tocnumber">2.1</span> <span class="toctext">pkgver</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#pkgrel"><span class="tocnumber">2.2</span> <span class="toctext">pkgrel</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#epoch"><span class="tocnumber">2.3</span> <span class="toctext">epoch</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Generic"><span class="tocnumber">3</span> <span class="toctext">Generic</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#pkgdesc"><span class="tocnumber">3.1</span> <span class="toctext">pkgdesc</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#arch"><span class="tocnumber">3.2</span> <span class="toctext">arch</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#url"><span class="tocnumber">3.3</span> <span class="toctext">url</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#license"><span class="tocnumber">3.4</span> <span class="toctext">license</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#groups"><span class="tocnumber">3.5</span> <span class="toctext">groups</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-14">
+<a href="#Dependencies"><span class="tocnumber">4</span> <span class="toctext">Dependencies</span></a>
+<ul>
+<li class="toclevel-2 tocsection-15"><a href="#depends"><span class="tocnumber">4.1</span> <span class="toctext">depends</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#optdepends"><span class="tocnumber">4.2</span> <span class="toctext">optdepends</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#makedepends"><span class="tocnumber">4.3</span> <span class="toctext">makedepends</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#checkdepends"><span class="tocnumber">4.4</span> <span class="toctext">checkdepends</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-19">
+<a href="#Package_relations"><span class="tocnumber">5</span> <span class="toctext">Package relations</span></a>
+<ul>
+<li class="toclevel-2 tocsection-20"><a href="#provides"><span class="tocnumber">5.1</span> <span class="toctext">provides</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#conflicts"><span class="tocnumber">5.2</span> <span class="toctext">conflicts</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#replaces"><span class="tocnumber">5.3</span> <span class="toctext">replaces</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23">
+<a href="#Others"><span class="tocnumber">6</span> <span class="toctext">Others</span></a>
+<ul>
+<li class="toclevel-2 tocsection-24"><a href="#backup"><span class="tocnumber">6.1</span> <span class="toctext">backup</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#options"><span class="tocnumber">6.2</span> <span class="toctext">options</span></a></li>
+<li class="toclevel-2 tocsection-26"><a href="#install"><span class="tocnumber">6.3</span> <span class="toctext">install</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#changelog"><span class="tocnumber">6.4</span> <span class="toctext">changelog</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-28">
+<a href="#Sources"><span class="tocnumber">7</span> <span class="toctext">Sources</span></a>
+<ul>
+<li class="toclevel-2 tocsection-29"><a href="#source"><span class="tocnumber">7.1</span> <span class="toctext">source</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#noextract"><span class="tocnumber">7.2</span> <span class="toctext">noextract</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#validpgpkeys"><span class="tocnumber">7.3</span> <span class="toctext">validpgpkeys</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#Integrity"><span class="tocnumber">8</span> <span class="toctext">Integrity</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33"><a href="#md5sums"><span class="tocnumber">8.1</span> <span class="toctext">md5sums</span></a></li>
+<li class="toclevel-2 tocsection-34"><a href="#sha1sums"><span class="tocnumber">8.2</span> <span class="toctext">sha1sums</span></a></li>
+<li class="toclevel-2 tocsection-35"><a href="#sha256sums"><span class="tocnumber">8.3</span> <span class="toctext">sha256sums</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#sha224sums.2C_sha384sums.2C_sha512sums"><span class="tocnumber">8.4</span> <span class="toctext">sha224sums, sha384sums, sha512sums</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-37"><a href="#See_also"><span class="tocnumber">9</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Package_name">Package name</span></h2>
+<h3><span class="mw-headline" id="pkgbase">pkgbase</span></h3>
+<p>An optional global directive is available when building a split package. <code>pkgbase</code> is used to refer to the group of packages in the output of <i>makepkg</i> and in the naming of source-only tarballs. If not specified, the first element in the <code>pkgname</code> array is used. The variable is not allowed to begin with a hyphen. All values for split packages default to the global ones given in the PKGBUILD. Everything, except <a href="#makedepends">#makedepends</a>, <a href="#Sources">#Sources</a>, and <a href="#Integrity">#Integrity</a> variables can be overridden within each split package's <code>package()</code> function.
+</p>
+<h3><span class="mw-headline" id="pkgname">pkgname</span></h3>
+<p>The name(s) of the package(s). This should consist of lowercase alphanumerics and any of the following characters: <code>@</code>, <code>.</code>, <code>_</code>, <code>+</code>, <code>-</code> (at symbol, dot, underscore, plus, hyphen). Names are not allowed to start with hyphens. For the sake of consistency, <code>pkgname</code> should match the name of the source tarball of the software: for instance, if the software is in <code>foobar-2.5.tar.gz</code>, use <code>pkgname=foobar</code>. The name of the directory containing the PKGBUILD should also match the <code>pkgname</code>.
+</p>
+<p>Split packages should be defined as an array, e.g. <code>pkgname=('foo' 'bar')</code>.
+</p>
+<h2><span class="mw-headline" id="Version">Version</span></h2>
+<h3><span class="mw-headline" id="pkgver">pkgver</span></h3>
+<p>The version of the package. This should be the same as the version released by the author of the package. It can contain letters, numbers, periods and underscores, but <b>not</b> a hyphen (<code>-</code>). If the author of the software uses one, replace it with an underscore (<code>_</code>). If the <code>pkgver</code> variable is used later in the PKGBUILD, then the underscore can easily be substituted for a hyphen, e.g. <code>source=("$pkgname-${pkgver//_/-}.tar.gz")</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If upstream uses a timestamp versioning such as <code>30102014</code>, ensure to use the reversed date, i.e. <code>20141030</code> (<a href="https://en.wikipedia.org/wiki/ISO_8601" class="extiw" title="wikipedia:ISO 8601">ISO 8601</a> format). Otherwise it will not appear as a newer version.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>
+<ul>
+<li> The ordering of uncommon values can be tested with <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/vercmp.8.html">vercmp</a>, which is provided by the <a href="../en/Pacman.html" title="Pacman">pacman</a> package.</li>
+<li> <a href="../en/Makepkg.html" title="Makepkg">makepkg</a> can automatically <a rel="nofollow" class="external text" href="http://allanmcrae.com/2013/04/pacman-4-1-released/">update</a> this variable by defining a <code>pkgver()</code> function in the PKGBUILD. See <a href="../en/VCS_package_guidelines.html#The_pkgver.28.29_function" title="VCS package guidelines">VCS package guidelines#The pkgver() function</a> for details.</li>
+</ul>
+</div>
+<h3><span class="mw-headline" id="pkgrel">pkgrel</span></h3>
+<p>The release number. This is usually a positive integer number that allows to differentiate between consecutive builds of the same version of a package. As fixes and additional features are added to the PKGBUILD that influence the resulting package, the <code>pkgrel</code> should be incremented by 1. When a new version of the software is released, this value must be reset to 1. In exceptional cases other formats can be found in use, such as <i>major.minor</i>.
+</p>
+<h3><span class="mw-headline" id="epoch">epoch</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><code>epoch</code> should only be used when absolutely required to do so.</div>
+<p>Used to force the package to be seen as newer than any previous version with a lower epoch. This value is required to be a positive integer; the default is 0. It is used when the version numbering scheme of a package changes (or is alphanumeric), breaking normal version comparison logic. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">pkgver=5.13
+pkgrel=2
+epoch=1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">1:5.13-2</pre>
+<p>See <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/pacman.8.html">pacman(8)</a> for more information on version comparisons.
+</p>
+<h2><span class="mw-headline" id="Generic">Generic</span></h2>
+<h3><span class="mw-headline" id="pkgdesc">pkgdesc</span></h3>
+<p>The description of the package. This is recommended to be 80 characters or less and should not include the package name in a self-referencing way, unless the application name differs from the package name. For example, use <code>pkgdesc="Text editor for X11"</code> instead of <code>pkgdesc="Nedit is a text editor for X11"</code>.
+</p>
+<p>Also it is important to use keywords wisely to increase the chances of appearing in relevant search queries.
+</p>
+<h3><span class="mw-headline" id="arch">arch</span></h3>
+<p>An array of architectures that the PKGBUILD is intended to build and work on. Arch officially supports only <code>i686</code> and <code>x86_64</code>, but projects like <a rel="nofollow" class="external text" href="http://archlinuxarm.org/">Arch Linux ARM</a> provide support for other architectures such as <code>arm</code> for armv5, <code>armv6h</code> for armv6 hardfloat, <code>armv7h</code> for armv7 hardfloat, and <code>aarch64</code> for armv8 64bit.
+</p>
+<p>If a package is architecture-independent in its compiled state (shell scripts, fonts, themes, many types of extensions, etc.) then use <code>arch=('any')</code>. Please note that, as this is intended for packages that can be built once and used on any architecture, it will cause the package to be labeled <code>-any</code> as opposed to <code>-i686</code>, <code>-x86_64</code>, etc.
+</p>
+<p>If instead a package can be compiled for any architecture, but is architecture-specific once compiled, specify all architectures officially supported by Arch, i.e. <code>arch=('i686' 'x86_64')</code>.
+</p>
+<p>The target architecture can be accessed with the variable <code>$CARCH</code> during a build.
+</p>
+<h3><span class="mw-headline" id="url">url</span></h3>
+<p>The URL of the official site of the software being packaged.
+</p>
+<h3><span class="mw-headline" id="license">license</span></h3>
+<p>The license under which the software is distributed. The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=licenses">licenses</a></span> package contains many commonly used licenses, which are installed to <code>/usr/share/licenses/common</code>. If a package is licensed under one of these licenses, the value should be set to the directory name, e.g. <code>license=('GPL')</code>. If the appropriate license is not included, several things must be done:
+</p>
+<ol>
+<li> Add <code>custom</code> to the <code>license</code> array. Optionally, you can replace <code>custom</code> with <code>custom:<i>name of license</i></code>. Once a license is used in two or more packages in an official repository (including <code>[community]</code>), it becomes a part of the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=licenses">licenses</a></span> package.</li>
+<li> Install the license in: <code>/usr/share/licenses/<i>pkgname</i>/</code>, e.g. <code>/usr/share/licenses/foobar/LICENSE</code>.</li>
+<li> If the license is only found in a website, then you need to separately include it in the package.</li>
+</ol>
+<ul>
+<li> The <a href="https://en.wikipedia.org/wiki/BSD_License" class="extiw" title="wikipedia:BSD License">BSD</a>, <a href="https://en.wikipedia.org/wiki/MIT_License" class="extiw" title="wikipedia:MIT License">MIT</a>, <a href="https://en.wikipedia.org/wiki/ZLIB_license" class="extiw" title="wikipedia:ZLIB license">zlib/png</a> and <a href="https://en.wikipedia.org/wiki/Python_License" class="extiw" title="wikipedia:Python License">Python</a> licenses are special cases and could not be included in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=licenses">licenses</a></span> package. For the sake of the <code>license</code> array, it is treated as a common license (<code>license=('BSD')</code>, <code>license=('MIT')</code>, <code>license=('ZLIB')</code> and <code>license=('Python')</code>), but technically each one is a custom license, because each one has its own copyright line. Any packages licensed under these four should have its own unique license stored in <code>/usr/share/licenses/<i>pkgname</i></code>. Some packages may not be covered by a single license. In these cases, multiple entries may be made in the <code>license</code> array, e.g. <code>license=('GPL' 'custom:<i>name of license'</i>)</code>.</li>
+<li> (L)GPL has many versions and permutations of those versions. For (L)GPL software, the convention is:
+<ul>
+<li> (L)GPL — (L)GPLv2 or any later version</li>
+<li> (L)GPL2 — (L)GPL2 only</li>
+<li> (L)GPL3 — (L)GPL3 or any later version</li>
+</ul>
+</li>
+<li> If after researching the issue no license can be determined, <a rel="nofollow" class="external text" href="https://projects.archlinux.org/pacman.git/tree/proto/PKGBUILD.proto">PKGBUILD.proto</a> suggests using <code>unknown</code>. However, upstream should be contacted about the conditions under which the software is (and is not) available.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Some software authors do not provide separate license file and describe distribution rules in section of common <code>ReadMe.txt</code>. This information can be extracted to a separate file during <code>build()</code> with something like <code>sed -n '/<b>This software</b>/,/<b>  thereof.</b>/p' ReadMe.txt &gt; LICENSE</code>
+</div>
+<h3><span class="mw-headline" id="groups">groups</span></h3>
+<p>The <a href="../en/Creating_packages.html#Meta_packages_and_groups" title="Creating packages">group</a> the package belongs in. For instance, when installing the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/kdebase/">kdebase</a></span> package, it installs all packages belonging in that group.
+</p>
+<h2><span class="mw-headline" id="Dependencies">Dependencies</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Additional architecture-specific arrays can be added by appending an underscore and the architecture name, e.g. <code>depends_i686=()</code>, <code>optdepends_x86_64=()</code>.
+</div>
+<h3><span class="mw-headline" id="depends">depends</span></h3>
+<p>An array of packages that must be installed before the software can be run. Version restrictions can be specified with comparison operators, e.g. <code>depends=('foobar&gt;=1.8.0')</code>; if multiple restrictions are needed, the dependency can be repeated for each, e.g. <code>depends=('foobar&gt;=1.8.0' 'foobar&lt;2.0.0')</code>. 
+</p>
+<p>Dependencies that are provided by other dependencies do not need to be listed. For instance, if a package <i>foo</i> depends on both <i>bar</i> and <i>baz</i>, and the <i>bar</i> package depends in turn on <i>baz</i> too, <i>baz</i> does not need to be included in <i>foo'</i>s <code>depends</code> array.
+</p>
+<h3><span class="mw-headline" id="optdepends">optdepends</span></h3>
+<p>An array of packages that are not needed for the software to function, but provide additional features. This may imply that not all executables provided by a package will function without the respective optdepends.<a rel="nofollow" class="external autonumber" href="https://lists.archlinux.org/pipermail/arch-general/2014-December/038124.html">[1]</a> If the software works on multiple alternative dependencies, all of them can be listed here, instead of the <code>depends</code> array.
+</p>
+<p>A short description of the extra functionality each optdepend provides should also be noted:
+</p>
+<pre>optdepends=('cups: printing support'
+            'sane: scanners support'
+            'libgphoto2: digital cameras support'
+            'alsa-lib: sound support'
+            'giflib: GIF images support'
+            'libjpeg: JPEG images support'
+            'libpng: PNG images support')
+</pre>
+<h3><span class="mw-headline" id="makedepends">makedepends</span></h3>
+<p>An array of packages that are <b>only</b> required to build the software. The minimum dependency version can be specified in the same format as in the <code>depends</code> array. The packages in the <code>depends</code> array are implicitly required to build the package, they should not be duplicated here.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>The following can be used to see if a particular package is either in the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span> group or pulled in by a members of the group:
+<pre>$ LC_ALL=C pacman -Si $(pactree -rl ''package'') 2&gt;/dev/null | grep -q "^Groups *:.*base-devel"
+</pre>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The group <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span> is assumed to be already installed when building with <i>makepkg</i>. Members of this group <b>should not</b> be included in <code>makedepends</code> array.</div>
+<h3><span class="mw-headline" id="checkdepends">checkdepends</span></h3>
+<p>An array of packages that the software depends on to run its test suite, but are not needed at runtime. Packages in this list follow the same format as <code>depends</code>. These dependencies are only considered when the <a href="../en/Creating_packages.html#check.28.29" title="Creating packages">check()</a> function is present and is to be run by makepkg. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The group <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/groups/x86_64/base-devel/">base-devel</a></span> is assumed to be already installed when building with <i>makepkg</i>. Members of this group <b>should not</b> be included in <code>checkdepends</code> array.</div>
+<h2><span class="mw-headline" id="Package_relations">Package relations</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Additional architecture-specific arrays can be added by appending an underscore and the architecture name, e.g. <code>provides_i686=()</code>, <code>conflicts_x86_64=()</code>.</div>
+<h3><span class="mw-headline" id="provides">provides</span></h3>
+<p>An array of additional packages that the software provides the features of (or a virtual package such as <code>cron</code> or <code>sh</code>). Packages providing the same item can be installed side-by-side, unless at least one of them uses a <code>conflicts</code> array.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>A version that the package provides should be mentioned (<code>pkgver</code> and perhaps the <code>pkgrel</code>), if packages needing the software may require one. For instance, a modified <i>qt</i> package version 3.3.8, named <i>qt-foobar</i>, should use <code>provides=('qt=3.3.8')</code>; using <code>provides=('qt')</code> would cause the dependencies that require a specific version of <i>qt</i> to fail. Do not add <code>pkgname</code> to the <code>provides</code> array, as it is done automatically.</div>
+<h3><span class="mw-headline" id="conflicts">conflicts</span></h3>
+<p>An array of packages that conflict with, or cause problems with the package, if installed. All these packages and packages providing this item will need to be removed. The version properties of the conflicting packages can also be specified in the same format as the <code>depends</code> array.
+</p>
+<h3><span class="mw-headline" id="replaces">replaces</span></h3>
+<p>An array of obsolete packages that are replaced by the package, e.g. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-gtk">wireshark-gtk</a></span> uses <code>replaces=('wireshark')</code>. When syncing, <i>pacman</i> will immediately replace an installed package upon encountering another package with the matching <code>replaces</code> in the repositories. If providing an alternate version of an already existing package or uploading to the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>, use the <code>conflicts</code> and <code>provides</code> arrays, which are only evaluated when actually installing the conflicting package.
+</p>
+<h2><span class="mw-headline" id="Others">Others</span></h2>
+<h3><span class="mw-headline" id="backup">backup</span></h3>
+<p>An array of files that can contain user-made changes and should be preserved during upgrade or removal of a package, primarily intended for configuration files in <code>/etc</code>.
+</p>
+<p>Files in this array should use <b>relative</b> paths without the leading slash (<code>/</code>) (e.g. <code>etc/pacman.conf</code>, instead of <code>/etc/pacman.conf</code>).
+</p>
+<p>When updating, new versions may be saved as <code>file.pacnew</code> to avoid overwriting a file which already exists and was previously modified by the user. Similarly, when the package is removed, user-modified files will be preserved as <code>file.pacsave</code> unless the package was removed with the <code>pacman -Rn</code> command.
+</p>
+<p>See also <a href="../en/Pacman/Pacnew_and_Pacsave.html" title="Pacnew and Pacsave files" class="mw-redirect">Pacnew and Pacsave files</a>.
+</p>
+<h3><span class="mw-headline" id="options">options</span></h3>
+<p>This array allows overriding some of the default behavior of <i>makepkg</i>, defined in <code>/etc/makepkg.conf</code>. To set an option, include the name in the array. To reverse the default behavior, place an <b><code>!</code></b> at the front.
+</p>
+<p>The full list of the available options can be found in <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/PKGBUILD.5.html">PKGBUILD(5)</a>.
+</p>
+<h3><span class="mw-headline" id="install">install</span></h3>
+<p>The name of the <code>.install</code> script to be included in the package. This should be the same as <code>pkgname</code>. <i>pacman</i> has the ability to store and execute a package-specific script when it installs, removes or upgrades a package. The script contains the following functions which run at different times:
+</p>
+<ul>
+<li> <code>pre_install</code> — The script is run right before files are extracted. One argument is passed: new package version.</li>
+<li> <code>post_install</code> — The script is run right after files are extracted. One argument is passed: new package version.</li>
+<li> <code>pre_upgrade</code> — The script is run right before files are extracted. Two arguments are passed in the following order: new package version, old package version.</li>
+<li> <code>post_upgrade</code> — The script is run right after files are extracted. Two arguments are passed in the following order: new package version, old package version.</li>
+<li> <code>pre_remove</code> — The script is run right before files are removed. One argument is passed: old package version.</li>
+<li> <code>post_remove</code> — The script is run right after files are removed. One argument is passed: old package version.</li>
+</ul>
+<p>Each function is run <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chrooted</a> inside the <i>pacman</i> install directory. See <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?pid=913891">this thread</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>A prototype <code>.install</code> is provided at <a rel="nofollow" class="external text" href="https://projects.archlinux.org/pacman.git/plain/proto/proto.install">/usr/share/pacman/proto.install</a>.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Do not end the script with <code>exit</code>. This would prevent the contained functions from executing.</div>
+<h3><span class="mw-headline" id="changelog">changelog</span></h3>
+<p>The name of the package changelog. To view changelogs for installed packages (that have this file):
+</p>
+<pre>$ pacman -Qc <i>pkgname</i>
+</pre>
+<h2><span class="mw-headline" id="Sources">Sources</span></h2>
+<h3><span class="mw-headline" id="source">source</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Additional architecture-specific arrays can be added by appending an underscore and the architecture name, e.g. <code>source_i686=()</code>. There must be a corresponding integrity array with checksums, e.g. <code>sha256sums_x86_64=()</code>.</div>
+<p>An array of files needed to build the package. It must contain the location of the software source, which in most cases is a full HTTP or FTP URL. The previously set variables <code>pkgname</code> and <code>pkgver</code> can be used effectively here (e.g. <code>source=("https://example.com/$pkgname-$pkgver.tar.gz")</code>).
+</p>
+<p>Files can also be supplied directly in the location of the <code>PKGBUILD</code> and added to this array. These paths are resolved relative to the directory of the <code>PKGBUILD</code>. Before the actual build process is started, all of the files referenced in this array will be downloaded or checked for existence, and <i>makepkg</i> will not proceed, if any are missing.
+</p>
+<p><i>.install</i> files are recognized automatically by <i>makepkg</i> and should not be included in the source array. Files in the source array with extensions <i>.sig</i>, <i>.sign</i>, or <i>.asc</i> are recognized by <i>makepkg</i> as PGP signatures and will be automatically used to verify the integrity of the corresponding source file.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>File names of downloaded sources should be globally unique, because the <a href="../en/Makepkg.html#Package_output" title="Makepkg">SRCDEST</a> variable could be the same directory for all packages. This can be ensured by specifying an alternative source name with the syntax <code>source=('<i>filename</i>::<i>fileuri</i>')</code>, where the chosen <code><i>filename</i></code> should be related to the package name:
+<pre>source=("project_name::hg+https://googlefontdirectory.googlecode.com/hg/")</pre>
+</div>
+<h3><span class="mw-headline" id="noextract">noextract</span></h3>
+<p>An array of files listed under <code>source</code>, which should not be extracted from their archive format by <i>makepkg</i>. This can be used with archives that cannot be handled by <code>/usr/bin/bsdtar</code> or those that need to be installed as-is. If an alternative unarchiving tool is used (e.g. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lrzip">lrzip</a></span>), it should be added in the <code>makedepends</code> array and the first line of the <a href="../en/Creating_packages.html#prepare.28.29" title="Creating packages">prepare()</a> function should extract the source archive manually; for example:
+</p>
+<pre>prepare() {
+  lrzip -d <i>source</i>.tar.lrz
+}
+</pre>
+<p>Note that while the <code>source</code> array accepts URLs, <code>noextract</code> is <b>just</b> the file name portion:
+</p>
+<pre>source=("http://foo.org/bar/foobar.tar.xz")
+noextract=('foobar.tar.xz')
+</pre>
+<p>To extract <i>nothing</i>, you can do something like this:
+</p>
+<ul><li> If <code>source</code> contains only plain URLs without custom file names, strip the source array before the last slash:</li></ul>
+<dl><dd> <pre>noextract=("${source[@]##*/}")</pre>
+</dd></dl>
+<ul><li> If <code>source</code> contains only entries with custom file names, strip the source array after the <code>::</code> separator (taken from <a rel="nofollow" class="external text" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/PKGBUILD?h=packages/firefox-i18n#n123">firefox-i18n's PKGBUILD</a>):</li></ul>
+<dl><dd> <pre>noextract=("${source[@]%%::*}")</pre>
+</dd></dl>
+<h3><span class="mw-headline" id="validpgpkeys">validpgpkeys</span></h3>
+<p>An array of PGP fingerprints. If used, <i>makepkg</i> will only accept signatures from the keys listed here and will ignore the trust values from the keyring. If the source file was signed with a subkey, <i>makepkg</i> will still use the primary key for comparison.
+</p>
+<p>Only full fingerprints are accepted. They must be uppercase and must not contain whitespace characters.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You can use <code>gpg --list-keys --fingerprint &lt;KEYID&gt;</code> to find out the fingerprint of the appropriate key.</div>
+<h2><span class="mw-headline" id="Integrity">Integrity</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Additional architecture-specific arrays can be added by appending an underscore and the architecture name, e.g. <code>md5sums_i686=()</code>, <code>sha256sums_x86_64=()</code>.
+</div>
+<p>These variables are arrays whose items are checksum strings that will be used to verify the integrity of the respective files in the <a href="#source">source</a> array. You can also insert <code>SKIP</code> for a particular file, and its checksum will not be tested.
+</p>
+<p>Checksums are intended to verify the <i>integrity</i> of the downloaded files, <b>not</b> their <i>authenticity</i>: for this reason, even though the MD5 algorithm is known to have considerable <a href="https://en.wikipedia.org/wiki/MD5#Security" class="extiw" title="wikipedia:MD5">vulnerabilities</a> when used for other purposes, it is recommended for file integrity as a faster alternative to SHA-2 hashes, especially when large files are present in the <code>source</code> array. If possible, however, always test the authenticity of the files by adding their signatures to the <code>source</code> array: in this case you will also be able to safely skip their checksum verification altogether, as described above.
+</p>
+<p>The values for these variables can be auto-generated by <a href="../en/Makepkg.html" title="Makepkg">makepkg</a>'s <code>-g</code>/<code>--geninteg</code> option, then commonly appended with <code>makepkg -g &gt;&gt; PKGBUILD</code>. The <code>updpkgsums</code> command is able to update the variables wherever they are in the PKGBUILD. Both tools will use the variable that is already set in the PKGBUILD, or fall back to <code>md5sums</code> if none is set.
+</p>
+<p>The file integrity checks to use can be set up with the <code>INTEGRITY_CHECK</code> option in <code>/etc/makepkg.conf</code>. See <a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/makepkg.conf.5.html">makepkg.conf(5)</a>.
+</p>
+<h3><span class="mw-headline" id="md5sums">md5sums</span></h3>
+<p>An array of 128-bit <a href="https://en.wikipedia.org/wiki/MD5" class="extiw" title="wikipedia:MD5">MD5</a> checksums of the files listed in the <code>source</code> array.
+</p>
+<h3><span class="mw-headline" id="sha1sums">sha1sums</span></h3>
+<p>An array of 160-bit <a href="https://en.wikipedia.org/wiki/SHA-1" class="extiw" title="wikipedia:SHA-1">SHA-1</a> checksums of the files listed in the <code>source</code> array.
+</p>
+<h3><span class="mw-headline" id="sha256sums">sha256sums</span></h3>
+<p>An array of <a href="https://en.wikipedia.org/wiki/SHA-2" class="extiw" title="wikipedia:SHA-2">SHA-2</a> checksums with digest size of 256 bits.
+</p>
+<h3><span class="mw-headline" id="sha224sums.2C_sha384sums.2C_sha512sums">sha224sums, sha384sums, sha512sums</span></h3>
+<p>An array of SHA-2 checksums with digest sizes 224, 384, and 512 bits, respectively. These are less common alternatives to <code>sha256sums</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li><a rel="nofollow" class="external text" href="https://www.archlinux.org/pacman/PKGBUILD.5.html">PKGBUILD(5) Manual Page</a></li>
+<li><a rel="nofollow" class="external text" href="https://projects.archlinux.org/pacman.git/plain/proto/PKGBUILD.proto">Example PKGBUILD file</a></li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

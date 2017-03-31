@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>LDAP Hosts - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-LDAP_Hosts skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">LDAP Hosts</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenLDAP.html" title="OpenLDAP">OpenLDAP</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/LDAP_authentication.html" title="LDAP Authentication" class="mw-redirect">LDAP Authentication</a></li>
+</ul>
+</div>
+<p>This document will allow you to put your /etc/hosts into your LDAP server. At first make sure you have an LDAP server up and running (take <a href="../en/LDAP_authentication.html" title="LDAP authentication">LDAP authentication</a> as an introduction). Next you need to create a proper ldif file from /etc/hosts. Actually mine is like:
+</p>
+<pre>
+127.0.0.1 localhost
+192.168.1.1 gojira.marex.local gojira
+192.168.1.50 gamera.marex.local gamera
+192.168.1.51 iris.marex.local iris
+192.168.1.52 zedan.marex.local zedan
+</pre>
+<p>Where 127.0.0.1 is localhost (of course), 192.168.1.1 is the LDAP server, followed by at least 3 workstation (gamera, iris &amp; zedan). For a ldif file you need to create a ou for your hosts and each host (I will call the next file hosts.ldif):
+</p>
+<pre>
+dn: ou=Hosts,dc=marex,dc=local                                                                                              
+objectClass: organizationalUnit                                                                                             
+objectClass: top                                                                                                            
+ou: Hosts
+
+dn: cn=gojira+ipHostNumber=192.168.1.1,ou=Hosts,dc=marex,dc=local
+objectClass: ipHost
+objectClass: device
+objectClass: top
+cn: gojira
+ipHostNumber: 192.168.1.1
+
+dn: cn=gamera+ipHostNumber=192.168.1.50,ou=Hosts,dc=marex,dc=local
+objectClass: ipHost
+objectClass: device
+objectClass: top
+cn: gamera
+ipHostNumber: 192.168.1.50
+
+dn: cn=iris+ipHostNumber=192.168.1.51,ou=Hosts,dc=marex,dc=local
+objectClass: ipHost
+objectClass: device
+objectClass: top
+cn: iris
+ipHostNumber: 192.168.1.51
+
+dn: cn=zedan+ipHostNumber=192.168.1.52,ou=Hosts,dc=marex,dc=local
+objectClass: ipHost
+objectClass: device
+objectClass: top
+cn: zedan
+ipHostNumber: 192.168.1.52
+</pre>
+<p>Next put the file into your LDAP server with your credentials (output truncated):
+</p>
+<pre>
+$ ldapadd -x -W -D 'cn=ldapadmin,dc=marex,dc=local' -h 192.168.1.1 -p 389 -f hosts.ldif
+...
+adding new entry "cn=zedan+ipHostNumber=192.168.1.52,ou=Hosts,dc=marex,dc=local"
+</pre>
+<p>If everything filled up then edit your /etc/nss_ldap.conf and change the line beginning with nss_base_hosts to the following:
+</p>
+<pre>
+nss_base_hosts          ou=Hosts,dc=marex,dc=local?one
+</pre>
+<p>Now change the /etc/hosts in that way that only localhost, the LDAP server and the own name of the workstation exist. An example how it could look on the workstation gamera:
+</p>
+<pre>
+127.0.0.1 localhost
+192.168.1.1 gojira.marex.local gojira
+192.168.1.50 gamera.marex.local gamera
+</pre>
+<p>On the LDAP server you can ignore every workstation. Finally you need to edit hosts entry in your /etc/nsswitch.conf:
+</p>
+<pre>
+hosts:          files dns ldap
+</pre>
+<p>Now test your configuration:
+</p>
+<pre>
+$ getent hosts
+127.0.0.1       localhost
+192.168.1.1     gojira.marex.local gojira
+192.168.1.50    gamera.marex.local gamera
+192.168.1.1     gojira
+192.168.1.50    gamera
+192.168.1.51    iris
+192.168.1.52    zedan
+</pre>
+<p>The first 3 lines are from /etc/hosts, the last 4 lines are from your LDAP server. Finally to get ping work with LDAP you need to start nscd:
+</p>
+<pre>
+$ mkdir -p /var/db/nscd
+$ mkdir -p /var/run/nscd
+$ /etc/rc.d/nscd start
+$ ping iris
+PING iris (192.168.1.51) 56(84) bytes of data.
+...
+</pre>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

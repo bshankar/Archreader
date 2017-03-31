@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>USB Armory - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-USB_Armory skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">USB Armory</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The <a rel="nofollow" class="external text" href="http://inversepath.com/usbarmory">USB armory</a> from Inverse Path is an open source hardware design, implementing a flash drive sized computer.
+</p>
+<p>The compact USB powered device provides a platform for developing and running a variety of applications.
+</p>
+<p>The security features of the USB armory System on a Chip (SoC), combined with the openness of the board design, empower developers and users with a fully customizable USB trusted device for open and innovative personal security applications.
+</p>
+<p>The hardware design features the Freescale i.MX53 processor, supporting advanced security features such as secure boot and ARM® TrustZone®.
+</p>
+<ul>
+<li> Freescale i.MX53 ARM® Cortex™-A8 800Mhz, 512MB DDR3 RAM</li>
+<li> USB host powered (&lt;500 mA) device with compact form factor (65 x 19 x 6 mm)</li>
+<li> ARM® TrustZone®, secure boot + storage + RAM</li>
+<li> microSD card slot</li>
+<li> 5-pin breakout header with GPIOs and UART</li>
+<li> customizable LED, including secure mode detection</li>
+<li> USB device emulation (CDC Ethernet, mass storage, HID, etc.)</li>
+<li> Open Hardware &amp; Software </li>
+</ul>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3">
+<a href="#Network"><span class="tocnumber">2.1</span> <span class="toctext">Network</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Firewall"><span class="tocnumber">2.1.1</span> <span class="toctext">Firewall</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5"><a href="#LED_Brightness"><span class="tocnumber">2.2</span> <span class="toctext">LED Brightness</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#X"><span class="tocnumber">2.3</span> <span class="toctext">X</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Follow the <a rel="nofollow" class="external text" href="http://archlinuxarm.org/platforms/armv7/freescale/usb-armory">official Arch Linux ARM instructions</a>.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<h3><span class="mw-headline" id="Network">Network</span></h3>
+<p>Device already has a static IP configured with <code>10.0.0.1</code> via <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a>. Notably lacking is a default DNS configuration, which can easily be added:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/network/gadget-deadbeef.network</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Network]
+DNS=1.2.3.4</pre>
+<p>On host, use the following <a href="../en/Netctl.html" title="Netctl">netctl</a> configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/netctl/armory</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Description='Ethernet over USB Armory'
+Interface=$INTERFACE_NAME
+IP=static
+Address=('10.0.0.2/24')</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>$INTERFACE_NAME</code> will change according to which USB port is used</div>
+<h4><span class="mw-headline" id="Firewall">Firewall</span></h4>
+<p>The official instructions require adding an <a href="../en/Iptables.html" title="Iptables">iptables</a> rule to allow packet forwarding from the USB Armory through the host machine:
+</p>
+<pre># iptables -t nat -A POSTROUTING -s 10.0.0.1/32 -o eth0 -j MASQUERADE
+</pre>
+<p>Hosts that also have an active <a href="../en/Simple_stateful_firewall.html" title="Simple stateful firewall">Simple stateful firewall</a> must also change the <code>FORWARD</code> policy:
+</p>
+<pre># iptables -P FORWARD ACCEPT
+</pre>
+<p>Or setup a more restrictive rule that allows NAT forwarding on the host.
+</p>
+<h3><span class="mw-headline" id="LED_Brightness">LED Brightness</span></h3>
+<p>By default, LED is way too bright after boot. Disable default modules:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/led.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+blacklist leds_gpio
+blacklist led_class
+blacklist ledtrig_heartbeat
+</pre>
+<p>Use <a href="../en/Systemd.html#Temporary_files" title="Systemd">Systemd#Temporary files</a> to set the brightness config:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/tmpfiles.d/led.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+w /sys/class/gpio/export - - - - 123
+w /sys/class/gpio/gpio123/direction - - - - in
+</pre>
+<h3><span class="mw-headline" id="X">X</span></h3>
+<p>Follow <a href="../en/Secure_Shell.html#X11_forwarding" title="Secure Shell">Secure Shell#X11 forwarding</a>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://github.com/yuvadm/usbarmory-arch">https://github.com/yuvadm/usbarmory-arch</a> for relevant packages mentioned in this article </li>
+<li> <a rel="nofollow" class="external free" href="http://archlinuxarm.org/platforms/armv7/freescale/usb-armory">http://archlinuxarm.org/platforms/armv7/freescale/usb-armory</a> Article on USB Armory on archlinuxarm.org</li>
+<li> <a rel="nofollow" class="external free" href="https://wiki.archassault.org/USB_Armory">https://wiki.archassault.org/USB_Armory</a> Article on the USB Armory on the archassault.org wiki</li>
+<li> <a rel="nofollow" class="external free" href="https://github.com/ckuethe/usbarmory/wiki/USB-Gadgets">https://github.com/ckuethe/usbarmory/wiki/USB-Gadgets</a> How to present USB Armory as a mass storage, hid device and ethernet adapter at the same time</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:ARM_architecture.html" title="Category:ARM architecture">ARM architecture</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

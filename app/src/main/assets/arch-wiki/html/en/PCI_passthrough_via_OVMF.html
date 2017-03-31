@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>PCI passthrough via OVMF - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-PCI_passthrough_via_OVMF skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">PCI passthrough via OVMF</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>The Open Virtual Machine Firmware (<a rel="nofollow" class="external text" href="http://www.tianocore.org/ovmf/">OVMF</a>) is a project to enable UEFI support for virtual machines. Starting with Linux 3.9 and recent versions of QEMU, it is now possible to passthrough a graphics card, offering the VM native graphics performance which is useful for graphic-intensive tasks.
+</p>
+<p>Provided you have a desktop computer with a spare GPU you can dedicate to the host (be it an integrated GPU or an old OEM card, the brands do not even need to match) and that your hardware supports it (see <a href="#Prerequisites">#Prerequisites</a>), it is possible to have a VM of any OS with its own dedicated GPU and near-native performance. For more information on techniques see the background <a rel="nofollow" class="external text" href="http://www.linux-kvm.org/images/b/b3/01x09b-VFIOandYou-small.pdf">presentation (pdf)</a>. 
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Prerequisites"><span class="tocnumber">1</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Setting_up_IOMMU"><span class="tocnumber">2</span> <span class="toctext">Setting up IOMMU</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Enabling_IOMMU"><span class="tocnumber">2.1</span> <span class="toctext">Enabling IOMMU</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Ensuring_that_the_groups_are_valid"><span class="tocnumber">2.2</span> <span class="toctext">Ensuring that the groups are valid</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Gotchas"><span class="tocnumber">2.3</span> <span class="toctext">Gotchas</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Plugging_your_guest_GPU_in_an_unisolated_CPU-based_PCIe_slot"><span class="tocnumber">2.3.1</span> <span class="toctext">Plugging your guest GPU in an unisolated CPU-based PCIe slot</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Isolating_the_GPU"><span class="tocnumber">3</span> <span class="toctext">Isolating the GPU</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Using_vfio-pci"><span class="tocnumber">3.1</span> <span class="toctext">Using vfio-pci</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Using_pci-stub_.28legacy_method.2C_pre-4.1_kernels.29"><span class="tocnumber">3.2</span> <span class="toctext">Using pci-stub (legacy method, pre-4.1 kernels)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10">
+<a href="#Setting_up_an_OVMF-based_guest_VM"><span class="tocnumber">4</span> <span class="toctext">Setting up an OVMF-based guest VM</span></a>
+<ul>
+<li class="toclevel-2 tocsection-11"><a href="#Configuring_libvirt"><span class="tocnumber">4.1</span> <span class="toctext">Configuring libvirt</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Setting_up_the_guest_OS"><span class="tocnumber">4.2</span> <span class="toctext">Setting up the guest OS</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Attaching_the_PCI_devices"><span class="tocnumber">4.3</span> <span class="toctext">Attaching the PCI devices</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Gotchas_2"><span class="tocnumber">4.4</span> <span class="toctext">Gotchas</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Using_a_non-EFI_image_on_an_OVMF-based_VM"><span class="tocnumber">4.4.1</span> <span class="toctext">Using a non-EFI image on an OVMF-based VM</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Performance_tuning"><span class="tocnumber">5</span> <span class="toctext">Performance tuning</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17">
+<a href="#CPU_pinning"><span class="tocnumber">5.1</span> <span class="toctext">CPU pinning</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#The_case_of_Hyper-threading"><span class="tocnumber">5.1.1</span> <span class="toctext">The case of Hyper-threading</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Static_huge_pages"><span class="tocnumber">5.2</span> <span class="toctext">Static huge pages</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#CPU_frequency_governor"><span class="tocnumber">5.3</span> <span class="toctext">CPU frequency governor</span></a></li>
+<li class="toclevel-2 tocsection-21"><a href="#High_DPC_Latency"><span class="tocnumber">5.4</span> <span class="toctext">High DPC Latency</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-22">
+<a href="#Special_procedures"><span class="tocnumber">6</span> <span class="toctext">Special procedures</span></a>
+<ul>
+<li class="toclevel-2 tocsection-23"><a href="#Using_identical_guest_and_host_GPUs"><span class="tocnumber">6.1</span> <span class="toctext">Using identical guest and host GPUs</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Passing_the_boot_GPU_to_the_guest"><span class="tocnumber">6.2</span> <span class="toctext">Passing the boot GPU to the guest</span></a></li>
+<li class="toclevel-2 tocsection-25"><a href="#Bypassing_the_IOMMU_groups_.28ACS_override_patch.29"><span class="tocnumber">6.3</span> <span class="toctext">Bypassing the IOMMU groups (ACS override patch)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-26"><a href="#Complete_example_for_QEMU_.28CLI-based.29_without_libvirtd_.28can_switch_GPUs_without_reboot.29"><span class="tocnumber">7</span> <span class="toctext">Complete example for QEMU (CLI-based) without libvirtd (can switch GPUs without reboot)</span></a></li>
+<li class="toclevel-1 tocsection-27"><a href="#Complete_example_for_QEMU_with_libvirtd"><span class="tocnumber">8</span> <span class="toctext">Complete example for QEMU with libvirtd</span></a></li>
+<li class="toclevel-1 tocsection-28">
+<a href="#Troubleshooting"><span class="tocnumber">9</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-29"><a href="#.22Error_43_:_Driver_failed_to_load.22_on_Nvidia_GPUs_passed_to_Windows_VMs"><span class="tocnumber">9.1</span> <span class="toctext">"Error 43 : Driver failed to load" on Nvidia GPUs passed to Windows VMs</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#Unexpected_crashes_related_to_CPU_exceptions"><span class="tocnumber">9.2</span> <span class="toctext">Unexpected crashes related to CPU exceptions</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#.22System_Thread_Exception_Not_Handled.22_when_booting_on_a_Windows_VM"><span class="tocnumber">9.3</span> <span class="toctext">"System Thread Exception Not Handled" when booting on a Windows VM</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Slowed_down_audio_pumped_through_HDMI_on_the_video_card"><span class="tocnumber">9.4</span> <span class="toctext">Slowed down audio pumped through HDMI on the video card</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-33">
+<a href="#Passing_though_other_devices"><span class="tocnumber">10</span> <span class="toctext">Passing though other devices</span></a>
+<ul>
+<li class="toclevel-2 tocsection-34"><a href="#USB_controller"><span class="tocnumber">10.1</span> <span class="toctext">USB controller</span></a></li>
+<li class="toclevel-2 tocsection-35">
+<a href="#Gotchas_3"><span class="tocnumber">10.2</span> <span class="toctext">Gotchas</span></a>
+<ul>
+<li class="toclevel-3 tocsection-36"><a href="#Passing_through_a_device_that_does_not_support_resetting"><span class="tocnumber">10.2.1</span> <span class="toctext">Passing through a device that does not support resetting</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-37"><a href="#See_also"><span class="tocnumber">11</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Prerequisites">Prerequisites</span></h2>
+<p>A VGA Passthrough relies on a number of technologies that are not ubiquitous as of today and might not be available on your hardware. You will not be able to do this on your machine unless the following requirements are met :
+</p>
+<ul>
+<li> Your CPU must support hardware virtualization (for kvm) and IOMMU (for the passthrough itself)
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://ark.intel.com/search/advanced?s=t&amp;VTX=true&amp;VTD=true">List of compatible Intel CPUs (Intel VT-x and Intel VT-d)</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://support.amd.com/en-us/kb-articles/Pages/GPU120AMDRVICPUsHyperVWin8.aspx">List of compatible AMD CPUs (AMD-V and AMD-Vi)</a>
+</li>
+</ul>
+</li>
+<li> Your motherboard must also support IOMMU
+<ul><li> Both the chipset and the BIOS must support it. It is not always easy to tell at a glance whether or not this is the case, but there is a <a rel="nofollow" class="external text" href="http://wiki.xen.org/wiki/VTdHowTo">fairly comprehensive list on the matter on the Xen wiki</a> as well as <a href="https://en.wikipedia.org/wiki/List_of_IOMMU-supporting_hardware" class="extiw" title="wikipedia:List of IOMMU-supporting hardware">another one on Wikipedia</a>.</li></ul>
+</li>
+<li> Your guest GPU ROM must support UEFI
+<ul><li> If you can find <a rel="nofollow" class="external text" href="https://www.techpowerup.com/vgabios/">any ROM in this list</a> that applies to your specific GPU and is said to support UEFI, you are generally in the clear. If not, you might want to try anyway if you have a recent GPU.</li></ul>
+</li>
+</ul>
+<p>You will probably want to have a spare monitor (the GPU will not display anything if there is no screen plugged in and using a VNC or Spice connection will not help your performance), as well as a mouse and a keyboard you can pass to your VM. If anything goes wrong, you will at least have a way to control your host machine this way.
+</p>
+<h2><span class="mw-headline" id="Setting_up_IOMMU">Setting up IOMMU</span></h2>
+<p>IOMMU is a system specific IO mapping mechanism and can be used with most devices. IOMMU is a generic name for Intel VT-x/Intel and AMD AMD-V/AMD-Vi.
+</p>
+<h3><span class="mw-headline" id="Enabling_IOMMU">Enabling IOMMU</span></h3>
+<p>Ensure that AMD-VI/VT-d is enabled in your BIOS settings. Both normally show up alongside other CPU features (meaning they could be in an overclocking-related menu) either with their actual names ("Vt-d" or "AMD-VI"), legacy names ("Vanderpool" for Vt-x, "Pacifica" for AMD-V) or in more ambiguous terms such as "Virtualization technology", which may or may not be explained in the manual.
+</p>
+<p>You will also have to enable iommu support in the kernel itself through a <a href="../en/Kernel_parameters.html" title="Kernel parameters">bootloader kernel option</a>. Depending on your type of CPU, use either <code>intel_iommu=on</code> for Intel CPUs (VT-d) or <code>amd_iommu=on</code> for AMD CPUs (AMD-Vi).
+</p>
+<p>After rebooting, check dmesg to confirm that IOMMU has been correctly enabled:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">dmesg|grep -e DMAR -e IOMMU</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[    0.000000] ACPI: DMAR 0x00000000BDCB1CB0 0000B8 (v01 INTEL  BDW      00000001 INTL 00000001)
+[    0.000000] Intel-IOMMU: enabled
+[    0.028879] dmar: IOMMU 0: reg_base_addr fed90000 ver 1:0 cap c0000020660462 ecap f0101a
+[    0.028883] dmar: IOMMU 1: reg_base_addr fed91000 ver 1:0 cap d2008c20660462 ecap f010da
+[    0.028950] IOAPIC id 8 under DRHD base  0xfed91000 IOMMU 1
+[    0.536212] DMAR: No ATSR found
+[    0.536229] IOMMU 0 0xfed90000: using Queued invalidation
+[    0.536230] IOMMU 1 0xfed91000: using Queued invalidation
+[    0.536231] IOMMU: Setting RMRR:
+[    0.536241] IOMMU: Setting identity map for device 0000:00:02.0 [0xbf000000 - 0xcf1fffff]
+[    0.537490] IOMMU: Setting identity map for device 0000:00:14.0 [0xbdea8000 - 0xbdeb6fff]
+[    0.537512] IOMMU: Setting identity map for device 0000:00:1a.0 [0xbdea8000 - 0xbdeb6fff]
+[    0.537530] IOMMU: Setting identity map for device 0000:00:1d.0 [0xbdea8000 - 0xbdeb6fff]
+[    0.537543] IOMMU: Prepare 0-16MiB unity mapping for LPC
+[    0.537549] IOMMU: Setting identity map for device 0000:00:1f.0 [0x0 - 0xffffff]
+[    2.182790] [drm] DMAR active, disabling use of stolen memory</pre>
+<h3><span class="mw-headline" id="Ensuring_that_the_groups_are_valid">Ensuring that the groups are valid</span></h3>
+<p>The following command will allow you to see how your various PCI devices are mapped to IOMMU groups. If it does not return anything, you either have not enabled IOMMU support properly or your hardware does not support it.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ for iommu_group in $(find /sys/kernel/iommu_groups/ -maxdepth 1 -mindepth 1 -type d); do echo "IOMMU group $(basename "$iommu_group")"; for device in $(\ls -1 "$iommu_group"/devices/); do echo -n $'\t'; lspci -nns "$device"; done; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+IOMMU group 0
+	00:00.0 Host bridge: Intel Corporation Xeon E3-1200 v2/Ivy Bridge DRAM Controller [8086:0158] (rev 09)
+IOMMU group 1
+	00:01.0 PCI bridge: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor PCI Express Root Port [8086:0151] (rev 09)
+IOMMU group 2
+	00:14.0 USB controller: Intel Corporation 7 Series/C210 Series Chipset Family USB xHCI Host Controller [8086:0e31] (rev 04)
+IOMMU group 4
+	00:1a.0 USB controller: Intel Corporation 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #2 [8086:0e2d] (rev 04)
+IOMMU group 5
+	00:1b.0 Audio device: Intel Corporation 7 Series/C210 Series Chipset Family High Definition Audio Controller [8086:0e20] (rev 04)
+IOMMU group 10
+	00:1d.0 USB controller: Intel Corporation 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #1 [8086:0e26] (rev 04)
+IOMMU group 13
+	06:00.0 VGA compatible controller: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+	06:00.1 Audio device: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)</pre>
+<p>An IOMMU group is the smallest set of physical devices that can be passed to a virtual machine. For instance, in the example above, both the GPU in 06:00.0 and its audio controller in 6:00.1 belong to IOMMU group 13 and can only be passed together. The frontal USB controller, however, has its own group (group 2) which is separate from both the USB expansion controller (group 10) and the rear USB controller (group 4), meaning that <a href="#USB_controller">any of them could be passed to a VM without affecting the others</a>.
+</p>
+<h3><span class="mw-headline" id="Gotchas">Gotchas</span></h3>
+<h4><span class="mw-headline" id="Plugging_your_guest_GPU_in_an_unisolated_CPU-based_PCIe_slot">Plugging your guest GPU in an unisolated CPU-based PCIe slot</span></h4>
+<p>Not all PCI-E slots are the same. Most motherboards have PCIe slots provided by both the CPU and the PCH. Depending on your CPU, it is possible that your processor-based PCIe slot does not support isolation properly, in which case the PCI slot itself will be appear to be grouped with the device that is connected to it.
+</p>
+<pre>IOMMU group 1
+	00:01.0 PCI bridge: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor PCI Express Root Port (rev 09)
+	01:00.0 VGA compatible controller: NVIDIA Corporation GM107 [GeForce GTX 750] (rev a2)
+	01:00.1 Audio device: NVIDIA Corporation Device 0fbc (rev a1)</pre>
+<p>This is fine so long as only your guest GPU is included in here, such as above. Depending on what is plugged in your other PCIe slots and whether they are allocated to your CPU or your PCH, you may find yourself with additional devices within the same group, which would force you to pass those as well. If you are ok with passing everything that is in there to your VM, you are free to continue. Otherwise, you will either need to try and plug your GPU in your other PCIe slots (if you have any) and see if those provide isolation from the rest or to install the ACS override patch, which comes with its own drawbacks.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If they are grouped with other devices in this manner, pci root ports and bridges should neither be bound to vfio at boot, nor be added to the VM.</div>
+<h2><span class="mw-headline" id="Isolating_the_GPU">Isolating the GPU</span></h2>
+<p>Due to their size and complexity, GPU drivers do not tend to support dynamic rebinding very well, so you cannot just have some GPU you use on the host be transparently passed to a VM without consequences. It is generally preferable to bind them with a placeholder driver instead. This will stop other drivers from attempting to claim it, and will force the GPU to remain inactive while a VM is not running. There are two methods for doing this, but it is recommended to use vfio-pci if your kernel supports it.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Once you reboot after this procedure, whatever GPU you have configured will no longer be usable on the host until you reverse the manipulation. Make sure the GPU you intend to use on the host is properly configured before doing this.</div>
+<h3><span class="mw-headline" id="Using_vfio-pci">Using vfio-pci</span></h3>
+<p>Starting with Linux 4.1, the kernel includes vfio-pci, which is functionally similar to pci-stub with a few added bonuses, such as switching devices into their D3 state when they are not in use. If your system supports it, which you can try by running the following command, you should use it. If it returns en error, you will have to rely on pci-stub instead.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ modinfo vfio-pci</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+filename:       /lib/modules/4.4.5-1-ARCH/kernel/drivers/vfio/pci/vfio-pci.ko.gz
+description:    VFIO PCI - User Level meta-driver
+author:         Alex Williamson &lt;alex.williamson@redhat.com&gt;
+...</pre>
+<p>Vfio-pci normally targets PCI devices by ID, meaning you only need to specify the IDs of the devices you intend to passthrough. For the following IOMMU group, you would want to bind vfio-pci with <code>10de:13c2</code> and <code>10de:0fbb</code>, which will be used as example values for the rest of this section.
+</p>
+<pre>IOMMU group 13
+	06:00.0 VGA compatible controller: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+	06:00.1 Audio device: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If, as noted <a href="#Plugging_your_guest_GPU_in_an_unisolated_CPU-based_PCIe_slot">here</a>, your pci root port is part of your IOMMU group, you <b>must not</b> pass its ID to <code>vfio-pci</code>, as it needs to remain attached to the host to function properly. Any other device within that group, however, should be left for <code>vfio-pci</code> to bind with.</div>
+<p>You can then add those vendor-device ID pairs to the default parameters passed to vfio-pci whenever it is inserted into the kernel.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/vfio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">options vfio-pci ids=10de:13c2,10de:0fbb</pre>
+<p>This, however, does not guarantee that vfio-pci will be loaded before other graphics drivers. To ensure that, we need to statically bind it in the kernel image by adding it anywhere in the MODULES list in mkinitpcio.conf, alongside with its dependencies.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you also have another driver loaded this way for <a href="../en/Kernel_mode_setting.html#Early_KMS_start" title="Kernel mode setting">early modesetting</a> (such as "nouveau", "radeon", "amdgpu", "i915", etc.), all of the following VFIO modules must preceed it.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES="... vfio vfio_iommu_type1 vfio_pci vfio_virqfd ..."</pre>
+<p>Also, ensure that the modconf hook is included in the HOOKS list of mkinitcpio.conf:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">HOOKS="... modconf ..."</pre>
+<p>Since new modules have been added to the initramfs configuration, it must be regenerated. Should you change the IDs of the devices in <code>/etc/modprobe.d/vfio.conf</code>, you will also have to regenerate it, as those parameters must be specified in the initramfs to be known during the early boot stages.
+</p>
+<pre># mkinitcpio -p linux</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using a non-standard kernel, such as <code>linux-vfio</code>, replace <code>linux</code> with whichever kernel you intend to use.</div>
+<p>Reboot and verify that vfio-pci has loaded properly and that it is now bound to the right devices.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ dmesg | grep -i vfio </pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[    0.329224] VFIO - User Level meta-driver version: 0.3
+[    0.341372] vfio_pci: add [10de:13c2[ffff:ffff]] class 0x000000/00000000
+[    0.354704] vfio_pci: add [10de:0fbb[ffff:ffff]] class 0x000000/00000000
+[    2.061326] vfio-pci 0000:06:00.0: enabling device (0100 -&gt; 0103)</pre>
+<p>It isn't necessary for all devices (or even expected device) from vfio.conf to be in dmesg output. Sometimes device doesn't appear in output at boot but actually is able to be visible and operatable in guest VM.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -nnk -d 10de:13c2</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+06:00.0 VGA compatible controller: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+	Kernel driver in use: vfio-pci
+	Kernel modules: nouveau nvidia</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ lspci -nnk -d 10de:0fbb</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+06:00.1 Audio device: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+	Kernel driver in use: vfio-pci
+	Kernel modules: snd_hda_intel</pre>
+<h3><span class="mw-headline" id="Using_pci-stub_.28legacy_method.2C_pre-4.1_kernels.29">Using pci-stub (legacy method, pre-4.1 kernels)</span></h3>
+<p>If your kernel does not support vfio-pci, you can use the pci-stub module instead.
+</p>
+<p>Pci-stub normally targets PCI devices by ID, meaning you only need to specify the IDs of the devices you intend to passthrough. For the following IOMMU group, you would want to bind vfio-pci with <code>10de:13c2</code> and <code>10de:0fbb</code>, which will be used as example values for the rest of this section.
+</p>
+<pre>IOMMU group 13
+	06:00.0 VGA compatible controller: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+	06:00.1 Audio device: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)</pre>
+<p>Most linux distros (including Arch Linux) have pci-stub built statically within the kernel image. If for any reason it needs to be loaded as a module in your case, you will need to bind it yourself using whatever tool your distro provides for this, such as <code>mkinitpcio</code> for Arch.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">MODULES="... pci-stub ..."</pre>
+<p>If you did need to add this module to your kernel image configuration manually, you must also regenerate it.
+</p>
+<pre># mkinitcpio -p linux</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you are using a non-standard kernel, such as <code>linux-vfio</code>, replace <code>linux</code> with whichever kernel you intend to use.</div>
+<p>Add the relevant PCI device IDs to the kernel command line:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/mkinitcpio.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+GRUB_CMDLINE_LINUX_DEFAULT="... pci-stub.ids=10de:13c2,10de:0fbb ..."
+...</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If, as noted <a href="#Plugging_your_guest_GPU_in_an_unisolated_CPU-based_PCIe_slot">here</a>, your pci root port is part of your IOMMU group, you <b>must not</b> pass its ID to <code>pci-stub</code>, as it needs to remain attached to the host to function properly. Any other device within that group, however, should be left for <code>pci-stub</code> to bind with.</div>
+<p>Reload the grub configuration:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg</pre>
+<p>Check dmesg output for successful assignment of the device to pci-stub:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">dmesg | grep pci-stub</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[    2.390128] pci-stub: add 10DE:13C2 sub=FFFFFFFF:FFFFFFFF cls=00000000/00000000
+[    2.390143] pci-stub 0000:06:00.0: claimed by stub
+[    2.390150] pci-stub: add 10DE:0FBB sub=FFFFFFFF:FFFFFFFF cls=00000000/00000000
+[    2.390159] pci-stub 0000:06:00.1: claimed by stub</pre>
+<h2><span class="mw-headline" id="Setting_up_an_OVMF-based_guest_VM">Setting up an OVMF-based guest VM</span></h2>
+<p>OVMF is an open-source UEFI firmware for QEMU virtual machines. While it's possible to use SeaBIOS to get similar results to an actual PCI passthough, the setup process is different and it is generally preferable to use the EFI method if your hardware supports it.
+</p>
+<h3><span class="mw-headline" id="Configuring_libvirt">Configuring libvirt</span></h3>
+<p><a href="../en/Libvirt.html" title="Libvirt">Libvirt</a> is a wrapper for a number of virtualization utilities that greatly simplifies the configuration and deployment process of virtual machines. In the case of KVM and QEMU, the frontend it provides allows us to avoid dealing with the permissions for QEMU and make it easier to add and remove various devices on a live VM. Its status as a wrapper, however, means that it might not always support all of the latest qemu features, which could end up requiring the use of a wrapper script to provide some extra arguments to QEMU.
+</p>
+<p>After installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qemu">qemu</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=libvirt">libvirt</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ovmf-git/">ovmf-git</a></span><sup><small>AUR</small></sup> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=virt-manager">virt-manager</a></span>, add the path to your OVMF firmware image and runtime variables template to your libvirt config so <code>virt-install</code> or <code>virt-manager</code> can find those later on.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/libvirt/qemu.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+nvram = [
+	"/usr/share/ovmf/x64/ovmf_x64.bin:/usr/share/ovmf/x64/ovmf_vars_x64.bin"
+]
+</pre>
+<p>You can now <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and start <code>libvirtd</code> and its logging component.
+</p>
+<pre>
+# systemctl enable --now libvirtd
+# systemctl enable virtlogd.socket</pre>
+<h3><span class="mw-headline" id="Setting_up_the_guest_OS">Setting up the guest OS</span></h3>
+<p>The process of setting up a VM using <code>virt-manager</code> is mostly self explainatory, as most of the process comes with fairly comprehensive on-screen instructions. However, you should pay special attention to the following steps :
+</p>
+<ul>
+<li> When the VM creation wizard asks you to name your VM, check the "Customize before install" checkbox.</li>
+<li> In the "Overview" section, set your firmware to "UEFI". If the option is grayed out, make sure that you have correctly specified the location of your firmware in <code>/etc/libvirt/qemu.conf</code> and restart <code>libvirtd.service</code>.</li>
+<li> In the "Processor" section, change your CPU model to "host-passthrough". If it is not in the list, you will have to type it by hand. This will ensure that your CPU is detected properly, since it causes libvirt to expose your CPU capabilities exactly as they are instead of only those it recognizes (which is the preferred default behavior to make CPU behavior easier to reproduce). Without it, some applications may complain about your CPU being of an unknown model.</li>
+<li> If you want to minimize IO overhead, go into "Add Hardware" and add a Controller for SCSI drives of the "VirtIO SCSI" model. You can then change the default IDE disk for a SCSI disk, which will bind to said controller.
+<ul><li> Windows VMs will not recognize those drives by default, so you need to download the ISO containing the drivers from <a rel="nofollow" class="external text" href="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/">here</a> and add an IDE (or SATA for Windows 8.1 and newer) CD-ROM storage device linking to said ISO, otherwise you will not be able to get Windows to recognize it during the installation process. When prompted to select a disk to install windows on, load the drivers contained on the CD-ROM under <i>vioscsi</i>.</li></ul>
+</li>
+</ul>
+<p>The rest of the installation process will take place as normal using a standard QXL video adapter running in a window. At this point, there is no need to install additional drivers for the rest of the virtual devices, since most of them will be removed later on. Once the guest OS is done installing, simply turn off the virtual machine.
+</p>
+<h3><span class="mw-headline" id="Attaching_the_PCI_devices">Attaching the PCI devices</span></h3>
+<p>With the installation done, it's now possible to edit the hardware details in libvirt and remove virtual integration devices, such as the spice channel and virtual display, the QXL video adapter, the emulated mouse and keyboard and the USB tablet device. Since that leaves you with no input devices, you may want to bind a few USB host devices to your VM as well, but remember to <b>leave at least one mouse and/or keyboard assigned to your host</b> in case something goes wrong with the guest. At this point, it also becomes possible to attach the PCI device that was isolated earlier; simply click on "Add Hardware" and select the PCI Host Devices you want to passthrough. If everything went well, the screen plugged into your GPU should show the OVMF splash screen and your VM should start up normally. From there, you can setup the drivers for the rest of your VM.
+</p>
+<h3><span class="mw-headline" id="Gotchas_2">Gotchas</span></h3>
+<h4><span class="mw-headline" id="Using_a_non-EFI_image_on_an_OVMF-based_VM">Using a non-EFI image on an OVMF-based VM</span></h4>
+<p>The OVMF firmware does not support booting off non-EFI mediums. If the installation process drops you in a UEFI shell right after booting, you may have an invalid EFI boot media. Try using an alternate linux/windows image to determine if you have an invalid media.
+</p>
+<h2><span class="mw-headline" id="Performance_tuning">Performance tuning</span></h2>
+<p>Most use cases for PCI passthroughs relate to performance-intensive domains such as video games and GPU-accelerated tasks. While a PCI passthrough on its own is a step towards reaching native performance, there are still a few ajustments on the host and guest to get the most out of your VM.
+</p>
+<h3><span class="mw-headline" id="CPU_pinning">CPU pinning</span></h3>
+<p>The default behavior for KVM guests is to run operations coming from the guest as a number of threads representing virtual processors. Those threads are managed by the Linux scheduler like any other thread and are dispatched to any available CPU cores based on niceness and priority queues. Since switching between threads adds a bit of overhead (because context switching forces the core to change its cache between operations), this can noticeably harm performance on the guest. CPU pinning aims to resolve this as it overrides process scheduling and ensures that the VM threads will always run and only run on those specific cores. Here, for instance, the guest cores 0, 1, 2 and 3 are mapped to the host cores 5, 6, 7 and 8 respectively.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+&lt;vcpu placement='static'&gt;4&lt;/vcpu&gt;
+&lt;cputune&gt;
+    &lt;vcpupin vcpu='0' cpuset='4'/&gt;
+    &lt;vcpupin vcpu='1' cpuset='5'/&gt;
+    &lt;vcpupin vcpu='2' cpuset='6'/&gt;
+    &lt;vcpupin vcpu='3' cpuset='7'/&gt;
+&lt;/cputune&gt;
+...</pre>
+<h4><span class="mw-headline" id="The_case_of_Hyper-threading">The case of Hyper-threading</span></h4>
+<p>If your CPU supports hardware multitasking, also known as Hyper-threading on Intel chips, there are two ways you can go with your CPU pinning. That is, Hyper-threading is simply a very efficient way of running two threads on one CPU at any given time, so while it may give you 8 logical cores on what would otherwise be a quad-core CPU, if the physical core is overloaded, the logical core won't be of any use. One could pin their VM threads on 2 physical cores and their 2 respective threads, but any task overloading those two cores won't be helped by the extra two logical cores, since in the end you're only passing through two cores out of four, not four out of eight. What you should do knowing this depends on what you intend to do with your host while your VM is running.
+</p>
+<p>This is the abridged content of <code>/proc/cpuinfo</code> on a quad-core machine with hyper-threading.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat /proc/cpuinfo | grep -e "processor" -e "core id" -e "^$"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+processor	: 0
+core id		: 0
+
+processor	: 1
+core id		: 1
+
+processor	: 2
+core id		: 2
+
+processor	: 3
+core id		: 3
+
+processor	: 4
+core id		: 0
+
+processor	: 5
+core id		: 1
+
+processor	: 6
+core id		: 2
+
+processor	: 7
+core id		: 3</pre>
+<p>If you don't intend to be doing any computation-heavy work on the host (or even anything at all) at the same time as you would on the VM, it would probably be better to pin your VM threads across all of your logical cores, so that the VM can fully take advantage of the spare CPU time on all your cores.
+</p>
+<p>On the quad-core machine mentioned above, it would look like this :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+&lt;vcpu placement='static'&gt;4&lt;/vcpu&gt;
+&lt;cputune&gt;
+    &lt;vcpupin vcpu='0' cpuset='4'/&gt;
+    &lt;vcpupin vcpu='1' cpuset='5'/&gt;
+    &lt;vcpupin vcpu='2' cpuset='6'/&gt;
+    &lt;vcpupin vcpu='3' cpuset='7'/&gt;
+&lt;/cputune&gt;
+...
+&lt;cpu mode='custom' match='exact'&gt;
+    ...
+    &lt;topology sockets='1' cores='4' threads='1'/&gt;
+    ...
+&lt;/cpu&gt;
+...</pre>
+<p>If you would instead prefer to have the host and guest running intensive tasks at the same time, it would then be preferable to pin a limited amount of physical cores and their respective threads on the guest and leave the rest to the host to avoid the two competing for CPU time.
+</p>
+<p>On the quad-core machine mentioned above, it would look like this :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+&lt;vcpu placement='static'&gt;4&lt;/vcpu&gt;
+&lt;cputune&gt;
+    &lt;vcpupin vcpu='0' cpuset='2'/&gt;
+    &lt;vcpupin vcpu='1' cpuset='3'/&gt;
+    &lt;vcpupin vcpu='2' cpuset='6'/&gt;
+    &lt;vcpupin vcpu='3' cpuset='7'/&gt;
+&lt;/cputune&gt;
+...
+&lt;cpu mode='custom' match='exact'&gt;
+    ...
+    &lt;topology sockets='1' cores='2' threads='2'/&gt;
+    ...
+&lt;/cpu&gt;
+...</pre>
+<h3><span class="mw-headline" id="Static_huge_pages">Static huge pages</span></h3>
+<p>When dealing with applications that require large amounts of memory, memory latency can become a problem since the more memory pages are being used, the more likely it is that this application will attempt to access information accross multiple memory "pages", which is the base unit for memory allocation. Resolving the actual address of the memory page takes multiple steps, and so CPUs normally cache information on recently used memory pages to make subsequent uses on the same pages faster. Applications using large amounts of memory run into a problem where, for instance, a virtual machine uses 4GB of memory divided into 4kB pages (which is the default size for normal pages), meaning that such cache misses can become extremely frequent and greatly increase memory latency. Huge pages exist to mitigate this issue by giving larger individual pages to those applications, increasing the odds that multiple operations will target the same page in succession. This is normally handeled with transparent huge pages, which dynamically manages hugepages to keep up with the demand.
+</p>
+<p>On a VM with a PCI passthrough, however, it is <b>not possible</b> to benefit from transparent huge pages, as IOMMU requires that the guest's memory be allocated and pinned as soon as the VM starts. It is therefore required to allocate huge pages statically in order to benefit from them. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Do note that static huge pages lock down the allocated amount of memory, making it unavailable for applications that are not configured to use them. Allocating 4GBs worth of huge pages on a machine with 8GBs of memory will only leave you with 4GBs of available memory on the host <b>even when the VM is not running</b>.</div>
+<p>To allocate huge pages at boot, one must simply specify the desired amount on their kernel comand line with <code>hugepages=x</code>. For instance, reserving 1024 pages with <code>hugepages=1024</code> and the default size of 2048kB per huge page creates 2GBs worth of memory for the virtual machine to use.
+</p>
+<p>Also, since static huge pages can only be used by applications that specifically request it, you must add this section in your libvirt domain configuration to allow kvm to benefit from them :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+&lt;memoryBacking&gt;
+	&lt;hugepages/&gt;
+&lt;/memoryBacking&gt;
+...</pre>
+<h3><span class="mw-headline" id="CPU_frequency_governor">CPU frequency governor</span></h3>
+<p>Depending on the way your <a href="../en/CPU_frequency_scaling.html" title="CPU frequency scaling">CPU governor</a> is configured, the VM threads may not hit the CPU load thresholds for the frequency to ramp up. Indeed, KVM cannot actually change the CPU frequency on its own, which can be a problem if the it does not scale up with vCPU usage as it would result in underwhelming performance. An easy way to see if it behaves correctly is to check if the frequency reported by <code>watch lscpu</code> goes up when running a CPU-intensive task on the guest. If you are indeed experiencing stutter and the frequency does not go up to reach its reported maximum, it may be due to <a rel="nofollow" class="external text" href="https://lime-technology.com/forum/index.php?topic=46664.msg447678#msg447678">cpu scaling being  controlled by the host OS</a>. In this case, try setting all cores to maximum frequency to see if this improves performance. Note that if you're using a modern intel chip with the default pstate driver, cpupower commands will be <a href="../en/CPU_frequency_scaling.html#CPU_frequency_driver" title="CPU frequency scaling">ineffective</a>, so monitor <code>/proc/cpuinfo</code> to make sure your cpu is actually at max frequency.
+</p>
+<h3><span class="mw-headline" id="High_DPC_Latency">High DPC Latency</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> As far as I can tell all virtio modules listed here are for virtual devices used when Linux runs as a guest. Loading them on the host serves no purpose. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PCI_passthrough_via_OVMF">Talk:PCI passthrough via OVMF#</a>)</div>
+</div>
+<p>If you are experiencing high DPC and/or interrupt latency in your Guest VM, ensure you have  <a href="../en/Kernel_modules.html#Manual_module_handling" title="Kernel modules">loaded the needed virtio kernel modules</a> on the host kernel. Loadable virtio kernel modules include: <code>virtio-pci, virtio-net, virtio-blk, virtio-balloon, virtio-ring</code> and <code>virtio</code>. 
+</p>
+<p>After loading one or more of these modules, <code>lsmod | grep virtio</code> executed on the host should not return empty.
+</p>
+<h2><span class="mw-headline" id="Special_procedures">Special procedures</span></h2>
+<p>Certain setups require specific configuration tweaks in order to work properly. If you're having problems getting your host or your VM to work properly, see if your system matches one of the cases below and try adjusting your configuration accordingly.
+</p>
+<h3><span class="mw-headline" id="Using_identical_guest_and_host_GPUs">Using identical guest and host GPUs</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> A number of users have been having issues with this, it should probably be adressed by the article. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PCI_passthrough_via_OVMF#Additionnal_sections">Talk:PCI passthrough via OVMF#Additionnal_sections</a>)</div>
+</div>
+<p>Due to how both pci-stub and vfio-pci use your vendor and device id pair to identify which device they need to bind to at boot, if you have two GPUs sharing such an ID pair you won't be able to get your passthough driver to bind with just one of them. This sort of setup makes it necessary to use a script, so that whichever driver you're using is instead assigned by pci bus address using the <code>driver_override</code> mechanism.
+</p>
+<p>Here, we will make a script to bind vfio-pci to all GPUs but the boot gpu. Create the script "/sbin/vfio-pci-override.sh":
+</p>
+<pre>   #!/bin/sh
+   
+   for i in $(find /sys/devices/pci* -name boot_vga); do
+           if [ $(cat $i) -eq 0 ]; then
+                   GPU=$(dirname $i)
+                   AUDIO=$(echo $GPU | sed -e "s/0$/1/")
+                   echo "vfio-pci" &gt; $GPU/driver_override
+                   if [ -d $AUDIO ]; then
+                           echo "vfio-pci" &gt; $AUDIO/driver_override
+                   fi
+           fi
+   done
+   
+   modprobe -i vfio-pci
+</pre>
+<p>Create /etc/modprobe.d/vfio.conf with the following:
+</p>
+<pre>   install vfio-pci /sbin/vfio-pci-override.sh
+</pre>
+<p>Edit /etc/mkinitcpio.conf
+</p>
+<p>Remove any video drivers from MODULES, and add vfio-pci, and vfio_iommu_type1
+</p>
+<pre>   MODULES="ext4 vfat vfio-pci vfio_iommu_type1"
+</pre>
+<p>Add "find" and "dirname" to BINARIES:
+</p>
+<pre>   BINARIES="find dirname"
+</pre>
+<p>Add "/etc/modprobe.d/vfio.conf" and "/sbin/vfio-pci-override.sh" to FILES:
+</p>
+<pre>   FILES="/etc/modprobe.d/vfio.conf /sbin/vfio-pci-override.sh"
+</pre>
+<p>Regenerate your initramfs, and reboot:
+</p>
+<pre>   mkinitcpio -p linux
+</pre>
+<h3><span class="mw-headline" id="Passing_the_boot_GPU_to_the_guest">Passing the boot GPU to the guest</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Not possible at the time as far as I'm aware, but a common issue on various forums. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PCI_passthrough_via_OVMF#Additionnal_sections">Talk:PCI passthrough via OVMF#Additionnal_sections</a>)</div>
+</div>
+<p>The GPU marked as <code>boot_vga</code> is a special case when it comes to doing PCI passthroughs, since the BIOS needs to use it in order to display things like boot messages or the BIOS configuration menu. To do that, it makes <a rel="nofollow" class="external text" href="https://www.redhat.com/archives/vfio-users/2016-May/msg00224.html">a copy of the VGA boot ROM which can then be freely modified</a>. This modified copy is the version the system gets to see, which the passthrough driver may reject as invalid. As such, it is generally reccomanded to change the boot GPU in the BIOS configuration so the host GPU is used instead or, if that's not possible, to swap the host and guest cards in the machine itself.
+</p>
+<h3><span class="mw-headline" id="Bypassing_the_IOMMU_groups_.28ACS_override_patch.29">Bypassing the IOMMU groups (ACS override patch)</span></h3>
+<p>If you find your PCI devices grouped among others that you do not wish to pass through, you may be able to seperate them using Alex Williamson's ACS override patch. Make sure you understand <a rel="nofollow" class="external text" href="http://vfio.blogspot.com/2014/08/iommu-groups-inside-and-out.html">the potential risk</a> of doing so. 
+</p>
+<p>You will need a kernel with the patch applied. The easiest method to acquiring this is through the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-vfio/">linux-vfio</a></span><sup><small>AUR</small></sup> package. 
+</p>
+<p>In addition, the ACS override patch needs to be enabled with kernel command line options.  The patch file adds the following documentation:
+</p>
+<pre>       pcie_acs_override =
+               [PCIE] Override missing PCIe ACS support for:
+           downstream
+               All downstream ports - full ACS capabilties
+           multifunction
+               All multifunction devices - multifunction ACS subset
+           id:nnnn:nnnn
+               Specfic device - full ACS capabilities
+               Specified as vid:did (vendor/device ID) in hex
+</pre>
+<p>The option <code>pcie_acs_override=downstream</code> is typically sufficient.
+</p>
+<p>After installation and configuration, reconfigure your <a href="../en/Kernel_parameters.html" title="Kernel parameters">bootloader kernel parameters</a> to load the new kernel with the <code>pcie_acs_override=</code> option enabled.
+</p>
+<h2><span class="mw-headline" id="Complete_example_for_QEMU_.28CLI-based.29_without_libvirtd_.28can_switch_GPUs_without_reboot.29">Complete example for QEMU (CLI-based) without libvirtd (can switch GPUs without reboot)</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a><b>This section is being considered for removal.</b><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Too specific, requires considerable efforts to work on other machines. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PCI_passthrough_via_OVMF#Removing_example_scripts">Talk:PCI passthrough via OVMF#Removing_example_scripts</a>)</div>
+</div>
+<p>This script starts Samba and Synergy, runs the VM and closes everything after the VM is shut down. Note that this method does <b>not</b> require libvirtd to be running or configured.
+</p>
+<p>Since this was posted, the author continued working on scripts to ease the workflow of switching GPUs. All of said scripts can be found on the author's GitLab instance: <a rel="nofollow" class="external free" href="https://git.mel.vin/melvin/scripts/tree/master/qemu">https://git.mel.vin/melvin/scripts/tree/master/qemu</a>.
+</p>
+<p>With these new scripts, is it possible to switch GPUs without rebooting, only a restart of the X session is needed. This is all handled by a tiny shell script that runs in the tty. When you log in the tty, it will ask which card you would like to use if you autolaunch the shell script.
+</p>
+<p><a rel="nofollow" class="external text" href="https://www.redhat.com/archives/vfio-users/2016-May/msg00187.html">vfio-users : Full set of (runtime) scripts for VFIO + Qemu CLI</a>
+</p>
+<p><a rel="nofollow" class="external text" href="https://www.redhat.com/archives/vfio-users/2015-August/msg00020.html">vfio-users : Example configuration with CLI Qemu (working VM =&gt; host audio)</a>
+</p>
+<p>The script below is the main QEMU launcher as of 2016-05-16, all other scripts can be found in the repo.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">slightly edited from "windows.sh" 2016-05-16 : <a rel="nofollow" class="external free" href="https://git.mel.vin/melvin/scripts/tree/master/qemu">https://git.mel.vin/melvin/scripts/tree/master/qemu</a></pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+if [[ $EUID -ne 0 ]]
+then
+	echo "This script must be run as root"
+	exit 1
+fi
+
+echo "Starting Samba"
+systemctl start smbd.service
+systemctl start nmbd.service
+
+echo "Starting VM"
+export QEMU_AUDIO_DRV="pa"
+qemu-system-x86_64 \
+	-serial none \
+	-parallel none \
+	-nodefaults \
+	-nodefconfig \
+	-no-user-config \
+	-enable-kvm \
+	-name Windows \
+	-cpu host,kvm=off,hv_vapic,hv_time,hv_relaxed,hv_spinlocks=0x1fff,hv_vendor_id=sugoidesu \
+	-smp sockets=1,cores=4,threads=1 \
+	-m 8192 \
+	-mem-path /dev/hugepages \
+	-mem-prealloc \
+	-soundhw hda \
+	-device ich9-usb-uhci3,id=uhci \
+	-device usb-ehci,id=ehci \
+	-device nec-usb-xhci,id=xhci \
+	-machine pc,accel=kvm,kernel_irqchip=on,mem-merge=off \
+	-drive if=pflash,format=raw,file=./Windows_ovmf_x64.bin \
+	-rtc base=localtime,clock=host,driftfix=none \
+	-boot order=c \
+	-net nic,vlan=0,macaddr=52:54:00:00:00:01,model=virtio,name=net0 \
+	-net bridge,vlan=0,name=bridge0,br=br0 \
+	-drive if=virtio,id=drive0,file=./Windows.img,format=raw,cache=none,aio=native \
+	-nographic \
+	-device vfio-pci,host=04:00.0,addr=09.0,multifunction=on \
+	-device vfio-pci,host=04:00.1,addr=09.1 \
+	-usbdevice host:046d:c29b `# Logitech G27` &amp;
+
+#	-usbdevice host:054c:05c4 `# Sony DualShock 4` \
+#	-usbdevice host:28de:1142 `# Steam Controller` \
+
+sleep 5
+
+while [[ $(pgrep -x -u root qemu-system-x86) ]]
+do
+	if [[ ! $(pgrep -x -u REGULAR_USER synergys) ]]
+	then
+		echo "Starting Synergy server"
+		sudo -u REGULAR_USER /usr/bin/synergys --debug ERROR --no-daemon --enable-crypto --config /etc/synergy.conf &amp;
+	fi
+
+	sleep 5
+done
+
+echo "VM stopped"
+
+echo "Stopping Synergy server"
+pkill -u REGULAR_USER synergys
+
+echo "Stopping Samba"
+systemctl stop smbd.service
+systemctl stop nmbd.service
+
+exit 0</pre>
+<h2><span class="mw-headline" id="Complete_example_for_QEMU_with_libvirtd">Complete example for QEMU with libvirtd</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a><b>This section is being considered for removal.</b><a href="../File:Tango-edit-cut.png" class="image"><img alt="Tango-edit-cut.png" src="../File:Tango-edit-cut.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Too specific,only works on the contributor's machine. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:PCI_passthrough_via_OVMF#Removing_example_scripts">Talk:PCI passthrough via OVMF#Removing_example_scripts</a>)</div>
+</div>
+<pre>&lt;domain type='kvm' xmlns:qemu='<a rel="nofollow" class="external free" href="http://libvirt.org/schemas/domain/qemu/1.0'">http://libvirt.org/schemas/domain/qemu/1.0'</a>&gt;
+  &lt;name&gt;win7&lt;/name&gt;
+  &lt;uuid&gt;a3bf6450-d26b-4815-b564-b1c9b098a740&lt;/uuid&gt;
+  &lt;memory unit='KiB'&gt;8388608&lt;/memory&gt;
+  &lt;currentMemory unit='KiB'&gt;8388608&lt;/currentMemory&gt;
+  &lt;vcpu placement='static'&gt;8&lt;/vcpu&gt;
+  &lt;os&gt;
+    &lt;type arch='x86_64' machine='pc-i440fx-2.4'&gt;hvm&lt;/type&gt;
+    &lt;boot dev='hd'/&gt;
+    &lt;bootmenu enable='yes'/&gt;
+  &lt;/os&gt;
+  &lt;features&gt;
+    &lt;acpi/&gt;
+    &lt;kvm&gt;
+      &lt;hidden state='on'/&gt;
+    &lt;/kvm&gt;
+  &lt;/features&gt;
+  &lt;cpu mode='host-passthrough'&gt;
+    &lt;topology sockets='1' cores='8' threads='1'/&gt;
+  &lt;/cpu&gt;
+  &lt;clock offset='utc'/&gt;
+  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+  &lt;on_reboot&gt;restart&lt;/on_reboot&gt;
+  &lt;on_crash&gt;destroy&lt;/on_crash&gt;
+  &lt;devices&gt;
+    &lt;emulator&gt;/usr/sbin/qemu-system-x86_64&lt;/emulator&gt;
+    &lt;disk type='block' device='disk'&gt;
+      &lt;driver name='qemu' type='raw' cache='none' io='native'/&gt;
+      &lt;source dev='/dev/rootvg/win7'/&gt;
+      &lt;target dev='vda' bus='virtio'/&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/&gt;
+    &lt;/disk&gt;
+    &lt;disk type='block' device='disk'&gt;
+      &lt;driver name='qemu' type='raw' cache='none' io='native'/&gt;
+      &lt;source dev='/dev/rootvg/windane'/&gt;
+      &lt;target dev='vdb' bus='virtio'/&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/&gt;
+    &lt;/disk&gt;
+    &lt;disk type='block' device='cdrom'&gt;
+      &lt;driver name='qemu' type='raw' cache='none' io='native'/&gt;
+      &lt;target dev='hdb' bus='ide'/&gt;
+      &lt;readonly/&gt;
+      &lt;address type='drive' controller='0' bus='0' target='0' unit='1'/&gt;
+    &lt;/disk&gt;
+    &lt;controller type='usb' index='0'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x2'/&gt;
+    &lt;/controller&gt;
+    &lt;controller type='pci' index='0' model='pci-root'/&gt;
+    &lt;controller type='ide' index='0'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/&gt;
+    &lt;/controller&gt;
+    &lt;controller type='sata' index='0'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/&gt;
+    &lt;/controller&gt;
+    &lt;interface type='network'&gt;
+      &lt;mac address='52:54:00:fa:59:92'/&gt;
+      &lt;source network='default'/&gt;
+      &lt;model type='rtl8139'/&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/&gt;
+    &lt;/interface&gt;
+    &lt;input type='mouse' bus='ps2'/&gt;
+    &lt;input type='keyboard' bus='ps2'/&gt;
+    &lt;sound model='ac97'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/&gt;
+    &lt;/sound&gt;
+    &lt;memballoon model='virtio'&gt;
+      &lt;address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/&gt;
+    &lt;/memballoon&gt;
+  &lt;/devices&gt;
+  &lt;qemu:commandline&gt;
+    &lt;qemu:arg value='-device'/&gt;
+    &lt;qemu:arg value='vfio-pci,host=02:00.0,multifunction=on,x-vga=on'/&gt;
+    &lt;qemu:arg value='-device'/&gt;
+    &lt;qemu:arg value='vfio-pci,host=02:00.1'/&gt;
+    &lt;qemu:env name='QEMU_PA_SAMPLES' value='1024'/&gt;
+    &lt;qemu:env name='QEMU_AUDIO_DRV' value='pa'/&gt;
+    &lt;qemu:env name='QEMU_PA_SERVER' value='/run/user/1000/pulse/native'/&gt;
+  &lt;/qemu:commandline&gt;
+&lt;/domain&gt;
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id=".22Error_43_:_Driver_failed_to_load.22_on_Nvidia_GPUs_passed_to_Windows_VMs">"Error 43 : Driver failed to load" on Nvidia GPUs passed to Windows VMs</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This may also fix SYSTEM_THREAD_EXCEPTION_NOT_HANDLED boot crashes related to Nvidia drivers</div>
+<p>Since version 337.88, Nvidia drivers on Windows check if an hypervisor is running and fail if it detects one, which results in an Error 43 in the Windows device manager. Starting with QEMU 2.5.0 and libvirt 1.3.3, the vendor_id for the hypervisor can be spoofed, which is enough to fool the Nvidia drivers into loading anyway. All one must do is add <code>hv_vendor_id=whatever</code> to the cpu parameters in their QEMU command line, or by adding the following line to their libvirt domain configuration. It may help for the ID to be set to a 12-character alphanumeric (e.g. '123456789ab') as opposed to longer or shorter strings.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+
+&lt;features&gt;
+	&lt;hyperv&gt;
+		...
+		&lt;vendor_id state='on' value='whatever'/&gt;
+		...
+	&lt;/hyperv&gt;
+	...
+	&lt;kvm&gt;
+	&lt;hidden state='on'/&gt;
+	&lt;/kvm&gt;
+&lt;/features&gt;
+...
+</pre>
+<p>Users with older versions of QEMU and/or libvirt will instead have to disable a few hypervisor extensions, which can degrade performance substentially. If this is what you want to do, do the following replacement in your libvirt domain config file.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">EDITOR=nano virsh edit myPciPassthroughVm</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+&lt;features&gt;
+	&lt;hyperv&gt;
+		&lt;relaxed state='on'/&gt;
+		&lt;vapic state='on'/&gt;
+		&lt;spinlocks state='on' retries='8191'/&gt;
+	&lt;/hyperv&gt;
+	...
+&lt;/features&gt;
+...
+&lt;clock offset='localtime'&gt;
+	&lt;timer name='hypervclock' present='yes'/&gt;
+&lt;/clock&gt;
+...</pre>
+<pre>...
+
+&lt;clock offset='localtime'&gt;
+	&lt;timer name='hypervclock' present='no'/&gt;
+&lt;/clock&gt;
+...
+&lt;features&gt;
+	&lt;kvm&gt;
+	&lt;hidden state='on'/&gt;
+	&lt;/kvm&gt;
+	...
+	&lt;hyperv&gt;
+		&lt;relaxed state='off'/&gt;
+		&lt;vapic state='off'/&gt;
+		&lt;spinlocks state='off'/&gt;
+	&lt;/hyperv&gt;
+	...
+&lt;/features&gt;
+...</pre>
+<h3><span class="mw-headline" id="Unexpected_crashes_related_to_CPU_exceptions">Unexpected crashes related to CPU exceptions</span></h3>
+<p>In some cases, kvm may react strangely to certain CPU operations, such as GeForce Experience complaining about an unsupported CPU being present or some game crashing for unknown reasons. A number of those issues can be solved by passing the <code>ignore_msrs=1</code> option to the KVM module, which will ignore unimplemented MSRs instead of returning an error value.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/modprobe.d/kvm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">...
+options kvm ignore_msrs=1
+...</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>While this is normally safe and some applications might not work without this, silently ignoring unknown MSR accesses could potentially break other software within the VM or other VMs.</div>
+<h3><span class="mw-headline" id=".22System_Thread_Exception_Not_Handled.22_when_booting_on_a_Windows_VM">"System Thread Exception Not Handled" when booting on a Windows VM</span></h3>
+<p>Windows 8 or Windows 10 guests may raise a generic compatibility exception at boot, namely "System Thread Exception Not Handled", which tends to be caused by legacy drivers acting strangely on real machines. On KVM machines this issue can generally be solved by setting the CPU model to <code>core2duo</code>.
+</p>
+<h3><span class="mw-headline" id="Slowed_down_audio_pumped_through_HDMI_on_the_video_card">Slowed down audio pumped through HDMI on the video card</span></h3>
+<p>For some users VM's audio slows down/starts stuttering/becomes demonic after a while when it's pumped through HDMI on the video card. This usually also slows down graphics.
+A possible solution consists of enabling MSI (Message Signaled-Based Interrupts) instead of the default (Line-Based Interrupts).
+</p>
+<p>In order to check whether MSI is supported or enabled, run the following command as root:
+</p>
+<pre># lspci -vs $device | grep 'MSI:'
+</pre>
+<p>where `$device` is the card's address (e.g. `01:00.0`).
+</p>
+<p>The output should be similar to:
+</p>
+<pre>Capabilities: [60] MSI: Enable<b>-</b> Count=1/1 Maskable- 64bit+
+</pre>
+<p>A <code>-</code> after <code>Enabled</code> means MSI is supported, but not used by the VM, while a <code>+</code> says that the VM is using it.
+</p>
+<p>The procedure to enable it is quite complex, instructions and an overview of the setting can be found <a rel="nofollow" class="external text" href="http://forums.guru3d.com/showthread.php?t=378044">here</a>.
+</p>
+<p>Other hints can be found on the <a rel="nofollow" class="external text" href="http://lime-technology.com/wiki/index.php/UnRAID_6/VM_Guest_Support#Enable_MSI_for_Interrupts_to_Fix_HDMI_Audio_Support">lime-technology's wiki</a>, or on this article on <a rel="nofollow" class="external text" href="http://vfio.blogspot.it/2014/09/vfio-interrupts-and-how-to-coax-windows.html">VFIO tips and tricks</a>.
+</p>
+<p>Some tools named <code>MSI_util</code> or similar are available on the Internet, but they didn't work for me on Windows 10 64bit.
+</p>
+<p>In order to fix the issues enabling MSI on the 0 function of my nVidia card (<code>01:00.0 VGA compatible controller: NVIDIA Corporation GM206 [GeForce GTX 960] (rev a1) (prog-if 00 [VGA controller])</code>) was not enough; I also enabled it on the other function (<code>01:00.1 Audio device: NVIDIA Corporation Device 0fba (rev a1)</code>) and that seems to have fixed the issue.
+</p>
+<h2><span class="mw-headline" id="Passing_though_other_devices">Passing though other devices</span></h2>
+<h3><span class="mw-headline" id="USB_controller">USB controller</span></h3>
+<p>If your motherboard has multiple USB controllers mapped to multiple groups, it is possible to pass those instead of USB devices. Passing an actual controller over an individual USB device provides the following advantages : 
+</p>
+<ul>
+<li> If a device disconnects or changes ID over the course of an given operation (such as a phone undergoing an update), the VM will not suddenly stop seeing it.</li>
+<li> Any USB port managed by this controller is directly handled by the VM and can have its devices unplugged, replugged and changed without having to notify the hypervisor.</li>
+<li> Libvirt will not complain if one of the USB devices you usually pass to the guest is missing when starting the VM.</li>
+</ul>
+<p>Unlike with GPUs, drivers for most USB controllers do not require any specific configuration to work on a VM and control can normally be passed back and forth between the host and guest systems with no side effects.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Make sure your USB controller supports resetting :<a href="#Passing_through_a_device_that_does_not_support_resetting">#Passing through a device that does not support resetting</a>
+</div>
+<p>You can find out which PCI devices correspond to which controller and how various ports and devices are assigned to each one of them using this command :
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ for usb_ctrl in $(find /sys/bus/usb/devices/usb* -maxdepth 0 -type l); do pci_path="$(dirname "$(realpath "${usb_ctrl}")")"; echo "Bus $(cat "${usb_ctrl}/busnum") --&gt; $(basename $pci_path) (IOMMU group $(basename $(realpath $pci_path/iommu_group)))"; lsusb -s "$(cat "${usb_ctrl}/busnum"):"; echo; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Bus 1 --&gt; 0000:00:1a.0 (IOMMU group 4)
+Bus 001 Device 004: ID 04f2:b217 Chicony Electronics Co., Ltd Lenovo Integrated Camera (0.3MP)
+Bus 001 Device 007: ID 0a5c:21e6 Broadcom Corp. BCM20702 Bluetooth 4.0 [ThinkPad]
+Bus 001 Device 008: ID 0781:5530 SanDisk Corp. Cruzer
+Bus 001 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+
+Bus 2 --&gt; 0000:00:1d.0 (IOMMU group 9)
+Bus 002 Device 006: ID 0451:e012 Texas Instruments, Inc. TI-Nspire Calculator
+Bus 002 Device 002: ID 8087:0024 Intel Corp. Integrated Rate Matching Hub
+Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub</pre>
+<p>This laptop has 3 USB ports managed by 2 USB controllers, each with their own IOMMU group. In this example, Bus 001 manages a single USB port (with a SanDisk USB pendrive plugged into it so it appears on the list), but also a number of internal devices, such as the internal webcam and the bluetooth card. Bus 002, on the other hand, does not apprear to manage anything except for the calculator that is plugged into it. The third port is empty, which is why it does not show up on the list, but is actually managed by Bus 002.
+</p>
+<p>Once you have identified which controller manages which ports by plugging various devices into them and decided which one you want to passthrough, simply add it to the list of PCI host devices controlled by the VM in your guest configuration. No other configuration should be needed.
+</p>
+<h3><span class="mw-headline" id="Gotchas_3">Gotchas</span></h3>
+<h4><span class="mw-headline" id="Passing_through_a_device_that_does_not_support_resetting">Passing through a device that does not support resetting</span></h4>
+<p>When the VM shuts down, all devices used by the guest are deinitialized by its OS in preparation for shutdown. In this state, those devices are no longer functionnal and must then be power-cycled before they can resume normal operation. Linux can handle this power-cycling on its own, but when a device has no known reset methods, it remains in this disabled state and becomes unavailable. Since Libvirt and Qemu both expect all host PCI devices to be ready to reattach to the host before completely stopping the VM, when encountering a device that won't reset, they will hang in a "Shutting down" state where they will not be able to be restarted until the host system has been rebooted. It is therefore reccomanded to only pass through PCI devices which the kernel is able to reset, as evidenced by the presence of a <code>reset</code> file in the PCI device sysfs node, such as <code>/sys/bus/pci/devices/0000:00:1a.0/reset</code>.
+</p>
+<p>The following bash command, based on the one used to list IOMMU groups, shows which devices can and cannot be reset.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">for iommu_group in $(find /sys/kernel/iommu_groups/ -maxdepth 1 -mindepth 1 -type d);do echo "IOMMU group $(basename "$iommu_group")"; for device in $(\ls -1 "$iommu_group"/devices/); do if [[ -e "$iommu_group"/devices/"$device"/reset ]]; then echo -n "[RESET]"; fi; echo -n $'\t';lspci -nns "$device"; done; done</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+IOMMU group 0
+	00:00.0 Host bridge [0600]: Intel Corporation Xeon E3-1200 v2/Ivy Bridge DRAM Controller [8086:0158] (rev 09)
+IOMMU group 1
+	00:01.0 PCI bridge [0604]: Intel Corporation Xeon E3-1200 v2/3rd Gen Core processor PCI Express Root Port [8086:0151] (rev 09)
+	01:00.0 VGA compatible controller [0300]: NVIDIA Corporation GK208 [GeForce GT 720] [10de:1288] (rev a1)
+	01:00.1 Audio device [0403]: NVIDIA Corporation GK208 HDMI/DP Audio Controller [10de:0e0f] (rev a1)
+IOMMU group 2
+	00:14.0 USB controller [0c03]: Intel Corporation 7 Series/C210 Series Chipset Family USB xHCI Host Controller [8086:1e31] (rev 04)
+IOMMU group 4
+[RESET]	00:1a.0 USB controller [0c03]: Intel Corporation 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #2 [8086:1e2d] (rev 04)
+IOMMU group 5
+[RESET]	00:1b.0 Audio device [0403]: Intel Corporation 7 Series/C210 Series Chipset Family High Definition Audio Controller [8086:1e20] (rev 04)
+IOMMU group 10
+[RESET]	00:1d.0 USB controller [0c03]: Intel Corporation 7 Series/C210 Series Chipset Family USB Enhanced Host Controller #1 [8086:1e26] (rev 04)
+IOMMU group 13
+	06:00.0 VGA compatible controller [0300]: NVIDIA Corporation GM204 [GeForce GTX 970] [10de:13c2] (rev a1)
+	06:00.1 Audio device [0403]: NVIDIA Corporation GM204 High Definition Audio Controller [10de:0fbb] (rev a1)
+</pre>
+<p>This signals that the xHCI USB controller in 00:14.0 cannot be reset and will therefore stop the VM from shutting down properly, while the integrated sound card in 00:1b.0 and the other two controllers in 00:1a.0 and 00:1d.0 do not share this problem and can be passed without issue.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://bbs.archlinux.org/viewtopic.php?id=162768">Discussion on Arch Linux forums</a> | <a rel="nofollow" class="external text" href="https://archive.is/kZYMt">Archived link</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://docs.google.com/spreadsheet/ccc?key=0Aryg5nO-kBebdFozaW9tUWdVd2VHM0lvck95TUlpMlE">User contributed hardware compatibility list</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://pastebin.com/rcnUZCv7">Example script from https://www.youtube.com/watch?v=37D2bRsthfI</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://vfio.blogspot.com/">Complete tutorial for PCI passthrough</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://www.redhat.com/archives/vfio-users/">VFIO users mailing list</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://webchat.freenode.net/?channels=vfio-users">#vfio-users on freenode</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtualization.html" title="Category:Virtualization">Virtualization</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Sections_flagged_with_Template:Remove.html" title="Category:Sections flagged with Template:Remove">Sections flagged with Template:Remove</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

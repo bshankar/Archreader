@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>DeveloperWiki:Dom0 - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-DeveloperWiki_Dom0 skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">DeveloperWiki:Dom0</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Users"><span class="tocnumber">1</span> <span class="toctext">Users</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Firewall"><span class="tocnumber">2</span> <span class="toctext">Firewall</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Incoming_traffic_to_dom0_.28INPUT_chain.29"><span class="tocnumber">2.1</span> <span class="toctext">Incoming traffic to dom0 (INPUT chain)</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Outgoing_traffoc_from_dom0_.28OUTPUT_chain.29"><span class="tocnumber">2.2</span> <span class="toctext">Outgoing traffoc from dom0 (OUTPUT chain)</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Incoming_traffic_to_gerolde_.28FORWARD_chain.29"><span class="tocnumber">2.3</span> <span class="toctext">Incoming traffic to gerolde (FORWARD chain)</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Incoming_traffic_to_gudrun_.28FORWARD_chain.29"><span class="tocnumber">2.4</span> <span class="toctext">Incoming traffic to gudrun (FORWARD chain)</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Traffic_from_gudrun_to_gerolde_.28FORWARD_chain.29"><span class="tocnumber">2.5</span> <span class="toctext">Traffic from gudrun to gerolde (FORWARD chain)</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Outgoing_traffic_from_gerolde_.28FORWARD_chain.29"><span class="tocnumber">2.6</span> <span class="toctext">Outgoing traffic from gerolde (FORWARD chain)</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Outgoing_traffic_from_gudrun_.28FORWARD_chain.29"><span class="tocnumber">2.7</span> <span class="toctext">Outgoing traffic from gudrun (FORWARD chain)</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Users">Users</span></h2>
+<table class="wikitable" border="1">
+
+<tr>
+<th> UID
+</th>
+<th> User
+</th>
+<th> Primary Purpose
+</th>
+<th> Cronjobs
+</th>
+<th> Owned Directories
+</th>
+</tr>
+<tr>
+<td>
+</td>
+<td> dale
+</td>
+<td> Emergency access from the console
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td> aaron
+</td>
+<td> Overlord stuff
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td> jgc
+</td>
+<td> Xen maintenance
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td> thomas
+</td>
+<td> Firewall maintenance
+</td>
+<td> no
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Firewall">Firewall</span></h2>
+<p>The firewall script is in <i>/usr/sbin/firewall.sh</i>. It is being maintained in a git repository. Clone it using
+</p>
+<pre>git clone file:///srv/firewall.git
+</pre>
+<p>Make sure to commit and push all changes when copying the script to /usr/sbin. Obviously, also don't break the script.
+</p>
+<p>The firewall divides traffic into seven groups:
+</p>
+<h3><span class="mw-headline" id="Incoming_traffic_to_dom0_.28INPUT_chain.29">Incoming traffic to dom0 (INPUT chain)</span></h3>
+<p>The only allowed incoming traffic to dom0 is <i>ssh</i> access from a small set of hosts.
+</p>
+<h3><span class="mw-headline" id="Outgoing_traffoc_from_dom0_.28OUTPUT_chain.29">Outgoing traffoc from dom0 (OUTPUT chain)</span></h3>
+<p>All outgoing traffic is allowed.
+</p>
+<h3><span class="mw-headline" id="Incoming_traffic_to_gerolde_.28FORWARD_chain.29">Incoming traffic to gerolde (FORWARD chain)</span></h3>
+<p>Limited to <i>ssh</i>, <i>rsync</i>, <i>smtp(s)</i>, developer package access and munin monitoring from Dan's server.
+</p>
+<h3><span class="mw-headline" id="Incoming_traffic_to_gudrun_.28FORWARD_chain.29">Incoming traffic to gudrun (FORWARD chain)</span></h3>
+<p>Limited to <i>http(s)</i>, <i>svnserve</i>, <i>git</i> and munin monitoring from Dan's server.
+</p>
+<h3><span class="mw-headline" id="Traffic_from_gudrun_to_gerolde_.28FORWARD_chain.29">Traffic from gudrun to gerolde (FORWARD chain)</span></h3>
+<p>Only <i>smtp(s)</i>, package access and NFS/portmap are allowed. All NFS server services on gerolde must use fixed ports.
+</p>
+<h3><span class="mw-headline" id="Outgoing_traffic_from_gerolde_.28FORWARD_chain.29">Outgoing traffic from gerolde (FORWARD chain)</span></h3>
+<p>All outgoing traffic is allowed.
+</p>
+<h3><span class="mw-headline" id="Outgoing_traffic_from_gudrun_.28FORWARD_chain.29">Outgoing traffic from gudrun (FORWARD chain)</span></h3>
+<p>Only DNS is allowed, everything else is blocked.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:DeveloperWiki:Server_Configuration.html" title="Category:DeveloperWiki:Server Configuration">DeveloperWiki:Server Configuration</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

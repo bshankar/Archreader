@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Keyboard configuration in Xorg - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Keyboard_configuration_in_Xorg skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Keyboard configuration in Xorg</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Keyboard_configuration_in_console.html" title="Keyboard configuration in console">Keyboard configuration in console</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Extra_keyboard_keys.html" title="Extra keyboard keys">Extra keyboard keys</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Xorg.html" title="Xorg">Xorg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/X_KeyBoard_extension.html" title="X KeyBoard extension">X KeyBoard extension</a></li>
+</ul>
+</div>
+<p>This article's purpose is to detail basic Xorg server keyboard configuration. For advanced topics such as keyboard layout modification or additional key mappings, see <a href="../en/X_KeyBoard_extension.html" title="X KeyBoard extension">X KeyBoard extension</a> or <a href="../en/Extra_keyboard_keys.html" title="Extra keyboard keys">Extra keyboard keys</a> respectively.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Overview"><span class="tocnumber">1</span> <span class="toctext">Overview</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Viewing_keyboard_settings"><span class="tocnumber">2</span> <span class="toctext">Viewing keyboard settings</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Third_party_utilities"><span class="tocnumber">2.1</span> <span class="toctext">Third party utilities</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4">
+<a href="#Setting_keyboard_layout"><span class="tocnumber">3</span> <span class="toctext">Setting keyboard layout</span></a>
+<ul>
+<li class="toclevel-2 tocsection-5"><a href="#Using_setxkbmap"><span class="tocnumber">3.1</span> <span class="toctext">Using setxkbmap</span></a></li>
+<li class="toclevel-2 tocsection-6">
+<a href="#Using_X_configuration_files"><span class="tocnumber">3.2</span> <span class="toctext">Using X configuration files</span></a>
+<ul>
+<li class="toclevel-3 tocsection-7"><a href="#Using_localectl"><span class="tocnumber">3.2.1</span> <span class="toctext">Using localectl</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8">
+<a href="#Frequently_used_XKB_options"><span class="tocnumber">4</span> <span class="toctext">Frequently used XKB options</span></a>
+<ul>
+<li class="toclevel-2 tocsection-9"><a href="#Switching_between_keyboard_layouts"><span class="tocnumber">4.1</span> <span class="toctext">Switching between keyboard layouts</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Terminating_Xorg_with_Ctrl.2BAlt.2BBackspace"><span class="tocnumber">4.2</span> <span class="toctext">Terminating Xorg with Ctrl+Alt+Backspace</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Swapping_Caps_Lock_with_Left_Control"><span class="tocnumber">4.3</span> <span class="toctext">Swapping Caps Lock with Left Control</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Enabling_mouse_keys"><span class="tocnumber">4.4</span> <span class="toctext">Enabling mouse keys</span></a></li>
+<li class="toclevel-2 tocsection-13">
+<a href="#Configuring_compose_key"><span class="tocnumber">4.5</span> <span class="toctext">Configuring compose key</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#Key_combinations"><span class="tocnumber">4.5.1</span> <span class="toctext">Key combinations</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-15"><a href="#Currency_sign_on_other_key"><span class="tocnumber">4.6</span> <span class="toctext">Currency sign on other key</span></a></li>
+<li class="toclevel-2 tocsection-16">
+<a href="#Switching_state_immediately_when_Caps_Lock_is_pressed"><span class="tocnumber">4.7</span> <span class="toctext">Switching state immediately when Caps Lock is pressed</span></a>
+<ul>
+<li class="toclevel-3 tocsection-17"><a href="#Workaround"><span class="tocnumber">4.7.1</span> <span class="toctext">Workaround</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Other_settings"><span class="tocnumber">5</span> <span class="toctext">Other settings</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19">
+<a href="#Adjusting_typematic_delay_and_rate"><span class="tocnumber">5.1</span> <span class="toctext">Adjusting typematic delay and rate</span></a>
+<ul>
+<li class="toclevel-3 tocsection-20"><a href="#Using_xset"><span class="tocnumber">5.1.1</span> <span class="toctext">Using xset</span></a></li>
+<li class="toclevel-3 tocsection-21"><a href="#Using_XServer_startup_options"><span class="tocnumber">5.1.2</span> <span class="toctext">Using XServer startup options</span></a></li>
+<li class="toclevel-3 tocsection-22"><a href="#Using_XServer_options"><span class="tocnumber">5.1.3</span> <span class="toctext">Using XServer options</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Overview">Overview</span></h2>
+<p>The Xorg server uses the <a href="../en/X_KeyBoard_extension.html" title="X KeyBoard extension">X KeyBoard extension</a> (XKB) to define keyboard layouts. Optionally, <a href="../en/Xmodmap.html" title="Xmodmap">xmodmap</a> can be used to access the internal keymap table directly, although this is not recommended for complex tasks. Also <a href="../en/Systemd.html" title="Systemd">systemd</a>'s <i>localectl</i> can be used to define the keyboard layout for both the Xorg server and the virtual console.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>XKB options can be overridden by the tools provided by some desktop environments such as <a href="../en/GNOME.html#XkbOptions_keyboard_options" title="GNOME">GNOME (XkbOptions)</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup> and <a href="../en/KDE.html#Set_keyboard" title="KDE">KDE (set keyboard)</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.</div>
+<h2><span class="mw-headline" id="Viewing_keyboard_settings">Viewing keyboard settings</span></h2>
+<p>You can use the following command to see the actual XKB settings:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ setxkbmap -print -verbose 10</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Setting verbose level to 10
+locale is C
+Applied rules from evdev:
+model:      evdev
+layout:     us
+options:    terminate:ctrl_alt_bksp
+Trying to build keymap using the following components:
+keycodes:   evdev+aliases(qwerty)
+types:      complete
+compat:     complete
+symbols:    pc+us+inet(evdev)+terminate(ctrl_alt_bksp)
+geometry:   pc(pc104)
+xkb_keymap {
+        xkb_keycodes  { include "evdev+aliases(qwerty)" };
+        xkb_types     { include "complete"      };
+        xkb_compat    { include "complete"      };
+        xkb_symbols   { include "pc+us+inet(evdev)+terminate(ctrl_alt_bksp)"    };
+        xkb_geometry  { include "pc(pc104)"     };
+};
+</pre>
+<h3><span class="mw-headline" id="Third_party_utilities">Third party utilities</span></h3>
+<p>There are some "unofficial" utilities which allow to print specific information about the currently used keyboard layout.
+</p>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xkb-switch-git/">xkb-switch-git</a></span><sup><small>AUR</small></sup>:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xkb-switch</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">us</pre>
+<ul><li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/xkblayout-state/">xkblayout-state</a></span><sup><small>AUR</small></sup>:</li></ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ xkblayout-state print "%s"</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">de</pre>
+<h2><span class="mw-headline" id="Setting_keyboard_layout">Setting keyboard layout</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Udev also comes into play (for example when plugging in a keyboard), undoing changes by <i>setxkbmap</i> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Keyboard_configuration_in_Xorg">Talk:Keyboard configuration in Xorg#</a>)</div>
+</div>
+<p>Keyboard layout in Xorg can be set in multiple ways. Here is an explanation of used options:
+</p>
+<ul>
+<li> <code>XkbModel</code> selects the keyboard model. This has an influence only for some extra keys your keyboard might have. The safe fallback are <code>pc104</code> or <code>pc105</code>. But for instance laptops usually have some extra keys, and sometimes you can make them work by simply setting a proper model.</li>
+<li> <code>XkbLayout</code> selects the keyboard layout. Multiple layouts may be specified in a comma-separated list, e.g. if you want to quickly switch between layouts.</li>
+<li> <code>XkbVariant</code> selects a specific layout variant. For instance, the default <code>sk</code> variant is <code>qwertz</code>, but you can manually specify <code>qwerty</code>, etc.</li>
+<li> <code>XkbOptions</code> contains some extra options. Used for specifying layout switching, notification LED, compose mode etc. See the <a href="#Frequently_used_XKB_options">#Frequently used XKB options</a> section for examples.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You must specify as many variants as the number of specified layouts. If you want the default variant, specify an empty string as the variant (the comma must stay). For example, to have the default <code>us</code> layout as primary and the <code>dvorak</code> variant of <code>us</code> layout as secondary, specify <code>us,us</code> as <code>XkbLayout</code> and <code>,dvorak</code> as <code>XkbVariant</code>.</div>
+<p>The layout name is usually a <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2#Officially_assigned_code_elements" class="extiw" title="wikipedia:ISO 3166-1 alpha-2">2-letter country code</a>. To see a full list of keyboard models, layouts, variants and options, along with a short description, open <code>/usr/share/X11/xkb/rules/base.lst</code>. Alternatively, you may use one of the following commands to see a list without a description:
+</p>
+<ul>
+<li> <code>localectl list-x11-keymap-models</code>
+</li>
+<li> <code>localectl list-x11-keymap-layouts</code>
+</li>
+<li> <code>localectl list-x11-keymap-variants [<i>layout</i>]</code>
+</li>
+<li> <code>localectl list-x11-keymap-options</code>
+</li>
+</ul>
+<p>Examples in the following subsections will have the same effect, they will set <code>pc104</code> model, <code>cz</code> as primary layout, <code>us</code> as secondary layout, <code>dvorak</code> variant for <code>us</code> layout and the <code>Alt+Shift</code> combination for switching between layouts. See <code>man xkeyboard-config</code> for more detailed information.
+</p>
+<h3><span class="mw-headline" id="Using_setxkbmap">Using setxkbmap</span></h3>
+<p><i>setxkbmap</i> sets the keyboard layout for the current X session only, but can be made persistent in <a href="../en/Xinit.html" title="Xinitrc" class="mw-redirect">xinitrc</a> or <a href="../en/Xprofile.html" title="Xprofile">xprofile</a>. This overrides system-wide configuration specified following <a href="#Using_X_configuration_files">#Using X configuration files</a>.
+</p>
+<p>The usage is as follows (see <code>man 1 setxkbmap</code>):
+</p>
+<pre>$ setxkbmap [-model <i>xkb_model</i>] [-layout <i>xkb_layout</i>] [-variant <i>xkb_variant</i>] [-option <i>xkb_options</i>]
+</pre>
+<p>To change just the layout (<code>-layout</code> is the default flag):
+</p>
+<pre>$ setxkbmap <i>xkb_layout</i>
+</pre>
+<p>For multiple customizations:
+</p>
+<pre>$ setxkbmap -model pc104 -layout cz,us -variant ,dvorak -option grp:alt_shift_toggle
+</pre>
+<h3><span class="mw-headline" id="Using_X_configuration_files">Using X configuration files</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>xorg.conf</code> is parsed by the X server at start-up. To apply changes, restart X.</div>
+<p>The syntax of X configuration files is explained in <a href="../en/Xorg.html#Configuration" title="Xorg">Xorg#Configuration</a>. This method creates system-wide configuration which is persistent across reboots.
+</p>
+<p>Here is an example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/X11/xorg.conf.d/00-keyboard.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "cz,us"
+        Option "XkbModel" "pc104"
+        Option "XkbVariant" ",dvorak"
+        Option "XkbOptions" "grp:alt_shift_toggle"
+EndSection
+</pre>
+<h4><span class="mw-headline" id="Using_localectl">Using localectl</span></h4>
+<p>For convenience, the tool <i>localectl</i> may be used instead of manually editing X configuration files. It will save the configuration in <code>/etc/X11/xorg.conf.d/00-keyboard.conf</code>, this file should not be manually edited, because <i>localectl</i> will overwrite the changes on next start.
+</p>
+<p>The usage is as follows:
+</p>
+<pre>$ localectl [--no-convert] set-x11-keymap <i>layout</i> [<i>model</i> [<i>variant</i> [<i>options</i>]]]
+</pre>
+<p>To set a <i>model</i>, <i>variant</i> or <i>options</i>, all preceding fields need to be specified. Unless the <code>--no-convert</code> option is passed, the specified keymap is also converted to the closest matching console keymap and applied to the <a href="../en/Keyboard_configuration_in_console.html" title="Keyboard configuration in console">console configuration</a> in <code>vconsole.conf</code>. See <code>man localectl</code> for more information.
+</p>
+<p>To create a <code>/etc/X11/xorg.conf.d/00-keyboard.conf</code> like the above:
+</p>
+<pre>$ localectl --no-convert set-x11-keymap cz,us pc104 ,dvorak grp:alt_shift_toggle
+</pre>
+<h2><span class="mw-headline" id="Frequently_used_XKB_options">Frequently used XKB options</span></h2>
+<h3><span class="mw-headline" id="Switching_between_keyboard_layouts">Switching between keyboard layouts</span></h3>
+<p>To be able to easily switch keyboard layouts, first specify multiple layouts between which you want to switch (the first one is the default). Then specify a key (or key combination), which will be used for switching. For example, to switch between a US and a Swedish layout using the <code>CapsLock</code> key, use <code>us,se</code> as an argument of <code>XkbLayout</code> and <code>grp:caps_toggle</code> as an argument of <code>XkbOptions</code>.
+</p>
+<p>You can use other key combinations than <code>CapsLock</code>, they are listed in <code>/usr/share/X11/xkb/rules/base.lst</code>, start with <code>grp:</code> and end with <code>toggle</code>. To get the full list of available options, run the following command:
+</p>
+<pre>$ grep "grp:.*toggle" /usr/share/X11/xkb/rules/base.lst
+</pre>
+<h3><span class="mw-headline" id="Terminating_Xorg_with_Ctrl.2BAlt.2BBackspace">Terminating Xorg with Ctrl+Alt+Backspace</span></h3>
+<p>By default, the key combination <code>Ctrl+Alt+Backspace</code> is disabled. You can enable it by passing <code>terminate:ctrl_alt_bksp</code> to <code>XkbOptions</code>. This can also be done by binding a key to <code>Terminate_Server</code> in <code>xmodmap</code> (which undoes any existing <code>XkbOptions</code> setting). In order for either method to work, one also needs to have <code>DontZap</code> set to "off" in <code>ServerFlags</code>; however, this is now the default.
+</p>
+<h3><span class="mw-headline" id="Swapping_Caps_Lock_with_Left_Control">Swapping Caps Lock with Left Control</span></h3>
+<p>To swap Caps Lock with Left Control key, add <code>ctrl:swapcaps</code> to <code>XkbOptions</code>. Run the following command to see similar options along with their descriptions:
+</p>
+<pre>$ grep -E "(ctrl|caps):" /usr/share/X11/xkb/rules/base.lst
+</pre>
+<h3><span class="mw-headline" id="Enabling_mouse_keys">Enabling mouse keys</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/Mouse_keys" class="extiw" title="wikipedia:Mouse keys">Mouse keys</a> is now disabled by default and has to be manually enabled by passing <code>keypad:pointerkeys</code> to <code>XkbOptions</code>. This will make the <code>Shift+NumLock</code> shortcut toggle mouse keys.
+</p>
+<h3><span class="mw-headline" id="Configuring_compose_key">Configuring compose key</span></h3>
+<p>Though typically not on traditional keyboards, a <a href="https://en.wikipedia.org/wiki/Compose_key" class="extiw" title="wikipedia:Compose key">Compose key</a> can be configured to an existent key.
+</p>
+<p>The <code>Compose</code> key begins a keypress sequence that involves (usually two) additional keypresses. Usage is typically either for entering characters in a language that the keyboard was not designed for, or for other less-used characters that are not covered with the <code>AltGr</code> modifier. For example, pressing <code>Compose</code> <code>'</code> <code>e</code> produces <code>é</code>, or <code>Compose</code> <code>-</code> <code>-</code> will produce an "em dash": <code>—</code>.
+</p>
+<p>Though a few more eccentric keyboards feature a <code>Compose</code> key, its availability is usually through substituting an already existing key to it. For example, to make the <code>Menu</code> key a <code>Compose</code> key use the <a href="../en/Desktop_environment.html" title="Desktop environment">Desktop environment</a> configuration, or pass <code>compose:menu</code> to <code>XkbOptions</code> (or <a href="#Using_setxkbmap">setxkbmap</a>: <code>setxkbmap -option compose:menu</code>). Allowed key substitutions are defined in <code>/usr/share/X11/xkb/rules/base.lst</code>:
+</p>
+<pre>$ grep "compose:" /usr/share/X11/xkb/rules/base.lst
+</pre>
+<p>If the desired mapping is not found in that file, an alternative is to use <a href="../en/Xmodmap.html" title="Xmodmap">xmodmap</a> to map the desired key to the <code>Multi_key</code> keysym, which acts as a compose key by default (note that <i>xmodmap</i> settings are reset by <i>setxkbmap</i>).
+</p>
+<h4><span class="mw-headline" id="Key_combinations">Key combinations</span></h4>
+<p>The default combinations for the compose keys depend on the <a href="../en/Locale.html" title="Locale">locale</a> configured for the session and are stored in <code>/usr/share/X11/locale/<i>used_locale</i>/Compose</code>, where <code><i>used_locale</i></code> is for example <code>en_US.UTF-8</code>.
+</p>
+<p>You can define your own compose key combinations by copying the default file to <code>~/.XCompose</code> and editing it. The compose key works with any of the thousands of valid Unicode characters, including those outside the Basic Multilingual Plane.
+</p>
+<p>However, GTK does not use <a href="https://en.wikipedia.org/wiki/X_Input_Method" class="extiw" title="wikipedia:X Input Method">XIM</a> by default and therefore does not follow <code>~/.XCompose</code> keys. This can be fixed by forcing GTK to use XIM by adding <code>export GTK_IM_MODULE=xim</code> and/or <code>export XMODIFIERS="@im=none"</code> to <code>~/.xprofile</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>XIM is very old, you might have better luck with other input methods: <a href="https://en.wikipedia.org/wiki/Smart_Common_Input_Method" class="extiw" title="wikipedia:Smart Common Input Method">SCIM</a>, <a href="https://en.wikipedia.org/wiki/Uim" class="extiw" title="wikipedia:Uim">uim</a>, <a href="https://en.wikipedia.org/wiki/Intelligent_Input_Bus" class="extiw" title="wikipedia:Intelligent Input Bus">IBus</a> etc. See <a href="../en/Internationalization.html#Input_methods_in_Xorg" title="Internationalization">Internationalization#Input methods in Xorg</a> for details.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>XIM will prevent insertion of Unicode characters with the <code>Ctrl+Shift+u</code> combination.</div>
+<h3><span class="mw-headline" id="Currency_sign_on_other_key">Currency sign on other key</span></h3>
+<p>Most European keyboards have a Euro sign (€) printed on on the <code>5</code> key. For example, to access it with <code>Alt+5</code>, use the <code>lv3:lalt_switch</code> and <code>eurosign:5</code> options.
+</p>
+<p>The Rupee sign (₹) can be used the same way with <code>rupeesign:4</code>.
+</p>
+<h3><span class="mw-headline" id="Switching_state_immediately_when_Caps_Lock_is_pressed">Switching state immediately when Caps Lock is pressed</span></h3>
+<p>Those who prefer typing capital letters with the Caps Lock key may experience a short delay when Caps Lock state is switched, resulting in two or more capital letters (e.g. <i>THe</i>, <i>ARch LInux</i>). This behaviour <a href="https://en.wikipedia.org/wiki/Caps_lock#History" class="extiw" title="wikipedia:Caps lock">stems from typewriters</a>.
+</p>
+<p>Some more popular operating systems have removed this behaviour, either voluntarily (as it can be confusing to some) or by mistake, however this is a question of preference. Bug reports have been filed on the Xserver bug tracker, as there is currently no easy way to switch to the behaviour reflected by those other operating systems. For anyone who would like to follow up the issue, bug reports and latest working progress can be found at <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=27903">[1]</a> and <a rel="nofollow" class="external autonumber" href="https://bugs.freedesktop.org/show_bug.cgi?id=56491">[2]</a>.
+</p>
+<h4><span class="mw-headline" id="Workaround">Workaround</span></h4>
+<p>First, export your keyboard configurations to a file:
+</p>
+<pre>$ xkbcomp -xkb $DISPLAY xkbmap
+</pre>
+<p>In the file <i>xkbmap</i>, locate the Caps Lock section which begins with <i>key &lt;CAPS&gt;</i>:
+</p>
+<pre> key &lt;CAPS&gt; {         [       Caps_Lock ] };
+</pre>
+<p>and replace whole section with the following code:
+</p>
+<pre>key &lt;CAPS&gt; {
+    repeat=no,
+    type[group1]="ALPHABETIC",
+    symbols[group1]=[ Caps_Lock, Caps_Lock],
+    actions[group1]=[ LockMods(modifiers=Lock), Private(type=3,data[0]=1,data[1]=3,data[2]=3)]
+};
+</pre>
+<p>Save and reload keyboard configurations:
+</p>
+<pre>$ xkbcomp -w 0 xkbmap $DISPLAY
+</pre>
+<p>Consider making it a service launching after X starts, since reloaded configurations do not survive a system reboot.
+</p>
+<h2><span class="mw-headline" id="Other_settings">Other settings</span></h2>
+<h3><span class="mw-headline" id="Adjusting_typematic_delay_and_rate">Adjusting typematic delay and rate</span></h3>
+<p>The <i>typematic delay</i> indicates the amount of time (typically in miliseconds) a key needs to be pressed in order for the repeating process to begin. After the repeating process has been triggered, the character will be repeated with a certain frequency (usually given in Hz) specified by the <i>typematic rate</i>. The typematic delay in the <a href="../en/Keyboard_configuration_in_console.html#Adjusting_typematic_delay_and_rate" title="Keyboard configuration in console">virtual console</a> is not affected by these settings.
+</p>
+<h4><span class="mw-headline" id="Using_xset">Using xset</span></h4>
+<p>The tool <i>xset</i> can be used to set the typematic delay and rate for an active X server, certain actions during runtime tho may cause the XServer to reset these changes and revert instead to its <i>seat defaults</i>.
+</p>
+<p>Usage:
+</p>
+<pre>$ xset r rate <i>delay</i> [<i>rate</i>]
+</pre>
+<p>For example to set a typematic delay to 200ms and a typematic rate to 30Hz, use the following command (use <a href="../en/Xinit.html" title="Xinitrc" class="mw-redirect">xinitrc</a> to make it permanent):
+</p>
+<pre>$ xset r rate 200 30
+</pre>
+<p>Issuing the command without specifying the delay and rate will reset the typematic values to their respective defaults; a delay of 660ms and a rate of 25Hz:
+</p>
+<pre>$ xset r rate
+</pre>
+<h4><span class="mw-headline" id="Using_XServer_startup_options">Using XServer startup options</span></h4>
+<p>A more resistant way to set the typematic delay and rate is to make them the <i>seat defaults</i> by passing the desired settings to the X server on its startup using the following options:
+</p>
+<ul>
+<li> <code>-ardelay <i>miliseconds</i></code> - sets the autorepeat delay (length of time in milliseconds that a key must be depressed before autorepeat starts).</li>
+<li> <code>-arinterval <i>miliseconds</i></code> - sets the autorepeat interval (length of time in milliseconds that should elapse between autorepeat-generated keystrokes).</li>
+</ul>
+<p>See <code>man xserver</code> for a full list of X server options and refer to your <a href="../en/Display_manager.html" title="Display manager">display manager</a> for information about how to pass these options.
+</p>
+<h4><span class="mw-headline" id="Using_XServer_options">Using XServer options</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The AutoRepeat Option has been removed from the keyboad driver version 1.4.0 <a rel="nofollow" class="external free" href="https://bugzilla.redhat.com/show_bug.cgi?id=601853#c12">https://bugzilla.redhat.com/show_bug.cgi?id=601853#c12</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Keyboard_configuration_in_Xorg">Talk:Keyboard configuration in Xorg#</a>)</div>
+</div>
+<p>Add this line to <code>/etc/X11/xorg.conf.d/00-keyboard.conf</code>:
+</p>
+<pre>Option "AutoRepeat" "<i>delay</i> <i>rate</i>"
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://madduck.net/docs/extending-xkb/">Madduck guide</a> on extending XKB</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Keyboards.html" title="Category:Keyboards">Keyboards</a></li>
+<li><a href="../en/Category:X_server.html" title="Category:X server">X server</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

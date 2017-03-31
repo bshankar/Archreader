@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>OpenVPN - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-OpenVPN skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">OpenVPN</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/OpenVPN_in_Linux_containers.html" title="OpenVPN in Linux containers">OpenVPN in Linux containers</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Easy-rsa.html" title="Easy-rsa">Easy-rsa</a></li>
+</ul>
+</div>
+<p>This article describes a basic installation and configuration of <a rel="nofollow" class="external text" href="http://openvpn.net">OpenVPN</a>, suitable for private and small business use. For more detailed information, please see the <a rel="nofollow" class="external text" href="https://community.openvpn.net/openvpn/wiki/Openvpn23ManPage">OpenVPN 2.3 man page</a> and the <a rel="nofollow" class="external text" href="http://openvpn.net/index.php/open-source/documentation">OpenVPN documentation</a>. OpenVPN is a robust and highly flexible <a href="https://en.wikipedia.org/wiki/VPN" class="extiw" title="wikipedia:VPN">VPN</a> daemon. It supports <a href="https://en.wikipedia.org/wiki/SSL/TLS" class="extiw" title="wikipedia:SSL/TLS">SSL/TLS</a> security, <a href="https://en.wikipedia.org/wiki/Bridging_(networking)" class="extiw" title="wikipedia:Bridging (networking)">Ethernet bridging</a>, <a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol" class="extiw" title="wikipedia:Transmission Control Protocol">TCP</a> or <a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol" class="extiw" title="wikipedia:User Datagram Protocol">UDP</a> <a href="https://en.wikipedia.org/wiki/Tunneling_protocol" class="extiw" title="wikipedia:Tunneling protocol">tunnel transport</a> through <a href="https://en.wikipedia.org/wiki/Proxy_server" class="extiw" title="wikipedia:Proxy server">proxies</a> or <a href="https://en.wikipedia.org/wiki/Network_address_translation" class="extiw" title="wikipedia:Network address translation">NAT</a>. Additionally it has support for dynamic IP addresses and <a href="https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol" class="extiw" title="wikipedia:Dynamic Host Configuration Protocol">DHCP</a>, scalability to hundreds or thousands of users, and portability to most major OS platforms.
+</p>
+<p>OpenVPN is tightly bound to the <a rel="nofollow" class="external text" href="http://www.openssl.org">OpenSSL</a> library, and derives much of its crypto capabilities from it. It supports conventional encryption using a <a href="https://en.wikipedia.org/wiki/Pre-shared_key" class="extiw" title="wikipedia:Pre-shared key">pre-shared secret key</a> (Static Key mode) or <a href="https://en.wikipedia.org/wiki/Public_key" class="extiw" title="wikipedia:Public key">public key security</a> (<a href="https://en.wikipedia.org/wiki/SSL/TLS" class="extiw" title="wikipedia:SSL/TLS">SSL/TLS</a> mode) using client &amp; server certificates. Additionally it supports unencrypted TCP/UDP tunnels.
+</p>
+<p>OpenVPN is designed to work with the <a href="https://en.wikipedia.org/wiki/TUN/TAP" class="extiw" title="wikipedia:TUN/TAP">TUN/TAP</a> virtual networking interface that exists on most platforms. Overall, it aims to offer many of the key features of <a href="https://en.wikipedia.org/wiki/Ipsec" class="extiw" title="wikipedia:Ipsec">IPSec</a> but with a relatively lightweight footprint. OpenVPN was written by James Yonan and is published under the <a href="https://en.wikipedia.org/wiki/GNU_General_Public_License" class="extiw" title="wikipedia:GNU General Public License">GNU General Public License (GPL)</a>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Install_OpenVPN"><span class="tocnumber">1</span> <span class="toctext">Install OpenVPN</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Kernel_configuration"><span class="tocnumber">2</span> <span class="toctext">Kernel configuration</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Connect_to_a_VPN_provided_by_a_third_party"><span class="tocnumber">3</span> <span class="toctext">Connect to a VPN provided by a third party</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Create_a_Public_Key_Infrastructure_.28PKI.29_from_scratch"><span class="tocnumber">4</span> <span class="toctext">Create a Public Key Infrastructure (PKI) from scratch</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#A_basic_L3_IP_routing_configuration"><span class="tocnumber">5</span> <span class="toctext">A basic L3 IP routing configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Example_configuration"><span class="tocnumber">5.1</span> <span class="toctext">Example configuration</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#The_server_configuration_file"><span class="tocnumber">5.2</span> <span class="toctext">The server configuration file</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Hardening_the_server"><span class="tocnumber">5.2.1</span> <span class="toctext">Hardening the server</span></a></li>
+<li class="toclevel-3 tocsection-9">
+<a href="#Deviating_from_the_standard_port_and.2For_protocol"><span class="tocnumber">5.2.2</span> <span class="toctext">Deviating from the standard port and/or protocol</span></a>
+<ul>
+<li class="toclevel-4 tocsection-10"><a href="#TCP_vs_UDP"><span class="tocnumber">5.2.2.1</span> <span class="toctext">TCP vs UDP</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11">
+<a href="#The_client_config_profile_.28OpenVPN.29"><span class="tocnumber">5.3</span> <span class="toctext">The client config profile (OpenVPN)</span></a>
+<ul>
+<li class="toclevel-3 tocsection-12"><a href="#Drop_root_privileges_after_connecting"><span class="tocnumber">5.3.1</span> <span class="toctext">Drop root privileges after connecting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13"><a href="#The_client_profile_.28generic_for_Linux.2C_iOS.2C_or_Android.29"><span class="tocnumber">5.4</span> <span class="toctext">The client profile (generic for Linux, iOS, or Android)</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="#Converting_certificates_to_encrypted_.p12_format"><span class="tocnumber">5.5</span> <span class="toctext">Converting certificates to encrypted .p12 format</span></a></li>
+<li class="toclevel-2 tocsection-15"><a href="#Testing_the_OpenVPN_configuration"><span class="tocnumber">5.6</span> <span class="toctext">Testing the OpenVPN configuration</span></a></li>
+<li class="toclevel-2 tocsection-16"><a href="#Configure_the_MTU_with_Fragment_and_MSS"><span class="tocnumber">5.7</span> <span class="toctext">Configure the MTU with Fragment and MSS</span></a></li>
+<li class="toclevel-2 tocsection-17">
+<a href="#IPv6"><span class="tocnumber">5.8</span> <span class="toctext">IPv6</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#Connect_to_the_server_via_IPv6"><span class="tocnumber">5.8.1</span> <span class="toctext">Connect to the server via IPv6</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Provide_IPv6_inside_the_tunnel"><span class="tocnumber">5.8.2</span> <span class="toctext">Provide IPv6 inside the tunnel</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Starting_OpenVPN"><span class="tocnumber">6</span> <span class="toctext">Starting OpenVPN</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Manual_startup"><span class="tocnumber">6.1</span> <span class="toctext">Manual startup</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#systemd_service_configuration"><span class="tocnumber">6.2</span> <span class="toctext">systemd service configuration</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Letting_NetworkManager_start_a_connection"><span class="tocnumber">6.3</span> <span class="toctext">Letting NetworkManager start a connection</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#Gnome_configuration"><span class="tocnumber">6.4</span> <span class="toctext">Gnome configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-25">
+<a href="#Routing_all_client_traffic_through_the_server"><span class="tocnumber">7</span> <span class="toctext">Routing all client traffic through the server</span></a>
+<ul>
+<li class="toclevel-2 tocsection-26">
+<a href="#Firewall_configuration"><span class="tocnumber">7.1</span> <span class="toctext">Firewall configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-27"><a href="#ufw"><span class="tocnumber">7.1.1</span> <span class="toctext">ufw</span></a></li>
+<li class="toclevel-3 tocsection-28"><a href="#iptables"><span class="tocnumber">7.1.2</span> <span class="toctext">iptables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-29">
+<a href="#Prevent_leaks_if_VPN_goes_down"><span class="tocnumber">7.2</span> <span class="toctext">Prevent leaks if VPN goes down</span></a>
+<ul>
+<li class="toclevel-3 tocsection-30"><a href="#ufw_2"><span class="tocnumber">7.2.1</span> <span class="toctext">ufw</span></a></li>
+<li class="toclevel-3 tocsection-31"><a href="#vpnfailsafe"><span class="tocnumber">7.2.2</span> <span class="toctext">vpnfailsafe</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-32">
+<a href="#L3_IPv4_routing"><span class="tocnumber">8</span> <span class="toctext">L3 IPv4 routing</span></a>
+<ul>
+<li class="toclevel-2 tocsection-33">
+<a href="#Prerequisites_for_routing_a_LAN"><span class="tocnumber">8.1</span> <span class="toctext">Prerequisites for routing a LAN</span></a>
+<ul>
+<li class="toclevel-3 tocsection-34"><a href="#Routing_tables"><span class="tocnumber">8.1.1</span> <span class="toctext">Routing tables</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-35"><a href="#Connect_the_server_LAN_to_a_client"><span class="tocnumber">8.2</span> <span class="toctext">Connect the server LAN to a client</span></a></li>
+<li class="toclevel-2 tocsection-36"><a href="#Connect_the_client_LAN_to_a_server"><span class="tocnumber">8.3</span> <span class="toctext">Connect the client LAN to a server</span></a></li>
+<li class="toclevel-2 tocsection-37"><a href="#Connect_both_the_client_and_server_LANs"><span class="tocnumber">8.4</span> <span class="toctext">Connect both the client and server LANs</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#Connect_clients_and_client_LANs"><span class="tocnumber">8.5</span> <span class="toctext">Connect clients and client LANs</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-39">
+<a href="#DNS"><span class="tocnumber">9</span> <span class="toctext">DNS</span></a>
+<ul>
+<li class="toclevel-2 tocsection-40"><a href="#Update_resolv-conf_script"><span class="tocnumber">9.1</span> <span class="toctext">Update resolv-conf script</span></a></li>
+<li class="toclevel-2 tocsection-41"><a href="#Update_systemd-resolved_script"><span class="tocnumber">9.2</span> <span class="toctext">Update systemd-resolved script</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-42"><a href="#L2_Ethernet_bridging"><span class="tocnumber">10</span> <span class="toctext">L2 Ethernet bridging</span></a></li>
+<li class="toclevel-1 tocsection-43">
+<a href="#Troubleshooting"><span class="tocnumber">11</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-44"><a href="#Client_daemon_not_restarting_after_suspend"><span class="tocnumber">11.1</span> <span class="toctext">Client daemon not restarting after suspend</span></a></li>
+<li class="toclevel-2 tocsection-45"><a href="#Connection_drops_out_after_some_time_of_inactivity"><span class="tocnumber">11.2</span> <span class="toctext">Connection drops out after some time of inactivity</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-46"><a href="#See_Also"><span class="tocnumber">12</span> <span class="toctext">See Also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Install_OpenVPN">Install OpenVPN</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openvpn">openvpn</a></span> package.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The software contained in this package supports both server and client mode, so install it on all machines that need to create VPN connections.</div>
+<h2><span class="mw-headline" id="Kernel_configuration">Kernel configuration</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>OpenVPN requires TUN/TAP support, which is already configured in the default kernel. Users of custom kernel should make sure to enable the <code>tun</code> module as below.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">Kernel config file</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ Device Drivers
+  --&gt; Network device support
+    [M] Universal TUN/TAP device driver support</pre>
+<p>Read <a href="../en/Kernel_modules.html" title="Kernel modules">Kernel modules</a> for more information.
+</p>
+<h2><span class="mw-headline" id="Connect_to_a_VPN_provided_by_a_third_party">Connect to a VPN provided by a third party</span></h2>
+<p>To connect to a VPN service provided by a third party, most of the following can most likely be ignored, especially regarding server setup. Begin with <a href="#The_client_config_profile_.28OpenVPN.29">#The client config profile</a> and skip ahead to <a href="#Starting_OpenVPN">#Starting OpenVPN</a> after that.  One should use the provider certificates and instructions, for instance see: <a href="../en/Airvpn.html" title="Airvpn">Airvpn</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Most free VPN providers will (often only) offer <a href="../en/PPTP_server.html" title="PPTP server">PPTP</a>, which is drastically easier to setup and configure, but is <a rel="nofollow" class="external text" href="http://poptop.sourceforge.net/dox/protocol-security.phtml">not secure</a>.</div>
+<h2><span class="mw-headline" id="Create_a_Public_Key_Infrastructure_.28PKI.29_from_scratch">Create a Public Key Infrastructure (PKI) from scratch</span></h2>
+<p>When setting up an OpenVPN server, users need to create a <a href="https://en.wikipedia.org/wiki/Public_key_infrastructure" class="extiw" title="wikipedia:Public key infrastructure">Public Key Infrastructure (PKI)</a> which is detailed in the <a href="../en/Easy-rsa.html" title="Easy-rsa">easy-rsa</a> article.  Once the needed certificates, private keys, and associated files are created via following the steps in the separate article, one should have 5 files in <code>/etc/openvpn</code> at this point:
+</p>
+<ul>
+<li><code>/etc/openvpn/ca.crt</code></li>
+<li><code>/etc/openvpn/dh.pem</code></li>
+<li>
+<code>/etc/openvpn/servername.crt</code> and <code>/etc/openvpn/servername.key</code>
+</li>
+<li><code>/etc/openvpn/ta.key</code></li>
+</ul>
+<h2><span class="mw-headline" id="A_basic_L3_IP_routing_configuration">A basic L3 IP routing configuration</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Unless otherwise explicitly stated, the rest of this article assumes this basic configuration.</div>
+<p>OpenVPN is an extremely versatile piece of software and many configurations are possible, in fact machines can be both "servers" and "clients", blurring the distinction between server and client.
+</p>
+<p>What really distinguishes a server from a client (apart from the type of certificate used) is the configuration file itself. The OpenVPN daemon start-up script reads all the *.conf configuration files it finds in <code>/etc/openvpn</code> on start-up and acts accordingly. If it finds more than one configuration file, it will start one OpenVPN process per configuration file.
+</p>
+<p>This article explains how to set up a server named <code>elmer</code> and a client that connects to it named <code>bugs</code>. More servers and clients can easily be added by creating more key/certificate pairs and adding more server and client configuration files.
+</p>
+<h3><span class="mw-headline" id="Example_configuration">Example configuration</span></h3>
+<p>The OpenVPN package comes with a collection of example configuration files for different purposes. The sample server and client configuration files make an ideal starting point for a basic OpenVPN setup with the following features:
+</p>
+<ul>
+<li> Uses <a href="https://en.wikipedia.org/wiki/Public_key_infrastructure" class="extiw" title="wikipedia:Public key infrastructure">Public Key Infrastructure (PKI)</a> for authentication.</li>
+<li> Creates a VPN using a virtual TUN network interface (OSI L3 IP routing).</li>
+<li> Listens for client connections on UDP port 1194 (OpenVPN's <a href="https://en.wikipedia.org/wiki/Port_number" class="extiw" title="wikipedia:Port number">official IANA port number</a>).</li>
+<li> Distributes virtual addresses to connecting clients from the 10.8.0.0/24 subnet.</li>
+</ul>
+<p>For more advanced configurations, please see the official <a rel="nofollow" class="external text" href="https://community.openvpn.net/openvpn/wiki/Openvpn23ManPage">OpenVPN 2.3 man page</a> and the <a rel="nofollow" class="external text" href="http://openvpn.net/index.php/open-source/documentation">OpenVPN documentation</a>.
+</p>
+<h3><span class="mw-headline" id="The_server_configuration_file">The server configuration file</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Note that if the server is behind a firewall or a NAT translating router, the OpenVPN port must be forward on to the server.</div>
+<p>Copy the example server configuration file to <code>/etc/openvpn/server.conf</code>:
+</p>
+<pre># cp /usr/share/openvpn/examples/server.conf /etc/openvpn/server.conf
+</pre>
+<p>Edit the file making a minimum of the following changes:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ca /etc/openvpn/ca.crt
+cert /etc/openvpn/servername.crt
+key /etc/openvpn/servername.key  # This file should be kept secret
+dh /etc/openvpn/dh.pem
+.
+tls-auth /etc/openvpn/ta.key <b>0</b>
+.
+user nobody
+group nobody
+</pre>
+<h4><span class="mw-headline" id="Hardening_the_server">Hardening the server</span></h4>
+<p>If security is a priority, additional configuration is recommended including: limiting the server to use a strong cipher/auth method and limiting the newer tls ciphers.  Do so by adding the following to <code>/etc/openvpn/server.conf</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+.
+cipher AES-256-CBC
+auth SHA512
+tls-version-min 1.2
+tls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-128-GCM-SHA256:TLS-DHE-RSA-WITH-AES-256-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-256-CBC-SHA:TLS-DHE-RSA-WITH-AES-128-CBC-SHA:TLS-DHE-RSA-WITH-CAMELLIA-128-CBC-SHA
+.
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The .ovpn client profile MUST contain a matching cipher and auth line to work properly (at least with the iOS and Android client)!</div>
+<h4><span class="mw-headline" id="Deviating_from_the_standard_port_and.2For_protocol">Deviating from the standard port and/or protocol</span></h4>
+<p>Some public/private network admins may not allow OpenVPN connections on its default port and/or protocol.  One strategy to circumvent this is to mimic https/SSL traffic which is very likely unobstructed.
+</p>
+<p>To do so, configure <code>/etc/openvpn/server.conf</code> as such:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+.
+port 443
+proto tcp
+.
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The .ovpn client profile MUST contain a matching port and proto line to work properly!</div>
+<h5><span class="mw-headline" id="TCP_vs_UDP">TCP vs UDP</span></h5>
+<p>There are subtle differences between TCP and UDP.
+</p>
+<p>TCP
+</p>
+<ul>
+<li> So-called "stateful protocol."</li>
+<li> High reliability due to error correction (i.e. waits for packet acknowledgment).</li>
+<li> Potentially slower than UDP.</li>
+</ul>
+<p>UDP
+</p>
+<ul>
+<li> So-called "stateless protocol."</li>
+<li> Less reliable than TCP as no error correction is in use.</li>
+<li> Potentially faster than TCP.</li>
+</ul>
+<h3><span class="mw-headline" id="The_client_config_profile_.28OpenVPN.29">The client config profile (OpenVPN)</span></h3>
+<p>Copy the example client configuration file to <code>/etc/openvpn/client.conf</code>:
+</p>
+<pre># cp /usr/share/openvpn/examples/client.conf /etc/openvpn/client.conf
+</pre>
+<p>Edit the following:
+</p>
+<ul>
+<li> The <code>remote</code> directive to reflect either the server's <a href="https://en.wikipedia.org/wiki/Fully_qualified_domain_name" class="extiw" title="wikipedia:Fully qualified domain name">Fully Qualified Domain Name</a>, hostname (as known to the client), or its IP address.</li>
+<li> Uncomment the <code>user</code> and <code>group</code> directives to drop privileges.</li>
+<li> The <code>ca</code>, <code>cert</code>, and <code>key</code> parameters to reflect the path and names of the keys and certificates.</li>
+<li> Enable the SSL/TLS HMAC handshake protection. <b>Note the use of the parameter 1 for a client</b>.</li>
+</ul>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+remote elmer.acmecorp.org 1194
+.
+user nobody
+group nobody
+ca /etc/openvpn/ca.crt
+cert /etc/openvpn/client.crt
+key /etc/openvpn/client.key
+.
+tls-auth /etc/openvpn/ta.key <b>1</b>
+</pre>
+<h4><span class="mw-headline" id="Drop_root_privileges_after_connecting">Drop root privileges after connecting</span></h4>
+<p>Using the options <code>user nobody</code> and <code>group nobody</code> in the configuration file makes <i>OpenVPN</i> drop its privileges after establishing the connection. The downside is that upon VPN disconnect the daemon is unable to delete its set network routes again. If one wants to limit transmitting traffic without the VPN connection, then lingering routes are not desired. Further, it can happen that the OpenVPN server pushes updates to routes at runtime of the tunnel. A client with dropped privileges will be unable to perform the update and exit with an error.
+</p>
+<p>As it could seem to require manual action to manage the routes, the options <code>user nobody</code> and <code>group nobody</code> might seem undesirable. Depending on setup, however, there are four ways to handle these situations: 
+</p>
+<ul>
+<li> For errors of the unit, a simple way is to <a href="../en/Systemd.html#Editing_provided_units" title="Edit" class="mw-redirect">edit</a> it and add a <code>Restart=on-failure</code> to the <code>[Service]</code> section. Though, this alone will not delete any obsoleted routes, so it may happen that the restarted tunnel is not routed properly. </li>
+<li> The package contains the <code>/usr/lib/openvpn/plugins/openvpn-plugin-down-root.so</code> (see README in its directory), which can be used to let <i>openvpn</i> fork a process with root privileges with the only task to execute a custom script when receiving a down signal from the main process, which is handling the tunnel with dropped privileges.<a rel="nofollow" class="external autonumber" href="https://community.openvpn.net/openvpn/browser/plugin/down-root/README?rev=d02a86d37bed69ee3fb63d08913623a86c88da15">[1]</a> </li>
+<li> The <a rel="nofollow" class="external text" href="https://openvpn.net/index.php/open-source/documentation/howto.html#security">OpenVPN HowTo</a> explains another way how to create an unprivileged user mode and wrapper script to have the routes restored automatically. </li>
+<li> Further, it is possible to let OpenVPN start as a non-privileged user in the first place, without ever running as root, see <a rel="nofollow" class="external text" href="https://community.openvpn.net/openvpn/wiki/UnprivilegedUser">this OpenVPN wiki HowTo</a>.</li>
+</ul>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The OpenVPN HowTos linked above create a dedicated non-privileged user/group, instead of the already existing <code>nobody</code>. The advantage is that this avoids potential risks when sharing a user among daemons.</div>
+<h3><span class="mw-headline" id="The_client_profile_.28generic_for_Linux.2C_iOS.2C_or_Android.29">The client profile (generic for Linux, iOS, or Android)</span></h3>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ovpngen/">ovpngen</a></span><sup><small>AUR</small></sup> package provides a simple shell script that creates OpenVPN compatible tunnel profiles in the unified file format suitable for the iOS version of OpenVPN Connect as well as for the Android app.
+</p>
+<p>Simply invoke the script with 5 tokens:
+</p>
+<ol>
+<li> Server Fully Qualified Domain Name of the OpenVPN server (or IP address).</li>
+<li> Full path to the CA cert.</li>
+<li> Full path to the client cert.</li>
+<li> Full path to the client private key.</li>
+<li> Full path to the server TLS shared secret key.</li>
+<li> Optionally a port number.</li>
+<li> Optionally a protocol (udp or tcp).</li>
+</ol>
+<p>Example:
+</p>
+<pre># ovpngen example.org /etc/openvpn/ca.crt /etc/easy-rsa/pki/signed/client1.crt /etc/easy-rsa/pki/private/client1.key /etc/openvpn/ta.key &gt; iphone.ovpn
+</pre>
+<p>The resulting <code>iphone.ovpn</code> can be edited if desired as the script does insert some commented lines.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If the server.conf contains a specified cipher and/or auth line, it is highly recommended that users manually edit the generated .ovpn file adding matching lines for cipher and auth.  Failure to do so may results in connection errors!</div>
+<h3><span class="mw-headline" id="Converting_certificates_to_encrypted_.p12_format">Converting certificates to encrypted .p12 format</span></h3>
+<p>Some software will only read VPN certificates that are stored in a password-encrypted .p12 file. These can be generated with the following command:
+</p>
+<pre># openssl pkcs12 -export -inkey keys/bugs.key -in keys/bugs.crt -certfile keys/ca.crt -out keys/bugs.p12</pre>
+<h3><span class="mw-headline" id="Testing_the_OpenVPN_configuration">Testing the OpenVPN configuration</span></h3>
+<p>Run <code># openvpn /etc/openvpn/server.conf</code> on the server, and <code># openvpn /etc/openvpn/client.conf</code> on the client.  Example output should be similar to the following:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># openvpn /etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Wed Dec 28 14:41:26 2011 OpenVPN 2.2.1 x86_64-unknown-linux-gnu [SSL] [LZO2] [EPOLL] [eurephia] built on Aug 13 2011
+Wed Dec 28 14:41:26 2011 NOTE: OpenVPN 2.1 requires '--script-security 2' or higher to call user-defined scripts or executables
+Wed Dec 28 14:41:26 2011 Diffie-Hellman initialized with 2048 bit key
+.
+.
+Wed Dec 28 14:41:54 2011 bugs/95.126.136.73:48904 MULTI: primary virtual IP for bugs/95.126.136.73:48904: 10.8.0.6
+Wed Dec 28 14:41:57 2011 bugs/95.126.136.73:48904 PUSH: Received control message: 'PUSH_REQUEST'
+Wed Dec 28 14:41:57 2011 bugs/95.126.136.73:48904 SENT CONTROL [bugs]: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart 120,ifconfig 10.8.0.6 10.8.0.5' (status=1)</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># openvpn /etc/openvpn/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">Wed Dec 28 14:41:50 2011 OpenVPN 2.2.1 i686-pc-linux-gnu [SSL] [LZO2] [EPOLL] [eurephia] built on Aug 13 2011
+Wed Dec 28 14:41:50 2011 NOTE: OpenVPN 2.1 requires '--script-security 2' or higher to call user-defined scripts or executables
+Wed Dec 28 14:41:50 2011 LZO compression initialized
+.
+.
+Wed Dec 28 14:41:57 2011 GID set to nobody
+Wed Dec 28 14:41:57 2011 UID set to nobody
+Wed Dec 28 14:41:57 2011 Initialization Sequence Completed</pre>
+<p>On the server, find the IP address assigned to the tunX device:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ip addr show</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.
+.
+40: tun0: &lt;POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 100
+    link/none
+    inet 10.8.0.1 peer 10.8.0.2/32 scope global tun0</pre>
+<p>Here we see that the server end of the tunnel has been given the IP address 10.8.0.1.
+</p>
+<p>Do the same on the client:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ip addr show</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">.
+.
+37: tun0: &lt;POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 100
+    link/none
+    inet 10.8.0.6 peer 10.8.0.5/32 scope global tun0</pre>
+<p>And the client side has been given the IP address 10.8.0.6.
+</p>
+<p>Now try pinging the interfaces.
+</p>
+<p>On the server:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ping -c3 10.8.0.6</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING 10.8.0.6 (10.8.0.6) 56(84) bytes of data.
+64 bytes from 10.8.0.6: icmp_req=1 ttl=64 time=238 ms
+64 bytes from 10.8.0.6: icmp_req=2 ttl=64 time=237 ms
+64 bytes from 10.8.0.6: icmp_req=3 ttl=64 time=205 ms
+
+--- 10.8.0.6 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 205.862/227.266/238.788/15.160 ms</pre>
+<p>On the client:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ping -c3 10.8.0.1</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING 10.8.0.1 (10.8.0.1) 56(84) bytes of data.
+64 bytes from 10.8.0.1: icmp_req=1 ttl=64 time=158 ms
+64 bytes from 10.8.0.1: icmp_req=2 ttl=64 time=158 ms
+64 bytes from 10.8.0.1: icmp_req=3 ttl=64 time=157 ms
+
+--- 10.8.0.1 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2001ms
+rtt min/avg/max/mdev = 157.426/158.278/158.940/0.711 ms</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If using a firewall, make sure that IP packets on the TUN device are not blocked.</div>
+<h3><span class="mw-headline" id="Configure_the_MTU_with_Fragment_and_MSS">Configure the MTU with Fragment and MSS</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you do not configure MTU, then you will notice that small packets like ping and DNS will work, however web browsing will not work.</div>
+<p>Now it is time to configure the maximum segment size (MSS). In order to do this we need to discover what is the smallest MTU along the path between the client and server. In order to do this you can ping the server and disable fragmentation. Then specify the max packet size.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Output is different - I do not see anything like <code>...Frag needed and DF set...</code> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:OpenVPN">Talk:OpenVPN#</a>)</div>
+</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ping -c5 -M do -s 1500 elmer.acmecorp.org</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING elmer.acmecorp.org (99.88.77.66) 1500(1528) bytes of data.
+From 1.2.3.4 (99.88.77.66) icmp_seq=1 Frag needed and DF set (mtu = 576)
+From 1.2.3.4 (99.88.77.66) icmp_seq=1 Frag needed and DF set (mtu = 576)
+From 1.2.3.4 (99.88.77.66) icmp_seq=1 Frag needed and DF set (mtu = 576)
+From 1.2.3.4 (99.88.77.66) icmp_seq=1 Frag needed and DF set (mtu = 576)
+From 1.2.3.4 (99.88.77.66) icmp_seq=1 Frag needed and DF set (mtu = 576)
+
+--- core.myrelay.net ping statistics ---
+0 packets transmitted, 0 received, +5 errors</pre>
+<p>We received an ICMP message telling us the MTU is 576 bytes. The means we need to fragment the UDP packets smaller then 576 bytes to allow for some UDP overhead.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># ping -c5 -M do -s 548 elmer.acmecorp.org</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">PING elmer.acmecorp.org (99.88.77.66) 548(576) bytes of data.
+556 bytes from 99.88.77.66: icmp_seq=1 ttl=48 time=206 ms
+556 bytes from 99.88.77.66: icmp_seq=2 ttl=48 time=224 ms
+556 bytes from 99.88.77.66: icmp_seq=3 ttl=48 time=206 ms
+556 bytes from 99.88.77.66: icmp_seq=4 ttl=48 time=207 ms
+556 bytes from 99.88.77.66: icmp_seq=5 ttl=48 time=208 ms
+
+--- myrelay.net ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4001ms
+rtt min/avg/max/mdev = 206.027/210.603/224.158/6.832 ms</pre>
+<p>After some trial and error..., we discover that we need to fragment packets on 548 bytes. In order to do this we specify this fragment size in the configuration and instruct OpenVPN to fix the Maximum Segment Size (MSS).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+remote elmer.acmecorp.org 1194
+...
+fragment 548
+mssfix 548
+...</pre>
+<p>We also need to tell the server about the fragmentation. Note that "mssfix" is NOT needed in the server configuration.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Clients that do not support the 'fragment' directive (e.g. OpenELEC, <a rel="nofollow" class="external text" href="https://forums.openvpn.net/topic13201.html#p31156">iOS app</a>) are not able to connect to a server that uses the 'fragment' directive. To support such clients, skip this section and configure the clients with the 'mtu-test' directive described below.</div>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+fragment 548
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The following will add about 3 minutes to OpenVPN start time. It is advisable to configure the fragment size unless your client is a laptop that will be connecting over many different networks and the bottle neck is on the client side.</div>
+<p>You can also allow OpenVPN to do this for you by having OpenVPN do the ping testing every time the client connects to the VPN. Be patient, since your client may not inform you about the test being run and the connection may appear as nonfunctional until finished.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/client.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+remote elmer.acmecorp.org 1194
+...
+mtu-test
+...
+tls-auth /etc/openvpn/ta.key <b>1</b>
+</pre>
+<h3><span class="mw-headline" id="IPv6">IPv6</span></h3>
+<h4><span class="mw-headline" id="Connect_to_the_server_via_IPv6">Connect to the server via IPv6</span></h4>
+<p>In order to enable Dual Stack for OpenVPN, you have to change <code>proto udp</code> to <code>proto udp6</code> in both server.conf and client.conf. Afterwards both IPv4 and IPv6 are enabled.
+</p>
+<h4><span class="mw-headline" id="Provide_IPv6_inside_the_tunnel">Provide IPv6 inside the tunnel</span></h4>
+<p>In order to provide IPv6 inside the tunnel, you need to have a IPv6 prefix routed to your OpenVPN server. Either set up a static route on your gateway (if you have a static block assigned), or use a DHCPv6 client to get a prefix with DHCPv6 Prefix delegation (see <a href="../en/IPv6.html#Prefix_delegation_.28DHCPv6-PD.29" title="IPv6">IPv6 Prefix delegation</a> for details). You can also use a unique local address from the address block fc00::/7. Both methods have advantages and disadvantages:
+</p>
+<ul>
+<li> Many ISPs only provide dynamically changing IPv6 prefixes. OpenVPN does not support prefix changes, so you need to change your server.conf every time the prefix is changed (Maybe can be automated with a script).</li>
+<li> ULA addresses are not routed to the Internet, and setting up NAT is not as straightforward as with IPv4. So you cannot route the entire traffic over the tunnel. If you only want to connect two sites via IPv6, without the need to connect to the Internet over the tunnel, the ULA addresses may be easier to use.</li>
+</ul>
+<p>After you have received a prefix (a /64 is recommended), append the following to the server.conf:
+</p>
+<pre>server-ipv6 2001:db8:0:123::/64
+</pre>
+<p>This is the IPv6 equivalent to the default 10.8.0.0/24 network of OpenVPN and needs to be taken from the DHCPv6 client. Or use for example fd00:1234::/64.
+</p>
+<p>If you want to push a route to your home network (192.168.1.0/24 equivalent), also append:
+</p>
+<pre>push "route-ipv6 2001:db8:0:abc::/64"
+</pre>
+<p>OpenVPN does not yet include DHCPv6, so there is no method to e.g. push DNS server over IPv6. This needs to be done with IPv4. The <a rel="nofollow" class="external text" href="https://community.openvpn.net/openvpn/wiki/IPv6">OpenVPN Wiki</a> provides some other configuration options.
+</p>
+<h2><span class="mw-headline" id="Starting_OpenVPN">Starting OpenVPN</span></h2>
+<h3><span class="mw-headline" id="Manual_startup">Manual startup</span></h3>
+<p>To troubleshoot a VPN connection, start the client's daemon manually with <code>openvpn /etc/openvpn/client.conf</code> as root. The server can be started the same way using its own configuration file (e.g., <code>openvpn /etc/openvpn/server.conf</code>).
+</p>
+<h3><span class="mw-headline" id="systemd_service_configuration">systemd service configuration</span></h3>
+<p>To start OpenVPN automatically at system boot, either for a client or for a server, <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>openvpn@<i>&lt;configuration&gt;</i>.service</code> on the applicable machine.
+</p>
+<p>For example, if the client configuration file is <code>/etc/openvpn/client.conf</code>, the service name is <code>openvpn@client.service</code>. Or, if the server configuration file is <code>/etc/openvpn/server.conf</code>, the service name is <code>openvpn@server.service</code>.
+</p>
+<h3><span class="mw-headline" id="Letting_NetworkManager_start_a_connection">Letting NetworkManager start a connection</span></h3>
+<p>On a client you might not always need to run a VPN tunnel and/or only want to establish it for a specific NetworkManager connection. This can be done by adding a script to <code>/etc/NetworkManager/dispatcher.d/</code>. In the following example "Provider" is the name of the NetworkManager connection:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/NetworkManager/dispatcher.d/10-openvpn</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/bash
+
+case "$2" in
+  up)
+    if [ "$CONNECTION_ID" == "Provider" ]; then
+      systemctl start openvpn@client
+    fi
+  ;;
+  down)
+    systemctl stop openvpn@client
+  ;;
+esac</pre>
+<p>See <a href="../en/NetworkManager.html#Network_services_with_NetworkManager_dispatcher" title="NetworkManager">NetworkManager#Network services with NetworkManager dispatcher</a> for more details.
+</p>
+<h3><span class="mw-headline" id="Gnome_configuration">Gnome configuration</span></h3>
+<p>If you would like to connect a client to an OpenVPN server through Gnome's built-in network configuration do the following. First, install <code>networkmanager-openvpn</code>. Then go to the Settings menu and choose Network. Click the plus sign to add a new connection and choose VPN. From there you can choose OpenVPN and manually enter the settings. You can also choose to import <a href="#The_client_configuration_file">#The client configuration file</a>, if you have already created one. Yet, be aware NetworkManager does not show error messages for options it does not import. To connect to the VPN simply turn the connection on and check the options are applied as you configured (e.g. via <code>journalctl -b -u NetworkManager</code>).
+</p>
+<h2><span class="mw-headline" id="Routing_all_client_traffic_through_the_server">Routing all client traffic through the server</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>There are potential pitfalls when routing all traffic through a VPN server. Refer to <a rel="nofollow" class="external text" href="http://openvpn.net/index.php/open-source/documentation/howto.html#redirect">the OpenVPN documentation on this topic</a> for more information.</div>
+<p>By default only traffic directly to and from an OpenVPN server passes through the VPN. To have all traffic, including web traffic, pass through the VPN do the following. First add the following to your server's configuration file (i.e., <code>/etc/openvpn/server.conf</code>) <a rel="nofollow" class="external autonumber" href="http://openvpn.net/index.php/open-source/documentation/howto.html#redirect">[2]</a>:
+</p>
+<pre>push "redirect-gateway def1 bypass-dhcp"
+push "dhcp-option DNS 8.8.8.8"
+</pre>
+<p>Change <code>8.8.8.8</code> to your preferred DNS IP address if configured to run on the same box as the server or else leave it at 8.8.8.8 to use google's DNS.
+</p>
+<p>If you have problems with non responsive DNS after connecting to server, install <a href="../en/BIND.html" title="BIND">BIND</a> as simple DNS forwarder and push the IP address of the OpenVPN server as DNS to clients.
+</p>
+<p>After setting up the configuration file, one must <a href="../en/Internet_sharing.html#Enable_packet_forwarding" title="Internet sharing">enable packet forwarding</a> on the server. Additionally, the server's firewall will need to be set up to allow VPN traffic through it, which is described below for both <a href="../en/Uncomplicated_Firewall.html" title="Ufw" class="mw-redirect">ufw</a> and <a href="../en/Iptables.html" title="Iptables">iptables</a>.
+</p>
+<p>To allow clients to be able to reach other (private) subnets behind the server, you may want to use the <code>push "route &lt;address pool&gt; &lt;subnet&gt;"</code> option:
+</p>
+<pre>push "route 172.10.142.0 255.255.255.0"
+push "route 172.20.142.0 255.255.255.0"
+</pre>
+<h3><span class="mw-headline" id="Firewall_configuration">Firewall configuration</span></h3>
+<h4><span class="mw-headline" id="ufw">ufw</span></h4>
+<p>In order to configure your ufw settings for VPN traffic first add the following to <code>/etc/default/ufw</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/default/ufw</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">DEFAULT_FORWARD_POLICY="ACCEPT"</pre>
+<p>Now change <code>/etc/ufw/before.rules</code>, and add the following code after the header and before the "*filter" line. Do not forget to change the IP/subnet mask to match the one in <code>/etc/openvpn/server.conf</code>.  The adapter ID in the example is generically called <code>eth0</code> so edit it for your system accordingly.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ufw/before.rules</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># NAT (Network Address Translation) table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+
+# Allow traffic from clients to eth0
+-A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+
+# do not delete the "COMMIT" line or the NAT table rules above will not be processed
+COMMIT</pre>
+<p>Open OpenVPN port 1194:
+</p>
+<pre># ufw allow 1194
+</pre>
+<p>Lastly, reload UFW:
+</p>
+<pre># ufw reload
+</pre>
+<h4><span class="mw-headline" id="iptables">iptables</span></h4>
+<p>In order to allow VPN traffic through your iptables firewall of your server, first create an iptables rule for NAT forwarding <a rel="nofollow" class="external autonumber" href="http://openvpn.net/index.php/open-source/documentation/howto.html#redirect">[3]</a> on the server, assuming the interface you want to forward to is named <code>eth0</code>:
+</p>
+<pre>iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
+</pre>
+<p>If you have difficulty pinging the server through the VPN, you may need to add explicit rules to open up TUN/TAP interfaces to all traffic. If that is the case, do the following <a rel="nofollow" class="external autonumber" href="https://community.openvpn.net/openvpn/wiki/255-qconnection-initiated-with-xxxxq-but-i-cannot-ping-the-server-through-the-vpn">[4]</a>:
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>There are security implications for the following rules if you do not trust all clients which connect to the server. Refer to the <a rel="nofollow" class="external text" href="https://community.openvpn.net/openvpn/wiki/255-qconnection-initiated-with-xxxxq-but-i-cannot-ping-the-server-through-the-vpn">OpenVPN documentation on this topic</a> for more details.</div>
+<pre>iptables -A INPUT -i tun+ -j ACCEPT
+iptables -A FORWARD -i tun+ -j ACCEPT
+iptables -A INPUT -i tap+ -j ACCEPT
+iptables -A FORWARD -i tap+ -j ACCEPT
+</pre>
+<p>Additionally be sure to accept connections from the OpenVPN port (default 1194) and through the physical interface.
+</p>
+<p>When you are satisfied make the changes permanent as shown in <a href="../en/Iptables.html#Configuration_and_usage" title="Iptables">iptables#Configuration and usage</a>.
+</p>
+<p>If you have multiple <code>tun</code> or <code>tap</code> interfaces, or more than one VPN configuration, you can "pin" the name of your interface by specifying it in the OpenVPN config file, e.g. <code>tun22</code> instead of <code>tun</code>. This is advantageous if you have different firewall rules for different interfaces or OpenVPN configurations.
+</p>
+<h3><span class="mw-headline" id="Prevent_leaks_if_VPN_goes_down">Prevent leaks if VPN goes down</span></h3>
+<p>The idea is simple: prevent all traffic through our default interface (enp3s0 for example) and only allow tun0.
+If the OpenVPN connection drops, your computer will lose its internet access and therefore, avoid your programs to continue connecting through an insecure network adapter.
+</p>
+<p>Be sure to set up a script to restart OpenVPN if it goes down if you do not want to manually restart it.
+</p>
+<h4><span class="mw-headline" id="ufw_2">ufw</span></h4>
+<pre> # Default policies
+ ufw default deny incoming
+ ufw default deny outgoing
+ 
+ # Openvpn interface (adjust interface accordingly to your configuration)
+ ufw allow in on tun0
+ ufw allow out on tun0
+ 
+ # Local Network (adjust ip accordingly to your configuration)
+ ufw allow in on enp3s0 from 192.168.1.0/24
+ ufw allow out on enp3s0 to 192.168.1.0/24
+ 
+ # Openvpn (adjust port accordingly to your configuration)
+ ufw allow out on enp3s0 to any port 1194
+ ufw allow in on enp3s0 from any port 1194
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> DNS <b>will not</b> work <b>unless</b> you run your own dns server like <a href="../en/BIND.html" title="BIND">BIND</a>
+<p>Otherwise, you will need to allow dns leak. <b>Be sure to trust your dns server!</b>
+</p>
+<pre> # DNS
+ ufw allow in from any to any port 53
+ ufw allow out from any to any port 53
+</pre>
+</div>
+<h4><span class="mw-headline" id="vpnfailsafe">vpnfailsafe</span></h4>
+<p>Alternatively, the <a rel="nofollow" class="external text" href="https://github.com/wknapik/vpnfailsafe">vpnfailsafe</a> (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/vpnfailsafe-git/">vpnfailsafe-git</a></span><sup><small>AUR</small></sup>) script can be used by the client to prevent DNS leaks and ensure that all traffic to the internet goes over the VPN. If the VPN tunnel goes down, internet access will be cut off, except for connections to the VPN server(s). The script contains the functionality of the <a href="#Update_resolv-conf_script">update-resolv-conf</a> script, so the two don't need to be combined.
+</p>
+<h2><span class="mw-headline" id="L3_IPv4_routing">L3 IPv4 routing</span></h2>
+<p>This section describes how to connect client/server LANs to each other using L3 IPv4 routing.
+</p>
+<h3><span class="mw-headline" id="Prerequisites_for_routing_a_LAN">Prerequisites for routing a LAN</span></h3>
+<p>For a host to be able to forward IPv4 packets between the LAN and VPN, it must be able to forward the packets between its NIC and its tun/tap device. See <a href="../en/Internet_sharing.html#Enable_packet_forwarding" title="Internet sharing">Internet sharing#Enable packet forwarding</a> for configuration details.
+</p>
+<h4><span class="mw-headline" id="Routing_tables">Routing tables</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Investigate if a routing protocol like RIP, QUAGGA, BIRD, etc can be used (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:OpenVPN">Talk:OpenVPN#</a>)</div>
+</div>
+<p>By default, all IP packets on a LAN addressed to a different subnet get sent to the default gateway.  If the LAN/VPN gateway is also the default gateway, there is no problem and the packets get properly forwarded. If not, the gateway has no way of knowing where to send the packets.  There are a couple of solutions to this problem.
+</p>
+<ul>
+<li> Add a static route to the default gateway routing the VPN subnet to the LAN/VPN gateway's IP address.</li>
+<li> Add a static route on each host on the LAN that needs to send IP packets back to the VPN.</li>
+<li> Use <a href="../en/Iptables.html" title="Iptables">iptables</a>' NAT feature on the LAN/VPN gateway to masquerade the incoming VPN IP packets.</li>
+</ul>
+<h3><span class="mw-headline" id="Connect_the_server_LAN_to_a_client">Connect the server LAN to a client</span></h3>
+The server is on a LAN using the 10.66.0.0/24 subnet.  To inform the client about the available subnet, add a push directive to the server configuration file:<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">push "route 10.66.0.0 255.255.255.0"</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To route more LANs from the server to the client, add more push directives to the server configuration file, but keep in mind that the server side LANs will need to know how to route to the client.
+</div>
+<h3><span class="mw-headline" id="Connect_the_client_LAN_to_a_server">Connect the client LAN to a server</span></h3>
+<p>Prerequisites:
+</p>
+<ul>
+<li> Any subnets used on the client side, must be unique and not in use on the server or by any other client. In this example we will use 192.168.4.0/24 for the clients LAN.</li>
+<li> Each client's certificate has a unique Common Name, in this case bugs.</li>
+<li> The server may not use the duplicate-cn directive in its config file.</li>
+</ul>
+<p>Create a client configuration directory on the server.  It will be searched for a file named the same as the client's common name, and the directives will be applied to the client when it connects.
+</p>
+<pre># mkdir -p /etc/openvpn/ccd
+</pre>
+<p>Create a file in the client configuration directory called bugs, containing the <code>iroute 192.168.4.0 255.255.255.0</code> directive.  It tells the server what subnet should be routed to the client:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/ccd/bugs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">iroute 192.168.4.0 255.255.255.0</pre>
+<p>Add the client-config-dir and the <code>route 192.168.4.0 255.255.255.0</code> directive to the server configuration file. It tells the server what subnet should be routed from the tun device to the server LAN:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+client-config-dir ccd
+route 192.168.4.0 255.255.255.0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To route more LANs from the client to the server, add more iroute and route directives to the appropriate configuration files, but keep in mind that the client side LANs will need to know how to route to the server.
+</div>
+<h3><span class="mw-headline" id="Connect_both_the_client_and_server_LANs">Connect both the client and server LANs</span></h3>
+<p>Combine the two previous sections:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+push "route 10.66.0.0 255.255.255.0"
+.
+.
+client-config-dir ccd
+route 192.168.4.0 255.255.255.0
+</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/ccd/bugs</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">iroute 192.168.4.0 255.255.255.0</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Remember to make sure that all the LANs or the needed hosts can route to all the destinations.</div>
+<h3><span class="mw-headline" id="Connect_clients_and_client_LANs">Connect clients and client LANs</span></h3>
+By default clients will not see each other. To allow IP packets to flow between clients and/or client LANs, add a client-to-client directive to the server configuration file: <pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">client-to-client</pre>
+<p>In order for another client or client LAN to see a specific client LAN, you will need to add a push directive for each client subnet to the server configuration file (this will make the server announce the available subnet(s) to other clients):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+client-to-client
+push "route 192.168.4.0 255.255.255.0"
+push "route 192.168.5.0 255.255.255.0"
+.
+.
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As always, make sure that the routing is properly configured.</div>
+<h2><span class="mw-headline" id="DNS">DNS</span></h2>
+<p>The DNS servers used by the system are defined in <code>/etc/resolv.conf</code>. Traditionally, this file is the responsibility of whichever program deals with connecting the system to the network (e.g. Wicd, NetworkManager, etc.). However, OpenVPN will need to modify this file if you want to be able to resolve names on the remote side.  To achieve this in a sensible way, install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openresolv">openresolv</a></span>, which makes it possible for more than one program to modify <code>resolv.conf</code> without stepping on each-other's toes.
+</p>
+<p>Before continuing, test openresolv by restarting your network connection and ensuring that <code>resolv.conf</code> states that it was generated by <i>resolvconf</i>, and that your DNS resolution still works as before. You should not need to configure openresolv; it should be automatically detected and used by your network system.
+</p>
+<p>For Linux, OpenVPN can send DNS host information, but expects an external process to act on it. This can be done with the <code>client.up</code> and <code>client.down</code> scripts packaged in <code>/usr/share/openvpn/contrib/pull-resolv-conf/</code>. See their comments on how to install them to <code>/etc/openvpn</code>. The following is an excerpt of a resulting client configuration using the scripts in conjunction with <i>resolvconf</i> and options to <a href="#Drop_root_privileges_after_connecting">#Drop root privileges after connecting</a>: 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/clienttunnel.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+user nobody
+group nobody
+# Optional, choose a suitable path to chroot into for your system
+chroot /srv
+script-security 2
+up /etc/openvpn/client.up 
+plugin /usr/lib/openvpn/plugins/openvpn-plugin-down-root.so "/etc/openvpn/client.down tun0"</pre>
+<h3><span class="mw-headline" id="Update_resolv-conf_script">Update resolv-conf script</span></h3>
+<p>The <a rel="nofollow" class="external text" href="https://github.com/masterkorp/openvpn-update-resolv-conf">openvpn-update-resolv-conf</a> script is available as an alternative to packaged scripts. It needs to be saved for example at <code>/etc/openvpn/update-resolv-conf</code> and made executable with <a href="../en/File_permissions_and_attributes.html#Changing_permissions" title="Chmod" class="mw-redirect">chmod</a>. There is also an AUR package: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/openvpn-update-resolv-conf/">openvpn-update-resolv-conf</a></span><sup><small>AUR</small></sup> which will take care of the script installation for you.
+</p>
+<p>Once the script is installed add lines like the following into your OpenVPN client configuration file:
+</p>
+<pre>script-security 2
+up /etc/openvpn/update-resolv-conf
+down /etc/openvpn/update-resolv-conf
+</pre>
+<p>Now, when your launch your OpenVPN connection, you should find that your resolv.conf file is updated accordingly, and also returns to normal when your close the connection.
+</p>
+<h3><span class="mw-headline" id="Update_systemd-resolved_script">Update systemd-resolved script</span></h3>
+<p>Since systemd-229, <a href="../en/Systemd-networkd.html" title="Systemd-networkd">systemd-networkd</a>'s <code>systemd-resolved.service</code> has exposed an API through DBus allowing management of DNS configuration on a per-link basis. Tools such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openresolv">openresolv</a></span> may not work reliably when <code>/etc/resolv.conf</code> is managed by <code>systemd-resolved</code>, and will not work at all if you are using <code>resolve</code> instead of <code>dns</code> in your <code>/etc/nsswitch.conf</code> file. The <a rel="nofollow" class="external text" href="https://github.com/jonathanio/update-systemd-resolved">update-systemd-resolved</a> script is another alternative and links OpenVPN with <code>systemd-resolved</code> via DBus to update the DNS records.
+</p>
+<p>If you copy the script into <code>/etc/openvpn</code> and mark as executable with <a href="../en/File_permissions_and_attributes.html#Changing_permissions" title="Chmod" class="mw-redirect">chmod</a>, or install it via the AUR package (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/openvpn-update-systemd-resolved/">openvpn-update-systemd-resolved</a></span><sup><small>AUR</small></sup>), you can add lines like the following into your OpenVPN client configuration file:
+</p>
+<pre>script-security 2
+setenv PATH /usr/bin
+up /etc/openvpn/update-systemd-resolved
+down-pre /etc/openvpn/update-systemd-resolved
+</pre>
+<h2><span class="mw-headline" id="L2_Ethernet_bridging">L2 Ethernet bridging</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Please add a well thought out section on L2 bridging. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:OpenVPN">Talk:OpenVPN#</a>)</div>
+</div>
+<p>For now see: <a href="../en/OpenVPN_Bridge.html" title="OpenVPN Bridge">OpenVPN Bridge</a>
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Client_daemon_not_restarting_after_suspend">Client daemon not restarting after suspend</span></h3>
+<p>If you put your client system to sleep, and on resume OpenVPN does not restart, resulting in broken connectivity, create the following file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/lib/systemd/system-sleep/vpn.sh</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">#!/bin/sh
+if [ "$1" == "pre" ]
+then
+  killall openvpn
+fi</pre>
+<p>Make it executable <code>chmod a+x /usr/lib/systemd/system-sleep/vpn.sh</code>
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/openvpn@.service.d/restart.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Service]
+Restart=always</pre>
+<h3><span class="mw-headline" id="Connection_drops_out_after_some_time_of_inactivity">Connection drops out after some time of inactivity</span></h3>
+<p>If the VPN-Connection drops some seconds after it stopped transmitting data and, even though it states it is connected, no data can be transmitted through the tunnel, try adding a <code>keepalive</code>directive to the server's configuration:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/openvpn/server.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+.
+.
+keepalive 10 120
+.
+.
+</pre>
+<p>In this case the server will send ping-like messages to all of its clients every <code>10</code> seconds, thus keeping the tunnel up.
+If the server does not receive a response within <code>120</code> seconds from a specific client, it will assume this client is down.
+</p>
+<p>A small ping-interval can increase the stability of the tunnel, but will also cause slightly higher traffic. Depending on your connection, also try lower intervals than 10 seconds.
+</p>
+<h2><span class="mw-headline" id="See_Also">See Also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="https://openvpn.net/index.php/open-source.html">OpenVPN Official Site</a>
+</li>
+<li> <a href="../en/Airvpn.html" title="Airvpn">Airvpn</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Virtual_Private_Network.html" title="Category:Virtual Private Network">Virtual Private Network</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

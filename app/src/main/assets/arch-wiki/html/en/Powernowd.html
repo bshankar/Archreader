@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Powernowd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Powernowd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Powernowd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.deater.net/john/powernowd.html">Powernowd</a> is a very simple <a href="../en/Daemons.html" title="Daemon" class="mw-redirect">daemon</a> that will adjust the speed of your CPU depending on system load.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This software, while may still work fine on modern kernels, <b>is no longer in active development</b> and likely less efficent than using cpufreq's ondemand governor.  Using the cpufreq-ondemand kernel module is preferable over powernowd. See <a href="../en/CPU_frequency_scaling.html" title="CPU frequency scaling">CPU frequency scaling</a> for more information on using the cpufreq-ondemand kernel module.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Do not let the name fool you.  Despite being named after <a href="https://en.wikipedia.org/wiki/PowerNow!" class="extiw" title="wikipedia:PowerNow!">AMD's PowerNow!</a> technology, it should work on any system supported by the cpufreq-userspace governor.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Obsolescent_Note"><span class="tocnumber">1</span> <span class="toctext">Obsolescent Note</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Features"><span class="tocnumber">2</span> <span class="toctext">Features</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Installation"><span class="tocnumber">3</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Prerequisites"><span class="tocnumber">3.1</span> <span class="toctext">Prerequisites</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Installation_of_Powernowd"><span class="tocnumber">3.2</span> <span class="toctext">Installation of Powernowd</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Basic_Configuration"><span class="tocnumber">4</span> <span class="toctext">Basic Configuration</span></a></li>
+</ul>
+</div>
+
+<h3><span class="mw-headline" id="Obsolescent_Note">Obsolescent Note</span></h3>
+<p>Although elegant, this software is actually obsolete.  One can achieve the same effect with the <code>cpufreq-ondemand</code> kernel module and adjusting the ondemand governor's threshold.  See <a href="../en/CPU_frequency_scaling.html" title="CPU frequency scaling">CPU frequency scaling</a> for more information.
+</p>
+<h3><span class="mw-headline" id="Features">Features</span></h3>
+<ul>
+<li> One, simple heuristic to determine CPU load: "user + sys" time.</li>
+<li> Ignore "niced" programs (setiathome, itself, etc). In my mind this is consistent with what is meant when someone 'nice's a program to begin with. (configurable in v0.85+)</li>
+<li> Designed for CPUs that support more than two speed states, but works well with anything.</li>
+<li> Very fast, low overhead /proc/stat gathering (method stolen from procps).</li>
+<li> Supports SMP</li>
+<li> Will automatically switch to 'userspace' governor.</li>
+<li> Care taken to make the code non-root exploitable (but please audit for yourself first!)</li>
+<li> Frequency step size is configurable (default to 100MHz/step)</li>
+<li> 4 different behavioral modes to choose from (SINE, AGGRESSIVE, PASSIVE, LEAPS), which determine the behavior when the load changes. Configurable from the command line.</li>
+<li> Written in C for speed and simplicity.</li>
+<li> Logging to stdout or syslog</li>
+<li> Configurable Polling frequency in milliseconds (defaults to 1s)</li>
+<li> Configurable highwater/lowwater marks for CPU usage. (defaults 80/20%)</li>
+</ul>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Prerequisites">Prerequisites</span></h3>
+<p>In order for frequency scaling to work properly, you will need to load the appropriate frequency driver for your processor as well as the cpufreq-userspace governor.  See <a href="../en/CPU_frequency_scaling.html" title="CPU frequency scaling">CPU frequency scaling</a>.
+</p>
+<h3><span class="mw-headline" id="Installation_of_Powernowd">Installation of Powernowd</span></h3>
+<p>This package is available in the AUR: <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/powernowd/">powernowd</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/powernowd">aur-mirror</a>]</sup>.  If you have not used the AUR before, you may want to check out <a href="../en/Arch_User_Repository.html" title="AUR User Guidelines" class="mw-redirect">AUR User Guidelines</a> at your leisure as there are a wealth of great software there for you, and building the package on your machine is trivial.  Install 'powernowd', then start the daemon:
+</p>
+<pre># /etc/rc.d/powernowd start
+</pre>
+<p>To have it automatically load at startup, add powernowd to your <code>DAEMONS</code> array in <code>/etc/rc.conf</code>.
+</p>
+<pre>DAEMONS=( ... <b>powernowd</b> ... )
+</pre>
+<h2><span class="mw-headline" id="Basic_Configuration">Basic Configuration</span></h2>
+<p>The only configuration you need is to set the highwater/lowwater marks for CPU usage.  Basically this means when the CPU usage is &gt;=highwater mark, then powernowd will use your highest CPU multiplier (i.e. full power); when the CPU usage &lt;=lowwater mark, then powernowd will use your lowest CPU multiplier.  The defaults are 80/20% but I find that adjusting them down gives me a more responsive system.  I use 15/5% for example.  To do so edit your <code>/etc/conf.d/powernowd</code> inserting the following line:
+</p>
+<pre>OPTIONS="-q -u 15 -l 5"
+</pre>
+<p>Restart the daemon and enjoy
+</p>
+<pre># /etc/rc.d/powernowd restart
+</pre>
+<p>There are other options you can set such as modes of operation (sine, passive, aggressive, leaps), polling frequency, number of threads per core, etc.  To see what is available, invoke powernowd with the -h switch
+</p>
+<pre>$ powernowd -h
+PowerNow Daemon v1.00, (c) 2003-2008 John Clemens
+Daemon to control the speed and voltage of cpus.
+
+This is a simple client to the CPUFreq driver, and uses
+linux kernel v2.5+ sysfs interface.  You need a supported
+cpu, and a kernel that supports sysfs to run this daemon.
+
+Available Options:
+ 	-h	Print this help message 
+	-d	Do not detach from terminal (default is to
+		detach and run in the background)
+	-v	Increase output verbosity, can be used more than once.
+	-q	Quiet mode, only emergency output.
+	-n	Include 'nice'd processes in calculations
+	-m #	Modes of operation, can be 0, 1, 2, or 3:
+		0 = SINE, 1 = AGGRESSIVE (default),
+		2 = PASSIVE, 3 = LEAPS
+	-s #	Frequency step in kHz (default = 100000)
+	-p #	Polling frequency in msecs (default = 1000)
+	-c #	Specify number of threads per power-managed core
+	-u #	CPU usage upper limit percentage [0 .. 100, default 80]
+	-l #    CPU usage lower limit percentage [0 .. 100, default 20]
+</pre>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Power_management.html" title="Category:Power management">Power management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Capabilities - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Capabilities skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Capabilities</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><b>Capabilities</b> (POSIX 1003.1e, capabilities(7)) provide fine-grained control over superuser permissions, allowing use of the root user to be avoided. Software developers are encouraged to replace uses of the powerful <a href="https://en.wikipedia.org/wiki/Setuid" class="extiw" title="wikipedia:Setuid">setuid</a> attribute in a system binary with a more minimal set of capabilities. Many packages make use of capabilities, such as CAP_NET_RAW being used for the <code>ping</code> binary provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=iputils">iputils</a></span>. This enables e.g. <code>ping</code> to be run by a normal user (as with the <b>setuid</b> method), while at the same time limiting the security consequences of a potential vulnerability in <code>ping</code>.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Implementation"><span class="tocnumber">1</span> <span class="toctext">Implementation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Administration_and_maintenance"><span class="tocnumber">2</span> <span class="toctext">Administration and maintenance</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Other_programs_that_benefit_from_capabilities"><span class="tocnumber">3</span> <span class="toctext">Other programs that benefit from capabilities</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#beep"><span class="tocnumber">3.1</span> <span class="toctext">beep</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#chvt"><span class="tocnumber">3.2</span> <span class="toctext">chvt</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#iftop"><span class="tocnumber">3.3</span> <span class="toctext">iftop</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#mii-tool"><span class="tocnumber">3.4</span> <span class="toctext">mii-tool</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Useful_commands"><span class="tocnumber">4</span> <span class="toctext">Useful commands</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Implementation">Implementation</span></h2>
+<p>Capabilities are implemented on Linux using <a href="../en/File_permissions_and_attributes.html#Extended_attributes" title="Extended attributes" class="mw-redirect">extended attributes</a> (<code>man 7 xattr</code>) in the <i>security</i> namespace. Extended attributes are supported by all major Linux filesystems, including Ext2, Ext3, Ext4, Btrfs, JFS, XFS, and Reiserfs. The following example prints the capabilities of ping with <code>getcap</code>, and then prints the same data in its encoded form using <code>getfattr</code>:
+</p>
+<pre>$ getcap /bin/ping
+/bin/ping = cap_net_raw+ep
+$ getfattr -d -m "^security\\." /bin/ping
+# file: bin/ping
+security.capability=0sAQAAAgAgAAAAAAAAAAAAAAAAAAA=
+</pre>
+<p>Extended attributes are copied automatically by <code>cp -a</code>, but some other programs require a special flag: <code>rsync -X</code>.
+</p>
+<p>Capabilities are set by package install scripts on Arch (e.g. <code>iputils.install</code>).
+</p>
+<h2><span class="mw-headline" id="Administration_and_maintenance">Administration and maintenance</span></h2>
+<p>It is considered a bug if a package has overly permissive capabilities, so these cases should be reported rather than listed here. A capability essentially equivalent to root access (CAP_SYS_ADMIN) or trivially allowing root access (CAP_DAC_OVERRIDE) does not count as a bug since Arch does not support any MAC/RBAC systems.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Many capabilities enable trivial privilege escalation. For examples and explanations see Brad Spengler's post <a rel="nofollow" class="external text" href="http://forums.grsecurity.net/viewtopic.php?f=7&amp;t=2522&amp;sid=c6fbcf62fd5d3472562540a7e608ce4e#p10271">False Boundaries and Arbitrary Code Execution</a>.</div>
+<h2><span class="mw-headline" id="Other_programs_that_benefit_from_capabilities">Other programs that benefit from capabilities</span></h2>
+<p>The following packages do not have files with the setuid attribute but require root privileges to work. By enabling some capabilities, regular users can use the program without privilege elevation.
+</p>
+<h3><span class="mw-headline" id="beep">beep</span></h3>
+<pre># setcap cap_dac_override,cap_sys_tty_config+ep /usr/bin/beep
+</pre>
+<h3><span class="mw-headline" id="chvt">chvt</span></h3>
+<pre># setcap cap_dac_read_search,cap_sys_tty_config+ep /usr/bin/chvt
+</pre>
+<h3><span class="mw-headline" id="iftop">iftop</span></h3>
+<pre># setcap cap_net_raw+ep /usr/bin/iftop
+</pre>
+<h3><span class="mw-headline" id="mii-tool">mii-tool</span></h3>
+<pre># setcap cap_net_admin+ep /usr/bin/mii-tool
+</pre>
+<h2><span class="mw-headline" id="Useful_commands">Useful commands</span></h2>
+<p>Find setuid-root files:
+</p>
+<pre>$ find /usr/bin /usr/lib -perm /4000 -user root
+</pre>
+<p>Find setgid-root files:
+</p>
+<pre>$ find /usr/bin /usr/lib -perm /2000 -group root
+</pre>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> Man Page capabilities(7) setcap(8) getcap(8)</li>
+<li> <a href="../en/DeveloperWiki:Security.html#Replacing_setuid_with_capabilities" title="DeveloperWiki:Security">DeveloperWiki:Security#Replacing setuid with capabilities</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

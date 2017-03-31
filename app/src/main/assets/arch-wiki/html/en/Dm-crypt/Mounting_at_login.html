@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Dm-crypt/Mounting at login - ArchWiki</title>
+<link rel="stylesheet" href="../../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Dm-crypt_Mounting_at_login skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 2em; margin-bottom: 0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Dm-crypt/Mounting at login</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"><span class="subpages">&lt; <a href="../../en/Dm-crypt.html" title="Dm-crypt">Dm-crypt</a></span></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Gnome-colors-add-files-to-archive.png" class="image"><img alt="Gnome-colors-add-files-to-archive.png" src="../../File:Gnome-colors-add-files-to-archive.png" width="48" height="48"></a><b>This article is being considered for <a href="../../en/ArchWiki:Archive.html" title="ArchWiki:Archive">archiving</a>.</b><a href="../../File:Gnome-colors-add-files-to-archive.png" class="image"><img alt="Gnome-colors-add-files-to-archive.png" src="../../File:Gnome-colors-add-files-to-archive.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Too many open issues and incomplete instructions make this article appears unfit for the wiki (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dm-crypt/Mounting_at_login#archive">Talk:Dm-crypt/Mounting at login#archive</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> See <a href="../../en/Help:Style.html" title="Help:Style">Help:Style</a> and related. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dm-crypt/Mounting_at_login">Talk:Dm-crypt/Mounting at login#</a>)</div>
+</div>
+<div style="float:right; clear:right; width:25%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../../en/Pam_mount.html" title="Pam mount">pam_mount</a></li>
+</ul>
+</div>
+<p>Back to <a href="../../en/Dm-crypt/Encrypting_a_non-root_file_system.html" title="Dm-crypt/Encrypting a non-root file system">Dm-crypt/Encrypting a non-root file system</a>
+</p>
+<p>It is possible to configure <a href="../../en/PAM.html" title="PAM">PAM</a> and <a href="../../en/Systemd.html" title="Systemd">systemd</a> to automatically mount a <a href="../../en/Dm-crypt.html" title="Dm-crypt">dm-crypt</a> encrypted home partition when its owner logs in, and to unmount it when he logs out.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#General_idea"><span class="tocnumber">1</span> <span class="toctext">General idea</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Helper_scripts"><span class="tocnumber">2</span> <span class="toctext">Helper scripts</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#.2Fusr.2Flocal.2Fbin.2Fsavepass"><span class="tocnumber">2.1</span> <span class="toctext">/usr/local/bin/savepass</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#.2Fusr.2Flocal.2Fbin.2Fsecuremount"><span class="tocnumber">2.2</span> <span class="toctext">/usr/local/bin/securemount</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#.2Fusr.2Flocal.2Fbin.2Fsecureumount"><span class="tocnumber">2.3</span> <span class="toctext">/usr/local/bin/secureumount</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#PAM_configuration"><span class="tocnumber">3</span> <span class="toctext">PAM configuration</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#systemd_service"><span class="tocnumber">4</span> <span class="toctext">systemd service</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="General_idea">General idea</span></h2>
+<p>We're going to save the user's password during the PAM authentication phase, and put it into the kernel's keyring. Next, we're going to use it in a systemd service, started automatically before systemd's own user@.service, to unlock and mount the partition at the correct place.
+</p>
+<p>When the user logs out, systemd will stop user@.service, and (because of a dependency) our service too - unmounting and locking the partition.
+</p>
+<div class="noprint archwiki-template-message">
+<p><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> The instructions do not explain how to use <code>cryptsetup luksFormat</code> for the given user's home directory. This needs to be done via keyctl pipe as well.  (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Dm-crypt/Mounting_at_login#Questions">Talk:Dm-crypt/Mounting at login#Questions</a>)</div>
+</div>
+<h2><span class="mw-headline" id="Helper_scripts">Helper scripts</span></h2>
+<p>You need 3 helper scripts:
+</p>
+<h3><span class="mw-headline" id=".2Fusr.2Flocal.2Fbin.2Fsavepass">/usr/local/bin/savepass</span></h3>
+<p>Script that saves the pam-provided password in the kernel's keyring (for root user).
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/savepass</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+exec keyctl padd user user:`id -u $PAM_USER` @u
+</pre>
+<h3><span class="mw-headline" id=".2Fusr.2Flocal.2Fbin.2Fsecuremount">/usr/local/bin/securemount</span></h3>
+<p>Script that unlocks given device with a key obtained from the kernel's keyring, and mounts it at the given place.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/securemount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+set -e
+KEYNAME=$1
+DEVICE=$2
+TARGET=$3
+DEC_DEVICE_NAME=$(/usr/bin/systemd-escape -p `/usr/bin/realpath $DEVICE`)
+DEC_DEVICE=/dev/mapper/$DEC_DEVICE_NAME
+
+/usr/bin/keyctl pipe `/usr/bin/keyctl request user $KEYNAME` | /usr/bin/cryptsetup open $DEVICE $DEC_DEVICE_NAME -d -
+/usr/bin/mount $DEC_DEVICE $TARGET
+</pre>
+<h3><span class="mw-headline" id=".2Fusr.2Flocal.2Fbin.2Fsecureumount">/usr/local/bin/secureumount</span></h3>
+<p>Script that unmounts and closes the encrypted device.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/usr/local/bin/secureumount</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/sh
+set -e
+TARGET=$1
+DEC_DEVICE=$(cat /proc/mounts | grep " $TARGET " | cut -d " " -f 1)
+
+/usr/bin/umount $TARGET
+/usr/bin/cryptsetup close $DEC_DEVICE
+</pre>
+<h2><span class="mw-headline" id="PAM_configuration">PAM configuration</span></h2>
+<p>Add <code>auth      optional  pam_exec.so     expose_authtok /usr/local/bin/savepass</code> before <code>auth      optional  pam_permit.so</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/system-auth</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#%PAM-1.0
+
+auth      required  pam_unix.so     try_first_pass nullok
+<b>auth      optional  pam_exec.so     expose_authtok /usr/local/bin/savepass</b>
+auth      optional  pam_permit.so
+auth      required  pam_env.so
+
+account   required  pam_unix.so
+account   optional  pam_permit.so
+account   required  pam_time.so
+
+password  required  pam_unix.so     try_first_pass nullok sha512 shadow
+password  optional  pam_permit.so
+
+session   required  pam_limits.so
+session   required  pam_unix.so
+session   optional  pam_permit.so
+</pre>
+<h2><span class="mw-headline" id="systemd_service">systemd service</span></h2>
+<p>Create a new service file in the /etc/systemd/system directory. Replace <b>123</b> with the user's ID, <b>/home/xyz</b> with the path you want to mount the partition at, and both <b>c139ae70<i>\x2d</i>5861<i>\x2d</i>4084<i>\x2d</i>84b1<i>\x2d</i>7d83f7bb7129</b> and <b>c139ae70-5861-4084-84b1-7d83f7bb7129</b> with the UUID of the encrypted partition. Note, that in the first case you need to use <b>\x2d</b> in place of all <b>-</b> signs.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/homedir@<b>123</b>.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=Home Directory for %I
+DefaultDependencies=no
+Conflicts=umount.target
+IgnoreOnIsolate=true
+Before=user@%i.service
+Requires=user@%i.service
+BindsTo=dev-disk-by\x2duuid-<b>c139ae70<i>\x2d</i>5861<i>\x2d</i>4084<i>\x2d</i>84b1<i>\x2d</i>7d83f7bb7129</b>.device
+After=dev-disk-by\x2duuid-<b>c139ae70<i>\x2d</i>5861<i>\x2d</i>4084<i>\x2d</i>84b1<i>\x2d</i>7d83f7bb7129</b>.device
+Before=umount.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutSec=0
+ExecStart=/usr/local/bin/securemount user:%i /dev/disk/by-uuid/<b>c139ae70-5861-4084-84b1-7d83f7bb7129</b> <b>/home/xyz</b>
+ExecStop=/usr/local/bin/secureumount <b>/home/xyz</b>
+
+[Install]
+RequiredBy=user@%i.service</pre>
+<p>Finally, enable the service.
+</p>
+<pre>systemctl enable homedir@123.service</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../../en/Category:Pages_flagged_with_Template:Archive.html" title="Category:Pages flagged with Template:Archive">Pages flagged with Template:Archive</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+						<ul id="f-list" style="margin: 0 2em">
+									<li>
+Retrieved from "<a dir="ltr" href="https://wiki.archlinux.org/index.php?title=Dm-crypt/Mounting_at_login&amp;oldid=446530">https://wiki.archlinux.org/index.php?title=Dm-crypt/Mounting_at_login&amp;oldid=446530</a>"</li>
+					<li id="lastmod"> This page was last modified on 13 August 2016, at 16:43.</li>
+									<li id="copyright">Content is available under <a class="external" rel="nofollow" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License 1.3 or later</a> unless otherwise noted.</li>
+									<br><li id="privacy"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:Privacy policy">Privacy policy</a></li>
+									<li id="about"><a href="../../en/ArchWiki:About.html" title="ArchWiki:About">About ArchWiki</a></li>
+									<li id="disclaimer"><a href="../../en/ArchWiki:General_disclaimer.html" title="ArchWiki:General disclaimer">Disclaimers</a></li>
+							</ul>
+		</div>
+		</div>
+		</body>
+</html>

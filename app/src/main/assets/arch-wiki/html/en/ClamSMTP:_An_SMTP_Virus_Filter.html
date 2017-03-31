@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ClamSMTP: An SMTP Virus Filter - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ClamSMTP_An_SMTP_Virus_Filter skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ClamSMTP: An SMTP Virus Filter</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Clamsmtp is a very simple virus filtering tool for any SMTP server. It is very usable with the Postfix MTA, so the following article applies to this and gives you an example of a simple configuration.
+</p>
+<p>The basic requirements are a working Postfix installation with a bunch of users and a working Clamav daemon, so be sure you have installed and configured them properly.
+</p>
+<p>See:
+</p>
+<p><a href="../en/ClamAV.html" title="ClamAV">ClamAV</a>
+</p>
+<p><a href="../en/Postfix.html" title="Postfix">Postfix</a>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#CLAMSMTP"><span class="tocnumber">2.1</span> <span class="toctext">CLAMSMTP</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#CLAMAV"><span class="tocnumber">2.2</span> <span class="toctext">CLAMAV</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#POSTFIX"><span class="tocnumber">2.3</span> <span class="toctext">POSTFIX</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6"><a href="#Testing"><span class="tocnumber">3</span> <span class="toctext">Testing</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Before you install Clamsmtp, install and configure Postfix, create users for your SMTP server, and test if it is working. Install Clamav, and test it too.
+</p>
+<p>If both of your tools work well, <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/clamsmtp/">clamsmtp</a></span><sup><small>AUR</small></sup>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="CLAMSMTP">CLAMSMTP</span></h3>
+<p>Let's see <code>/etc/conf.d/clamsmtp</code> first
+</p>
+<p>change the line:
+</p>
+<pre>START_CLAMSMTP="no" 
+</pre>
+<p>to 
+</p>
+<pre>START_CLAMSMTP="yes"
+</pre>
+<p>Now, we will configure the daemon, by editing <code>/etc/clamav/clamsmtpd.conf</code>. You can erase the original file or simply make a backup of it. Create a new file with this contents:
+</p>
+<pre># Simple clamsmtpd config file
+
+OutAddress: 10025 
+Listen: 127.0.0.1:10026 
+TempDirectory: /var/spool/clamsmtp
+User: clamav
+</pre>
+<p>Clamsmtp works as a daemon. The workflow is simple, it listens on a port specified in its configuration file, catches the mails, scans them via Clamav, and then it pushes them back to Postfix via another port.
+Here, the daemon will listen on port 10026, then scan the mails as user clamav, and will send them back to Postfix on port 10025.
+</p>
+<p>Next we create the cache for clamsmtp by:
+</p>
+<pre>mkdir /var/spool/clamsmtp
+chown clamav:clamav /var/spool/clamsmtp
+</pre>
+<p>(for whatever reason, the default TempDirectory: <code>/tmp</code> returns permission errors )
+</p>
+<p><br>
+</p>
+<h3><span class="mw-headline" id="CLAMAV">CLAMAV</span></h3>
+<p>check your <code>/etc/clamav/clamd.conf</code>, and uncomment the line ( normally, it is already done ):
+</p>
+<pre>#ScanMail yes
+</pre>
+<p>to 
+</p>
+<pre>ScanMail yes
+</pre>
+<h3><span class="mw-headline" id="POSTFIX">POSTFIX</span></h3>
+<p>Now, we have to configure Postfix to work together with Clamsmtp. Edit <code>/etc/postfix/main.cf</code>, and add this two lines to the end of the file:
+</p>
+<pre>content_filter = scan:127.0.0.1:10026 
+receive_override_options = no_address_mappings 
+</pre>
+<p>Postfix will send mails to localhost on port 10026.
+</p>
+<p><br>
+Edit <code>/etc/postfix/master.cf</code>:
+</p>
+<pre>scan      unix  -       -       n       -       16      smtp 
+        -o smtp_send_xforward_command=yes 
+# For injecting mail back into postfix from the filter 
+127.0.0.1:10025 inet  n -       n       -       16      smtpd 
+       -o content_filter= 
+       -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+       -o smtpd_helo_restrictions= 
+       -o smtpd_client_restrictions= 
+       -o smtpd_sender_restrictions= 
+       -o smtpd_recipient_restrictions=permit_mynetworks,reject 
+       -o mynetworks_style=host 
+       -o smtpd_authorized_xforward_hosts=127.0.0.0/8 
+</pre>
+<p>The first two lines create the service „scan”, the others take charge of accepting the already scanned mail from Clamsmtp from port 10025 and delivering them to the recipients.
+</p>
+<h2><span class="mw-headline" id="Testing">Testing</span></h2>
+<p>Now, test your server:
+</p>
+<pre>/etc/rc.d/clamav restart
+/etc/rc.d/postfix restart
+/etc/rc.d/clamsmtp restart
+</pre>
+<p>Send yourself a mail, without any viruses
+</p>
+<p>If you do not have any arriving mails, check <code>/var/log/mail.log</code> for errors
+</p>
+<p>Then, download a test-virus
+</p>
+<pre>wget <a rel="nofollow" class="external free" href="http://eicar.org/download/eicar_com.zip">http://eicar.org/download/eicar_com.zip</a>
+</pre>
+<p>and send it as an attachment.
+</p>
+<p>Check your server's logfile again, you should get something similar to this:
+</p>
+<p><span style="color: #e30f0f"> <i>May 23 00:04:08 servername postfix/smtp[2415]: A9B941F911: to=&lt;user@your.postfix.server&gt;, relay=127.0.0.1[127.0.0.1]:10026, delay=0.13, delays=0.08/0/0.04/0, dsn=2.0.0, status=sent (250 Virus Detected; Discarded Email)</i>
+</span></p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external free" href="http://memberwebs.com/stef/software/clamsmtp/">http://memberwebs.com/stef/software/clamsmtp/</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://www.postfix.org/">http://www.postfix.org/</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Mail_server.html" title="Category:Mail server">Mail server</a></li>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Add new partitions to an existing system - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Add_new_partitions_to_an_existing_system skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Add new partitions to an existing system</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Partitioning.html" title="Partitioning">Partitioning</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a><b>This article is being considered for redirection to <a href="../en/Partitioning.html" title="Partitioning">Partitioning</a>.</b><a href="../File:Tango-emblem-symbolic-link.png" class="image"><img alt="Tango-emblem-symbolic-link.png" src="../File:Tango-emblem-symbolic-link.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> The only information here is <code>cp -a</code>, the rest is filler or duplicated from other articles such as <a href="../en/File_systems.html" title="File systems">File systems</a>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Add_new_partitions_to_an_existing_system">Talk:Add new partitions to an existing system#</a>)</div>
+</div>
+<p>You may find yourself in the situation where you either want to create a new partition to give yourself more flexibility (for example, for backup operations), or you are forced to use new partition(s) because your original is full and to free up space you need to move data from the full partition to a new one.
+</p>
+<p>As an easy alternative, you can always download a copy of another operating system such as <a rel="nofollow" class="external text" href="http://www.ubuntu.com">Ubuntu</a> and boot into a live media version (<a href="../en/USB_flash_installation_media.html" title="USB Installation Media" class="mw-redirect">Arch USB Installation Media guide</a>). Newer versions of Ubuntu include <a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Be sure to at least read through all the steps in this guide before making any real changes. There is always a risk for losing your data when adjusting partitions.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Preamble"><span class="tocnumber">1</span> <span class="toctext">Preamble</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Creating_the_New_Partitions"><span class="tocnumber">2</span> <span class="toctext">Creating the New Partitions</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Extended_Growth_.26_Logical_Partitioning"><span class="tocnumber">2.1</span> <span class="toctext">Extended Growth &amp; Logical Partitioning</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-4"><a href="#Moving_Existing_Data_to_the_New_Partition"><span class="tocnumber">3</span> <span class="toctext">Moving Existing Data to the New Partition</span></a></li>
+<li class="toclevel-1 tocsection-5">
+<a href="#Remounting_the_New_Partitions_on_the_Filesystem"><span class="tocnumber">4</span> <span class="toctext">Remounting the New Partitions on the Filesystem</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Manually_remounting_and_checking"><span class="tocnumber">4.1</span> <span class="toctext">Manually remounting and checking</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Permanent_remounting"><span class="tocnumber">4.2</span> <span class="toctext">Permanent remounting</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Preamble">Preamble</span></h2>
+<p>Here are the steps involved with adding new partitions:
+</p>
+<ol>
+<li> Create new partitions.</li>
+<li> Mount the new partitions in a temporary location.</li>
+<li> Copy the existing files from old partition to the newly created partitions in their temporary locations.</li>
+<li> Delete the files under the original directories</li>
+<li> Move new partition from their temporary mount points to their permanent homes</li>
+<li> Update fstab accordingly.</li>
+</ol>
+<h2><span class="mw-headline" id="Creating_the_New_Partitions">Creating the New Partitions</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Changing, Resizing and/or Creating partitions has the VERY REAL potential to cause DATA LOSS Use common sense. BACKUP ANYTHING YOU DO NOT WANT TO LOSE!</div>
+<p>New partitions can be created either on previously unpartitioned sections of an existing disk (or raid array in my case) or simply on an additional newly installed drive. 
+</p>
+<p>You will need your filesystems to be <b>UNMOUNTED</b> when you make changes such as adding new partitions to the free space on your disk or shrinking partitions. Therefore you will need to boot into an environment such as provided by the install CD in <b>Rescue</b> mode. 
+</p>
+<p>Command line utilities such as fdisk, cfdisk or sfdisk can be used, but if you are unfamiliar with creating partitions and filesystems Gparted-Live iso is recommended. It provides a nice gui and additional checks to make sure what you are doing is okay. See also <a href="../en/GNU_Parted.html" title="GParted" class="mw-redirect">GParted</a> for how to use GParted.
+</p>
+<h3><span class="mw-headline" id="Extended_Growth_.26_Logical_Partitioning">Extended Growth &amp; Logical Partitioning</span></h3>
+<p>Partitions come in three main flavors: Primary, Extended and Logical. An Extended partition is for the most part just a "wrapper" to contain logical partitions.
+</p>
+<p>If you have a typical Linux partition scheme, then you probably have a single "extended" partition with "logical" partitions of '/', '<code>/home</code>' and possibly a '<code>/boot</code>' partition. Your logical partitions will probably completely fill the extended partition they reside in. Before you can add additional partitions, you must grow the current extended partition to make room for your new logical partitions, or you can create a new extended partition. I prefer to grow the extended partition then add the new logical partitions. I find no need for primary partitions unless dual booting windows. 
+</p>
+<p>You will need to create a filesystem on the new partitions with 'mkfs -t &lt;fstype&gt;' or you may select the desired filesystem when defining your partition with Gparted. If you do not know which filesystem you are using, then from the command line type "df -hT" and check the type column.
+</p>
+<h2><span class="mw-headline" id="Moving_Existing_Data_to_the_New_Partition">Moving Existing Data to the New Partition</span></h2>
+<p>To benefit from the extra space provided by the new partitions, the new partitions need to be integrated into the  filesystem. 
+</p>
+<p>Files should not be written to the parts of the filesystem you are moving during this process. The safest way to accomplish the copy and delete is to either boot from your install cd into rescue mode and create mount points to hold your <code>/</code> filesystem and the new partitions, or alternatively shutdown anything that could write to or read from the existing directories. For example, for <code>/var</code>, syslog-ng needed to be shutdown. If using dmraid, issue "dmraid -ay" to activate your raid sets when booting from the install CD into rescue mode.
+</p>
+<p>The basic process (as root) is:
+</p>
+<p>Stop any processes that might write to the old directories.
+</p>
+<pre># /etc/rc.d/syslog-ng stop
+</pre>
+<p>Create temporary mount points for your new partitions.
+</p>
+<pre># mkdir /mnt/newtemp
+</pre>
+<p>Mount the new partitions on the temporary mount points.
+</p>
+<pre># mount /dev/sda5 /mnt/newtemp
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Before doing this ensure that the system does not still need read or write access to these folders</div>
+<p>Copy the information from the old directories to the new partitions.
+</p>
+<pre># cp -a /olddir /mnt/newtemp
+</pre>
+<p>Confirm the information was written to the new partitions with ls, diff, etc. When you are certain the information was written correctly to the new partitions delete the information from the old directories.
+</p>
+<pre># rm -r /olddir
+</pre>
+<h2><span class="mw-headline" id="Remounting_the_New_Partitions_on_the_Filesystem">Remounting the New Partitions on the Filesystem</span></h2>
+<p>Next the new partition(s) should be unmounted from their temporary location(s) and assigned their proper place in the filesystem.
+</p>
+<h3><span class="mw-headline" id="Manually_remounting_and_checking">Manually remounting and checking</span></h3>
+<p>Unmount the new partitions from the temporary mount point
+</p>
+<pre>umount /mnt/newtemp
+</pre>
+<p>Mount the new partitions as /newdir
+</p>
+<pre>mount /dev/sda5 /newdir
+</pre>
+<p>Now the new partitions are in the proper location in the filesystem and you can confirm the new room with <code>df -h</code>
+</p>
+<h3><span class="mw-headline" id="Permanent_remounting">Permanent remounting</span></h3>
+<p>Finally make the new changes permanent by adding the new mount configuration to <code>/etc/fstab</code>. As root edit <code>/etc/fstab</code> adding something similar to the following corresponding to your own new partitions:
+</p>
+<pre>/dev/sda5 /newdir ext3 defaults 0 2
+</pre>
+<p>(See the <a href="../en/Fstab.html" title="Fstab">fstab</a> article for more details.)
+</p>
+<p>If you have disabled any running processes, restart or enable them, check the files on your new partitions to insure all is well and check the logs for any permission errors. Then reboot and make sure it all works as expected.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:File_systems.html" title="Category:File systems">File systems</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_flagged_with_Template:Redirect.html" title="Category:Pages flagged with Template:Redirect">Pages flagged with Template:Redirect</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Remastering the Install ISO - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Remastering_the_Install_ISO skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Remastering the Install ISO</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Archiso.html" title="Archiso">Archiso</a></li>
+</ul>
+</div>
+<p>Remastering the official Arch Linux install ISO image is not necessary for most applications. However, it may be desirable in some cases.
+</p>
+<ul>
+<li> Basic hardware is not supported by the core install. (rare)</li>
+<li> Installation on a non-internet capable machine.</li>
+<li> Deployment of Arch Linux on many similar machines, requiring the same installation procedure.</li>
+</ul>
+<p>As these ISOs are bootable, they can also be used for system rescue, testing, project demos, and more.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Archiso"><span class="tocnumber">1</span> <span class="toctext">Archiso</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Manually"><span class="tocnumber">2</span> <span class="toctext">Manually</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#How_it_works"><span class="tocnumber">2.1</span> <span class="toctext">How it works</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Extracting_the_ISO"><span class="tocnumber">2.2</span> <span class="toctext">Extracting the ISO</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Customization"><span class="tocnumber">2.3</span> <span class="toctext">Customization</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Modifying_the_x86_64_system"><span class="tocnumber">2.3.1</span> <span class="toctext">Modifying the x86_64 system</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Modifying_the_i686_system"><span class="tocnumber">2.3.2</span> <span class="toctext">Modifying the i686 system</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="#Modifying_the_EFI_boot_image"><span class="tocnumber">2.3.3</span> <span class="toctext">Modifying the EFI boot image</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-9"><a href="#Create_a_new_ISO"><span class="tocnumber">2.4</span> <span class="toctext">Create a new ISO</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-10"><a href="#larch"><span class="tocnumber">3</span> <span class="toctext">larch</span></a></li>
+<li class="toclevel-1 tocsection-11"><a href="#poison-livecd-creator"><span class="tocnumber">4</span> <span class="toctext">poison-livecd-creator</span></a></li>
+<li class="toclevel-1 tocsection-12"><a href="#Linux-pf"><span class="tocnumber">5</span> <span class="toctext">Linux-pf</span></a></li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Archiso">Archiso</span></h2>
+<p>It is often preferable to rebuild the installation ISO with <a href="../en/Archiso.html" title="Archiso">Archiso</a>, instead of remastering an existing ISO.
+</p>
+<h2><span class="mw-headline" id="Manually">Manually</span></h2>
+<h3><span class="mw-headline" id="How_it_works">How it works</span></h3>
+<p>The installer ISO contains two separate archlinux systems. One for 32 bit (i686) and one for 64 bit (x86_64). The root filesystems of those systems are stored in <code>arch/i686/airootfs.sfs</code> and <code>arch/x86_64/airootfs.sfs</code>. The kernels and initramfs are in <code>arch/boot/i686</code> and <code>arch/boot/x86_64</code>. This means in order to fully remaster the ISO, you have to do your changes for both the 32 bit and the 64 bit system.
+</p>
+<p>When booting, the initramfs will search for the device it was booted from via its label, <code>ARCH_201410</code> for example, and will mount the root filesystem for the correct architecture.
+</p>
+<h3><span class="mw-headline" id="Extracting_the_ISO">Extracting the ISO</span></h3>
+<p>To remaster the Arch Linux ISO, you will need a copy of the original ISO image. Download it from the <a rel="nofollow" class="external text" href="https://www.archlinux.org/download/">download page</a>
+</p>
+<p>Now, create a new directory to mount the ISO:
+</p>
+<pre># mkdir /mnt/archiso
+</pre>
+<p>Mount the ISO to this directory (due to the nature of ISOs, the result is read-only):
+</p>
+<pre># mount -t iso9660 -o loop /path/to/archISO /mnt/archiso
+</pre>
+<p>Copy the contents to another directory, where they can be edited:
+</p>
+<pre>$ cp -a /mnt/archiso ~/customiso
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Make sure <code>customiso</code> does not exist beforehand, otherwise this will create a subdirectory called <code>archiso</code> inside <code>customiso</code>
+</div>
+<h3><span class="mw-headline" id="Customization">Customization</span></h3>
+<h4><span class="mw-headline" id="Modifying_the_x86_64_system">Modifying the x86_64 system</span></h4>
+<p>Change into the directory of the x86_64 system:
+</p>
+<pre> $ cd ~/customiso/arch/x86_64
+</pre>
+<p>Unsquash <code>airootfs.sfs</code> (to <code>squashfs-root</code>):
+</p>
+<pre> $ unsquashfs airootfs.sfs
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>You need <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=squashfs-tools">squashfs-tools</a></span> in order to do that.</div>
+<p>Now you can modify the content of the system in <code>squashfs-root</code>. You can also chroot into this system to install packages etc.:
+</p>
+<pre> # arch-chroot squashfs-root /bin/bash
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>arch-chroot</code> is part of the package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=arch-install-scripts">arch-install-scripts</a></span>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If the <code>arch-chroot</code> script is not available in your system (e.g, when remastering arch-based distros), mount the api file systems and copy over your DNS details. See <a href="../en/Change_root.html#Using_chroot" title="Chroot" class="mw-redirect">Chroot#Using chroot</a>.</div>
+<p>To be able to install package, you have to initialise the pacman keyring:
+</p>
+<pre> (chroot) # pacman-key --init
+ (chroot) # pacman-key --populate archlinux
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>This step can take quite a while, be patient. (see <a href="../en/Pacman/Package_signing.html#Initializing_the_keyring" title="Pacman-key" class="mw-redirect">Pacman-Key</a>)</div>
+<p>If the kernel or initrd is updated, additional steps are required. In this case you have to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=archiso">archiso</a></span> inside the chroot and change the content of <code>/etc/mkinitcpio.conf</code>:
+</p>
+<pre> (chroot) # pacman -Syu --force archiso linux
+ (chroot) # nano /etc/mkinitcpio.conf
+</pre>
+<p>Change the line that says <code>HOOKS="...</code> to:
+</p>
+<pre> HOOKS="base udev memdisk archiso_shutdown archiso archiso_loop_mnt archiso_pxe_common archiso_pxe_nbd archiso_pxe_http archiso_pxe_nfs archiso_kms block pcmcia filesystems keyboard"
+</pre>
+<p>Now update the initramfs:
+</p>
+<pre> (chroot) # mkinitcpio -p linux
+</pre>
+<p>When you are done, create a list of all installed packages, clean the pacman cache and exit the chroot:
+</p>
+<pre> (chroot) # LANG=C pacman -Sl | awk '/\[installed\]$/ {print $1 "/" $2 "-" $3}' &gt; /pkglist.txt
+ (chroot) # pacman -Scc
+ (chroot) # exit
+</pre>
+<p>If you updated the kernel or the initramfs, copy them over to the system:
+</p>
+<pre> $ cp squashfs-root/boot/vmlinuz-linux ~/customiso/arch/boot/x86_64/vmlinuz
+ $ cp squashfs-root/boot/initramfs-linux.img ~/customiso/arch/boot/x86_64/archiso.img
+</pre>
+<p>Move the list of packages:
+</p>
+<pre> $ mv squashfs-root/pkglist.txt ~/customiso/arch/pkglist.x86_64.txt
+</pre>
+<p>Now recreate <code>airootfs.sfs</code>:
+</p>
+<pre> $ rm airootfs.sfs
+ $ mksquashfs squashfs-root airootfs.sfs
+</pre>
+<p>Cleanup:
+</p>
+<pre> # rm -r squashfs-root
+</pre>
+<p>Now update the MD5 checksum of <code>airootfs.sfs</code>:
+</p>
+<pre> $ md5sum airootfs.sfs &gt; airootfs.md5
+</pre>
+<h4><span class="mw-headline" id="Modifying_the_i686_system">Modifying the i686 system</span></h4>
+<p>Follow the same steps as for the x86_64 system but with the following differences:
+</p>
+<ol>
+<li> In every command use <code>i686</code> instead of <code>x86_64</code>
+</li>
+<li> When doing the chroot, use this command instead:</li>
+</ol>
+<pre> # setarch i686 arch-chroot squashfs-root /bin/bash
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you do not have the arch-chroot script, put <code>setarch i686</code> before the line where you do <code>chroot</code>
+</div>
+<h4><span class="mw-headline" id="Modifying_the_EFI_boot_image">Modifying the EFI boot image</span></h4>
+<p>If you have updated the kernel or the initramfs and wish to boot on EFI systems, update the EFI boot image.
+You will need <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dosfstools">dosfstools</a></span> as the EFI boot image is a <code>FAT16</code> filesystem.
+</p>
+<pre> $ mkdir mnt
+ # mount -t fat -o loop ~/customiso/EFI/archiso/efiboot.img mnt
+ $ cp ~/customiso/arch/boot/x86_64/vmlinuz mnt/EFI/archiso/vmlinuz.efi
+ $ cp ~/customiso/arch/boot/x86_64/archiso.img mnt/EFI/archiso/archiso.img
+</pre>
+<p>If you see <code>No space left on device</code> errors, you might need to resize <code>efiboot.img</code>.
+You can also create a new <code>efiboot.img</code> and copy the old files (replace <code>50</code> with the required size).
+</p>
+<pre> $ dd if=/dev/zero bs=1M count=50 of=efiboot-new.img
+ $ mkfs.fat -n "ARCHISO_EFI" efiboot-new.img
+ $ mkdir new
+ # mount -t fat -o loop efiboot-new.img new
+ $ cp -r mnt/* new/
+ # umount new mnt
+ $ mv efiboot-new.img ~/customiso/EFI/archiso/efiboot.img
+</pre>
+<p>And use the new <code>efiboot.img</code> as above.
+</p>
+<h3><span class="mw-headline" id="Create_a_new_ISO">Create a new ISO</span></h3>
+<p>Create a new ISO image with <code>genisoimage</code>, which is part of <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=cdrkit">cdrkit</a></span>.
+</p>
+<pre>$ genisoimage -l -r -J -V "ARCH_201209" -b isolinux/isolinux.bin -no-emul-boot -boot-load-size 4 -boot-info-table -c isolinux/boot.cat -o ../arch-custom.iso ./
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The ISO label must remain the same as the original label (in this case <code>ARCH_201209</code>) for the image to boot successfully.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The <code>-b</code> and <code>-c</code> options expect paths relative to the root of the ISO</div>
+<p>The resulting ISO image will boot only from CD, DVD or BD. For booting from USB stick or hard disk, it needs the <a rel="nofollow" class="external text" href="http://www.syslinux.org/wiki/index.php/Isohybrid">isohybrid</a> feature.
+This can be achieved by postprocessing the ISO by program isohybrid included in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=syslinux">syslinux</a></span>.
+Officially, the version of installed SYSLINUX has to be the same as the version of /isolinux/isolinux.bin in the ISO. It is not known whether really incompatible version combinations exist.
+</p>
+<p>An alternative to genisoimage plus isohybrid can be derived from the xorriso run of mkarchiso.
+</p>
+<pre>$ iso_label="ARCH_201209"
+$ xorriso -as mkisofs \
+       -iso-level 3 \  
+       -full-iso9660-filenames \
+       -volid "${iso_label}" \
+       -eltorito-boot isolinux/isolinux.bin \
+       -eltorito-catalog isolinux/boot.cat \
+       -no-emul-boot -boot-load-size 4 -boot-info-table \
+       -isohybrid-mbr ~/customiso/isolinux/isohdpfx.bin \
+       -output arch-custom.iso \ 
+       ~/customiso
+</pre>
+<p>Option -isohybrid-mbr needs an <a href="../en/Partitioning.html#Master_Boot_Record" title="MBR" class="mw-redirect">MBR</a> template file. Most probably there is already such a file /isolinux/isohdpfx.bin in the original ISO, which matches the SYSLINUX version used in the ISO.
+Only if this file is missing in the copied ISO content, it has to be cut out of the original ISO image file, before above xorriso run is performed:
+</p>
+<pre>$ dd if=/path/to/archISO bs=512 count=1 of=~/customiso/isolinux/isohdpfx.bin
+</pre>
+<p>If the original ISO supports bootability via EFI, this can be activated in the new ISO by inserting the following options between the lines "-isohybrid-mbr ..." and "-output ...":
+</p>
+<pre>       -eltorito-alt-boot \
+       -e EFI/archiso/efiboot.img \
+       -no-emul-boot -isohybrid-gpt-basdat \
+</pre>
+<p>The file /EFI/archiso/efiboot.img is a FAT filesystem image file. If it is missing in the original ISO, then there was no EFI support in that ISO.
+</p>
+<p>The newly created ISO image <code>arch-custom.iso</code> is found in the home directory. You can write the ISO image to a USB stick as explained in <a href="../en/USB_flash_installation_media.html" title="USB Installation Media" class="mw-redirect">USB Installation Media</a>. Alternatively you can burn the ISO image on a CD, DVD, or BD with your preferred software. On Arch, that is covered in the <a href="../en/Optical_disc_drive.html#Burning_an_ISO_image_to_CD.2C_DVD.2C_or_BD" title="Optical disc drive">article about burning an ISO image</a>.
+</p>
+<h2><span class="mw-headline" id="larch">larch</span></h2>
+<p><a href="../en/Archiso.html" title="Larch" class="mw-redirect">larch</a> aims to provide a more desktop-based approach, and it does not require an Arch Linux host system.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>
+<ul>
+<li> As of version 2.6.39, the vanilla kernel no longer supports aufs, making a custom kernel a necessity.</li>
+<li> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-aufs_friendly/">linux-aufs_friendly</a></span><sup><small>AUR</small></sup> is an AUFS version of the arch kernel, and larch maintains an i686 build, you need not compile anything unless you want 64 bit.</li>
+</ul>
+</div>
+<h2><span class="mw-headline" id="poison-livecd-creator">poison-livecd-creator</span></h2>
+<p>It is a very simple live CD creator. It uses just a Makefile to build live CD images, and uses pacman to install base and additional packages to the live CD. You can choose your packages and build them into a live CD. Moreover, it uses <a href="../en/GRUB.html" title="GRUB">GRUB</a> to boot the live CD in order to add more flexibility. This means that it is much easier to make a live USB stick without formating it. For that, you just need to install GRUB into your USB pen drive and copy the files in the ISO to your root directory in the pen drive. It relies on an Arch Linux host system and <a href="../en/Pacman.html" title="Pacman">pacman</a>.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/poison-livecd-creator/">poison-livecd-creator</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/poison-livecd-creator">aur-mirror</a>]</sup>.
+</p>
+<h2><span class="mw-headline" id="Linux-pf">Linux-pf</span></h2>
+<p>It supports aufs among other things, making it an option for live CDs.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-pf/">linux-pf</a></span><sup><small>AUR</small></sup>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>As of version 2.6.39, the vanilla kernel no longer supports aufs, making a custom kernel a necessity.</div>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external free" href="http://www.knoppix.net/wiki/KnoppixRemasteringHowto">http://www.knoppix.net/wiki/KnoppixRemasteringHowto</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://syslinux.zytor.com/iso.php">http://syslinux.zytor.com/iso.php</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="http://busybox.net/">http://busybox.net/</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linux-live.org/">Linux Live Kit</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Getting_and_installing_Arch.html" title="Category:Getting and installing Arch">Getting and installing Arch</a></li>
+<li><a href="../en/Category:Live_Arch_systems.html" title="Category:Live Arch systems">Live Arch systems</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

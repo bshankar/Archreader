@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Mozilla Firefox Sync Server - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Mozilla_Firefox_Sync_Server skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Mozilla Firefox Sync Server</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Various <a href="../en/Help:Style.html" title="Help:Style">style</a> problems. Personal comments should go in the Discussion page. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Mozilla_Firefox_Sync_Server">Talk:Mozilla Firefox Sync Server#</a>)</div>
+</div>
+<p>From <a href="https://en.wikipedia.org/wiki/Firefox_Sync" class="extiw" title="wikipedia:Firefox Sync">Wikipedia</a>:
+</p>
+<dl><dd> <i>Firefox Sync, originally branded Mozilla Weave, is a browser synchronization feature that allows users to partially synchronize bookmarks, browsing history, preferences, passwords, filled forms, add-ons and the last 25 opened tabs across multiple computers.</i>
+</dd></dl>
+<dl><dd> <i>It keeps user data on Mozilla servers, but the data is encrypted in such a way that no third party, not even Mozilla, can access user information. It is also possible for the user to host their own Firefox Sync servers, or indeed, for any entity to do so.</i>
+</dd></dl>
+<p>This page details how you should proceed to host your own (Mozilla) Firefox Sync Server (shortened to FFSync), version 1.1 or version 1.5, and how to host your own Firefox Account server.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> The 1.1 version of the Mozilla Firefox Sync Server has been deprecated in Firefox 29 and support has been removed from version 32. Version 1.5 of the Mozilla Firefox Sync Server is available for Firefox 29+. However, this now requires users create a Firefox Account. See the following links for details:
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://wiki.mozilla.org/Identity/Firefox_Accounts">https://wiki.mozilla.org/Identity/Firefox_Accounts</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="https://blog.mozilla.org/blog/2014/02/07/introducing-mozilla-firefox-accounts/">https://blog.mozilla.org/blog/2014/02/07/introducing-mozilla-firefox-accounts/</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="https://blog.mozilla.org/services/2014/02/07/a-better-firefox-sync/">https://blog.mozilla.org/services/2014/02/07/a-better-firefox-sync/</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="https://blog.mozilla.org/futurereleases/2014/02/07/test-the-new-firefox-sync-and-customize-the-new-ui-in-firefox-aurora/">https://blog.mozilla.org/futurereleases/2014/02/07/test-the-new-firefox-sync-and-customize-the-new-ui-in-firefox-aurora/</a>
+</li>
+</ul>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> The 1.1 and 1.5 versions are currently conflicting for simplicity but one could have the two versions alongside on the same server with some changes. The databases should probably not be shared between different versions however.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong> Enter <code>about:sync-log</code> in the Firefox URL bar to get a list of logs related to Firefox Sync.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Version_1.5"><span class="tocnumber">1</span> <span class="toctext">Version 1.5</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Server_configuration"><span class="tocnumber">1.2</span> <span class="toctext">Server configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Running_behind_nginx"><span class="tocnumber">1.3</span> <span class="toctext">Running behind nginx</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Client_configuration"><span class="tocnumber">1.4</span> <span class="toctext">Client configuration</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Firefox_Account_Server"><span class="tocnumber">1.5</span> <span class="toctext">Firefox Account Server</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Version_1.1"><span class="tocnumber">2</span> <span class="toctext">Version 1.1</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Installation_2"><span class="tocnumber">2.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-9">
+<a href="#Server_configuration_2"><span class="tocnumber">2.2</span> <span class="toctext">Server configuration</span></a>
+<ul>
+<li class="toclevel-3 tocsection-10"><a href="#Basic_configuration"><span class="tocnumber">2.2.1</span> <span class="toctext">Basic configuration</span></a></li>
+<li class="toclevel-3 tocsection-11"><a href="#Disable_debug_mode"><span class="tocnumber">2.2.2</span> <span class="toctext">Disable debug mode</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Set_email"><span class="tocnumber">2.2.3</span> <span class="toctext">Set email</span></a></li>
+<li class="toclevel-3 tocsection-13"><a href="#Storage_backend"><span class="tocnumber">2.2.4</span> <span class="toctext">Storage backend</span></a></li>
+<li class="toclevel-3 tocsection-14"><a href="#Disk_quota"><span class="tocnumber">2.2.5</span> <span class="toctext">Disk quota</span></a></li>
+<li class="toclevel-3 tocsection-15">
+<a href="#Running_behind_a_Web_Server"><span class="tocnumber">2.2.6</span> <span class="toctext">Running behind a Web Server</span></a>
+<ul>
+<li class="toclevel-4 tocsection-16"><a href="#Apache_combined_with_mod_wsgi"><span class="tocnumber">2.2.6.1</span> <span class="toctext">Apache combined with mod_wsgi</span></a></li>
+<li class="toclevel-4 tocsection-17"><a href="#nginx_with_Gunicorn"><span class="tocnumber">2.2.6.2</span> <span class="toctext">nginx with Gunicorn</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-18"><a href="#Not_recommended_setup_with_default_web_server"><span class="tocnumber">2.2.7</span> <span class="toctext">Not recommended setup with default web server</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-19"><a href="#Client_configuration_2"><span class="tocnumber">2.3</span> <span class="toctext">Client configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20"><a href="#See_also"><span class="tocnumber">3</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Version_1.5">Version 1.5</span></h2>
+<p>This is for Firefox version 29 and onward.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mozilla-firefox-sync-server-git/">mozilla-firefox-sync-server-git</a></span><sup><small>AUR</small></sup> is available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>The setup creates an isolated Python environment in which all necessary dependencies are downloaded and installed. Afterwards, running the server only relies on the isolated Python environment, independently of the system-wide Python.
+</p>
+<h3><span class="mw-headline" id="Server_configuration">Server configuration</span></h3>
+<p>One file is available to configure a FFsync server: <code>/opt/mozilla-firefox-sync-server/syncserver.ini</code>. Most options are explained clearly in the <a rel="nofollow" class="external text" href="http://docs.services.mozilla.com/howtos/run-sync-1.5.html">official documentation</a>. Here is a full example with comments:
+</p>
+<pre># Use a Unix socket and the Gunicorn server
+[server:main]
+use = egg:gunicorn#main
+bind = unix:/run/ffsync/syncserver.sock
+workers = 2
+timeout = 60
+syslog = true
+syslog_prefix = ffsync
+syslog_facility = daemon
+
+[app:main]
+use = egg:syncserver
+
+[syncserver]
+# This must be edited to point to the public URL of your server,
+# i.e. the URL as seen by Firefox.
+public_url = http://example.com/ffsync/
+
+# This defines the database in which to store all server data.
+sqluri = sqlite:////var/lib/ffsync/sync_storage.db
+
+# This is a secret key used for signing authentication tokens.
+# It should be long and randomly-generated.
+# The following command will give a suitable value on *nix systems:
+#
+#    head -c 20 /dev/urandom</pre>
+<h3><span class="mw-headline" id="Running_behind_nginx">Running behind nginx</span></h3>
+<p>A sample from the nginx config:
+</p>
+<pre># Firefox sync config
+        location /ffsync/ {
+            rewrite  ^/ffsync(.+)$ $1 break;
+            proxy_pass http://unix:/run/ffsync/syncserver.sock;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_redirect off;
+            proxy_read_timeout 120;
+            proxy_connect_timeout 10;
+            gzip        off;
+        }</pre>
+<h3><span class="mw-headline" id="Client_configuration">Client configuration</span></h3>
+<p>To configure desktop Firefox to talk to your new Sync server, go to <code>about:config</code>, search for <code>services.sync.tokenServerURI</code> and change its value to the URL of your server with a path of <code>token/1.0/sync/1.5</code>:
+</p>
+<pre>services.sync.tokenServerURI: http://example.com/ffsync/token/1.0/sync/1.5</pre>
+<h3><span class="mw-headline" id="Firefox_Account_Server">Firefox Account Server</span></h3>
+<p>Until this section is completed, you will have to use the official Firefox Accounts service provided by Mozilla. You can try running your own by following the instructions from the <a rel="nofollow" class="external text" href="http://docs.services.mozilla.com/howtos/run-fxa.html">official documentation</a>.
+</p>
+<h2><span class="mw-headline" id="Version_1.1">Version 1.1</span></h2>
+<p>This is for Firefox version up to but not including version 32.
+</p>
+<h3><span class="mw-headline" id="Installation_2">Installation</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mozilla-firefox-sync-server-hg/">mozilla-firefox-sync-server-hg</a></span><sup><small>AUR</small></sup> is available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<p>The setup creates an isolated Python environment in which all necessary dependencies are downloaded and installed. Afterwards, running the server only relies on the isolated Python environment, independently of the system-wide Python.
+</p>
+<h3><span class="mw-headline" id="Server_configuration_2">Server configuration</span></h3>
+<p>Two files are used to configure a FFsync server: <code>/opt/mozilla-firefox-sync-server/development.ini</code> and <code>/opt/mozilla-firefox-sync-server/etc/sync.conf</code>.
+</p>
+<h4><span class="mw-headline" id="Basic_configuration">Basic configuration</span></h4>
+<p>The fallback node URL must reflect the server's visible URL (here <code>https://example.com/ffsync/</code>). In <code>/opt/mozilla-firefox-sync-server/etc/sync.conf</code>, change:
+</p>
+<pre>[nodes]
+fallback_node = http://localhost:5000/</pre>
+<p>to:
+</p>
+<pre>[nodes]
+fallback_node = https://example.com/ffsync/</pre>
+<h4><span class="mw-headline" id="Disable_debug_mode">Disable debug mode</span></h4>
+<p>In <code>/opt/mozilla-firefox-sync-server/development.ini</code>, set:
+</p>
+<pre>[DEFAULT]
+debug = False</pre>
+<h4><span class="mw-headline" id="Set_email">Set email</span></h4>
+<p>In <code>/opt/mozilla-firefox-sync-server/etc/sync.conf</code>, set:
+</p>
+<pre>[smtp]
+sender = ffsync@example.com</pre>
+<h4><span class="mw-headline" id="Storage_backend">Storage backend</span></h4>
+<p>The default storage backend is sqlite which should be fine if you do not have a lot of users. To split the various databases into several files, edit the <code>sqluri</code> fields in <code>/opt/mozilla-firefox-sync-server/etc/sync.conf</code>.
+</p>
+<p>The <a rel="nofollow" class="external text" href="http://docs.services.mozilla.com/howtos/run-sync.html">Official FFsync server Howto</a> details setup with MySQL or LDAP as a backend.
+</p>
+<h4><span class="mw-headline" id="Disk_quota">Disk quota</span></h4>
+<p>The default disk quota is quite restrictive and will quickly be filled if a lot of bookmarks are stored. Bump the disk quota from 5 to 25 MB in <code>/opt/mozilla-firefox-sync-server/etc/sync.conf</code>:
+</p>
+<pre>[storage]
+...
+quota_size = 25600
+...</pre>
+<h4><span class="mw-headline" id="Running_behind_a_Web_Server">Running behind a Web Server</span></h4>
+<p>The default configuration runs a built-in server which should not be used in production.
+</p>
+<h5><span class="mw-headline" id="Apache_combined_with_mod_wsgi">Apache combined with mod_wsgi</span></h5>
+<p>See the <a rel="nofollow" class="external text" href="http://docs.services.mozilla.com/howtos/run-sync.html">Official FFsync server Howto</a>.
+</p>
+<h5><span class="mw-headline" id="nginx_with_Gunicorn">nginx with Gunicorn</span></h5>
+<p>The <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILD</a> available in the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a> installs the Gunicorn server, in the python <code>virtualenv</code>, by default. Enable it by changing the following lines in <code>/opt/mozilla-firefox-sync-server/development.ini</code>:
+</p>
+<pre>[server:main]
+use = egg:gunicorn#main
+host = unix:/run/ffsync/syncserver.sock
+use_threadpool = True
+threadpool_workers = 60</pre>
+<p>Create the <code>/etc/tmpfiles.d/ffsync.conf</code> file to create the <code>/run/ffsync/</code> folder at boot:
+</p>
+<pre>D /run/ffsync 0750 ffsync http</pre>
+<p>Create this folder now by running:
+</p>
+<pre># systemd-tmpfiles --create ffsync.conf</pre>
+<p>Enable and start the Gunicorn serveur using the systemd service unit provided in <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mozilla-firefox-sync-server-hg/">mozilla-firefox-sync-server-hg</a></span><sup><small>AUR</small></sup>:
+</p>
+<pre># systemctl enable ffsync
+# systemctl start ffsync</pre>
+<p>Use this config extract to configure nginx:
+</p>
+<pre># Firefox sync config
+location /ffsync/ {
+    rewrite  ^/ffsync(.+)$ $1 break;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://unix:/run/ffsync/syncserver.sock;
+}</pre>
+<h4><span class="mw-headline" id="Not_recommended_setup_with_default_web_server">Not recommended setup with default web server</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> vague statement ("outdated"), see <a href="../en/Help:Style.html#Language_register" title="Help:Style">Help:Style#Language register</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Mozilla_Firefox_Sync_Server">Talk:Mozilla Firefox Sync Server#</a>)</div>
+</div>
+<p>(Outdated) systemd service unit:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">
+/etc/systemd/system/ffsync.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=Mozilla Firefox Syn Server
+After=network.target
+
+[Service]
+Type=simple
+User=ffsync
+Group=ffsync
+WorkingDirectory=/opt/mozilla-firefox-sync-server
+ExecStart=/opt/mozilla-firefox-sync-server/bin/python2 /opt/mozilla-firefox-sync-server/bin/paster serve /opt/mozilla-firefox-sync-server/development.ini
+StandardOutput=/var/log/ffsync/sync-messages.log
+
+[Install]
+WantedBy=multi-user.target
+Alias=ffsync.service
+
+</pre>
+<h3><span class="mw-headline" id="Client_configuration_2">Client configuration</span></h3>
+<p>Use the Sync Configuration Wizard in Firefox' Settings to create a new account on the server. Do not forget to choose "Custom server..." in the list, and input the server address: <code>https://example.com/ffsync/</code>
+</p>
+<p>The "Advanced Settings" button allows fine tuning of the synchronized elements list, and the definition of the client hostname.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://docs.services.mozilla.com/howtos/run-sync.html">Official Mozilla Firefox Sync Server Howto</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://alien.slackbook.org/blog/setting-up-your-own-mozilla-sync-server/">Howto with Apache support by Eric Hameleers</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://tim.siosm.fr/blog/2012/12/11/firefox-sync-nginx-systemd/">Howto with nginx and systemd support by Timothée Ravier</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://amnesiak.org/blog/mozilla-sync-server-with-nginx.html">Howto with nginx support</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://terminal28.com/how-to-install-and-configure-own-firefox-sync-server-weave-debian/">Howto using MySQL</a>
+</li>
+<li> <a href="../en/OwnCloud.html" title="OwnCloud">OwnCloud</a> has mozilla sync server application</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

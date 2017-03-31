@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>ZoneMinder - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-ZoneMinder skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">ZoneMinder</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>ZoneMinder is an integrated set of applications which provide a complete surveillance solution allowing capture, analysis, recording and monitoring of any CCTV or security cameras attached to a Linux based machine. It is designed to run on distributions which support the Video For Linux (V4L) interface and has been tested with video cameras attached to BTTV cards, various USB cameras and also supports most IP network cameras.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Apache"><span class="tocnumber">2.1</span> <span class="toctext">Apache</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#PHP"><span class="tocnumber">2.2</span> <span class="toctext">PHP</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#MySQL"><span class="tocnumber">2.3</span> <span class="toctext">MySQL</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Starting"><span class="tocnumber">2.4</span> <span class="toctext">Starting</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7">
+<a href="#Troubleshooting"><span class="tocnumber">3</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8">
+<a href="#Flushing_application_data"><span class="tocnumber">3.1</span> <span class="toctext">Flushing application data</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#Recreate_the_database"><span class="tocnumber">3.1.1</span> <span class="toctext">Recreate the database</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Flush_the_cache_folders"><span class="tocnumber">3.1.2</span> <span class="toctext">Flush the cache folders</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-11"><a href="#Local_video_devices"><span class="tocnumber">3.2</span> <span class="toctext">Local video devices</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#Multiple_local_USB_cameras"><span class="tocnumber">3.3</span> <span class="toctext">Multiple local USB cameras</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13"><a href="#See_also"><span class="tocnumber">4</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>It is very important that <a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a> stack is installed and properly configured in order for ZoneMinder to work.</div>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zoneminder/">zoneminder</a></span><sup><small>AUR</small></sup> package. The development branch is also available with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/zoneminder-git/">zoneminder-git</a></span><sup><small>AUR</small></sup>.
+</p>
+<p>For thumbnail generation (used rarely), install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=netpbm">netpbm</a></span> package.
+</p>
+<p>Once configuration below is completed and the system service started, the web interface will be accessible via <a rel="nofollow" class="external free" href="http://localhost/zoneminder/">http://localhost/zoneminder/</a>.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Apache">Apache</span></h3>
+<p>Enable PHP as described in <a href="../en/Apache_HTTP_Server.html#PHP" title="Apache HTTP Server">Apache HTTP Server#PHP</a>.
+</p>
+<p>Uncomment the following line in <code>/etc/httpd/conf/httpd.conf</code>:
+</p>
+<pre>LoadModule cgi_module modules/mod_cgi.so
+</pre>
+<p>Include the <code>httpd-zoneminder</code> configuration file, by adding this line at or near the end of <code>httpd.conf</code>:
+</p>
+<pre>Include conf/extra/httpd-zoneminder.conf
+</pre>
+<h3><span class="mw-headline" id="PHP">PHP</span></h3>
+<p>Edit <code>/etc/php/php.ini</code>. Ensure the following extensions are enabled by uncommenting these lines:
+</p>
+<pre> extension=ftp.so
+ extension=gd.so
+ extension=gettext.so
+ extension=mcrypt.so
+ extension=pdo_mysql.so
+ extension=sockets.so
+ extension=zip.so
+</pre>
+<p>Also set your timezone, for example:
+</p>
+<pre>date.timezone = "Australia/Sydney"
+</pre>
+<p>See <a rel="nofollow" class="external free" href="http://php.net/manual/en/timezones.php">http://php.net/manual/en/timezones.php</a> for a list of timezones.
+</p>
+<h3><span class="mw-headline" id="MySQL">MySQL</span></h3>
+<p>Create the zm database and user with appropriate permissions and password : 
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+CREATE DATABASE zm;
+CREATE USER 'zmuser'@'localhost' IDENTIFIED BY 'choose_password';
+GRANT ALL ON zm.* TO 'zmuser'@'localhost';
+exit</pre>
+<p>Import the preconfigured tables into your newly created zm database:
+</p>
+<pre>$ mysql -u root -p zm &lt; /usr/share/zoneminder/db/zm_create.sql
+</pre>
+<p>Update the ZoneMinder config with your new parameters:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/zm.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ZM_DB_HOST=localhost
+ZM_DB_NAME=zm
+ZM_DB_USER=zmuser
+ZM_DB_PASS=chosen_password</pre>
+<h3><span class="mw-headline" id="Starting">Starting</span></h3>
+<p><a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">Start</a>/<a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> <code>httpd.service</code> and <code>zoneminder.service</code>.
+</p>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<p>Logs by default are kept in <code>/var/log/zoneminder</code>. You can also inspect the log within the web interface.
+</p>
+<p>See the upstream wiki page, <a rel="nofollow" class="external text" href="http://www.zoneminder.com/wiki/index.php/Troubleshooting">Troubleshooting</a>.
+</p>
+<h3><span class="mw-headline" id="Flushing_application_data">Flushing application data</span></h3>
+<p>This is useful for developers or users that need to wipe all ZoneMinder and start fresh.
+</p>
+<h4><span class="mw-headline" id="Recreate_the_database">Recreate the database</span></h4>
+<p>Drop the ZoneMinder MySQL database and delete the MySQL user:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+DROP DATABASE zm;
+DROP USER 'zmuser'@'localhost';
+</pre>
+<p>Recreate the database and user:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root -p</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+CREATE DATABASE zm;
+CREATE USER 'zmuser'@'localhost' IDENTIFIED BY 'choose_password';
+GRANT CREATE, INSERT, SELECT, DELETE, UPDATE ON zm.* TO 'zmuser'@'localhost';
+exit</pre>
+<p>Import the preconfigured tables into your newly created zm database:
+</p>
+<pre>$ mysql -u root -p zm &lt; /usr/share/zoneminder/db/zm_create.sql
+</pre>
+<h4><span class="mw-headline" id="Flush_the_cache_folders">Flush the cache folders</span></h4>
+<p>Note: this removes all images and events!
+</p>
+<pre>$ rm -Rf /var/cache/zoneminder/events/* /var/cache/zoneminder/images/* /var/cache/zoneminder/temp/*
+</pre>
+<h3><span class="mw-headline" id="Local_video_devices">Local video devices</span></h3>
+<p>It is important that the user running httpd (usually <b>http</b>) can access your cameras, for example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ groups http</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+video http</pre>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ ls -l /dev/video0</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+crw-rw----+ 1 root video 81, 0 Oct 28 21:54 /dev/video0</pre>
+<p>That is, add the <b>http</b> user to the <b>video</b> group.
+</p>
+<h3><span class="mw-headline" id="Multiple_local_USB_cameras">Multiple local USB cameras</span></h3>
+<p>If you observe an error like, <b>libv4l2: error turning on stream: No space left on device</b> when using multiple USB video devices (such as multiple webcams), you may need to increase the bandwidth on the bus.
+</p>
+<p>Test first by stopping the <b>zoneminder</b> service, then:
+</p>
+<pre>$ rmmod uvcvideo
+$ modprobe uvcvideo quirks=128
+</pre>
+<p>Start the <b>zoneminder</b> service and if the issue is resolved, perist the change by adding the module option to <b>/etc/modprobe.d/uvcvideo.conf</b>. for example:
+</p>
+<pre>options uvcvideo nodrop=1 quirks=128
+</pre>
+<p>(<a rel="nofollow" class="external text" href="http://renoirsrants.blogspot.com.au/2011/07/multiple-webcams-on-zoneminder.html">reference</a>)
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul><li> <a rel="nofollow" class="external free" href="http://www.zoneminder.com/wiki/index.php/Arch_Linux">http://www.zoneminder.com/wiki/index.php/Arch_Linux</a> — Upstream project page.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

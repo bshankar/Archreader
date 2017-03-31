@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>NeoGRUB - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-NeoGRUB skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">NeoGRUB</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>NeoGRUB is an implementation of GRUB4DOS provided by the EasyBCD bootloader-configurator for Windows. When installed to the Windows bootloader (via Add New Entry - NeoGrub) from EasyBCD, it embeds an implementation of GRUB Legacy <i>inside the Windows Bootloader</i>. This implementation can boot Arch Linux and other Linuxes  <i>directly, without chainloading a Linux bootloader installed on the linux's /boot.</i> 
+</p>
+<p>This can be helpful if you find that updates to Arch are breaking your Arch's GRUB or Syslinux.
+</p>
+<p>One caveat: NeoGRUB is only known to support the following filesystems: FAT16, FAT32, MINIX fs, ext2, ReiserFS, JFS, XFS
+that means that your /boot partition must be one of these filesystems if you use NeoGRUB.
+Your root partition and the others are not restricted to these filesystems.
+</p>
+<p>When you install NeoGRUB to the windows bootloader, click Configure. A configuration file window pops up, prompting you for GRUB configuration syntax for the NeoGrub. Here's an example to boot Arch Linux:
+</p>
+<pre>title Arch
+find --set-root /boot/vmlinuz-linux
+kernel /boot/vmlinuz-linux ro root=/dev/sda3
+
+initrd /boot/initramfs-linux.img
+</pre>
+<p>adjust the /dev/sda3 line accordingly to point to your Linux / partition. Also, if you use a kernel other than default (such as linux-lts or the -ck kernel) adjust the initramfs and vmlinuz files accordingly.
+</p>
+<p>More information of the nature and workings of EasyBCD and NeoGRUB is at the developer's site:
+</p>
+<ul>
+<li> <a rel="nofollow" class="external free" href="https://neosmart.net/wiki/easybcd/neogrub/">https://neosmart.net/wiki/easybcd/neogrub/</a>
+</li>
+<li> <a rel="nofollow" class="external free" href="https://neosmart.net/wiki/easybcd/neogrub/linux/">https://neosmart.net/wiki/easybcd/neogrub/linux/</a>
+</li>
+</ul>
+<p>note that that last link has an example to boot Ubuntu. Ubuntu adds version numbers to its vmlinuz and initrd files, which would require that you update the NeoGRUB every kernel update. Arch does not have this problem. Also note that Arch uses initramfs, not initrd, but you still use the syntax in the code box above.
+</p>
+<h2><span class="mw-headline" id="Chainloading_GRUB">Chainloading GRUB</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Merged from <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php?title=GRUB&amp;oldid=442061#With_Windows_via_EasyBCD_and_NeoGRUB">GRUB#With Windows via EasyBCD and NeoGRUB</a>, needs to be adapted for this page. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:NeoGRUB">Talk:NeoGRUB#</a>)</div>
+</div>
+<p>Since EasyBCD's NeoGRUB currently does not understand the GRUB menu format, chainload to it by replacing the contents of your <code>C:\NST\menu.lst</code> file with lines similar to the following:
+</p>
+<pre>default 0
+timeout 1
+</pre>
+<pre>title       Chainload into GRUB v2
+root        (hd0,7)
+kernel      /boot/grub/i386-pc/core.img
+</pre>
+<p>Finally, <a href="#Generate_the_main_configuration_file">#Generate the main configuration file</a><sup>[<a href="../en/ArchWiki:Requests.html#Broken_section_links" title="ArchWiki:Requests">broken link</a>: invalid section]</sup>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_loaders.html" title="Category:Boot loaders">Boot loaders</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_with_broken_section_links.html" title="Category:Pages with broken section links">Pages with broken section links</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

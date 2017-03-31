@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Secure Shell - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Secure_Shell skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Secure Shell</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SSH_keys.html" title="SSH keys">SSH keys</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pam_abl.html" title="Pam abl">Pam abl</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Fail2ban.html" title="Fail2ban">fail2ban</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Sshguard.html" title="Sshguard">sshguard</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SSHFS.html" title="Sshfs" class="mw-redirect">Sshfs</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Syslog-ng.html" title="Syslog-ng">Syslog-ng</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SFTP_chroot.html" title="SFTP chroot">SFTP chroot</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/SCP_and_SFTP.html" title="SCP and SFTP">SCP_and_SFTP</a></li>
+</ul>
+</div>
+<p>Secure Shell (SSH) is a network protocol that allows data to be exchanged over a secure channel between two computers. Encryption provides confidentiality and integrity of data. SSH uses public-key cryptography to authenticate the remote computer and allow the remote computer to authenticate the user, if necessary.
+</p>
+<p>SSH is typically used to log into a remote machine and execute commands, but it also supports tunneling, forwarding arbitrary TCP ports and X11 connections; file transfer can be accomplished using the associated SFTP or SCP protocols.
+</p>
+<p>An SSH server, by default, listens on the standard TCP port 22. An SSH client program is typically used for establishing connections to an <i>sshd</i> daemon accepting remote connections. Both are commonly present on most modern operating systems, including macOS, GNU/Linux, Solaris and OpenVMS. Proprietary, freeware and open source versions of various levels of complexity and completeness exist.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#OpenSSH"><span class="tocnumber">1</span> <span class="toctext">OpenSSH</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Installation"><span class="tocnumber">1.1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-2 tocsection-3">
+<a href="#Client_usage"><span class="tocnumber">1.2</span> <span class="toctext">Client usage</span></a>
+<ul>
+<li class="toclevel-3 tocsection-4"><a href="#Configuration"><span class="tocnumber">1.2.1</span> <span class="toctext">Configuration</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Server_usage"><span class="tocnumber">1.3</span> <span class="toctext">Server usage</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Configuration_2"><span class="tocnumber">1.3.1</span> <span class="toctext">Configuration</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Daemon_management"><span class="tocnumber">1.3.2</span> <span class="toctext">Daemon management</span></a></li>
+<li class="toclevel-3 tocsection-8">
+<a href="#Protection"><span class="tocnumber">1.3.3</span> <span class="toctext">Protection</span></a>
+<ul>
+<li class="toclevel-4 tocsection-9"><a href="#Force_public_key_authentication"><span class="tocnumber">1.3.3.1</span> <span class="toctext">Force public key authentication</span></a></li>
+<li class="toclevel-4 tocsection-10"><a href="#Two-factor_authentication_and_public_keys"><span class="tocnumber">1.3.3.2</span> <span class="toctext">Two-factor authentication and public keys</span></a></li>
+<li class="toclevel-4 tocsection-11">
+<a href="#Protecting_against_brute_force_attacks"><span class="tocnumber">1.3.3.3</span> <span class="toctext">Protecting against brute force attacks</span></a>
+<ul>
+<li class="toclevel-5 tocsection-12"><a href="#Using_iptables"><span class="tocnumber">1.3.3.3.1</span> <span class="toctext">Using iptables</span></a></li>
+<li class="toclevel-5 tocsection-13"><a href="#Anti-brute-force_tools"><span class="tocnumber">1.3.3.3.2</span> <span class="toctext">Anti-brute-force tools</span></a></li>
+</ul>
+</li>
+<li class="toclevel-4 tocsection-14">
+<a href="#Limit_root_login"><span class="tocnumber">1.3.3.4</span> <span class="toctext">Limit root login</span></a>
+<ul>
+<li class="toclevel-5 tocsection-15"><a href="#Deny"><span class="tocnumber">1.3.3.4.1</span> <span class="toctext">Deny</span></a></li>
+<li class="toclevel-5 tocsection-16"><a href="#Restrict"><span class="tocnumber">1.3.3.4.2</span> <span class="toctext">Restrict</span></a></li>
+</ul>
+</li>
+<li class="toclevel-4 tocsection-17"><a href="#Securing_the_authorized_keys_file"><span class="tocnumber">1.3.3.5</span> <span class="toctext">Securing the authorized_keys file</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-18">
+<a href="#Other_SSH_clients_and_servers"><span class="tocnumber">2</span> <span class="toctext">Other SSH clients and servers</span></a>
+<ul>
+<li class="toclevel-2 tocsection-19"><a href="#Dropbear"><span class="tocnumber">2.1</span> <span class="toctext">Dropbear</span></a></li>
+<li class="toclevel-2 tocsection-20"><a href="#Mosh"><span class="tocnumber">2.2</span> <span class="toctext">Mosh</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-21">
+<a href="#Tips_and_tricks"><span class="tocnumber">3</span> <span class="toctext">Tips and tricks</span></a>
+<ul>
+<li class="toclevel-2 tocsection-22">
+<a href="#Encrypted_SOCKS_tunnel"><span class="tocnumber">3.1</span> <span class="toctext">Encrypted SOCKS tunnel</span></a>
+<ul>
+<li class="toclevel-3 tocsection-23"><a href="#Step_1:_start_the_connection"><span class="tocnumber">3.1.1</span> <span class="toctext">Step 1: start the connection</span></a></li>
+<li class="toclevel-3 tocsection-24"><a href="#Step_2:_configure_your_browser_.28or_other_programs.29"><span class="tocnumber">3.1.2</span> <span class="toctext">Step 2: configure your browser (or other programs)</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-25">
+<a href="#X11_forwarding"><span class="tocnumber">3.2</span> <span class="toctext">X11 forwarding</span></a>
+<ul>
+<li class="toclevel-3 tocsection-26"><a href="#Setup"><span class="tocnumber">3.2.1</span> <span class="toctext">Setup</span></a></li>
+<li class="toclevel-3 tocsection-27"><a href="#Usage"><span class="tocnumber">3.2.2</span> <span class="toctext">Usage</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-28"><a href="#Forwarding_other_ports"><span class="tocnumber">3.3</span> <span class="toctext">Forwarding other ports</span></a></li>
+<li class="toclevel-2 tocsection-29"><a href="#Multiplexing"><span class="tocnumber">3.4</span> <span class="toctext">Multiplexing</span></a></li>
+<li class="toclevel-2 tocsection-30"><a href="#Speeding_up_SSH"><span class="tocnumber">3.5</span> <span class="toctext">Speeding up SSH</span></a></li>
+<li class="toclevel-2 tocsection-31"><a href="#Mounting_a_remote_filesystem_with_SSHFS"><span class="tocnumber">3.6</span> <span class="toctext">Mounting a remote filesystem with SSHFS</span></a></li>
+<li class="toclevel-2 tocsection-32"><a href="#Keep_alive"><span class="tocnumber">3.7</span> <span class="toctext">Keep alive</span></a></li>
+<li class="toclevel-2 tocsection-33"><a href="#Automatically_restart_SSH_tunnels_with_systemd"><span class="tocnumber">3.8</span> <span class="toctext">Automatically restart SSH tunnels with systemd</span></a></li>
+<li class="toclevel-2 tocsection-34">
+<a href="#Autossh_-_automatically_restarts_SSH_sessions_and_tunnels"><span class="tocnumber">3.9</span> <span class="toctext">Autossh - automatically restarts SSH sessions and tunnels</span></a>
+<ul>
+<li class="toclevel-3 tocsection-35"><a href="#Run_autossh_automatically_at_boot_via_systemd"><span class="tocnumber">3.9.1</span> <span class="toctext">Run autossh automatically at boot via systemd</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-36">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-37"><a href="#Checklist"><span class="tocnumber">4.1</span> <span class="toctext">Checklist</span></a></li>
+<li class="toclevel-2 tocsection-38"><a href="#SSH_connection_hangs_after_poweroff.2Freboot"><span class="tocnumber">4.2</span> <span class="toctext">SSH connection hangs after poweroff/reboot</span></a></li>
+<li class="toclevel-2 tocsection-39">
+<a href="#Connection_refused_or_timeout_problem"><span class="tocnumber">4.3</span> <span class="toctext">Connection refused or timeout problem</span></a>
+<ul>
+<li class="toclevel-3 tocsection-40"><a href="#Port_forwarding"><span class="tocnumber">4.3.1</span> <span class="toctext">Port forwarding</span></a></li>
+<li class="toclevel-3 tocsection-41"><a href="#Is_SSH_running_and_listening.3F"><span class="tocnumber">4.3.2</span> <span class="toctext">Is SSH running and listening?</span></a></li>
+<li class="toclevel-3 tocsection-42"><a href="#Are_there_firewall_rules_blocking_the_connection.3F"><span class="tocnumber">4.3.3</span> <span class="toctext">Are there firewall rules blocking the connection?</span></a></li>
+<li class="toclevel-3 tocsection-43"><a href="#Is_the_traffic_even_getting_to_your_computer.3F"><span class="tocnumber">4.3.4</span> <span class="toctext">Is the traffic even getting to your computer?</span></a></li>
+<li class="toclevel-3 tocsection-44">
+<a href="#Your_ISP_or_a_third_party_blocking_default_port.3F"><span class="tocnumber">4.3.5</span> <span class="toctext">Your ISP or a third party blocking default port?</span></a>
+<ul>
+<li class="toclevel-4 tocsection-45"><a href="#Diagnosis"><span class="tocnumber">4.3.5.1</span> <span class="toctext">Diagnosis</span></a></li>
+<li class="toclevel-4 tocsection-46"><a href="#Possible_solution"><span class="tocnumber">4.3.5.2</span> <span class="toctext">Possible solution</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-47"><a href="#Read_from_socket_failed:_connection_reset_by_peer"><span class="tocnumber">4.3.6</span> <span class="toctext">Read from socket failed: connection reset by peer</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-48"><a href="#.22.5Byour_shell.5D:_No_such_file_or_directory.22_.2F_ssh_exchange_identification_problem"><span class="tocnumber">4.4</span> <span class="toctext">"[your shell]: No such file or directory" / ssh_exchange_identification problem</span></a></li>
+<li class="toclevel-2 tocsection-49">
+<a href="#.22Terminal_unknown.22_or_.22Error_opening_terminal.22_error_message"><span class="tocnumber">4.5</span> <span class="toctext">"Terminal unknown" or  "Error opening terminal" error message</span></a>
+<ul>
+<li class="toclevel-3 tocsection-50"><a href="#TERM_hack"><span class="tocnumber">4.5.1</span> <span class="toctext">TERM hack</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-51"><a href="#Connection_closed_by_x.x.x.x_.5Bpreauth.5D"><span class="tocnumber">4.6</span> <span class="toctext">Connection closed by x.x.x.x [preauth]</span></a></li>
+<li class="toclevel-2 tocsection-52"><a href="#id_dsa_refused_by_OpenSSH_7.0"><span class="tocnumber">4.7</span> <span class="toctext">id_dsa refused by OpenSSH 7.0</span></a></li>
+<li class="toclevel-2 tocsection-53"><a href="#No_matching_key_exchange_method_found_by_OpenSSH_7.0"><span class="tocnumber">4.8</span> <span class="toctext">No matching key exchange method found by OpenSSH 7.0</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-54"><a href="#See_also"><span class="tocnumber">5</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="OpenSSH">OpenSSH</span></h2>
+<p>OpenSSH (OpenBSD Secure Shell) is a set of computer programs providing encrypted communication sessions over a computer network using the ssh protocol. It was created as an open source alternative to the proprietary Secure Shell software suite offered by SSH Communications Security. OpenSSH is developed as part of the OpenBSD project, which is led by Theo de Raadt.
+</p>
+<p>OpenSSH is occasionally confused with the similarly-named OpenSSL; however, the projects have different purposes and are developed by different teams, the similar name is drawn only from similar goals.
+</p>
+<h3><span class="mw-headline" id="Installation">Installation</span></h3>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span> package.
+</p>
+<h3><span class="mw-headline" id="Client_usage">Client usage</span></h3>
+<p>To connect to a server, run:
+</p>
+<pre>$ ssh -p <i>port</i> <i>user</i>@<i>server-address</i>
+</pre>
+<p>If the server only allows public-key authentication, follow <a href="../en/SSH_keys.html" title="SSH keys">SSH keys</a>.
+</p>
+<h4><span class="mw-headline" id="Configuration">Configuration</span></h4>
+<p>The client can be configured to store common options and hosts. All options can be declared globally or restricted to specific hosts. For example:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.ssh/config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;"># global options
+User user
+
+# host-specific options
+Host <i>myserver</i>
+    HostName <i>server-address</i>
+    Port     <i>port</i></pre>
+<p>With such a configuration, the following commands are equivalent
+</p>
+<pre>$ ssh -p <i>port</i> <i>user</i>@<i>server-address</i>
+$ ssh <i>myserver</i>
+</pre>
+<p>See <span class="plainlinks archwiki-template-man" title="$ man 5 ssh_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/ssh_config.5.html">ssh_config(5)</a></span> for more information.
+</p>
+<p>Some options do not have command line switch equivalents, but you can specify config options on the command line with <code>-o</code>. For example <code>-oKexAlgorithms=+diffie-hellman-group1-sha1</code>.
+</p>
+<h3><span class="mw-headline" id="Server_usage">Server usage</span></h3>
+<h4><span class="mw-headline" id="Configuration_2">Configuration</span></h4>
+<p>The SSH daemon configuration file can be found and edited in <code>/etc/ssh/ssh<b>d</b>_config</code>.
+</p>
+<p>To allow access only for some users add this line:
+</p>
+<pre>AllowUsers    <i>user1 user2</i>
+</pre>
+<p>To allow access only for some groups:
+</p>
+<pre>AllowGroups   <i>group1 group2</i>
+</pre>
+<p>To disable root login over SSH, change the PermitRootLogin line into this:
+</p>
+<pre>PermitRootLogin no
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong><code>PermitRootLogin prohibit-password</code> is the default since version 7.0p1. See <span class="plainlinks archwiki-template-man" title="$ man 5 sshd_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/sshd_config.5.html">sshd_config(5)</a></span>.</div>
+<p>To add a nice welcome message (e.g. from the <code>/etc/issue</code> file), configure the <code>Banner</code> option:
+</p>
+<pre>Banner /etc/issue
+</pre>
+<p>Host keys will be generated automatically by the <i>sshd</i> <a href="#Daemon_management">service files</a>. If you want sshd to use a particular key which you have provided, you can configure it manually:
+</p>
+<pre>HostKey /etc/ssh/ssh_host_rsa_key
+</pre>
+<p>If the server is to be exposed to the WAN, it is recommended to change the default port from 22 to a random higher one like this:
+</p>
+<pre>Port 39901
+</pre>
+<p>To help select a port review the <a href="https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers" class="extiw" title="wikipedia:List of TCP and UDP port numbers">list of TCP and UDP port numbers</a>. You can also find port information locally in <code>/etc/services</code>. Select an alternative port that is <b>not</b> already assigned to a common service to prevent conflicts. A port change from default port 22 is recommended, because it will reduce the <i>number</i> of log entries caused by automated authentication attempts - not eliminate them. See <a href="../en/Port_knocking.html" title="Port knocking">Port knocking</a> for related information. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>OpenSSH can also listen on multiple ports simply by having multiple <b>Port x</b> lines in the config file.</div>
+<p>It is also recommended to disable password logins entirely.  This will greatly increase security, see <a href="#Force_public_key_authentication">#Force public key authentication</a> for more information.
+</p>
+<h4><span class="mw-headline" id="Daemon_management">Daemon management</span></h4>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=openssh">openssh</a></span> comes with two kinds of <a href="../en/Systemd.html" title="Systemd">systemd</a> service files:
+</p>
+<ol>
+<li>
+<code>sshd.service</code>, which will keep the SSH daemon permanently active and fork for each incoming connection.<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/sshd.service?h=packages/openssh#n16">[1]</a> It is especially suitable for systems with a large amount of SSH traffic.<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/sshd.service?h=packages/openssh&amp;id=4cadf5dff444e4b7265f8918652f4e6dff733812#n15">[2]</a> </li>
+<li>
+<code>sshd.socket</code> + <code>sshd@.service</code>, which spawn on-demand instances of the SSH daemon per connection. Using it implies that <i>systemd</i> listens on the SSH socket and will only start the daemon process for an incoming connection. It is the recommended way to run <code>sshd</code> in almost all cases.<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/svntogit/packages.git/tree/trunk/sshd.service?h=packages/openssh&amp;id=4cadf5dff444e4b7265f8918652f4e6dff733812#n18">[3]</a><a rel="nofollow" class="external autonumber" href="http://lists.freedesktop.org/archives/systemd-devel/2011-January/001107.html">[4]</a><a rel="nofollow" class="external autonumber" href="http://0pointer.de/blog/projects/inetd.html">[5]</a>
+</li>
+</ol>
+<p>You can <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> either <code>sshd.service</code> <b>or</b> <code>sshd.socket</code> to begin using the daemon.
+</p>
+<p>If using the socket service, you will need to <a href="../en/Systemd.html#Editing_provided_units" title="Systemd">edit</a> the unit file if you want it to listen on a port other than the default 22:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl edit sshd.socket</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Socket]
+ListenStream=
+ListenStream=12345
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Using <code>sshd.socket</code> negates the <code>ListenAddress</code> setting, so it will allow connections over any address. To achieve the effect of setting <code>ListenAddress</code>, you must specify the port <i>and</i> IP for <code>ListenStream</code> (e.g. <code>ListenStream=192.168.1.100:22</code>). You must also add <code>FreeBind=true</code> under <code>[Socket]</code> or else setting the IP address will have the same drawback as setting <code>ListenAddress</code>: the socket will fail to start if the network is not up in time.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>When using socket activation neither <code>sshd.socket</code> nor the daemon's regular <code>sshd.service</code> allow to monitor connection attempts in the log, but executing <code># journalctl /usr/bin/sshd</code> does.</div>
+<h4><span class="mw-headline" id="Protection">Protection</span></h4>
+<p>Allowing remote log-on through SSH is good for administrative purposes, but can pose a threat to your server's security. Often the target of brute force attacks, SSH access needs to be limited properly to prevent third parties gaining access to your server.
+</p>
+<p>Several other good guides are available on the topic, for example:
+</p>
+<ul>
+<li><a rel="nofollow" class="external text" href="https://wiki.mozilla.org/Security/Guidelines/OpenSSH">Article by Mozilla Infosec Team</a></li>
+<li><a rel="nofollow" class="external text" href="https://stribika.github.io/2015/01/04/secure-secure-shell.html">Secure sshd</a></li>
+</ul>
+<h5><span class="mw-headline" id="Force_public_key_authentication">Force public key authentication</span></h5>
+<p>If a client cannot authenticate through a public key, by default the SSH server falls back to password authentication, thus allowing a malicious user to attempt to gain access by <a href="#Protecting_against_brute_force_attacks">brute-forcing</a> the password. One of the most effective ways to protect against this attack is to disable password logins entirely, and force the use of <a href="../en/SSH_keys.html" title="SSH keys">SSH keys</a>. This can be accomplished by disabling the following options in <code>sshd_config</code>:
+</p>
+<pre>PasswordAuthentication no
+ChallengeResponseAuthentication no
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Before adding this to your configuration, make sure that all accounts which require SSH access have public-key authentication set up in the corresponding <code>authorized_keys</code> files. See <a href="../en/SSH_keys.html#Copying_the_public_key_to_the_remote_server" title="SSH keys">SSH keys#Copying the public key to the remote server</a> for more information.</div>
+<h5><span class="mw-headline" id="Two-factor_authentication_and_public_keys">Two-factor authentication and public keys</span></h5>
+<p>Since OpenSSH 6.2, you can add your own chain to authenticate with using the <code>AuthenticationMethods</code> option. This enables you to use public keys as well as a two-factor authorization.
+</p>
+<p>See <a href="../en/Google_Authenticator.html" title="Google Authenticator">Google Authenticator</a> to set up Google Authenticator.
+</p>
+<p>To use <a href="../en/PAM.html" title="PAM">PAM</a> with OpenSSH, edit the following files:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ChallengeResponseAuthentication yes
+AuthenticationMethods publickey keyboard-interactive:pam
+</pre>
+<p>Then you can log in with either a publickey <b>or</b> the user authentication as required by your PAM setup.
+</p>
+<p>If, on the other hand, you want to authenticate the user on both a publickey <b>and</b> the user authentication as required by your PAM setup, use a comma instead of a space to separate the AuthenticationMethods:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+ChallengeResponseAuthentication yes
+AuthenticationMethods publickey,keyboard-interactive:pam
+</pre>
+<p>With required pubkey <b>and</b> pam authentication you may wish to disable the password requirement:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pam.d/sshd</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+auth      required  pam_securetty.so     #disable remote root
+#Require google authenticator
+auth      required  pam_google_authenticator.so
+#But not password
+#auth      include   system-remote-login
+account   include   system-remote-login
+password  include   system-remote-login
+session   include   system-remote-login
+</pre>
+<h5><span class="mw-headline" id="Protecting_against_brute_force_attacks">Protecting against brute force attacks</span></h5>
+<p>Brute forcing is a simple concept: One continuously tries to log in to a webpage or server log-in prompt like SSH with a high number of random username and password combinations.
+</p>
+<h6><span class="mw-headline" id="Using_iptables">Using iptables</span></h6>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Simple_stateful_firewall.html#Bruteforce_attacks" title="Simple stateful firewall">Simple_stateful_firewall#Bruteforce_attacks</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Out of scope, same technique as already described in the SSF. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Secure_Shell">Talk:Secure Shell#</a>)</div>
+</div>
+<p>If you are already using iptables you can easily protect SSH against brute force attacks by using the following rules. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In this example the SSH port was changed to port 42660 TCP.</div>
+<p>Before the following rules can be used we create a new rule chain to log and drop to many connection attempts:
+</p>
+<pre># iptables -N LOG_AND_DROP
+</pre>
+<p>The first rule will be applied to packets that signal the start of new connections headed for TCP port 42660
+</p>
+<pre># iptables -A INPUT -p tcp -m tcp --dport 42660 -m state --state NEW -m recent --set --name DEFAULT --rsource
+</pre>
+<p>The next rule tells iptables to look for packets that match the previous rule's parameters, and which also come from hosts already added to the watch list.
+</p>
+<pre># iptables -A INPUT -p tcp -m tcp --dport 42660 -m state --state NEW -m recent --update --seconds 90 --hitcount 4 --name DEFAULT --rsource -j LOG_AND_DROP
+</pre>
+<p>Now iptables decides what to do with TCP traffic to port 42660 which does not match the previous rule.
+</p>
+<pre># iptables -A INPUT -p tcp -m tcp --dport 42660 -j ACCEPT
+</pre>
+<p>We are appending this rule to the LOG_AND_DROP table, and we use the -j (jump) operator to pass the packet's information to the logging facility
+</p>
+<pre># iptables -A LOG_AND_DROP -j LOG --log-prefix "iptables deny: " --log-level 7
+</pre>
+<p>After they are logged by the first rule, all packets are then dropped
+</p>
+<pre># iptables -A LOG_AND_DROP -j DROP
+</pre>
+<h6><span class="mw-headline" id="Anti-brute-force_tools">Anti-brute-force tools</span></h6>
+<p>You can protect yourself from brute force attacks by using an automated script that blocks anybody trying to brute force their way in, for example <a href="../en/Fail2ban.html" title="Fail2ban">fail2ban</a> or <a href="../en/Sshguard.html" title="Sshguard">sshguard</a>.
+</p>
+<ul>
+<li> Only allow incoming SSH connections from trusted locations</li>
+<li> Use <a href="../en/Fail2ban.html" title="Fail2ban">fail2ban</a> or <a href="../en/Sshguard.html" title="Sshguard">sshguard</a> to automatically block IP addresses that fail password authentication too many times.</li>
+<li> Use <a rel="nofollow" class="external text" href="https://github.com/jtniehof/pam_shield">pam_shield</a> to block IP addresses that perform too many login attempts within a certain period of time. In contrast to <a href="../en/Fail2ban.html" title="Fail2ban">fail2ban</a> or <a href="../en/Sshguard.html" title="Sshguard">sshguard</a>, this program does not take login success or failure into account.</li>
+</ul>
+<h5><span class="mw-headline" id="Limit_root_login">Limit root login</span></h5>
+<p>It is generally considered bad practice to allow the root user to log in without restraint over SSH. There are two methods by which SSH root access can be restricted for increased security.
+</p>
+<h6><span class="mw-headline" id="Deny">Deny</span></h6>
+<p>Sudo selectively provides root rights for actions requiring these without requiring authenticating against the root account. This allows locking the root account against access via SSH and potentially functions as a security measure against brute force attacks, since now an attacker must guess the account name in addition to the password.
+</p>
+<p>SSH can be configured to deny remote logins with the root user by editing the "Authentication" section in <code>/etc/ssh/sshd_config</code>. Simply change <code>#PermitRootLogin prohibit-password</code> to <code>no</code> and uncomment the line:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+PermitRootLogin no
+...
+</pre>
+<p>Next, <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> the SSH daemon.
+</p>
+<p>You will now be unable to log in through SSH under root, but will still be able to log in with your normal user and use <a href="../en/Su.html" title="Su">su</a> or <a href="../en/Sudo.html" title="Sudo">sudo</a> to do system administration.
+</p>
+<h6><span class="mw-headline" id="Restrict">Restrict</span></h6>
+<p>Some automated tasks such as remote, full-system backup require full root access. To allow these in a secure way, instead of disabling root login via SSH, it is possible to only allow root logins for selected commands. This can be achieved by editing <code>~root/.ssh/authorized_keys</code>, by prefixing the desired key, e.g. as follows:
+</p>
+<pre>command="/usr/lib/rsync/rrsync -ro /" ssh-rsa …
+</pre>
+<p>This will allow any login with this specific key only to execute the command specified between the quotes.
+</p>
+<p>The increased attack surface created by exposing the root user name at login can be compensated by adding the following to <code>sshd_config</code>:
+</p>
+<pre>PermitRootLogin forced-commands-only
+</pre>
+<p>This setting will not only restrict the commands which root may execute via SSH, but it will also disable the use of passwords, forcing use of public key authentication for the root account.
+</p>
+<p>A slightly less restrictive alternative will allow any command for root, but makes brute force attacks infeasible by enforcing public key authentication. For this option, set:
+</p>
+<pre>PermitRootLogin without-password
+</pre>
+<h5><span class="mw-headline" id="Securing_the_authorized_keys_file">Securing the authorized_keys file</span></h5>
+<p>For additional protection, you can prevent users from adding new public keys and connecting from them.
+</p>
+<p>In the server, make the <code>authorized_keys</code> file read-only for the user and deny all other permissions:
+</p>
+<pre>$ chmod 400 ~/.ssh/authorized_keys
+</pre>
+<p>To keep the user from simply changing the permissions back, <a href="../en/File_permissions_and_attributes.html#chattr_and_lsattr" title="File permissions and attributes">set the immutable bit</a> on the <code>authorized_keys</code> file. After that the user could rename the <code>~/.ssh</code> directory to something else and create a new <code>~/.ssh</code> directory and <code>authorized_keys</code> file. To prevent this, set the immutable bit on the <code>~/.ssh</code> directory too.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If you find yourself needing to add a new key, you will first have to remove the immutable bit from <code>authorized_keys</code> and make it writable. Follow the steps above to secure it again.</div>
+<h2><span class="mw-headline" id="Other_SSH_clients_and_servers">Other SSH clients and servers</span></h2>
+<p>Apart from OpenSSH, there are many SSH <a href="https://en.wikipedia.org/wiki/Comparison_of_SSH_clients" class="extiw" title="wikipedia:Comparison of SSH clients">clients</a> and <a href="https://en.wikipedia.org/wiki/Comparison_of_SSH_servers" class="extiw" title="wikipedia:Comparison of SSH servers">servers</a> available.
+</p>
+<h3><span class="mw-headline" id="Dropbear">Dropbear</span></h3>
+<p><a href="https://en.wikipedia.org/wiki/Dropbear_(software)" class="extiw" title="wikipedia:Dropbear (software)">Dropbear</a> is a SSH-2 client and server. <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=dropbear">dropbear</a></span> is available in the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>The command-line ssh client is named dbclient.
+</p>
+<h3><span class="mw-headline" id="Mosh">Mosh</span></h3>
+<p>From the Mosh <a rel="nofollow" class="external text" href="http://mosh.mit.edu/">website</a>:
+</p>
+<dl><dd>Remote terminal application that allows roaming, supports intermittent connectivity, and provides intelligent local echo and line editing of user keystrokes. Mosh is a replacement for SSH. It is more robust and responsive, especially over slow connections such as Wi-Fi, cellular, and long-distance.</dd></dl>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mosh">mosh</a></span> package, or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mosh-git/">mosh-git</a></span><sup><small>AUR</small></sup> for the latest revision.
+</p>
+<p>Mosh has an undocumented command line option <code>--predict=experimental</code> which produces more aggressive echoing of local keystrokes. Users interested in low-latency visual confirmation of keyboard input may prefer this prediction mode.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Mosh by design does not let you access session history, consider installing a terminal multiplexer such as <a href="../en/Tmux.html" title="Tmux">tmux</a> or <a href="../en/GNU_Screen.html" title="Screen" class="mw-redirect">screen</a>.</div>
+<h2><span class="mw-headline" id="Tips_and_tricks">Tips and tricks</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> According to the current layout, this section seems rather generic, but in fact most of the offered tips work only in <i>openssh</i>. For example <i>dropbear</i> (listed in <a href="#Other_SSH_clients_and_servers">#Other SSH clients and servers</a>) does not support SOCKS proxy.<a rel="nofollow" class="external autonumber" href="https://en.wikipedia.org/wiki/Comparison_of_SSH_clients#Technical">[6]</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Secure_Shell">Talk:Secure Shell#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="Encrypted_SOCKS_tunnel">Encrypted SOCKS tunnel</span></h3>
+<p>This is highly useful for laptop users connected to various unsafe wireless connections. The only thing you need is an SSH server running at a somewhat secure location, like your home or at work. It might be useful to use a dynamic DNS service like <a rel="nofollow" class="external text" href="http://www.dyndns.org/">DynDNS</a> so you do not have to remember your IP-address.
+</p>
+<h4><span class="mw-headline" id="Step_1:_start_the_connection">Step 1: start the connection</span></h4>
+<p>You only have to execute this single command to start the connection:
+</p>
+<pre>$ ssh -TND 4711 <i>user</i>@<i>host</i>
+</pre>
+<p>where <code><i>user</i></code> is your username at the SSH server running at the <code><i>host</i></code>. It will ask for your password, and then you are connected! The <code>N</code> flag disables the interactive prompt, and the <code>D</code> flag specifies the local port on which to listen on (you can choose any port number if you want).  The <code>T</code> flag disables pseudo-tty allocation.
+</p>
+<p>It is nice to add the verbose (<code>-v</code>) flag, because then you can verify that it is actually connected from that output.
+</p>
+<h4><span class="mw-headline" id="Step_2:_configure_your_browser_.28or_other_programs.29">Step 2: configure your browser (or other programs)</span></h4>
+<p>The above step is completely useless if you do not configure your web browser (or other programs) to use this newly created socks tunnel. Since the current version of SSH supports both SOCKS4 and SOCKS5, you can use either of them.
+</p>
+<ul><li> For Firefox: <i>Edit &gt; Preferences &gt; Advanced &gt; Network &gt; Connection &gt; Setting</i>: <br> Check the <i>Manual proxy configuration</i> radio button, and enter <code>localhost</code> in the <i>SOCKS host</i> text field, and then enter your port number in the next text field (<code>4711</code> in the example above).</li></ul>
+<p>Firefox does not automatically make DNS requests through the socks tunnel. This potential privacy concern can be mitigated by the following steps:
+</p>
+<ol>
+<li> Type about:config into the Firefox location bar.</li>
+<li> Search for network.proxy.socks_remote_dns</li>
+<li> Set the value to true.</li>
+<li> Restart the browser.</li>
+</ol>
+<ul><li> For Chromium: You can set the SOCKS settings as environment variables or as command line options. I recommend to add one of the following functions to your <code>.bashrc</code>:</li></ul>
+<pre>function secure_chromium {
+    port=4711
+    export SOCKS_SERVER=localhost:$port
+    export SOCKS_VERSION=5
+    chromium &amp;
+    exit
+}
+</pre>
+<p>OR
+</p>
+<pre>function secure_chromium {
+    port=4711
+    chromium --proxy-server="socks://localhost:$port" &amp;
+    exit
+}
+</pre>
+<p>Now open a terminal and just do:
+</p>
+<pre>$ secure_chromium
+</pre>
+<p>Enjoy your secure tunnel!
+</p>
+<h3><span class="mw-headline" id="X11_forwarding">X11 forwarding</span></h3>
+<p>X11 forwarding is a mechanism that allows graphical interfaces of X11 programs running on a remote system to be displayed on a local client machine. For X11 forwarding the remote host does not need to have a full X11 system installed, however it needs at least to have <i>xauth</i> installed. <i>xauth</i> is a utility that maintains <code>Xauthority</code> configurations used by server and client for authentication of X11 session (<a rel="nofollow" class="external text" href="http://xmodulo.com/2012/11/how-to-enable-x11-forwarding-using-ssh.html">source</a>).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>X11 forwarding has important security implications which should be at least acknowledged by reading relevant sections of <span class="plainlinks archwiki-template-man" title="$ man 1 ssh"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ssh.1.html">ssh(1)</a></span>, <span class="plainlinks archwiki-template-man" title="$ man 5 sshd_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/sshd_config.5.html">sshd_config(5)</a></span>, and <span class="plainlinks archwiki-template-man" title="$ man 5 ssh_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/ssh_config.5.html">ssh_config(5)</a></span> manual pages. See also <a rel="nofollow" class="external text" href="https://security.stackexchange.com/questions/14815/security-concerns-with-x11-forwarding">a short writeup</a>
+</div>
+<h4><span class="mw-headline" id="Setup">Setup</span></h4>
+<p>On the remote system:
+</p>
+<ul>
+<li>
+<a href="../en/Pacman.html#Installing_specific_packages" title="Pacman">install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xauth">xorg-xauth</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xhost">xorg-xhost</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>
+</li>
+<li>in <code>/etc/ssh/ssh<b>d</b>_config</code>:
+<ul>
+<li>verify that <code>AllowTcpForwarding</code> and <code>X11UseLocalhost</code> options are set to <i>yes</i>, and that <code>X11DisplayOffset</code> is set to <i>10</i> (those are the default values if nothing has been changed, see <span class="plainlinks archwiki-template-man" title="$ man 5 sshd_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/sshd_config.5.html">sshd_config(5)</a></span>)</li>
+<li>set <code>X11Forwarding</code> to <i>yes</i>
+</li>
+</ul>
+</li>
+<li> then <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">restart</a> the <a href="#Daemon_management"><i>sshd</i> daemon</a>. </li>
+</ul>
+<p>On the client's side, enable the <code>ForwardX11</code> option by either specifying the <code>-X</code> switch on the command line for opportunistic connections, or by setting <code>ForwardX11</code> to <i>yes</i> in the <a href="#Configuration">client's configuration</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>You can enable the <code>ForwardX11Trusted</code> option (<code>-Y</code> switch on the command line) if GUI is drawing badly or you receive errors; this will prevent X11 forwardings from being subjected to the <a rel="nofollow" class="external text" href="http://www.x.org/wiki/Development/Documentation/Security/">X11 SECURITY extension</a> controls. Be sure you have read <a href="#X11_forwarding">the warning</a> at the beginning of this section if you do so.</div>
+<h4><span class="mw-headline" id="Usage">Usage</span></h4>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> <code>xhost</code> is <a rel="nofollow" class="external text" href="http://unix.stackexchange.com/questions/12755/how-to-forward-x-over-ssh-from-ubuntu-machine#comment-17148">generally not needed</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Secure_Shell">Talk:Secure Shell#</a>)</div>
+</div>
+<p>Log on to the remote machine normally, specifying the <code>-X</code> switch if <i>ForwardX11</i> was not enabled in the client's configuration file:
+</p>
+<pre>$ ssh -X <i>user@host</i>
+</pre>
+<p>If you receive errors trying to run graphical applications, try <i>ForwardX11Trusted</i> instead:
+</p>
+<pre>$ ssh -Y <i>user@host</i>
+</pre>
+<p>You can now start any X program on the remote server, the output will be forwarded to your local session:
+</p>
+<pre>$ xclock
+</pre>
+<p>If you get "Cannot open display" errors try the following command as the non root user:
+</p>
+<pre>$ xhost +
+</pre>
+<p>The above command will allow anybody to forward X11 applications. To restrict forwarding to a particular host type:
+</p>
+<pre>$ xhost +hostname
+</pre>
+<p>where hostname is the name of the particular host you want to forward to. See <span class="plainlinks archwiki-template-man" title="$ man 1 xhost"><a rel="nofollow" class="external text" href="https://docs.oracle.com/cd/E36784_01/html/E36870/xhost-1.html">xhost(1)</a></span> for more details.
+</p>
+<p>Be careful with some applications as they check for a running instance on the local machine. <a href="../en/Firefox.html" title="Firefox">Firefox</a> is an example: either close the running Firefox instance or use the following start parameter to start a remote instance on the local machine:
+</p>
+<pre>$ firefox --no-remote
+</pre>
+<p>If you get "X11 forwarding request failed on channel 0" when you connect (and the server <code>/var/log/errors.log</code> shows "Failed to allocate internet-domain X11 display socket"), make sure package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xorg-xauth">xorg-xauth</a></span> is installed. If its installation is not working, try to either:
+</p>
+<ul>
+<li> enable the <code>AddressFamily any</code> option in <code>ssh<b>d</b>_config</code> on the <i>server</i>, or</li>
+<li> set the <code>AddressFamily</code> option in <code>ssh<b>d</b>_config</code> on the <i>server</i> to inet.</li>
+</ul>
+<p>Setting it to inet may fix problems with Ubuntu clients on IPv4.
+</p>
+<p>For running X applications as other user on the SSH server you need to <code>xauth add</code> the authentication line taken from <code>xauth list</code> of the SSH logged in user.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong><a rel="nofollow" class="external text" href="http://unix.stackexchange.com/a/12772/29867">Here</a> are <a rel="nofollow" class="external text" href="http://unix.stackexchange.com/a/46748/29867">some</a> useful <a rel="nofollow" class="external text" href="http://superuser.com/a/805060/185665">links</a> for troubleshooting <code>X11 Forwarding</code> issues.</div>
+<h3><span class="mw-headline" id="Forwarding_other_ports">Forwarding other ports</span></h3>
+<p>In addition to SSH's built-in support for X11, it can also be used to securely tunnel any TCP connection, by use of local forwarding or remote forwarding.
+</p>
+<p>Local forwarding opens a port on the local machine, connections to which will be forwarded to the remote host and from there on to a given destination. Very often, the forwarding destination will be the same as the remote host, thus providing a secure shell and, e.g. a secure VNC connection, to the same machine. Local forwarding is accomplished by means of the <code>-L</code> switch and it is accompanying forwarding specification in the form of <code>&lt;tunnel port&gt;:&lt;destination address&gt;:&lt;destination port&gt;</code>.
+</p>
+<p>Thus:
+</p>
+<pre>$ ssh -L 1000:mail.google.com:25 192.168.0.100
+</pre>
+<p>will use SSH to login to and open a shell on 192.168.0.100, and will also create a tunnel from the local machine's TCP port 1000 to mail.google.com on port 25. Once established, connections to localhost:1000 will connect to the Gmail SMTP port. To Google, it will appear that any such connection (though not necessarily the data conveyed over the connection) originated from 192.168.0.100, and such data will be secure as between the local machine and 192.168.0.100, but not between 192.168.0.100, unless other measures are taken.
+</p>
+<p>Similarly:
+</p>
+<pre>$ ssh -L 2000:192.168.0.100:6001 192.168.0.100
+</pre>
+<p>will allow connections to localhost:2000 which will be transparently sent to the remote host on port 6001. The preceding example is useful for VNC connections using the vncserver utility--part of the tightvnc package--which, though very useful, is explicit about its lack of security.
+</p>
+<p>Remote forwarding allows the remote host to connect to an arbitrary host via the SSH tunnel and the local machine, providing a functional reversal of local forwarding, and is useful for situations where, e.g., the remote host has limited connectivity due to firewalling. It is enabled with the <code>-R</code> switch and a forwarding specification in the form of <code>&lt;tunnel port&gt;:&lt;destination address&gt;:&lt;destination port&gt;</code>.
+</p>
+<p>Thus:
+</p>
+<pre>$ ssh -R 3000:irc.freenode.net:6667 192.168.0.200
+</pre>
+<p>will bring up a shell on 192.168.0.200, and connections from 192.168.0.200 to itself on port 3000 (remotely speaking, localhost:3000) will be sent over the tunnel to the local machine and then on to irc.freenode.net on port 6667, thus, in this example, allowing the use of IRC programs on the remote host to be used, even if port 6667 would normally be blocked to it.
+</p>
+<p>Both local and remote forwarding can be used to provide a secure "gateway," allowing other computers to take advantage of an SSH tunnel, without actually running SSH or the SSH daemon by providing a bind-address for the start of the tunnel as part of the forwarding specification, e.g. <code>&lt;tunnel address&gt;:&lt;tunnel port&gt;:&lt;destination address&gt;:&lt;destination port&gt;</code>. The <code>&lt;tunnel address&gt;</code> can be any address on the machine at the start of the tunnel, <code>localhost</code>, <code>*</code> (or blank), which, respectively, allow connections via the given address, via the loopback interface, or via any interface. By default, forwarding is limited to connections from the machine at the "beginning" of the tunnel, i.e. the <code>&lt;tunnel address&gt;</code> is set to <code>localhost</code>. Local forwarding requires no additional configuration, however remote forwarding is limited by the remote server's SSH daemon configuration. See the <code>GatewayPorts</code> option in <code>sshd_config(5)</code> for more information.
+</p>
+<h3><span class="mw-headline" id="Multiplexing">Multiplexing</span></h3>
+<p>The SSH daemon usually listens on port 22. However, it is common practice for many public internet hotspots to block all traffic that is not on the regular HTTP/S ports (80 and 443, respectively), thus effectively blocking SSH connections. The immediate solution for this is to have <code>sshd</code> listen additionally on one of the whitelisted ports:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/ssh/sshd_config</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+Port 22
+Port 443
+</pre>
+<p>However, it is likely that port 443 is already in use by a web server serving HTTPS content, in which case it is possible to use a multiplexer, such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sslh">sslh</a></span>, which listens on the multiplexed port and can intelligently forward packets to many services.
+</p>
+<h3><span class="mw-headline" id="Speeding_up_SSH">Speeding up SSH</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you intend to use SSH for SFTP or SCP, installing <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/openssh-hpn-git/">openssh-hpn-git</a></span><sup><small>AUR</small></sup> can significantly increase throughput.<a rel="nofollow" class="external autonumber" href="https://www.psc.edu/index.php/hpn-ssh">[7]</a>
+</div>
+<p>There are several <a href="#Configuration">client configuration</a> options which can speed up connections either globally or for specific hosts. See <span class="plainlinks archwiki-template-man" title="$ man 5 ssh_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/ssh_config.5.html">ssh_config(5)</a></span> for full descriptions of these options.
+</p>
+<p>You can make all sessions to the same host share a single connection using these options:
+</p>
+<pre>ControlMaster auto
+ControlPersist yes
+ControlPath ~/.ssh/sockets/socket-%r@%h:%p
+</pre>
+<p>where <code>~/.ssh/sockets</code> can be any directory not writable by other users. 
+</p>
+<p>Another option to improve speed is to enable compression with the <code>Compression yes</code> option or the <code>-C</code> flag.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><span class="plainlinks archwiki-template-man" title="$ man 1 ssh"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man1/ssh.1.html">ssh(1)</a></span> states that "<i>Compression is desirable on modem lines and other slow connections, but will only slow down things on fast networks</i>". This tip might be counterproductive depending on your network configuration.</div>
+<p>Login time can be shortened by bypassing IPv6 lookup using the <code>AddressFamily inet</code> option or <code>-4</code> flag.
+</p>
+<h3><span class="mw-headline" id="Mounting_a_remote_filesystem_with_SSHFS">Mounting a remote filesystem with SSHFS</span></h3>
+<p>Please refer to the <a href="../en/SSHFS.html" title="Sshfs" class="mw-redirect">Sshfs</a> article to use sshfs to mount a remote system - accessible via SSH - to a local folder, so you will be able to do any operation on the mounted files with any tool (copy, rename, edit with vim, etc.). Using sshfs instead of shfs is generally preferred as a new version of shfs has not been released since 2004.
+</p>
+<h3><span class="mw-headline" id="Keep_alive">Keep alive</span></h3>
+<p>Your ssh session will automatically log out if it is idle. To send a "keep alive" signal to the server every 120 seconds add the <code>ServerAliveInterval 120</code> option to your <a href="#Configuration">client configuration</a>. See also the <code>ServerAliveCountMax</code> and <code>TCPKeepAlive</code> options.
+</p>
+<p>Conversely, to keep incoming connections alive, set the <code>ClientAliveInterval</code> option in your <a href="#Configuration_2">server configuration</a>.
+</p>
+<h3><span class="mw-headline" id="Automatically_restart_SSH_tunnels_with_systemd">Automatically restart SSH tunnels with systemd</span></h3>
+<p><a href="../en/Systemd.html" title="Systemd">systemd</a> can automatically start SSH connections on boot/login <i>and</i> restart them when they fail. This makes it a useful tool for maintaining SSH tunnels.
+</p>
+<p>The following service can start an SSH tunnel on login using the connection settings in your <a href="#Saving_connection_data_in_ssh_config">ssh config</a>. If the connection closes for any reason, it waits 10 seconds before restarting it:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">~/.config/systemd/user/tunnel.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+[Unit]
+Description=SSH tunnel to myserver
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+ExecStart=/usr/bin/ssh -F %h/.ssh/config -N myserver
+</pre>
+<p>Then <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> and <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> the user service. See <a href="#Keep_alive">#Keep alive</a> for how to prevent the tunnel from timing out. If you wish to start the tunnel on boot, you will need to rewrite the unit as a system service.
+</p>
+<h3><span class="mw-headline" id="Autossh_-_automatically_restarts_SSH_sessions_and_tunnels">Autossh - automatically restarts SSH sessions and tunnels</span></h3>
+<p>When a session or tunnel cannot be kept alive, for example due to bad network conditions causing client disconnections, you can use <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=autossh">autossh</a></span> to automatically restart them.
+</p>
+<p>Usage examples:
+</p>
+<pre>$ autossh -M 0 -o "ServerAliveInterval 45" -o "ServerAliveCountMax 2" username@example.com
+</pre>
+<p>Combined with <a href="../en/SSHFS.html" title="Sshfs" class="mw-redirect">sshfs</a>:
+</p>
+<pre>$ sshfs -o reconnect,compression=yes,transform_symlinks,ServerAliveInterval=45,ServerAliveCountMax=2,ssh_command='autossh -M 0' username@example.com: /mnt/example 
+</pre>
+<p>Connecting through a SOCKS-proxy set by <a href="../en/Proxy_settings.html" title="Proxy settings">Proxy settings</a>:
+</p>
+<pre>$ autossh -M 0 -o "ServerAliveInterval 45" -o "ServerAliveCountMax 2" -NCD 8080 username@example.com 
+</pre>
+<p>With the <code>-f</code> option autossh can be made to run as a background process. Running it this way however means the passphrase cannot be entered interactively.
+</p>
+<p>The session will end once you type <code>exit</code> in the session, or the autossh process receives a SIGTERM, SIGINT of SIGKILL signal.
+</p>
+<h4><span class="mw-headline" id="Run_autossh_automatically_at_boot_via_systemd">Run autossh automatically at boot via systemd</span></h4>
+<p>If you want to automatically start autossh, you can create a systemd unit file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/systemd/system/autossh.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+Description=AutoSSH service for port 2222
+After=network.target
+
+[Service]
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 0 -NL 2222:localhost:2222 -o TCPKeepAlive=yes foo@bar.com
+
+[Install]
+WantedBy=multi-user.target</pre>
+<p>Here <code>AUTOSSH_GATETIME=0</code> is an environment variable specifying how long ssh must be up before autossh considers it a successful connection, setting it to 0 autossh also ignores the first run failure of ssh. This may be useful when running autossh at boot. Other environment variables are available on the manpage. Of course, you can make this unit more complex if necessary (see the systemd documentation for details), and obviously you can use your own options for autossh, but note that the <code>-f</code> implying <code>AUTOSSH_GATETIME=0</code> does not work with systemd. 
+</p>
+<p>Remember to <a href="../en/Systemd.html#Using_units" title="Start" class="mw-redirect">start</a> and/or <a href="../en/Systemd.html#Using_units" title="Enable" class="mw-redirect">enable</a> the service afterwards.
+</p>
+<p>You may also need to disable ControlMaster e.g.
+</p>
+<pre>$ ExecStart=/usr/bin/autossh -M 0 -o ControlMaster=no -NL 2222:localhost:2222 -o TCPKeepAlive=yes foo@bar.com
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>It is also easy to maintain several autossh processes, to keep several tunnels alive. Just create multiple service files with different names.</div>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Checklist">Checklist</span></h3>
+<p>Check these simple issues before you look any further.
+</p>
+<ol>
+<li> The config directory <code>~/.ssh</code> and its contents should be accessible only by your user (check this on both the client and the server): <pre>
+$ chmod 700 ~/.ssh
+$ chmod 600 ~/.ssh/*
+$ chown -R $USER ~/.ssh
+</pre>
+</li>
+<li> Check that the client's public key (e.g. <code>id_rsa.pub</code>) is in <code>~/.ssh/authorized_keys</code> on the server.</li>
+<li> Check that you did not limit SSH access with <code>AllowUsers</code> or <code>AllowGroups</code> in the <a href="#Configuration_2">server config</a>.</li>
+<li> Check if the user has set a password. Sometimes new users who have not yet logged in to the server do not have a password.</li>
+<li> <a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> <code>sshd</code> and logout/login on both client and server.</li>
+</ol>
+<h3><span class="mw-headline" id="SSH_connection_hangs_after_poweroff.2Freboot">SSH connection hangs after poweroff/reboot</span></h3>
+<p>SSH connections hang after poweroff or reboot if systemd stops the network before sshd. To fix this, change the <code>After</code> statement for user sessions:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"># systemctl edit systemd-user-sessions.service</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Unit]
+After=network.target</pre>
+<h3><span class="mw-headline" id="Connection_refused_or_timeout_problem">Connection refused or timeout problem</span></h3>
+<h4><span class="mw-headline" id="Port_forwarding">Port forwarding</span></h4>
+<p>If you are behind a NAT mode/router (which is likely unless you are on a VPS or publicly addressed host), make sure that your router is forwarding incoming ssh connections to your machine. Find the server's internal IP address with <code>$ ip addr</code> and set up your router to forward TCP on your SSH port to that IP. <a rel="nofollow" class="external text" href="http://portforward.com">portforward.com</a> can help with that.
+</p>
+<h4><span class="mw-headline" id="Is_SSH_running_and_listening.3F">Is SSH running and listening?</span></h4>
+<pre>$ ss -tnlp
+</pre>
+<p>If the above command do not show SSH port is open, SSH is NOT running. Check <code>/var/log/messages</code> for errors etc.
+</p>
+<h4><span class="mw-headline" id="Are_there_firewall_rules_blocking_the_connection.3F">Are there firewall rules blocking the connection?</span></h4>
+<p><a href="../en/Iptables.html" title="Iptables">Iptables</a> may be blocking connections on port <code>22</code>. Check this with:
+</p>
+<pre># iptables -nvL</pre>
+<p>and look for rules that might be dropping packets on the <code>INPUT</code> chain. Then, if necessary, unblock the port with a command like: 
+</p>
+<pre>
+# iptables -I INPUT 1 -p tcp --dport 22 -j ACCEPT
+</pre>
+<p>For more help configuring firewalls, see <a href="../en/Firewalls.html" title="Firewalls">firewalls</a>.
+</p>
+<h4><span class="mw-headline" id="Is_the_traffic_even_getting_to_your_computer.3F">Is the traffic even getting to your computer?</span></h4>
+<p>Start a traffic dump on the computer you are having problems with:
+</p>
+<pre># tcpdump -lnn -i any port ssh and tcp-syn
+</pre>
+<p>This should show some basic information, then wait for any matching traffic to happen before displaying it. Try your connection now. If you do not see any output when you attempt to connect, then something outside of your computer is blocking the traffic (e. g., hardware firewall, NAT router etc.).
+</p>
+<h4><span class="mw-headline" id="Your_ISP_or_a_third_party_blocking_default_port.3F">Your ISP or a third party blocking default port?</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Try this step if you <b>know</b> you are not running any firewalls and you know you have configured the router for DMZ or have forwarded the port to your computer and it still does not work. Here you will find diagnostic steps and a possible solution.</div>
+<p>In some cases, your ISP might block the default port (SSH port 22) so whatever you try (opening ports, hardening the stack, defending against flood attacks, et al) ends up useless. To confirm this, create a server on all interfaces (0.0.0.0) and connect remotely. 
+</p>
+<p>If you get an error message comparable to this:
+</p>
+<pre>ssh: connect to host www.inet.hr port 22: Connection refused
+</pre>
+<p>That means the port is <b>not</b> being blocked by the ISP, but the server does not run SSH on that port (See <a href="https://en.wikipedia.org/wiki/Security_through_obscurity" class="extiw" title="wikipedia:Security through obscurity">security through obscurity</a>).
+</p>
+<p>However, if you get an error message comparable to this:
+</p>
+<pre>ssh: connect to host 111.222.333.444 port 22: Operation timed out 
+</pre>
+<p>That means that something is rejecting your TCP traffic on port 22. Basically that port is stealth, either by your firewall or 3rd party intervention (like an ISP blocking and/or rejecting incoming traffic on port 22). If you know you are not running any firewall on your computer, and you know that Gremlins are not growing in your routers and switches, then your ISP is blocking the traffic.
+</p>
+<p>To double check, you can run Wireshark on your server and listen to traffic on port 22. Since Wireshark is a Layer 2 Packet Sniffing utility, and TCP/UDP are Layer 3 and above (see <a href="https://en.wikipedia.org/wiki/Internet_protocol_suite" class="extiw" title="wikipedia:Internet protocol suite">IP Network stack</a>), if you do not receive anything while connecting remotely, a third party is most likely to be blocking the traffic on that port to your server.
+</p>
+<h5><span class="mw-headline" id="Diagnosis">Diagnosis</span></h5>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> either <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=tcpdump">tcpdump</a></span> or Wireshark with the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-cli">wireshark-cli</a></span> package.
+</p>
+<p>For tcpdump:
+</p>
+<pre># tcpdump -ni <i>interface</i> "port 22"
+</pre>
+<p>For Wireshark:
+</p>
+<pre>$ tshark -f "tcp port 22" -i <i>interface</i>
+</pre>
+<p>where <code><i>interface</i></code> is the network interface for a WAN connection (see <code>ip a</code> to check). If you are not receiving any packets while trying to connect remotely, you can be very sure that your ISP is blocking the incoming traffic on port 22.
+</p>
+<h5><span class="mw-headline" id="Possible_solution">Possible solution</span></h5>
+<p>The solution is just to use some other port that the ISP is not blocking. Open the <code>/etc/ssh/sshd_config</code> and configure the file to use different ports. For example, add:
+</p>
+<pre>Port 22
+Port 1234
+</pre>
+<p>Also make sure that other "Port" configuration lines in the file are commented out. Just commenting "Port 22" and putting "Port 1234" will not solve the issue because then sshd will only listen on port 1234. Use both lines to run the SSH server on both ports. 
+</p>
+<p><a href="../en/Systemd.html#Using_units" title="Restart" class="mw-redirect">Restart</a> the server <code>sshd.service</code> and you are almost done. You still have to configure your client(s) to use the other port instead of the default port. There are numerous solutions to that problem, but let us cover two of them here.
+</p>
+<h4><span class="mw-headline" id="Read_from_socket_failed:_connection_reset_by_peer">Read from socket failed: connection reset by peer</span></h4>
+<p>Recent versions of openssh sometimes fail with the above error message when connecting to older ssh servers. This can be worked around by setting various <a href="#Configuration">client options</a> for that host. See <span class="plainlinks archwiki-template-man" title="$ man 5 ssh_config"><a rel="nofollow" class="external text" href="http://man7.org/linux/man-pages/man5/ssh_config.5.html">ssh_config(5)</a></span> for more information about the following options.
+</p>
+<p>The problem could be the <code>ecdsa-sha2-nistp*-cert-v01@openssh</code> elliptical host key algorithms. These can be disabled by setting <code>HostKeyAlgorithms</code> to a list excluding those algorithms.
+</p>
+<p>If that does not work, it could be that the list of ciphers is too long. Set the <code>Ciphers</code> option to a shorter list (fewer than 80 characters should be enough). Similarly, you can also try shortening the list of <code>MACs</code>.
+</p>
+<p>See also the <a rel="nofollow" class="external text" href="http://www.gossamer-threads.com/lists/openssh/dev/51339">discussion</a> on the openssh bug forum.
+</p>
+<h3><span class="mw-headline" id=".22.5Byour_shell.5D:_No_such_file_or_directory.22_.2F_ssh_exchange_identification_problem">"[your shell]: No such file or directory" / ssh_exchange_identification problem</span></h3>
+<p>One possible cause for this is the need of certain SSH clients to find an absolute path (one returned by <code>whereis -b [your shell]</code>, for instance) in <code>$SHELL</code>, even if the shell's binary is located in one of the <code>$PATH</code> entries.
+</p>
+<h3><span class="mw-headline" id=".22Terminal_unknown.22_or_.22Error_opening_terminal.22_error_message">"Terminal unknown" or  "Error opening terminal" error message</span></h3>
+<p>If you receive the above errors upon logging in, this means the server does not recognize your terminal. Ncurses applications like nano may fail with the message "Error opening terminal".
+</p>
+<p>The correct solution is to install the client terminal's terminfo file on the server. This tells console programs on the server how to correctly interact with your terminal. You can get info about current terminfo using <code>$ infocmp</code> and then find out <a href="../en/Pacman.html#Querying_package_databases" title="Pacman">which package owns it</a>.
+</p>
+<p>If you cannot <a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">install</a> it normally, you can copy your terminfo to your home directory on the server:
+</p>
+<pre>$ ssh myserver mkdir -p  ~/.terminfo/${TERM:0:1}
+$ scp /usr/share/terminfo/${TERM:0:1}/$TERM myserver:~/.terminfo/${TERM:0:1}/
+</pre>
+<p>After logging in and out from the server the problem should be fixed.
+</p>
+<h4><span class="mw-headline" id="TERM_hack">TERM hack</span></h4>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>This should only be used as a last resort.</div>
+<p>Alternatively, you can simply set <code>TERM=xterm</code> in your environment on the server (e.g. in <code>.bash_profile</code>). This will silence the error and allow ncurses applications to run again, but you may experience strange behavior and graphical glitches unless your terminal's control sequences exactly match xterm's.
+</p>
+<h3><span class="mw-headline" id="Connection_closed_by_x.x.x.x_.5Bpreauth.5D">Connection closed by x.x.x.x [preauth]</span></h3>
+<p>If you are seeing this error in your sshd logs, make sure you have set a valid HostKey
+</p>
+<pre>HostKey /etc/ssh/ssh_host_rsa_key
+</pre>
+<h3><span class="mw-headline" id="id_dsa_refused_by_OpenSSH_7.0">id_dsa refused by OpenSSH 7.0</span></h3>
+<p>OpenSSH 7.0 deprecated DSA public keys for security reasons. If you absolutely must enable them, set the <a href="#Configuration">config</a> option <code>PubkeyAcceptedKeyTypes +ssh-dss</code> (<a rel="nofollow" class="external free" href="http://www.openssh.com/legacy.html">http://www.openssh.com/legacy.html</a> does not mention this).
+</p>
+<h3><span class="mw-headline" id="No_matching_key_exchange_method_found_by_OpenSSH_7.0">No matching key exchange method found by OpenSSH 7.0</span></h3>
+<p>OpenSSH 7.0 deprecated the diffie-hellman-group1-sha1 key algorithm because it is weak and within theoretical range of the so-called Logjam attack (see <a rel="nofollow" class="external free" href="http://www.openssh.com/legacy.html">http://www.openssh.com/legacy.html</a>). If the key algorithm is needed for a particular host, ssh will produce an error message like this:
+</p>
+<pre>Unable to negotiate with 127.0.0.1: no matching key exchange method found.
+Their offer: diffie-hellman-group1-sha1
+</pre>
+<p>The best resolution for these failures is to upgrade/configure the server to not use deprecated algorithms. If that is not possible, you can force the client to reenable the algorithm with the <a href="#Configuration">client option</a> <code>KexAlgorithms +diffie-hellman-group1-sha1</code>.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/Secure_Shell" class="extiw" title="wikipedia:Secure Shell">Wikipedia:Secure Shell</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.la-samhna.de/library/brutessh.html">Defending against brute force ssh attacks</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/library/l-keyc/index.html">OpenSSH key management, Part 1</a> and <a rel="nofollow" class="external text" href="http://www.ibm.com/developerworks/library/l-keyc2">Part 2</a> on IBM developerWorks</li>
+<li> <a rel="nofollow" class="external text" href="https://stribika.github.io/2015/01/04/secure-secure-shell.html">Secure Secure Shell</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Secure_Shell.html" title="Category:Secure Shell">Secure Shell</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

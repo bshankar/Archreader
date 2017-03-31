@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Logitech MX Master - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Logitech_MX_Master skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Logitech MX Master</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><a rel="nofollow" class="external text" href="http://www.logitech.com/en-us/product/mx-master">Logitech MX Master</a>
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Usage"><span class="tocnumber">1</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Mappings_for_extra_buttons"><span class="tocnumber">2</span> <span class="toctext">Mappings for extra buttons</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Power"><span class="tocnumber">3</span> <span class="toctext">Power</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Smart_shift"><span class="tocnumber">4</span> <span class="toctext">Smart shift</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Mainly, the mouse should work right away with the supplied USB dongle. To get a <a href="../en/Bluetooth.html" title="Bluetooth">Bluetooth</a> connection working, change the channel on the bottom of the mouse, and click the <code>connect</code> button. Now, search for the mouse with a bluetooth manager of your choice and engage a connection. In future it should connect as soon as you switch to that channel when your bluetooth is active.
+</p>
+<h2><span class="mw-headline" id="Mappings_for_extra_buttons">Mappings for extra buttons</span></h2>
+<p>The vertical wheel and the two buttons near it should work right away, however the thumb button requires some special threatment, and you might want to remap the rest.
+</p>
+<p>To remap the buttons of the mouse you can use the packages <a href="../en/Xbindkeys.html" title="Xbindkeys">xbindkeys</a> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xautomation">xautomation</a></span>.
+</p>
+<p><i>xbindkeys</i> will redirect the buttons and <i>xte</i> (which is included in xautomation) will execute the custom key presses. To do so, create a config file named <code>.xbindkeysrc</code> in your home directory.
+</p>
+<p>Here is a sample configuration for the vertical scroll wheel and the two buttons near it:
+</p>
+<pre># thumb wheel up =&gt; increase volume and unmute      
+"amixer -D pulse set Master 4000+ unmute"
+   b:6                                   
+                                        
+# thumb wheel down =&gt; lower volume       
+"amixer -D pulse set Master 4000-"       
+   b:7                                   
+                                        
+# backward button =&gt; previous song       
+"xte 'key XF86AudioPrev'"                
+   b:8                                   
+                                        
+# forward button =&gt; next song            
+"xte 'key XF86AudioNext'"                
+   b:9
+</pre>
+<p>If using PulseAudio (more info <a href="../en/Xbindkeys.html#Xbindkeysrc" title="Xbindkeys">here</a>):
+</p>
+<pre># thumb wheel up =&gt; increase volume
+"pactl set-sink-volume @DEFAULT_SINK@ +2%"
+   b:6
+
+# thumb wheel down =&gt; lower volume
+"pactl set-sink-volume @DEFAULT_SINK@ -2%"
+   b:7
+
+</pre>
+<p>If you prefer to get a visual feedback on how the volume level changes you could use the following lines instead  
+(Might work in GNOME too but I have only tested on KDE)
+</p>
+<pre># thumb wheel up =&gt; increase volume
+"xte 'key XF86AudioRaiseVolume'"
+   b:6
+
+# thumb wheel down =&gt; lower volume
+"xte 'key XF86AudioLowerVolume'"
+   b:7
+</pre>
+<p><br>
+Now start <code>xbindkeys</code>, preferably add that to the autostart list of your desktop environment.
+</p>
+<p>The thumb button is special, with the Logitech software available for Windows and Mac, you would be able to map up to 5 actions to it: by pressing the button or by pressing the button and moving the mouse in one of four directions. As of November 2015, there is no way to enable the direction feature using Arch. 
+</p>
+<p>If you look at the keys the button triggers you will notice that it sends a series of keys, confusing xbindkeys. You need to add a short sleep here so xbindkeys will only react on the first keys send so we can at least map one action to it:
+</p>
+<pre># thumb button =&gt; play/pause music         
+# Credit to gregmuellegger <a rel="nofollow" class="external free" href="https://bbs.archlinux.org/viewtopic.php?pid=1551271#p1551271">https://bbs.archlinux.org/viewtopic.php?pid=1551271#p1551271</a>                               
+# We need a sleep here since the button triggers a few more key codes. 
+# It also triggers Control+Mod2+Control_L and Alt+Mod2+Alt_L. The sleep       
+# prevents that X receives those keypresses simultaniously. Therefore they    
+# might interfere and trigger unwanted actions. By the sleep we make sure that
+# the Alt+Left is receive as distinct event.                                  
+"sleep 0.1 &amp;&amp; xte 'key XF86AudioPlay'"                                        
+   m:0xc + c:23
+</pre>
+<p>Remember that all changes to <code>~/.xbindkeysrc</code> require a restart of the xbindkeys process: 
+</p>
+<pre>$ pkill xbindkeys &amp;&amp; xbindkeys
+</pre>
+<h2><span class="mw-headline" id="Power">Power</span></h2>
+<p>Battery status can be read as described on <a href="../en/Logitech_Unifying_Receiver.html" title="Logitech Unifying Receiver">Logitech Unifying Receiver</a>. e.g. Solaar (<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/solaar/">solaar</a></span><sup><small>AUR</small></sup>) has s system tray utility.
+</p>
+<h2><span class="mw-headline" id="Smart_shift">Smart shift</span></h2>
+<p>In order to change the sensitivity of changing the mouse wheel mode (between hyperfast and click-to-click), install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/solaar-git/">solaar-git</a></span><sup><small>AUR</small></sup>. A slider appears that can be set somewhere between 0 and 50 (inclusive). 0 means always in hyperfast mode, 50 means always in click-to-click mode.
+</p>
+<p>To change the sensitivity, change this value somewhere between 0 and 50.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Mice.html" title="Category:Mice">Mice</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

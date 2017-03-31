@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Modprobed-db - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Modprobed-db skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Modprobed-db</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Kernels.html" title="Kernels">Kernels</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Linux-ck.html" title="Linux-ck">Linux-ck</a></li>
+</ul>
+</div>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/modprobed-db/">modprobed-db</a></span><sup><small>AUR</small></sup> keeps a running list of ALL modules ever probed on a system and allow for easy recall.  This is very useful for users wishing to build a minimal kernel via a <code>make localmodconfig</code> which simply takes every module currently probed and switches everything BUT them off in the <code>.config</code> for a kernel resulting in smaller kernel packages and reduced compilation times.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation_and_Setup"><span class="tocnumber">1</span> <span class="toctext">Installation and Setup</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Cron"><span class="tocnumber">2.1</span> <span class="toctext">Cron</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Systemd"><span class="tocnumber">2.2</span> <span class="toctext">Systemd</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Data_Recall"><span class="tocnumber">2.3</span> <span class="toctext">Data Recall</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#Using_the_Official_Arch_kernel_PKGBUILD"><span class="tocnumber">2.3.1</span> <span class="toctext">Using the Official Arch kernel PKGBUILD</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="#Using_Some_Kernels_in_the_AUR"><span class="tocnumber">2.3.2</span> <span class="toctext">Using Some Kernels in the AUR</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Recommendations"><span class="tocnumber">3</span> <span class="toctext">Recommendations</span></a></li>
+<li class="toclevel-1 tocsection-9"><a href="#Suggested_Modules"><span class="tocnumber">4</span> <span class="toctext">Suggested Modules</span></a></li>
+<li class="toclevel-1 tocsection-10"><a href="#Benefits_of_modprobed-db_with_make_localmodconfig_in_custom_kernels"><span class="tocnumber">5</span> <span class="toctext">Benefits of modprobed-db with <b>make localmodconfig</b> in custom kernels</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation_and_Setup">Installation and Setup</span></h2>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/modprobed-db/">modprobed-db</a></span><sup><small>AUR</small></sup> package is available from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<ol>
+<li>Run <code>modprobed-db</code> which will create <code>$XDG_CONFIG_HOME/modprobed-db.conf</code> if one does not already exist.</li>
+<li>Run <code>modprobed-db store</code> to store the current loaded modules.</li>
+</ol>
+<p><b>Optionally:</b> add modules in the ignore array that you do NOT want counted, for example modules that get built or that are provided by another package.
+Some common ones are included by default:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ cat ~/.config/modprobed-db.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+IGNORE=(nvidia vboxdrv vboxnetflt vboxnetadp vboxpci lirc_dev lirc_i2c
+osscore oss_hdaudio oss_usb tp_smapi thinkpad_ec
+zavl znvpair zunicode zcommon zpios zfs spl splat)</pre>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>Once the initial database has been created, simply use the system (insert USB sticks, use hardware that requires modules, mount filesystems that require modules, etc.) and periodically update the databases by one of two automatic methods:
+</p>
+<h3><span class="mw-headline" id="Cron">Cron</span></h3>
+<p>The most convenient method to use modprobed-db is to simply add a crontab entry invoking <code>/usr/bin/modprobed-db store</code> at some regular interval.
+</p>
+<p>Example running the script once every hour:
+</p>
+<pre>$ crontab -e
+0 */1 * * *   /usr/bin/modprobed-db store &amp;&gt; /dev/null
+</pre>
+<h3><span class="mw-headline" id="Systemd">Systemd</span></h3>
+<p>Systemd users not wishing to use cron may use the included user service: <code>modprobed-db.service</code>. It will run modprobed-db in store mode once per hour, and at boot and on shutdown.
+</p>
+<pre>$ systemctl --user enable modprobed-db.service
+$ systemctl --user start modprobed-db.service
+</pre>
+<p>Status of the service and of the timer can be queried like any service and timer:
+</p>
+<pre>$ systemctl --user status modprobed-db
+$ systemctl --user list-timers
+</pre>
+<h3><span class="mw-headline" id="Data_Recall">Data Recall</span></h3>
+<p>As mentioned earlier, this script is meant to be used in concert with the <b>make localmodconfig</b> step of compiling a kernel.  After the database has been adequately populated, simply invoke <code>/usr/bin/modprobed-db recall</code> prior to compiling a kernel to load all modules followed by the <b>make localmodconfig</b> to do the magic.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Since <code>/usr/bin/modprobe</code> requires root privileges, <code>/usr/bin/modprobed-db</code> needs to be called as root or via sudo when users wish to recall the database.</div>
+<h4><span class="mw-headline" id="Using_the_Official_Arch_kernel_PKGBUILD">Using the Official Arch kernel PKGBUILD</span></h4>
+<p>The official Arch kernel's PKGBUILD does not have native support for this, but it is easily modified as follows:
+</p>
+<pre> ...
+  # get kernel version
+  make prepare
+
+  sudo /usr/bin/modprobed-db recall        # &lt;---- insert this line
+  make localmodconfig                      # &lt;---- insert this line
+
+  # load configuration
+  # Configure the kernel. Replace the line below with one of your choice.
+  #make menuconfig # CLI menu for configuration
+  #make nconfig # new CLI menu for configuration
+  #make xconfig # X-based configuration
+  #make oldconfig # using old config from previous kernel version
+  # ... or manually edit .config
+ ...</pre>
+<h4><span class="mw-headline" id="Using_Some_Kernels_in_the_AUR">Using Some Kernels in the AUR</span></h4>
+<p>Several kernel packages in the AUR have native support for modprobed-db in their PKGBUILD files.
+For example:
+</p>
+<ul>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-bfs/">linux-bfs</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/linux-bfs">aur-mirror</a>]</sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-bridge-pl/">linux-bridge-pl</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/linux-bridge-pl">aur-mirror</a>]</sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ck-fbcondecor/">linux-ck-fbcondecor</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ck/">linux-ck</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lqx/">linux-lqx</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lts310/">linux-lts310</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lts312/">linux-lts312</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-lts-ck/">linux-lts-ck</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-pf/">linux-pf</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-uksm-ck/">linux-uksm-ck</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/linux-uksm-ck">aur-mirror</a>]</sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-ice/">linux-ice</a></span><sup><small>AUR</small></sup>
+</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/linux-uksm/">linux-uksm</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/linux-uksm">aur-mirror</a>]</sup>
+</li>
+</ul>
+<p>Find which other packages use it:
+</p>
+<pre>cd /scratch
+git clone --depth 1 <a rel="nofollow" class="external free" href="http://pkgbuild.com/git/aur-mirror.git">http://pkgbuild.com/git/aur-mirror.git</a>
+find /scratch/aur-mirror -iname "PKGBUILD" -print0 | xargs -0 grep -i 'modprobed-db recall\|modprobed_db recall' | sort
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The server pkgbuild.com is rather slow and the git clone can take a while.</div>
+<p>Alternatively, download the .tar.xz snapshot (around 90 MB) by following <a rel="nofollow" class="external text" href="http://pkgbuild.com/git/aur-mirror.git/">this link</a> and then clicking on the latest commit message.
+</p>
+<h2><span class="mw-headline" id="Recommendations">Recommendations</span></h2>
+<p>It is recommended that users install the package and then "use" the system for a good amount of time to allow the database to grow based on usage and capture everything the system needs before building a kernel with a <b>make localmodconfig</b>.  Some suggested actions to allow appropriate modules to load and get cataloged:
+</p>
+<ul>
+<li>Insert every kind of removable media (USB, DVD, CD, etc.)</li>
+<li>Use every device on the machine (wifi, network, USB stuff like cameras, ipods, etc.)</li>
+<li>Mount every kind of filesystem one might typically use including ext2/3/4, fat, vfat, CIFS shares, NFS shares, etc.</li>
+<li>Use as many applications (that one would normally use) as possible in order to capture modules on which they depend.  For example, IP blocking/filtering software like <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/pgl-cli/">pgl-cli</a></span><sup><small>AUR</small></sup>.</li>
+<li>Users who plan to mount iso image file should do so (this will make sure to capture the <b>loop</b> and <b>isofs</b> modules).</li>
+<li>Users requiring encryption software such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=truecrypt">truecrypt</a></span> should make sure to load it, and mount some encrypted containers to ensure that the needed crypto modules are in the db.</li>
+<li>Try-out different Linux-kernels; they may include modules not enabled in the default/other kernel(s)</li>
+</ul>
+<h2><span class="mw-headline" id="Suggested_Modules">Suggested Modules</span></h2>
+<ul>
+<li>cifs</li>
+<li>ext2</li>
+<li>ext3</li>
+<li>ext4</li>
+<li>fat</li>
+<li>isofs</li>
+<li>loop</li>
+<li>efivars</li>
+<li>vfat</li>
+<li>usb_storage</li>
+</ul>
+<h2><span class="mw-headline" id="Benefits_of_modprobed-db_with_make_localmodconfig_in_custom_kernels">Benefits of modprobed-db with <b>make localmodconfig</b> in custom kernels</span></h2>
+<ol>
+<li>Reduced kernel footprint on FS</li>
+<li>Reduced compilation time</li>
+</ol>
+<p>Comparisons using version 3.8.8-1 of the Arch kernel (from ABS):
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> The modprobed.db on the test machine contains 209 lines; YMMV based on specific usage and needs.</div>
+<table border="1">
+<tr>
+<td> <b>Machine CPU</b> </td>
+<td> <b># of threads</b> </td>
+<td> <b>make localmodconfig</b>
+</td>
+<td>
+<b># of Modules</b> </td>
+<td> <b>Modules' Size on HDD</b> </td>
+<td> <b>Compilation Time</b>
+</td>
+</tr>
+<tr>
+<td> Intel i7-3770K @ 4.50 GHz </td>
+<td> 8 </td>
+<td> No </td>
+<td> 3,025 </td>
+<td> 129 MB </td>
+<td> 7 min 37 sec
+</td>
+</tr>
+<tr>
+<td> Intel i7-3770K @ 4.50 GHz </td>
+<td> 8 </td>
+<td> Yes </td>
+<td> 230 </td>
+<td> 18 MB </td>
+<td> 1 min 13 sec
+</td>
+</tr>
+<tr>
+<td> Intel Q9550 @ 3.40 GHz </td>
+<td> 4 </td>
+<td> No </td>
+<td> 3,025 </td>
+<td> 129 MB </td>
+<td> 14 min 21 sec
+</td>
+</tr>
+<tr>
+<td> Intel Q9550 @ 3.40 GHz </td>
+<td> 4 </td>
+<td> Yes </td>
+<td> 230 </td>
+<td> 18 MB </td>
+<td> 2 min 20 sec
+</td>
+</tr>
+<tr>
+<td> Intel E5200 @ 3.33 GHz </td>
+<td> 2 </td>
+<td> No </td>
+<td> 3,025 </td>
+<td> 129 MB </td>
+<td> 34 min 35 sec
+</td>
+</tr>
+<tr>
+<td> Intel E5200 @ 3.33 GHz </td>
+<td> 2 </td>
+<td> Yes </td>
+<td> 230 </td>
+<td> 18 MB </td>
+<td> 5 min 46 sec
+</td>
+</tr>
+</table>
+<ul>
+<li><b>13x less modules built</b></li>
+<li><b>7x less space</b></li>
+<li><b>6x less compilation time</b></li>
+</ul>
+<p>Number of modules found by:
+</p>
+<pre>find /scratch/linux-3.8 -name '*.ko' | wc -l
+</pre>
+<p>Size on HDD found by:
+</p>
+<pre>find /scratch/linux-3.8 -name '*.ko' -print0 | xargs -0 du -ch
+</pre>
+<p>Compilation time found by entering a preconfigured linux-3.8.8 (using stock Arch config):
+</p>
+<pre>$ time make -jx modules
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The Arch standard is to gzip each module; the numbers shown in the table above are not gzip'ed but the savings ratio will be unaffected by this.</div>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Kernel.html" title="Category:Kernel">Kernel</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

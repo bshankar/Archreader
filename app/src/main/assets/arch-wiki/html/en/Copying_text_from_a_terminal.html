@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Copying text from a terminal - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Copying_text_from_a_terminal skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Copying text from a terminal</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Most mature terminal emulators permit users to copy or save their contents.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#General_approach"><span class="tocnumber">1</span> <span class="toctext">General approach</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Terminals_without_CLIPBOARD_selection"><span class="tocnumber">1.1</span> <span class="toctext">Terminals without CLIPBOARD selection</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Intercepting_commands.E2.80.99s_output"><span class="tocnumber">1.2</span> <span class="toctext">Intercepting commands’s output</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Accessing_Linux_terminal_backlog"><span class="tocnumber">1.3</span> <span class="toctext">Accessing Linux terminal backlog</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5"><a href="#A_cheatsheet_for_common_emulators"><span class="tocnumber">2</span> <span class="toctext">A cheatsheet for common emulators</span></a></li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Special_cases"><span class="tocnumber">3</span> <span class="toctext">Special cases</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#putty"><span class="tocnumber">3.1</span> <span class="toctext">putty</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#urxvt"><span class="tocnumber">3.2</span> <span class="toctext">urxvt</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#xterm"><span class="tocnumber">3.3</span> <span class="toctext">xterm</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="General_approach">General approach</span></h2>
+<p>In graphical terminal emulators, contents are typically selectable by mouse, and can then be copied using the context menu, <i>Edit</i> menu or a key combination such as <code>Ctrl+Shift+C</code>.
+</p>
+<h3><span class="mw-headline" id="Terminals_without_CLIPBOARD_selection">Terminals without CLIPBOARD selection</span></h3>
+<p>Some emulators do not support the <a href="../en/Clipboard.html#Background" title="Clipboard">CLIPBOARD selection</a> natively, and copy data to the PRIMARY selection. For them <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xclip">xclip</a></span> may be used:
+</p>
+<pre>$ xclip -o | xclip -selection clipboard -i
+</pre>
+<p>The above command reads data from the PRIMARY selection and writes it to CLIPBOARD selection.
+</p>
+<p>Other <a href="../en/Clipboard.html#List_of_clipboard_managers" title="Clipboard">clipboard managers</a> such as <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=autocutsel">autocutsel</a></span> provide automatic synchronization between selection buffers.
+</p>
+<h3><span class="mw-headline" id="Intercepting_commands.E2.80.99s_output">Intercepting commands’s output</span></h3>
+<p>Use <i>tee</i> to intercept the output of a command.
+</p>
+<pre>$ command 2&gt;&amp;1 | tee output-file
+</pre>
+<p>After the <code>command</code> is executed, <code>output-file</code> will contain its output.
+</p>
+<h3><span class="mw-headline" id="Accessing_Linux_terminal_backlog">Accessing Linux terminal backlog</span></h3>
+<p>The backlog of a native terminal named <code>/dev/ttyN</code> may be accessed via <code>/dev/vcsN</code>.
+Hence, if one is working in <code>/dev/tty1</code>, the following snippet will let store the backlog in a file <code>output-file</code>:
+</p>
+<pre># cat /dev/vcs1 &gt;output-file
+</pre>
+<h2><span class="mw-headline" id="A_cheatsheet_for_common_emulators">A cheatsheet for common emulators</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a><b>The factual accuracy of this article or section is disputed.</b><a href="../File:Tango-inaccurate.png" class="image"><img alt="Tango-inaccurate.png" src="../File:Tango-inaccurate.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Some "No" entries in this table may be wrong. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Copying_text_from_a_terminal#A_cheatsheet_for_common_emulators:_.22No.22_entries_factual_accuracy">Talk:Copying text from a terminal#A cheatsheet for common emulators: "No" entries factual accuracy</a>)</div>
+</div>
+<p>Unless the "Notes" column states otherwise, the keys combination is <code>Ctrl+Shift+c</code>.
+</p>
+<table class="wikitable">
+<tr>
+<th rowspan="2"> Emulator </th>
+<th rowspan="2"> Selection → PRIMARY </th>
+<th colspan="5"> Selection → CLIPBOARD
+</th>
+</tr>
+<tr>
+<th> Automatic </th>
+<th> Keys combination </th>
+<th> Context menu → Copy </th>
+<th> Window menu → Copy </th>
+<th> Notes
+</th>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/aterm/">aterm</a></span><sup><small>AUR</small></sup>             </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/ETerm/">ETerm</a></span><sup><small>AUR</small></sup>             </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/germinal/">germinal</a></span><sup><small>AUR</small></sup>          </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Guake.html" title="Guake">guake</a>                 </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=konsole">konsole</a></span>           </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lilyterm">lilyterm</a></span>          </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> <code>Ctrl+Delete</code>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=lxterminal">lxterminal</a></span>        </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=mate-terminal">mate-terminal</a></span>     </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mlterm/">mlterm</a></span><sup><small>AUR</small></sup>            </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes      </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=pantheon-terminal">pantheon-terminal</a></span> </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=putty">putty</a></span>             </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=qterminal">qterminal</a></span>         </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=roxterm">roxterm</a></span>           </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=rxvt">rxvt</a></span>              </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=sakura">sakura</a></span>            </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/St.html" title="St">st</a>                    </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Terminator.html" title="Terminator">terminator</a>            </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=terminology">terminology</a></span>       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Termite.html" title="Termite">termite</a>               </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Tilda.html" title="Tilda">tilda</a>                 </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/tinyterm-git/">tinyterm-git</a></span><sup><small>AUR</small></sup>      </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Rxvt-unicode.html" title="Urxvt" class="mw-redirect">urxvt</a>                 </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Optional </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> <code>Ctrl+Alt+c</code>
+</td>
+</tr>
+<tr>
+<td> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xfce4-terminal">xfce4-terminal</a></span>    </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Xterm.html" title="Xterm">xterm</a>                 </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes      </td>
+<td style="background: #ffa; color: inherit; vertical-align: middle; text-align: center;">Optional </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td> <a rel="nofollow" class="external autonumber" href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=588785">[1]</a>
+</td>
+</tr>
+<tr>
+<td> <a href="../en/Yakuake.html" title="Yakuake">yakuake</a>               </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No       </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #afa; color: inherit; vertical-align: middle; text-align: center;">Yes </td>
+<td style="background: #faa; color: inherit; vertical-align: middle; text-align: center;">No </td>
+<td>
+</td>
+</tr>
+</table>
+<h2><span class="mw-headline" id="Special_cases">Special cases</span></h2>
+<h3><span class="mw-headline" id="putty">putty</span></h3>
+<p>The <a href="#Terminals_without_CLIPBOARD_selection">xclip approach</a> works for <i>putty</i>: one just has to remember that the <i>xclip</i> invocation should be done on the local computer (in another terminal), not on the remote machine to which <i>putty</i> is connected.
+</p>
+<h3><span class="mw-headline" id="urxvt">urxvt</span></h3>
+<p>Selecting text to CLIPBOARD requires the <code>selection-to-clipboard</code> perl extension. See <a href="../en/Rxvt-unicode.html#Cut_and_paste" title="Rxvt-unicode">Rxvt-unicode#Cut and paste</a> for details.
+</p>
+<h3><span class="mw-headline" id="xterm">xterm</span></h3>
+<p>Access to the CLIPBOARD selection in <i>xterm</i> requires <a href="../en/Xterm.html#PRIMARY_or_CLIPBOARD" title="Xterm">additional steps</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Command_shells.html" title="Category:Command shells">Command shells</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Accuracy.html" title="Category:Pages or sections flagged with Template:Accuracy">Pages or sections flagged with Template:Accuracy</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

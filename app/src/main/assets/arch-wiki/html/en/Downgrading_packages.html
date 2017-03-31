@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Downgrading packages - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Downgrading_packages skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Downgrading packages</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_Build_System.html" title="Arch Build System">Arch Build System</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Makepkg.html" title="Makepkg">makepkg</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Pacman.html" title="Pacman">pacman</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_Linux_Archive.html" title="Arch Linux Archive">Arch Linux Archive</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a><b>This article or section needs expansion.</b><a href="../File:Tango-view-fullscreen.png" class="image"><img alt="Tango-view-fullscreen.png" src="../File:Tango-view-fullscreen.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> soname bumps, cf. <a href="../en/Frequently_asked_questions.html#What_if_I_run_a_full_system_upgrade_and_there_will_be_an_update_for_a_shared_library.2C_but_not_for_the_apps_that_depend_on_it.3F" title="Frequently asked questions">Frequently_asked_questions#What_if_I_run_a_full_system_upgrade_and_there_will_be_an_update_for_a_shared_library.2C_but_not_for_the_apps_that_depend_on_it.3F</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:Downgrading_packages">Talk:Downgrading packages#</a>)</div>
+</div>
+<p>Before downgrading a single or multiple packages, consider why you wish to do so. If it is due to a bug, search the <a rel="nofollow" class="external text" href="https://bugs.archlinux.org/">bug tracker</a> for existing tasks. If there is none, add a new task; it is better to correct bugs, or at least warn other users of possible issues.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>
+<ul>
+<li> Downgrading one package may require that its dependencies be downgraded as well. When the number of packages to downgrade is large, consider using a snapshot. See <a href="../en/Arch_Linux_Archive.html#How_to_restore_all_packages_to_a_specific_date" title="Arch Linux Archive">Arch Linux Archive#How to restore all packages to a specific date</a>.</li>
+<li> Be careful with changes to configuration files and scripts. For now pacman will handle this for us, as long as we do not bypass its safeguards.</li>
+</ul>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Return_to_an_earlier_package_version"><span class="tocnumber">1</span> <span class="toctext">Return to an earlier package version</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Using_the_pacman_cache"><span class="tocnumber">1.1</span> <span class="toctext">Using the pacman cache</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#Downgrading_the_kernel"><span class="tocnumber">1.2</span> <span class="toctext">Downgrading the kernel</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Arch_Linux_Archive"><span class="tocnumber">1.3</span> <span class="toctext">Arch Linux Archive</span></a></li>
+<li class="toclevel-2 tocsection-5">
+<a href="#Rebuild_the_package"><span class="tocnumber">1.4</span> <span class="toctext">Rebuild the package</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="#vABS_-_Versioned_Arch_Build_System"><span class="tocnumber">1.4.1</span> <span class="toctext">vABS - Versioned Arch Build System</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-7"><a href="#Automation"><span class="tocnumber">1.5</span> <span class="toctext">Automation</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#Return_from_.5Btesting.5D"><span class="tocnumber">2</span> <span class="toctext">Return from [testing]</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Return_to_an_earlier_package_version">Return to an earlier package version</span></h2>
+<h3><span class="mw-headline" id="Using_the_pacman_cache">Using the pacman cache</span></h3>
+<p>If a package was installed at an earlier stage, and the <a href="../en/Pacman.html#Cleaning_the_package_cache" title="Pacman">pacman cache</a> was not cleaned, install an earlier version from <code>/var/cache/pacman/pkg/</code>.
+</p>
+<p>This process will remove the current package and install the older version. Dependency changes will be handled, but <a href="../en/Pacman.html" title="Pacman">pacman</a> will not handle version conflicts. If a library or other package needs to be downgraded with the packages, please be aware that you will have to downgrade this package yourself as well.
+</p>
+<pre># cd /var/cache/pacman/pkg/
+# pacman -U &lt;file_name_of_the_package&gt;
+</pre>
+<p>Once the package is reverted, temporarily add it to the <a href="../en/Pacman.html#Skip_package_from_being_upgraded" title="Pacman">IgnorePkg section</a> of <code>pacman.conf</code>, until the difficulty with the updated package is resolved.
+</p>
+<h3><span class="mw-headline" id="Downgrading_the_kernel">Downgrading the kernel</span></h3>
+<p>If you are unable to boot after a kernel update, then you can downgrade the kernel via a live CD. Use a fairly recent Arch Linux installation medium. Once it has booted, mount the partition where your system is installed to <code>/mnt</code>, and if you have <code>/boot</code> or <code>/var</code> on separate partitions, mount them there as well (e.g. <code>mount /dev/sdc3 /mnt/boot</code>). Then <a href="../en/Change_root.html" title="Chroot" class="mw-redirect">chroot</a> into the system:
+</p>
+<pre># arch-chroot /mnt /bin/bash
+</pre>
+<p>Here you can go to <code>/var/cache/pacman/pkg</code> and downgrade the packages. At least downgrade <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux">linux</a></span>, <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=linux-headers">linux-headers</a></span> and any kernel modules. For example:
+</p>
+<pre># pacman -U linux-3.5.6-1-x86_64.pkg.tar.xz linux-headers-3.5.6-1-x86_64.pkg.tar.xz virtualbox-host-modules-4.2.0-5-x86_64.pkg.tar.xz
+</pre>
+<p>Exit the chroot (with <code>exit</code>), reboot and you should be done.
+</p>
+<h3><span class="mw-headline" id="Arch_Linux_Archive">Arch Linux Archive</span></h3>
+<p>The <a href="../en/Arch_Linux_Archive.html" title="Arch Linux Archive">Arch Linux Archive</a> is a daily snapshot of the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>.
+</p>
+<p>The <i>ALA</i> can be used to install a previous package version, or restore the system to an earlier date.
+</p>
+<h3><span class="mw-headline" id="Rebuild_the_package">Rebuild the package</span></h3>
+<p>If the package is unavailable, find the correct <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILD</a> and rebuild it with <a href="../en/Makepkg.html" title="Makepkg">makepkg</a>.
+</p>
+<p>For packages from the <a href="../en/Official_repositories.html" title="Official repositories">official repositories</a>, retrieve the PKGBUILD with <a href="../en/Arch_Build_System.html" title="ABS" class="mw-redirect">ABS</a> and change the software version. Alternatively, find the package on the <a rel="nofollow" class="external text" href="https://www.archlinux.org/packages">Packages</a> website, click "View Changes", and navigate to the desired version. The files are available through a <code>.tar.gz</code> snapshot, and via the <i>Tree</i> view.
+</p>
+<p>See also <a href="../en/Getting_PKGBUILDs_from_SVN.html#Checkout_an_older_revision_of_a_package" title="Getting PKGBUILDs from SVN">Getting PKGBUILDs from SVN#Checkout an older revision of a package</a>.
+</p>
+<p>Old AUR packages can be obtained from <a rel="nofollow" class="external text" href="http://pkgbuild.com/git/aur-mirror.git/">aur-mirror</a>. See <a href="../en/Arch_User_Repository.html#Git_repositories_for_AUR3_packages" title="Arch User Repository">Arch User Repository#Git repositories for AUR3 packages</a> for details.
+</p>
+<h4><span class="mw-headline" id="vABS_-_Versioned_Arch_Build_System">vABS - Versioned Arch Build System</span></h4>
+<p><a rel="nofollow" class="external text" href="https://vabs.archlinux-br.org">vABS</a> is an addition to ABS that has as main goal to keep different versions of the official PKGBUILDs. In ABS you have the latest versions of PKGBUILDs, while in vABS you also have old versions (up to 2 years). Select the desired version and download the build files tgz package or individual files and easily build your package with pkgbuild. More information about the service can be found <a rel="nofollow" class="external text" href="https://www.archlinux-br.org/vabs_en">here</a>.
+</p>
+<h3><span class="mw-headline" id="Automation">Automation</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/downgrader/">downgrader</a></span><sup><small>AUR</small></sup> is a tool which works with libalpm, supports the pacman log and downgrading packages using <a href="../en/Arch_Linux_Archive.html" title="Arch Linux Archive">Arch Linux Archive</a>, local cache and <a rel="nofollow" class="external text" href="http://repo-arm.archlinuxcn.org">ARM</a>.
+</p>
+<p>The <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/downgrade/">downgrade</a></span><sup><small>AUR</small></sup> package is a Bash script to downgrade one (or multiple) packages, by using the pacman cache or the <a href="../en/Arch_Linux_Archive.html" title="Arch Rollback Machine" class="mw-redirect">Arch Rollback Machine</a>. See <code>man downgrade</code> for details.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/agetpkg-git/">agetpkg-git</a></span><sup><small>AUR</small></sup> quickly lists/gets/installs packages from the <a href="../en/Arch_Linux_Archive.html" title="Arch Linux Archive">Arch Linux Archive</a>.
+</p>
+<h2><span class="mw-headline" id="Return_from_.5Btesting.5D">Return from [testing]</span></h2>
+<p>See <a href="../en/Official_repositories.html#Disabling_testing_repositories" title="Official repositories">Official repositories#Disabling testing repositories</a>.
+</p>
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_management.html" title="Category:Package management">Package management</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Expansion.html" title="Category:Pages or sections flagged with Template:Expansion">Pages or sections flagged with Template:Expansion</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

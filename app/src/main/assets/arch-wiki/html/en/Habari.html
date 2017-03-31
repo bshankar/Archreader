@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Habari - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Habari skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Habari</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>This document describes how to set up the Habari open source blogging engine on an Arch Linux system. It also tells how to enable your .htaccess file and required php modules that would prevent install errors from occurring.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Before_You_Install"><span class="tocnumber">1</span> <span class="toctext">Before You Install</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Installation"><span class="tocnumber">2</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Step_1:_Check_PHP_Configuration"><span class="tocnumber">2.1</span> <span class="toctext">Step 1: Check PHP Configuration</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Step_2:_Prepare_MySQL_Database"><span class="tocnumber">2.2</span> <span class="toctext">Step 2: Prepare MySQL Database</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#Step_3:_Check_Apache_Configuration"><span class="tocnumber">2.3</span> <span class="toctext">Step 3: Check Apache Configuration</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#Step_4:_Prepare_Habari_Directory"><span class="tocnumber">2.4</span> <span class="toctext">Step 4: Prepare Habari Directory</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Step_5:_Run_The_Installer"><span class="tocnumber">2.5</span> <span class="toctext">Step 5: Run The Installer</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-8"><a href="#External_Links"><span class="tocnumber">3</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Before_You_Install">Before You Install</span></h2>
+<p>Know that Habari is still alpha and there is no package in the main or AUR repositories. While some would claim that wordpress is better, wordpress is bloated and habari makes for an excellent alternative fit for efficient arch user.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong> This howto assumes you have a LAMP already setup and ready to go. If you haven't set one up yet, see <a href="../en/Apache_HTTP_Server.html" title="LAMP" class="mw-redirect">LAMP</a>.</div>
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<h3><span class="mw-headline" id="Step_1:_Check_PHP_Configuration">Step 1: Check PHP Configuration</span></h3>
+<p>Make sure the following extensions are uncommented in <code>/etc/php/php.ini</code>:
+</p>
+<pre>extension=gd.so
+extension=gettext.so
+extension=iconv.so
+extension=mhash.so
+extension=pdo_mysql.so
+extension=session.so
+extension=xmlrpc.so
+extension=zlib.so
+</pre>
+<h3><span class="mw-headline" id="Step_2:_Prepare_MySQL_Database">Step 2: Prepare MySQL Database</span></h3>
+<p>You need to create a habari database for the blog to write stuff to. One can choose <b>habaridata</b> for the db name, <b>habari</b> for the username, and <b>habaripass</b> for the password. Assuming you've already accessed your mysql install and set a root password:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ mysql -u root</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+mysql&gt; CREATE DATABASE habaridata;
+mysql&gt; GRANT ALL PRIVILEGES ON habaridata.* TO 'habari'@'localhost' IDENTIFIED BY 'habaripass';
+mysql&gt; QUIT;
+</pre>
+<h3><span class="mw-headline" id="Step_3:_Check_Apache_Configuration">Step 3: Check Apache Configuration</span></h3>
+<p>Edit <code>/etc/httpd/conf/httpd.conf</code> and uncomment the following line:
+</p>
+<pre>LoadModule rewrite_module modules/mod_rewrite.so
+</pre>
+<p>Change all (just to be safe):
+</p>
+<pre>AllowOverride None
+</pre>
+<p>To:
+</p>
+<pre>AllowOverride FileInfo
+</pre>
+<p>Add (just to be safe):
+</p>
+<pre># Habari .htaccess
+&lt;Directory /srv/http/blog&gt;
+     AllowOverride FileInfo
+&lt;/Directory&gt;
+</pre>
+<p>Restart Apache (<code>httpd.service</code>).
+</p>
+<h3><span class="mw-headline" id="Step_4:_Prepare_Habari_Directory">Step 4: Prepare Habari Directory</span></h3>
+<pre># cd /srv/http
+# mkdir habari (or whatever you want to call the folder that'll house the habari install (e.g., blog, etc.))
+# cd habari
+# chmod o+w . (this is to make the installation go smoothly, so apache can write to the folder)
+# touch .htaccess
+# touch config.php
+# chmod o+w .htaccess
+# chmod o+w config.php
+# svn checkout http://svn.habariproject.org/habari/trunk/htdocs .
+# mkdir user/files
+# chown http:http user/files
+# chmod o+w user/files
+# chown http:http user/cache
+# chmod o+w user/cache
+</pre>
+<h3><span class="mw-headline" id="Step_5:_Run_The_Installer">Step 5: Run The Installer</span></h3>
+<p>Head over to http://yourdomain.com/habari or whatever folder you called it. The habari installer should come up. This is fairly straightforward. Input the database information including the username and password. It is recommended to also have a prefix for the database, if you're mysql for other programs. The hostname will be localhost 99% of the time. You can enable all the plugins including the nifty wordpress importer if you want to migrate from that. The name of the blog can also be specified by changing the default <b>My Habari</b>. Click the install button at the very bottom and congratulations; you are now running Habari
+</p>
+<h2><span class="mw-headline" id="External_Links">External Links</span></h2>
+<ul>
+<li> Main Habari Install Resource: <a rel="nofollow" class="external free" href="http://wiki.habariproject.org/en/Installation">http://wiki.habariproject.org/en/Installation</a>
+</li>
+<li> Habari Troubleshooting: <a rel="nofollow" class="external free" href="http://wiki.habariproject.org/en/Troubleshooting">http://wiki.habariproject.org/en/Troubleshooting</a>
+</li>
+<li> For more info on mysql database preparation, see <a rel="nofollow" class="external free" href="https://help.ubuntu.com/community/PunBB">https://help.ubuntu.com/community/PunBB</a>
+</li>
+<li> Habari Themes: <a rel="nofollow" class="external free" href="http://wiki.habariproject.org/en/Available_Themes">http://wiki.habariproject.org/en/Available_Themes</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Web_server.html" title="Category:Web server">Web server</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

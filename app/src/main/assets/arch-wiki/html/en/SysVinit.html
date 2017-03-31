@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>SysVinit - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-SysVinit skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">SysVinit</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Init.html" title="Init">init</a></li>
+</ul>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a><b>This article or section needs language, wiki syntax or style improvements.</b><a href="../File:Tango-edit-clear.png" class="image"><img alt="Tango-edit-clear.png" src="../File:Tango-edit-clear.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Blog-like writing, duplicate information (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SysVinit">Talk:SysVinit#</a>)</div>
+</div>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a><b>This article or section is out of date.</b><a href="../File:Tango-view-refresh-red.png" class="image"><img alt="Tango-view-refresh-red.png" src="../File:Tango-view-refresh-red.png" width="48" height="48"></a></p>
+<div>
+<b>Reason:</b> Needs to be checked against <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/initscripts-fork/">initscripts-fork</a></span><sup><small>AUR</small></sup> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SysVinit">Talk:SysVinit#</a>)</div>
+</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>SysVinit is not officially supported in Arch Linux <a rel="nofollow" class="external autonumber" href="https://www.archlinux.org/news/end-of-initscripts-support/">[1]</a>.</div>
+<p>On systems based on SysVinit, <b>init</b> is the first process that is executed once the Linux kernel loads. The default init program used by the kernel is <code>/sbin/init</code> provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-sysvcompat">systemd-sysvcompat</a></span> (by default on new installs, see <a href="../en/Systemd.html" title="Systemd">systemd</a>) or <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sysvinit/">sysvinit</a></span><sup><small>AUR</small></sup>. The word <b>init</b> will always refer to sysvinit in this article.
+</p>
+<p><b>inittab</b> is the startup configuration file for init located in <code>/etc</code>. It contains directions for init on what programs and scripts to run when entering a specific runlevel.
+</p>
+<p>Although a SysVinit-based Arch system does use init, most of the work is delegated to the <a href="#Main_Boot_Scripts">#Main Boot Scripts</a>. This article concentrates on init and inittab.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Overview_of_init_and_inittab"><span class="tocnumber">2</span> <span class="toctext">Overview of init and inittab</span></a></li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Switching_runlevel"><span class="tocnumber">3</span> <span class="toctext">Switching runlevel</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#Through_bootloader"><span class="tocnumber">3.1</span> <span class="toctext">Through bootloader</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#After_boot_up"><span class="tocnumber">3.2</span> <span class="toctext">After boot up</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#inittab"><span class="tocnumber">4</span> <span class="toctext">inittab</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#Default_Runlevel"><span class="tocnumber">4.1</span> <span class="toctext">Default Runlevel</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Main_Boot_Scripts"><span class="tocnumber">4.2</span> <span class="toctext">Main Boot Scripts</span></a></li>
+<li class="toclevel-2 tocsection-9"><a href="#Single_User_Boot"><span class="tocnumber">4.3</span> <span class="toctext">Single User Boot</span></a></li>
+<li class="toclevel-2 tocsection-10"><a href="#Gettys_and_Login"><span class="tocnumber">4.4</span> <span class="toctext">Gettys and Login</span></a></li>
+<li class="toclevel-2 tocsection-11"><a href="#Ctrl.2BAlt.2BDel"><span class="tocnumber">4.5</span> <span class="toctext">Ctrl+Alt+Del</span></a></li>
+<li class="toclevel-2 tocsection-12"><a href="#X_Programs"><span class="tocnumber">4.6</span> <span class="toctext">X Programs</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="#Power-Sensing_Scripts"><span class="tocnumber">4.7</span> <span class="toctext">Power-Sensing Scripts</span></a></li>
+<li class="toclevel-2 tocsection-14">
+<a href="#Custom_Keyboard_Request"><span class="tocnumber">4.8</span> <span class="toctext">Custom Keyboard Request</span></a>
+<ul>
+<li class="toclevel-3 tocsection-15"><a href="#Trigger_the_kbrequest"><span class="tocnumber">4.8.1</span> <span class="toctext">Trigger the kbrequest</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16">
+<a href="#Writing_rc.d_scripts"><span class="tocnumber">5</span> <span class="toctext">Writing rc.d scripts</span></a>
+<ul>
+<li class="toclevel-2 tocsection-17"><a href="#Guideline"><span class="tocnumber">5.1</span> <span class="toctext">Guideline</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#Available_functions"><span class="tocnumber">5.2</span> <span class="toctext">Available functions</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Example"><span class="tocnumber">5.3</span> <span class="toctext">Example</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Migration_to_systemd"><span class="tocnumber">6</span> <span class="toctext">Migration to systemd</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Considerations_before_switching"><span class="tocnumber">6.1</span> <span class="toctext">Considerations before switching</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Supplementary_information"><span class="tocnumber">6.2</span> <span class="toctext">Supplementary information</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-23"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/sysvinit/">sysvinit</a></span><sup><small>AUR</small></sup> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/initscripts-fork/">initscripts-fork</a></span><sup><small>AUR</small></sup> from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>. This step will remove <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=systemd-sysvcompat">systemd-sysvcompat</a></span>, and you will use sysvinit on reboot. To restore <a href="../en/Systemd.html" title="Systemd">systemd</a>, append <code>init=/usr/lib/systemd/systemd</code> to the <a href="../en/Kernel_parameters.html" title="Kernel command line" class="mw-redirect">kernel command line</a>.
+</p>
+<p>Additional init scripts are available at <a rel="nofollow" class="external text" href="https://bitbucket.org/TZ86/arch-rcscripts/src/3e83aeed6c68c6252b8db1428c10a717bc9e05ff/community/?at=master">arch-rcscripts</a>. See <a href="../en/Init.html#Configuration" title="Init">Init#Configuration</a> for generic configuration steps.
+</p>
+<h2><span class="mw-headline" id="Overview_of_init_and_inittab">Overview of init and inittab</span></h2>
+<p>init is always process 1 and, other than managing some swap space, is the parent process to <b>all</b> other processes. You can get an idea of where init lies in the process hierarchy of your system with <code>pstree</code>:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ pstree -Ap</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+init(1)-+-acpid(3432)
+        |-crond(3423)
+        |-dbus-daemon(3469)
+        |-gpm(3485)
+        |-mylogin(3536)
+        |-ngetty(3535)---login(3954)---zsh(4043)---pstree(4326)
+        |-polkitd(4033)---{polkitd}(4035)
+        |-syslog-ng(3413)---syslog-ng(3414)
+        `-udevd(643)-+-udevd(3194)
+                     `-udevd(3218)
+</pre>
+<p>Besides usual initialization of system (as the name suggests), init also handles rebooting, shutdown and booting into recovery mode (single-user mode). To support these, inittab groups entries into different <b>runlevel</b>s. The runlevels Arch uses are 0 for halt, 1 (aliased as S) for single-user mode, 3 for normal booting (multi-user mode), 5 for X and 6 for reboot. Other distros may adopt other conventions, but the meanings of 0, 1 and 6 are universal.
+</p>
+<p>Upon execution, init scans inittab and carry out appropriate actions. An entry in inittab takes the form
+</p>
+<pre>
+id:runlevels:action:process
+</pre>
+<p>Where <code>id</code> is a unique identifier for the entry (just a name, no real impact on init), and <code>runlevels</code> is a (not delimited) string of runlevels. If the runlevel init is entering appears in <code>runlevels</code>, <code>action</code> is carried out, executing <code>process</code> if appropriate. Some special <code>action</code>s would cause init to ignore <code>runlevels</code> and adopt a special matching method. More explanation follows in the next section.
+</p>
+<p>See also <code>man 5 inittab</code> and <code>man 8 init</code>.
+</p>
+<h2><span class="mw-headline" id="Switching_runlevel">Switching runlevel</span></h2>
+<h3><span class="mw-headline" id="Through_bootloader">Through bootloader</span></h3>
+<p>To change the runlevel the system boots into, simply add the desired runlevel <code>n</code> to the respective bootloader's configuration line. A common application of this is <a href="../en/Xinit.html#inittab" title="Start X at login" class="mw-redirect">Start X at login#inittab</a>. To boot to the desired runlevel, add its number to the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> (e.g. <code>3</code> for runlevel 3).
+</p>
+<p>The run-level was appended to the end so the kernel knows what run-level to start with. To use another init program (e.g. <a href="../en/Systemd.html" title="Systemd">systemd</a>), add <code>init=/bin/systemd</code> or similar. 
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>If using some init other than sysvinit, the runlevel parameter might be ignored.</div>
+<h3><span class="mw-headline" id="After_boot_up">After boot up</span></h3>
+<p>After the system has booted up, you may issue <code>telinit n</code> to inform init to change the runlevel to <code>n</code>. init then reads inittab and "diffs" runlevel n and current runlevel - killing processes not present in the new runlevel and carrying out actions not present in the old runlevel. Processes present in both runlevels are left untouched. The killing procedure is actually a little complex; again, technical details can be found in the init manpage.
+</p>
+<p>init doesn't watch inittab. You need to call <code>telinit</code> explicitly to apply modifications to inittab. The command <code>telinit q</code> causes init to re-examine inittab but not switch runlevel.
+</p>
+<h2><span class="mw-headline" id="inittab">inittab</span></h2>
+<p>In this section we examine common entries in inittab, in the same order as they appear in the default inittab used by Arch. After that there are a few examples to help you create your own inittab entry.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Always test a modified <code>/etc/inittab</code> with <code>telinit q</code> before you reboot, or a small syntax error can prevent your system from booting.</div>
+<h3><span class="mw-headline" id="Default_Runlevel">Default Runlevel</span></h3>
+<p>The default runlevel is 3. Uncomment or add this if you prefer to boot into runlevel 5 (which is used for X conventionally) by default:
+</p>
+<pre>
+id:5:initdefault:
+</pre>
+<h3><span class="mw-headline" id="Main_Boot_Scripts">Main Boot Scripts</span></h3>
+<p>These are the main Arch init scripts.
+</p>
+<pre>
+rc::sysinit:/etc/rc.sysinit
+rs:S1:wait:/etc/rc.single
+rm:2345:wait:/etc/rc.multi
+rh:06:wait:/etc/rc.shutdown
+</pre>
+<h3><span class="mw-headline" id="Single_User_Boot">Single User Boot</span></h3>
+<p>Sometimes your kernel may fail to boot up all the way, due to a corrupted or dead hard drive or filesystem, missing key files, etc. In that case your init image may automatically enter into <b>single-user mode</b> which only allows root login and uses <code>/sbin/sulogin</code> instead of <code>/sbin/login</code> to control the login process. You can also boot into single-user mode by appending the letter <code>S</code> to your kernel command line in your <a href="../en/GRUB.html" title="GRUB">GRUB</a>, <a href="../en/LILO.html" title="LILO">LILO</a>, or <a href="../en/Syslinux.html" title="Syslinux">syslinux</a> configuration. If you would like something other than sulogin to run, specify it here.
+</p>
+<pre>
+su:S:wait:/sbin/sulogin -p
+</pre>
+<h3><span class="mw-headline" id="Gettys_and_Login">Gettys and Login</span></h3>
+<p>These are crucial entries that run the <a href="../en/Getty.html" title="Getty">gettys</a> on your terminals. Most default configurations will have several gettys running on ttys1-6 which is what pops up on your screen with the login prompt. Also see openvt, chvt, stty, and ioctl.
+</p>
+<pre>
+c1:234:respawn:/sbin/agetty 9600 tty1 xterm-color
+c5:5:respawn:/sbin/agetty 57600 tty2 xterm-256color
+</pre>
+<h3><span class="mw-headline" id="Ctrl.2BAlt.2BDel">Ctrl+Alt+Del</span></h3>
+<p>When the special key sequence <code>Ctrl+Alt+Del</code> is pressed, this determines what to do.
+</p>
+<pre>
+ca::ctrlaltdel:/sbin/shutdown -t3 -r now
+</pre>
+<h3><span class="mw-headline" id="X_Programs">X Programs</span></h3>
+<p>If you are not afraid to debug, you can figure out how to start all sorts of programs from inittab. One useful type of program is to start your login manager when the runlevel is 5, multi-user-x-mode. In the following example you can see how to start <a href="../en/SLiM.html" title="SLiM">SLiM</a> when entering runlevel 5.
+</p>
+<pre>
+x:5:respawn:/usr/bin/slim &gt;/dev/null 2&gt;&amp;1
+#x:5:respawn:/usr/bin/xdm -nodaemon -confi /etc/X11/xdm/archlinux/xdm-config
+</pre>
+<h3><span class="mw-headline" id="Power-Sensing_Scripts">Power-Sensing Scripts</span></h3>
+<p>Init can communicate with your UPS device and execute processes based on the status of the UPS. Here are some examples:
+</p>
+<pre>
+pf::powerfail:/sbin/shutdown -f -h +2 "Power Failure; System Shutting Down"
+pr:12345:powerokwait:/sbin/shutdown -c "Power Restored; Shutdown Cancelled"
+</pre>
+<h3><span class="mw-headline" id="Custom_Keyboard_Request">Custom Keyboard Request</span></h3>
+<p>The following line adds a custom function for when a special key sequence is pressed. You can modify this special key sequence to be anything you like, similar to a <code>Ctrl+Alt+Del</code>.
+</p>
+<pre>
+kb::kbrequest:/usr/bin/wall "Keyboard Request -- edit /etc/inittab to customize"
+</pre>
+<h4><span class="mw-headline" id="Trigger_the_kbrequest">Trigger the kbrequest</span></h4>
+<p>You can trigger the special key sequence <b>kbrequest</b> by sending the WINCH signal to the init process (1) as root (via sudo). In this example, the command:
+</p>
+<pre>kill -WINCH 1
+</pre>
+<p>Causes <code>wall</code> to write to all ttys:
+</p>
+<pre>
+Broadcast message from root@askapachehost (console) (Wed Oct 27 14:02:26 2010):
+Keyboard Request -- edit /etc/inittab to customize
+</pre>
+<h2><span class="mw-headline" id="Writing_rc.d_scripts">Writing rc.d scripts</span></h2>
+<p>Initscripts uses rc.d scripts to used to control the starting, stopping and restarting of <a href="../en/Daemons.html" title="Daemons">daemons</a>.
+</p>
+<h3><span class="mw-headline" id="Guideline">Guideline</span></h3>
+<ul>
+<li> Source <code>/etc/rc.conf</code>, <code>/etc/rc.d/functions</code>, and optionally <code>/etc/conf.d/DAEMON_NAME</code>.</li>
+<li> Arguments and other daemon options should be placed in <code>/etc/conf.d/DAEMON_NAME</code>. This is done to separate configuration from logic and to keep a consistent style among daemon scripts.</li>
+<li> Use functions in <code>/etc/rc.d/functions</code> instead of duplicating their functionality.</li>
+<li> Include at least start, stop and restart as arguments to the script.</li>
+</ul>
+<h3><span class="mw-headline" id="Available_functions">Available functions</span></h3>
+<ul><li> There are some functions provided by <code>/etc/rc.d/functions</code>:
+<ul>
+<li> <code>stat_busy "<i>message</i>"</code>: set status <i>busy</i> for printed message (e.g. Starting daemon   [BUSY])</li>
+<li> <code>stat_done</code>: set status <i>done</i> (e.g. Starting daemon   [DONE])</li>
+<li> <code>stat_fail</code>: set status <i>failed</i> (e.g. Starting daemon   [FAILED])</li>
+<li> <code>get_pid <i>program</i></code>: get PID of the program</li>
+<li> <code>ck_pidfile <i>PID-file</i> <i>program</i></code>: check whether PID-file is still valid for the program (e.g. ck_pidfile /var/run/daemon.pid daemon || rm -f /var/run/daemon.pid)</li>
+<li> <code>[add|rm]_daemon <i>program</i></code>: add/remove program to running daemons (stored in <code>/run/daemons/</code>)</li>
+</ul>
+</li></ul>
+<p>Full list of functions is much longer and most possibilities (like way to control whether or not non-root users can launch daemon) are still undocumented and can be learned only from <code>/etc/rc.d/functions</code> source. See also <code>man rc.d</code>.
+</p>
+<h3><span class="mw-headline" id="Example">Example</span></h3>
+<p>The following is an example for <i>crond</i>. Look in <code>/etc/rc.d</code> for greater variety.
+</p>
+<p>The configuration file:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/conf.d/crond</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">ARGS="-S -l info"</pre>
+<p>The actual script:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/rc.d/crond</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+#!/bin/bash
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+DAEMON=crond
+ARGS=
+
+[ -r /etc/conf.d/$DAEMON ] &amp;&amp; . /etc/conf.d/$DAEMON
+
+PID=$(get_pid $DAEMON)
+
+case "$1" in
+ start)
+   stat_busy "Starting $DAEMON"
+   [ -z "$PID" ] &amp;&amp; $DAEMON $ARGS &amp;&gt;/dev/null
+   if [ $? = 0 ]; then
+     add_daemon $DAEMON
+     stat_done
+   else
+     stat_fail
+     exit 1
+   fi
+   ;;
+ stop)
+   stat_busy "Stopping $DAEMON"
+   [ -n "$PID" ] &amp;&amp; kill $PID &amp;&gt;/dev/null
+   if [ $? = 0 ]; then
+     rm_daemon $DAEMON
+     stat_done
+   else
+     stat_fail
+     exit 1
+   fi
+   ;;
+ restart)
+   $0 stop
+   sleep 1
+   $0 start
+   ;;
+ *)
+   echo "usage: $0 {start|stop|restart}"  
+esac
+</pre>
+<h2><span class="mw-headline" id="Migration_to_systemd">Migration to systemd</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Init.html" title="Init">Init</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> 2012 installation media are of no relevance, merge remainders to <a href="../en/Init.html" title="Init">Init</a> (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:SysVinit">Talk:SysVinit#</a>)</div>
+</div>
+<h3><span class="mw-headline" id="Considerations_before_switching">Considerations before switching</span></h3>
+<ul><li> Interactive <i>initscripts</i> do not work with <i>systemd</i>.</li></ul>
+<h3><span class="mw-headline" id="Supplementary_information">Supplementary information</span></h3>
+<ul><li> It is not necessary to add your user to <a href="../en/Users_and_groups.html#Group_management" title="Groups" class="mw-redirect">groups</a> (<code>sys</code>, <code>disk</code>, <code>lp</code>, <code>network</code>, <code>video</code>, <code>audio</code>, <code>optical</code>, <code>storage</code>, <code>scanner</code>, <code>power</code>, etc.) for most use cases with systemd. The groups can even cause some functionality to break. For example, the <code>audio</code> group will break fast user switching and allows applications to block software mixing. Every PAM login provides a logind session, which for a local session will give you permissions via <a href="https://en.wikipedia.org/wiki/Access_control_list" class="extiw" title="wikipedia:Access control list">POSIX ACLs</a> on audio/video devices, and allow certain operations like mounting removable storage via <a href="../en/Udisks.html" title="Udisks">udisks</a>.</li></ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a href="https://en.wikipedia.org/wiki/Init" class="extiw" title="wikipedia:Init">Wikipedia: Init</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linux-tutorial.info/modules.php?name=MContent&amp;pageid=65">Linux Knowledge Base and Tutorial. Run Levels.</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linux.com/articles/114107">Linux.com. Introduction to runlevels and inittab</a>
+</li>
+<li> <a rel="nofollow" class="external text" href="http://www.linux.com/news/enterprise/systems-management/8116-an-introduction-to-services-runlevels-and-rcd-scripts">Linux.com. An introduction to services, runlevels, and rc.d scripts.</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Boot_process.html" title="Category:Boot process">Boot process</a></li>
+<li><a href="../en/Category:Daemons_and_system_services.html" title="Category:Daemons and system services">Daemons and system services</a></li>
+</ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Style.html" title="Category:Pages or sections flagged with Template:Style">Pages or sections flagged with Template:Style</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Out_of_date.html" title="Category:Pages or sections flagged with Template:Out of date">Pages or sections flagged with Template:Out of date</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

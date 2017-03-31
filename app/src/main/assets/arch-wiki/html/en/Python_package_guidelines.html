@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Python package guidelines - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Python_package_guidelines skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Python package guidelines</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<div class="toc" style="display:block; text-align: center; margin-bottom: 1em;">
+<b><a href="../en/Creating_packages.html" title="Creating packages">Package creation guidelines</a></b>
+<hr>
+<p><a href="../en/CLR_package_guidelines.html" title="CLR package guidelines">CLR</a> – <a href="../en/Cross-compiling_tools_package_guidelines.html" title="Cross-compiling tools package guidelines">Cross</a> – <a href="../en/Eclipse_plugin_package_guidelines.html" title="Eclipse plugin package guidelines">Eclipse</a> – <a href="../en/Free_Pascal_package_guidelines.html" title="Free Pascal package guidelines">Free Pascal</a> – <a href="../en/GNOME_package_guidelines.html" title="GNOME package guidelines">GNOME</a> – <a href="../en/Go_package_guidelines.html" title="Go package guidelines">Go</a> – <a href="../en/Haskell_package_guidelines.html" title="Haskell package guidelines">Haskell</a> – <a href="../en/Java_package_guidelines.html" title="Java package guidelines">Java</a> – <a href="../en/KDE_package_guidelines.html" title="KDE package guidelines">KDE</a> – <a href="../en/Kernel_module_package_guidelines.html" title="Kernel module package guidelines">Kernel</a> – <a href="../en/Lisp_package_guidelines.html" title="Lisp package guidelines">Lisp</a> – <a href="../en/MinGW_package_guidelines.html" title="MinGW package guidelines">MinGW</a> – <a href="../en/Node.js_package_guidelines.html" title="Node.js package guidelines">Node.js</a> – <a href="../en/Nonfree_applications_package_guidelines.html" title="Nonfree applications package guidelines">Nonfree</a> – <a href="../en/OCaml_package_guidelines.html" title="OCaml package guidelines">OCaml</a> – <a href="../en/Perl_package_guidelines.html" title="Perl package guidelines">Perl</a> – <a href="../en/PHP_package_guidelines.html" title="PHP package guidelines">PHP</a> – <strong class="selflink">Python</strong> – <a href="../en/Ruby_Gem_package_guidelines.html" title="Ruby Gem package guidelines">Ruby</a> – <a href="../en/VCS_package_guidelines.html" title="VCS package guidelines">VCS</a> – <a href="../en/Web_application_package_guidelines.html" title="Web application package guidelines">Web</a> – <a href="../en/Wine_package_guidelines.html" title="Wine package guidelines">Wine</a>
+</p>
+</div>
+<p>This document covers standards and guidelines on writing <a href="../en/PKGBUILD.html" title="PKGBUILD">PKGBUILDs</a> for <a href="../en/Python.html" title="Python">Python</a> software.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Package_naming"><span class="tocnumber">1</span> <span class="toctext">Package naming</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#Versioned_packages"><span class="tocnumber">1.1</span> <span class="toctext">Versioned packages</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-3">
+<a href="#Installation_methods"><span class="tocnumber">2</span> <span class="toctext">Installation methods</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="#distutils"><span class="tocnumber">2.1</span> <span class="toctext">distutils</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#pip"><span class="tocnumber">2.2</span> <span class="toctext">pip</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Notes"><span class="tocnumber">3</span> <span class="toctext">Notes</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7"><a href="#PyPI_download_URLs"><span class="tocnumber">3.1</span> <span class="toctext">PyPI download URLs</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Package_naming">Package naming</span></h2>
+<p>For Python 3 libraries, use <code>python-<i>modulename</i></code>. For applications, use the program name. In either case, the package name should be entirely lowercase.
+</p>
+<p>Python 2 libraries should instead be named <code>python2-<i>modulename</i></code>.
+</p>
+<h3><span class="mw-headline" id="Versioned_packages">Versioned packages</span></h3>
+<p>If you need to add a versioned package then use <code>python-<i>modulename</i>-<i>version</i></code>, e.g. <code>python-colorama-0.2.5</code>. So python dependency <code>colorama==0.2.5</code> will turn into <code>python-colorama-0.2.5</code> Arch package.
+</p>
+<h2><span class="mw-headline" id="Installation_methods">Installation methods</span></h2>
+<p>Python packages are generally installed using language-specific tools, such as <a rel="nofollow" class="external text" href="https://pip.pypa.io/">pip</a> or <a rel="nofollow" class="external text" href="https://setuptools.readthedocs.io/en/latest/easy_install.html">easy_install</a>, which are comparable to dedicated package managers in that they are designed to fetch the source files from an online repository (usually <a rel="nofollow" class="external text" href="https://pypi.python.org/">PyPI</a>, the Python Package Index) and track the relevant files (for a detailed comparison between the two, see <a rel="nofollow" class="external text" href="https://packaging.python.org/pip_easy_install/#pip-vs-easy-install">pip vs easy_install</a>).
+</p>
+<p>However, for managing Python packages from within PKGBUILDs, the standard-provided <a rel="nofollow" class="external text" href="http://docs.python.org/library/distutils.html">distutils</a> proves to be the most convenient solution since it uses the downloaded source package's <code>setup.py</code> and easily installs files under <code><i>$pkgdir</i>/usr/lib/python<i>&lt;python version&gt;</i>/site-packages/<i>$pkgname</i></code> directory.
+</p>
+<h3><span class="mw-headline" id="distutils">distutils</span></h3>
+<p>A <i>distutils</i> example PKGBUILD can be found <a rel="nofollow" class="external text" href="https://projects.archlinux.org/abs.git/tree/prototypes/PKGBUILD-python.proto">here</a> or at <code>/usr/share/pacman/PKGBUILD-python.proto</code>, provided by the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=abs">abs</a></span> package. It follows the form:
+</p>
+<pre><i>&lt;python version&gt;</i> setup.py install --root="$pkgdir/" --optimize=1
+</pre>
+<p>where:
+</p>
+<ul>
+<li> <i>&lt;python version&gt;</i> is replaced with the proper binary, <code>python</code> or <code>python2</code>
+</li>
+<li> <code>--root="$pkgdir/"</code> prevents trying to directly install in the host system instead of inside the package file, which would result in a permission error</li>
+<li> <code>--optimize=1</code> compiles <code>.pyo</code> files so they can be tracked by <a href="../en/Pacman.html" title="Pacman">pacman</a>.</li>
+</ul>
+<h3><span class="mw-headline" id="pip">pip</span></h3>
+<p>If you need to use <i>pip</i> (provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python-pip">python-pip</a></span> and <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=python2-pip">python2-pip</a></span>), <i>e.g.</i> for installing <a rel="nofollow" class="external text" href="https://bitbucket.org/pypa/wheel/">wheel</a> packages, remember to pass the following flags:
+</p>
+<pre>PIP_CONFIG_FILE=/dev/null pip install --isolated --root="$pkgdir" --ignore-installed --no-deps *.whl
+</pre>
+<ul>
+<li> <code>PIP_CONFIG_FILE=/dev/null</code> ignores <code>{/etc,~/.config}/pip.conf</code> that may be appending arbitrary flags to <b>pip</b>.</li>
+<li> <code>--isolated</code> ignores environment variables (and again <code>{/etc,~/.config}/pip/pip.conf</code>) that may otherwise also be appending arbitrary flags to <b>pip</b>.</li>
+<li> <code>--ignore-installed</code> is necessary until <a rel="nofollow" class="external free" href="https://github.com/pypa/pip/issues/3063">https://github.com/pypa/pip/issues/3063</a> is resolved (otherwise <b>pip</b> skips the install in the presence of an earlier <code>--user</code> install).</li>
+<li> <code>--no-deps</code> ensures, that dependencies do not get packaged together with the main package.</li>
+</ul>
+<h2><span class="mw-headline" id="Notes">Notes</span></h2>
+<p>In most cases, you should put <code>any</code> in the <code>arch</code> array since most Python packages are architecture independent.
+</p>
+<p>Please do not install a directory named just <code>tests</code>, as it easily conflicts with other Python packages (for example, <code>/usr/lib/python2.7/site-packages/tests/</code>).
+</p>
+<h3><span class="mw-headline" id="PyPI_download_URLs">PyPI download URLs</span></h3>
+<p>PyPI URLs of the form <code>https://pypi.python.org/packages/source/${pkgname:0:1}/${pkgname}/${pkgname}-${pkgver}.tar.gz</code> were silently abandoned for new package versions in the course of 2016, replaced by a scheme using an unpredictable hash that needs to be fetched from the PyPI website each time a package must be updated<a rel="nofollow" class="external autonumber" href="https://bitbucket.org/pypa/pypi/issues/438/backwards-compatible-un-hashed-package#comment-27230605">[1]</a>.
+</p>
+<p>As downstream packagers voiced their concerns to PyPI maintainers<a rel="nofollow" class="external autonumber" href="https://bitbucket.org/pypa/pypi/issues/438/backwards-compatible-un-hashed-package">[2]</a>, a new stable scheme was provided<a rel="nofollow" class="external autonumber" href="https://bitbucket.org/pypa/pypi/issues/438/backwards-compatible-un-hashed-package#comment-27606213">[3]</a>: <a href="../en/PKGBUILD.html#source" title="PKGBUILD">PKGBUILD#source</a> <code>source=()</code> array should now use <code>https://files.pythonhosted.org/packages/source/${pkgname:0:1}/${pkgname}/${pkgname}-${pkgver}.tar.gz</code> as their URL.
+</p>
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Package_development.html" title="Category:Package development">Package development</a></li></ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

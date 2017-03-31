@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>GLC - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-GLC skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">GLC</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>GLC is an  ALSA &amp;  OpenGL capture tool for Linux. It consists of a generic video capture, playback and processing library and a set of tools built around that library. GLC should be able to capture any application that uses ALSA for sound and OpenGL for drawing. It is similar to Fraps on Windows.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="#Usage"><span class="tocnumber">2</span> <span class="toctext">Usage</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="#Playback"><span class="tocnumber">3</span> <span class="toctext">Playback</span></a></li>
+<li class="toclevel-1 tocsection-4"><a href="#Encoding"><span class="tocnumber">4</span> <span class="toctext">Encoding</span></a></li>
+<li class="toclevel-1 tocsection-5"><a href="#Mixing_audio_streams"><span class="tocnumber">5</span> <span class="toctext">Mixing audio streams</span></a></li>
+<li class="toclevel-1 tocsection-6"><a href="#Interfaces"><span class="tocnumber">6</span> <span class="toctext">Interfaces</span></a></li>
+<li class="toclevel-1 tocsection-7"><a href="#See_also"><span class="tocnumber">7</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>To install GLC, simply install the <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/glc/">glc</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/glc">aur-mirror</a>]</sup> package from AUR.
+</p>
+<p>If you want to record 32 bit programs such as Wine on a 64 bit system, you will also need to install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/lib32-glc/">lib32-glc</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/lib32-glc">aur-mirror</a>]</sup>.
+</p>
+<p>NOTE: GLC will only work with ALSA. If you use Pulseaudio, install the <a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages.php?O=0&amp;K=glc-pulseaudio&amp;do_Search=Pesquisar">glc-pulseaudio*</a> packages instead. If you use OSS, you will probably need to record the audio separately.
+</p>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>The basic usage is simple. By default, GLC will save a (large) .glc file in the current directory. You can then play or encode it. Just run this:
+</p>
+<pre>glc-capture [application]
+</pre>
+<p>Press <b>Shift + F8</b> to start and stop recording. Otherwise you can use:
+</p>
+<pre>glc-capture -s [application]
+</pre>
+<p>To start recording immediately. For complete list of available options see:
+</p>
+<pre>glc-capture --help
+</pre>
+<p>If you want to record from two different audio devices, usually the application and the microphone, you need to use the <b>-a</b> option. For example:
+</p>
+<pre>glc-capture -a 'hw:0,48000,1;hw:1,48000,1' [application]
+</pre>
+<p>The <b>-a</b> format is <i>device,rate,channels;device2...</i>; you probably want to mix the two audio streams togheter after, so to make it easier keep both sample rate at the same value.
+</p>
+<h2><span class="mw-headline" id="Playback">Playback</span></h2>
+<p>To play a captured stream directly, execute
+</p>
+<pre>glc-play [stream file]
+</pre>
+<p><b>ESC</b> stops playback, <b>f</b> toggles fullscreen and Right seeks forward.
+</p>
+<h2><span class="mw-headline" id="Encoding">Encoding</span></h2>
+<p>In order to use the videos outside of glc-play, you will need to encode it. Here are a few example that work well for encoding. Of course, you can be creative and use any of the formats supported by ffmpeg to get your desired result (mencoder works too, I'm just not familiar with it).
+</p>
+<p>For either script, run with the following context (assuming it's saved as glc-encode.sh):
+</p>
+<pre>glc-encode.sh filename.glc
+</pre>
+<p><b>H.264 Ultrafast + FLAC Audio</b>: (fairly quick encoding, high quality, good filesize)
+This script requires the following packages: ffmpeg
+</p>
+<pre>#!/bin/bash
+glc-play $1 -a 1 -o glc.wav
+glc-play $1 -o - -y 1 | ffmpeg -i - -preset ultrafast -i glc.wav -acodec flac -vcodec libx264 output.mkv
+rm glc.wav
+</pre>
+<p>It will output as output.mkv
+</p>
+<p><b>Lossless</b> (usually quickest, no quality loss, <i>huge</i> files, need plenty of HD space):
+This script requires the following packages: ffmpeg
+</p>
+<pre>#!/bin/bash
+glc-play $1 -a 1 -o glc.wav
+glc-play $1 -y 1 -o glc.yuv
+ffmpeg -i glc.wav -i glc.yuv -acodec copy -vcodec copy output.mkv
+rm glc.yuv
+rm glc.wav
+</pre>
+<p>It will output as output.mkv
+</p>
+<p><b>WebM</b>:
+This script requires the following packages: vorbis-tools, ffmpeg, and mkvtoolnix
+</p>
+<pre>#!/bin/bash
+glc-play $1 -a 1 -o - | oggenc - -b 128k -o glc.ogg
+glc-play $1 -o - -y 1 | ffmpeg -i - -vcodec libvpx glc.webm
+mkvmerge -o output.webm glc.webm glc.ogg
+rm glc.ogg
+rm glc.webm
+</pre>
+<p>It will output as output.webm
+</p>
+<p>Note: Sometimes when recording WINE, the audio stream you want won't be #1, so you'll have to find out which one it is and experiment, and edit the encoding script accordingly. You can get some info on the streams using <b>glc-play -i 1 filename.glc</b>
+</p>
+<h2><span class="mw-headline" id="Mixing_audio_streams">Mixing audio streams</span></h2>
+<p>Using <b>glc-play -i 1 filename.glc</b> you get the list of audio tracks, extract them with the command from the previous section and you get <b>.wav</b> files with the audio tracks.
+</p>
+<p>Depending on how the application started the Alsa driver, it is possible there are silent tracks, so listen them and delete the unneeded ones. Once done you can mix using <b>sox</b> (from the package of the same name) using this command:
+</p>
+<pre>sox -m -v 0.3 gamesound.wav -v 0.7 voice.wav finalaudio.wav
+</pre>
+<p>The <b>-m</b> option asks the mix, instead <b>-v</b> options change the volume of the audio file, try to keep the sum of both to 1.
+</p>
+<p>Once you get a single <b>.wav</b> file with audio as you want, encode and mux normally.
+</p>
+<h2><span class="mw-headline" id="Interfaces">Interfaces</span></h2>
+<p>Two graphical interfaces are available for glc to try and simplify it's usage, with both of them being avalible from the <a href="../en/Arch_User_Repository.html" title="AUR" class="mw-redirect">AUR</a>.
+</p>
+<ul>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/soulcapture/">soulcapture</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/soulcapture">aur-mirror</a>]</sup> is a graphical front-end made in <a href="../en/Gambas.html" title="Gambas">Gambas</a> that utilizes <a href="../en/FFmpeg.html" title="FFmpeg">FFmpeg</a> for encoding.</li>
+<li>
+<span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gamecaster/">gamecaster</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/gamecaster">aur-mirror</a>]</sup> is a graphical front-end made in <a href="../en/Python.html" title="Python">Python</a> that utilizes <a href="../en/FFmpeg.html" title="FFmpeg">FFmpeg</a> for encoding; optimized for Ubuntu.</li>
+</ul>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li>
+<a rel="nofollow" class="external free" href="https://github.com/nullkey/glc">https://github.com/nullkey/glc</a> - Homepage, and they have a good wiki there as well</li>
+<li>
+<a rel="nofollow" class="external free" href="https://github.com/darkimmortal/glc">https://github.com/darkimmortal/glc</a> - An alternative version with support for 32-bit float audio (many Windows games via <a href="../en/Wine.html" title="Wine">wine</a> use this)</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Multimedia.html" title="Category:Multimedia">Multimedia</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

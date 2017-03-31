@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>rEFInd - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-REFInd skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">rEFInd</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p><span></span>
+</p>
+<div style="width:45%; margin: 0 0 0.5em 0.5em;">
+<p style="background:#333; color:white; padding:0.2em; border-bottom:5px #08c solid; margin:0; text-align:center; font-weight:bold;">Related articles</p>
+<ul style="list-style-type:none; margin:0; padding:0.3em;">
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Arch_boot_process.html" title="Arch boot process">Arch boot process</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Boot_loaders.html" title="Boot loaders" class="mw-redirect">Boot loaders</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a></li>
+<li style="padding:0.4em 0; line-height:1;"><a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a></li>
+</ul>
+</div>
+<p><i>rEFInd</i> is a <a href="../en/Unified_Extensible_Firmware_Interface.html" title="UEFI" class="mw-redirect">UEFI</a> boot manager capable of launching <a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a> kernels. It is a fork of the no-longer-maintained <a rel="nofollow" class="external text" href="http://refit.sourceforge.net/">rEFIt</a> and fixes many issues with respect to non-Mac UEFI booting. It is designed to be platform-neutral and to simplify booting multiple OSes.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In the entire article <code><i>esp</i></code> denotes the mountpoint of the <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a> aka ESP.</div>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Scripted_installation"><span class="tocnumber">1.1</span> <span class="toctext">Scripted installation</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3">
+<a href="#Secure_Boot"><span class="tocnumber">1.1.1</span> <span class="toctext">Secure Boot</span></a>
+<ul>
+<li class="toclevel-4 tocsection-4"><a href="#Using_PreLoader"><span class="tocnumber">1.1.1.1</span> <span class="toctext">Using PreLoader</span></a></li>
+<li class="toclevel-4 tocsection-5"><a href="#Using_your_own_keys"><span class="tocnumber">1.1.1.2</span> <span class="toctext">Using your own keys</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-6"><a href="#Manual_installation"><span class="tocnumber">1.2</span> <span class="toctext">Manual installation</span></a></li>
+<li class="toclevel-2 tocsection-7">
+<a href="#Upgrading"><span class="tocnumber">1.3</span> <span class="toctext">Upgrading</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8"><a href="#Pacman_hook"><span class="tocnumber">1.3.1</span> <span class="toctext">Pacman hook</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-9">
+<a href="#Configuration"><span class="tocnumber">2</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-10">
+<a href="#Passing_kernel_parameters"><span class="tocnumber">2.1</span> <span class="toctext">Passing kernel parameters</span></a>
+<ul>
+<li class="toclevel-3 tocsection-11"><a href="#For_kernels_automatically_detected_by_rEFInd"><span class="tocnumber">2.1.1</span> <span class="toctext">For kernels automatically detected by rEFInd</span></a></li>
+<li class="toclevel-3 tocsection-12"><a href="#Manual_boot_stanzas"><span class="tocnumber">2.1.2</span> <span class="toctext">Manual boot stanzas</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-13">
+<a href="#Usage"><span class="tocnumber">3</span> <span class="toctext">Usage</span></a>
+<ul>
+<li class="toclevel-2 tocsection-14"><a href="#Using_rEFInd_with_an_existing_UEFI_Windows_installation"><span class="tocnumber">3.1</span> <span class="toctext">Using rEFInd with an existing UEFI Windows installation</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15">
+<a href="#Tools"><span class="tocnumber">4</span> <span class="toctext">Tools</span></a>
+<ul>
+<li class="toclevel-2 tocsection-16"><a href="#UEFI_shell"><span class="tocnumber">4.1</span> <span class="toctext">UEFI shell</span></a></li>
+<li class="toclevel-2 tocsection-17"><a href="#Memtest86"><span class="tocnumber">4.2</span> <span class="toctext">Memtest86</span></a></li>
+<li class="toclevel-2 tocsection-18"><a href="#GPT_fdisk_.28gdisk.29"><span class="tocnumber">4.3</span> <span class="toctext">GPT fdisk (gdisk)</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#iPXE"><span class="tocnumber">4.4</span> <span class="toctext">iPXE</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20">
+<a href="#Troubleshooting"><span class="tocnumber">5</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Using_drivers_in_UEFI_shell"><span class="tocnumber">5.1</span> <span class="toctext">Using drivers in UEFI shell</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#btrfs_subvolume_root_support"><span class="tocnumber">5.2</span> <span class="toctext">btrfs subvolume root support</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Apple_Macs"><span class="tocnumber">5.3</span> <span class="toctext">Apple Macs</span></a></li>
+<li class="toclevel-2 tocsection-24"><a href="#VirtualBox"><span class="tocnumber">5.4</span> <span class="toctext">VirtualBox</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-25"><a href="#See_also"><span class="tocnumber">6</span> <span class="toctext">See also</span></a></li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p><a href="../en/Help:Reading.html#Installation_of_packages" title="Install" class="mw-redirect">Install</a> <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=refind-efi">refind-efi</a></span> from the <a href="../en/Official_repositories.html" title="Official repositories">Official repositories</a>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>Your kernel and initramfs need to reside on a file system which <i>rEFInd</i> can read.</div>
+<p><i>rEFInd</i> has <b>read-only</b> drivers for ReiserFS, Ext2, Ext4, Btrfs, ISO-9660, HFS+, and NTFS. Additionally <i>rEFInd</i> can use drivers from the UEFI firmware i.e. FAT (or HFS+ on Macs or ISO-9660 on some systems).
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong>rEFInd before version 0.10.4 does not support the <code>64bit</code> feature of Ext4 file system.</div>
+<p>To find additional drivers see <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/drivers.html#finding">The rEFInd Boot Manager: Using EFI Drivers: Finding Additional EFI Drivers</a>.
+</p>
+<h3><span class="mw-headline" id="Scripted_installation">Scripted installation</span></h3>
+<p>The rEFInd package includes the <code>/usr/bin/refind-install</code> script to simplify the process of setting rEFInd as your default EFI boot entry. The script has several options for handling differing setups and UEFI implementations, but for many systems it should be sufficient to simply run:
+</p>
+<pre># refind-install
+</pre>
+<p>This will attempt to find and mount your <a href="../en/EFI_System_Partition.html" title="ESP" class="mw-redirect">ESP</a>, copy <i>rEFInd'</i>s files to <code>/EFI/refind/</code> on the ESP, and use <code>efibootmgr</code> to make <i>rEFInd</i> the default EFI boot application.
+</p>
+<p>Alternatively you can install <i>rEFInd</i> to the default/fallback boot path <code>/EFI/BOOT/BOOT*.EFI</code>. This is helpful for bootable USB flash drives or on systems that have issues with the NVRAM changes made by <code>efibootmgr</code>:
+</p>
+<pre># refind-install --usedefault <i>/dev/sdXY</i>
+</pre>
+<p>Where <code><i>/dev/sdXY</i></code> is the partition of your ESP.
+</p>
+<p>You can read the comments in the install script for explanations of the various installation options.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>By default <code>refind-install</code> installs only the driver for the file system on which kernel resides. Additional file systems need to be installed manually or you can install all drivers with the <code>--alldrivers</code> option. This is useful for bootable USB flash drives e.g.:
+<pre># refind-install --usedefault <i>/dev/sdXY</i> --alldrivers
+</pre>
+</div>
+<p>After installing rEFInd's files to the ESP, verify that <i>rEFInd</i> has created <code>refind_linux.conf</code> containing the required <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> (e.g. <code>root=</code>) in the same directory as your kernel. If it has not created this file, you will need to set up <a href="#Passing_kernel_parameters">#Passing kernel parameters</a> manually or you will most likely get a kernel panic on your next boot.
+</p>
+<p>By default, <i>rEFInd</i> will scan all of your drives (that it has drivers for) and add a boot entry for each EFI bootloader it finds, which should include your kernel (since Arch enables <a href="../en/EFISTUB.html" title="EFISTUB">EFISTUB</a> by default). So you may have a bootable system at this point.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>It is always a good idea to edit the default config <code>/EFI/refind/refind.conf</code> on the ESP to ensure that the default options work for you.</div>
+<h4><span class="mw-headline" id="Secure_Boot">Secure Boot</span></h4>
+<p>See <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/secureboot.html">Managing Secure Boot</a> for <a href="../en/Secure_Boot.html" title="Secure Boot">Secure Boot</a> support in rEFInd.
+</p>
+<h5><span class="mw-headline" id="Using_PreLoader">Using PreLoader</span></h5>
+<p>See <a href="../en/Secure_Boot.html#Set_up_PreLoader" title="Secure Boot">Secure Boot#Set up PreLoader</a> to acquire signed <code>PreLoader.efi</code> and <code>HashTool.efi</code> binaries.
+</p>
+<p>Execute <code>refind-install</code> with the option <code>--preloader <i>/path/to/preloader</i></code> 
+</p>
+<pre># refind-install --preloader /usr/share/preloader-signed/PreLoader.efi
+</pre>
+<p>The script will
+</p>
+<ul>
+<li> copy <code>PreLoader.efi</code> to <code><i>esp</i>/EFI/refind/refind_x64.efi</code> or <code><i>esp</i>/EFI/BOOT/BOOT_X64.EFI</code> if used with <code>--usedefault</code> option</li>
+<li> copy rEFInd binary as <code>loader.efi</code> to the same directory as PreLoader on ESP</li>
+<li> copy <code>HashTool.efi</code> to same directory as PreLoader on ESP</li>
+<li> setup boot entry with <code>efibootmgr</code> unless used with <code>--usedefault</code> option</li>
+</ul>
+<p>Next time you boot with Secure Boot enabled, HashTool will launch and you will need to register rEFInd (<code>loader.efi</code>) as a trusted application.
+</p>
+<h5><span class="mw-headline" id="Using_your_own_keys">Using your own keys</span></h5>
+<p>Follow <a href="../en/Secure_Boot.html#Using_your_own_keys" title="Secure Boot">Secure Boot#Using your own keys</a> to create keys.
+</p>
+<p>Create directory <code>/etc/refind.d/keys</code> and place Signature Database (<b>db</b>) key and certificates in it. Name the files: <code>refind_local.key</code>, <code>refind_local.crt</code> and <code>refind_local.cer</code>.
+</p>
+<p>When running install script add option <code>--localkeys</code>, e.g.:
+</p>
+<pre># refind-install --localkeys
+</pre>
+<p><i>rEFInd</i> EFI binary will be signed with supplied key and certificate.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>If you run <code>refind-install --localkeys</code> without creating the keys first, <i>refind-install</i> will create the keys for you.</div>
+<h3><span class="mw-headline" id="Manual_installation">Manual installation</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>rEFInd can boot Linux in many ways. See <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/linux.html">The <i>rEFInd</i> Boot Manager: Methods of Booting Linux</a> for coverage of the various approaches.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>For 32-bit EFI, replace <b>x64</b> with <b>ia32</b> in the commands below.</div>
+<p>If the <code>refind-install</code> script does not work for you, <i>rEFInd</i> can be set up manually.
+</p>
+<p>First, copy the executable to the ESP:
+</p>
+<pre># cp /usr/share/refind/refind_x64.efi <i>esp</i>/EFI/refind/
+</pre>
+<p>Then use <a href="../en/Unified_Extensible_Firmware_Interface.html#efibootmgr" title="UEFI" class="mw-redirect">efibootmgr</a> to create a boot entry in the UEFI NVRAM, where <code><i>/dev/sdX</i></code> and <code><i>Y</i></code> are the device and partition number of your ESP. If you are installing <i>rEFInd</i> to the default UEFI path <code>/EFI/BOOT/BOOTX64.EFI</code>, you can probably skip this step.
+</p>
+<pre># efibootmgr --create --disk <i>/dev/sdX</i> --part <i>Y</i> --loader /EFI/refind/refind_x64.efi --label "rEFInd Boot Manager"
+</pre>
+<p>At this point, you should be able to reboot into <i>rEFInd</i>, but it will not be able to boot your kernel. If your kernel does not reside on your ESP, <i>rEFInd</i> can mount your partitions to find it - provided it has the right drivers.
+</p>
+<p><i>rEFInd</i> automatically loads all drivers from the subdirectories <code>drivers</code> and <code>drivers_<i>arch</i></code> (e.g. <code>drivers_x64</code>) in its install directory.
+</p>
+<pre># mkdir <i>esp</i>/EFI/refind/drivers_x64
+# cp /usr/share/refind/drivers_x64/<b>drivername</b>_x64.efi <i>esp</i>/EFI/refind/drivers_x64/
+</pre>
+<p>Now <i>rEFInd</i> should have a boot entry for your kernel, but it will not pass the correct kernel parameters. Set up <a href="#Passing_kernel_parameters">#Passing kernel parameters</a>. You should now be able to boot your kernel using <i>rEFInd</i>. If you are still unable to boot or if you want to tweak <i>rEFInd'</i>s settings, many options can be changed with a config file:
+</p>
+<pre># cp /usr/share/refind/refind.conf-sample <i>esp</i>/EFI/refind/refind.conf
+</pre>
+<p>The sample config is well commented and self-explanatory.
+</p>
+<p>Unless you have set <code>textonly</code> in the config file, you should copy <i>rEFInd'</i>s icons to get rid of the ugly placeholders:
+</p>
+<pre># cp -r /usr/share/refind/icons <i>esp</i>/EFI/refind/
+</pre>
+<p>You can try out different fonts by copying them and changing the <code>font</code> setting in <code>refind.conf</code>:
+</p>
+<pre># cp -r /usr/share/refind/fonts <i>esp</i>/EFI/refind/
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDFFDD; border: thin solid #BBDDBB; overflow: hidden;">
+<strong> Tip: </strong>Pressing F10 in <i>rEFInd</i> will save a screenshot to the top level directory of the ESP.</div>
+<h3><span class="mw-headline" id="Upgrading">Upgrading</span></h3>
+<p>Pacman updates the <i>rEFInd</i> files in <code>/usr/share/refind/</code> and will not copy new files to the ESP for you. If <code>refind-install</code> worked for your original installation of <i>rEFInd</i>, you can rerun it to copy the updated files. The new config file will be copied as <code>refind.conf-sample</code> so that you can integrate changes into your config file using a diff tool. If your <i>rEFInd</i> required <a href="#Manual_installation">#Manual installation</a>, you will need to figure out which files to copy yourself.
+</p>
+<h4><span class="mw-headline" id="Pacman_hook">Pacman hook</span></h4>
+<p>You can automate the update process using a hook:
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/etc/pacman.d/hooks/refind.hook</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">[Trigger]
+Operation=Upgrade
+Type=Package
+Target=refind-efi
+
+[Action]
+When=PostTransaction
+Exec=/usr/bin/refind-install</pre>
+<p>Where the <code>Exec=</code> may need to be changed to the correct update command for your setup. If you did <a href="#Manual_installation">#Manual installation</a>, you could create your own update script to call with the hook.
+</p>
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<p>The <i>rEFInd</i> configuration <code>refind.conf</code> is located in the same directory as the <i>rEFInd</i> EFI application (usually <code><i>esp</i>/EFI/refind</code> or <code><i>esp</i>/EFI/BOOT</code>). The default config contains extensive comments explaining all its options, see <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/configfile.html">Configuring the Boot Manager</a> for more detailed explanations.
+</p>
+<h3><span class="mw-headline" id="Passing_kernel_parameters">Passing kernel parameters</span></h3>
+<p>There are two methods for setting the <a href="../en/Kernel_parameters.html" title="Kernel parameters">kernel parameters</a> that <i>rEFInd</i> will pass to the kernel.
+</p>
+<h4><span class="mw-headline" id="For_kernels_automatically_detected_by_rEFInd">For kernels automatically detected by rEFInd</span></h4>
+<p>If <i>rEFInd</i> automatically detects your kernel, you can place a <code>refind_linux.conf</code> file containing the kernel parameters in the same directory as your kernel. You can use <code>/usr/share/refind/refind_linux.conf-sample</code> as a starting point. The first uncommented line of <code>refind_linux.conf</code> will be the default parameters for the kernel. Subsequent lines will create entries in a submenu accessible using <code>+</code>, <code>F2</code>, or <code>Insert</code>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">/boot/refind_linux.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+"Boot using default options"     "root=PARTUUID=XXXXXXXX rw add_efi_memmap"
+"Boot using fallback initramfs"  "root=PARTUUID=XXXXXXXX rw add_efi_memmap initrd=/boot/initramfs-linux-fallback.img"
+"Boot to terminal"               "root=PARTUUID=XXXXXXXX rw add_efi_memmap systemd.unit=multi-user.target"
+</pre>
+<p>Alternatively, try running:
+</p>
+<pre># refind-mkrlconf
+</pre>
+<p>Which will attempt to find your kernel in <code>/boot</code> and automatically generate <code>refind_linux.conf</code>. The script will only set up the most basic kernel parameters, so be sure to check the file it created for correctness.
+</p>
+<p>If you do not specify an <code>initrd=</code> parameter, <i>rEFInd</i> will automatically add it by searching for common RAM disk filenames in the same directory as the kernel. If you need multiple <code>initrd=</code> parameters, you must specify them manually in <code>refind_linux.conf</code>. For example, a <a href="../en/Microcode.html" title="Microcode">Microcode</a> passed before the initramfs: <code>... initrd=/boot/intel-ucode.img initrd=/boot/initramfs-linux.img</code>.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><code>initrd</code> path is relative to the root of the file system on which the kernel resides.</div>
+<h4><span class="mw-headline" id="Manual_boot_stanzas">Manual boot stanzas</span></h4>
+<p>If your kernel is not autodetected, or if you simply want more control over the options for a menu entry, you can manually create boot entries using stanzas in <code>refind.conf</code>. Ensure that <code>scanfor</code> includes <code>manual</code> or these entries will not appear in <i>rEFInd'</i>s menu. Kernel parameters are set with the <code>options</code> keyword. <i>rEFInd</i> will append the <code>initrd=</code> parameter using the file specified by the <code>initrd</code> keyword in the stanza. If you need additional initrds (e.g. for <a href="../en/Microcode.html" title="Microcode">Microcode</a>), you can specify them in <code>options</code> (and the one specified by the <code>initrd</code> keyword will be added to the end).
+</p>
+<p>Manual boot stanzas are explained in <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/configfile.html#stanzas">Creating Manual Boot Stanzas</a>.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"><i>esp</i>/EFI/refind/refind.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+
+menuentry "Arch Linux" {
+	icon     /EFI/refind/icons/os_arch.png
+	volume   "Arch Linux"
+	loader   /boot/vmlinuz-linux
+	initrd   /boot/initramfs-linux.img
+	options  "root=PARTUUID=XXXXXXXX rw add_efi_memmap"
+	submenuentry "Boot using fallback initramfs" {
+		initrd /boot/initramfs-linux-fallback.img
+	}
+	submenuentry "Boot to terminal" {
+		add_options "systemd.unit=multi-user.target"
+	}
+}
+</pre>
+<p>It is likely that you will need to change <code>volume</code> to match either a filesystem's LABEL, a PARTLABEL, or a PARTUUID of the partition where the kernel image resides. See <a href="../en/Persistent_block_device_naming.html#by-label" title="Persistent block device naming">Persistent block device naming#by-label</a> for examples of assigning a volume label.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong><code>loader</code> and <code>initrd</code> paths are relative to the root of <code>volume</code>.</div>
+<h2><span class="mw-headline" id="Usage">Usage</span></h2>
+<p>See <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/using.html">Using rEFInd</a>.
+</p>
+<h3><span class="mw-headline" id="Using_rEFInd_with_an_existing_UEFI_Windows_installation">Using rEFInd with an existing UEFI Windows installation</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The usual caveats of <a href="../en/Dual_boot_with_Windows.html" title="Dual boot with Windows">Dual boot with Windows</a> apply.</div>
+<p><i>rEFInd</i> is compatible with the EFI system partition created by a UEFI Windows installation, so there is no need to create or format another FAT32 partition when installing Arch alongside Windows. Simply mount the existing ESP and install <i>rEFInd</i> as usual. By default, <i>rEFInd'</i>s autodetection feature should recognize any existing Windows/recovery bootloaders.
+</p>
+<h2><span class="mw-headline" id="Tools">Tools</span></h2>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a><b>This article or section is a candidate for moving to <a href="../en/Unified_Extensible_Firmware_Interface.html" title="Unified Extensible Firmware Interface">Unified Extensible Firmware Interface</a>.</b><a href="../File:Tango-go-next.png" class="image"><img alt="Tango-go-next.png" src="../File:Tango-go-next.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> Although <i>rEFInd</i> has a special interface for these common tools, they are not a feature of <i>rEFInd</i>. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:REFInd">Talk:REFInd#</a>)</div>
+</div>
+<p><i>rEFInd</i> supports running various 3rd-party tools. Tools need to be installed separately. Edit <code>showtools</code> in <code>refind.conf</code> to choose which ones to show.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"><i>esp</i>/EFI/refind/refind.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+showtools <b>shell</b>, <b>memtest</b>, <b>gdisk</b>, <b>netboot</b>, ...
+...
+</pre>
+<h3><span class="mw-headline" id="UEFI_shell">UEFI shell</span></h3>
+<p>See <a href="../en/Unified_Extensible_Firmware_Interface.html#UEFI_Shell" title="Unified Extensible Firmware Interface">UEFI shell</a>.
+</p>
+<p>Copy <code>shellx64.efi</code> to the root of the <a href="../en/EFI_System_Partition.html" title="EFI System Partition">EFI System Partition</a>.
+</p>
+<h3><span class="mw-headline" id="Memtest86">Memtest86</span></h3>
+<p>Install <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/memtest86-efi/">memtest86-efi</a></span><sup><small>AUR</small></sup> and copy it to <code><i>esp</i>/EFI/tools/</code>.
+</p>
+<pre># cp /usr/share/memtest86-efi/bootx64.efi <i>esp</i>/EFI/tools/memtest86.efi
+</pre>
+<h3><span class="mw-headline" id="GPT_fdisk_.28gdisk.29">GPT fdisk (gdisk)</span></h3>
+<p>There is no package for the EFI version of <i>gdisk</i>, but you can download a binary from <i>gdisk'</i>s author.
+</p>
+<p>Download <code>gdisk-efi-*.zip</code> from <a rel="nofollow" class="external text" href="http://sourceforge.net/projects/gptfdisk/files/gptfdisk/">SourceForge</a>, extract the archive, and copy <code>gdisk_x64.efi</code> to <code><i>esp</i>/EFI/tools</code>.
+</p>
+<h3><span class="mw-headline" id="iPXE">iPXE</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>PXE support in <i>rEFInd</i> is <b>experimental</b>.</div>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=refind-efi">refind-efi</a></span> contains the iPXE UEFI binaries, you just need to copy them to <code><i>esp</i>/EFI/tools/</code>.
+</p>
+<pre># cp /usr/share/refind/tools_x64/ipxe_discovery_x64.efi <i>esp</i>/EFI/tools/ipxe_discovery.efi
+# cp /usr/share/refind/tools_x64/ipxe_x64.efi <i>esp</i>/EFI/tools/ipxe.efi
+</pre>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Using_drivers_in_UEFI_shell">Using drivers in UEFI shell</span></h3>
+<p>To use <i>rEFInd'</i>s drivers in UEFI shell load them using command <code>load</code> and refresh mapped drives with <code>map -r</code>.
+</p>
+<pre>Shell&gt; load FS0:\EFI\refind\drivers\ext4_x64.efi
+Shell&gt; map -r
+</pre>
+<p>Now you can access your file system from UEFI shell.
+</p>
+<h3><span class="mw-headline" id="btrfs_subvolume_root_support">btrfs subvolume root support</span></h3>
+<div class="noprint archwiki-template-message">
+<p><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a><b>This article or section is a candidate for merging with <a href="../en/Btrfs.html" title="Btrfs">Btrfs</a>.</b><a href="../File:Merge-arrows-2.png" class="image"><img alt="Merge-arrows-2.png" src="../File:Merge-arrows-2.png" width="48" height="48"></a></p>
+<div>
+<b>Notes:</b> There is nothing <i>rEFInd</i> specific about this issue. (Discuss in <a rel="nofollow" class="external text" href="https://wiki.archlinux.org/index.php/Talk:REFInd">Talk:REFInd#</a>)</div>
+</div>
+<p>If booting a <a href="../en/Btrfs.html" title="Btrfs">btrfs</a> subvolume as root, amend the <code>options</code> line with <code>rootflags=subvol=&lt;root subvolume&gt;</code>. In the example below, root has been mounted as a btrfs subvolume called 'ROOT' (e.g. <code>mount -o subvol=ROOT /dev/sdxY /mnt</code>):
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;"><i>esp</i>/EFI/refind/refind.conf</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">
+...
+
+menuentry "Arch Linux" {
+        icon     /EFI/refind/icons/os_arch.png
+        volume   Boot
+        loader   /boot/vmlinuz-linux
+        initrd   /boot/initramfs-linux.img
+        options  "root=PARTUUID=XXXXXXXX rw rootflags=subvol=ROOT"
+
+...
+        }
+</pre>
+<p>A failure to do so will otherwise result in the following error message: <code>ERROR: Root device mounted successfully, but /sbin/init does not exist.</code>
+</p>
+<h3><span class="mw-headline" id="Apple_Macs">Apple Macs</span></h3>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/mactel-boot/">mactel-boot</a></span><sup><small>AUR</small></sup> is an experimental "bless" utility for Linux. If that does not work, use "bless" from within OSX to set <i>rEFInd</i> as the default boot entry:
+</p>
+<pre># bless --setBoot --folder <i>esp</i>/EFI/refind --file <i>esp</i>/EFI/refind/refind_x64.efi
+</pre>
+<h3><span class="mw-headline" id="VirtualBox">VirtualBox</span></h3>
+<p>Currently, VirtualBox will only boot the default <code>/EFI/BOOT/BOOT*.EFI</code> path, so <code>refind-install</code> needs to be used with at least the <code>--usedefault</code> option. See <a href="../en/VirtualBox.html#Installation_in_EFI_mode" title="VirtualBox">VirtualBox#Installation in EFI mode</a> for more information.
+</p>
+<h2><span class="mw-headline" id="See_also">See also</span></h2>
+<ul>
+<li> <a rel="nofollow" class="external text" href="http://www.rodsbooks.com/refind/">The rEFInd Boot Manager</a> by Roderick W. Smith.</li>
+<li> <code>/usr/share/refind/docs/README.txt</code>
+</li>
+<li> <a rel="nofollow" class="external text" href="https://sourceforge.net/p/refind/discussion/">rEFInd discussion forum on Sourceforge</a>
+</li>
+</ul>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Boot_loaders.html" title="Category:Boot loaders">Boot loaders</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden categories: <ul>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Move.html" title="Category:Pages or sections flagged with Template:Move">Pages or sections flagged with Template:Move</a></li>
+<li><a href="../en/Category:Pages_or_sections_flagged_with_Template:Merge.html" title="Category:Pages or sections flagged with Template:Merge">Pages or sections flagged with Template:Merge</a></li>
+</ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

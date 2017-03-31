@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Working with the serial console - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Working_with_the_serial_console skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Working with the serial console</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Configure your Arch Linux machine so you can connect to it via the serial console port (com port).
+This will enable you to administer the machine even if it has no keyboard, mouse, monitor, or network attached to it (a headless server).
+</p>
+<p>As of Arch Linux 2007.x, installation of Arch Linux is possible via the serial console as well.
+</p>
+<p>A basic environment for this scenario is two machines connected using a serial cable (9-pin connector cable).
+The administering machine can be any Unix/Linux or Windows machine with a terminal emulator program (PuTTY or Minicom, for example).
+</p>
+<p>The configuration instructions below will enable GRUB menu selection, boot messages, and terminal forwarding to the serial console.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1">
+<a href="#Configuration"><span class="tocnumber">1</span> <span class="toctext">Configuration</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2">
+<a href="#Configure_console_access_on_the_target_machine"><span class="tocnumber">1.1</span> <span class="toctext">Configure console access on the target machine</span></a>
+<ul>
+<li class="toclevel-3 tocsection-3">
+<a href="#GRUB2_and_systemd"><span class="tocnumber">1.1.1</span> <span class="toctext">GRUB2 and systemd</span></a>
+<ul>
+<li class="toclevel-4 tocsection-4"><a href="#Without_GRUB2.2C_systemd_only"><span class="tocnumber">1.1.1.1</span> <span class="toctext">Without GRUB2, systemd only</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-5"><a href="#GRUB_v1_and_No_systemd"><span class="tocnumber">1.1.2</span> <span class="toctext">GRUB v1 and No systemd</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-6">
+<a href="#Making_Connections"><span class="tocnumber">2</span> <span class="toctext">Making Connections</span></a>
+<ul>
+<li class="toclevel-2 tocsection-7">
+<a href="#Connect_using_a_terminal_emulator_program"><span class="tocnumber">2.1</span> <span class="toctext">Connect using a terminal emulator program</span></a>
+<ul>
+<li class="toclevel-3 tocsection-8">
+<a href="#Command_line"><span class="tocnumber">2.1.1</span> <span class="toctext">Command line</span></a>
+<ul>
+<li class="toclevel-4 tocsection-9"><a href="#dterm"><span class="tocnumber">2.1.1.1</span> <span class="toctext">dterm</span></a></li>
+<li class="toclevel-4 tocsection-10"><a href="#Minicom"><span class="tocnumber">2.1.1.2</span> <span class="toctext">Minicom</span></a></li>
+<li class="toclevel-4 tocsection-11"><a href="#picocom"><span class="tocnumber">2.1.1.3</span> <span class="toctext">picocom</span></a></li>
+<li class="toclevel-4 tocsection-12"><a href="#Screen"><span class="tocnumber">2.1.1.4</span> <span class="toctext">Screen</span></a></li>
+<li class="toclevel-4 tocsection-13"><a href="#Serialclient"><span class="tocnumber">2.1.1.5</span> <span class="toctext">Serialclient</span></a></li>
+</ul>
+</li>
+<li class="toclevel-3 tocsection-14"><a href="#And.2C_for_Windows"><span class="tocnumber">2.1.2</span> <span class="toctext">And, for Windows</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#Graphical_front-ends"><span class="tocnumber">2.1.3</span> <span class="toctext">Graphical front-ends</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-16"><a href="#Installing_Arch_Linux_using_the_serial_console"><span class="tocnumber">3</span> <span class="toctext">Installing Arch Linux using the serial console</span></a></li>
+<li class="toclevel-1 tocsection-17">
+<a href="#Troubleshooting"><span class="tocnumber">4</span> <span class="toctext">Troubleshooting</span></a>
+<ul>
+<li class="toclevel-2 tocsection-18"><a href="#Ctrl-C_and_Minicom"><span class="tocnumber">4.1</span> <span class="toctext">Ctrl-C and Minicom</span></a></li>
+<li class="toclevel-2 tocsection-19"><a href="#Resizing_a_terminal"><span class="tocnumber">4.2</span> <span class="toctext">Resizing a terminal</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Configuration">Configuration</span></h2>
+<h3><span class="mw-headline" id="Configure_console_access_on_the_target_machine">Configure console access on the target machine</span></h3>
+<h4><span class="mw-headline" id="GRUB2_and_systemd">GRUB2 and systemd</span></h4>
+<p>If you configure the serial console in GRUB2 systemd will create a getty listener on the same serial device as GRUB2 by default. So, this is the only configuration needed for Arch running with systemd. To make grub enable the serial console, open <code>/etc/default/grub</code> in an editor.
+Change the <code>GRUB_CMDLINE_DEFAULT</code> line to start the console on <code>/dev/ttyS0</code>. Note in the example below, we set two consoles up; one on tty0 and one on the serial port.
+</p>
+<pre>GRUB_CMDLINE_LINUX_DEFAULT="console=tty0 console=ttyS0,38400n8"
+</pre>
+<p>Now we need to tell grub where is the console and what command to start in order to enable the serial console (Note as above for Linux kernel, one can append multiple input/output terminals in grub e.g. GRUB_TERMINAL="console serial" would enable both display and serial):
+</p>
+<pre>## Serial console
+GRUB_TERMINAL=serial
+GRUB_SERIAL_COMMAND="serial --speed=38400 --unit=0 --word=8 --parity=no --stop=1"
+</pre>
+<p>Rebuild the grub.cfg file with following command:
+</p>
+<pre># grub-mkconfig -o /boot/grub/grub.cfg
+</pre>
+<p>After a reboot, getty will be listening on <code>/dev/ttyS0</code>, expecting 38400 baud, 8 data bits, no parity and one stop bit. When Arch boots, systemd will automatically start a getty session to listen on the same device with the same settings.
+</p>
+<h5><span class="mw-headline" id="Without_GRUB2.2C_systemd_only">Without GRUB2, systemd only</span></h5>
+<p>Ignore this entire section if you have configured GRUB2 to listen on the serial interface. If you do not want GRUB2 to listen on the serial device, but only want getty listening after boot then follow these steps.
+</p>
+<p>To start getty listening on <code>/dev/ttyS0</code> use systemctl:
+</p>
+<pre># systemctl start getty@ttyS0.service
+</pre>
+<p>You can check to see the speed(s) getty is using with systemctl, but should be 38400 8N1:
+</p>
+<pre># systemctl status serial-getty@ttyS0.service
+</pre>
+<p>To have getty listening on <code>/dev/ttyS0</code> every boot, enable the service for that specific port:
+</p>
+<pre># systemctl enable serial-getty@ttyS0.service
+</pre>
+<p>Now, after a reboot, getty will be listening on device <code>/dev/ttyS0</code> expecting 38400 baud, 8 data bits, no parity and one stop bit-times.
+</p>
+<h4><span class="mw-headline" id="GRUB_v1_and_No_systemd">GRUB v1 and No systemd</span></h4>
+<p>Edit the GRUB config file <code>/boot/grub/menu.lst</code> and add these lines to the general area of the configuration:
+</p>
+<pre>serial --unit=0 --speed=9600
+terminal --timeout=5 serial console
+</pre>
+<p>Add suitable console parameters (e.g. change the serial device name or baud rate if required) at the end of your current kernel line:
+</p>
+<pre>console=tty0 console=ttyS0,9600
+</pre>
+<p>For example, the kernel line should look something like this after modification:
+</p>
+<pre>kernel /vmlinuz-linux root=/dev/md0 ro md=0,/dev/sda3,/dev/sdb3 vga=773 console=tty0 console=ttyS0,9600
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>When the <code>terminal --timeout=5 serial console</code> line is added to your menu.lst grub configuration, your boot sequence will now show a series of "Press any key to continue"  messages.  If no key is pressed, the boot menu will appear on whichever (serial or console) appears first in the 'terminal' configuration line.  The lines will look like this upon boot:</div>
+<p><code>
+Press any key to continue.<br>
+Press any key to continue.<br>
+Press any key to continue.<br>
+Press any key to continue.<br>
+Press any key to continue.<br>
+Press any key to continue.<br>
+Press any key to continue.
+</code>
+</p>
+<p>Next, we have to edit <code>/etc/inittab</code> and add a new agetty line below the existing ones:
+</p>
+<pre>c0:2345:respawn:/sbin/agetty 9600 ttyS0 linux
+</pre>
+<p>Edit <code>/etc/securetty</code> and add an entry for the the serial console, <i>below the existing entries</i>:
+</p>
+<pre>ttyS0
+</pre>
+<p>Reboot.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>In all of the steps above, ttyS1 can also be used in case your machine has more than one serial port.</div>
+<h2><span class="mw-headline" id="Making_Connections">Making Connections</span></h2>
+<h3><span class="mw-headline" id="Connect_using_a_terminal_emulator_program">Connect using a terminal emulator program</span></h3>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>Before making a connection, it is recommended to add your user to the <code>uucp</code> group. Otherwise you will need root's permission to make a connection:
+<pre># gpasswd -a <i>username</i> uucp
+</pre>
+See <a href="../en/Users_and_groups.html#User_groups" title="Users and groups">Users and groups#User groups</a> for details.</div>
+<p>Perform these steps on the machine used to connect the remote console.
+</p>
+<h4><span class="mw-headline" id="Command_line">Command line</span></h4>
+<h5><span class="mw-headline" id="dterm">dterm</span></h5>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/dterm/">dterm</a></span><sup><small>AUR</small></sup> is a tiny serial communication program. If you invoke it without parameters, it will connect to <code>/dev/ttyS0</code> at 9600 baud by default. The following example connect to <code>/dev/ttyS0</code> at 115200 baud, with 8 data bits, no parity bit and 1 stop bit-times:
+</p>
+<pre>$ dterm 115200 8 n 1
+</pre>
+<p>See its homepage<a rel="nofollow" class="external autonumber" href="http://www.knossos.net.nz/resources/free-software/dterm/">[1]</a> for more examples.
+</p>
+<h5><span class="mw-headline" id="Minicom">Minicom</span></h5>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=minicom">minicom</a></span> can be obtained from the official repositories. Start Minicom in setup mode:
+</p>
+<pre>$ minicom -s
+</pre>
+<p>Using the textual navigation menu, change the serial port settings to the following:
+</p>
+<pre>Serial Device: /dev/ttyS0
+Bps/Par/Bits: 9600 8N1
+</pre>
+<p>Press Enter to exit the menus (pressing Esc will not save changes).
+Remove the modem Init and Reset strings, as we are not connecting to a modem. To do this, under the <code>Modem and Dialing</code> menu, delete the Init and Reset strings. Optionally save the configuration by choosing <code>save setup as dfl</code> from the main menu.
+Restart minicom with the serial cable connected to the target machine.
+To end the session, press <code>Ctrl+A</code> followed by <code>Ctrl+X</code>.
+</p>
+<h5><span class="mw-headline" id="picocom">picocom</span></h5>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=picocom">picocom</a></span> is a tiny dumb-terminal emulation program that is very like minicom, but instead of <i>mini</i>, it is <i>pico</i>. The following example connect to <code>ttyS0</code> at 9600 bps:
+</p>
+<pre>$ picocom -b 9600 /dev/ttyS0
+</pre>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>if the backspace key won't work properly try out this option: '--omap delbs'</div>
+<p>See its manual for detailed usage.
+</p>
+<h5><span class="mw-headline" id="Screen">Screen</span></h5>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=screen">screen</a></span> is able to connect to a serial port. It will connect at 9600 baud by default:
+</p>
+<pre>$ screen /dev/ttyS0
+</pre>
+<p>A different baud rate (e.g. 115200) may be specified on the commmand line.
+</p>
+<pre>screen /dev/ttyS0 115200
+</pre>
+<h5><span class="mw-headline" id="Serialclient">Serialclient</span></h5>
+<p>Serialclient<a rel="nofollow" class="external autonumber" href="https://github.com/flagos/serialclient">[2]</a> is a CLI client for serial connection written in ruby. Install it with the following:
+</p>
+<pre># pacman -S ruby
+# gem install serialclient
+</pre>
+<p>Then, you can use like this:
+</p>
+<pre>$ serialclient -p /dev/ttyS0
+</pre>
+<h4><span class="mw-headline" id="And.2C_for_Windows">And, for Windows</span></h4>
+<p>On Windows machines, connect to the serial port using programs like PuTTY<a rel="nofollow" class="external autonumber" href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">[3]</a> or Terminalbpp<a rel="nofollow" class="external autonumber" href="https://sites.google.com/site/terminalbpp/">[4]</a>.
+</p>
+<h4><span class="mw-headline" id="Graphical_front-ends">Graphical front-ends</span></h4>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/gtkterm/">gtkterm</a></span><sup><small>AUR</small></sup><sup>[<a href="../en/ArchWiki:Requests.html#Broken_package_links" title="ArchWiki:Requests">broken link</a>: archived in <a rel="nofollow" class="external text" href="https://github.com/felixonmars/aur3-mirror/tree/master/gtkterm">aur-mirror</a>]</sup> provides a graphical interface to the task, with most abilities provided by <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=vte">vte</a></span>.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://aur.archlinux.org/packages/cutecom/">cutecom</a></span><sup><small>AUR</small></sup> is another gui enabled serial monitor.
+</p>
+<p><span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=putty">putty</a></span> is also available for Linux.
+</p>
+<h2><span class="mw-headline" id="Installing_Arch_Linux_using_the_serial_console">Installing Arch Linux using the serial console</span></h2>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>The Arch Linux monthly release(i.e. the installation CD)'s boot loader has been configured<a rel="nofollow" class="external autonumber" href="https://projects.archlinux.org/archiso.git/tree/configs/releng/syslinux/archiso_head.cfg#n1">[5]</a> to listen on 0 port(<code>ttyS0</code>/COM1) at 38400 bps, with 8 data bits, no parity bit and 1 stop bit-times.</div>
+<ol>
+<li> Connect to the target machine using the method described above.</li>
+<li> Boot the target machine using the Arch Linux installation CD.</li>
+<li> When the bootloader appears, select <i>Boot Arch Linux (&lt;arch&gt;)</i> and press <code>Tab</code> to edit</li>
+<li> Append <code>console=ttyS0,38400</code> and press <code>Enter</code>.</li>
+<li> Now systemd should detect ttyS0 and spawn a serial getty on it. Login as <code>root</code> and start the installation as usual.</li>
+</ol>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>After setup is complete, the console settings will not be saved on the target machine; in order to avoid having to connect a keyboard and monitor, configure console access on the target machine before rebooting.</div>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>While a port speed of 9600 is used in most of the examples in this document, working with higher values is recommended (List of available speeds is displayed in Minicom by pressing 'Ctrl-A' and then 'P')</div>
+<h2><span class="mw-headline" id="Troubleshooting">Troubleshooting</span></h2>
+<h3><span class="mw-headline" id="Ctrl-C_and_Minicom">Ctrl-C and Minicom</span></h3>
+<p>If you are having trouble sending a Control-C command through minicom you need to switch off hardware flow control in the device settings (minicom -s), which then enables the break.
+</p>
+<h3><span class="mw-headline" id="Resizing_a_terminal">Resizing a terminal</span></h3>
+<p>Unlike ssh, serial connection does not have a mechanism to transfer something like <code>SIGWINCH</code> when a terminal is resized. This will cause weird problem with some full-screen programs (e.g. <code>less</code>) when you resized your terminal emulator's window.
+</p>
+<p>Resize the terminal via <code>stty</code> is a workaround:
+</p>
+<pre>$ stty rows <i>lines</i> cols <i>columns</i>
+</pre>
+<p>However the above one requires you to manually input the proper geometry. The following examples should simplify the work.
+</p>
+<p>1. There is a less-known utility called <code>resize</code>, which is shipped with <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=xterm">xterm</a></span>, can solve this problem. Invoke it without parameter after you resize the terminal emulator's window:
+</p>
+<pre>$ resize
+</pre>
+<p>2. In the case that you do not want to install xterm, it is possible to do the same work via a simple shell function. Put the following function into your zshrc, invoke it without parameter after you resize the terminal emulator's window:
+</p>
+<pre>rsz() {
+	if [[ -t 0 &amp;&amp; $# -eq 0 ]];then
+		local IFS='[;' escape geometry x y
+		print -n '\e7\e[r\e[999;999H\e[6n\e8'
+		read -sd R escape geometry
+		x=${geometry##*;} y=${geometry%%;*}
+		if [[ ${COLUMNS} -eq ${x} &amp;&amp; ${LINES} -eq ${y} ]];then
+			print "${TERM} ${x}x${y}"
+		else
+			print "${COLUMNS}x${LINES} -&gt; ${x}x${y}"
+			stty cols ${x} rows ${y}
+		fi
+	else
+		[[ -n ${commands[repo-elephant]} ]] &amp;&amp; repo-elephant || print 'Usage: rsz'  ## Easter egg here :)
+	fi
+}</pre>
+
+</div>
+<div id="catlinks" class="catlinks">
+<div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Category</a>: <ul><li><a href="../en/Category:Other_hardware.html" title="Category:Other hardware">Other hardware</a></li></ul>
+</div>
+<div id="mw-hidden-catlinks" class="mw-hidden-catlinks mw-hidden-cats-hidden">Hidden category: <ul><li><a href="../en/Category:Pages_with_broken_package_links.html" title="Category:Pages with broken package links">Pages with broken package links</a></li></ul>
+</div>
+</div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>

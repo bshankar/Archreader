@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="client-nojs">
+<head>
+<meta charset="UTF-8">
+<title>Wireshark - ArchWiki</title>
+<link rel="stylesheet" href="../ArchWikiOffline.css">
+<meta name="ResourceLoaderDynamicStyles" content="">
+<style></style>
+<meta name="generator" content="MediaWiki 1.26.4">
+<meta name="robots" content="noindex,follow">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="/opensearch_desc.php" title="ArchWiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.archlinux.org/api.php?action=rsd">
+<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html">
+<link rel="alternate" type="application/atom+xml" title="ArchWiki Atom feed" href="/index.php?title=Special:RecentChanges&amp;feed=atom">
+</head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Wireshark skin-archlinux action-view">
+
+		<div id="globalWrapper" style="width: 100%">
+		<div id="column-content">
+			<div id="content" class="mw-body" role="main" style="margin: 0.5em; margin-bottom:0; margin-top:0">
+				<a id="top"></a>
+				
+				<div class="mw-indicators">
+</div>
+				<h1 id="firstHeading" class="firstHeading" lang="en">Wireshark</h1>
+				
+				<div id="bodyContent" class="mw-body-content">
+					<div id="contentSub"></div>
+										<div id="mw-content-text" lang="en" dir="ltr" class="mw-content-ltr">
+<p>Wireshark is a free and open-source packet analyzer. It is used for network troubleshooting, analysis, software and communications protocol development, and education. Originally named Ethereal, in May 2006 the project was renamed Wireshark due to trademark issues.
+</p>
+<div id="toc" class="toc">
+<div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Installation"><span class="tocnumber">1</span> <span class="toctext">Installation</span></a></li>
+<li class="toclevel-1 tocsection-2">
+<a href="#Capturing_as_normal_user"><span class="tocnumber">2</span> <span class="toctext">Capturing as normal user</span></a>
+<ul>
+<li class="toclevel-2 tocsection-3"><a href="#Add_the_user_to_the_wireshark_group"><span class="tocnumber">2.1</span> <span class="toctext">Add the user to the wireshark group</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#Use_sudo"><span class="tocnumber">2.2</span> <span class="toctext">Use sudo</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-5">
+<a href="#A_few_capturing_techniques"><span class="tocnumber">3</span> <span class="toctext">A few capturing techniques</span></a>
+<ul>
+<li class="toclevel-2 tocsection-6"><a href="#Filtering_TCP_packets"><span class="tocnumber">3.1</span> <span class="toctext">Filtering TCP packets</span></a></li>
+<li class="toclevel-2 tocsection-7"><a href="#Filtering_UDP_packets"><span class="tocnumber">3.2</span> <span class="toctext">Filtering UDP packets</span></a></li>
+<li class="toclevel-2 tocsection-8"><a href="#Filter_packets_to_a_specific_IP_Address"><span class="tocnumber">3.3</span> <span class="toctext">Filter packets to a specific IP Address</span></a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+<h2><span class="mw-headline" id="Installation">Installation</span></h2>
+<p>The wireshark package has been split into the CLI version as well as GTK and Qt frontends, which depend on the CLI.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #FFDDDD; border: thin solid #DDBBBB; overflow: hidden;">
+<strong> Warning: </strong> The Qt frontend, along with missing some features, is also not as stable as the GTK frontend. If you have issues with listing network interfaces, enabling monitor mode, and/or permissions, even after setting everything up correctly, try using the GTK version and see if your issues persist.</div>
+<ul>
+<li> CLI version - <a href="../en/Pacman.html" title="Pacman">Install</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-cli">wireshark-cli</a></span>.</li>
+<li> GTK frontend - <a href="../en/Pacman.html" title="Pacman">Install</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-gtk">wireshark-gtk</a></span>.</li>
+<li> Qt frontend - <a href="../en/Pacman.html" title="Pacman">Install</a> package <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-qt">wireshark-qt</a></span>.</li>
+</ul>
+<h2><span class="mw-headline" id="Capturing_as_normal_user">Capturing as normal user</span></h2>
+<p>Running Wireshark as root is insecure.
+</p>
+<p>Arch Linux uses
+<a rel="nofollow" class="external text" href="http://wiki.wireshark.org/CaptureSetup/CapturePrivileges#Other_Linux_based_systems_or_other_installation_methods">method from Wireshark wiki</a>
+to separate privileges.  When <span class="plainlinks archwiki-template-pkg"><a rel="nofollow" class="external text" href="https://www.archlinux.org/packages/?name=wireshark-cli">wireshark-cli</a></span> is installed, <a href="../en/PKGBUILD.html#install" title="PKGBUILD">install script</a> sets <code>/usr/bin/dumpcap</code> capabilities.
+</p>
+<pre style="margin-bottom: 0; border-bottom:none; padding-bottom:0.8em;">$ getcap /usr/bin/dumpcap</pre>
+<pre style="margin-top: 0; border-top-style:dashed; padding-top: 0.8em;">/usr/bin/dumpcap = cap_net_admin,cap_net_raw+eip</pre>
+<p><code>/usr/bin/dumpcap</code> is the only process that has privileges to
+capture packets. <code>/usr/bin/dumpcap</code> can only be run by root and
+members of the <code>wireshark</code> group.
+</p>
+<p>There are two methods to capture as a normal user :
+</p>
+<h3><span class="mw-headline" id="Add_the_user_to_the_wireshark_group">Add the user to the wireshark group</span></h3>
+<p>To use wireshark as a normal user, add user to the <code>wireshark</code> <a href="../en/Users_and_groups.html#Group_management" title="Group" class="mw-redirect">group</a>.
+</p>
+<h3><span class="mw-headline" id="Use_sudo">Use sudo</span></h3>
+<p>You can use <a href="../en/Sudo.html" title="Sudo">sudo</a> to temporarily change group to 
+<code>wireshark</code>. The following line allows all users in the wheel
+group to run programs with GID set to wireshark GID:
+</p>
+<pre>%wheel ALL=(:wireshark) /usr/bin/wireshark, /usr/bin/tshark</pre>
+<p>Then run wireshark with
+</p>
+<pre>$ sudo -g wireshark wireshark</pre>
+<h2><span class="mw-headline" id="A_few_capturing_techniques">A few capturing techniques</span></h2>
+<p>There are a number of different ways to capture exactly what you are looking for in Wireshark, by applying filters.
+</p>
+<div style="padding: 5px; margin: 0.50em 0; background-color: #DDDDFF; border: thin solid #BBBBDD; overflow: hidden;">
+<strong> Note: </strong>To learn the filter syntax, see man pcap-filter(7).</div>
+<h3><span class="mw-headline" id="Filtering_TCP_packets">Filtering TCP packets</span></h3>
+<p>If you want to see all the current TCP packets, type <code>tcp</code> into the "Filter" bar or in the CLI, enter:
+</p>
+<pre>$ tshark -f "tcp"
+</pre>
+<h3><span class="mw-headline" id="Filtering_UDP_packets">Filtering UDP packets</span></h3>
+<p>If you want to see all the current UDP packets, type <code>udp</code> into the "Filter" bar or in the CLI, enter:
+</p>
+<pre>$ tshark -f "udp"
+</pre>
+<h3><span class="mw-headline" id="Filter_packets_to_a_specific_IP_Address">Filter packets to a specific IP Address</span></h3>
+<ul><li> If you would like to see all the traffic going to a specific address, enter <code>ip.dst == 1.2.3.4</code>, replacing <code>1.2.3.4</code> with the IP address the outgoing traffic is being sent to.</li></ul>
+<ul><li> If you would like to see all the incoming traffic for a specific address, enter <code>ip.src == 1.2.3.4</code>, replacing <code>1.2.3.4</code> with the IP address the incoming traffic is being sent to.</li></ul>
+<ul><li> If you would like to see all the incoming and outgoing traffic for a specific address, enter <code>ip.addr == 1.2.3.4</code>, replacing <code>1.2.3.4</code> with the relevant IP address.</li></ul>
+
+</div>
+<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks" class="mw-normal-catlinks">
+<a href="../Special:Categories.html" title="Special:Categories">Categories</a>: <ul>
+<li><a href="../en/Category:Security.html" title="Category:Security">Security</a></li>
+<li><a href="../en/Category:Networking.html" title="Category:Networking">Networking</a></li>
+</ul>
+</div></div>					<div class="visualClear"></div>
+				</div>
+			</div>
+		</div>
+		<div class="visualClear"></div>
+					<div id="footer" role="contentinfo">
+Extracted from <a href="https://wiki.archlinux.org"> ArchWiki </a> and licensed under <a href="http://www.gnu.org/copyleft/fdl.html"> GDL >= 1.3</a>
+		</div>
+		</div>
+		</body>
+</html>
