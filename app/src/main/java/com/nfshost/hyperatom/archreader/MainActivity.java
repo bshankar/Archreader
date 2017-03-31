@@ -1,9 +1,10 @@
 package com.nfshost.hyperatom.archreader;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,6 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
                    SearchView.OnQueryTextListener {
 
-    // Declare Variables
     ListView list;
     ListViewAdapter adapter;
     SearchView editsearch;
@@ -42,9 +42,13 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        MainContentFragment fragment = new MainContentFragment();
+        fragmentTransaction.add(R.id.content_main_linear_layout, fragment);
+        fragmentTransaction.commit();
     }
+
 
     @Override
     public boolean onQueryTextSubmit(String query) {
@@ -73,31 +77,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-
-        // Generate sample data
-        animalNameList = new String[]{"Lion", "Tiger", "Dog",
-                "Cat", "Tortoise", "Rat", "Elephant", "Fox",
-                "Cow","Donkey","Monkey"};
-
-        // Locate the ListView in listview_main.xml
-        list = (ListView) findViewById(R.id.search_results);
-
-        for (int i = 0; i < animalNameList.length; i++) {
-            AnimalNames animalNames = new AnimalNames(animalNameList[i]);
-            // Binds all strings into an array
-            arraylist.add(animalNames);
-        }
-
-        // Pass results to ListViewAdapter Class
-        adapter = new ListViewAdapter(this, arraylist);
-
-        // Binds the Adapter to the ListView
-        list.setAdapter(adapter);
-
-        // Locate the EditText in listview_main.xml
-        editsearch = (SearchView) MenuItemCompat.getActionView(
-                menu.findItem(R.id.action_search));
-        editsearch.setOnQueryTextListener(this);
         return true;
     }
 
