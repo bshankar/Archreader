@@ -8,12 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 
 public class ContentFragment extends Fragment {
 
-    private WebView webView;
-    private final String assets =
+    public static WebView webView;
+    public static final String assets =
             "file:///android_asset/arch-wiki/html/en/";
 
     @Nullable
@@ -34,7 +35,7 @@ public class ContentFragment extends Fragment {
         webView.setVerticalScrollBarEnabled (false);
         webView.setHorizontalScrollBarEnabled (false);
 
-        loadUrl("Table_of_contents.html");
+        loadUrl(getString(R.string.home_url));
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -56,10 +57,13 @@ public class ContentFragment extends Fragment {
                 }
 
                 if (webView.canGoBack()) {
+                    Toast.makeText(getActivity(),
+                            R.string.going_back_message,
+                            Toast.LENGTH_SHORT);
                     webView.goBack();
                 }
 
-                loadUrl("Error.html");
+                loadUrl(getString(R.string.error_url));
             }
         });
     }

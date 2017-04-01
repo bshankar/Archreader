@@ -12,6 +12,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -102,7 +103,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+            WebView webView = ContentFragment.webView;
+            webView.loadUrl(ContentFragment.assets + getString(R.string.home_url));
+
         } else if (id == R.id.nav_history) {
 
         } else if (id == R.id.nav_favorites) {
