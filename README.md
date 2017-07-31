@@ -1,6 +1,6 @@
 # Archreader
 
-Archwiki offline reader built on top of webview
+Archwiki offline reader for android built on top of webview
 
 # TODO
 Buttons
